@@ -33,11 +33,16 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.jcr.RepositoryException;
 
 public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowModelImpl.class);
 
-    private static final String WORKFLOW_MODEL_PATH_PREFIX = "/etc/workflow/models/";
+    private static final String[] WORKFLOW_MODEL_PATH_PREFIXES = new String[]{
+        "",
+        "/etc/workflow/models"
+    };
+    
     private static final String WORKFLOW_MODEL_PATH_SUFFIX = "/jcr:content/model";
 
     private Map<String, Map<String, Object>> syntheticWorkflowModel = new LinkedHashMap<String, Map<String, Object>>();
@@ -46,16 +51,20 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
                                       String modelId,
                                       boolean ignoredIncompatibleTypes) throws WorkflowException {
 
-        if (!StringUtils.startsWith(modelId, WORKFLOW_MODEL_PATH_PREFIX)) {
-            modelId = WORKFLOW_MODEL_PATH_PREFIX + modelId;
+        try {
+            modelId = findWorkflowModel(workflowSession, modelId);
+        } catch (RepositoryException ex) {
+            log.error("Unable to locate workflow with id " + modelId, ex);
+            throw new WorkflowException(ex.getMessage(), ex);
         }
 
-        if (!StringUtils.endsWith(modelId, WORKFLOW_MODEL_PATH_SUFFIX)) {
-            modelId = modelId + WORKFLOW_MODEL_PATH_SUFFIX;
+        WorkflowModel model = workflowSession.getModel(modelId);
+
+        if (model == null) {
+            log.error("Unable to locate workflow starting node for " + modelId);
+            throw new WorkflowException("Unable to locate workflow starting node for " + modelId);            
         }
-
-        final WorkflowModel model = workflowSession.getModel(modelId);
-
+        
         log.debug("Located Workflow Model [ {} ] with modelId [ {} ]", model.getTitle(), modelId);
 
         final List<WorkflowNode> nodes = model.getNodes();
@@ -99,5 +108,19 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
 
     private boolean isProcessType(WorkflowNode node) {
         return WorkflowNode.TYPE_PROCESS.equals(node.getType());
+    }
+
+    private String findWorkflowModel(WorkflowSession workflowSession, String modelId) throws RepositoryException {
+        String separator = modelId.startsWith("/") ? "" : "/";
+        for (String prefix : WORKFLOW_MODEL_PATH_PREFIXES) {
+            String testPath = prefix + separator + modelId;
+            String olderWorkflowStyle = testPath + WORKFLOW_MODEL_PATH_SUFFIX;
+            if (workflowSession.getSession().nodeExists(olderWorkflowStyle)) {
+                return olderWorkflowStyle;
+            } else if (workflowSession.getSession().nodeExists(testPath)) {
+                return testPath;
+            }
+        }
+        throw new RepositoryException("Unable to locate workflow model with id "+modelId);
     }
 }

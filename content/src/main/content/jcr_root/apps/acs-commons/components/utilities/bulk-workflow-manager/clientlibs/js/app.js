@@ -169,6 +169,7 @@ angular.module('acs-commons-bulk-workflow-manager-app', ['acsCoral', 'ACS.Common
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).success(function (data, status, headers, config) {
                     $scope.formOptions = data || {};
+                    $scope.form.selectUserEventData = data.userEventData[0];
                 }).error(function (data, status, headers, config) {
                     NotificationsService.add('error',
                         data.title || 'Error retrieving form values from the server.',

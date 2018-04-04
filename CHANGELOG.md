@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 - #1262 - MCP race condition affects showing completion status for processes that finish very quickly
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
 
 ## [3.14.12] - 2018-04-03
