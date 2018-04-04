@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1307 - MCP now has error reporting and also XLSX export for errors.
 - #1238 - HTTP cache JCR storage 
 
 ### Fixed
