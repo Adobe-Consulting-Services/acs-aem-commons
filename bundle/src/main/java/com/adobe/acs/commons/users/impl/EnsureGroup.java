@@ -45,10 +45,15 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Group", configurationFactory = true, metatype = true, immediate = true,
-        policy = ConfigurationPolicy.REQUIRE)
-@Properties({ @Property(name = "webconsole.configurationFactory.nameHint",
-        value = "Ensure Group: {operation} {principalName}") })
+@Component(label = "ACS AEM Commons - Ensure Group",
+           configurationFactory = true,
+           metatype = true,
+           immediate = true,
+           policy = ConfigurationPolicy.REQUIRE)
+@Properties({
+                    @Property(name = "webconsole.configurationFactory.nameHint",
+                              value = "Ensure Group: {operation} {principalName}")
+})
 @Service(value = { EnsureGroup.class, EnsureAuthorizable.class })
 public final class EnsureGroup implements EnsureAuthorizable {
 
@@ -190,6 +195,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
      * @throws RepositoryException
      * @throws EnsureAuthorizableException
      */
+    @SuppressWarnings("squid:S2589")
     private void ensureRemoval(ResourceResolver resourceResolver, Group group) throws RepositoryException,
             EnsureAuthorizableException {
         org.apache.jackrabbit.api.security.user.Group jcrGroup = findGroup(resourceResolver, group.getPrincipalName());
@@ -245,21 +251,21 @@ public final class EnsureGroup implements EnsureAuthorizable {
     private org.apache.jackrabbit.api.security.user.Group findGroup(ResourceResolver resourceResolver,
             String principalName) throws RepositoryException, EnsureAuthorizableException {
         UserManager userManager = resourceResolver.adaptTo(UserManager.class);
-        org.apache.jackrabbit.api.security.user.Group group = null;
+        org.apache.jackrabbit.api.security.user.Group jcrGroup = null;
 
         Authorizable authorizable = userManager.getAuthorizable(principalName);
 
         if (authorizable != null) {
             // Am authorizable was found with this name; check if this is a group
             if (authorizable instanceof org.apache.jackrabbit.api.security.user.Group) {
-                group = (org.apache.jackrabbit.api.security.user.Group) authorizable;
+                jcrGroup = (org.apache.jackrabbit.api.security.user.Group) authorizable;
             } else {
                 throw new EnsureAuthorizableException(String.format("Authorizable [ %s ] at [ %s ] is not a group",
                         principalName, authorizable.getPath()));
             }
         }
 
-        return group;
+        return jcrGroup;
     }
 
     /**

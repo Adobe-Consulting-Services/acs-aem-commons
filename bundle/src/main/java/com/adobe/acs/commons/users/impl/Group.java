@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Group extends AbstractAuthorizable {
-
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(Group.class);
 
     private static final String PATH_GROUPS = "/home/groups";
