@@ -124,7 +124,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             replicatedAtClean = Calendar.getInstance();
             log.warn("The provided [ replicatedAt ] parameter is null. Force setting the [ {} ] value to [ {} ]",
                     ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED,
-                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime());
+                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime()));
         }
 
         String replicatedByClean = replicatedBy;
