@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ServiceUser extends AbstractAuthorizable {
-
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ServiceUser.class);
 
     private static final String PATH_SYSTEM_USERS = "/home/users/system";

@@ -27,6 +27,7 @@ import javax.jcr.ValueFormatException;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 
+import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -238,16 +239,23 @@ public class EnsureAce {
         params.put("property.value", principalName);
         params.put("p.limit", "-1");
 
-        final Query query =
-                queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-        query.getResult().getHits().forEach(hit -> {
+        final Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+
+        // Handle leaking resource resolver in AEM QueryBuilder
+        ResourceResolver leakingResourceResolver = null;
+        for (final Hit hit : query.getResult().getHits()) {
             try {
-                Resource aceResource = resourceResolver.getResource(hit.getPath());
+                // Handle leaking resource resolver in AEM QueryBuilder
+                if (leakingResourceResolver == null) {
+                    leakingResourceResolver = hit.getResource().getResourceResolver();
+                }
+
+                final Resource aceResource = resourceResolver.getResource(hit.getPath());
 
                 // first parent is the rep:policy node
                 // second parent (grand-parent) is the content node this ACE controls
                 // that is the node we need to use the JackrabbitAccessControlManager api
-                Resource contentResource = aceResource.getParent().getParent();
+                final Resource contentResource = aceResource.getParent().getParent();
 
                 if (!paths.contains(contentResource.getPath())) {
                     for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
@@ -260,7 +268,12 @@ public class EnsureAce {
             } catch (RepositoryException e) {
                 log.error("Failed to get resource for query result.", e);
             }
-        });
+        }
+
+        // Handle leaking resource resolver in AEM QueryBuilder
+        if (leakingResourceResolver != null) {
+            leakingResourceResolver.close();
+        }
 
         return acls;
     }
