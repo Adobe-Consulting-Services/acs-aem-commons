@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -29,7 +28,6 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -43,6 +41,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -123,11 +122,16 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
         Calendar replicatedAtClean = replicatedAt;
         if (replicatedAtClean == null) {
             replicatedAtClean = Calendar.getInstance();
+            log.warn("The provided [ replicatedAt ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED,
+                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime());
         }
 
         String replicatedByClean = replicatedBy;
         if (replicatedBy == null) {
             replicatedByClean = DEFAULT_REPLICATED_BY;
+            log.warn("The provided [ replicatedBy ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
         }
 
         int count = 0;
