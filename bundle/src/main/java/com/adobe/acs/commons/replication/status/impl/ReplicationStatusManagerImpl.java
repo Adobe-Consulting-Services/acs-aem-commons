@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
+import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -52,6 +53,8 @@ import java.util.Calendar;
 @Service
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
+
+    public static final String DEFAULT_REPLICATED_BY = "Unknown";
 
     private static final String REP_STATUS_ACTIVATE = "Activate";
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
@@ -116,6 +119,17 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             throws RepositoryException, PersistenceException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
+        // Issue #1265
+        Calendar replicatedAtClean = replicatedAt;
+        if (replicatedAtClean == null) {
+            replicatedAtClean = Calendar.getInstance();
+        }
+
+        String replicatedByClean = replicatedBy;
+        if (replicatedBy == null) {
+            replicatedByClean = DEFAULT_REPLICATED_BY;
+        }
+
         int count = 0;
         for (final Resource resource : resources) {
 
@@ -146,8 +160,8 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                     this.addReplicationStatusMixin(node);
                 }
 
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAt);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAtClean);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
             }
 
