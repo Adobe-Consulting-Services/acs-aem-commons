@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1247 - Added the new component for dynamically population of dropdown in Report Builder Parameter
 - #1229 - Added config option to remove trailing slash from extensionless URLs in sitemap.
 - #1242 - New ResourceUtil utility class.
+- #1245 - On-Deploy Scripts Framework
 - #1255 - Add trimming to the dispatcher flush rules to allow multi line xml configs
 - #1256 - Allow adding of context root maven property for deploying acs-aem-commons locally
 - #1274 - MCP now supports RequestParameter in process definitions.  This gives access to file binary and other metadata such as name and size.
