@@ -9,9 +9,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
-### Fixed
-- #1283: Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
-
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
@@ -28,6 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
 - #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
 - #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
+- #1283: Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
 
 ## [3.14.12] - 2018-04-03
 
