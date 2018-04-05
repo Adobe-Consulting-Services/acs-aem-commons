@@ -28,7 +28,6 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -42,6 +41,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -52,6 +52,8 @@ import java.util.Calendar;
 @Service
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
+
+    public static final String DEFAULT_REPLICATED_BY = "Unknown";
 
     private static final String REP_STATUS_ACTIVATE = "Activate";
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
@@ -116,6 +118,22 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             throws RepositoryException, PersistenceException {
         final Session session = resourceResolver.adaptTo(Session.class);
 
+        // Issue #1265
+        Calendar replicatedAtClean = replicatedAt;
+        if (replicatedAtClean == null) {
+            replicatedAtClean = Calendar.getInstance();
+            log.warn("The provided [ replicatedAt ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED,
+                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime()));
+        }
+
+        String replicatedByClean = replicatedBy;
+        if (replicatedBy == null) {
+            replicatedByClean = DEFAULT_REPLICATED_BY;
+            log.warn("The provided [ replicatedBy ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
+        }
+
         int count = 0;
         for (final Resource resource : resources) {
 
@@ -146,8 +164,8 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                     this.addReplicationStatusMixin(node);
                 }
 
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAt);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAtClean);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
             }
 

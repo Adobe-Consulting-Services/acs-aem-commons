@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
+### Fixed
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
+
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
