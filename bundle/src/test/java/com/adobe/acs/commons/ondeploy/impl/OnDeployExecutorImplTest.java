@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.ondeploy.impl;
 
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
@@ -44,17 +63,13 @@ import static org.powermock.api.mockito.PowerMockito.doThrow;
 
 public class OnDeployExecutorImplTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     @Before
     public void setup() throws RepositoryException {
         context.registerService(QueryBuilder.class, mock(QueryBuilder.class));
 
-        ResourceResolver resourceResolver = context.resourceResolver();
-        Session session = resourceResolver.adaptTo(Session.class);
-        session.getRootNode().addNode("var", JcrConstants.NT_UNSTRUCTURED)
-                .addNode("acs-commons", JcrConstants.NT_UNSTRUCTURED)
-                .addNode("on-deploy-scripts-status", JcrConstants.NT_UNSTRUCTURED);
+        context.build().resource(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER).commit();
 
         LogTester.reset();
     }
@@ -62,13 +77,10 @@ public class OnDeployExecutorImplTest {
     @Test
     public void testCloseResources() {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        Session session = mock(Session.class);
-
-        doReturn(session).when(resourceResolver).adaptTo(Session.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();
-        doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
+        doNothing().when(impl).runScripts(same(resourceResolver), anyList());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
             @Override
@@ -78,23 +90,18 @@ public class OnDeployExecutorImplTest {
         });
         context.registerInjectActivateService(impl);
 
-        verify(session).logout();
         verify(resourceResolver).close();
     }
 
     @Test
     public void testCloseResourcesIsFailSafe() {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        Session session = mock(Session.class);
-
-        doReturn(session).when(resourceResolver).adaptTo(Session.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();
-        doNothing().when(impl).runScripts(same(resourceResolver), same(session), anyList());
+        doNothing().when(impl).runScripts(same(resourceResolver), anyList());
 
         doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
-        doThrow(new RuntimeException("session logout failed")).when(session).logout();
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
             @Override
@@ -104,20 +111,16 @@ public class OnDeployExecutorImplTest {
         });
         context.registerInjectActivateService(impl);
 
-        assertLogText("Failed session.logout()");
         assertLogText("Failed resourceResolver.close()");
     }
 
     @Test
     public void testCloseResourcesOnException() {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
-        Session session = mock(Session.class);
-
-        doReturn(session).when(resourceResolver).adaptTo(Session.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();
-        doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), same(session), anyList());
+        doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), anyList());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
             @Override
@@ -130,7 +133,6 @@ public class OnDeployExecutorImplTest {
             context.registerInjectActivateService(impl);
             fail("Expected exception");
         } catch (Exception e) {
-            verify(session).logout();
             verify(resourceResolver).close();
         }
     }
@@ -157,12 +159,12 @@ public class OnDeployExecutorImplTest {
         ResourceResolver resourceResolver = context.resourceResolver();
 
         // Mimic the situation where a script initiated in the past failed
-        Session session = context.resourceResolver().adaptTo(Session.class);
-        String status1NodePath = "/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName();
-        Node statusNode = impl.getOrCreateStatusTrackingNode(session, status1NodePath);
-        impl.trackScriptStart(session, statusNode);
-        impl.trackScriptEnd(session, statusNode, "fail");
-        Resource originalStatus1 = resourceResolver.getResource(status1NodePath);
+        Resource statusResource = impl.getOrCreateStatusTrackingResource(resourceResolver, OnDeployScriptTestExampleSuccess1.class);
+        String status1ResourcePath = statusResource.getPath();
+        assertEquals(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/" + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
+        impl.trackScriptStart(statusResource);
+        impl.trackScriptEnd(statusResource, "fail");
+        Resource originalStatus1 = resourceResolver.getResource(status1ResourcePath);
         assertEquals("fail", originalStatus1.getValueMap().get("status", ""));
         LogTester.reset();
 
@@ -175,7 +177,7 @@ public class OnDeployExecutorImplTest {
         });
         context.registerInjectActivateService(new OnDeployExecutorImpl());
 
-        Resource status1 = resourceResolver.getResource(status1NodePath);
+        Resource status1 = resourceResolver.getResource(status1ResourcePath);
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
@@ -257,10 +259,9 @@ public class OnDeployExecutorImplTest {
         OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
 
         // Mimic the situation where a script initiated in the past is still running
-        Session session = context.resourceResolver().adaptTo(Session.class);
-        String status1NodePath = "/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName();
-        Node statusNode = impl.getOrCreateStatusTrackingNode(session, status1NodePath);
-        impl.trackScriptStart(session, statusNode);
+        Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
+        String status1ResourcePath = statusResource.getPath();
+        impl.trackScriptStart(statusResource);
         LogTester.reset();
 
         // Here's where the real test begins
@@ -279,7 +280,7 @@ public class OnDeployExecutorImplTest {
             assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
         }
 
-        assertLogText("On-deploy script is already running or in an otherwise unknown state: " + status1NodePath + " - status: running");
+        assertLogText("On-deploy script is already running or in an otherwise unknown state: " + status1ResourcePath + " - status: running");
         assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
 

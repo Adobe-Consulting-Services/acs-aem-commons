@@ -19,11 +19,13 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
+import aQute.bnd.annotation.ConsumerType;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * An on-deploy script that can be run via the OnDeployExecutor.
  */
+@ConsumerType
 public interface OnDeployScript {
     /**
      * Execute the script, passing in a resourceResolver instance.

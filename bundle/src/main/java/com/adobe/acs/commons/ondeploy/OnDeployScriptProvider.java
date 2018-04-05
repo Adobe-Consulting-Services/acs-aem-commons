@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy;
 
+import aQute.bnd.annotation.ConsumerType;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 /**
  * Provider interface to supply a list of scripts to be run by the OnDeployExecutor.
  */
+@ConsumerType
 public interface OnDeployScriptProvider {
     /**
      * Get the list of scripts to run.

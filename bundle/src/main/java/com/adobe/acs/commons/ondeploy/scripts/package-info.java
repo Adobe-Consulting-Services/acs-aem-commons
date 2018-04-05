@@ -17,10 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.ondeploy;
-
 /**
- * A service that triggers scripts on deployment to an AEM server.
+ * On-Deploy Scripts Framework.
  */
-public interface OnDeployExecutor {
-}
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.ondeploy.scripts;

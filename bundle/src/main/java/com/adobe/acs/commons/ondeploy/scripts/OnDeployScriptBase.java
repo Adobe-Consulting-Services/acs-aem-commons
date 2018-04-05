@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
+import aQute.bnd.annotation.ConsumerType;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.search.PredicateGroup;
@@ -44,15 +45,16 @@ import java.util.Map;
 /**
  * Base on-deploy script implementation.
  */
+@ConsumerType
 public abstract class OnDeployScriptBase implements OnDeployScript {
     private static final String SLING_RESOURCE_TYPE = "sling:resourceType";
 
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    protected PageManager pageManager;
-    protected ResourceResolver resourceResolver;
-    protected Session session;
-    protected Workspace workspace;
+    private PageManager pageManager;
+    private ResourceResolver resourceResolver;
+    private Session session;
+    private Workspace workspace;
 
     /**
      * @see OnDeployScript#execute(ResourceResolver)
@@ -62,11 +64,12 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
         this.pageManager = resourceResolver.adaptTo(PageManager.class);
         this.session = resourceResolver.adaptTo(Session.class);
-        this.workspace = session.getWorkspace();
-
+        if (session != null) {
+            this.workspace = session.getWorkspace();
+        }
         try {
             execute();
-            session.save();
+            resourceResolver.commit();
         } catch (Exception e) {
             throw new OnDeployScriptException(e);
         }
@@ -88,7 +91,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param absolutePath Path to fetch or create.
      * @return The fetched or created node.
      */
-    protected Node getOrCreateNode(String absolutePath) throws RepositoryException {
+    protected final Node getOrCreateNode(String absolutePath) throws RepositoryException {
         return getOrCreateNode(absolutePath, JcrConstants.NT_UNSTRUCTURED, JcrConstants.NT_UNSTRUCTURED);
     }
 
@@ -103,7 +106,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param nodeType The type of node to create.
      * @return The fetched or created node.
      */
-    protected Node getOrCreateNode(String absolutePath, String nodeType) throws RepositoryException {
+    protected final Node getOrCreateNode(String absolutePath, String nodeType) throws RepositoryException {
         return getOrCreateNode(absolutePath, JcrConstants.NT_UNSTRUCTURED, nodeType);
     }
 
@@ -120,7 +123,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param nodeType The type of node to create.
      * @return The fetched or created node.
      */
-    protected Node getOrCreateNode(String absolutePath, String intermediateNodeType, String nodeType) throws RepositoryException {
+    protected final Node getOrCreateNode(String absolutePath, String intermediateNodeType, String nodeType) throws RepositoryException {
         try {
             return session.getNode(absolutePath);
         } catch (PathNotFoundException e) {
@@ -136,7 +139,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param oldPropertyName Old property name.
      * @param newPropertyName New property name.
      */
-    protected void renameProperty(Node node, String oldPropertyName, String newPropertyName) throws RepositoryException {
+    protected final void renameProperty(Node node, String oldPropertyName, String newPropertyName) throws RepositoryException {
         Resource resource = resourceResolver.getResource(node.getPath());
         renameProperty(resource, oldPropertyName, newPropertyName);
     }
@@ -144,11 +147,11 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     /**
      * Rename a property on a resource.
      *
-     * @param node Resource to update the property name on.
+     * @param resource Resource to update the property name on.
      * @param oldPropertyName Old property name.
      * @param newPropertyName New property name.
      */
-    protected void renameProperty(Resource resource, String oldPropertyName, String newPropertyName) {
+    protected final void renameProperty(Resource resource, String oldPropertyName, String newPropertyName) {
         ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
         if (properties.containsKey(oldPropertyName)) {
             logger.info("Renaming property '{}' to '{}' on resource: {}", new Object[] { oldPropertyName, newPropertyName, resource.getPath() });
@@ -164,7 +167,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      *
      * @param path Path to the node to remove.
      */
-    protected void removeResource(String path) throws RepositoryException {
+    protected final void removeResource(String path) throws RepositoryException {
         Resource resource = resourceResolver.getResource(path);
         if (resource != null) {
             logger.info("Deleting node at {}", path);
@@ -181,7 +184,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param oldResourceType The current sling:resourceType.
      * @param newResourceType The new sling:resourceType to be used.
      */
-    protected void searchAndUpdateResourceType(String oldResourceType, String newResourceType) throws RepositoryException {
+    protected final void searchAndUpdateResourceType(String oldResourceType, String newResourceType) throws RepositoryException {
         Map<String, String> map = new HashMap<>();
         map.put("p.limit", "-1");
         map.put("path", "/content");
@@ -209,7 +212,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
      * @param node         The node to update.
      * @param resourceType The new sling:resourceType to be used.
      */
-    protected void updateResourceType(Node node, String resourceType) throws RepositoryException {
+    protected final void updateResourceType(Node node, String resourceType) throws RepositoryException {
         boolean hasResourceType = node.hasProperty(SLING_RESOURCE_TYPE);
         if (!hasResourceType || !resourceType.equals(node.getProperty(SLING_RESOURCE_TYPE).getString())) {
             logger.info("Updating node at {} to resource type: {}", node.getPath(), resourceType);
@@ -217,5 +220,21 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
         } else {
             logger.info("Node at {} is already resource type: {}", node.getPath(), resourceType);
         }
+    }
+
+    protected final ResourceResolver getResourceResolver() {
+        return resourceResolver;
+    }
+
+    protected final PageManager getPageManager() {
+        return pageManager;
+    }
+
+    protected final Session getSession() {
+        return session;
+    }
+
+    protected final Workspace getWorkspace() {
+        return workspace;
     }
 }
