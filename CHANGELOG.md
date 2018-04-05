@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
+### Fixed
+- #1283: Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
+
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
