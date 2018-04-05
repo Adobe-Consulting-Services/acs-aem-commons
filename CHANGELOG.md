@@ -9,13 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
-### Fixed
-- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
-
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
 ### Added
+- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
 - #1307 - MCP now has error reporting and also XLSX export for errors.
 - #1238 - HTTP cache JCR storage 
@@ -25,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1262 - MCP race condition affects showing completion status for processes that finish very quickly
 - #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
 
 ## [3.14.12] - 2018-04-03
 
