@@ -63,7 +63,7 @@ import static org.powermock.api.mockito.PowerMockito.doThrow;
 
 public class OnDeployExecutorImplTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Before
     public void setup() throws RepositoryException {
