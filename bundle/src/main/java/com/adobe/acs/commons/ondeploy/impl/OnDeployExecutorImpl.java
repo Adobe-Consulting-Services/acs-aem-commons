@@ -200,7 +200,7 @@ public class OnDeployExecutorImpl {
             ModifiableValueMap properties = statusResource.adaptTo(ModifiableValueMap.class);
             properties.put(SCRIPT_STATUS, SCRIPT_STATUS_RUNNING);
             properties.put(SCRIPT_DATE_START, Calendar.getInstance());
-            properties.put(SCRIPT_DATE_END, null);
+            properties.remove(SCRIPT_DATE_END);
             statusResource.getResourceResolver().commit();
         } catch (PersistenceException e) {
             logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusResource.getPath());
