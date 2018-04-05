@@ -20,23 +20,17 @@
 
 package com.adobe.acs.commons.users.impl;
 
-import java.util.Map;
+import aQute.bnd.annotation.ProviderType;
+import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+@ProviderType
+@Description("ACS AEM Commons - Ensure Authorizable MBean")
+public interface EnsureAuthorizableManager {
 
-public final class ServiceUser extends AbstractAuthorizable {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ServiceUser.class);
+    @Description("Execute all Ensure Service User and Ensure Group configurations")
+    void ensureAll();
 
-    private static final String PATH_SYSTEM_USERS = "/home/users/system";
-
-    public ServiceUser(Map<String, Object> config) throws EnsureAuthorizableException {
-        super(config);
-    }
-
-    @Override
-    public String getDefaultPath() {
-        return PATH_SYSTEM_USERS;
-    }
+    @Description("Execute all Ensure Service User and Ensure Group configurations for the provided principal name")
+    void ensurePrincipalName(@Name(value="Principal Name")String principalName);
 }

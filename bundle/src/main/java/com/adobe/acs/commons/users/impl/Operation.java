@@ -20,23 +20,6 @@
 
 package com.adobe.acs.commons.users.impl;
 
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class ServiceUser extends AbstractAuthorizable {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ServiceUser.class);
-
-    private static final String PATH_SYSTEM_USERS = "/home/users/system";
-
-    public ServiceUser(Map<String, Object> config) throws EnsureAuthorizableException {
-        super(config);
-    }
-
-    @Override
-    public String getDefaultPath() {
-        return PATH_SYSTEM_USERS;
-    }
+public enum Operation {
+    ADD, REMOVE
 }

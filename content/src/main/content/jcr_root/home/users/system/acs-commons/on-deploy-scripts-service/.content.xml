@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="7ed78675-7b76-3fe1-b6a9-d3528844f21e"
+    rep:authorizableId="acs-commons-on-deploy-scripts-service"
+    rep:principalName="acs-commons-on-deploy-scripts-service"/>

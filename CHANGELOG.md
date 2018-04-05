@@ -9,19 +9,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
 
-### Added
-- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
-
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
 
 ### Added
+- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1307 - MCP now has error reporting and also XLSX export for errors.
 - #1238 - HTTP cache JCR storage 
+- #1245 - On-Deploy Scripts Framework
 
 ### Fixed
 - #1262 - MCP race condition affects showing completion status for processes that finish very quickly
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
 
 ## [3.14.12] - 2018-04-03
 
@@ -61,6 +63,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
 - #1239 - Fixing issue which prevented ACS AEM Commons 3.14.0, 3.14.2 and 3.14.4 being installed on AEM 6.2.
+- #1244 - Added Ensure Group functionality.
 
 ## [3.14.4] - 2018-01-24
 

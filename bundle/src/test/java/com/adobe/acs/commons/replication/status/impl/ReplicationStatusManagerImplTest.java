@@ -47,9 +47,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -186,6 +184,23 @@ public class ReplicationStatusManagerImplTest {
         assertSameTime(replicatedAt, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
         assertEquals(replicatedBy, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
         assertEquals(replicationStatus, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
+    }
+
+
+    // Issue #1265
+    @Test
+    public void testSetReplicationStatus_NullReplicatedByAndReplicatedAt() throws Exception {
+        final String replicatedBy = null;
+        final Calendar replicatedAt = null;
+
+        replicationStatusManager.setReplicationStatus(resourceResolver,
+                replicatedBy,
+                replicatedAt,
+                ReplicationStatusManager.Status.ACTIVATED,
+                REPLICATED_PATH);
+
+        assertNotNull(replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertEquals(ReplicationStatusManagerImpl.DEFAULT_REPLICATED_BY, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
     }
 
     @Test
