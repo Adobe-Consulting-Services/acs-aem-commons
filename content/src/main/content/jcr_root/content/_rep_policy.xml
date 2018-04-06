@@ -13,4 +13,8 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-twitter-updater-service"
             rep:privileges="{Name}[jcr:read,jcr:modifyProperties,crx:replicate]"/>
+    <allow2
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-on-deploy-scripts-service"
+            rep:privileges="{Name}[jcr:versionManagement,jcr:read,rep:write,jcr:lockManagement,crx:replicate]"/>
 </jcr:root>

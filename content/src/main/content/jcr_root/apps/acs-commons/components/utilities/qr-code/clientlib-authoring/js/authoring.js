@@ -11,22 +11,24 @@
      * Bind to the Page Editor load event; This is the main hook.
      */
     $document.on("cq-editor-loaded", function() {
-        $.when(getConfig(Granite.author.ContentFrame.currentLocation())).then(function(config) {
-            if ($button) {
-                // Remove QR from previous editor loads
-                $button.remove();
-                $qrCode.remove();
-            }
+        if (Granite.author.ContentFrame.currentLocation().indexOf("/content/") === 0) {
+            $.when(getConfig(Granite.author.ContentFrame.currentLocation())).then(function (config) {
+                if ($button) {
+                    // Remove QR from previous editor loads
+                    $button.remove();
+                    $qrCode.remove();
+                }
 
-            if (config.enabled) {
-                $button = buildButton(config.publishURL);
-                $qrCode = buildQrCode($button, config);
-                bindToButton($button, $qrCode);
-            } else {
-                $button.remove();
-                $qrCode.remove();
-            }
-        });
+                if (config.enabled) {
+                    $button = buildButton(config.publishURL);
+                    $qrCode = buildQrCode($button, config);
+                    bindToButton($button, $qrCode);
+                } else {
+                    $button.remove();
+                    $qrCode.remove();
+                }
+            });
+        }
 
     });
 

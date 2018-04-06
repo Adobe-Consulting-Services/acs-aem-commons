@@ -1,6 +1,5 @@
 package com.adobe.acs.commons.users.impl;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -11,10 +10,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ServiceUserTest {
+public class AbstractAuthorizableTest {
 
     @Test
-    public void testServiceUser() throws EnsureServiceUserException {
+    public void testServiceUser() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read,rep:write;path=/content/dam;rep:glob=/jcr:content/*;rep:ntNames=cq:Page,dam:Asset;rep:itemNames=jcr:title,jcr:description;rep:prefixes=cq,dam";
 
@@ -22,10 +21,10 @@ public class ServiceUserTest {
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertEquals(true, ace.isAllow());
@@ -54,7 +53,7 @@ public class ServiceUserTest {
 
 
     @Test
-    public void testServiceUser_blankGlob() throws EnsureServiceUserException {
+    public void testServiceUser_blankGlob() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;rep:glob=;";
 
@@ -62,10 +61,10 @@ public class ServiceUserTest {
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
@@ -74,7 +73,7 @@ public class ServiceUserTest {
     }
 
     @Test
-    public void testServiceUser_NoGlob() throws EnsureServiceUserException {
+    public void testServiceUser_NoGlob() throws EnsureAuthorizableException {
         String[] aces = new String[1];
         aces[0] = "type=allow;privileges=jcr:read;path=/content/dam;";
 
@@ -82,10 +81,10 @@ public class ServiceUserTest {
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
         config.put(EnsureServiceUser.PROP_ACES, aces);
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
 
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
@@ -93,8 +92,8 @@ public class ServiceUserTest {
         }
     }
 
-    @Test(expected=EnsureServiceUserException.class)
-    public void testServiceUser_ProtectedSystemUser() throws EnsureServiceUserException {
+    @Test(expected=EnsureAuthorizableException.class)
+    public void testServiceUser_ProtectedSystemUser() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "cryptoservice");
 
@@ -103,58 +102,70 @@ public class ServiceUserTest {
 
 
     @Test
-    public void testServiceUser_principalName() throws EnsureServiceUserException {
+    public void testServiceUser_principalName() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName1() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName1() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "folder/test-service-user");
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName2() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName2() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "./folder/test-service-user");
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
-    public void testServiceUser_relativePrincipalName3() throws EnsureServiceUserException {
+    public void testServiceUser_relativePrincipalName3() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
         config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/folder/test-service-user");
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake/folder", serviceUser.getIntermediatePath());
     }
 
     @Test
-    public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureServiceUserException {
+    public void testServiceUser_absoluteRealtivePrincipalName2() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/home/users/system/folder/test-service-user");
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "/home/fake/folder/test-service-user");
 
-        ServiceUser serviceUser = new ServiceUser(config);
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
 
-        Assert.assertEquals("test-service-user", serviceUser.getPrincipalName());
-        Assert.assertEquals("/home/users/system/folder", serviceUser.getIntermediatePath());
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake/folder", serviceUser.getIntermediatePath());
+    }
+
+    private class FakeAuthorizable extends AbstractAuthorizable {
+
+        public FakeAuthorizable(Map<String, Object> config) throws EnsureAuthorizableException {
+            super(config);
+        }
+
+        @Override
+        public String getDefaultPath() {
+            return "/home/fake";
+        }
     }
 
 }
