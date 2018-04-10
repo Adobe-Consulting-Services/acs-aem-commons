@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
+- #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
