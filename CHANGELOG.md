@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
 
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
