@@ -578,21 +578,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     private boolean isRequestCachableAccordingToHandlingRules(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent){
-        return checkOnHandlingRule(request, cacheConfig, new Function<HttpCacheHandlingRule, Boolean>() {
-            @Override
-            public Boolean apply(HttpCacheHandlingRule rule) {
-                return rule.onResponseCache(request, response, cacheConfig, cacheContent);
-            }
-        }, "Caching for request {} has been cancelled as per custom rule {}");
+        return checkOnHandlingRule(request, cacheConfig, rule -> rule.onResponseCache(request, response, cacheConfig, cacheContent), "Caching for request {} has been cancelled as per custom rule {}");
     }
 
     private boolean isRequestDeliverableFromCacheAccordingToHandlingRules(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent) {
-        return checkOnHandlingRule(request, cacheConfig, new Function<HttpCacheHandlingRule, Boolean>() {
-            @Override
-            public Boolean apply(HttpCacheHandlingRule rule) {
-                return rule.onCacheDeliver(request, response, cacheConfig, cacheContent);
-            }
-        }, "Cache cannot be delivered for the url {} honoring the rule {}");
+        return checkOnHandlingRule(request, cacheConfig, rule-> rule.onCacheDeliver(request, response, cacheConfig, cacheContent), "Cache cannot be delivered for the url {} honoring the rule {}");
     }
 
     private boolean checkOnHandlingRule(SlingHttpServletRequest request,  HttpCacheConfig cacheConfig, Function<HttpCacheHandlingRule, Boolean> check,String onFailLogMessage){

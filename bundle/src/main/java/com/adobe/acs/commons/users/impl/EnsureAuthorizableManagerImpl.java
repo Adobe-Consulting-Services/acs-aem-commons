@@ -49,7 +49,7 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 @Service(value = DynamicMBean.class)
 public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implements EnsureAuthorizableManager {
 
-    private final Logger log = LoggerFactory.getLogger(EnsureAuthorizableManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EnsureAuthorizableManagerImpl.class);
 
     private Map<String, EnsureAuthorizable> ensureAuthorizables = new ConcurrentHashMap<>();
 

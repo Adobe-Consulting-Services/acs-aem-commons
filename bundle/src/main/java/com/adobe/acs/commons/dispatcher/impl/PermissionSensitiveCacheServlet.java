@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
-    private final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
 
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {
