@@ -239,7 +239,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 r.refresh();
                 //once version is committed we are safe to create, which only replaces the original version
             }
-            assetManager.createAsset(assetPath, source.getStream(), type, false);
+            try {
+                assetManager.createAsset(assetPath, source.getStream(), type, false);
+            } finally {
+                source.close();
+            }
             r.commit();
             r.refresh();
         }
@@ -396,6 +400,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
         long getLength();
 
         HierarchialElement getElement();
+        
+        void close() throws IOException;
 
     }
 

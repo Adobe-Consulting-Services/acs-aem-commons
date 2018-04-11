@@ -67,7 +67,7 @@ public class Folder implements HierarchialElement {
 
     @Override
     public AssetIngestor.Source getSource() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("This implementation of folder does not provide a source.");
     }
 
     @Override

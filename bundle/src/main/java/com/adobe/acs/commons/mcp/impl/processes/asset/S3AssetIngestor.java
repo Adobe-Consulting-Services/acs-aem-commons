@@ -28,6 +28,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -161,6 +162,7 @@ public class S3AssetIngestor extends AssetIngestor {
     private class S3Source implements Source {
 
         private final S3ObjectSummary s3ObjectSummary;
+        private S3ObjectInputStream lastOpenStream;
         private final HierarchialElement element;
 
         private S3Source(S3ObjectSummary s3ObjectSummary, S3HierarchialElement element) {
@@ -175,7 +177,9 @@ public class S3AssetIngestor extends AssetIngestor {
 
         @Override
         public InputStream getStream() throws IOException {
-            return s3Client.getObject(bucket, s3ObjectSummary.getKey()).getObjectContent();
+            close();
+            lastOpenStream = s3Client.getObject(bucket, s3ObjectSummary.getKey()).getObjectContent();
+            return lastOpenStream;
         }
 
         @Override
@@ -186,6 +190,14 @@ public class S3AssetIngestor extends AssetIngestor {
         @Override
         public HierarchialElement getElement() {
             return element;
+        }
+        
+        @Override
+        public void close() throws IOException {
+            if (lastOpenStream != null) {
+                lastOpenStream.close();
+            }
+            lastOpenStream = null;
         }
     }
 

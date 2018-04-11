@@ -100,6 +100,7 @@ public class FileAssetIngestor extends AssetIngestor {
     private class FileSource implements Source {
         private final File file;
         private final HierarchialElement element;
+        private InputStream lastOpenStream;
 
         private FileSource(File f, FileHierarchialElement el) {
             this.file = f;
@@ -113,7 +114,9 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public InputStream getStream() throws IOException {
-            return new FileInputStream(file);
+            close();
+            lastOpenStream = new FileInputStream(file);
+            return lastOpenStream;
         }
 
         @Override
@@ -124,6 +127,14 @@ public class FileAssetIngestor extends AssetIngestor {
         @Override
         public HierarchialElement getElement() {
             return element;
+        }
+        
+        @Override
+        public void close() throws IOException {
+            if (lastOpenStream != null) {
+                lastOpenStream.close();
+            }
+            lastOpenStream = null;
         }
     }
 

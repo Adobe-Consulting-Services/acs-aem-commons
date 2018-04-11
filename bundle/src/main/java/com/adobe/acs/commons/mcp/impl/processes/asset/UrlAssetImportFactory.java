@@ -24,6 +24,7 @@ import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 /**
@@ -36,9 +37,12 @@ public class UrlAssetImportFactory extends AdministratorsOnlyProcessDefinitionFa
     @Reference
     private transient MimeTypeService mimeTypeService;
 
+    @Reference
+    private transient HttpClientBuilderFactory httpClientService;
+
     @Override
     protected UrlAssetImport createProcessDefinitionInstance() {
-        return new UrlAssetImport(mimeTypeService);
+        return new UrlAssetImport(mimeTypeService, httpClientService);
     }
 
     @Override

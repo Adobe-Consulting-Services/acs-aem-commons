@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -62,9 +64,13 @@ public class UrlAssetImport extends AssetIngestor {
     public static String UNKNOWN_TARGET_FOLDER = "/content/dam/unsorted";
 
     private static final Logger LOG = LoggerFactory.getLogger(UrlAssetImport.class);
+    private HttpClient httpClient = null;
 
-    public UrlAssetImport(MimeTypeService mimeTypeService) {
+    public UrlAssetImport(MimeTypeService mimeTypeService, HttpClientBuilderFactory httpFactory) {
         super(mimeTypeService);
+        if (httpFactory != null) {
+            this.httpClient = httpFactory.newBuilder().build();
+        }
     }
 
     @FormField(
@@ -177,7 +183,7 @@ public class UrlAssetImport extends AssetIngestor {
     public void updateMetadataFromRow(FileOrRendition file, ModifiableValueMap meta) {
         for (String prop : fileData.getHeaderRow()) {
             if (prop.contains(":")) {
-                String value = file.get(prop);
+                String value = file.getProperty(prop);
                 if (value == null) {
                     meta.remove(prop);
                 } else {
@@ -204,7 +210,11 @@ public class UrlAssetImport extends AssetIngestor {
                     if (!dryRunMode) {
                         disableWorkflowProcessing(rr);
                         Asset asset = rr.getResource(file.getNodePath()).adaptTo(Asset.class);
-                        asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
+                        try {
+                            asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
+                        } finally {
+                            renditionFile.getSource().close();
+                        }
                     }
                     incrementCount(importedAssets, 1L);
                     incrementCount(importedData, renditionFile.getSource().getLength());
@@ -248,7 +258,7 @@ public class UrlAssetImport extends AssetIngestor {
         }
         String name = source.substring(source.lastIndexOf('/') + 1);
         Folder folder = extractFolder(assetData);
-        FileOrRendition file = new FileOrRendition(name, source, folder, assetData);
+        FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
                 assetData.get(RENDITION_NAME),
@@ -294,5 +304,9 @@ public class UrlAssetImport extends AssetIngestor {
         int aDist = StringUtils.getLevenshteinDistance(a.getName().toLowerCase(), fileName);
         int bDist = StringUtils.getLevenshteinDistance(b.getName().toLowerCase(), fileName);
         return Integer.compare(aDist, bDist);
+    }
+    
+    private HttpClient getHttpClient() {
+        return httpClient;
     }
 }

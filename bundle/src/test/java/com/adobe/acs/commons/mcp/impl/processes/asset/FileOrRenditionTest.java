@@ -46,8 +46,8 @@ public class FileOrRenditionTest {
      */
     @Test
     public void testRenditionBehavior() {
-        FileOrRendition asset = new FileOrRendition("name", "url", testFolder, Collections.EMPTY_MAP);
-        FileOrRendition rendition = new FileOrRendition("name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition asset = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition rendition = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
         rendition.setAsRenditionOfImage("testRendition", "original asset");
         asset.addRendition(rendition);
         assertEquals("original asset", rendition.getOriginalAssetName());
@@ -62,7 +62,7 @@ public class FileOrRenditionTest {
      */
     @Test
     public void testAssetBehavior() {
-        FileOrRendition instance = new FileOrRendition("name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition instance = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
         assertNull("No rendition name present", instance.getOriginalAssetName());
         assertNotNull("Renditions data strucutre always present", instance.getRenditions());
         assertTrue("Is a file", instance.isFile());
@@ -77,12 +77,13 @@ public class FileOrRenditionTest {
     public void testFileSource() throws MalformedURLException, IOException {
         String basePath = new File(".").toURI().toURL().toString();
         
-        FileOrRendition instance = new FileOrRendition("name", basePath+"/pom.xml", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition instance = new FileOrRendition(()->null, "name", basePath+"/pom.xml", testFolder, Collections.EMPTY_MAP);
         Source fileSource = instance.getSource();
         assertEquals(instance, fileSource.getElement());
         assertEquals("name", fileSource.getName());
         assertTrue("Able to determine file size", fileSource.getLength() > 0);
         assertTrue("Able to read file", fileSource.getStream().available() > 0);
+        fileSource.close();
     }
     
 }

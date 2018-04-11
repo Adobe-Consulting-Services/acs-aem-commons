@@ -83,7 +83,7 @@ public class UrlAssetImportTest {
             return mock(Asset.class);            
         }).when(assetManager).createAsset(any(String.class), any(InputStream.class), any(String.class), any(Boolean.class));
 
-        importProcess = new UrlAssetImport(context.getService(MimeTypeService.class));
+        importProcess = new UrlAssetImport(context.getService(MimeTypeService.class), null);
         importProcess.fileData = new Spreadsheet(true, "source", "target", "dc:title", "dc:attr");
         
         doAnswer(invocation -> {
