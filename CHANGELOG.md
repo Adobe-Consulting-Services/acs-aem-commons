@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
+- #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
@@ -26,7 +28,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1303 - Updated HTTP Cache test to handle all platforms more agnostically
 - #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
 - #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
-- #1283: Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
+- #1283 - Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
+- #1319 - Ensuring that PageRootProviderConfig references are sorted consistently.
 
 ## [3.14.12] - 2018-04-03
 

@@ -49,6 +49,7 @@ import java.util.Map;
 public abstract class OnDeployScriptBase implements OnDeployScript {
     private static final String SLING_RESOURCE_TYPE = "sling:resourceType";
 
+    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private PageManager pageManager;
@@ -154,7 +155,7 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
     protected final void renameProperty(Resource resource, String oldPropertyName, String newPropertyName) {
         ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
         if (properties.containsKey(oldPropertyName)) {
-            logger.info("Renaming property '{}' to '{}' on resource: {}", new Object[] { oldPropertyName, newPropertyName, resource.getPath() });
+            logger.info("Renaming property '{}' to '{}' on resource: {}", oldPropertyName, newPropertyName, resource.getPath());
             properties.put(newPropertyName, properties.get(oldPropertyName));
             properties.remove(oldPropertyName);
         } else {

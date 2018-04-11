@@ -192,7 +192,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
         registeredServices.put(id, serviceRegistration);
         log.debug("Automatic Package Replication job {} successfully updated with service {}",
-                new Object[] { id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID) });
+                id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID));
 
         return serviceRegistration;
     }

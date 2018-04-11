@@ -259,7 +259,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
             if (imageTransformer == null) {
-                log.warn("Skipping transform. Missing ImageTransformer for type: {}");
+                log.warn("Skipping transform. Missing ImageTransformer for type: {}", type);
                 continue;
             }
 

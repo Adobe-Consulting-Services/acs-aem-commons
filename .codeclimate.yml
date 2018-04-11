@@ -44,6 +44,8 @@ plugins:
 #    enabled: true
   pmd:
     enabled: true
+    config:
+      file: ".codeclimate/pmd-ruleset.xml"
 exclude_patterns:
 - ".idea/"
 - "**/vendor/"
