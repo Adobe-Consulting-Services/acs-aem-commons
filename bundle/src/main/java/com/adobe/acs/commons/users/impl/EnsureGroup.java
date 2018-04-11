@@ -149,8 +149,8 @@ public final class EnsureGroup implements EnsureAuthorizable {
                 log.debug("No changes required for Group [ {} ]. Skipping...", group.getPrincipalName());
             }
 
-            log.info("Successfully ensured [ {} ] of Group [ {} ] in [ {} ms ]", new String[] { operation.toString(),
-                    getAuthorizable().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start) });
+            log.info("Successfully ensured [ {} ] of Group [ {} ] in [ {} ms ]", operation.toString(),
+                    getAuthorizable().getPrincipalName(), String.valueOf(System.currentTimeMillis() - start));
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Group [ %s ]",
                     operation.toString(), group.getPrincipalName()), e);

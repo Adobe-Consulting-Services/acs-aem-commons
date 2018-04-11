@@ -119,14 +119,14 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
                     // If OR condition; return true on the first condition match
                     if (log.isDebugEnabled()) {
                         log.debug("Including [ {} ] based on [ {}  -> {} ] as part of [ OR ]",
-                                new String[] {row.getPath(), operation, entry.getValue()});
+                                row.getPath(), operation, entry.getValue());
                     }
                     return true;
                 } else if (!or && !ruleIncludes) {
                     // If AND condition; return true on the first condition failure
                     if (log.isDebugEnabled()) {
                         log.debug("Excluding [ {} ] based on [ {}  -> {} ] as part of [ AND ]",
-                                new String[] {row.getPath(), operation, entry.getValue()});
+                                row.getPath(), operation, entry.getValue());
                     }
 
                     return false;

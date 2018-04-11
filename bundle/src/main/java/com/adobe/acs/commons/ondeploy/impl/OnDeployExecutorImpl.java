@@ -76,7 +76,7 @@ public class OnDeployExecutorImpl {
 
     private static final String SERVICE_NAME = "on-deploy-scripts";
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(OnDeployExecutorImpl.class);
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;

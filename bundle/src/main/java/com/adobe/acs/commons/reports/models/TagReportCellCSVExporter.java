@@ -51,7 +51,7 @@ public class TagReportCellCSVExporter implements ReportCellCSVExporter {
     
     TagManager tagMgr = resource.getResourceResolver().adaptTo(TagManager.class);
 
-    log.debug("Loading tags from {}@{}", new String[] { resource.getPath(), property });
+    log.debug("Loading tags from {}@{}", resource.getPath(), property);
     List<String> tags = new ArrayList<String>();
     String[] values = resource.getValueMap().get(property, String[].class);
     if (values != null) {

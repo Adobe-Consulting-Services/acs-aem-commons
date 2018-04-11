@@ -76,7 +76,7 @@ import java.util.Scanner;
 })
 @Service(value = Runnable.class)
 public class HealthCheckStatusEmailer implements Runnable {
-    private final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
+    private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
