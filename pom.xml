@@ -640,12 +640,24 @@
                             <version>${scr.plugin.version}</version>
                             <dependencies>
                                 <dependency>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>slf4j-simple</artifactId>
+                                    <version>1.6.4</version>
+                                </dependency>
+                                <dependency>
                                     <groupId>org.jacoco</groupId>
                                     <artifactId>org.jacoco.agent</artifactId>
                                     <version>${jacoco.version}</version>
                                     <classifier>runtime</classifier>
                                 </dependency>
                             </dependencies>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>animal-sniffer-maven-plugin</artifactId>
+                            <configuration>
+                                <skip>true</skip>
+                            </configuration>
                         </plugin>
                     </plugins>
                 </pluginManagement>
