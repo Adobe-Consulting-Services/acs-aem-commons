@@ -133,13 +133,13 @@ public class FileOrRendition implements HierarchialElement {
     private class UrlConnectionSource implements Source {
 
         private final FileOrRendition thizz;
+        private Long size = null;
+        private URLConnection connection = null;
+        private InputStream lastOpenStream = null;
 
         public UrlConnectionSource(FileOrRendition thizz) {
             this.thizz = thizz;
         }
-        Long size = null;
-        URLConnection connection = null;
-        InputStream lastOpenStream = null;
 
         @Override
         public String getName() {
@@ -192,12 +192,12 @@ public class FileOrRendition implements HierarchialElement {
 
         private final FileOrRendition thizz;
         private HttpGet lastRequest;
+        private Long size = null;
+        private HttpResponse connection = null;
 
         public HttpConnectionSource(FileOrRendition thizz) {
             this.thizz = thizz;
         }
-        Long size = null;
-        HttpResponse connection = null;
 
         @Override
         public String getName() {
