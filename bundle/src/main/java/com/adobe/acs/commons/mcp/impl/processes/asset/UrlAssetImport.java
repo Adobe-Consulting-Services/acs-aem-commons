@@ -111,11 +111,11 @@ public class UrlAssetImport extends AssetIngestor {
         if (httpFactory != null) {
             HttpClientBuilder clientBuilder = httpFactory.newBuilder();
             clientBuilder.setDefaultSocketConfig(
-                    SocketConfig.copy(SocketConfig.DEFAULT)
+                    SocketConfig.custom()
                             .setSoTimeout(timeout)
                             .build());
             clientBuilder.setDefaultRequestConfig(
-                    RequestConfig.copy(RequestConfig.DEFAULT)
+                    RequestConfig.custom()
                             .setConnectTimeout(timeout)
                             .build()
             );
