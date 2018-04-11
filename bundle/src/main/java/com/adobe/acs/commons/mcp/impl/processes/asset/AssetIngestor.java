@@ -51,6 +51,7 @@ import java.util.EnumMap;
 import java.util.List;
 
 public abstract class AssetIngestor extends ProcessDefinition {
+
     public static final String ALL_ASSETS = "All Assets";
 
     protected final transient MimeTypeService mimetypeService;
@@ -78,7 +79,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             options = "checked"
     )
     boolean detailedReport = true;
-    
+
     @FormField(
             name = "Inhibit workflow",
             description = "If checked, disables asset processing workflow",
@@ -177,14 +178,14 @@ public abstract class AssetIngestor extends ProcessDefinition {
         reportRows.add(reportRow);
         return reportRow;
     }
-    
+
     protected synchronized EnumMap<ReportColumns, Object> trackDetailedActivity(String item, String action, String description, Long bytes) {
         if (detailedReport) {
             return trackActivity(item, action, description, bytes);
         } else {
             return null;
         }
-    }    
+    }
 
     @SuppressWarnings("squid:S2445")
     private void increment(EnumMap<ReportColumns, Object> row, ReportColumns col, long amt) {
@@ -192,16 +193,15 @@ public abstract class AssetIngestor extends ProcessDefinition {
             row.put(col, (Long) row.getOrDefault(col, 0) + amt);
         }
     }
-    
+
     protected void incrementCount(EnumMap<ReportColumns, Object> row, long amt) {
         increment(row, ReportColumns.count, amt);
     }
-    
+
     protected void incrementBytes(EnumMap<ReportColumns, Object> row, long amt) {
         increment(row, ReportColumns.bytes, amt);
-    }    
-    
-    
+    }
+
     protected long getCount(EnumMap<ReportColumns, Object> row) {
         return (long) row.getOrDefault(ReportColumns.count, 0);
     }
@@ -224,36 +224,36 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00112")
     private void createAsset(Source source, String assetPath, ResourceResolver r, boolean versioning) throws Exception {
-        boolean versioned = false;
-        if (!dryRunMode) {
-            disableWorkflowProcessing(r);
-            AssetManager assetManager = r.adaptTo(AssetManager.class);
-            String type = mimetypeService.getMimeType(source.getName());
-            if (versioning) {
-                //if asset is null, no version gets created
-                Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
-                versioned = asset != null;
-                //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
-                assetManager.createRevision(asset, "initial version of asset", asset.getName());
+        try {
+            boolean versioned = false;
+            if (!dryRunMode) {
+                disableWorkflowProcessing(r);
+                AssetManager assetManager = r.adaptTo(AssetManager.class);
+                String type = mimetypeService.getMimeType(source.getName());
+                if (versioning) {
+                    //if asset is null, no version gets created
+                    Asset asset = r.getResource(assetPath).adaptTo(Asset.class);
+                    versioned = asset != null;
+                    //once you are past this first version, default behavior is to start numbering 1.0, 1.1 and so on
+                    assetManager.createRevision(asset, "initial version of asset", asset.getName());
+                    r.commit();
+                    r.refresh();
+                    //once version is committed we are safe to create, which only replaces the original version
+                }
+                assetManager.createAsset(assetPath, source.getStream(), type, false);
                 r.commit();
                 r.refresh();
-                //once version is committed we are safe to create, which only replaces the original version
             }
-            try {
-                assetManager.createAsset(assetPath, source.getStream(), type, false);
-            } finally {
-                source.close();
+            if (versioned) {
+                trackDetailedActivity(assetPath, "Revised", "Created new version of asset", source.getLength());
+            } else {
+                trackDetailedActivity(assetPath, "Create", "Imported asset", source.getLength());
             }
-            r.commit();
-            r.refresh();
+            incrementBytes(importedData, source.getLength());
+            incrementCount(importedAssets, 1L);
+        } finally {
+            source.close();
         }
-        if (versioned) {
-            trackDetailedActivity(assetPath, "Revised", "Created new version of asset", source.getLength());
-        } else {
-            trackDetailedActivity(assetPath, "Create", "Imported asset", source.getLength());
-        }
-        incrementBytes(importedData, source.getLength());
-        incrementCount(importedAssets, 1L);
     }
 
     protected void handleExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
@@ -380,9 +380,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected void disableWorkflowProcessing(ResourceResolver rr) throws RepositoryException {
         if (inhibitWorkflow) {
             rr.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(CHANGED_BY_WORKFLOW);
-        }        
+        }
     }
-    
+
     private transient GenericReport report = new GenericReport();
 
     @Override
@@ -400,7 +400,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         long getLength();
 
         HierarchialElement getElement();
-        
+
         void close() throws IOException;
 
     }

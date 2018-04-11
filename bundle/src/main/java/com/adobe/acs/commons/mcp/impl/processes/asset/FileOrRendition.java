@@ -191,6 +191,7 @@ public class FileOrRendition implements HierarchialElement {
     private class HttpConnectionSource implements Source {
 
         private final FileOrRendition thizz;
+        private HttpGet lastRequest;
 
         public HttpConnectionSource(FileOrRendition thizz) {
             this.thizz = thizz;
@@ -203,17 +204,18 @@ public class FileOrRendition implements HierarchialElement {
             return name;
         }
 
-        private HttpResponse downloadResource() throws IOException {
+        private HttpResponse initiateDownload() throws IOException {
             if (connection == null) {
-                connection = clientProvider.get().execute(new HttpGet(url));
+                lastRequest = new HttpGet(url);
+                connection = clientProvider.get().execute(lastRequest);
+                size = connection.getEntity().getContentLength();
             }
             return connection;
         }
 
         @Override
         public InputStream getStream() throws IOException {
-            HttpResponse c = downloadResource();
-            connection = null;
+            HttpResponse c = initiateDownload();
             return c.getEntity().getContent();
         }
 
@@ -221,7 +223,7 @@ public class FileOrRendition implements HierarchialElement {
         public long getLength() {
             if (size == null) {
                 try {
-                    size = downloadResource().getEntity().getContentLength();
+                    initiateDownload();
                 } catch (IOException ex) {
                     Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
@@ -236,8 +238,13 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         public void close() throws IOException {
+            if (lastRequest != null) {
+                lastRequest.releaseConnection();
+                lastRequest = null;
+            }
             if (connection != null && connection.getEntity() != null && connection.getEntity().getContent() != null) {
                 connection.getEntity().getContent().close();
+                connection = null;
             }
         }
     }

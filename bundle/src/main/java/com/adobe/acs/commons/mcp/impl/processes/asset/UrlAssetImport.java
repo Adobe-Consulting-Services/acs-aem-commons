@@ -41,6 +41,10 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
@@ -64,13 +68,12 @@ public class UrlAssetImport extends AssetIngestor {
     public static String UNKNOWN_TARGET_FOLDER = "/content/dam/unsorted";
 
     private static final Logger LOG = LoggerFactory.getLogger(UrlAssetImport.class);
+    private HttpClientBuilderFactory httpFactory;
     private HttpClient httpClient = null;
 
     public UrlAssetImport(MimeTypeService mimeTypeService, HttpClientBuilderFactory httpFactory) {
         super(mimeTypeService);
-        if (httpFactory != null) {
-            this.httpClient = httpFactory.newBuilder().build();
-        }
+        this.httpFactory = httpFactory;
     }
 
     @FormField(
@@ -80,7 +83,7 @@ public class UrlAssetImport extends AssetIngestor {
             required = true
     )
     transient RequestParameter importFile;
-    
+
     @FormField(
             name = "Default prefix",
             description = "Added to source if it starts with / e.g. file:/ | file:/C: | http://www.somewebsite",
@@ -88,15 +91,36 @@ public class UrlAssetImport extends AssetIngestor {
             options = ("default=file:/")
     )
     private String defaultPrefix = "file:/";
-    
+
+    @FormField(
+            name = "Connection timeout",
+            description = "HTTP Connection timeout (in milliseconds)",
+            required = true,
+            options = ("default=30000")
+    )
+    private int timeout = 30000;
+
     transient Set<FileOrRendition> files;
     transient Map<String, Folder> folders = new TreeMap<>();
 
     Spreadsheet fileData;
-    
+
     @Override
     public void init() throws RepositoryException {
         super.init();
+        if (httpFactory != null) {
+            HttpClientBuilder clientBuilder = httpFactory.newBuilder();
+            clientBuilder.setDefaultSocketConfig(
+                    SocketConfig.copy(SocketConfig.DEFAULT)
+                            .setSoTimeout(timeout)
+                            .build());
+            clientBuilder.setDefaultRequestConfig(
+                    RequestConfig.copy(RequestConfig.DEFAULT)
+                            .setConnectTimeout(timeout)
+                            .build()
+            );
+            httpClient = clientBuilder.build();
+        }
     }
 
     @Override
@@ -104,7 +128,7 @@ public class UrlAssetImport extends AssetIngestor {
         try {
             fileData = new Spreadsheet(importFile);
             files = extractFilesAndFolders(fileData.getDataRows());
-            instance.getInfo().setDescription("Import " + fileData.getFileName() + " (" + fileData.getRowCount() + " rows)");        
+            instance.getInfo().setDescription("Import " + fileData.getFileName() + " (" + fileData.getRowCount() + " rows)");
         } catch (IOException ex) {
             LOG.error("Unable to process import", ex);
             instance.getInfo().setDescription("Import " + fileData.getFileName() + " (failed)");
@@ -201,24 +225,24 @@ public class UrlAssetImport extends AssetIngestor {
         return r -> {
             file.getRenditions().forEach((rendition, renditionFile) -> {
                 manager.deferredWithResolver(rr -> {
-                    String renditionName = rendition;
-                    String type = mimetypeService.getMimeType(renditionFile.getName());
-                    String extension = renditionFile.getName().substring(renditionFile.getName().lastIndexOf('.') + 1).toLowerCase();
-                    if (renditionName.lastIndexOf('.') <= 0) {
-                        renditionName += "." + extension;
-                    }
-                    if (!dryRunMode) {
-                        disableWorkflowProcessing(rr);
-                        Asset asset = rr.getResource(file.getNodePath()).adaptTo(Asset.class);
-                        try {
-                            asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
-                        } finally {
-                            renditionFile.getSource().close();
+                    try {
+                        String renditionName = rendition;
+                        String type = mimetypeService.getMimeType(renditionFile.getName());
+                        String extension = renditionFile.getName().substring(renditionFile.getName().lastIndexOf('.') + 1).toLowerCase();
+                        if (renditionName.lastIndexOf('.') <= 0) {
+                            renditionName += "." + extension;
                         }
+                        if (!dryRunMode) {
+                            disableWorkflowProcessing(rr);
+                            Asset asset = rr.getResource(file.getNodePath()).adaptTo(Asset.class);
+                            asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
+                        }
+                        incrementCount(importedAssets, 1L);
+                        incrementCount(importedData, renditionFile.getSource().getLength());
+                        trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
+                    } finally {
+                        renditionFile.getSource().close();
                     }
-                    incrementCount(importedAssets, 1L);
-                    incrementCount(importedData, renditionFile.getSource().getLength());
-                    trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
                 });
             });
         };
@@ -305,7 +329,7 @@ public class UrlAssetImport extends AssetIngestor {
         int bDist = StringUtils.getLevenshteinDistance(b.getName().toLowerCase(), fileName);
         return Integer.compare(aDist, bDist);
     }
-    
+
     private HttpClient getHttpClient() {
         return httpClient;
     }
