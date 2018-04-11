@@ -113,107 +113,9 @@ public class FileOrRendition implements HierarchialElement {
         if (fileSource == null) {
             FileOrRendition thizz = this;
             if (url.toLowerCase().startsWith("http")) {
-                fileSource = new Source() {
-                    Long size = null;
-
-                    HttpResponse connection = null;
-
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
-
-                    private HttpResponse downloadResource() throws IOException {
-                        if (connection == null) {
-                            connection = clientProvider.get().execute(new HttpGet(url));
-                        }
-                        return connection;
-                    }
-
-                    @Override
-                    public InputStream getStream() throws IOException {
-                        HttpResponse c = downloadResource();
-                        connection = null;
-                        return c.getEntity().getContent();
-                    }
-
-                    @Override
-                    public long getLength() {
-                        if (size == null) {
-                            try {
-                                size = downloadResource().getEntity().getContentLength();
-                            } catch (IOException ex) {
-                                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
-                                size = -1L;
-                            }
-                        }
-                        return size;
-                    }
-
-                    @Override
-                    public HierarchialElement getElement() {
-                        return thizz;
-                    }
-                    
-                    public void close() throws IOException {
-                        if (connection != null && connection.getEntity() != null && connection.getEntity().getContent() != null) {
-                            connection.getEntity().getContent().close();
-                        }
-                    }
-                };
+                fileSource = new HttpConnectionSource(thizz);
             } else {
-                fileSource = new Source() {
-                    Long size = null;
-
-                    URLConnection connection = null;
-                    InputStream lastOpenStream = null;
-
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
-
-                    private URLConnection getConnection() throws IOException {
-                        if (connection == null) {
-                            URL theUrl = new URL(url);
-                            connection = theUrl.openConnection();
-                        }
-                        return connection;
-                    }
-
-                    @Override
-                    public InputStream getStream() throws IOException {
-                        close();
-                        URLConnection c = getConnection();
-                        connection = null;
-                        return c.getInputStream();
-                    }
-
-                    @Override
-                    public long getLength() {
-                        if (size == null) {
-                            try {
-                                size = getConnection().getContentLengthLong();
-                            } catch (IOException ex) {
-                                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
-                                size = -1L;
-                            }
-                        }
-                        return size;
-                    }
-
-                    @Override
-                    public HierarchialElement getElement() {
-                        return thizz;
-                    }
-                    
-                    public void close() throws IOException {
-                        if (lastOpenStream != null) {
-                            lastOpenStream.close();
-                        }
-                        lastOpenStream = null;
-                    }
-                };
+                fileSource = new UrlConnectionSource(thizz);
             }
         }
         return fileSource;
@@ -226,6 +128,118 @@ public class FileOrRendition implements HierarchialElement {
 
     public String getProperty(String prop) {
         return properties.get(prop);
+    }
+
+    private class UrlConnectionSource implements Source {
+
+        private final FileOrRendition thizz;
+
+        public UrlConnectionSource(FileOrRendition thizz) {
+            this.thizz = thizz;
+        }
+        Long size = null;
+        URLConnection connection = null;
+        InputStream lastOpenStream = null;
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        private URLConnection getConnection() throws IOException {
+            if (connection == null) {
+                URL theUrl = new URL(url);
+                connection = theUrl.openConnection();
+            }
+            return connection;
+        }
+
+        @Override
+        public InputStream getStream() throws IOException {
+            close();
+            URLConnection c = getConnection();
+            connection = null;
+            return c.getInputStream();
+        }
+
+        @Override
+        public long getLength() {
+            if (size == null) {
+                try {
+                    size = getConnection().getContentLengthLong();
+                } catch (IOException ex) {
+                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+                    size = -1L;
+                }
+            }
+            return size;
+        }
+
+        @Override
+        public HierarchialElement getElement() {
+            return thizz;
+        }
+
+        public void close() throws IOException {
+            if (lastOpenStream != null) {
+                lastOpenStream.close();
+            }
+            lastOpenStream = null;
+        }
+    }
+
+    private class HttpConnectionSource implements Source {
+
+        private final FileOrRendition thizz;
+
+        public HttpConnectionSource(FileOrRendition thizz) {
+            this.thizz = thizz;
+        }
+        Long size = null;
+        HttpResponse connection = null;
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        private HttpResponse downloadResource() throws IOException {
+            if (connection == null) {
+                connection = clientProvider.get().execute(new HttpGet(url));
+            }
+            return connection;
+        }
+
+        @Override
+        public InputStream getStream() throws IOException {
+            HttpResponse c = downloadResource();
+            connection = null;
+            return c.getEntity().getContent();
+        }
+
+        @Override
+        public long getLength() {
+            if (size == null) {
+                try {
+                    size = downloadResource().getEntity().getContentLength();
+                } catch (IOException ex) {
+                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+                    size = -1L;
+                }
+            }
+            return size;
+        }
+
+        @Override
+        public HierarchialElement getElement() {
+            return thizz;
+        }
+
+        public void close() throws IOException {
+            if (connection != null && connection.getEntity() != null && connection.getEntity().getContent() != null) {
+                connection.getEntity().getContent().close();
+            }
+        }
     }
 
 }
