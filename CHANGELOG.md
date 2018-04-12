@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
 - #1283 - Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
 - #1319 - Ensuring that PageRootProviderConfig references are sorted consistently.
+- #1327 - Package Replication Status Handler didn't work for packages which contained ACLs.
 
 ## [3.14.12] - 2018-04-03
 
