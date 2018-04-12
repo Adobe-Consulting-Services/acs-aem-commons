@@ -14,6 +14,7 @@ generated/
 
 #Netbeans
 nb-configuration.xml
+/bundle/nbproject/
 
 #vlt directories
 content/src/main/content/jcr_root/.content.xml
@@ -23,4 +24,5 @@ content/src/main/content/jcr_root/etc/designs/.content.xml
 content/src/main/content/jcr_root/etc/clientlibs/.content.xml
 .pmd
 .metadata
+
 node_modules

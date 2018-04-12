@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1279 - New import tools for node metadata and file/url-based asset ingestion
 - #1307 - MCP now has error reporting and also XLSX export for errors.
 - #1238 - HTTP cache JCR storage 
 - #1245 - On-Deploy Scripts Framework

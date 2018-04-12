@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
+import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.day.cq.dam.api.AssetManager;
@@ -147,7 +148,7 @@ public class FileAssetIngestorTest {
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(3, ingestor.folderCount.get());
+        assertEquals(3, ingestor.getCount(ingestor.createdFolders));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder1"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));
@@ -202,9 +203,9 @@ public class FileAssetIngestorTest {
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
-        assertEquals(3, ingestor.assetCount.get());
-        assertEquals(3, ingestor.folderCount.get());
-        assertEquals(FILE_SIZE * 3, ingestor.totalImportedData.get());
+        assertEquals(3, ingestor.getCount(ingestor.importedAssets));
+        assertEquals(3, ingestor.getCount(ingestor.createdFolders));
+        assertEquals(FILE_SIZE * 3, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(3)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertThat(assetPathCaptor.getAllValues(),
                 containsInAnyOrder("/content/dam/folder1/image.png", "/content/dam/folder2/folder3/image.png", "/content/dam/image.png"));
@@ -226,9 +227,9 @@ public class FileAssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
 
         assertNull(context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
-        assertEquals(1, ingestor.assetCount.get());
-        assertEquals(0, ingestor.folderCount.get());
-        assertEquals(FILE_SIZE, ingestor.totalImportedData.get());
+        assertEquals(1, ingestor.getCount(ingestor.importedAssets));
+        assertEquals(0, ingestor.getCount(ingestor.createdFolders));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 
@@ -250,9 +251,9 @@ public class FileAssetIngestorTest {
         assertFalse(context.resourceResolver().hasChanges());
 
         assertEquals("testTitle", context.resourceResolver().getResource("/content/dam/test").getValueMap().get("jcr:title"));
-        assertEquals(1, ingestor.assetCount.get());
-        assertEquals(0, ingestor.folderCount.get());
-        assertEquals(FILE_SIZE, ingestor.totalImportedData.get());
+        assertEquals(1, ingestor.getCount(ingestor.importedAssets));
+        assertEquals(0, ingestor.getCount(ingestor.createdFolders));
+        assertEquals(FILE_SIZE, (long) ingestor.importedData.get(AssetIngestor.ReportColumns.bytes));
         verify(assetManager, times(1)).createAsset(assetPathCaptor.capture(), any(), any(), eq(false));
         assertEquals("/content/dam/test/image.png", assetPathCaptor.getValue());
 

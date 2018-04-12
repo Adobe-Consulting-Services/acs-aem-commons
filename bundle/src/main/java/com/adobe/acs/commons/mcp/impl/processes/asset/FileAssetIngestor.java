@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
@@ -90,7 +90,8 @@ public class FileAssetIngestor extends AssetIngestor {
                 if (canImportFile(fs)) {
                     manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
                 } else {
-                    filesSkipped.incrementAndGet();
+                    incrementCount(skippedFiles, 1);
+                    trackDetailedActivity(fs.getName(), "Skip", "Skipping file", 0L);
                 }
             });        
         });
@@ -99,6 +100,7 @@ public class FileAssetIngestor extends AssetIngestor {
     private class FileSource implements Source {
         private final File file;
         private final HierarchialElement element;
+        private InputStream lastOpenStream;
 
         private FileSource(File f, FileHierarchialElement el) {
             this.file = f;
@@ -112,7 +114,9 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public InputStream getStream() throws IOException {
-            return new FileInputStream(file);
+            close();
+            lastOpenStream = new FileInputStream(file);
+            return lastOpenStream;
         }
 
         @Override
@@ -123,6 +127,14 @@ public class FileAssetIngestor extends AssetIngestor {
         @Override
         public HierarchialElement getElement() {
             return element;
+        }
+        
+        @Override
+        public void close() throws IOException {
+            if (lastOpenStream != null) {
+                lastOpenStream.close();
+            }
+            lastOpenStream = null;
         }
     }
 

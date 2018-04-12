@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.asset;
 
+import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
