@@ -52,13 +52,13 @@ import java.util.stream.Stream;
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(label = "Server")
-    private static final String SERVER_PROP = "server";
+    private static final String SERVER_PROP = "server.url";
 
     @Property(label = "Username")
-    private static final String USERNAME_PROP = "username";
+    private static final String USERNAME_PROP = "server.user";
 
     @Property(label = "Password")
-    private static final String PASSWORD_PROP = "password";
+    private static final String PASSWORD_PROP = "server.pass";
 
     @Property(
             label = "Tag Sync Paths",
@@ -78,32 +78,32 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(
             label = "Failure Retry Delay (in minutes)",
-            description = "Number of minutes the server will wait to attempt to sync a remote asset that failed " +
-                    "a sync attempt (minimum 1)",
+            description = "Number of minutes the server will wait to attempt to sync a remote asset that failed "
+                    + "a sync attempt (minimum 1)",
             intValue = 15
     )
     private static final String RETRY_DELAY_PROP = "retry.delay";
 
     @Property(
             label = "Number of Assets to Sync Before Saving",
-            description = "Number of asset nodes to sync before saving and refreshing the session during a node " +
-                    "sync. The lower the number, the longer the sync will take (default 100)",
+            description = "Number of asset nodes to sync before saving and refreshing the session during a node "
+                    + "sync. The lower the number, the longer the sync will take (default 100)",
             intValue = 100
     )
     private static final String SAVE_INTERVAL_PROP = "save.interval";
 
     @Property(
             label = "Event User Data",
-            description = "The event user data that will be set during all JCR manipulations performed by " +
-                    "remote assets. This can be used in workflow launchers that listen to DAM paths (such as " +
-                    "for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
+            description = "The event user data that will be set during all JCR manipulations performed by "
+                    + "remote assets. This can be used in workflow launchers that listen to DAM paths (such as "
+                    + "for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
             value = "changedByWorkflowProcess")
     private static final String EVENT_USER_DATA_PROP = "event.user.data";
 
     @Property(
             label = "Whitelisted Service Users",
-            description = "Service users that are allowed to trigger remote asset binary syncs. By default, service " +
-                    "user activity never triggers an asset binary sync.",
+            description = "Service users that are allowed to trigger remote asset binary syncs. By default, service "
+                    + "user activity never triggers an asset binary sync.",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )

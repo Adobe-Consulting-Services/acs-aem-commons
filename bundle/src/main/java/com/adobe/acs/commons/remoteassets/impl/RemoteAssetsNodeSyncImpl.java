@@ -617,8 +617,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         String assetFileExtension = FilenameUtils.getExtension(assetNode.getName());
         String parentNodeFileExtension = FilenameUtils.getExtension(renditionNode.getName());
         for (String file : files) {
-            if ("original".equals(renditionNode.getName()) && file.equals(assetFileExtension) ||
-                    !"original".equals(renditionNode.getName()) && file.equals(parentNodeFileExtension)) {
+            if ("original".equals(renditionNode.getName()) && file.equals(assetFileExtension)
+                    || !"original".equals(renditionNode.getName()) && file.equals(parentNodeFileExtension)) {
 
                 remoteAssetFileUri = ASSET_FILE_PREFIX + "." + file;
                 break;

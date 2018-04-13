@@ -147,22 +147,26 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         for (String syncPath : this.config.getDamSyncPaths()) {
-            if (resource.getPath().startsWith(syncPath)) {
-                Session session = resource.getResourceResolver().adaptTo(Session.class);
-                String userId = session.getUserID();
-                if (!userId.equals("admin")) {
-                    if (this.config.getWhitelistedServiceUsers().contains(userId)) {
-                        return true;
-                    }
-                    User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
-                    if (currentUser != null && !currentUser.isSystemUser()) {
-                        return true;
-                    } else {
-                        LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
-                    }
-                } else {
-                    LOG.debug("Avoiding binary sync for admin user");
-                }
+            if (!resource.getPath().startsWith(syncPath)) {
+                continue;
+            }
+
+            Session session = resource.getResourceResolver().adaptTo(Session.class);
+            String userId = session.getUserID();
+            if (userId.equals("admin")) {
+                LOG.debug("Avoiding binary sync for admin user");
+                continue;
+            }
+
+            if (this.config.getWhitelistedServiceUsers().contains(userId)) {
+                return true;
+            }
+
+            User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+            if (currentUser != null && !currentUser.isSystemUser()) {
+                return true;
+            } else {
+                LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
             }
         }
 
