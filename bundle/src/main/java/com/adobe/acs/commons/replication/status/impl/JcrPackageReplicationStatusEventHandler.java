@@ -20,12 +20,18 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.jcrclustersupport.ClusterAware;
-import com.day.cq.replication.ReplicationAction;
-import com.day.cq.replication.ReplicationEvent;
-import com.day.cq.replication.ReplicationStatus;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +44,7 @@ import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.sling.api.resource.LoginException;
@@ -55,15 +62,12 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.jcrclustersupport.ClusterAware;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
+import com.day.cq.replication.ReplicationStatus;
 
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
