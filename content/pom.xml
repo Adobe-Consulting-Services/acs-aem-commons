@@ -54,7 +54,7 @@
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                     <properties>
-                        <acHandling>merge_preserve</acHandling>
+                        <acHandling>merge</acHandling>
                     </properties>
                     <embeddeds>
                         <embedded>
