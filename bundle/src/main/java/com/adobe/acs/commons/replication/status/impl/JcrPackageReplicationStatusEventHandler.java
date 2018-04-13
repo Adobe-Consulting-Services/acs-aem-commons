@@ -259,7 +259,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     private void setReplicationStatus(JcrPackage jcrPackage, String replicatedBy, ResourceResolver resourceResolver) {
-        final List<Resource> resources = new ArrayList<Resource>();
+        final List<Resource> resources = new ArrayList<>();
         final String packageId;
         try {
             JcrPackageDefinition packageDefinition = jcrPackage.getDefinition();

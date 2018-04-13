@@ -7,7 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.12...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.0...HEAD
+
+## [3.15.0] - 2018-04-13
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
