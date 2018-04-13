@@ -40,6 +40,13 @@ public class RemoteAssets {
     public static final String SERVICE_NAME = "remote-assets";
 
     /**
+     * Private constructor.
+     */
+    private RemoteAssets() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    /**
      * Retrieve a {@link ResourceResolver} after logging in.
      * @param resourceResolverFactory ResourceResolverFactory
      * @return ResourceResolver

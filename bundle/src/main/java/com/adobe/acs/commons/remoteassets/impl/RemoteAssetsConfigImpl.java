@@ -52,13 +52,13 @@ import java.util.stream.Stream;
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(label = "Server")
-    private static final String SERVER = "server";
+    private static final String SERVER_PROP = "server";
 
     @Property(label = "Username")
-    private static final String USERNAME = "username";
+    private static final String USERNAME_PROP = "username";
 
     @Property(label = "Password")
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD_PROP = "password";
 
     @Property(
             label = "Tag Sync Paths",
@@ -66,7 +66,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
-    private static final String TAG_SYNC_PATHS = "tag.paths";
+    private static final String TAG_SYNC_PATHS_PROP = "tag.paths";
 
     @Property(
             label = "Asset Sync Paths",
@@ -74,38 +74,40 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
-    private static final String DAM_SYNC_PATHS = "dam.paths";
+    private static final String DAM_SYNC_PATHS_PROP = "dam.paths";
 
     @Property(
             label = "Failure Retry Delay (in minutes)",
-            description = "Number of minutes the server will wait to attempt to sync a remote asset that failed a sync attempt (minimum 1)",
+            description = "Number of minutes the server will wait to attempt to sync a remote asset that failed " +
+                    "a sync attempt (minimum 1)",
             intValue = 15
     )
-    private static final String RETRY_DELAY = "retry.delay";
+    private static final String RETRY_DELAY_PROP = "retry.delay";
 
     @Property(
             label = "Number of Assets to Sync Before Saving",
-            description = "Number of asset nodes to sync before saving and refreshing the session during a node sync. The lower the number, " +
-                    "the longer the sync will take (default 100)",
+            description = "Number of asset nodes to sync before saving and refreshing the session during a node " +
+                    "sync. The lower the number, the longer the sync will take (default 100)",
             intValue = 100
     )
-    private static final String SAVE_INTERVAL = "save.interval";
+    private static final String SAVE_INTERVAL_PROP = "save.interval";
 
     @Property(
             label = "Event User Data",
-            description = "The event user data that will be set during all JCR manipulations performed by remote assets. This can be used in " +
-                    "workflow launchers that listen to DAM paths (such as for DAM Update Assets) to exclude unnecessary processing such as " +
-                    "rendition generation.",
+            description = "The event user data that will be set during all JCR manipulations performed by " +
+                    "remote assets. This can be used in workflow launchers that listen to DAM paths (such as " +
+                    "for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
             value = "changedByWorkflowProcess")
-    private static final String EVENT_USER_DATA = "event.user.data";
+    private static final String EVENT_USER_DATA_PROP = "event.user.data";
 
     @Property(
             label = "Whitelisted Service Users",
-            description = "Service users that are allowed to trigger remote asset binary syncs.  By defualt, service user activity never triggers an asset binary sync.",
+            description = "Service users that are allowed to trigger remote asset binary syncs. By default, service " +
+                    "user activity never triggers an asset binary sync.",
             cardinality = Integer.MAX_VALUE,
             value = {}
     )
-    private static final String WHITELISTED_SERVICE_USERS = "whitelisted.service.users";
+    private static final String WHITELISTED_SERVICE_USERS_PROP = "whitelisted.service.users";
 
     private String server = StringUtils.EMPTY;
     private String username = StringUtils.EMPTY;
@@ -126,28 +128,28 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private void activate(final ComponentContext componentContext) {
         final Dictionary<String, Object> properties = componentContext.getProperties();
 
-        this.server = PropertiesUtil.toString(properties.get(SERVER), StringUtils.EMPTY);
+        this.server = PropertiesUtil.toString(properties.get(SERVER_PROP), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.server)) {
             throw new IllegalArgumentException("Remote server must be specified");
         }
-        this.username = PropertiesUtil.toString(properties.get(USERNAME), StringUtils.EMPTY);
+        this.username = PropertiesUtil.toString(properties.get(USERNAME_PROP), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.username)) {
             throw new IllegalArgumentException("Remote server username must be specified");
         }
-        this.password = PropertiesUtil.toString(properties.get(PASSWORD), StringUtils.EMPTY);
+        this.password = PropertiesUtil.toString(properties.get(PASSWORD_PROP), StringUtils.EMPTY);
         if (StringUtils.isBlank(this.password)) {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
-        this.tagSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS), new String[0]))
+        this.tagSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS_PROP), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
-        this.damSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS), new String[0]))
+        this.damSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS_PROP), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
-        this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY), 1);
-        this.saveInterval = PropertiesUtil.toInteger(properties.get(SAVE_INTERVAL), 100);
-        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA), StringUtils.EMPTY);
-        this.whitelistedServiceUsers = Stream.of(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS), new String[0]))
+        this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY_PROP), 1);
+        this.saveInterval = PropertiesUtil.toInteger(properties.get(SAVE_INTERVAL_PROP), 100);
+        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA_PROP), StringUtils.EMPTY);
+        this.whitelistedServiceUsers = Stream.of(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS_PROP), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toSet());
     }

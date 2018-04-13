@@ -104,6 +104,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     }
 
     /**
+     * @deprecated
      * When resolving a remote asset, first sync the asset from the remote server.
      * @param resource The resource being resolved.
      * @param request HttpServletRequest

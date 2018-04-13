@@ -41,6 +41,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -138,20 +139,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                     LOG.debug("syncing from remote asset url {}", url);
                 }
 
-                try (InputStream inputStream = connection.getInputStream()) {
-                    Map<String, Object> props = new HashMap<>();
-                    props.put("rendition.mime", assetRendition.getMimeType());
-                    asset.setRendition(renditionName, inputStream, props);
-                } catch (FileNotFoundException fne) {
-                    if ("original".equals(renditionName)) {
-                        throw fne;
-                    }
-
-                    asset.removeRendition(renditionName);
-                    LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
-                } finally {
-                    connection.disconnect();
-                }
+                setRenditionOnAsset(connection, assetRendition, asset, renditionName);
             }
 
             node.setProperty("isRemoteAsset", (Value)null);
@@ -159,13 +147,42 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             this.session.save();
             return localRes;
         } catch (Exception e) {
-            LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
+            LOG.error("Error transferring remote asset '{}' to local server {}", resource.getPath(), e);
             try {
                 this.session.refresh(false);
             } catch (RepositoryException re) {
                 LOG.error("Failed to rollback asset changes", re);
             }
             return flagAssetAsFailedSync(resource);
+        }
+    }
+
+    /**
+     * Set supplied rendition on the supplied asset.
+     * @param connection HttpURLConnection
+     * @param assetRendition Rendition
+     * @param asset Asset
+     * @param renditionName String
+     * @throws FileNotFoundException exception
+     */
+    private void setRenditionOnAsset(HttpURLConnection connection, Rendition assetRendition, Asset asset, String renditionName)
+            throws FileNotFoundException {
+
+        try (InputStream inputStream = connection.getInputStream()) {
+            Map<String, Object> props = new HashMap<>();
+            props.put("rendition.mime", assetRendition.getMimeType());
+            asset.setRendition(renditionName, inputStream, props);
+        } catch (FileNotFoundException fne) {
+            if ("original".equals(renditionName)) {
+                throw fne;
+            }
+
+            asset.removeRendition(renditionName);
+            LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
+        } catch (IOException e) {
+            LOG.error("IO Exception has occurred {}", e);
+        } finally {
+            connection.disconnect();
         }
     }
 
@@ -191,5 +208,4 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         }
         return resource;
     }
-
 }

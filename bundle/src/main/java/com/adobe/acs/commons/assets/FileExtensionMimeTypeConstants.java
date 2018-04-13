@@ -33,305 +33,305 @@ public final class FileExtensionMimeTypeConstants {
     /**
      * .image mime type constant.
      */
-    public static final String _IMAGE = "image/s7asset";
+    public static final String EXT_IMAGE = "image/s7asset";
 
     /**
      * .3g2 mime type constant.
      */
-    public static final String _3G2 = "video/3gpp2";
+    public static final String EXT_3G2 = "video/3gpp2";
 
     /**
      * .3gp mime type constant.
      */
-    public static final String _3GP = "video/3gpp";
+    public static final String EXT_3GP = "video/3gpp";
 
     /**
      * .aac mime type constant.
      */
-    public static final String _AAC = "audio/x-aac";
+    public static final String EXT_AAC = "audio/x-aac";
 
     /**
      * .afm mime type constant.
      */
-    public static final String _AFM = "application/x-font-type1";
+    public static final String EXT_AFM = "application/x-font-type1";
 
     /**
      * .aiff mime type constant.
      */
-    public static final String _AIFF = "audio/x-aiff";
+    public static final String EXT_AIFF = "audio/x-aiff";
 
     /**
      * .avi mime type constant.
      */
-    public static final String _AVI = "video/x-msvideo";
+    public static final String EXT_AVI = "video/x-msvideo";
 
     /**
      * .bmp mime type constant.
      */
-    public static final String _BMP = "image/bmp";
+    public static final String EXT_BMP = "image/bmp";
 
     /**
      * .css mime type constant.
      */
-    public static final String _CSS = "text/css";
+    public static final String EXT_CSS = "text/css";
 
     /**
      * .doc mime type constant.
      */
-    public static final String _DOC = "application/msword";
+    public static final String EXT_DOC = "application/msword";
 
     /**
      * .docx mime type constant.
      */
-    public static final String _DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    public static final String EXT_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     /**
      * .ai, .eps and .ps mime type constant.
      */
-    public static final String _AI_EPS_PS = "application/postscript";
+    public static final String EXT_AI_EPS_PS = "application/postscript";
 
     /**
      * .eps #1 mime type constant.
      */
-    public static final String _EPS_1 = "application/eps";
+    public static final String EXT_EPS_1 = "application/eps";
 
     /**
      * .eps #2 mime type constant.
      */
-    public static final String _EPS_2 = "application/x-eps";
+    public static final String EXT_EPS_2 = "application/x-eps";
 
     /**
      * .eps image #1 mime type constant.
      */
-    public static final String _EPS_IMAGE_1 = "image/eps";
+    public static final String EXT_EPS_IMAGE_1 = "image/eps";
 
     /**
      * .eps image #2 mime type constant.
      */
-    public static final String _EPS_IMAGE_2 = "image/x-eps";
+    public static final String EXT_EPS_IMAGE_2 = "image/x-eps";
 
     /**
      * .epub mime type constant.
      */
-    public static final String _EPUB = "application/epub+zip";
+    public static final String EXT_EPUB = "application/epub+zip";
 
     /**
      * .f4v mime type constant.
      */
-    public static final String _F4V = "video/x-f4v";
+    public static final String EXT_F4V = "video/x-f4v";
 
     /**
      * .fla and .swf mime type constant.
      */
-    public static final String _FLA_SWF = "application/x-shockwave-flash";
+    public static final String EXT_FLA_SWF = "application/x-shockwave-flash";
 
     /**
      * .flv mime type constant.
      */
-    public static final String _FLV = "video/x-flv";
+    public static final String EXT_FLV = "video/x-flv";
 
     /**
      * .fpx mime type constant.
      */
-    public static final String _FPX = "image/vnd.fpx";
+    public static final String EXT_FPX = "image/vnd.fpx";
 
     /**
      * .gif mime type constant.
      */
-    public static final String _GIF = "image/gif";
+    public static final String EXT_GIF = "image/gif";
 
     /**
      * .html mime type constant.
      */
-    public static final String _HTML = "text/html";
+    public static final String EXT_HTML = "text/html";
 
     /**
      * .icc and .icm mime type constant.
      */
-    public static final String _ICC_ICM = "application/vnd.iccprofile";
+    public static final String EXT_ICC_ICM = "application/vnd.iccprofile";
 
     /**
      * .indd mime type constant.
      */
-    public static final String _INDD = "application/x-indesign";
+    public static final String EXT_INDD = "application/x-indesign";
 
     /**
      * .jar mime type constant.
      */
-    public static final String _JAR = "application/java-archive";
+    public static final String EXT_JAR = "application/java-archive";
 
     /**
      * .jpeg and .jpg mime type constant.
      */
-    public static final String _JPEG_JPG = "image/jpeg";
+    public static final String EXT_JPEG_JPG = "image/jpeg";
 
     /**
      * .m2v, .mpeg and .mpg mime type constant.
      */
-    public static final String _M2V_MPEG_MPG = "video/mpeg";
+    public static final String EXT_M2V_MPEG_MPG = "video/mpeg";
 
     /**
      * .m4v mime type constant.
      */
-    public static final String _M4V = "video/x-m4v";
+    public static final String EXT_M4V = "video/x-m4v";
 
     /**
      * .midi mime type constant.
      */
-    public static final String _MIDI = "audio/midi";
+    public static final String EXT_MIDI = "audio/midi";
 
     /**
      * .mov mime type constant.
      */
-    public static final String _MOV = "video/quicktime";
+    public static final String EXT_MOV = "video/quicktime";
 
     /**
      * .mp3 mime type constant.
      */
-    public static final String _MP3 = "audio/mpeg";
+    public static final String EXT_MP3 = "audio/mpeg";
 
     /**
      * .mp4 mime type constant.
      */
-    public static final String _MP4 = "video/mp4";
+    public static final String EXT_MP4 = "video/mp4";
 
     /**
      * .mts mime type constant.
      */
-    public static final String _MTS = "model/vnd.mts";
+    public static final String EXT_MTS = "model/vnd.mts";
 
     /**
      * .ogg mime type constant.
      */
-    public static final String _OGG = "audio/ogg";
+    public static final String EXT_OGG = "audio/ogg";
 
     /**
      * .ogv mime type constant.
      */
-    public static final String _OGV = "video/ogg";
+    public static final String EXT_OGV = "video/ogg";
 
     /**
      * .otf mime type constant.
      */
-    public static final String _OTF = "application/x-font-otf";
+    public static final String EXT_OTF = "application/x-font-otf";
 
     /**
      * .pdf mime type constant.
      */
-    public static final String _PDF = "application/pdf";
+    public static final String EXT_PDF = "application/pdf";
 
     /**
      * .pfb and .pfm mime type constant.
      */
-    public static final String _PFB_PFM = "application/x-font-type1";
+    public static final String EXT_PFB_PFM = "application/x-font-type1";
 
     /**
      * .pict mime type constant.
      */
-    public static final String _PICT = "image/x-pict";
+    public static final String EXT_PICT = "image/x-pict";
 
     /**
      * .png mime type constant.
      */
-    public static final String _PNG = "image/png";
+    public static final String EXT_PNG = "image/png";
 
     /**
      * .ppt mime type constant.
      */
-    public static final String _PPT = "application/vnd.ms-powerpoint";
+    public static final String EXT_PPT = "application/vnd.ms-powerpoint";
 
     /**
      * .pptx mime type constant.
      */
-    public static final String _PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    public static final String EXT_PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
     /**
      * .psd mime type constant.
      */
-    public static final String _PSD = "image/vnd.adobe.photoshop";
+    public static final String EXT_PSD = "image/vnd.adobe.photoshop";
 
     /**
      * .rar mime type constant.
      */
-    public static final String _RAR = "application/x-rar-compressed";
+    public static final String EXT_RAR = "application/x-rar-compressed";
 
     /**
      * .rtf mime type constant.
      */
-    public static final String _RTF = "application/rtf";
+    public static final String EXT_RTF = "application/rtf";
 
     /**
      * .svg mime type constant.
      */
-    public static final String _SVG = "image/svg+xml";
+    public static final String EXT_SVG = "image/svg+xml";
 
     /**
      * .tar mime type constant.
      */
-    public static final String _TAR = "application/x-tar";
+    public static final String EXT_TAR = "application/x-tar";
 
     /**
      * .tif and .tiff mime type constant.
      */
-    public static final String _TIF_TIFF = "image/tiff";
+    public static final String EXT_TIF_TIFF = "image/tiff";
 
     /**
      * .ttc and .ttf mime type constant.
      */
-    public static final String _TTC_TTF = "application/x-font-ttf";
+    public static final String EXT_TTC_TTF = "application/x-font-ttf";
 
     /**
      * .txt mime type constant.
      */
-    public static final String _TXT = "text/plain";
+    public static final String EXT_TXT = "text/plain";
 
     /**
      * .vob mime type constant.
      */
-    public static final String _VOB = "video/dvd";
+    public static final String EXT_VOB = "video/dvd";
 
     /**
      * .vtt mime type constant.
      */
-    public static final String _VTT = "text/vtt";
+    public static final String EXT_VTT = "text/vtt";
 
     /**
      * .wav mime type constant.
      */
-    public static final String _WAV = "audio/x-wav";
+    public static final String EXT_WAV = "audio/x-wav";
 
     /**
      * .webm mime type constant.
      */
-    public static final String _WEBM = "video/webm";
+    public static final String EXT_WEBM = "video/webm";
 
     /**
      * .wma mime type constant.
      */
-    public static final String _WMA = "audio/x-ms-wma";
+    public static final String EXT_WMA = "audio/x-ms-wma";
 
     /**
      * .wmv mime type constant.
      */
-    public static final String _WMV = "video/x-ms-wmv";
+    public static final String EXT_WMV = "video/x-ms-wmv";
 
     /**
      * .xls mime type constant.
      */
-    public static final String _XLS = "application/vnd.ms-excel";
+    public static final String EXT_XLS = "application/vnd.ms-excel";
 
     /**
      * .xlsx mime type constant.
      */
-    public static final String _XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    public static final String EXT_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     /**
      * .xml mime type constant.
      */
-    public static final String _XML = "application/xml";
+    public static final String EXT_XML = "application/xml";
 
     /**
      * .zip mime type constant.
      */
-    public static final String _ZIP = "application/zip";
+    public static final String EXT_ZIP = "application/zip";
 }
