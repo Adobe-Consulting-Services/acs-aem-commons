@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.mcp.model.impl;
 
 import com.adobe.acs.commons.fam.Failure;
+import java.util.Date;
 import javax.inject.Inject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.sling.api.resource.Resource;
@@ -28,6 +29,9 @@ import org.apache.sling.models.annotations.Model;
 @Model(adaptables = Resource.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class ArchivedProcessFailure {
     @Inject
+    public Date time;
+    
+    @Inject
     public String error;
     
     @Inject
@@ -39,6 +43,7 @@ public class ArchivedProcessFailure {
     public static ArchivedProcessFailure adapt(Failure source) {
         ArchivedProcessFailure dest = new ArchivedProcessFailure();
         if (source.getException() != null) {
+            dest.time = source.getTime().getTime();
             dest.error = source.getException().getMessage();
             dest.stackTrace = ExceptionUtils.getStackTrace(source.getException());
         }

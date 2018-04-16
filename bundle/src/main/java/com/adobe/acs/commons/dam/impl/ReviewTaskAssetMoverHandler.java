@@ -377,24 +377,24 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                                 resourceResolver.commit();
                                 assetManager.moveAsset(asset.getPath(), destAssetPath);
                                 log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             } else if (CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
                                 destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
                                 assetManager.moveAsset(asset.getPath(), destAssetPath);
                                 log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             } else if (CONFLICT_RESOLUTION_NEW_VERSION.equals(conflictResolution)) {
                                 log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                                 createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
                             } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
                                 log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                        new String[]{asset.getPath(), destAssetPath, status});
+                                        asset.getPath(), destAssetPath, status);
                             }
                         } else {
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
                             log.info("Moved [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[]{asset.getPath(), destAssetPath, status});
+                                    asset.getPath(), destAssetPath, status);
                         }
                     } else {
                         log.warn("Request to move reviewed asset to a non DAM Asset path [ {} ]", destPath);

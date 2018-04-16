@@ -141,12 +141,15 @@ var ScriptRunner = {
             url: ScriptRunner.SERVLET_URL + ".list.json",
             dataType: "json",
             success: function (response) {
-                var processDom, process, i, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
+                var processDom, process, i, noErrors = true, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
                 tableBody.empty();
                 ScriptRunner.watchList = [];
                 for (i = 0; i < response.length; i++) {
                     process = response[i];
-                    ScriptRunner.cleanProcessObject(process);
+                    noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                    if (!noErrors) {
+                        break;
+                    }
                     if (process.infoBean.isRunning) {
                         ScriptRunner.watchList.push(process.id);
                     }
@@ -167,19 +170,28 @@ var ScriptRunner = {
                     processDom.click(ScriptRunner.viewProcessCallback(process.id, process.path));
                     tableBody.append(processDom);
                 }
-                jQuery("#processListing").trigger("foundation-contentloaded");
-                ScriptRunner.pollingLoop();
+                if (noErrors) {
+                    jQuery("#processListing").trigger("foundation-contentloaded");
+                    ScriptRunner.pollingLoop();
+                } else {
+                    ScriptRunner.rebuildProcessList();
+                }
             }
         });
     },
     cleanProcessObject: function (process) {
-        if (!process.infoBean.result) {
-            process.infoBean.result = {
-                tasksCompleted: '???'
-            };
-        }
-        if (!process.infoBean.reportedErrors) {
-            process.infoBean.reportedErrors = [];
+        if (!process || !process.infoBean) {
+            return false;
+        } else {
+            if (!process.infoBean.result) {
+                process.infoBean.result = {
+                    tasksCompleted: '???'
+                };
+            }
+            if (!process.infoBean.reportedErrors) {
+                process.infoBean.reportedErrors = [];
+            }
+            return true;
         }
     },
     pollingLoop: function () {
@@ -190,11 +202,14 @@ var ScriptRunner = {
                     url: ScriptRunner.SERVLET_URL + ".status.json",
                     dataType: "json",
                     success: function (statusList) {
-                        var i, process, processRow;
+                        var i, process, processRow, noErrors = true;
                         ScriptRunner.watchList = [];
                         for (i = 0; i < statusList.length; i++) {
                             process = statusList[i];
-                            ScriptRunner.cleanProcessObject(process);
+                            noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                            if (!noErrors) {
+                                break;
+                            }
                             processRow = jQuery(ScriptRunner.processTable).find("#process-" + process.id);
                             if (process.infoBean.isRunning) {
                                 ScriptRunner.watchList.push(process.id);
@@ -206,7 +221,11 @@ var ScriptRunner = {
                             processRow.find(".process-reported-errors").html(process.infoBean.reportedErrors.length);
                             processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
                         }
-                        ScriptRunner.pollingLoop();
+                        if (noErrors) {
+                            ScriptRunner.pollingLoop();
+                        } else {
+                            ScriptRunner.rebuildProcessList();
+                        }
                     },
                     error: ScriptRunner.error,
                     data: {

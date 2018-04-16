@@ -86,7 +86,7 @@ public class QueryReportExecutor implements ReportExecutor {
       Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
 
       if (page != -1) {
-        log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
+        log.debug("Fetching results with limit {} and offset {}", limit, offset);
         query.setLimit(limit);
         query.setOffset(offset);
       } else {
