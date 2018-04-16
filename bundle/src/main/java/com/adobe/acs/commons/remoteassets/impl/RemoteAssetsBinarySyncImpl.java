@@ -166,7 +166,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      * @throws FileNotFoundException exception
      */
     private void setRenditionOnAsset(HttpURLConnection connection, Rendition assetRendition, Asset asset, String renditionName)
-            throws FileNotFoundException {
+            throws IOException {
 
         try (InputStream inputStream = connection.getInputStream()) {
             Map<String, Object> props = new HashMap<>();
@@ -179,8 +179,6 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
             asset.removeRendition(renditionName);
             LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
-        } catch (IOException e) {
-            LOG.error("IO Exception has occurred {}", e);
         } finally {
             connection.disconnect();
         }
