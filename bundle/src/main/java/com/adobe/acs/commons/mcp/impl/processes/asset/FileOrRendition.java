@@ -163,13 +163,14 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         @Override
-        public long getLength() {
+        public long getLength() throws IOException {
             if (size == null) {
                 try {
                     size = getConnection().getContentLengthLong();
-                } catch (IOException ex) {
+                } catch (IOException | IllegalArgumentException ex) {
                     Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
+                    throw ex;
                 }
             }
             return size;
@@ -220,13 +221,14 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         @Override
-        public long getLength() {
+        public long getLength() throws IOException {
             if (size == null) {
                 try {
                     initiateDownload();
                 } catch (IOException ex) {
                     Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
+                    throw ex;
                 }
             }
             return size;

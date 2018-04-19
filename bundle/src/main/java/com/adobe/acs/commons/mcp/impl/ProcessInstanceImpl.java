@@ -18,6 +18,7 @@ package com.adobe.acs.commons.mcp.impl;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
+import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -55,6 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -101,7 +104,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         infoBean.getResult().setTasksCompleted(
                 Math.max(infoBean.getResult().getTasksCompleted(), countCompleted)
         );
-        actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
+        infoBean.setReportedErrors(actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toList()));
 
         return progress;
     }
@@ -186,11 +189,11 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             infoBean.setIsRunning(true);
             runStep(0);
         } catch (LoginException | RepositoryException ex) {
+            LOG.error("Error starting managed process " + getName(), ex);
             Failure f = new Failure();
             f.setException(ex);
             f.setNodePath(getPath());
             recordErrors(-1, Arrays.asList(f), rr);
-            LOG.error("Error starting managed process " + getName(), ex);
             halt();
         }
     }
@@ -224,7 +227,8 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         if (failures.isEmpty()) {
             return;
         }
-        failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
+        List<ArchivedProcessFailure> archivedFailures = failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toList());
+        infoBean.setReportedErrors(archivedFailures);
         try {
             String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
             JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
@@ -232,14 +236,19 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 rr.commit();
                 rr.refresh();
             }
+            ActionManager manager = getActionManagerFactory().createTaskManager("Record errors", rr, 1);
+            ActionBatch batch = new ActionBatch(manager, 50);
             for (int i = 0; i < failures.size(); i++) {
                 String errPath = errFolder + "/err" + i;
-                Map<String, Object> values = new HashMap<>();
-                ValueMapSerializer.serializeToMap(values, failures.get(i));
-                ResourceUtil.getOrCreateResource(rr, errPath, values, null, false);
+                Failure failure = failures.get(i);
+                batch.add(rr2 -> {
+                    Map<String, Object> values = new HashMap<>();
+                    ValueMapSerializer.serializeToMap(values, failure);
+                    ResourceUtil.getOrCreateResource(rr2, errPath, values, null, false);
+                });
             }
-            rr.commit();
-        } catch (RepositoryException | PersistenceException ex) {
+            batch.commitBatch();
+        } catch (RepositoryException | PersistenceException | LoginException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }

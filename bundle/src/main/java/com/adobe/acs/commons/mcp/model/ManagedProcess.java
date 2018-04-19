@@ -23,8 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -62,7 +62,9 @@ public class ManagedProcess implements Serializable {
     @Inject
     private Result result;
 
-    private Collection<ArchivedProcessFailure> reportedErrors;
+    private int reportedErrors = 0;
+    
+    private transient Collection<ArchivedProcessFailure> reportedErrorsList;
 
     @Inject
     private transient Resource resource;
@@ -70,20 +72,28 @@ public class ManagedProcess implements Serializable {
     /**
      * @return the reportedErrors
      */
-    public Collection<ArchivedProcessFailure> getReportedErrors() {
-        if (reportedErrors == null) {
-            reportedErrors = new LinkedHashSet<>();
-        }
+    public int getReportedErrors() {
         return reportedErrors;
     }
+    
+    /**
+     * @return the reportedErrorsList
+     */
+    public Collection<ArchivedProcessFailure> getReportedErrorsList() {
+        if (reportedErrorsList == null) {
+            return Collections.EMPTY_LIST;
+        } else {
+            return reportedErrorsList;
+        }
+    }    
 
     /**
      * @param reportedErrors the reportedErrors to set
      */
     public void setReportedErrors(List<ArchivedProcessFailure> reportedErrors) {
-        this.reportedErrors = reportedErrors;
+        this.reportedErrorsList = Collections.unmodifiableList(reportedErrors);
+        this.reportedErrors = reportedErrorsList.size();
     }
-
 
     /**
      * @return the requester
@@ -241,10 +251,10 @@ public class ManagedProcess implements Serializable {
     private void readErrors() {
         Resource failuresRoot = resource.getChild("failures");
         if (failuresRoot != null && failuresRoot.hasChildren()) {
-            reportedErrors = new ArrayList<>();
+            reportedErrorsList = new ArrayList<>();
             failuresRoot.getChildren().forEach(step->
                     step.getChildren().forEach(f -> 
-                            reportedErrors.add(f.adaptTo(ArchivedProcessFailure.class))
+                            reportedErrorsList.add(f.adaptTo(ArchivedProcessFailure.class))
                     )
             );             
         }
