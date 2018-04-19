@@ -61,7 +61,7 @@ public class ManagedProcess implements Serializable {
     private String status;
     @Inject
     private Result result;
-
+    @Inject
     private int reportedErrors = 0;
     
     private transient Collection<ArchivedProcessFailure> reportedErrorsList;
@@ -251,12 +251,13 @@ public class ManagedProcess implements Serializable {
     private void readErrors() {
         Resource failuresRoot = resource.getChild("failures");
         if (failuresRoot != null && failuresRoot.hasChildren()) {
-            reportedErrorsList = new ArrayList<>();
+            List<ArchivedProcessFailure> failures = new ArrayList<>();
             failuresRoot.getChildren().forEach(step->
                     step.getChildren().forEach(f -> 
-                            reportedErrorsList.add(f.adaptTo(ArchivedProcessFailure.class))
+                            failures.add(f.adaptTo(ArchivedProcessFailure.class))
                     )
-            );             
+            );
+            setReportedErrors(failures);
         }
     }
     

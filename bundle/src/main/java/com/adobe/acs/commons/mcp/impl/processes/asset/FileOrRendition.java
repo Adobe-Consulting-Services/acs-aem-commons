@@ -167,7 +167,7 @@ public class FileOrRendition implements HierarchialElement {
             if (size == null) {
                 try {
                     size = getConnection().getContentLengthLong();
-                } catch (IOException | IllegalArgumentException ex) {
+                } catch (IOException ex) {
                     Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
                     throw ex;
@@ -207,9 +207,15 @@ public class FileOrRendition implements HierarchialElement {
 
         private HttpResponse initiateDownload() throws IOException {
             if (connection == null) {
-                lastRequest = new HttpGet(url);
-                connection = clientProvider.get().execute(lastRequest);
-                size = connection.getEntity().getContentLength();
+                try {
+                    lastRequest = new HttpGet(url);
+                    connection = clientProvider.get().execute(lastRequest);
+                    size = connection.getEntity().getContentLength();
+                } catch (IOException | IllegalArgumentException ex) {
+                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+                    size = -1L;
+                    throw new IOException("Error with URL " + url + ": " + ex.getMessage(), ex);
+                }
             }
             return connection;
         }
@@ -223,13 +229,7 @@ public class FileOrRendition implements HierarchialElement {
         @Override
         public long getLength() throws IOException {
             if (size == null) {
-                try {
-                    initiateDownload();
-                } catch (IOException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
-                    size = -1L;
-                    throw ex;
-                }
+                initiateDownload();
             }
             return size;
         }

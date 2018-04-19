@@ -115,7 +115,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getErrorCount() {
-        return tasksError.get();
+        return Math.max(tasksError.get(), failures.size());
     }
 
     @Override
@@ -125,7 +125,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getRemainingCount() {
-        return getAddedCount() - (getSuccessCount() + getErrorCount());
+        return getAddedCount() - (getSuccessCount() + tasksError.get());
     }
 
     @Override
@@ -157,17 +157,14 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 if (!closesResolver) {
                     logCompletetion();
                 }
-            } catch (Exception ex) {
-                LOG.error("Error in error handler for action " + getName(), ex);
-                if (!closesResolver) {
-                    logError(ex);
-                }
             } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
+                LOG.error("Fatal uncaught error in action " + getName(), t);
                 if (!closesResolver) {
-                    logError(new RuntimeException(t));
+                    logError(t instanceof Exception ? (Exception) t : new RuntimeException(t));
                 }
-                throw t;
+                if (t instanceof Error) {
+                    throw (Error) t;
+                }
             }
         }, this);
 
@@ -251,6 +248,14 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
+    public void cancel(boolean useForce) {
+        super.cancel(useForce);
+        if (getErrorCount() > 0) {
+            processErrorHandlers();
+        }
+    }
+    
+    @Override
     public void addCleanupTask() {
         // This is deprecated, only included for backwards-compatibility.
     }
@@ -282,21 +287,28 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 });
             }
         } else {
-            synchronized (errorHandlers) {
-                errorHandlers.forEach(handler -> {
-                    try {
-                        this.withResolver(res -> handler.accept(getFailureList(), res));
-                    } catch (Exception ex) {
-                        LOG.error("Error in error handler for action " + getName(), ex);
-                    }
-                });
-            }
+            processErrorHandlers();
         }
         synchronized (finishHandlers) {
             finishHandlers.forEach(Runnable::run);
         }
     }
 
+    private void processErrorHandlers() {
+        List<CheckedBiConsumer<List<Failure>, ResourceResolver>> handlerList = new ArrayList();
+        synchronized (errorHandlers) {
+            handlerList.addAll(errorHandlers);
+            errorHandlers.clear();
+        }
+        handlerList.forEach(handler -> {
+            try {
+                this.withResolver(res -> handler.accept(getFailureList(), res));
+            } catch (Exception ex) {
+                LOG.error("Error in error handler for action " + getName(), ex);
+            }
+        });
+    }
+    
     @SuppressWarnings("squid:S2142")
     private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {

@@ -182,20 +182,13 @@ public class UrlAssetImport extends AssetIngestor {
                                                 .andThen(importRenditions(file, manager)))
                         ));
                     }
-                } catch (IOException | IllegalArgumentException ex) {
+                } catch (IOException ex) {
                     Failure failure = new Failure();
                     failure.setException(ex);
                     failure.setNodePath(file.getNodePath());
                     manager.getFailureList().add(failure);
                 } finally {
-                    try {
-                        file.getSource().close();
-                    } catch (IOException ex) {
-                        Failure failure = new Failure();
-                        failure.setException(ex);
-                        failure.setNodePath(file.getNodePath());
-                        manager.getFailureList().add(failure);
-                    }
+                    file.getSource().close();
                 }
             }));
         });

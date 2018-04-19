@@ -109,9 +109,11 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
             @Override
             public boolean shouldSkipClass(Class<?> type) {
-                return !type.isArray()
-                        && !type.isPrimitive()
-                        && type.getPackage().getName().startsWith("java.io");
+                if (type.getPackage() != null) {
+                    return type.getPackage().getName().startsWith("java.io");
+                } else {
+                    return type == byte[].class;
+                }
             }
         });
         gsonBuilder.disableInnerClassSerialization();

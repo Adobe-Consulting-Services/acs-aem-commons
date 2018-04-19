@@ -188,7 +188,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             definition.buildProcess(this, rr);
             infoBean.setIsRunning(true);
             runStep(0);
-        } catch (LoginException | RepositoryException ex) {
+        } catch (LoginException | RepositoryException | RuntimeException ex) {
             LOG.error("Error starting managed process " + getName(), ex);
             Failure f = new Failure();
             f.setException(ex);
@@ -234,8 +234,8 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
             if (rr.hasChanges()) {
                 rr.commit();
-                rr.refresh();
             }
+            rr.refresh();
             ActionManager manager = getActionManagerFactory().createTaskManager("Record errors", rr, 1);
             ActionBatch batch = new ActionBatch(manager, 50);
             for (int i = 0; i < failures.size(); i++) {
@@ -248,7 +248,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 });
             }
             batch.commitBatch();
-        } catch (RepositoryException | PersistenceException | LoginException ex) {
+       } catch (RepositoryException | PersistenceException | LoginException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }
