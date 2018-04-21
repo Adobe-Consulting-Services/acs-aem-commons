@@ -154,7 +154,8 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             runActionAndLogErrors(action, closesResolver);
         }, this);
     }
-
+    
+    @SuppressWarnings("squid:S1181")
     private void runActionAndLogErrors(CheckedConsumer<ResourceResolver> action, Boolean closesResolver) {
         started.compareAndSet(0, System.currentTimeMillis());
         try {
