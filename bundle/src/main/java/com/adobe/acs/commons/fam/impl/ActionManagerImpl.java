@@ -151,34 +151,37 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             tasksAdded.incrementAndGet();
         }
         taskRunner.scheduleWork(() -> {
-            started.compareAndSet(0, System.currentTimeMillis());
-            try {
-                withResolver(action);
-                if (!closesResolver) {
-                    logCompletetion();
-                }
-            } catch (Error e) {
-                // These are very fatal errors but we should log them if we can
-                LOG.error("Fatal uncaught error in action " + getName(), e);
-                if (!closesResolver) {
-                    logError(new RuntimeException(e));
-                }
-                throw e;
-            } catch (Exception t) {
-                // Less fatal errors, but still need to explicitly catch them
-                LOG.error("Error in action " + getName(), t);
-                if (!closesResolver) {
-                    logError(t);
-                }
-            } catch (Throwable t) {
-                // There are some slippery runtime errors (unchecked) which slip through the cracks
-                LOG.error("Fatal uncaught error in action " + getName(), t);
-                if (!closesResolver) {
-                    logError(new RuntimeException(t));
-                }
-            }
+            runActionAndLogErrors(action, closesResolver);
         }, this);
+    }
 
+    private void runActionAndLogErrors(CheckedConsumer<ResourceResolver> action, Boolean closesResolver) {
+        started.compareAndSet(0, System.currentTimeMillis());
+        try {
+            withResolver(action);
+            if (!closesResolver) {
+                logCompletetion();
+            }
+        } catch (Error e) {
+            // These are very fatal errors but we should log them if we can
+            LOG.error("Fatal uncaught error in action " + getName(), e);
+            if (!closesResolver) {
+                logError(new RuntimeException(e));
+            }
+            throw e;
+        } catch (Exception t) {
+            // Less fatal errors, but still need to explicitly catch them
+            LOG.error("Error in action " + getName(), t);
+            if (!closesResolver) {
+                logError(t);
+            }
+        } catch (Throwable t) {
+            // There are some slippery runtime errors (unchecked) which slip through the cracks
+            LOG.error("Fatal uncaught error in action " + getName(), t);
+            if (!closesResolver) {
+                logError(new RuntimeException(t));
+            }
+        }
     }
 
     @Override
@@ -265,7 +268,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             processErrorHandlers();
         }
     }
-    
+
     @Override
     public void addCleanupTask() {
         // This is deprecated, only included for backwards-compatibility.
@@ -319,7 +322,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             }
         });
     }
-    
+
     @SuppressWarnings("squid:S2142")
     private void performAutomaticCleanup() {
         if (!cleanupHandlerRegistered.getAndSet(true)) {
