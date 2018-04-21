@@ -284,7 +284,7 @@ public class PageRelocator extends ProcessDefinition {
     }
     
     protected void removeSource(ActionManager step6) {
-        if (instanceInfo.getReportedErrors().isEmpty() && !dryRun) {
+        if (instanceInfo.getReportedErrorsList().isEmpty() && !dryRun) {
             step6.deferredWithResolver(rr -> {
                 rr.delete(rr.getResource(sourcePath));
             });

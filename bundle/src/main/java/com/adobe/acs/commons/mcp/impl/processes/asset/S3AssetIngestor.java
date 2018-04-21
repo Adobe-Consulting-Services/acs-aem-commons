@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -112,7 +113,7 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     void createFolders(ActionManager manager) {
-        manager.deferredWithResolver(r->{
+        manager.deferredWithResolver(r -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             manager.setCurrentItem(baseItemName);
 
@@ -123,11 +124,11 @@ public class S3AssetIngestor extends AssetIngestor {
 
     private void createFolders(ActionManager manager, ObjectListing listing) {
         listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchialElement::new)
-            .filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el-> {
-                manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
-                    manager.setCurrentItem(el.getItemName());
-                    createFolderNode(el, rr);
-                }));
+                .filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el -> {
+            manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+                manager.setCurrentItem(el.getItemName());
+                createFolderNode(el, rr);
+            }));
         });
         if (listing.isTruncated()) {
             createFolders(manager, s3Client.listNextBatchOfObjects(listing));
@@ -135,7 +136,7 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     void importAssets(ActionManager manager) {
-        manager.deferredWithResolver(rr->{
+        manager.deferredWithResolver(rr -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, rr.adaptTo(Session.class), true);
             manager.setCurrentItem(baseItemName);
             ObjectListing listing = s3Client.listObjects(bucket, s3BasePath);
@@ -146,12 +147,28 @@ public class S3AssetIngestor extends AssetIngestor {
     private void importAssets(ActionManager manager, ObjectListing listing) {
         listing.getObjectSummaries().stream().map(S3HierarchialElement::new)
                 .filter(S3HierarchialElement::isFile).filter(this::canImportContainingFolder)
-                .map(S3HierarchialElement::getSource).forEach(ss-> {
-            if (canImportFile(ss)) {
-                manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
-            } else {
-                incrementCount(skippedFiles, 1);
-                trackDetailedActivity(ss.getName(), "Skip", "Skipping file", 0L);
+                .map(S3HierarchialElement::getSource).forEach(ss -> {
+            try {
+                if (canImportFile(ss)) {
+                    manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
+                } else {
+                    incrementCount(skippedFiles, 1);
+                    trackDetailedActivity(ss.getName(), "Skip", "Skipping file", 0L);
+                }
+            } catch (IOException ex) {
+                Failure failure = new Failure();
+                failure.setException(ex);
+                failure.setNodePath(ss.getElement().getNodePath());
+                manager.getFailureList().add(failure);
+            } finally {
+                try {
+                    ss.close();
+                } catch (IOException ex) {
+                    Failure failure = new Failure();
+                    failure.setException(ex);
+                    failure.setNodePath(ss.getElement().getNodePath());
+                    manager.getFailureList().add(failure);
+                }
             }
         });
         if (listing.isTruncated()) {
@@ -191,7 +208,7 @@ public class S3AssetIngestor extends AssetIngestor {
         public HierarchialElement getElement() {
             return element;
         }
-        
+
         @Override
         public void close() throws IOException {
             if (lastOpenStream != null) {
@@ -202,6 +219,7 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     class S3HierarchialElement implements HierarchialElement {
+
         private final S3ObjectSummary original;
         private final String negativePath;
         final String effectiveKey;

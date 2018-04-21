@@ -74,6 +74,7 @@ public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceRes
         if (count > 0) {
             manager.deferredWithResolver(
                     Actions.retry(retryCount, retryDelay, (ResourceResolver rr) -> {
+                        rr.refresh();
                         LOG.info("Executing {} actions", count);
                         for (CheckedConsumer<ResourceResolver> consumer : consumers) {
                             consumer.accept(rr);

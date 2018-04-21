@@ -43,7 +43,7 @@ limitations under the License.
                     </tr>
                 </thead>
                 <tbody is="coral-table-body"
-                       data-sly-list.err="${process.reportedErrors}">
+                       data-sly-list.err="${process.reportedErrorsList}">
                     <tr is="coral-table-row">
                         <td is="coral-table-cell">${'yyyy-MM-dd HH:mm:ss' @ format=err.time}</td>
                         <td is="coral-table-cell">${err.nodePath}</td>

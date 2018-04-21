@@ -16,6 +16,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
@@ -87,11 +88,27 @@ public class FileAssetIngestor extends AssetIngestor {
             manager.setCurrentItem(fileBasePath);
             Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile)
                     .filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
-                if (canImportFile(fs)) {
-                    manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
-                } else {
-                    incrementCount(skippedFiles, 1);
-                    trackDetailedActivity(fs.getName(), "Skip", "Skipping file", 0L);
+                try {
+                    if (canImportFile(fs)) {
+                        manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
+                    } else {
+                        incrementCount(skippedFiles, 1);
+                        trackDetailedActivity(fs.getName(), "Skip", "Skipping file", 0L);
+                    }
+                } catch (IOException ex) {
+                    Failure failure = new Failure();
+                    failure.setException(ex);
+                    failure.setNodePath(fs.getElement().getNodePath());
+                    manager.getFailureList().add(failure);
+                } finally {
+                    try {
+                        fs.close();
+                    } catch (IOException ex) {
+                        Failure failure = new Failure();
+                        failure.setException(ex);
+                        failure.setNodePath(fs.getElement().getNodePath());
+                        manager.getFailureList().add(failure);
+                    }
                 }
             });        
         });

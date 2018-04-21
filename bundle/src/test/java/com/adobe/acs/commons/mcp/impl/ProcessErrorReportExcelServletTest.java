@@ -46,7 +46,7 @@ public class ProcessErrorReportExcelServletTest {
         servlet = new ProcessErrorReportExcelServlet();
         failures = new ArrayList<>();
         process = mock(ManagedProcess.class);
-        when(process.getReportedErrors()).thenReturn(failures);
+        when(process.getReportedErrorsList()).thenReturn(failures);
         when(process.getName()).thenReturn("Test Report");
     }
 

@@ -141,18 +141,17 @@ public final class Actions {
                     r.refresh();
                     LOG.info("Timeout reached, aborting work", e);
                     throw e;
+                } catch (Error e) {
+                    LOG.info("Critical runtime exception " + e.getMessage(), e);
+                    throw e;                    
                 } catch (Throwable e) {
+                    LOG.info("Error commit, retry count is " + remaining, e);
                     r.revert();
                     r.refresh();
-                    LOG.info("Error commit, retry count is " + remaining, e);
-                    if (e instanceof Exception) {
-                        if (remaining-- <= 0) {
-                            throw e;
-                        } else {
-                            Thread.sleep(pausePerRetry);
-                        }
-                    } else {
+                    if (remaining-- <= 0) {
                         throw e;
+                    } else {
+                        Thread.sleep(pausePerRetry);
                     }
                 }
             }

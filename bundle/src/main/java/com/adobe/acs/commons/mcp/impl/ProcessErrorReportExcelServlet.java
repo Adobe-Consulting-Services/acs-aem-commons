@@ -102,7 +102,7 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
             headerCell.setCellStyle(headerStyle);
         }
 
-        Collection<ArchivedProcessFailure> rows = report.getReportedErrors();
+        Collection<ArchivedProcessFailure> rows = report.getReportedErrorsList();
         //make rows, don't forget the header row
         for (ArchivedProcessFailure error : rows) {
             Row row = sheet.createRow(sheet.getPhysicalNumberOfRows());

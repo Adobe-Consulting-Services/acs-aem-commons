@@ -83,7 +83,7 @@ public class PageRelocatorTest {
         assertEquals("Page Relocator: relocator test", instance.getName());
         initInstance(instance, rr);
         instance.run(rr);
-        assertFalse("ACL issues should have been tracked", instance.getInfo().getReportedErrors().isEmpty());
+        assertFalse("ACL issues should have been tracked", instance.getInfo().getReportedErrorsList().isEmpty());
         assertEquals("Aborted", instance.getInfo().getStatus());
     }
 
