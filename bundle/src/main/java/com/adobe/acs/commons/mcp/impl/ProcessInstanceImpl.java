@@ -248,8 +248,8 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 rr.commit();
             }
             rr.refresh();
-            ActionManager manager = getActionManagerFactory().createTaskManager("Record errors", rr, 1);
-            ActionBatch batch = new ActionBatch(manager, 50);
+            ActionManager errorManager = getActionManagerFactory().createTaskManager("Record errors", rr, 1);
+            ActionBatch batch = new ActionBatch(errorManager, 50);
             for (int i = 0; i < failures.size(); i++) {
                 String errPath = errFolder + "/err" + i;
                 Failure failure = failures.get(i);
@@ -260,7 +260,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 });
             }
             batch.commitBatch();
-        } catch (RepositoryException | PersistenceException | LoginException ex) {
+        } catch (RepositoryException | PersistenceException | LoginException | NullPointerException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }

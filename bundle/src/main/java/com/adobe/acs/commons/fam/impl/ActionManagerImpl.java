@@ -157,13 +157,24 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 if (!closesResolver) {
                     logCompletetion();
                 }
+            } catch (Error e) {
+                // These are very fatal errors but we should log them if we can
+                LOG.error("Fatal uncaught error in action " + getName(), e);
+                if (!closesResolver) {
+                    logError(new RuntimeException(e));
+                }
+                throw e;
+            } catch (Exception t) {
+                // Less fatal errors, but still need to explicitly catch them
+                LOG.error("Error in action " + getName(), t);
+                if (!closesResolver) {
+                    logError(t);
+                }
             } catch (Throwable t) {
+                // There are some slippery runtime errors (unchecked) which slip through the cracks
                 LOG.error("Fatal uncaught error in action " + getName(), t);
                 if (!closesResolver) {
-                    logError(t instanceof Exception ? (Exception) t : new RuntimeException(t));
-                }
-                if (t instanceof Error) {
-                    throw (Error) t;
+                    logError(new RuntimeException(t));
                 }
             }
         }, this);
