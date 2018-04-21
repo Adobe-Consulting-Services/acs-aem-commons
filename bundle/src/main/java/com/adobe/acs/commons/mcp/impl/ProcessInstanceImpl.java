@@ -61,8 +61,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Abstraction of a Process which runs using FAM and consists of one or more
- * actions.
+ * Abstraction of a Process which runs using FAM and consists of one or more actions.
  */
 public class ProcessInstanceImpl implements ProcessInstance, Serializable {
 
@@ -150,9 +149,19 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
 
     @Override
     public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException {
-        ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
-        infoBean.setRequestInputs(inputs);
-        definition.parseInputs(inputs);
+        try {
+            ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
+            infoBean.setRequestInputs(inputs);
+            definition.parseInputs(inputs);
+        } catch (DeserializeException | RepositoryException ex) {
+            LOG.error("Error starting managed process " + getName(), ex);
+            Failure f = new Failure();
+            f.setException(ex);
+            f.setNodePath(getPath());
+            recordErrors(-1, Arrays.asList(f), resourceResolver);
+            halt();
+            throw ex;
+        }
     }
 
     @Override
@@ -193,7 +202,10 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             Failure f = new Failure();
             f.setException(ex);
             f.setNodePath(getPath());
-            recordErrors(-1, Arrays.asList(f), rr);
+            asServiceUser(serviceResolver -> {
+                persistStatus(serviceResolver);
+                recordErrors(-1, Arrays.asList(f), serviceResolver);
+            });
             halt();
         }
     }
@@ -248,7 +260,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 });
             }
             batch.commitBatch();
-       } catch (RepositoryException | PersistenceException | LoginException ex) {
+        } catch (RepositoryException | PersistenceException | LoginException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }
