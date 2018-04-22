@@ -25,6 +25,8 @@ import org.apache.jackrabbit.api.security.user.User;
 import javax.jcr.RepositoryException;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.apache.jackrabbit.api.security.user.Group;
 
@@ -50,9 +52,10 @@ public abstract class AuthorizedGroupProcessDefinitionFactory<P extends ProcessD
                                             return true;
                                         }
                                     }
-                                } catch (RepositoryException e) {
+                                    return false;
+                                } catch (RepositoryException ex) {
+                                    return false;
                                 }
-                                return false;
                             });
         } catch (RepositoryException e) {
             return false;
