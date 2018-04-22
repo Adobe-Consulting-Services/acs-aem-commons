@@ -25,10 +25,7 @@ import org.apache.jackrabbit.api.security.user.User;
 import javax.jcr.RepositoryException;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import org.apache.jackrabbit.api.security.user.Group;
 
 /**
  * ProcessDefinitionFactory which limits availability of a process to the admin users and members of the specified
