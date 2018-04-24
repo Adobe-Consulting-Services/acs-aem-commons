@@ -91,4 +91,15 @@ public interface CheckedFunction<T, R> {
     public static <T> CheckedFunction<T, T> identity() {
         return (T t) -> t;
     }
+
+    public static <T> CheckedFunction<T, Boolean> or(CheckedFunction<T, Boolean>... functions) {
+        return t -> {
+            for (CheckedFunction<T, Boolean> f : functions) {
+                if (f.apply(t)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }    
 }
