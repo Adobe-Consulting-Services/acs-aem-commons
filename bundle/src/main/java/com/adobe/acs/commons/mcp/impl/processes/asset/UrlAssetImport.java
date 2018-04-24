@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -101,7 +102,7 @@ public class UrlAssetImport extends AssetIngestor {
     private int timeout = 30000;
 
     transient Set<FileOrRendition> files;
-    transient Map<String, Folder> folders = new TreeMap<>();
+    transient Map<String, Folder> folders = new TreeMap<>((a,b)->b.compareTo(a));
 
     Spreadsheet fileData;
 
@@ -172,13 +173,22 @@ public class UrlAssetImport extends AssetIngestor {
             // Check the file using the deferral method so that any failures at retrieving file size can be retried.
             manager.deferredWithResolver(Actions.retry(5, 50, rr1 -> {
                 manager.setCurrentItem("Evaluate " + file.getItemName());
-                if (canImportFile(file.getSource())) {
-                    // Files are downloaded in a separate action to get higher overall throughput.
-                    manager.deferredWithResolver(Actions.retry(5, 50,
-                            importAsset(file.getSource(), manager)
-                                    .andThen(updateMetadata(file)
-                                            .andThen(importRenditions(file, manager)))
-                    ));
+                try {
+                    if (canImportFile(file.getSource())) {
+                        // Files are downloaded in a separate action to get higher overall throughput.
+                        manager.deferredWithResolver(Actions.retry(5, 50,
+                                importAsset(file.getSource(), manager)
+                                        .andThen(updateMetadata(file)
+                                                .andThen(importRenditions(file, manager)))
+                        ));
+                    }
+                } catch (IOException ex) {
+                    Failure failure = new Failure();
+                    failure.setException(ex);
+                    failure.setNodePath(file.getNodePath());
+                    manager.getFailureList().add(failure);
+                } finally {
+                    file.getSource().close();
                 }
             }));
         });
@@ -240,6 +250,12 @@ public class UrlAssetImport extends AssetIngestor {
                         incrementCount(importedAssets, 1L);
                         incrementCount(importedData, renditionFile.getSource().getLength());
                         trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
+                    } catch (IOException | IllegalArgumentException ex) {
+                        Failure failure = new Failure();
+                        failure.setException(ex);
+                        failure.setNodePath(renditionFile.getNodePath());
+                        manager.getFailureList().add(failure);
+                        throw ex;
                     } finally {
                         renditionFile.getSource().close();
                     }

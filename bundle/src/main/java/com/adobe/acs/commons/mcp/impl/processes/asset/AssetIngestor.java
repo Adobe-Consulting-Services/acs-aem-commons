@@ -333,7 +333,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         };
     }
 
-    protected boolean canImportFile(Source source) {
+    protected boolean canImportFile(Source source) throws IOException {
         String name = source.getName().toLowerCase();
         if (minimumSize > 0 && source.getLength() < minimumSize) {
             return false;
@@ -397,7 +397,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
         InputStream getStream() throws IOException;
 
-        long getLength();
+        long getLength() throws IOException;
 
         HierarchialElement getElement();
 

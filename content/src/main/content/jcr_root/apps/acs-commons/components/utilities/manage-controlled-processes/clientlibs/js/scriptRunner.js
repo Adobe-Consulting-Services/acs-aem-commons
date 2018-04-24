@@ -111,7 +111,10 @@ var ScriptRunner = {
     startProcess: function () {
         /* Use FormData object to support file uploads */
         var data = new FormData($('#processDefinitionInput form', window.top.document)[0]);
-
+        ScriptRunner.startDialog.header.innerHTML = 'Starting Process, please wait';
+        ScriptRunner.startDialog.content.innerHTML = '<coral-masonry layout="fixed-centered" columnwidth="200" spacing="20">'+
+                '<coral-masonry-item><coral-wait size="L"></coral-wait></coral-masony-item></coral-masonry-item>';
+        ScriptRunner.startDialog.footer.innerHTML = "";
         jQuery.ajax({
             url: ScriptRunner.SERVLET_URL + ".start.json",
             method: "POST",
@@ -164,7 +167,7 @@ var ScriptRunner = {
                                     ) +
                             "</td>" +
                             "<td is='coral-table-cell' class='process-tasks-completed'>" + process.infoBean.result.tasksCompleted + "</td>" +
-                            "<td is='coral-table-cell' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
+                            "<td is='coral-table-cell' class='process-reported-errors'>" + process.infoBean.reportedErrors + "</td>" +
                             "</tr>"
                             );
                     processDom.click(ScriptRunner.viewProcessCallback(process.id, process.path));
@@ -232,7 +235,7 @@ var ScriptRunner = {
                         ids: ScriptRunner.watchList
                     }
                 });
-            }, 250);
+            }, 500);
         }
     },
     error: function (e) {

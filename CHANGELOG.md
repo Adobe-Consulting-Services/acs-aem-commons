@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.0...HEAD
+### Fixed
+- #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
 
 ### Added
 

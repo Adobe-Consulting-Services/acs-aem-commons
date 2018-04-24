@@ -50,7 +50,11 @@ public class CancelHandler implements Serializable {
     }
     
     public void trackActiveWork(Thread t) {
-        activeWork.add(t);
+        if (cancelled) {
+            t.interrupt();
+        } else {
+            activeWork.add(t);
+        }
     }
     
     public void untrackActiveWork(Thread t) {
