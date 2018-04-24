@@ -21,149 +21,135 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
+import com.google.common.base.Function;
+import org.apache.jackrabbit.commons.cnd.CndImporter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.annotation.Nullable;
 import javax.jcr.Node;
 import javax.jcr.Session;
-import javax.jcr.nodetype.NodeType;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Calendar;
 
-import static junit.framework.Assert.assertEquals;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static junit.framework.Assert.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({JcrUtil.class, DamUtil.class})
+@RunWith(MockitoJUnitRunner.class)
 public class ReplicationStatusManagerImplTest {
 
-    @Mock
-    NodeType replicationNodeType;
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Spy
     ReplicationStatusManagerImpl replicationStatusManager = new ReplicationStatusManagerImpl();
 
-    @Mock
     ResourceResolver resourceResolver;
 
-    @Mock
     Session session;
     
     @Mock
     PageManager pageManager;
-    
-    
+
     static final String PAGE_PATH = "/content/page";
 
     @Mock
     Page pagePage;
-    
-    @Mock
+
     Resource pageContentResource;
-    
     
     static final String ASSET_PATH = "/content/asset";
 
     @Mock
-    Resource assetResource;
-
-    @Mock
     Asset assetAsset;
-    
-    @Mock
-    Resource assetContentResource;
 
+    Resource assetContentResource;
 
     static final String UNREPLICATED_PATH = "/content/unreplicated";
 
-    @Mock
     Resource unreplicatedResource;
 
-    @Mock
     Node unreplicatedNode;
-
 
     static final String REPLICATED_PATH = "/content/replicated";
 
-    @Mock
     Resource replicatedResource;
 
-    @Mock
     Node replicatedNode;
-
-
 
     @Before
     public void setUp() throws Exception {
-        when(replicationNodeType.getName()).thenReturn(ReplicationStatus.NODE_TYPE);
+        resourceResolver = context.resourceResolver();
+        session = resourceResolver.adaptTo(Session.class);
 
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-        
+        InputStream cnd = getClass().getResourceAsStream("replication.cnd");
+        CndImporter.registerNodeTypes(new InputStreamReader(cnd, "UTF-8"), session);
+
+        context.registerAdapter(ResourceResolver.class, PageManager.class, pageManager);
+
+        context.load().json(getClass().getResourceAsStream("ReplicationStatusManagerImplTest.json"), "/content");
+
         /* Page */
+        pageContentResource = resourceResolver.getResource(PAGE_PATH + "/jcr:content");
         when(pageManager.getContainingPage(PAGE_PATH)).thenReturn(pagePage);
         when(pagePage.getContentResource()).thenReturn(pageContentResource);
         
         /* Asset */
-        PowerMockito.mockStatic(DamUtil.class);
-        when(resourceResolver.getResource(ASSET_PATH)).thenReturn(assetResource);
-        when(DamUtil.resolveToAsset(assetResource)).thenReturn(assetAsset);
+        assetContentResource = resourceResolver.getResource(ASSET_PATH + "/jcr:content");
+        context.registerAdapter(Resource.class, Asset.class, new Function<Resource, Asset>() {
+            @Nullable
+            @Override
+            public Asset apply(@Nullable Resource input) {
+                if (input.getPath().equals(ASSET_PATH)) {
+                    return assetAsset;
+                } else {
+                    return null;
+                }
+            }
+        });
         when(assetAsset.getPath()).thenReturn(ASSET_PATH);
-        when(assetResource.getChild(JcrConstants.JCR_CONTENT)).thenReturn(assetContentResource);
 
         /* Unreplicated Node */
-        when(resourceResolver.getResource(UNREPLICATED_PATH)).thenReturn(unreplicatedResource);
-        when(unreplicatedResource.adaptTo(Node.class)).thenReturn(unreplicatedNode);
-        when(unreplicatedNode.getSession()).thenReturn(session);
-        when(unreplicatedNode.isNodeType(ReplicationStatus.NODE_TYPE)).thenReturn(false);
-        when(unreplicatedNode.getMixinNodeTypes()).thenReturn(new NodeType[] { });
-        when(unreplicatedNode.canAddMixin(ReplicationStatus.NODE_TYPE)).thenReturn(true);
+        unreplicatedResource = resourceResolver.getResource(UNREPLICATED_PATH);
+        unreplicatedNode = unreplicatedResource.adaptTo(Node.class);
 
         /* Replicated Node */
-        when(resourceResolver.getResource(REPLICATED_PATH)).thenReturn(replicatedResource);
-        when(replicatedResource.adaptTo(Node.class)).thenReturn(replicatedNode);
-        when(replicatedNode.getSession()).thenReturn(session);
-        when(replicatedNode.isNodeType(ReplicationStatus.NODE_TYPE)).thenReturn(true);
-        when(replicatedNode.getMixinNodeTypes()).thenReturn(new NodeType[] { replicationNodeType });
+        replicatedResource = resourceResolver.getResource(REPLICATED_PATH);
+        replicatedNode = replicatedResource.adaptTo(Node.class);
     }
     
     @Test
     public void testGetReplicationStatusResource_Page() {
-    	assertEquals(pageContentResource, replicationStatusManager.getReplicationStatusResource(PAGE_PATH, resourceResolver));
+        assertSamePath(pageContentResource, replicationStatusManager.getReplicationStatusResource(PAGE_PATH, resourceResolver));
     }
     
     @Test
     public void testGetReplicationStatusResource_Asset() {
-    	assertEquals(assetContentResource, replicationStatusManager.getReplicationStatusResource(ASSET_PATH, resourceResolver));
+        assertSamePath(assetContentResource, replicationStatusManager.getReplicationStatusResource(ASSET_PATH, resourceResolver));
     }
     
     @Test
     public void testGetReplicationStatusResource_Resource() {
-    	assertEquals(unreplicatedResource, replicationStatusManager.getReplicationStatusResource(UNREPLICATED_PATH, resourceResolver));
+        assertSamePath(unreplicatedResource, replicationStatusManager.getReplicationStatusResource(UNREPLICATED_PATH, resourceResolver));
     }
 
     @Test
     public void testSetReplicationStatus_Activate() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         final String replicationStatus = "Activate";
         final String replicatedBy = "Test User";
         final Calendar replicatedAt = Calendar.getInstance();
@@ -175,24 +161,15 @@ public class ReplicationStatusManagerImplTest {
                 ReplicationStatusManager.Status.ACTIVATED,
                 UNREPLICATED_PATH);
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(unreplicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAt);
+        assertTrue(unreplicatedNode.isNodeType(ReplicationStatus.NODE_TYPE));
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(unreplicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
-
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(unreplicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
-
-        verify(unreplicatedNode, times(1)).addMixin(ReplicationStatus.NODE_TYPE);
-
-        verify(session, times(1)).save();
+        assertSameTime(replicatedAt, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertEquals(replicatedBy, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
+        assertEquals(replicationStatus, unreplicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
     }
 
     @Test
     public void testSetReplicationStatus_Deactivate_1() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         final String replicationStatus = "Deactivate";
         final String replicatedBy = "Test User";
         final Calendar replicatedAt = Calendar.getInstance();
@@ -204,62 +181,56 @@ public class ReplicationStatusManagerImplTest {
                 ReplicationStatusManager.Status.DEACTIVATED,
                 REPLICATED_PATH);
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAt);
+        assertSameTime(replicatedAt, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertEquals(replicatedBy, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
+        assertEquals(replicationStatus, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION).getString());
+    }
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
+    // Issue #1265
+    @Test
+    public void testSetReplicationStatus_NullReplicatedByAndReplicatedAt() throws Exception {
+        final String replicatedBy = null;
+        final Calendar replicatedAt = null;
 
-        verify(replicatedNode, times(0)).addMixin(ReplicationStatus.NODE_TYPE);
+        replicationStatusManager.setReplicationStatus(resourceResolver,
+                replicatedBy,
+                replicatedAt,
+                ReplicationStatusManager.Status.ACTIVATED,
+                REPLICATED_PATH);
 
-        verify(session, times(1)).save();
+        assertNotNull(replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED).getDate());
+        assertEquals(ReplicationStatusManagerImpl.DEFAULT_REPLICATED_BY, replicatedNode.getProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY).getString());
     }
 
     @Test
     public void testSetReplicationStatus2() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         replicationStatusManager.setReplicationStatus(resourceResolver,
                 null,
                 null,
                 ReplicationStatusManager.Status.CLEAR,
                 REPLICATED_PATH);
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, null);
-
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, null);
-
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, null);
-
-        verify(replicatedNode, times(0)).addMixin(ReplicationStatus.NODE_TYPE);
-
-        verify(session, times(1)).save();
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED));
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY));
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION));
     }
 
     @Test
     public void testClearReplicationStatus() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         replicationStatusManager.clearReplicationStatus(resourceResolver,
                 replicatedResource);
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, null);
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED));
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY));
+        assertFalse(replicatedNode.hasProperty(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION));
+    }
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, null);
+    private static void assertSamePath(Resource expected, Resource actual) {
+        assertEquals(expected.getPath(), actual.getPath());
+    }
 
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.setProperty(replicatedNode, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, null);
-
-        verify(replicatedNode, times(0)).addMixin(ReplicationStatus.NODE_TYPE);
-
-        verify(session, times(1)).save();
+    private static void assertSameTime(Calendar expected, Calendar actual) {
+        assertEquals(expected.getTimeInMillis(), actual.getTimeInMillis());
     }
 }

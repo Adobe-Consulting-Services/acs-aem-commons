@@ -96,5 +96,4 @@
             eventsRegistered.push(body);
         }
     });
-})
-(window.jQuery);
+})(window.jQuery);

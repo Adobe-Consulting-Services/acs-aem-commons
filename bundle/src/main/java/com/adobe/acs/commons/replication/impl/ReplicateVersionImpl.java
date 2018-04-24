@@ -115,7 +115,6 @@ public class ReplicateVersionImpl implements
         for (Iterator<Resource> iter = resolver.listChildren(res); iter.hasNext();) {
             Resource resChild = iter.next();
             buildResourceList(resolver, resChild, resources);
-            resChild = null;
         }
     }
 
@@ -161,13 +160,11 @@ public class ReplicateVersionImpl implements
 
         String path = resource.getPath();
         List<Version> versions = findAllVersions(path, session);
-        Collections.sort(versions, new Comparator<Version>() {
-            public int compare(Version v1, Version v2) {
-                try {
-                    return v2.getCreated().compareTo(v1.getCreated());
-                } catch (RepositoryException e) {
-                    return 0;
-                }
+        Collections.sort(versions, (v1, v2) -> {
+            try {
+                return v2.getCreated().compareTo(v1.getCreated());
+            } catch (RepositoryException e) {
+                return 0;
             }
         });
         Calendar cal = GregorianCalendar.getInstance();
@@ -210,11 +207,11 @@ public class ReplicateVersionImpl implements
                 .getAllVersions(); iter.hasNext();) {
             Version v = iter.nextVersion();
             versions.add(v);
-            v = null;
         }
 
         return versions;
     }
+
     private String getNormalizedPath(String path) {
         String root = path;
         if (root == null || "".equals(root)) {

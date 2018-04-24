@@ -75,7 +75,7 @@ public class SharpenImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        verify(layer, times(1)).sharpen(2.0f,1.0f);
+        verify(layer, times(0)).sharpen(2.0f,1.0f);
         verifyNoMoreInteractions(layer);
     }
 }

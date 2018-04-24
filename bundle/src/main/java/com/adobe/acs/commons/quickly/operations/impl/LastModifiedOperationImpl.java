@@ -159,10 +159,10 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     private List<Resource> getLastModifiedPages(final ResourceResolver resourceResolver, final Command cmd) {
 
         final String relativeDateRange = this.getRelativeDateRangeLowerBoundParam(cmd);
-        final String userID = this.getUserIDParam(cmd, resourceResolver.getUserID());
+        final String userId = this.getUserIdParam(cmd, resourceResolver.getUserID());
 
         return this.getLastModifiedQuery(resourceResolver,
-                userID,
+                userId,
                 relativeDateRange,
                 "cq:PageContent",
                 "@" + NameConstants.PN_PAGE_LAST_MOD, MAX_QUERY_RESULTS);
@@ -196,6 +196,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         try {
             log.debug("Lastmod QueryBuilder Map: {}", new JSONObject(map).toString(2));
         } catch (JSONException e) {
+            // no-op
         }
 
         final Query query = queryBuilder.createQuery(PredicateGroup.create(map),
@@ -236,7 +237,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     }
 
 
-    private String getUserIDParam(final Command cmd, String currentUserID) {
+    private String getUserIdParam(final Command cmd, String currentUserId) {
         final String[] params = cmd.getParams();
 
         if (params.length > 0) {
@@ -249,7 +250,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
             }
         }
 
-        return currentUserID;
+        return currentUserId;
     }
 
 }

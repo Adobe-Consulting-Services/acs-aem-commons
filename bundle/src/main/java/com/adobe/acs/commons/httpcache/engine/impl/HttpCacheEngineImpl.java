@@ -75,6 +75,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
@@ -117,6 +119,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
+
+    /** jmx property labels */
+    static final String JMX_PN_ORDER = "Order";
+    static final String JMX_PN_OSGICOMPONENT = "OSGi Component";
+    static final String JMX_PN_HTTPCACHE_CONFIGS = "HTTP Cache Configs";
+    static final String JMX_PN_HTTPCACHE_CONFIG = "HTTP Cache Config";
+    static final String JMX_PN_HTTPCACHE_STORE = "HTTP Cache Store";
+    static final String JMX_PN_HTTPCACHE_STORES = "HTTP Cache Stores";
+    static final String JMX_HTTPCACHE_HANDLING_RULE = "HTTP Cache Handling Rule";
+    static final String JMX_PN_HTTPCACHE_HANDLING_RULES = "HTTP Cache Handling Rules";
+
     /** Thread safe list to contain the registered HttpCacheConfig references. */
     private CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
 
@@ -275,8 +288,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get
-                (PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
+                PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -365,49 +378,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public boolean deliverCacheContent(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                        HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException,
             HttpCacheDataStreamException, HttpCachePersistenceException {
-
         // Get the cached content from cache
         CacheContent cacheContent = getCacheStore(cacheConfig).getIfPresent(cacheConfig.buildCacheKey(request));
-
-        // Execute custom rules.
-        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
-            // Apply rule if it's a configured global or cache-config tied rule.
-            if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
-                HttpCacheHandlingRule rule = entry.getValue();
-                if (!rule.onCacheDeliver(request, response, cacheConfig, cacheContent)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Cache cannot be delivered for the url {} honoring the rule {}", request
-                                .getRequestURL(), rule.getClass().getName());
-                    }
-                    return false;
-                }
-            }
+        if (!isRequestDeliverableFromCacheAccordingToHandlingRules(request, response, cacheConfig, cacheContent)){
+            return false;
         }
 
-        response.setStatus(cacheContent.getStatus());
-        // Spool header info into the servlet response.
-        for (String headerName : cacheContent.getHeaders().keySet()) {
-            for (String headerValue : cacheContent.getHeaders().get(headerName)) {
-                response.setHeader(headerName, headerValue);
-            }
-        }
-
-        // Spool other attributes to the servlet response.
-        response.setContentType(cacheContent.getContentType());
-        response.setCharacterEncoding(cacheContent.getCharEncoding());
-
-        // Copy the cached data into the servlet output stream.
-        try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-            if (log.isDebugEnabled()) {
-                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
-            }
-
-            return true;
-        } catch (IOException e) {
-            throw new HttpCacheDataStreamException("Unable to copy from cached data to the servlet output stream.");
-        }
+        prepareCachedResponse(response, cacheContent);
+        return executeCacheContentDeliver(request, response, cacheContent);
     }
+
+
 
     @Override
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
@@ -441,25 +422,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             CacheKey cacheKey = cacheConfig.buildCacheKey(request);
             cacheContent = new CacheContent().build(responseWrapper);
 
-            // Execute custom rules.
-            boolean canCacheResponse = true;
-            for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
-                // Apply rule if it's a configured global or cache-config tied rule.
-                if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
-                    HttpCacheHandlingRule rule = entry.getValue();
-                    if (!rule.onResponseCache(request, response, cacheConfig, cacheContent)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Per custom rule {} caching for this request {} has been cancelled.", rule
-                                    .getClass().getName(), request.getRequestURI());
-                        }
-                        canCacheResponse = false;
-                        break;
-                    }
-                }
-            }
-
             // Persist in cache.
-            if (canCacheResponse) {
+            if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
                 getCacheStore(cacheConfig).put(cacheKey, cacheContent);
                 log.debug("Response for the URI cached - {}", request.getRequestURI());
             }
@@ -487,27 +451,16 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     @Override
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
-
         // Find out all the cache config which has this path applicable for invalidation.
         for (HttpCacheConfig cacheConfig : cacheConfigs) {
             if (cacheConfig.canInvalidate(path)) {
-
                 // Execute custom rules.
-                for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
-                    // Apply rule if it's a configured global or cache-config tied rule.
-                    if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
-                        HttpCacheHandlingRule rule = entry.getValue();
-                        if (rule.onCacheInvalidate(path)) {
-                            getCacheStore(cacheConfig).invalidate(cacheConfig.buildCacheKey(path));
-                        } else {
-                            log.debug("Cache invalidation rejected for path {} per custom rule {}", path, rule
-                                    .getClass().getName());
-                        }
-                    }
-                }
+                executeCustomRuleInvalidations(path, cacheConfig);
             }
         }
     }
+
+
 
     /**
      * Get the cache store set for the config if available.
@@ -536,24 +489,24 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Handling Rule",
-                "HTTP Cache Handling Rule",
-                new String[]{"HTTP Cache Handling Rule"},
-                new String[]{"HTTP Cache Handling Rule"},
+                JMX_HTTPCACHE_HANDLING_RULE,
+                JMX_HTTPCACHE_HANDLING_RULE,
+                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
+                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
                 new OpenType[]{SimpleType.STRING});
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Handling Rules",
-                        "HTTP Cache Handling Rules",
+                        JMX_PN_HTTPCACHE_HANDLING_RULES,
+                        JMX_PN_HTTPCACHE_HANDLING_RULES,
                         cacheEntryType,
-                        new String[]{"HTTP Cache Handling Rule"}));
+                        new String[]{JMX_HTTPCACHE_HANDLING_RULE}));
         // @formatter:on
 
         for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
             final Map<String, Object> row = new HashMap<String, Object>();
 
-            row.put("HTTP Cache Handling Rule", entry.getValue().getClass().getName());
+            row.put(JMX_HTTPCACHE_HANDLING_RULE, entry.getValue().getClass().getName());
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
 
@@ -565,18 +518,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // @formatter:off
         // Exposing all google guava stats.
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Config",
-                "HTTP Cache Config",
-                new String[]{ "Order", "OSGi Component" },
-                new String[]{ "Order", "OSGi Component" },
+                JMX_PN_HTTPCACHE_CONFIG,
+                JMX_PN_HTTPCACHE_CONFIG,
+                new String[]{JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
+                new String[]{ JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
                 new OpenType[]{ SimpleType.INTEGER, SimpleType.STRING });
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Configs",
-                        "HTTP Cache Configs",
+                        JMX_PN_HTTPCACHE_CONFIGS,
+                        JMX_PN_HTTPCACHE_CONFIGS,
                         cacheEntryType,
-                        new String[]{ "OSGi Component" }));
+                        new String[]{ JMX_PN_OSGICOMPONENT }));
 
         // @formatter:on
 
@@ -585,8 +538,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
             Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
 
-            row.put("Order", cacheConfig.getOrder());
-            row.put("OSGi Component", (String) osgiConfig.get(Constants.SERVICE_PID));
+            row.put(JMX_PN_ORDER, cacheConfig.getOrder());
+            row.put(JMX_PN_OSGICOMPONENT, (String) osgiConfig.get(Constants.SERVICE_PID));
 
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
@@ -598,18 +551,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
         // @formatter:off
         final CompositeType cacheEntryType = new CompositeType(
-                "HTTP Cache Store",
-                "HTTP Cache Store",
-                new String[]{ "HTTP Cache Store" },
-                new String[]{ "HTTP Cache Store" },
+                JMX_PN_HTTPCACHE_STORE,
+                JMX_PN_HTTPCACHE_STORE,
+                new String[]{JMX_PN_HTTPCACHE_STORE},
+                new String[]{JMX_PN_HTTPCACHE_STORE},
                 new OpenType[]{ SimpleType.STRING});
 
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(
-                        "HTTP Cache Stores",
-                        "HTTP Cache Stores",
+                        JMX_PN_HTTPCACHE_STORES,
+                        JMX_PN_HTTPCACHE_STORES,
                         cacheEntryType,
-                        new String[]{ "HTTP Cache Store" }));
+                        new String[]{JMX_PN_HTTPCACHE_STORE}));
         // @formatter:on
 
         Enumeration<String> storeNames = cacheStoresMap.keys();
@@ -617,10 +570,88 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             final String storeName = storeNames.nextElement();
             final Map<String, Object> row = new HashMap<String, Object>();
 
-            row.put("HTTP Cache Store", storeName);
+            row.put(JMX_PN_HTTPCACHE_STORE, storeName);
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
 
         return tabularData;
+    }
+
+    private boolean isRequestCachableAccordingToHandlingRules(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent){
+        return checkOnHandlingRule(request, cacheConfig, rule -> rule.onResponseCache(request, response, cacheConfig, cacheContent), "Caching for request {} has been cancelled as per custom rule {}");
+    }
+
+    private boolean isRequestDeliverableFromCacheAccordingToHandlingRules(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent) {
+        return checkOnHandlingRule(request, cacheConfig, rule-> rule.onCacheDeliver(request, response, cacheConfig, cacheContent), "Cache cannot be delivered for the url {} honoring the rule {}");
+    }
+
+    private boolean checkOnHandlingRule(SlingHttpServletRequest request,  HttpCacheConfig cacheConfig, Function<HttpCacheHandlingRule, Boolean> check,String onFailLogMessage){
+        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
+            // Apply rule if it's a configured global or cache-config tied rule.
+            if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
+                HttpCacheHandlingRule rule = entry.getValue();
+                if(!check.apply(rule)){
+                    if (log.isDebugEnabled()) {
+                        log.debug(onFailLogMessage, request
+                                .getRequestURL(), rule.getClass().getName());
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void prepareCachedResponse(SlingHttpServletResponse response, CacheContent cacheContent) {
+        response.setStatus(cacheContent.getStatus());
+        // Spool header info into the servlet response.
+        for (String headerName : cacheContent.getHeaders().keySet()) {
+            for (String headerValue : cacheContent.getHeaders().get(headerName)) {
+                response.setHeader(headerName, headerValue);
+            }
+        }
+
+        // Spool other attributes to the servlet response.
+        response.setContentType(cacheContent.getContentType());
+        response.setCharacterEncoding(cacheContent.getCharEncoding());
+    }
+
+    private boolean executeCacheContentDeliver(SlingHttpServletRequest request, SlingHttpServletResponse response, CacheContent cacheContent) throws HttpCacheDataStreamException {
+        // Copy the cached data into the servlet output stream.
+        try {
+            serveCacheContentIntoResponse(response, cacheContent);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
+            }
+            return true;
+        } catch (IOException e) {
+            throw new HttpCacheDataStreamException("Unable to copy from cached data to the servlet output stream.");
+        }
+    }
+
+    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
+            throws IOException {
+        try {
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+        } catch(IllegalStateException ex) {
+            // in this case, either the writer has already been obtained or the response doesn't support getOutputStream()
+            IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
+        }
+    }
+
+    private void executeCustomRuleInvalidations(String path, HttpCacheConfig cacheConfig) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
+        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
+            // Apply rule if it's a configured global or cache-config tied rule.
+            if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
+                HttpCacheHandlingRule rule = entry.getValue();
+                if (rule.onCacheInvalidate(path)) {
+                    getCacheStore(cacheConfig).invalidate(cacheConfig.buildCacheKey(path));
+                } else {
+                    log.debug("Cache invalidation rejected for path {} per custom rule {}", path, rule
+                            .getClass().getName());
+                }
+            }
+        }
     }
 }

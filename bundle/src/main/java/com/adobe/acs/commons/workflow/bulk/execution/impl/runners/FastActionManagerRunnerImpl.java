@@ -24,7 +24,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
-import com.adobe.acs.commons.functions.Consumer;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
@@ -33,6 +33,7 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import com.day.cq.workflow.WorkflowException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -49,6 +50,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.sling.api.resource.LoginException;
 
 @Component
 @Service
@@ -144,15 +146,15 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
     }
 
     @Override
+    public void complete(Workspace workspace, Payload payload) throws Exception {
+        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
+    }
+
+    @Override
     public void run(Workspace workspace, Payload payload) {
         if (!throttledTaskRunner.isRunning()) {
             throttledTaskRunner.resumeExecution();
         }
-    }
-
-    @Override
-    public void complete(Workspace workspace, Payload payload) throws Exception {
-        throw new UnsupportedOperationException("FAM payloads cannot be completed as they are not tracked");
     }
 
     @Override
@@ -184,6 +186,9 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
             this.actions = actions;
             this.syntheticWorkflowRunner = syntheticWorkflowRunner;
         }
+
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141", "squid:S1854"})
         public void run() {
             ResourceResolver resourceResolver;
             Resource configResource;
@@ -240,18 +245,14 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                 final int total = resources.size();
                 final AtomicInteger success = new AtomicInteger(0);
 
-                for (final Resource resource : resources) {
-                    final String path = resource.getPath();
-
-                    manager.deferredWithResolver(new Consumer<ResourceResolver>() {
-                        @Override
-                        public void accept(ResourceResolver r) throws Exception {
+                resources.stream().map((resource) -> resource.getPath()).forEach((path) -> {
+                    manager.deferredWithResolver((ResourceResolver r) -> {
                         try {
                             manager.setCurrentItem(path);
 
                             if (retryCount > 0) {
                                 try {
-                                    actions.retryAll(retryCount, retryPause, actions.startSyntheticWorkflows(model)).accept(r, path);
+                                    Actions.retryAll(retryCount, retryPause, Actions.startSyntheticWorkflows(model, syntheticWorkflowRunner)).accept(r, path);
                                     success.incrementAndGet();
                                 } catch (Exception e) {
                                     log.warn("Could not process [ {} ] with [ " + retryCount + " ] retries", path, e);
@@ -260,7 +261,7 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                                 }
                             } else {
                                 try {
-                                    actions.startSyntheticWorkflows(model).accept(r, path);
+                                    Actions.startSyntheticWorkflows(model, syntheticWorkflowRunner).accept(r, path);
                                     success.incrementAndGet();
                                 } catch (Exception e) {
                                     log.warn("Could not process [ {} ]", path, e);
@@ -273,10 +274,9 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
                                 complete(r, workspacePath, manager, success.get());
                             }
                         }
-                        }
                     });
-                }
-            } catch (Exception e) {
+                });
+            } catch (WorkflowException | RepositoryException | LoginException | PersistenceException e) {
                 log.error("Error occurred while processing Fast Action Manager Synthetic Workflow via Bulk Workflow Manager", e);
             }
         }

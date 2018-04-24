@@ -54,6 +54,7 @@ public final class TemplateUtil {
         return hasTemplate(page.getProperties(), templatePath);
     }
 
+    @SuppressWarnings("squid:S1144")
     private static boolean hasTemplate(@CheckForNull final ValueMap valueMap, @CheckForNull final String templatePath) {
         if (valueMap != null && templatePath != null) {
             String path = valueMap.get(NameConstants.NN_TEMPLATE, String.class);

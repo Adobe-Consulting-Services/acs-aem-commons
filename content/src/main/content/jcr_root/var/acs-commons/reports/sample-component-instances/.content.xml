@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:description="A report showing all of the instances of a component by the component's sling:resourceType."
+        jcr:title="Component Instances"
+        sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
+        <config
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <queryconfig
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/configs/queryconfig"
+                pageSize="50"
+                query="SELECT * FROM [nt:base] AS s WHERE [sling:resourceType]='{{resourceType}}' {{#if path }} AND ISDESCENDANTNODE([{{path}}]){{/if}}"
+                queryLanguage="JCR-SQL2"
+                reportExecutor="com.adobe.acs.commons.reports.models.QueryReportExecutor"/>
+        </config>
+        <parameters
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <basic
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/basic"
+                fieldLabel="Resource Type"
+                name="resourceType"
+                required="true"
+                resourceType="granite/ui/components/coral/foundation/form/textfield"/>
+            <basic_696044931
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/basic"
+                fieldLabel="Path"
+                name="path"
+                resourceType="granite/ui/components/coral/foundation/form/textfield"/>
+        </parameters>
+        <columns
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <path
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/path"
+                exporter="com.adobe.acs.commons.reports.models.PathReportCellCSVExporter"
+                heading="Path"
+                link="true"/>
+            <containing_page
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/containing-page"
+                exporter="com.adobe.acs.commons.reports.models.ContainingPageReportCellCSVExporter"
+                heading="Containing Page"/>
+            <editor
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
+                editor="/crx/de/index.jsp#"
+                heading="Edit"/>
+        </columns>
+    </jcr:content>
+</jcr:root>

@@ -1,0 +1,54 @@
+
+
+dt {
+	font-weight: bold;
+}
+
+dd {
+	margin-left: 0;
+	padding-bottom: 1em;
+}
+
+
+.acs-commons-page .coral-Form-fieldlabel {
+	padding: 10px 0;
+	width: 150px;
+	display: inline-block;
+}
+
+.coral-Table-cell ul {
+	padding-left: 1.5em;
+}
+
+.form-row {
+	padding: 1em 0;
+}
+
+.pagination {
+	padding: .5em;
+}
+
+.pagination__next {
+	float: right;
+}
+
+.report__details {
+	margin: 1em 0;
+}
+
+.report__result {
+	padding: 0 1em;
+}
+
+.report__result tbody {
+	background-color: white;
+}
+
+.report__result-container {
+	max-height: 500px;
+	overflow: scroll;
+}
+
+.report__result thead, .report__result tbody tr:hover {
+	background-color: rgb(240, 240, 240);
+}

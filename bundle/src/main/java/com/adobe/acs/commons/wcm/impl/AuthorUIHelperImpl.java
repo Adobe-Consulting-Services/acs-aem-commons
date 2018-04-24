@@ -65,19 +65,19 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
 
     @Property(label = "Touch UI Page Editor", description = "URL of the page editor used when authoring UI mode is Touch-Optimized", value = WCM_EDITOR_URL_TOUCH_DEFAULT)
     public static final String WCM_EDITOR_URL_TOUCH = "wcmEditorTouchURL";
-    private String wcmEditorTouchURL = WCM_EDITOR_URL_TOUCH_DEFAULT;
+    private String wcmEditorTouchUrl = WCM_EDITOR_URL_TOUCH_DEFAULT;
 
     @Property(label = "Classic UI Page Editor", description = "URL of the page editor used when authoring UI mode is Classic", value = WCM_EDITOR_URL_CLASSIC_DEFAULT)
     public static final String WCM_EDITOR_URL_CLASSIC = "wcmEditorClassicURL";
-    private String wcmEditorClassicURL = WCM_EDITOR_URL_CLASSIC_DEFAULT;
+    private String wcmEditorClassicUrl = WCM_EDITOR_URL_CLASSIC_DEFAULT;
 
     @Property(label = "Touch UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Touch-Optimized", value = DAM_EDITOR_URL_TOUCH_DEFAULT)
     public static final String DAM_EDITOR_URL_TOUCH = "damEditorTouchURL";
-    private String damEditorTouchURL = DAM_EDITOR_URL_TOUCH_DEFAULT;
+    private String damEditorTouchUrl = DAM_EDITOR_URL_TOUCH_DEFAULT;
 
     @Property(label = "Classic UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Classic", value = DAM_EDITOR_URL_CLASSIC_DEFAULT)
     public static final String DAM_EDITOR_URL_CLASSIC = "damEditorClassicURL";
-    private String damEditorClassicURL = DAM_EDITOR_URL_CLASSIC_DEFAULT;
+    private String damEditorClassicUrl = DAM_EDITOR_URL_CLASSIC_DEFAULT;
 
     @Override
     public boolean isTouchUI() {
@@ -89,9 +89,9 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
 
         String pageUrl;
         if (isTouch) {
-            pageUrl = wcmEditorTouchURL + pagePath + ".html";
+            pageUrl = wcmEditorTouchUrl + pagePath + ".html";
         } else {
-            pageUrl = wcmEditorClassicURL + pagePath + ".html";
+            pageUrl = wcmEditorClassicUrl + pagePath + ".html";
         }
 
         if (absoluteUrl) {
@@ -106,9 +106,9 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
 
         String assetUrl;
         if (isTouch) {
-            assetUrl = damEditorTouchURL + assetPath;
+            assetUrl = damEditorTouchUrl + assetPath;
         } else {
-            assetUrl = damEditorClassicURL + assetPath;
+            assetUrl = damEditorClassicUrl + assetPath;
         }
 
         if (absoluteUrl) {
@@ -123,15 +123,15 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
         this.isTouch = PropertiesUtil.toBoolean(config.get(TOUCH_UI), DEFAULT_TOUCH_UI);
 
         // wcm editor configurations
-        this.wcmEditorTouchURL = PropertiesUtil
+        this.wcmEditorTouchUrl = PropertiesUtil
                 .toString(config.get(WCM_EDITOR_URL_TOUCH), WCM_EDITOR_URL_TOUCH_DEFAULT);
-        this.wcmEditorClassicURL = PropertiesUtil.toString(config.get(WCM_EDITOR_URL_CLASSIC),
+        this.wcmEditorClassicUrl = PropertiesUtil.toString(config.get(WCM_EDITOR_URL_CLASSIC),
                 WCM_EDITOR_URL_CLASSIC_DEFAULT);
 
         // dam editor configurations
-        this.damEditorTouchURL = PropertiesUtil
+        this.damEditorTouchUrl = PropertiesUtil
                 .toString(config.get(DAM_EDITOR_URL_TOUCH), DAM_EDITOR_URL_TOUCH_DEFAULT);
-        this.damEditorClassicURL = PropertiesUtil.toString(config.get(DAM_EDITOR_URL_CLASSIC),
+        this.damEditorClassicUrl = PropertiesUtil.toString(config.get(DAM_EDITOR_URL_CLASSIC),
                 DAM_EDITOR_URL_CLASSIC_DEFAULT);
     }
 

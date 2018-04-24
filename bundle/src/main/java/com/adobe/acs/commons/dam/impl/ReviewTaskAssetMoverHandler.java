@@ -31,6 +31,7 @@ import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.UnhandledException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -115,6 +116,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     private static final String SERVICE_NAME = "review-task-asset-mover";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -221,14 +223,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
                         while (assets.hasNext()) {
                             final Asset asset = assets.next().adaptTo(Asset.class);
-
-                            try {
-                                moveAsset(resourceResolver, assetManager, asset, taskProperties);
-                            } catch (Exception e) {
-                                log.error("Could not move reviewed asset [ {} ]", asset.getPath(), e);
-                                resourceResolver.revert();
-                                resourceResolver.refresh();
-                            }
+                            moveAsset(resourceResolver, assetManager, asset, taskProperties);
                         }
                     }
                 }
@@ -279,9 +274,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * @param destPath     the folder the asset will be moved into
          * @param assetName    the asset name
          * @return a unique asset path to the asset
-         * @throws Exception
+         * @throws PersistenceException
          */
-        private String createUniqueAssetPath(AssetManager assetManager, String destPath, String assetName) throws Exception {
+        private String createUniqueAssetPath(AssetManager assetManager, String destPath, String assetName) throws PersistenceException {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             final String now = sdf.format(new Date());
             String destAssetPath = destPath + "/" + assetName;
@@ -289,7 +284,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             int count = 0;
             while (assetManager.assetExists(destAssetPath)) {
                 if (count > 1000) {
-                    throw new Exception("Unable to generate a unique name after 1000 attempts. Something must be wrong!");
+                    throw new PersistenceException("Unable to generate a unique name after 1000 attempts. Something must be wrong!");
                 }
 
                 if (count == 0) {
@@ -352,60 +347,67 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          * @param asset          the asset to move
          * @param taskProperties the task properties containing the target onApproveMoveTo and onRejectMoveTo paths
          */
-        private void moveAsset(ResourceResolver resourceResolver, AssetManager assetManager, Asset asset, ValueMap taskProperties) throws Exception {
-            final String status = asset.getValueMap().get(REL_PN_DAM_STATUS, String.class);
-            final String conflictResolution = taskProperties.get(PN_CONFLICT_RESOLUTION, defaultConflictResolution);
-            final String onApprovePath = taskProperties.get(PN_ON_APPROVE, String.class);
-            final String onRejectPath = taskProperties.get(PN_ON_REJECT, String.class);
+        @SuppressWarnings("squid:S3776")
+        private void moveAsset(ResourceResolver resourceResolver, AssetManager assetManager, Asset asset, ValueMap taskProperties) {
+            try {
+                final String status = asset.getValueMap().get(REL_PN_DAM_STATUS, String.class);
+                final String conflictResolution = taskProperties.get(PN_CONFLICT_RESOLUTION, defaultConflictResolution);
+                final String onApprovePath = taskProperties.get(PN_ON_APPROVE, String.class);
+                final String onRejectPath = taskProperties.get(PN_ON_REJECT, String.class);
 
-            String destPath = null;
+                String destPath = null;
 
-            if (StringUtils.equals(APPROVED, status)) {
-                destPath = onApprovePath;
-            } else if (StringUtils.equals(REJECTED, status)) {
-                destPath = onRejectPath;
-            }
+                if (StringUtils.equals(APPROVED, status)) {
+                    destPath = onApprovePath;
+                } else if (StringUtils.equals(REJECTED, status)) {
+                    destPath = onRejectPath;
+                }
 
-            if (destPath != null) {
-                if (StringUtils.startsWith(destPath, PATH_CONTENT_DAM)) {
+                if (destPath != null) {
+                    if (StringUtils.startsWith(destPath, PATH_CONTENT_DAM)) {
 
-                    String destAssetPath = destPath + "/" + asset.getName();
-                    final boolean exists = assetManager.assetExists(destAssetPath);
+                        String destAssetPath = destPath + "/" + asset.getName();
+                        final boolean exists = assetManager.assetExists(destAssetPath);
 
-                    if (exists) {
-                        if (StringUtils.equals(asset.getPath(), destAssetPath)) {
-                            log.info("Reviewed asset [ {} ] is already in its final location, so there is nothing to do.", asset.getPath());
-                        } else if (CONFLICT_RESOLUTION_REPLACE.equals(conflictResolution)) {
-                            assetManager.removeAsset(destAssetPath);
-                            resourceResolver.commit();
+                        if (exists) {
+                            if (StringUtils.equals(asset.getPath(), destAssetPath)) {
+                                log.info("Reviewed asset [ {} ] is already in its final location, so there is nothing to do.", asset.getPath());
+                            } else if (CONFLICT_RESOLUTION_REPLACE.equals(conflictResolution)) {
+                                assetManager.removeAsset(destAssetPath);
+                                resourceResolver.commit();
+                                assetManager.moveAsset(asset.getPath(), destAssetPath);
+                                log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                        asset.getPath(), destAssetPath, status);
+                            } else if (CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
+                                destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
+                                assetManager.moveAsset(asset.getPath(), destAssetPath);
+                                log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                        asset.getPath(), destAssetPath, status);
+                            } else if (CONFLICT_RESOLUTION_NEW_VERSION.equals(conflictResolution)) {
+                                log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                        asset.getPath(), destAssetPath, status);
+                                createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
+                            } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
+                                log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                        asset.getPath(), destAssetPath, status);
+                            }
+                        } else {
                             assetManager.moveAsset(asset.getPath(), destAssetPath);
-                            log.info("Moved with replace [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[]{asset.getPath(), destAssetPath, status});
-                        } else if (CONFLICT_RESOLUTION_NEW_ASSET.equals(conflictResolution)) {
-                            destAssetPath = createUniqueAssetPath(assetManager, destPath, asset.getName());
-                            assetManager.moveAsset(asset.getPath(), destAssetPath);
-                            log.info("Moved with unique asset name [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[]{asset.getPath(), destAssetPath, status});
-                        } else if (CONFLICT_RESOLUTION_NEW_VERSION.equals(conflictResolution)) {
-                            log.info("Creating new version of existing asset [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[]{asset.getPath(), destAssetPath, status});
-                            createRevision(resourceResolver, assetManager, assetManager.getAsset(destAssetPath), asset);
-                        } else if (CONFLICT_RESOLUTION_SKIP.equals(conflictResolution)) {
-                            log.info("Skipping with due to existing asset at the same destination [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                    new String[] { asset.getPath(), destAssetPath, status });
+                            log.info("Moved [ {} ] ~> [ {} ] based on approval status [ {} ]",
+                                    asset.getPath(), destAssetPath, status);
                         }
                     } else {
-                        assetManager.moveAsset(asset.getPath(), destAssetPath);
-                        log.info("Moved [ {} ] ~> [ {} ] based on approval status [ {} ]",
-                                new String[]{asset.getPath(), destAssetPath, status});
+                        log.warn("Request to move reviewed asset to a non DAM Asset path [ {} ]", destPath);
                     }
-                } else {
-                    log.warn("Request to move reviewed asset to a non DAM Asset path [ {} ]", destPath);
                 }
-            }
 
-            if (resourceResolver.hasChanges()) {
-                resourceResolver.commit();
+                if (resourceResolver.hasChanges()) {
+                    resourceResolver.commit();
+                }
+            } catch (PersistenceException e) {
+                log.error("Could not move reviewed asset [ {} ]", asset.getPath(), e);
+                resourceResolver.revert();
+                resourceResolver.refresh();
             }
         }
     }

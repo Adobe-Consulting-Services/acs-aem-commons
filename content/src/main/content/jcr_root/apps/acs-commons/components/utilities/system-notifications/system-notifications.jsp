@@ -6,8 +6,8 @@
 %><%@taglib prefix="ui" uri="http://www.adobe.com/taglibs/granite/ui/1.0" %><%
 %><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
     
-    // 2015-10-22 03:03
-    final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+    // 2015-10-22 03:03:00
+    final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
     I18n i18n = new I18n(slingRequest);

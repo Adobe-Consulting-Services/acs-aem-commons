@@ -51,12 +51,9 @@ public final class GenericListImpl implements GenericList {
             this.props = props;
         }
 
+        @Override
         public String getTitle() {
             return title;
-        }
-
-        public String getValue() {
-            return value;
         }
 
         @Override
@@ -72,25 +69,30 @@ public final class GenericListImpl implements GenericList {
                 return getTitle();
             }
 
-            String title = null;
+            String localizedTitle = null;
 
             // try property name like jcr:title.de_ch 
             if (locale.getCountry().length() > 0) {
-                title = getLocalizedTitle(locale);
+                localizedTitle = getLocalizedTitle(locale);
             }
             // then just jcr:title.de
-            if (title == null) {
-                title = getLocalizedTitle(new Locale(language));
+            if (localizedTitle == null) {
+                localizedTitle = getLocalizedTitle(new Locale(language));
             }
-            if (title == null) {
+            if (localizedTitle == null) {
                 return getTitle();
             } else {
-                return title;
+                return localizedTitle;
             }
         }
         
         private String getLocalizedTitle(Locale locale) {
             return props.get(TITLE_PREFIX + locale.toString().toLowerCase(), String.class);
+        }
+
+        @Override
+        public String getValue() {
+            return value;
         }
 
     }

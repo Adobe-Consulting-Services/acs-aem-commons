@@ -31,5 +31,6 @@ public interface ResourceRunnable {
      * @param resource the resource
      * @throws Exception
      */
+    @SuppressWarnings("squid:S00112")
     void run(Resource resource) throws Exception;
 }

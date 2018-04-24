@@ -24,11 +24,19 @@
     <allow2
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-package-replication-status-event-service"
-            rep:privileges="{Name}[jcr:read,rep:write]"/>
+            rep:privileges="{Name}[jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl]"/>
     <allow3
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-ensure-service-user-service"
             rep:privileges="{Name}[jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl]"/>
+    <allow4
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-automatic-package-replicator-service"
+            rep:privileges="{Name}[jcr:read]"/>
+    <allow5
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="acs-commons-on-deploy-scripts-service"
+            rep:privileges="{Name}[jcr:read]"/>
     <!--
     <allow4
             jcr:primaryType="rep:GrantACE"

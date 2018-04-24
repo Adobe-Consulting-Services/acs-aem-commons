@@ -24,6 +24,7 @@ import aQute.bnd.annotation.ConsumerType;
  * to operate via side-effects.
  *
  * @param <T> the type of the input to the operation
+ * @deprecated Use CheckedConsumer instead
  */
 @ConsumerType
 @Deprecated
@@ -50,7 +51,7 @@ public abstract class Consumer<T> implements CheckedConsumer<T> {
 
     private static class Adapter<T> extends Consumer<T> {
 
-        final private CheckedConsumer<T> delegate;
+        private final CheckedConsumer<T> delegate;
 
         public Adapter(CheckedConsumer<T> delegate) {
             this.delegate = delegate;

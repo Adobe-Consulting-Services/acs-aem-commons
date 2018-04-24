@@ -57,9 +57,8 @@ public class SyntheticChildAsPropertyResource extends SyntheticResource {
     @Override
     @SuppressWarnings("unchecked")
     public final <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        if (type == ValueMap.class) {
-            return (AdapterType) this.data;
-        } else if (type == ModifiableValueMap.class) {
+        if (type == ValueMap.class
+                || type == ModifiableValueMap.class) {
             return (AdapterType) this.data;
         }
 

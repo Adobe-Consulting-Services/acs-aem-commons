@@ -52,7 +52,7 @@ public interface ReplicationStatusManager {
      * <p>
      * Pages and Assets return their respective content resource while any other path returns itself
      *
-     * @param path 			   The path to retrieve the resource for.
+     * @param path             The path to retrieve the resource for.
      * @param resourceResolver The resource resolver must have access to read the specified path.
      */
     Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver);
@@ -64,8 +64,8 @@ public interface ReplicationStatusManager {
      * updates. All other resources will be quietly skipped.
      *
      * @param resourceResolver The resource resolver must have access to modify all of target resources.
-     * @param replicatedBy     name to set the last replicated property to.
-     * @param replicatedAt     date to set the last replicated date to.
+     * @param replicatedBy     name to set the last replicated property to. If value is null then a value of "Unknown" is used.
+     * @param replicatedAt     date to set the last replicated date to. If value is null then the current time is used.
      * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
      *                         cq:ReplicationStatus mixin when possible)
      * @param paths            The paths to update.
@@ -82,8 +82,8 @@ public interface ReplicationStatusManager {
      * updates. All other resources will be quietly skipped.
      *
      * @param resourceResolver The resource resolver must have access to modify all of target resources.
-     * @param replicatedBy     name to set the last replicated property to.
-     * @param replicatedAt     date to set the last replicated date to.
+     * @param replicatedBy     name to set the last replicated property to. If value is null then a value of "Unknown" is used.
+     * @param replicatedAt     date to set the last replicated date to.  If value is null then the current time is used.
      * @param status           ACTIVATE | DEACTIVATE | CLEAR (Clear removes all replication properties and the
      *                         cq:ReplicationStatus mixin when possible)
      * @param resources        The resources to update.

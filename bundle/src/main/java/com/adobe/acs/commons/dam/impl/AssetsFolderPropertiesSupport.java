@@ -21,7 +21,12 @@
 package com.adobe.acs.commons.dam.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -38,7 +43,12 @@ import org.apache.sling.servlets.post.SlingPostProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
@@ -148,6 +158,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
      * @param request the request
      * @return true if Assets Folder Properties Support should process this request.
      */
+    @SuppressWarnings("squid:S3923")
     protected boolean accepts(SlingHttpServletRequest request) {
         if (!StringUtils.equalsIgnoreCase(POST_METHOD, request.getMethod())) {
             // Only POST methods are processed
@@ -170,7 +181,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
 
     /**
      * This method handles the READING of the properties so that granite UI widgets can display stored data in the form.
-     * This needs to be included AFTER 	/apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties
+     * This needs to be included AFTER /apps/dam/gui/content/assets/foldersharewizard/jcr:content/body/items/form/items/wizard/items/settingStep/items/fixedColumns/items/fixedColumn2/items/tabs/items/tab1/items/folderproperties
      * such that it can augment the Property map constructed by that OOTB script.
      *
      * Note that this exposes a value map for the [sling:*Folder] node, and NOT the [sling:*Folder]/jcr:content, so properties must be prefixed with jcr:content/...

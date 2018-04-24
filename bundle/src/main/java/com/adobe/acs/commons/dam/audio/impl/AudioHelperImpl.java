@@ -59,31 +59,34 @@ public class AudioHelperImpl implements AudioHelper {
     protected final void activate(ComponentContext ctx) {
         String slingHome = ctx.getBundleContext().getProperty("sling.home");
         workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
-        if (!workingDir.exists()) {
-            if (!workingDir.mkdirs()) {
-                throw new IllegalStateException("Could not create " + workingDir.getPath());
-            }
+        if (!workingDir.exists() && !workingDir.mkdirs()) {
+            throw new IllegalStateException("Could not create " + workingDir.getPath());
         }
     }
 
     @Override
+    @SuppressWarnings("squid:S2095")
     public <A, R> R process(Asset asset, ResourceResolver resourceResolver, A args, AudioProcessor<A, R> audioProcessor)
             throws AudioException {
         File tmpDir = null;
         File tmpWorkingDir = null;
-        FileOutputStream fos = null;
-        InputStream is = null;
+
         try {
             // creating temp directory
             tmpDir = FFMpegAudioUtils.createTempDir(null);
 
             // creating temp working directory for ffmpeg
             tmpWorkingDir = FFMpegAudioUtils.createTempDir(workingDir);
+        } catch (IOException e) {
+            throw new AudioException(e);
+        }
 
-            // streaming file to temp directory
-            final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
-            fos = new FileOutputStream(tmpFile);
-            is = asset.getOriginal().getStream();
+        // streaming file to temp directory
+        final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
+
+        try (FileOutputStream fos = new FileOutputStream(tmpFile);
+             InputStream is = asset.getOriginal().getStream();) {
+
             IOUtils.copy(is, fos);
 
             return audioProcessor.processAudio(asset, resourceResolver, tmpFile, locator, tmpWorkingDir, args);
@@ -94,8 +97,6 @@ public class AudioHelperImpl implements AudioHelper {
             log.error(e.getMessage(), e);
             return null;
         } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(fos);
             try {
                 // cleaning up temp directory
                 if (tmpDir != null) {

@@ -180,7 +180,7 @@
 
             function postProcess(data){
                 _.each(mNames, function($multifield, mName){
-                    cmf.buildMultiField(data[mName], $multifield, mName);
+                    cmf.buildMultiField(cmf.nestedPluck(data,mName), $multifield, mName);
                 });
 
                 $document.trigger("touchui-composite-multifield-nodestore-ready", mNames);
@@ -207,18 +207,12 @@
                 $fields = $(multifield).children().children(cmf.CFFW);
 
                 $fields.each(function (j, field) {
-                    fillValue($form, $(multifield).data("name"), $(field).find("[name]"), (counter + 1));
+                    fillValue($form, $(multifield).data("name"), $(field).find("[name]").not("[name*='@']"), (counter + 1));
                 });
             });
 
             function fillValue($form, fieldSetName, $field, counter){
-                var name, value;
-                // for userpicker and richtext $field length is 2, excluding richtext
-                if($field.length > 1 && !$field.parent().hasClass("richtext-container")) {
-                    name = $($field[1]).attr("name");
-                } else {
-                    name = $field.attr("name");
-                }
+                var name = $field.attr("name"), value;
 
                 if (!name) {
                     return;

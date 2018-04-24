@@ -92,7 +92,7 @@ import java.util.regex.Pattern;
                     + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
             name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
             value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN
-		),
+        ),
         @Property(
                 label = "Extension",
                 description = "",
@@ -163,7 +163,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
 
-    private static RenditionPatternPicker renditionPatternPicker =
+    private RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
 
     /**
@@ -234,7 +234,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         response.setContentType(mimeType);
 
         if (progressiveJpeg) {
-            ProgressiveJPEG.write(layer, quality, response.getOutputStream());
+            ProgressiveJpeg.write(layer, quality, response.getOutputStream());
         } else {
             layer.write(mimeType, quality, response.getOutputStream());
         }
@@ -259,7 +259,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
             if (imageTransformer == null) {
-                log.warn("Skipping transform. Missing ImageTransformer for type: {}");
+                log.warn("Skipping transform. Missing ImageTransformer for type: {}", type);
                 continue;
             }
 
@@ -372,7 +372,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 return new Image(resource);
             }
         } else {
-        	if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
+            if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
                     && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
                 // Is a UGC image
                 return new SocialImageImpl(resource, NAME_IMAGE);
@@ -457,7 +457,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final int defaultQuality = 82;
         final int maxQuality = 100;
         final int minQuality = 0;
-        final int maxQualityGIF = 255;
+        final int maxQualityGif = 255;
         final double oneHundred = 100D;
 
         log.debug("Transforming with [ quality ]");
@@ -471,7 +471,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         quality = quality / oneHundred;
 
         if (StringUtils.equals("image/gif", mimeType)) {
-            quality = quality * maxQualityGIF;
+            quality = quality * maxQualityGif;
         }
 
         return quality;
@@ -500,11 +500,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     protected final void activate(final Map<String, String> properties) throws Exception {
         final String regex = PropertiesUtil.toString(properties.get(PROP_ASSET_RENDITION_PICKER_REGEX),
                 DEFAULT_ASSET_RENDITION_PICKER_REGEX);
-	    final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
-			    DEFAULT_FILENAME_PATTERN);
-	    if(StringUtils.isNotEmpty(fileNameRegex)) {
-		    lastSuffixPattern = Pattern.compile(fileNameRegex);
-	    }
+        final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
+                DEFAULT_FILENAME_PATTERN);
+        if(StringUtils.isNotEmpty(fileNameRegex)) {
+            lastSuffixPattern = Pattern.compile(fileNameRegex);
+        }
         try {
             renditionPatternPicker = new RenditionPatternPicker(regex);
             log.info("Asset Rendition Pattern Picker: {}", regex);

@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>3.9.1-SNAPSHOT</version>
+    <version>3.15.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -25,10 +25,12 @@
         <name>Adobe</name>
         <url>http://www.adobe.com/</url>
     </organization>
-
-    <prerequisites>
-        <maven>3.0.2</maven>
-    </prerequisites>
+    <scm>
+        <connection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</connection>
+        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
+        <url>https://github.com/Adobe-Consulting-Services/acs-aem-commons/tree/master</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -36,10 +38,13 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
+        <crx.contextRoot />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
+        <sl4fj.version>1.7.6</sl4fj.version>
+        <scr.plugin.version>1.17.0</scr.plugin.version>
     </properties>
 
     <build>
@@ -48,12 +53,12 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.17.0</version>
+                    <version>${scr.plugin.version}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.slf4j</groupId>
                             <artifactId>slf4j-simple</artifactId>
-                            <version>1.6.4</version>
+                            <version>${sl4fj.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -96,65 +101,6 @@
                     <version>0.0.24</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.6.201602180812</version>
-                    <executions>
-                        <execution>
-                            <id>default-prepare-agent</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.5</version>
-                    <configuration>
-                        <linkXRef>false</linkXRef>
-                        <rulesets>
-                            <ruleset>acs/pmd/rules.xml</ruleset>
-                        </rulesets>
-                        <targetJdk>1.6</targetJdk>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>coding-standards</artifactId>
-                            <version>0.0.1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>3.0.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.12.1</version>
-                    <configuration>
-                        <linkXRef>false</linkXRef>
-                        <configLocation>acs/checkstyle/checks.xml</configLocation>
-                        <includeResources>false</includeResources>
-                        <includeTestResources>false</includeTestResources>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>checkstyle-osgi-checks</artifactId>
-                            <version>0.0.3</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.adobe.acs</groupId>
-                            <artifactId>coding-standards</artifactId>
-                            <version>0.0.1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.9</version>
                     <configuration>
@@ -190,6 +136,11 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.20.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.17</version>
                 </plugin>
@@ -210,14 +161,50 @@
                     <artifactId>coveralls-maven-plugin</artifactId>
                     <version>4.3.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.3.9</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>*:*:*:*:compile</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
-
-    <scm>
-        <developerConnection>scm:git:git@github.com:Adobe-Consulting-Services/acs-aem-commons.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
@@ -248,13 +235,19 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.6.4</version>
+                <version>${sl4fj.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.6.4</version>
+                <version>${sl4fj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${sl4fj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -407,118 +400,6 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>analysis</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-pmd-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>pmd</goal>
-                                    <goal>cpd</goal>
-                                    <!-- build will fail on warnings -->
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>javadoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>findbugs-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                    <!--
-                                    See https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/28
-                                    <goal>check</goal>
-                                    -->
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>analysisCI</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-pmd-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>pmd</goal>
-                                    <goal>cpd</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>javadoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>findbugs-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>findbugs</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <!-- profile for settings when running on Java8 -->
         <profile>
             <id>java8</id>
@@ -534,6 +415,82 @@
                         </configuration>
                     </plugin>
                 </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <jacoco.version>0.8.1</jacoco.version>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>*</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jacoco-instrument</id>
+                                <goals>
+                                    <goal>instrument</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-restore-instrumented-classes</id>
+                                <goals>
+                                    <goal>restore-instrumented-classes</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.felix</groupId>
+                            <artifactId>maven-scr-plugin</artifactId>
+                            <version>${scr.plugin.version}</version>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>slf4j-simple</artifactId>
+                                    <version>1.6.4</version>
+                                </dependency>
+                                <dependency>
+                                    <groupId>org.jacoco</groupId>
+                                    <artifactId>org.jacoco.agent</artifactId>
+                                    <version>${jacoco.version}</version>
+                                    <classifier>runtime</classifier>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>animal-sniffer-maven-plugin</artifactId>
+                            <configuration>
+                                <skip>true</skip>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
             </build>
         </profile>
     </profiles>

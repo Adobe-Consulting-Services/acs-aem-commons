@@ -36,14 +36,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.wcm.AuthorUIHelper;
 import com.day.cq.commons.Externalizer;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
@@ -54,8 +51,7 @@ import com.day.cq.workflow.metadata.SimpleMetaDataMap;
  * Should be called AbstractRenditionModifyingProcessTest, but that name implies
  * an abstract class.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DamUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SendTemplatedEmailProcessTest {
 
     @Mock
@@ -101,9 +97,6 @@ public class SendTemplatedEmailProcessTest {
 
         when(workflowSession.getSession()).thenReturn(session);
         when(resourceResolverFactory.getResourceResolver(any(Map.class))).thenReturn(resourceResolver);
-
-        // Mock DamUtil class
-        PowerMockito.mockStatic(DamUtil.class);
 
         GROUP_MEMBERS = new String[] { "user1@adobe.com", "user2@adobe.com" };
 
@@ -161,9 +154,7 @@ public class SendTemplatedEmailProcessTest {
         when(resourceResolver.getResource(DAM_PAYLOAD_PATH)).thenReturn(payloadRes);
         when(payloadRes.getPath()).thenReturn(DAM_PAYLOAD_PATH);
         when(payloadRes.getResourceResolver()).thenReturn(resourceResolver);
-
-        // mock DamUtil
-        when(DamUtil.isAsset(payloadRes)).thenReturn(true);
+        when(payloadRes.getResourceType()).thenReturn("dam:Asset");
 
         // mock authorUI and externalizer
         when(authorUIHelper.generateEditAssetLink(DAM_PAYLOAD_PATH, true, resourceResolver)).thenReturn(editAssetUrl);
@@ -207,9 +198,6 @@ public class SendTemplatedEmailProcessTest {
         when(resourceResolver.getResource(WCM_PAYLOAD_PATH)).thenReturn(payloadRes);
         when(payloadRes.getPath()).thenReturn(WCM_PAYLOAD_PATH);
         when(payloadRes.getResourceResolver()).thenReturn(resourceResolver);
-
-        // mock DamUtil
-        when(DamUtil.isAsset(payloadRes)).thenReturn(false);
 
         // mock authorUI and externalizer
         when(authorUIHelper.generateEditPageLink(WCM_PAYLOAD_PATH, true, resourceResolver)).thenReturn(

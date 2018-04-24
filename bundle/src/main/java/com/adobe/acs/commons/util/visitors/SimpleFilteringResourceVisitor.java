@@ -15,31 +15,28 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import org.apache.jackrabbit.spi.commons.iterator.Iterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.sling.api.resource.Resource;
 
 public class SimpleFilteringResourceVisitor {
 
-    public static enum TraversalMode {
+    public enum TraversalMode {
         DEPTH, BREADTH
-    };
+    }
+
     TraversalMode mode = TraversalMode.BREADTH;
     BiConsumer<Map.Entry<String, Object>, Integer> propertyVisitor = null;
     BiConsumer<Resource, Integer> resourceVisitor = null;
     BiConsumer<Resource, Integer> leafVisitor = null;
-    Queue<Resource> currentLevel = new LinkedList<>();
-    Queue<Resource> nextLevel = new LinkedList<>();
+    LinkedList<Resource> stack = new LinkedList<>();
     Function<String, Boolean> propertyFilter = s -> true;
     Function<Resource, Boolean> traversalFilter = r -> true;
-
-    public SimpleFilteringResourceVisitor() {
-    }
 
     public void setPropertyFilter(Function<String, Boolean> filter) {
         propertyFilter = filter;
@@ -69,64 +66,50 @@ public class SimpleFilteringResourceVisitor {
         mode = TraversalMode.DEPTH;
     }
 
-    public void accept(final Resource res) {
-        currentLevel.clear();
-        nextLevel.clear();
-        accept(res, 0);
-    }
+    public void accept(final Resource head) {
+        if (head == null) {
+            return;
+        }
+        
+        stack.clear();
+        stack.add(head);
 
-    protected void accept(final Resource res, int level) {
-        if (res != null) {
+        int headLevel = getDepth(head.getPath());
+
+        while (!stack.isEmpty()) {
+            Resource res = stack.poll();
+
+            int level = getDepth(res.getPath()) - headLevel;
+
             if (propertyVisitor != null) {
                 res.getValueMap().entrySet().stream()
                         .filter(e -> propertyFilter.apply(e.getKey()))
                         .forEach(entry -> propertyVisitor.accept(entry, level));
             }
-            if (mode == TraversalMode.DEPTH) {
-                if (traversalFilter.apply(res)) {
-                    this.traverseChildren(res.listChildren(), level);
-                    if (resourceVisitor != null) {
-                        resourceVisitor.accept(res, level);
-                    }
-                } else {
-                    if (leafVisitor != null) {
-                        leafVisitor.accept(res, level);
-                    }
-                }
-            } else {
-                if (traversalFilter.apply(res)) {
-                    if (resourceVisitor != null) {
-                        resourceVisitor.accept(res, level);
-                    }
-                    this.traverseChildren(res.listChildren(), level);
-                } else {
-                    if (leafVisitor != null) {
-                        leafVisitor.accept(res, level);
-                    }
-                    this.traverseChildren(Iterators.empty(), level);
-                }
-            }
 
+            if (traversalFilter == null || traversalFilter.apply(res)) {
+                if (resourceVisitor != null) {
+                    resourceVisitor.accept(res, level);
+                }
+                switch (mode) {
+                    case BREADTH:
+                        stack.addAll(toList(res.getChildren()));
+                        break;
+                    default:
+                        stack.addAll(0, toList(res.getChildren()));
+                }
+            } else if (leafVisitor != null) {
+                leafVisitor.accept(res, level);
+            }
         }
     }
 
-    protected void traverseChildren(final Iterator<Resource> children, int level) {
-        if (mode == TraversalMode.DEPTH) {
-            while (children.hasNext()) {
-                final Resource child = children.next();
-                accept(child, level+1);
-            }
-        } else {
-            children.forEachRemaining(nextLevel::add);
-            if (currentLevel.isEmpty()) {
-                currentLevel.addAll(nextLevel);
-                nextLevel.clear();
-                level++;
-            }
-            Resource res = currentLevel.poll();
-            if (res != null) {
-                accept(res, level);
-            }
-        }
+    public static <T> List<T> toList(final Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .collect(Collectors.toList());
     }
+    
+    public static int getDepth(String path) {
+        return (int) path.chars().filter(c -> c == '/').count() - 1;
+    }    
 }

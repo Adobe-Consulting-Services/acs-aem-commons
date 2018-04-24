@@ -24,6 +24,8 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.JSONGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
+import com.google.gson.stream.JsonWriter;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -31,8 +33,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +53,11 @@ import java.util.Set;
     @Property(
             name="sling.servlet.paths",
             value= JSONDumpServlet.SERVLET_PATH
-    ),
+            ),
     @Property(
-        name="sling.auth.requirements",
-        value= "-" + JSONDumpServlet.SERVLET_PATH
-    )
+            name="sling.auth.requirements",
+            value= "-" + JSONDumpServlet.SERVLET_PATH
+            )
 })
 @Service
 public class JSONDumpServlet extends BaseChecksumServlet {
@@ -69,7 +69,7 @@ public class JSONDumpServlet extends BaseChecksumServlet {
 
     @Override
     public final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-            ServletException, IOException {
+    ServletException, IOException {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
@@ -79,7 +79,7 @@ public class JSONDumpServlet extends BaseChecksumServlet {
     }
 
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
-            ServletException, IOException {
+    ServletException, IOException {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
@@ -90,7 +90,7 @@ public class JSONDumpServlet extends BaseChecksumServlet {
 
     private void handleRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException,
-        RepositoryException, ServletException {
+            RepositoryException, ServletException {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -101,11 +101,11 @@ public class JSONDumpServlet extends BaseChecksumServlet {
         String filename = df.format(today);
 
         response.setHeader("Content-Disposition", "filename=jcr-checksum-"
-            + filename + ".json");
+                + filename + ".json");
 
         String optionsName = request.getParameter(ServletConstants.OPTIONS_NAME);
         ChecksumGeneratorOptions options =
-            ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
+                ChecksumGeneratorOptionsFactory.getOptions(request, optionsName);
 
         if (log.isDebugEnabled()) {
             log.debug(options.toString());
@@ -117,22 +117,23 @@ public class JSONDumpServlet extends BaseChecksumServlet {
             try {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print(
-                    "ERROR: At least one path must be specified");
+                        "ERROR: At least one path must be specified");
             } catch (IOException ioe) {
                 throw ioe;
             }
-        }
+        } else {
+            Session session = request.getResourceResolver().adaptTo(Session.class);
 
-        Session session = request.getResourceResolver().adaptTo(Session.class);
+            JsonWriter jsonWriter = new JsonWriter(response.getWriter());
 
-        JSONWriter jsonWriter = new JSONWriter(response.getWriter());
-
-        try {
-            JSONGenerator.generateJSON(session, paths, options, jsonWriter);
-        } catch (RepositoryException e) {
-            throw new ServletException("Error accessing repository", e);
-        } catch (JSONException e) {
-            throw new ServletException("Unable to generate json", e);
+            try {
+                JSONGenerator.generateJSON(session, paths, options, jsonWriter);
+                jsonWriter.close();
+            } catch (RepositoryException e) {
+                throw new ServletException("Error accessing repository", e);
+            } catch (IOException e) {
+                throw new ServletException("Unable to generate json", e);
+            }
         }
     }
 }

@@ -123,7 +123,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
      *
      * @param path the path to search for
      */
-    void invalidateReferences(String path){
+    void invalidateReferences(String path) {
         ResourceResolver adminResolver = null;
         try {
             adminResolver = resolverFactory.getServiceResourceResolver(null);
@@ -137,7 +137,9 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
         } catch (Exception e){
             log.debug("failed to invalidate references of {}", path);
         } finally {
-            if(adminResolver != null) adminResolver.close();
+            if (adminResolver != null) {
+                adminResolver.close();
+            }
         }
     }
 }

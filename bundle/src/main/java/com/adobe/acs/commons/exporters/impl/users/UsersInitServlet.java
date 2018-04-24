@@ -25,11 +25,11 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -51,6 +51,8 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 )
 public class UsersInitServlet extends SlingSafeMethodsServlet {
     private static final String QUERY = "SELECT * FROM [rep:Group] WHERE ISDESCENDANTNODE([/home/groups]) ORDER BY [rep:principalName]";
+    private static final String KEY_TEXT = "text";
+    private static final String KEY_VALUE = "value";
 
     /**
      * Returns a JSON containing the options available to the form, and any prior saved data that should pre-populate the form.
@@ -63,24 +65,22 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        final JSONObject json = new JSONObject();
-        final JSONObject existing = new JSONObject();
-        final JSONObject options = new JSONObject();
+        final JsonObject json = new JsonObject();
+        final JsonObject existing = new JsonObject();
+        final JsonObject options = new JsonObject();
 
         try {
-            options.put(GROUPS, getGroupOptions(request.getResourceResolver()));
-            options.put(GROUP_FILTERS, getGroupFilterOptions());
+            options.add(GROUPS, getGroupOptions(request.getResourceResolver()));
+            options.add(GROUP_FILTERS, getGroupFilterOptions());
 
             final Parameters parameters = new Parameters(request.getResource());
-            existing.put(GROUP_FILTER, parameters.getGroupFilter());
-            existing.put(GROUPS, Arrays.asList(parameters.getGroups()));
-            existing.put(CUSTOM_PROPERTIES, parameters.getCustomPropertiesAsJSON());
+            existing.addProperty(GROUP_FILTER, parameters.getGroupFilter());
+            existing.add(GROUPS, new Gson().toJsonTree(Arrays.asList(parameters.getGroups())));
+            existing.add(CUSTOM_PROPERTIES, parameters.getCustomPropertiesAsJSON());
 
-            json.put("options", options);
-            json.put("form", existing);
+            json.add("options", options);
+            json.add("form", existing);
 
-        } catch (JSONException e) {
-            throw new ServletException(e);
         } catch (RepositoryException e) {
             throw new ServletException(e);
         }
@@ -95,15 +95,15 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
      * @return a JSON Array of all the user group principals name that the resourceResolver can read.
      * @throws RepositoryException
      */
-    private JSONArray getGroupOptions(ResourceResolver resourceResolver) throws RepositoryException {
-        final JSONArray jsonArray = new JSONArray();
+    private JsonArray getGroupOptions(ResourceResolver resourceResolver) throws RepositoryException {
+        final JsonArray jsonArray = new JsonArray();
         final QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
         final Query query = queryManager.createQuery(QUERY, Query.JCR_SQL2);
         final NodeIterator nodeIter = query.execute().getNodes();
 
         while (nodeIter.hasNext()) {
             Resource resource = resourceResolver.getResource(nodeIter.nextNode().getPath());
-            jsonArray.put(resource.getValueMap().get("rep:principalName", "Unknown"));
+            jsonArray.add(new JsonPrimitive(resource.getValueMap().get("rep:principalName", "Unknown")));
         }
 
         return jsonArray;
@@ -114,25 +114,24 @@ public class UsersInitServlet extends SlingSafeMethodsServlet {
      * @return a JSON Array of the available group filter options.
      * @throws JSONException
      */
-    private JSONArray getGroupFilterOptions() throws JSONException {
-        JSONArray jsonArray = new JSONArray();
+    private JsonArray getGroupFilterOptions() {
+        JsonObject both = new JsonObject();
+        both.addProperty(KEY_TEXT, "Direct or Indirect Membership");
+        both.addProperty(KEY_VALUE, GROUP_FILTER_BOTH);
 
-        JSONObject both = new JSONObject();
-        both.put("text", "Direct or Indirect Membership");
-        both.put("value", GROUP_FILTER_BOTH);
-
-        JSONObject direct = new JSONObject();
-        direct.put("text", "Direct Membership");
-        direct.put("value", GROUP_FILTER_DIRECT);
+        JsonObject direct = new JsonObject();
+        direct.addProperty(KEY_TEXT, "Direct Membership");
+        direct.addProperty(KEY_VALUE, GROUP_FILTER_DIRECT);
 
 
-        JSONObject indirect = new JSONObject();
-        indirect.put("text", "Indirect Membership");
-        indirect.put("value", GROUP_FILTER_INDIRECT);
+        JsonObject indirect = new JsonObject();
+        indirect.addProperty(KEY_TEXT, "Indirect Membership");
+        indirect.addProperty(KEY_VALUE, GROUP_FILTER_INDIRECT);
 
-        jsonArray.put(direct);
-        jsonArray.put(indirect);
-        jsonArray.put(both);
+        JsonArray jsonArray = new JsonArray();
+        jsonArray.add(direct);
+        jsonArray.add(indirect);
+        jsonArray.add(both);
 
         return jsonArray;
     }

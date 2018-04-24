@@ -55,8 +55,8 @@ public class HelpOperationImpl extends AbstractOperation {
     public boolean accepts(final SlingHttpServletRequest request,
                            final Command cmd) {
 
-        return StringUtils.equalsIgnoreCase(CMD, cmd.getOp()) ||
-                StringUtils.equalsIgnoreCase(CMD_ALIAS, cmd.getOp());
+        return StringUtils.equalsIgnoreCase(CMD, cmd.getOp())
+                || StringUtils.equalsIgnoreCase(CMD_ALIAS, cmd.getOp());
     }
 
     @Override

@@ -19,8 +19,14 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
@@ -34,7 +40,13 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.
@@ -182,7 +194,7 @@ public class JsonEventLogger implements EventHandler {
      * @return {@code val} if not handled, or return a converted JSONObject, JSONArray, or String
      * @throws JSONException
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "squid:S3776"})
     protected static Object convertValue(Object val) throws JSONException {
         if (val.getClass().isArray()) {
             Object[] vals = (Object[]) val;
@@ -255,6 +267,7 @@ public class JsonEventLogger implements EventHandler {
     //
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected void activate(ComponentContext ctx) {
         log.trace("[activate] entered activate method.");
         Dictionary<?, ?> props = ctx.getProperties();
@@ -299,14 +312,14 @@ public class JsonEventLogger implements EventHandler {
 
     @Override
     public String toString() {
-        return "EventLogger{" +
-                "valid=" + valid +
-                ", topics=" + Arrays.toString(topics) +
-                ", filter='" + filter + '\'' +
-                ", category='" + category + '\'' +
-                ", level='" + level + '\'' +
-                ", enabled=" + isLoggerEnabled() +
-                '}';
+        return "EventLogger{"
+                + "valid=" + valid
+                + ", topics=" + Arrays.toString(topics)
+                + ", filter='" + filter + '\''
+                + ", category='" + category + '\''
+                + ", level='" + level + '\''
+                + ", enabled=" + isLoggerEnabled()
+                + '}';
     }
 
 

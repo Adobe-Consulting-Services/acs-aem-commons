@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BrandPortalAgentFilter implements AgentFilter {
@@ -50,14 +51,14 @@ public class BrandPortalAgentFilter implements AgentFilter {
 
         for (final Resource config : brandPortalConfigs) {
             if (log.isDebugEnabled()) {
-                log.debug("Checking Agent [ {} ] against Brand Portal cloud service config [ {} ] for property [ {} ]", new String[]{agent.getId(), config.getPath(), PROP_TENTANT_URL});
+                log.debug("Checking Agent [ {} ] against Brand Portal cloud service config [ {} ] for property [ {} ]", agent.getId(), config.getPath(), PROP_TENTANT_URL);
             }
 
             final ValueMap properties = config.getValueMap();
-            final String tenantURL = StringUtils.stripToNull(properties.get(PROP_TENTANT_URL, String.class));
+            final String tenantUrl = StringUtils.stripToNull(properties.get(PROP_TENTANT_URL, String.class));
 
-            if (StringUtils.isNotBlank(tenantURL)) {
-                boolean included = StringUtils.startsWith(transportURI, tenantURL + "/");
+            if (StringUtils.isNotBlank(tenantUrl)) {
+                boolean included = StringUtils.startsWith(transportURI, tenantUrl + "/");
 
                 if (included) {
                     log.debug("Including replication agent [ {} ]", agent.getId());
@@ -69,9 +70,10 @@ public class BrandPortalAgentFilter implements AgentFilter {
         return false;
     }
 
+    @SuppressWarnings("squid:S3776")
     protected List<Resource> getBrandPortalConfigs(Resource content) {
         if (content == null) {
-            return null;
+            return Collections.emptyList();
         } else if (JcrConstants.JCR_CONTENT.equals(content.getName())) {
             content = content.getParent();
         }
@@ -84,7 +86,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
             String[] configs = properties.get(PROP_MP_CONFIG, new String[]{});
             if (ArrayUtils.isNotEmpty(configs)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resolved Brand Portal configs [ {}@{} -> {} ]", new String[]{content.getPath(), PROP_MP_CONFIG, StringUtils.join(configs, ",")});
+                    log.debug("Resolved Brand Portal configs [ {}@{} -> {} ]", content.getPath(), PROP_MP_CONFIG, StringUtils.join(configs, ","));
                 }
 
                 for (final String config : configs) {

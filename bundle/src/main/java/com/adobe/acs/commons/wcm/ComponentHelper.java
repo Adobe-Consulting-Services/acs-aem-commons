@@ -29,6 +29,7 @@ import com.adobe.acs.commons.util.ModeUtil;
 import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
+@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public interface ComponentHelper {
     /**
      * Checks if Page equals in WCM Mode DESIGN.
@@ -210,6 +211,7 @@ public interface ComponentHelper {
      */
     String getDDEditBlock(SlingHttpServletRequest request, String name,
                                         ComponentEditType.Type editType, boolean... isConfigured);
+
     /**
      * Get the edit icon HTML img tag (&gt;img ...&lt;) for the specified
      * EditType

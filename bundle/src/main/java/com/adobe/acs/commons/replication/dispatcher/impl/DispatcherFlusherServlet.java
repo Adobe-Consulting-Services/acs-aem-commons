@@ -78,6 +78,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
 
     @Override
+    @SuppressWarnings("squid:S3776")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         final Resource resource = request.getResource();
