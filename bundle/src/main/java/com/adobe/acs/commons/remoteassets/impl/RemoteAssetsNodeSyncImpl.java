@@ -139,7 +139,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Grab JSON from the provided path and sync to the JCR.
+     * Retrieve or create a node in the JCR.
      *
      * @param nextPath String
      * @param primaryType String
@@ -219,7 +219,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Handler for when the object is an instance of {@link JsonObject}.
+     * Handler for when a JSON element is an Object, representing a resource.
      *
      * @param key String
      * @param parentResource Resource
@@ -254,7 +254,38 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Handler for when the object is an instance of {@link JSONArray}.
+     * Handler for when a JSON element represents a resource property.
+     *
+     * @param key String
+     * @param json JsonObject
+     * @param resource Resource
+     * @throws RepositoryException exception
+     */
+    private void setNodeProperty(final ResourceResolver remoteAssetsResolver, final String key, final JsonObject json, final Resource resource) throws RepositoryException {
+        try {
+            JsonElement value = json.get(key);
+
+            if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
+                setNodeJcrDataProperty(remoteAssetsResolver, resource, json.getAsJsonPrimitive(JcrConstants.JCR_LASTMODIFIED).getAsString());
+            } else if (key.startsWith(":")) {
+                // Skip binary properties, since they do not come across in JSON
+                return;
+            } else if (PROTECTED_PROPERTIES.contains(key)) {
+                // Skipping due to the property being unmodifiable.
+                return;
+            } else if (resource.getValueMap().get(key) != null && resource.getValueMap().get(key, String.class).equals(value.getAsString())) {
+                // Skipping due to the property already existing and being equal
+                return;
+            } else {
+                setNodeSimpleProperty(value.getAsJsonPrimitive(), key, resource);
+            }
+        } catch (RepositoryException re) {
+            LOG.warn("Repository exception thrown. Skipping '{}' single property for resource '{}'.", key, resource.getPath());
+        }
+    }
+
+    /**
+     * Handler for when a JSON element is an array.
      *
      * @param key String
      * @param jsonArray JsonArray
@@ -279,38 +310,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Handler for when a JSON element that represents a resource property.
-     *
-     * @param key String
-     * @param json JsonObject
-     * @param resource Resource
-     * @throws RepositoryException exception
-     */
-    private void setNodeProperty(final ResourceResolver remoteAssetsResolver, final String key, final JsonObject json, final Resource resource) throws RepositoryException {
-        try {
-            JsonElement value = json.get(key);
-
-            if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
-                setNodeJcrDataProperty(remoteAssetsResolver, resource, json.getAsJsonPrimitive(JcrConstants.JCR_LASTMODIFIED).getAsString());
-            } else if (key.startsWith(":")) {
-                // Skip binary properties, since they do not come across in JSON
-                return;
-            } else if (PROTECTED_PROPERTIES.contains(key)) {
-                // Skipping due to the property being unmodifiable.
-                return;
-            } else if (resource.getValueMap().get(key) != null && resource.getValueMap().get(key, String.class).equals(value.getAsString())) {
-                // Skipping due to the property already existing and being equal
-                return;
-            } else {
-                setNodeProperty(value.getAsJsonPrimitive(), key, resource);
-            }
-        } catch (RepositoryException re) {
-            LOG.warn("Repository exception thrown. Skipping '{}' single property for resource '{}'.", key, resource.getPath());
-        }
-    }
-
-    /**
-     * Set mixins property for a resource.
+     * Set mixins property for a resource, based on an array found in the retrieved JSON..
      *
      * @param jsonArray JsonArray
      * @param key String
@@ -326,7 +326,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Set tags property for a resource.
+     * Set tags property for a resource, based on an array found in the retrieved JSON..
      *
      * @param jsonArray JsonArray
      * @param key String
@@ -354,7 +354,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Set generic array property for a resource.
+     * Set generic array property for a resource, based on an array found in the retrieved JSON.
      *
      * @param jsonArray JsonArray
      * @param key String
@@ -535,14 +535,14 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Set a resource property.
+     * Set a simple resource property from the fetched JSON.
      *
      * @param value Object
      * @param key String
      * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeProperty(final JsonPrimitive value, final String key, final Resource resource) throws RepositoryException {
+    private void setNodeSimpleProperty(final JsonPrimitive value, final String key, final Resource resource) throws RepositoryException {
         ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
         if (value.isString() && DATE_REGEX.matcher(value.getAsString()).matches()) {
             try {
@@ -572,6 +572,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     /**
      * Get the correct temporary binary (file type) based on the renditions file extension
      * or the overall asset's file extension if it is the original rendition.
+     *
      * @param fileResource Resource
      * @param files String...
      * @return InputStream
