@@ -32,6 +32,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.jackrabbit.value.DateValue;
@@ -53,6 +54,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 /**
  * Service to sync a remote asset's binaries a from remote server. Implements {@link RemoteAssetsBinarySync}.
@@ -168,8 +171,8 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             Map<String, Object> props = new HashMap<>();
             props.put(RenditionHandler.PROPERTY_RENDITION_MIME_TYPE, assetRendition.getMimeType());
             asset.addRendition(renditionName, inputStream, props);
-        } catch (FileNotFoundException fne) {
-            if (DamConstants.ORIGINAL_FILE.equals(renditionName)) {
+        } catch (HttpResponseException fne) {
+            if (DamConstants.ORIGINAL_FILE.equals(renditionName) || fne.getStatusCode() != HTTP_NOT_FOUND) {
                 throw fne;
             }
 
