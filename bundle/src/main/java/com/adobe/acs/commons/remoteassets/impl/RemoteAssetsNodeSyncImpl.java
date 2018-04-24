@@ -20,8 +20,8 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.tagging.Tag;
@@ -40,6 +40,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.vault.util.JcrConstants;
@@ -55,15 +58,11 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -110,6 +109,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
+
+    @Reference
+    private HttpClientBuilderFactory httpClientBuilderFactory;
 
     private ResourceResolver resourceResolver;
     private Session session;
@@ -209,34 +211,26 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @throws IOException exception
      */
     private JsonObject getJsonFromUri(final String path) throws IOException {
+        URI pathUri;
         try {
-            URI pathUri = new URI(null, null, path, null);
-            // we want to traverse the JCR one level at a time, hence the '1' selector.
-            URL url = new URL(this.remoteAssetsConfig.getServer() + pathUri.toString() + ".1.json");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Authorization", String.format("Basic %s", RemoteAssets.encodeForBasicAuth(this.remoteAssetsConfig)));
-
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String line;
-                StringBuilder sb = new StringBuilder();
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
-                }
-                String responseString = sb.toString();
-                try {
-                    JsonObject responseJson = new JsonParser().parse(responseString).getAsJsonObject();
-                    LOG.debug("JSON successfully fetched for URL '{}'.", url.toString());
-                    return responseJson;
-                } catch (JsonSyntaxException | IllegalStateException e) {
-                    LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), responseString);
-                    throw new IOException("Invalid JSON response", e);
-                }
-            } finally {
-                connection.disconnect();
-            }
+            pathUri = new URI(null, null, path, null);
         } catch (URISyntaxException e) {
             LOG.error("URI Syntax Exception", e);
             throw new IOException("Invalid URI", e);
+        }
+
+        // we want to traverse the JCR one level at a time, hence the '1' selector.
+        String url = this.remoteAssetsConfig.getServer() + pathUri.toString() + ".1.json";
+        Executor executor = this.remoteAssetsConfig.getRemoteAssetsHttpExecutor();
+        String responseString = executor.execute(Request.Get(url)).returnContent().asString();
+
+        try {
+            JsonObject responseJson = new JsonParser().parse(responseString).getAsJsonObject();
+            LOG.debug("JSON successfully fetched for URL '{}'.", url);
+            return responseJson;
+        } catch (JsonSyntaxException | IllegalStateException e) {
+            LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url, responseString);
+            throw new IOException("Invalid JSON response", e);
         }
     }
 

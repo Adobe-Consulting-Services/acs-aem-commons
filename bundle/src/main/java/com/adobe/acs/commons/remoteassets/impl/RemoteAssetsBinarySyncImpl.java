@@ -32,6 +32,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
 import org.apache.jackrabbit.value.DateValue;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -46,9 +48,7 @@ import javax.jcr.Value;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,15 +132,8 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                     continue;
                 }
                 String renditionName = assetRendition.getName();
-
-                URL url = new URL(String.format("%s%s", baseUrl, renditionName));
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Authorization", String.format("Basic %s", RemoteAssets.encodeForBasicAuth(this.remoteAssetsConfig)));
-
-                LOG.debug("syncing from remote asset url {}", url);
-
-                setRenditionOnAsset(connection, assetRendition, asset, renditionName);
+                String remoteUrl = String.format("%s%s", baseUrl, renditionName);
+                setRenditionOnAsset(remoteUrl, assetRendition, asset, renditionName);
             }
 
             node.setProperty(RemoteAssets.IS_REMOTE_ASSET, (Value)null);
@@ -159,17 +152,19 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     }
 
     /**
-     * Set supplied rendition on the supplied asset.
-     * @param connection HttpURLConnection
+     * Fetch binary from URL and set into the asset rendition.
+     * @param remoteUrl String
      * @param assetRendition Rendition
      * @param asset Asset
      * @param renditionName String
      * @throws FileNotFoundException exception
      */
-    private void setRenditionOnAsset(HttpURLConnection connection, Rendition assetRendition, Asset asset, String renditionName)
+    private void setRenditionOnAsset(String remoteUrl, Rendition assetRendition, Asset asset, String renditionName)
             throws IOException {
 
-        try (InputStream inputStream = connection.getInputStream()) {
+        LOG.debug("Syncing from remote asset url {}", remoteUrl);
+        Executor executor = this.remoteAssetsConfig.getRemoteAssetsHttpExecutor();
+        try (InputStream inputStream = executor.execute(Request.Get(remoteUrl)).returnContent().asStream()) {
             Map<String, Object> props = new HashMap<>();
             props.put(RenditionHandler.PROPERTY_RENDITION_MIME_TYPE, assetRendition.getMimeType());
             asset.addRendition(renditionName, inputStream, props);
@@ -180,8 +175,6 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
             asset.removeRendition(renditionName);
             LOG.warn("Rendition '{}' not found on remote environment. Removing local rendition.", renditionName);
-        } finally {
-            connection.disconnect();
         }
     }
 

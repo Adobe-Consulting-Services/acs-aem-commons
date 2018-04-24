@@ -24,13 +24,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.http.HttpHost;
+import org.apache.http.client.fluent.Executor;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -50,6 +55,8 @@ import java.util.stream.Stream;
 )
 @Service()
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsConfigImpl.class);
+    private static final boolean DEFAULT_ALLOW_INSECURE = false;
 
     @Property(label = "Server")
     private static final String SERVER_PROP = "server.url";
@@ -59,6 +66,10 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     @Property(label = "Password")
     private static final String PASSWORD_PROP = "server.pass";
+
+    @Property(label = "Allow Insecure Connection", description = "Allow non-https connection to remote assets server, "
+            + "allowing potential compromize of conenction credentials", boolValue = DEFAULT_ALLOW_INSECURE)
+    private static final String ALLOW_INSECURE_PROP = "server.insecure";
 
     @Property(
             label = "Tag Sync Paths",
@@ -112,12 +123,15 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private String server = StringUtils.EMPTY;
     private String username = StringUtils.EMPTY;
     private String password = StringUtils.EMPTY;
+    private boolean allowInsecureRemote = false;
     private List<String> tagSyncPaths = new ArrayList<>();
     private List<String> damSyncPaths = new ArrayList<>();
     private Integer retryDelay;
     private Integer saveInterval;
     private String eventUserData = StringUtils.EMPTY;
     private Set<String> whitelistedServiceUsers = new HashSet<>();
+
+    private Executor remoteAssetsHttpExecutor;
 
     /**
      * Method to run on activation.
@@ -140,6 +154,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         if (StringUtils.isBlank(this.password)) {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
+        this.allowInsecureRemote = PropertiesUtil.toBoolean(properties.get(ALLOW_INSECURE_PROP), DEFAULT_ALLOW_INSECURE);
         this.tagSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS_PROP), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
@@ -152,14 +167,8 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         this.whitelistedServiceUsers = Stream.of(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS_PROP), new String[0]))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toSet());
-    }
 
-    /**
-     * Method to run on deactivation.
-     */
-    @Deactivate
-    private void deactivate() {
-        // Do nothing.
+        buildRemoteHttpExecutor();
     }
 
     /**
@@ -241,5 +250,40 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     @Override
     public Set<String> getWhitelistedServiceUsers() {
         return this.whitelistedServiceUsers;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getRemoteAssetsHttpExecutor()
+     * @return Executor
+     */
+    public Executor getRemoteAssetsHttpExecutor() {
+        return remoteAssetsHttpExecutor;
+    }
+
+    private void buildRemoteHttpExecutor() {
+        URL url;
+        try {
+            url = new URL(this.server);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Remote server address is malformed");
+        }
+
+        if (!url.getProtocol().equalsIgnoreCase("https")) {
+            if (this.allowInsecureRemote) {
+                LOG.warn("Remote Assets connection is not HTTPS - authentication username and password will be"
+                        + " communicated in CLEAR TEXT.  This configuration is NOT recommended, as it may allow"
+                        + " credentials to be compromised!");
+            } else {
+                throw new IllegalArgumentException("Remote server address must be HTTPS so that credentials"
+                        + " cannot be compromised.  As an alternative, you may configure remote assets to allow"
+                        + " use of a non-HTTPS connection, allowing connection credentials to potentially be"
+                        + " compromised AT YOUR OWN RISK.");
+            }
+        }
+
+        HttpHost host = new HttpHost(url.getHost(), url.getPort(), url.getProtocol());
+        this.remoteAssetsHttpExecutor = Executor.newInstance()
+                .auth(host, username, password)
+                .authPreemptive(host);
     }
 }

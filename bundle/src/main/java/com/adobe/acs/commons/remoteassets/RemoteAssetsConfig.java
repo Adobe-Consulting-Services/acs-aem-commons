@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.remoteassets;
 
+import org.apache.http.client.fluent.Executor;
+
 import java.util.List;
 import java.util.Set;
 
@@ -74,4 +76,9 @@ public interface RemoteAssetsConfig {
      * By default, service user activity never triggers an asset binary sync.
      */
     Set<String> getWhitelistedServiceUsers();
+
+    /**
+     * Get an HTTP Executor for making calls to the remote AEM Assets server.
+     */
+    Executor getRemoteAssetsHttpExecutor();
 }
