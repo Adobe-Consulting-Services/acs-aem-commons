@@ -53,6 +53,11 @@ import java.util.List;
 public abstract class AssetIngestor extends ProcessDefinition {
 
     public static final String ALL_ASSETS = "All Assets";
+    static final String[] AUTHORIZED_GROUPS = new String[]{
+        "administrators",
+        "asset-ingest",
+        "dam-administrators"
+    };
 
     protected final transient MimeTypeService mimetypeService;
 
