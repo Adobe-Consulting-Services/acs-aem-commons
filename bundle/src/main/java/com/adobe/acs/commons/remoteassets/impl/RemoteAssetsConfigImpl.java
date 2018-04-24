@@ -26,20 +26,28 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Executor;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -132,6 +140,9 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private Set<String> whitelistedServiceUsers = new HashSet<>();
 
     private Executor remoteAssetsHttpExecutor;
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     /**
      * Method to run on activation.
@@ -256,8 +267,51 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
      * @see RemoteAssetsConfig#getRemoteAssetsHttpExecutor()
      * @return Executor
      */
+    @Override
     public Executor getRemoteAssetsHttpExecutor() {
         return remoteAssetsHttpExecutor;
+    }
+
+    /**
+     * @see RemoteAssetsConfig#getResourceResolver()
+     */
+    @Override
+    public ResourceResolver getResourceResolver() {
+        try {
+            Map<String, Object> userParams = new HashMap<>();
+            userParams.put(ResourceResolverFactory.SUBSERVICE, RemoteAssets.SERVICE_NAME);
+            ResourceResolver resourceResolver = this.resourceResolverFactory.getServiceResourceResolver(userParams);
+            Session session = resourceResolver.adaptTo(Session.class);
+            if (StringUtils.isNotBlank(this.getEventUserData())) {
+                session.getWorkspace().getObservationManager().setUserData(this.getEventUserData());
+            }
+            return resourceResolver;
+        } catch (Exception e) {
+            LOG.error("Remote assets functionality cannot be enabled - service user login failed");
+            throw new RemoteAssetsServiceException(e);
+        }
+    }
+
+    /**
+     * @see RemoteAssetsConfig#closeResourceResolver(ResourceResolver)
+     */
+    @Override
+    public void closeResourceResolver(ResourceResolver resourceResolver) {
+        if (resourceResolver != null) {
+            try {
+                Session session = resourceResolver.adaptTo(Session.class);
+                if (session != null) {
+                    session.logout();
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed session.logout()", e);
+            }
+            try {
+                resourceResolver.close();
+            } catch (Exception e) {
+                LOG.warn("Failed resourceResolver.close()", e);
+            }
+        }
     }
 
     private void buildRemoteHttpExecutor() {

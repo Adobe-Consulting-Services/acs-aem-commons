@@ -23,7 +23,9 @@ import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
@@ -35,20 +37,18 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.vault.util.JcrConstants;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -102,9 +101,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     ));
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private RemoteAssetsConfig remoteAssetsConfig;
 
     @Reference
@@ -113,99 +109,66 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
 
-    private ResourceResolver resourceResolver;
-    private Session session;
-    private ValueFactory valueFactory;
     private int saveRefreshCount = 0;
-
-    /**
-     * Method to run on activation.
-     * @throws RepositoryException exception
-     */
-    @Activate
-    protected void activate() throws RepositoryException {
-        this.resourceResolver = RemoteAssets.logIn(this.resourceResolverFactory);
-        this.session = this.resourceResolver.adaptTo(Session.class);
-        if (StringUtils.isNotBlank(remoteAssetsConfig.getEventUserData())) {
-            this.session.getWorkspace().getObservationManager().setUserData(this.remoteAssetsConfig.getEventUserData());
-        }
-        this.valueFactory = this.session.getValueFactory();
-    }
-
-    /**
-     * Method to run on deactivation.
-     */
-    @Deactivate
-    protected void deactivate() {
-        if (this.session != null) {
-            try {
-                this.session.logout();
-            } catch (Exception e) {
-                LOG.warn("Failed session.logout()", e);
-            }
-        }
-
-        if (this.resourceResolver != null) {
-            try {
-                this.resourceResolver.close();
-            } catch (Exception e) {
-                LOG.warn("Failed resourceResolver.close()", e);
-            }
-        }
-    }
 
     /**
      * @see RemoteAssetsNodeSync#syncAssetNodes()
      */
     @Override
     public void syncAssetNodes() {
-        List<String> syncPaths = new ArrayList<>();
-        syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
-        syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
-
+        ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
         try {
+            List<String> syncPaths = new ArrayList<>();
+            syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
+            syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
             for (String syncPath : syncPaths) {
-                this.session.refresh(true);
+                LOG.info("Starting sync of nodes for {}", syncPath);
+                remoteAssetsResolver.refresh();
                 JsonObject topLevelJsonWithChildren = getJsonFromUri(syncPath);
-                Node topLevelSyncNode = getOrCreateNode(syncPath, topLevelJsonWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString());
-                createOrUpdateNodes(topLevelJsonWithChildren, topLevelSyncNode);
-                this.session.save();
+                String resourcePrimaryType = topLevelJsonWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString();
+                Resource topLevelSyncResource = getOrCreateNode(remoteAssetsResolver, syncPath, resourcePrimaryType);
+                createOrUpdateNodes(remoteAssetsResolver, topLevelJsonWithChildren, topLevelSyncResource);
+                remoteAssetsResolver.commit();
+                LOG.info("Completed sync of nodes for {}", syncPath);
             }
-        } catch (IOException e) {
-            LOG.error("IO Exception {}", e);
-        } catch (RepositoryException e) {
-            LOG.error("Repository Exception {}", e);
+        } catch (Exception e) {
+            LOG.error("Unexpected error sync'ing remote asset nodes", e);
+        } finally {
+            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
         }
     }
 
     /**
      * Grab JSON from the provided path and sync to the JCR.
+     *
      * @param nextPath String
      * @param primaryType String
-     * @return Node
+     * @return Resource
      * @throws RepositoryException exception
      */
-    private Node getOrCreateNode(final String nextPath, final String primaryType) throws RepositoryException {
-        Node node;
+    private Resource getOrCreateNode(final ResourceResolver remoteAssetsResolver, final String nextPath, final String primaryType) throws RepositoryException {
+        Resource resource;
 
         try {
-            node = JcrUtils.getNodeIfExists(nextPath, this.session);
-            if (node == null) {
-                node = JcrUtil.createPath(nextPath, primaryType, this.session);
-                LOG.debug("New node '{}' created.", node.getPath());
+            resource = remoteAssetsResolver.getResource(nextPath);
+            if (resource == null) {
+                Node node = JcrUtil.createPath(nextPath, primaryType, remoteAssetsResolver.adaptTo(Session.class));
+                resource = remoteAssetsResolver.getResource(node.getPath());
+                LOG.debug("New resource '{}' created.", resource.getPath());
             } else {
-                LOG.debug("Node '{}' retrieved from JCR.", node.getPath());
+                LOG.debug("Resource '{}' retrieved from JCR.", resource.getPath());
             }
         } catch (RepositoryException re) {
-            LOG.error("Repository Exception. Unable to get or create node '{}'", nextPath, re);
+            LOG.error("Repository Exception. Unable to get or create resource '{}'", nextPath, re);
             throw re;
         }
 
-        return node;
+        return resource;
     }
 
     /**
      * Get {@link JsonObject} from URL response.
+     *
      * @param path String
      * @return JsonObject
      * @throws IOException exception
@@ -235,140 +198,149 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Create or update nodes from remote JSON.
+     * Create or update resources from remote JSON.
+     *
      * @param json JsonObject
-     * @param node Node
+     * @param resource Resource
      * @throws IOException exception
      * @throws RepositoryException exception
      */
-    private void createOrUpdateNodes(final JsonObject json, final Node node) throws IOException, RepositoryException {
+    private void createOrUpdateNodes(final ResourceResolver remoteAssetsResolver, final JsonObject json, final Resource resource) throws IOException, RepositoryException {
         for (Map.Entry<String, JsonElement> jsonEntry : json.entrySet()) {
             JsonElement jsonElement = jsonEntry.getValue();
             if (jsonElement.isJsonObject()) {
-                createOrUpdateNodesForJsonObject(jsonEntry.getKey(), node);
+                createOrUpdateNodesForJsonObject(remoteAssetsResolver, jsonEntry.getKey(), resource);
             } else if (jsonElement.isJsonArray()) {
-                setNodeArrayProperty(jsonEntry.getKey(), jsonElement.getAsJsonArray(), node);
+                setNodeArrayProperty(remoteAssetsResolver, jsonEntry.getKey(), jsonElement.getAsJsonArray(), resource);
             } else {
-                setNodeProperty(jsonEntry.getKey(), json, node);
+                setNodeProperty(remoteAssetsResolver, jsonEntry.getKey(), json, resource);
             }
         }
     }
 
     /**
      * Handler for when the object is an instance of {@link JsonObject}.
+     *
      * @param key String
-     * @param parentNode Node
+     * @param parentResource Resource
      * @throws IOException exception
      * @throws RepositoryException exception
      */
-    private void createOrUpdateNodesForJsonObject(final String key, final Node parentNode) throws IOException, RepositoryException {
+    private void createOrUpdateNodesForJsonObject(final ResourceResolver remoteAssetsResolver, final String key, final Resource parentResource) throws IOException, RepositoryException {
         if (PROTECTED_NODES.contains(key)) {
             return;
         }
 
-        String objectPath = String.format("%s/%s", parentNode.getPath(), key);
+        String objectPath = String.format("%s/%s", parentResource.getPath(), key);
         JsonObject jsonObjectWithChildren = getJsonFromUri(objectPath);
-        Node node = getOrCreateNode(objectPath, jsonObjectWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString());
-        createOrUpdateNodes(jsonObjectWithChildren, node);
+        String resourcePrimaryType = jsonObjectWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString();
+        Resource resource = getOrCreateNode(remoteAssetsResolver, objectPath, resourcePrimaryType);
+        createOrUpdateNodes(remoteAssetsResolver, jsonObjectWithChildren, resource);
 
-        if (DamConstants.NT_DAM_ASSET.equals(parentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())) {
-            node.setProperty(RemoteAssets.IS_REMOTE_ASSET, true);
-            LOG.debug("Property '{}' added for node '{}'.", RemoteAssets.IS_REMOTE_ASSET, node.getPath());
+        ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+        if (DamConstants.NT_DAM_ASSET.equals(parentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+            resourceProperties.put(RemoteAssets.IS_REMOTE_ASSET, true);
+            LOG.debug("Property '{}' added for resource '{}'.", RemoteAssets.IS_REMOTE_ASSET, resource.getPath());
 
             // Save and refresh the session after the save refresh count has reached the configured amount.
             this.saveRefreshCount++;
             if (this.saveRefreshCount == this.remoteAssetsConfig.getSaveInterval()) {
                 this.saveRefreshCount = 0;
-                this.session.save();
-                this.session.refresh(true);
-                LOG.debug("Session has been saved and refreshed.");
+                remoteAssetsResolver.commit();
+                remoteAssetsResolver.refresh();
+                LOG.debug("Executed incremental save of node sync.");
             }
         }
     }
 
     /**
      * Handler for when the object is an instance of {@link JSONArray}.
+     *
      * @param key String
      * @param jsonArray JsonArray
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeArrayProperty(final String key, final JsonArray jsonArray, final Node node) throws RepositoryException {
+    private void setNodeArrayProperty(final ResourceResolver remoteAssetsResolver, final String key, final JsonArray jsonArray, final Resource resource) throws RepositoryException {
         try {
             if (PROTECTED_PROPERTIES.contains(key)) {
                 // Skipping due to the property being unmodifiable.
                 return;
             } else if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
-                setNodeMixinsProperty(jsonArray, key, node);
+                setNodeMixinsProperty(jsonArray, key, resource);
             } else if (NameConstants.PN_TAGS.equals(key)) {
-                setNodeTagsProperty(jsonArray, key, node);
+                setNodeTagsProperty(remoteAssetsResolver, jsonArray, key, resource);
             } else {
-                setNodeArrayProperty(jsonArray, key, node);
+                setNodeArrayProperty(remoteAssetsResolver, jsonArray, key, resource);
             }
         } catch (RepositoryException re) {
-            LOG.warn("Repository exception thrown. Skipping {} array property for node '{}'.", key, node.getPath());
+            LOG.warn("Repository exception thrown. Skipping {} array property for resource '{}'.", key, resource.getPath());
         }
     }
 
     /**
-     * Handler for when the object is an NOT instance of {@link JsonObject} or {@link JSONArray}.
+     * Handler for when a JSON element that represents a resource property.
+     *
      * @param key String
      * @param json JsonObject
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeProperty(final String key, final JsonObject json, final Node node) throws RepositoryException {
+    private void setNodeProperty(final ResourceResolver remoteAssetsResolver, final String key, final JsonObject json, final Resource resource) throws RepositoryException {
         try {
             JsonElement value = json.get(key);
 
             if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
-                setNodeJcrDataProperty(node, json.getAsJsonPrimitive(JcrConstants.JCR_LASTMODIFIED).getAsString());
+                setNodeJcrDataProperty(remoteAssetsResolver, resource, json.getAsJsonPrimitive(JcrConstants.JCR_LASTMODIFIED).getAsString());
             } else if (key.startsWith(":")) {
                 // Skip binary properties, since they do not come across in JSON
-                return;
-            } else if (node.hasProperty(key) && node.getProperty(key).getString().equals(value.getAsString())) {
-                // Skipping due to the property already existing and being equal
                 return;
             } else if (PROTECTED_PROPERTIES.contains(key)) {
                 // Skipping due to the property being unmodifiable.
                 return;
+            } else if (resource.getValueMap().get(key) != null && resource.getValueMap().get(key, String.class).equals(value.getAsString())) {
+                // Skipping due to the property already existing and being equal
+                return;
             } else {
-                setNodeProperty(value.getAsJsonPrimitive(), key, node);
+                setNodeProperty(value.getAsJsonPrimitive(), key, resource);
             }
         } catch (RepositoryException re) {
-            LOG.warn("Repository exception thrown. Skipping '{}' single property for node '{}'.", key, node.getPath());
+            LOG.warn("Repository exception thrown. Skipping '{}' single property for resource '{}'.", key, resource.getPath());
         }
     }
 
     /**
-     * Set mixins property for the property's node.
+     * Set mixins property for a resource.
+     *
      * @param jsonArray JsonArray
      * @param key String
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeMixinsProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
+    private void setNodeMixinsProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
+        Node node = resource.adaptTo(Node.class);
         for (JsonElement jsonElement : jsonArray) {
-            LOG.debug("Adding mixin '{}' for node '{}'.", jsonElement.getAsString(), node.getPath());
+            LOG.debug("Adding mixin '{}' for resource '{}'.", jsonElement.getAsString(), resource.getPath());
             node.addMixin(jsonElement.getAsString());
         }
     }
 
     /**
-     * Set tags property for the property's node.
+     * Set tags property for a resource.
+     *
      * @param jsonArray JsonArray
      * @param key String
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeTagsProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
-        TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
+    private void setNodeTagsProperty(final ResourceResolver remoteAssetsResolver, final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
+        TagManager tagManager = remoteAssetsResolver.adaptTo(TagManager.class);
         ArrayList<Tag> tagList = new ArrayList<>();
 
         for (JsonElement jsonElement : jsonArray) {
             Tag tag = tagManager.resolve(jsonElement.getAsString());
             if (tag == null) {
-                LOG.warn("Tag '{}' could not be found. Skipping tag for node '{}'.", jsonElement.getAsString(), node.getPath());
+                LOG.warn("Tag '{}' could not be found. Skipping tag for resource '{}'.", jsonElement.getAsString(), resource.getPath());
                 continue;
             }
 
@@ -376,69 +348,76 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         }
 
         if (tagList.size() > 0) {
-            Resource parentResource = this.resourceResolver.getResource(node.getPath());
-            tagManager.setTags(parentResource, tagList.toArray(new Tag[tagList.size()]));
-            LOG.debug("Tags added for node '{}'.", node.getPath());
+            tagManager.setTags(resource.getParent(), tagList.toArray(new Tag[tagList.size()]));
+            LOG.debug("Tags added for resource '{}'.", resource.getPath());
         }
     }
 
     /**
-     * Set generic array property for the property's node.
+     * Set generic array property for a resource.
+     *
      * @param jsonArray JsonArray
      * @param key String
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeArrayProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
+    private void setNodeArrayProperty(final ResourceResolver remoteAssetsResolver, final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
         JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
-        Value[] propertyValues = new Value[jsonArray.size()];
 
         try {
+            Object[] values;
             if (firstVal.isBoolean()) {
+                values = new Boolean[jsonArray.size()];
                 for (int i = 0; i < jsonArray.size(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsBoolean());
+                    values[i] = jsonArray.get(i).getAsBoolean();
                 }
             } else if (firstVal.isNumber()) {
                 if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
+                    values = new Double[jsonArray.size()];
                     for (int i = 0; i < jsonArray.size(); i++) {
-                        propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsDouble());
+                        values[i] = jsonArray.get(i).getAsDouble();
                     }
                 } else {
+                    values = new Long[jsonArray.size()];
                     for (int i = 0; i < jsonArray.size(); i++) {
-                        propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsLong());
+                        values[i] = jsonArray.get(i).getAsLong();
                     }
                 }
             } else {
+                values = new String[jsonArray.size()];
                 for (int i = 0; i < jsonArray.size(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsString());
+                    values[i] = jsonArray.get(i).getAsString();
                 }
             }
 
-            node.setProperty(key, propertyValues);
-            LOG.debug("Array property '{}' added for node '{}'.", key, node.getPath());
+            ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+            resourceProperties.put(key, values);
+            LOG.debug("Array property '{}' added for resource '{}'.", key, resource.getPath());
         } catch (Exception e) {
-            LOG.error("Unable to assign property:node to '{}' {}", key + node.getPath(), e);
+            LOG.error("Unable to assign property:resource to '{}' {}", key + resource.getPath(), e);
         }
     }
 
     /**
-     * Set JCR Data property to a temporary binary for the property's node.
-     * Also, property 'jcr:data' is a mandatory field.
-     * @param node Node
+     * Set jcr:data property to a temporary binary for a rendition resource.
+     *
+     * @param resource Resource
      * @param rawResponseLastModified String
      * @throws RepositoryException exception
      */
-    private void setNodeJcrDataProperty(final Node node, final String rawResponseLastModified) throws RepositoryException {
-        // first checking to make sure existing node has lastModified and jcr:data properties then seeing if binaries should be updated
-        // based off of whether the node's lastModified matches the JSON's lastModified
-        if (node.hasProperty(JcrConstants.JCR_LASTMODIFIED) && node.hasProperty(JcrConstants.JCR_DATA)
+    private void setNodeJcrDataProperty(final ResourceResolver remoteAssetsResolver, final Resource resource, final String rawResponseLastModified) throws RepositoryException {
+        ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
+        // first checking to make sure existing resource has lastModified and jcr:data properties then seeing if binaries
+        // should be updated based off of whether the resource's lastModified matches the JSON's lastModified
+        if (resourceProperties.get(JcrConstants.JCR_LASTMODIFIED) != null && resourceProperties.get(JcrConstants.JCR_DATA) != null
                 && StringUtils.isNotEmpty(rawResponseLastModified)) {
 
-            String nodeLastModified = node.getProperty(JcrConstants.JCR_LASTMODIFIED).getString();
-            Calendar responseLastModified = GregorianCalendar.from(ZonedDateTime.parse(rawResponseLastModified, DATE_TIME_FORMATTER));
+            String resourceLastModified = resourceProperties.get(JcrConstants.JCR_LASTMODIFIED, String.class);
+            Calendar remoteLastModified = GregorianCalendar.from(ZonedDateTime.parse(rawResponseLastModified, DATE_TIME_FORMATTER));
 
-            if (nodeLastModified.equals(this.valueFactory.createValue(responseLastModified).getString())) {
-                LOG.debug("Not creating binary for node '{}' because binary has not been updated.", node.getPath());
+            ValueFactory valueFactory = remoteAssetsResolver.adaptTo(Session.class).getValueFactory();
+            if (resourceLastModified.equals(valueFactory.createValue(remoteLastModified).getString())) {
+                LOG.debug("Not creating binary for resource '{}' because binary has not been updated.", resource.getPath());
                 return;
             }
         }
@@ -446,7 +425,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         InputStream inputStream = new ByteArrayInputStream(StringUtils.EMPTY.getBytes());
 
         try {
-            Resource resource = this.resourceResolver.getResource(node.getPath());
             String mimeType = (String) resource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
 
             if (FileExtensionMimeTypeConstants.EXT_3G2.equals(mimeType)) {
@@ -468,13 +446,13 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if (FileExtensionMimeTypeConstants.EXT_DOCX.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".docx");
             } else if (FileExtensionMimeTypeConstants.EXT_AI_EPS_PS.equals(mimeType)) {
-                inputStream = getCorrectBinaryTypeStream(node, "ai", "eps", "ps");
+                inputStream = getCorrectBinaryTypeStream(resource, "ai", "eps", "ps");
             } else if (FileExtensionMimeTypeConstants.EXT_EPUB.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".epub");
             } else if (FileExtensionMimeTypeConstants.EXT_F4V.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".f4v");
             } else if (FileExtensionMimeTypeConstants.EXT_FLA_SWF.equals(mimeType)) {
-                inputStream = getCorrectBinaryTypeStream(node, "fla", "swf");
+                inputStream = getCorrectBinaryTypeStream(resource, "fla", "swf");
             } else if (FileExtensionMimeTypeConstants.EXT_GIF.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".gif");
             } else if (FileExtensionMimeTypeConstants.EXT_HTML.equals(mimeType)) {
@@ -484,7 +462,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if (FileExtensionMimeTypeConstants.EXT_JAR.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jar");
             } else if (FileExtensionMimeTypeConstants.EXT_JPEG_JPG.equals(mimeType)) {
-                inputStream = getCorrectBinaryTypeStream(node, "jpeg", "jpg");
+                inputStream = getCorrectBinaryTypeStream(resource, "jpeg", "jpg");
             } else if (FileExtensionMimeTypeConstants.EXT_M4V.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".m4v");
             } else if (FileExtensionMimeTypeConstants.EXT_MIDI.equals(mimeType)) {
@@ -496,7 +474,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if (FileExtensionMimeTypeConstants.EXT_MP4.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mp4");
             } else if (FileExtensionMimeTypeConstants.EXT_M2V_MPEG_MPG.equals(mimeType)) {
-                inputStream = getCorrectBinaryTypeStream(node, "m2v", "mpeg", "mpg");
+                inputStream = getCorrectBinaryTypeStream(resource, "m2v", "mpeg", "mpg");
             } else if (FileExtensionMimeTypeConstants.EXT_OGG.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ogg");
             } else if (FileExtensionMimeTypeConstants.EXT_OGV.equals(mimeType)) {
@@ -520,7 +498,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if (FileExtensionMimeTypeConstants.EXT_TAR.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".tar");
             } else if (FileExtensionMimeTypeConstants.EXT_TIF_TIFF.equals(mimeType)) {
-                inputStream = getCorrectBinaryTypeStream(node, "tif", "tiff");
+                inputStream = getCorrectBinaryTypeStream(resource, "tif", "tiff");
             } else if (FileExtensionMimeTypeConstants.EXT_TXT.equals(mimeType)) {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".txt");
             } else if (FileExtensionMimeTypeConstants.EXT_WAV.equals(mimeType)) {
@@ -543,8 +521,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 inputStream = this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jpeg");
             }
 
-            node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
-            LOG.debug("Binary added for node '{}'.", node.getPath());
+            resourceProperties.put(JcrConstants.JCR_DATA, inputStream);
+            LOG.debug("Binary added for resource '{}'.", resource.getPath());
         } finally {
             try {
                 if (inputStream != null) {
@@ -557,57 +535,58 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Set generic property for the property's node.
+     * Set a resource property.
+     *
      * @param value Object
      * @param key String
-     * @param node Node
+     * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeProperty(final JsonPrimitive value, final String key, final Node node) throws RepositoryException {
+    private void setNodeProperty(final JsonPrimitive value, final String key, final Resource resource) throws RepositoryException {
+        ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
         if (value.isString() && DATE_REGEX.matcher(value.getAsString()).matches()) {
             try {
-                node.setProperty(key, GregorianCalendar.from(ZonedDateTime.parse(value.getAsString(), DATE_TIME_FORMATTER)));
+                resourceProperties.put(key, GregorianCalendar.from(ZonedDateTime.parse(value.getAsString(), DATE_TIME_FORMATTER)));
             } catch (DateTimeParseException e) {
-                LOG.warn("Unable to parse date '{}' for property:node '{}'.", value, key + ":" + node.getPath());
+                LOG.warn("Unable to parse date '{}' for property:resource '{}'.", value, key + ":" + resource.getPath());
             }
         } else if (value.isString() && DECIMAL_REGEX.matcher(value.getAsString()).matches()) {
-            node.setProperty(key, value.getAsBigDecimal());
+            resourceProperties.put(key, value.getAsBigDecimal());
         } else if (value.isBoolean()) {
-            node.setProperty(key, value.getAsBoolean());
+            resourceProperties.put(key, value.getAsBoolean());
         } else if (value.isNumber()) {
             if (DECIMAL_REGEX.matcher(value.getAsString()).matches()) {
-                node.setProperty(key, value.getAsDouble());
+                resourceProperties.put(key, value.getAsDouble());
             } else {
-                node.setProperty(key, value.getAsLong());
+                resourceProperties.put(key, value.getAsLong());
             }
+        } else if (value.isJsonNull()) {
+            resourceProperties.remove(key);
         } else {
-            node.setProperty(key, value.isJsonNull() ? null : value.getAsString());
+            resourceProperties.put(key, value.getAsString());
         }
 
-        LOG.debug("Property '{}' added for node '{}'.", key, node.getPath());
+        LOG.debug("Property '{}' added for resource '{}'.", key, resource.getPath());
     }
 
     /**
      * Get the correct temporary binary (file type) based on the renditions file extension
      * or the overall asset's file extension if it is the original rendition.
-     * @param fileNode Node
+     * @param fileResource Resource
      * @param files String...
      * @return InputStream
      * @throws RepositoryException exception
      */
-    private InputStream getCorrectBinaryTypeStream(final Node fileNode, String... files) throws RepositoryException {
-        Node renditionNode = fileNode.getParent();
-        Node assetNode = fileNode;
-        while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
-            assetNode = assetNode.getParent();
-        }
+    private InputStream getCorrectBinaryTypeStream(final Resource fileResource, String... files) throws RepositoryException {
+        Resource renditionResource = fileResource.getParent();
+        Asset assetResource = DamUtil.resolveToAsset(renditionResource);
 
         String remoteAssetFileUri = ASSET_FILE_PREFIX + "." + files[0];
-        String assetFileExtension = FilenameUtils.getExtension(assetNode.getName());
-        String parentNodeFileExtension = FilenameUtils.getExtension(renditionNode.getName());
+        String assetFileExtension = FilenameUtils.getExtension(assetResource.getName());
+        String renditionParentFileExtension = FilenameUtils.getExtension(renditionResource.getName());
         for (String file : files) {
-            if (DamConstants.ORIGINAL_FILE.equals(renditionNode.getName()) && file.equals(assetFileExtension)
-                    || !DamConstants.ORIGINAL_FILE.equals(renditionNode.getName()) && file.equals(parentNodeFileExtension)) {
+            if (DamConstants.ORIGINAL_FILE.equals(renditionResource.getName()) && file.equals(assetFileExtension)
+                    || !DamConstants.ORIGINAL_FILE.equals(renditionResource.getName()) && file.equals(renditionParentFileExtension)) {
 
                 remoteAssetFileUri = ASSET_FILE_PREFIX + "." + file;
                 break;

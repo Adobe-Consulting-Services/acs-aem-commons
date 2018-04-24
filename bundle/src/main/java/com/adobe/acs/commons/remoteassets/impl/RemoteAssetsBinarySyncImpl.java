@@ -36,16 +36,15 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.jackrabbit.value.DateValue;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.Value;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,47 +69,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private RemoteAssetsConfig remoteAssetsConfig;
-
-    private ResourceResolver resourceResolver;
-    private Session session;
-
-    /**
-     * Method to run on activation.
-     * @throws RepositoryException exception
-     */
-    @Activate
-    protected void activate() throws RepositoryException {
-        this.resourceResolver = RemoteAssets.logIn(this.resourceResolverFactory);
-        this.session = this.resourceResolver.adaptTo(Session.class);
-        if (StringUtils.isNotBlank(this.remoteAssetsConfig.getEventUserData())) {
-            this.session.getWorkspace().getObservationManager().setUserData(this.remoteAssetsConfig.getEventUserData());
-        }
-    }
-
-    /**
-     * Method to run on deactivation.
-     */
-    @Deactivate
-    protected void deactivate() {
-        if (this.session != null) {
-            try {
-                this.session.logout();
-            } catch (Exception e) {
-                LOG.warn("Failed session.logout()", e);
-            }
-        }
-        if (this.resourceResolver != null) {
-            try {
-                this.resourceResolver.close();
-            } catch (Exception e) {
-                LOG.warn("Failed resourceResolver.close()", e);
-            }
-        }
-    }
 
     /**
      * @see RemoteAssetsBinarySync#syncAsset(Resource)
@@ -119,10 +78,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      */
     @Override
     public Resource syncAsset(Resource resource) {
+        ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
         try {
-            this.session.refresh(true);
-            Resource localRes = this.resourceResolver.getResource(resource.getPath());
-            Node node = localRes.adaptTo(Node.class);
+            Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
 
             Asset asset = DamUtil.resolveToAsset(localRes);
             URI pathUri = new URI(null, null, asset.getPath(), null);
@@ -139,18 +97,21 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 setRenditionOnAsset(remoteUrl, assetRendition, asset, renditionName);
             }
 
-            node.setProperty(RemoteAssets.IS_REMOTE_ASSET, (Value)null);
-            node.setProperty(RemoteAssets.REMOTE_SYNC_FAILED, (Value)null);
-            this.session.save();
+            ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
+            localResProps.remove(RemoteAssets.IS_REMOTE_ASSET);
+            localResProps.remove(RemoteAssets.REMOTE_SYNC_FAILED);
+            remoteAssetsResolver.commit();
             return localRes;
         } catch (Exception e) {
             LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
             try {
-                this.session.refresh(false);
-            } catch (RepositoryException re) {
+                remoteAssetsResolver.revert();
+            } catch (Exception re) {
                 LOG.error("Failed to rollback asset changes", re);
             }
-            return flagAssetAsFailedSync(resource);
+            return flagAssetAsFailedSync(remoteAssetsResolver, resource);
+        } finally {
+            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
         }
     }
 
@@ -186,18 +147,18 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      * @param resource Resource
      * @return Resource
      */
-    private Resource flagAssetAsFailedSync(Resource resource) {
+    private Resource flagAssetAsFailedSync(ResourceResolver remoteAssetsResolver, Resource resource) {
         try {
-            Resource localRes = this.resourceResolver.getResource(resource.getPath());
-            Node node = localRes.adaptTo(Node.class);
-            node.setProperty(RemoteAssets.REMOTE_SYNC_FAILED, new DateValue(new GregorianCalendar()));
-            this.session.save();
+            Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
+            ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
+            localResProps.put(RemoteAssets.REMOTE_SYNC_FAILED, new DateValue(new GregorianCalendar()));
+            remoteAssetsResolver.commit();
             return localRes;
         } catch (Exception e) {
             LOG.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);
             try {
-                this.session.refresh(false);
-            } catch (RepositoryException re) {
+                remoteAssetsResolver.revert();
+            } catch (Exception re) {
                 LOG.error("Failed to rollback asset changes", re);
             }
         }

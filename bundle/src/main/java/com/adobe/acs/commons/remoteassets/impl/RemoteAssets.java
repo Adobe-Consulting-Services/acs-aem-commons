@@ -19,21 +19,10 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Common functionality for Remote Assets.
  */
 public class RemoteAssets {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RemoteAssets.class);
     public static final String IS_REMOTE_ASSET = "isRemoteAsset";
     public static final String REMOTE_SYNC_FAILED = "remoteSyncFailed";
     public static final String SERVICE_NAME = "remote-assets";
@@ -43,21 +32,5 @@ public class RemoteAssets {
      */
     private RemoteAssets() {
         throw new IllegalStateException("Utility class");
-    }
-
-    /**
-     * Retrieve a {@link ResourceResolver} after logging in.
-     * @param resourceResolverFactory ResourceResolverFactory
-     * @return ResourceResolver
-     */
-    public static ResourceResolver logIn(ResourceResolverFactory resourceResolverFactory) {
-        try {
-            Map<String, Object> userParams = new HashMap<>();
-            userParams.put(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-            return resourceResolverFactory.getServiceResourceResolver(userParams);
-        } catch (LoginException le2) {
-            LOG.error("Remote assets functionality cannot be enabled - service user login failed");
-            throw new RemoteAssetsServiceException(le2);
-        }
     }
 }

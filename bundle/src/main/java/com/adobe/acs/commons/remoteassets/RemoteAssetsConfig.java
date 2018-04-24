@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.remoteassets;
 
 import org.apache.http.client.fluent.Executor;
+import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
 import java.util.Set;
@@ -81,4 +82,14 @@ public interface RemoteAssetsConfig {
      * Get an HTTP Executor for making calls to the remote AEM Assets server.
      */
     Executor getRemoteAssetsHttpExecutor();
+
+    /**
+     * Get a resourceResolver for the remote assets service user.
+     */
+    ResourceResolver getResourceResolver();
+
+    /**
+     * Close resourceResolver for the remote assets service user, along with associated session.
+     */
+    void closeResourceResolver(ResourceResolver resourceResolver);
 }
