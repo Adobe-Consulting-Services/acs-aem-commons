@@ -21,11 +21,14 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import com.day.cq.dam.api.DamConstants;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
 import org.apache.sling.api.resource.ValueMap;
@@ -84,9 +87,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             }
         } catch (Exception e) {
             // Logging at debug level b/c if this happens it could represent a ton of logging
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Failed binary sync check for remote asset: {} - {}", resource.getPath(), e.getMessage());
-            }
+            LOG.debug("Failed binary sync check for remote asset: {} - {}", resource.getPath(), e);
             return resource;
         }
 
@@ -96,7 +97,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             LOG.info("Sync'ing remote asset binaries: {}", resource.getPath());
             ret = this.assetSync.syncAsset(resource);
         } catch (Exception e) {
-            LOG.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e.getMessage());
+            LOG.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e);
         } finally {
             remoteResourcesSyncing.remove(resource.getPath());
         }
@@ -129,11 +130,11 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         ValueMap props = resource.getValueMap();
-        if (!props.get("jcr:primaryType", "").equals("dam:AssetContent")) {
+        if (!DamConstants.NT_DAM_ASSETCONTENT.equals(props.get(JcrConstants.JCR_PRIMARYTYPE))) {
             return false;
         }
 
-        if (!props.get("isRemoteAsset", false)) {
+        if (!props.get(RemoteAssets.IS_REMOTE_ASSET, false)) {
             return false;
         }
 
@@ -141,32 +142,34 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return false;
         }
 
-        Calendar lastFailure = props.get("remoteSyncFailed", (Calendar) null);
+        Calendar lastFailure = props.get(RemoteAssets.REMOTE_SYNC_FAILED, (Calendar) null);
         if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (this.config.getRetryDelay() * 60000))) {
             return false;
         }
 
+        boolean matchesSyncPath = false;
         for (String syncPath : this.config.getDamSyncPaths()) {
-            if (!resource.getPath().startsWith(syncPath)) {
-                continue;
+            if (resource.getPath().startsWith(syncPath)) {
+                matchesSyncPath = true;
             }
+        }
 
+        if (matchesSyncPath) {
             Session session = resource.getResourceResolver().adaptTo(Session.class);
             String userId = session.getUserID();
-            if (userId.equals("admin")) {
-                LOG.debug("Avoiding binary sync for admin user");
-                continue;
-            }
+            if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+                if (this.config.getWhitelistedServiceUsers().contains(userId)) {
+                    return true;
+                }
 
-            if (this.config.getWhitelistedServiceUsers().contains(userId)) {
-                return true;
-            }
-
-            User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
-            if (currentUser != null && !currentUser.isSystemUser()) {
-                return true;
+                User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+                if (currentUser != null && !currentUser.isSystemUser()) {
+                    return true;
+                } else {
+                    LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                }
             } else {
-                LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                LOG.debug("Avoiding binary sync for admin user");
             }
         }
 

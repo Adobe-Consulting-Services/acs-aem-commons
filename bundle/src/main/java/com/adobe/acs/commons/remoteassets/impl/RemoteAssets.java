@@ -20,12 +20,14 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Session;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -37,6 +39,8 @@ import java.util.Map;
 public class RemoteAssets {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssets.class);
+    public static final String IS_REMOTE_ASSET = "isRemoteAsset";
+    public static final String REMOTE_SYNC_FAILED = "remoteSyncFailed";
     public static final String SERVICE_NAME = "remote-assets";
 
     /**

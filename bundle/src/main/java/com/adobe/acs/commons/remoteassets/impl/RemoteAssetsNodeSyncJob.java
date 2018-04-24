@@ -63,22 +63,6 @@ public class RemoteAssetsNodeSyncJob implements Runnable {
     private RemoteAssetsNodeSync remoteAssetsNodeSync;
 
     /**
-     * Method to run on activation.
-     */
-    @Activate
-    protected final void activate() {
-        // Do nothing.
-    }
-
-    /**
-     * Method to run on deactivation.
-     */
-    @Deactivate
-    protected void deactivate() {
-        // Do nothing.
-    }
-
-    /**
      * @see Runnable#run().
      */
     @Override

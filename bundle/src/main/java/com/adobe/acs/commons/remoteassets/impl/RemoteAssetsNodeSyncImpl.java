@@ -190,13 +190,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             node = JcrUtils.getNodeIfExists(nextPath, this.session);
             if (node == null) {
                 node = JcrUtil.createPath(nextPath, primaryType, this.session);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("New node '{}' created.", node.getPath());
-                }
+                LOG.debug("New node '{}' created.", node.getPath());
             } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Node '{}' retrieved from JCR.", node.getPath());
-                }
+                LOG.debug("Node '{}' retrieved from JCR.", node.getPath());
             }
         } catch (RepositoryException re) {
             LOG.error("Repository Exception. Unable to get or create node '{}'", nextPath, re);
@@ -215,29 +211,25 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     private JSONObject getJsonFromUri(final String path) throws IOException, JSONException {
         try {
-            URI pathUi = new URI(null, null, path, null);
+            URI pathUri = new URI(null, null, path, null);
             // we want to traverse the JCR one level at a time, hence the '1' selector.
-            URL url = new URL(this.remoteAssetsConfig.getServer() + pathUi.toString() + ".1.json");
+            URL url = new URL(this.remoteAssetsConfig.getServer() + pathUri.toString() + ".1.json");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", String.format("Basic %s", RemoteAssets.encodeForBasicAuth(this.remoteAssetsConfig)));
 
             try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 String line;
                 StringBuilder sb = new StringBuilder();
-
                 while ((line = br.readLine()) != null) {
                     sb.append(line);
                 }
-
-                String sbString = sb.toString();
-
-                if (StringUtils.startsWith(sbString, "{")) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("JSON successfully fetched for URL '{}'.", url.toString());
-                    }
-                    return new JSONObject(sbString);
-                } else {
-                    LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), sbString);
+                String responseString = sb.toString();
+                try {
+                    JSONObject responseJson = new JSONObject(responseString);
+                    LOG.debug("JSON successfully fetched for URL '{}'.", url.toString());
+                    return responseJson;
+                } catch (JSONException e) {
+                    LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), responseString);
                 }
             } finally {
                 connection.disconnect();
@@ -246,7 +238,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             LOG.error("URI Syntax Exception {}", e);
         }
 
-        throw new JSONException("Response JSON came back null.");
+        throw new JSONException("Response JSON came back null or invalid.");
     }
 
     /**
@@ -290,10 +282,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         createOrUpdateNodes(objectJson, node);
 
         if (DamConstants.NT_DAM_ASSET.equals(parentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())) {
-            node.setProperty("isRemoteAsset", true);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Property 'isRemoteAsset' added for node '{}'.", key, node.getPath());
-            }
+            node.setProperty(RemoteAssets.IS_REMOTE_ASSET, true);
+            LOG.debug("Property '{}' added for node '{}'.", RemoteAssets.IS_REMOTE_ASSET, node.getPath());
 
             // Save and refresh the session after the save refresh count has reached the configured amount.
             this.saveRefreshCount++;
@@ -301,10 +291,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 this.saveRefreshCount = 0;
                 this.session.save();
                 this.session.refresh(true);
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Session has been saved and refreshed.");
-                }
+                LOG.debug("Session has been saved and refreshed.");
             }
         }
     }
@@ -376,9 +363,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private void setMixinsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
         JSONArray mixins = (JSONArray) json.get(key);
         for (int i = 0; i < mixins.length(); i++) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Adding mixin '{}' for node '{}'.", mixins.getString(i), node.getPath());
-            }
+            LOG.debug("Adding mixin '{}' for node '{}'.", mixins.getString(i), node.getPath());
             node.addMixin(mixins.getString(i));
         }
     }
@@ -409,10 +394,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         if (tagList.size() > 0) {
             Resource parentResource = this.resourceResolver.getResource(node.getPath());
             tagManager.setTags(parentResource, tagList.toArray(new Tag[tagList.size()]));
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Tags added for node '{}'.", node.getPath());
-            }
+            LOG.debug("Tags added for node '{}'.", node.getPath());
         }
     }
 
@@ -450,10 +432,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
 
             node.setProperty(key, propertyValues);
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Array property '{}' added for node '{}'.", key, node.getPath());
-            }
+            LOG.debug("Array property '{}' added for node '{}'.", key, node.getPath());
         } catch (Exception e) {
             LOG.error("Unable to assign property:node to '{}' {}", key + node.getPath(), e);
         }
@@ -476,9 +455,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             Calendar responseLastModified = GregorianCalendar.from(ZonedDateTime.parse(rawResponseLastModified, DATE_TIME_FORMATTER));
 
             if (nodeLastModified.equals(this.valueFactory.createValue(responseLastModified).getString())) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Not creating binary for node '{}' because binary has not been updated.");
-                }
+                LOG.debug("Not creating binary for node '{}' because binary has not been updated.", node.getPath());
                 return;
             }
         }
@@ -584,9 +561,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
 
             node.setProperty(JcrConstants.JCR_DATA, this.valueFactory.createBinary(inputStream));
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Binary added for node '{}'.", node.getPath());
-            }
+            LOG.debug("Binary added for node '{}'.", node.getPath());
         } finally {
             try {
                 if (inputStream != null) {
@@ -617,8 +592,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         String assetFileExtension = FilenameUtils.getExtension(assetNode.getName());
         String parentNodeFileExtension = FilenameUtils.getExtension(renditionNode.getName());
         for (String file : files) {
-            if ("original".equals(renditionNode.getName()) && file.equals(assetFileExtension)
-                    || !"original".equals(renditionNode.getName()) && file.equals(parentNodeFileExtension)) {
+            if (DamConstants.ORIGINAL_FILE.equals(renditionNode.getName()) && file.equals(assetFileExtension)
+                    || !DamConstants.ORIGINAL_FILE.equals(renditionNode.getName()) && file.equals(parentNodeFileExtension)) {
 
                 remoteAssetFileUri = ASSET_FILE_PREFIX + "." + file;
                 break;
@@ -656,8 +631,6 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             node.setProperty(key, value == null ? null : value.toString());
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Property '{}' added for node '{}'.", key, node.getPath());
-        }
+        LOG.debug("Property '{}' added for node '{}'.", key, node.getPath());
     }
 }

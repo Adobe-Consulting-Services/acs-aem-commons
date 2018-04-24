@@ -21,8 +21,11 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.granite.asset.api.Asset;
-import com.adobe.granite.asset.api.Rendition;
+import com.adobe.granite.asset.api.RenditionHandler;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.api.Rendition;
+import com.day.cq.dam.commons.util.DamUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -118,9 +121,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             Resource localRes = this.resourceResolver.getResource(resource.getPath());
             Node node = localRes.adaptTo(Node.class);
 
-            Asset asset = localRes.getParent().adaptTo(Asset.class);
-            URI pathUi = new URI(null, null, asset.getPath(), null);
-            String baseUrl = this.remoteAssetsConfig.getServer().concat(pathUi.toString()).concat("/_jcr_content/renditions/");
+            Asset asset = DamUtil.resolveToAsset(localRes);
+            URI pathUri = new URI(null, null, asset.getPath(), null);
+            String baseUrl = this.remoteAssetsConfig.getServer().concat(pathUri.toString()).concat("/_jcr_content/renditions/");
 
             Iterator<? extends Rendition> renditions = asset.listRenditions();
             while (renditions.hasNext()) {
@@ -135,19 +138,17 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Authorization", String.format("Basic %s", RemoteAssets.encodeForBasicAuth(this.remoteAssetsConfig)));
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("syncing from remote asset url {}", url);
-                }
+                LOG.debug("syncing from remote asset url {}", url);
 
                 setRenditionOnAsset(connection, assetRendition, asset, renditionName);
             }
 
-            node.setProperty("isRemoteAsset", (Value)null);
-            node.setProperty("remoteSyncFailed", (Value)null);
+            node.setProperty(RemoteAssets.IS_REMOTE_ASSET, (Value)null);
+            node.setProperty(RemoteAssets.REMOTE_SYNC_FAILED, (Value)null);
             this.session.save();
             return localRes;
         } catch (Exception e) {
-            LOG.error("Error transferring remote asset '{}' to local server {}", resource.getPath(), e);
+            LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
             try {
                 this.session.refresh(false);
             } catch (RepositoryException re) {
@@ -170,10 +171,10 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
         try (InputStream inputStream = connection.getInputStream()) {
             Map<String, Object> props = new HashMap<>();
-            props.put("rendition.mime", assetRendition.getMimeType());
-            asset.setRendition(renditionName, inputStream, props);
+            props.put(RenditionHandler.PROPERTY_RENDITION_MIME_TYPE, assetRendition.getMimeType());
+            asset.addRendition(renditionName, inputStream, props);
         } catch (FileNotFoundException fne) {
-            if ("original".equals(renditionName)) {
+            if (DamConstants.ORIGINAL_FILE.equals(renditionName)) {
                 throw fne;
             }
 
@@ -193,7 +194,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         try {
             Resource localRes = this.resourceResolver.getResource(resource.getPath());
             Node node = localRes.adaptTo(Node.class);
-            node.setProperty("remoteSyncFailed", new DateValue(new GregorianCalendar()));
+            node.setProperty(RemoteAssets.REMOTE_SYNC_FAILED, new DateValue(new GregorianCalendar()));
             this.session.save();
             return localRes;
         } catch (Exception e) {
