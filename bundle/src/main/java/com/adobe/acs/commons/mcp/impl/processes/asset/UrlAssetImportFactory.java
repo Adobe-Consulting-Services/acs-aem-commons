@@ -51,7 +51,7 @@ public class UrlAssetImportFactory extends AuthorizedGroupProcessDefinitionFacto
     }
 
     @Override
-    public String[] getAuthorizedGroups() {
+    protected final String[] getAuthorizedGroups() {
         return AssetIngestor.AUTHORIZED_GROUPS;
     }    
 }

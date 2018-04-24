@@ -29,7 +29,7 @@ import aQute.bnd.annotation.ConsumerType;
 public abstract class AdministratorsOnlyProcessDefinitionFactory<P extends ProcessDefinition> extends AuthorizedGroupProcessDefinitionFactory<P> {
 
     @Override
-    public String[] getAuthorizedGroups() {
+    protected final String[] getAuthorizedGroups() {
         return new String[]{"administrators"};
     }
     

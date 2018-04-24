@@ -59,7 +59,7 @@ public abstract class AuthorizedGroupProcessDefinitionFactory<P extends ProcessD
         }
     }
 
-    public abstract String[] getAuthorizedGroups();
+    protected abstract String[] getAuthorizedGroups();
 
     @Override
     protected abstract P createProcessDefinitionInstance();

@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
@@ -62,7 +61,7 @@ public class S3AssetIngestorFactory extends AuthorizedGroupProcessDefinitionFact
     }
     
     @Override
-    public String[] getAuthorizedGroups() {
+    protected final String[] getAuthorizedGroups() {
         return AssetIngestor.AUTHORIZED_GROUPS;
     }    
 }

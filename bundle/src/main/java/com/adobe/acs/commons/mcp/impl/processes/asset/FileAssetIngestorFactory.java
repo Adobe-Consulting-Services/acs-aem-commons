@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import org.apache.felix.scr.annotations.Component;
@@ -45,7 +44,7 @@ public class FileAssetIngestorFactory extends AuthorizedGroupProcessDefinitionFa
     }
     
     @Override
-    public String[] getAuthorizedGroups() {
+    protected final String[] getAuthorizedGroups() {
         return AssetIngestor.AUTHORIZED_GROUPS;
     }
 }
