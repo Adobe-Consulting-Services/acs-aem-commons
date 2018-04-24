@@ -27,6 +27,12 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.NameConstants;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -41,9 +47,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +60,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,8 +72,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -162,15 +164,13 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         try {
             for (String syncPath : syncPaths) {
                 this.session.refresh(true);
-                JSONObject topLevelJson = getJsonFromUri(syncPath);
-                Node topLevelSyncNode = getOrCreateNode(syncPath, (String) topLevelJson.get(JcrConstants.JCR_PRIMARYTYPE));
-                createOrUpdateNodes(topLevelJson, topLevelSyncNode);
+                JsonObject topLevelJsonWithChildren = getJsonFromUri(syncPath);
+                Node topLevelSyncNode = getOrCreateNode(syncPath, topLevelJsonWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString());
+                createOrUpdateNodes(topLevelJsonWithChildren, topLevelSyncNode);
                 this.session.save();
             }
         } catch (IOException e) {
             LOG.error("IO Exception {}", e);
-        } catch (JSONException e) {
-            LOG.error("Json Exception {}", e);
         } catch (RepositoryException e) {
             LOG.error("Repository Exception {}", e);
         }
@@ -203,13 +203,12 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
-     * Get {@link JSONObject} from URL response.
+     * Get {@link JsonObject} from URL response.
      * @param path String
-     * @return JSONObject
+     * @return JsonObject
      * @throws IOException exception
-     * @throws JSONException exception
      */
-    private JSONObject getJsonFromUri(final String path) throws IOException, JSONException {
+    private JsonObject getJsonFromUri(final String path) throws IOException {
         try {
             URI pathUri = new URI(null, null, path, null);
             // we want to traverse the JCR one level at a time, hence the '1' selector.
@@ -225,61 +224,58 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
                 }
                 String responseString = sb.toString();
                 try {
-                    JSONObject responseJson = new JSONObject(responseString);
+                    JsonObject responseJson = new JsonParser().parse(responseString).getAsJsonObject();
                     LOG.debug("JSON successfully fetched for URL '{}'.", url.toString());
                     return responseJson;
-                } catch (JSONException e) {
+                } catch (JsonSyntaxException | IllegalStateException e) {
                     LOG.error("Unable to grab JSON Object. Please ensure URL {} is valid. \nRaw Response: {}", url.toString(), responseString);
+                    throw new IOException("Invalid JSON response", e);
                 }
             } finally {
                 connection.disconnect();
             }
         } catch (URISyntaxException e) {
-            LOG.error("URI Syntax Exception {}", e);
+            LOG.error("URI Syntax Exception", e);
+            throw new IOException("Invalid URI", e);
         }
-
-        throw new JSONException("Response JSON came back null or invalid.");
     }
 
     /**
      * Create or update nodes from remote JSON.
-     * @param json JSONObject
-     * @param parentNode Node
+     * @param json JsonObject
+     * @param node Node
      * @throws IOException exception
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void createOrUpdateNodes(final JSONObject json, final Node parentNode) throws IOException, JSONException, RepositoryException {
-        Iterator<String> keys = json.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            if (json.get(key) instanceof JSONObject) {
-                jsonObjectTypeHandler(key, parentNode);
-            } else if (json.get(key) instanceof JSONArray) {
-                jsonArrayTypeHandler(key, json, parentNode);
+    private void createOrUpdateNodes(final JsonObject json, final Node node) throws IOException, RepositoryException {
+        for (Map.Entry<String, JsonElement> jsonEntry : json.entrySet()) {
+            JsonElement jsonElement = jsonEntry.getValue();
+            if (jsonElement.isJsonObject()) {
+                createOrUpdateNodesForJsonObject(jsonEntry.getKey(), node);
+            } else if (jsonElement.isJsonArray()) {
+                setNodeArrayProperty(jsonEntry.getKey(), jsonElement.getAsJsonArray(), node);
             } else {
-                otherTypeHandler(key, json, parentNode);
+                setNodeProperty(jsonEntry.getKey(), json, node);
             }
         }
     }
 
     /**
-     * Handler for when the object is an instance of {@link JSONObject}.
+     * Handler for when the object is an instance of {@link JsonObject}.
      * @param key String
      * @param parentNode Node
      * @throws IOException exception
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void jsonObjectTypeHandler(final String key, final Node parentNode) throws IOException, JSONException, RepositoryException {
+    private void createOrUpdateNodesForJsonObject(final String key, final Node parentNode) throws IOException, RepositoryException {
         if (PROTECTED_NODES.contains(key)) {
             return;
         }
 
         String objectPath = String.format("%s/%s", parentNode.getPath(), key);
-        JSONObject objectJson = getJsonFromUri(objectPath);
-        Node node = getOrCreateNode(objectPath, (String) objectJson.get(JcrConstants.JCR_PRIMARYTYPE));
-        createOrUpdateNodes(objectJson, node);
+        JsonObject jsonObjectWithChildren = getJsonFromUri(objectPath);
+        Node node = getOrCreateNode(objectPath, jsonObjectWithChildren.getAsJsonPrimitive(JcrConstants.JCR_PRIMARYTYPE).getAsString());
+        createOrUpdateNodes(jsonObjectWithChildren, node);
 
         if (DamConstants.NT_DAM_ASSET.equals(parentNode.getProperty(JcrConstants.JCR_PRIMARYTYPE).getValue().getString())) {
             node.setProperty(RemoteAssets.IS_REMOTE_ASSET, true);
@@ -299,92 +295,86 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     /**
      * Handler for when the object is an instance of {@link JSONArray}.
      * @param key String
-     * @param json JSONObject
-     * @param parentNode Node
-     * @throws JSONException exception
+     * @param jsonArray JsonArray
+     * @param node Node
      * @throws RepositoryException exception
      */
-    private void jsonArrayTypeHandler(final String key, final JSONObject json, final Node parentNode) throws JSONException, RepositoryException {
+    private void setNodeArrayProperty(final String key, final JsonArray jsonArray, final Node node) throws RepositoryException {
         try {
             if (PROTECTED_PROPERTIES.contains(key)) {
                 // Skipping due to the property being unmodifiable.
                 return;
             } else if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
-                setMixinsProperty(json, key, parentNode);
+                setNodeMixinsProperty(jsonArray, key, node);
             } else if (NameConstants.PN_TAGS.equals(key)) {
-                setTagsProperty(json, key, parentNode);
+                setNodeTagsProperty(jsonArray, key, node);
             } else {
-                setArrayProperty(json, key, parentNode);
+                setNodeArrayProperty(jsonArray, key, node);
             }
         } catch (RepositoryException re) {
-            LOG.warn("Repository exception thrown. Skipping {} array property for node '{}'.", key, parentNode.getPath());
+            LOG.warn("Repository exception thrown. Skipping {} array property for node '{}'.", key, node.getPath());
         }
     }
 
     /**
-     * Handler for when the object is an NOT instance of {@link JSONObject} or {@link JSONArray}.
+     * Handler for when the object is an NOT instance of {@link JsonObject} or {@link JSONArray}.
      * @param key String
-     * @param json JSONObject
-     * @param parentNode Node
-     * @throws JSONException exception
+     * @param json JsonObject
+     * @param node Node
      * @throws RepositoryException exception
      */
-    private void otherTypeHandler(final String key, final JSONObject json, final Node parentNode) throws JSONException, RepositoryException {
+    private void setNodeProperty(final String key, final JsonObject json, final Node node) throws RepositoryException {
         try {
-            Object value = json.get(key);
+            JsonElement value = json.get(key);
 
             if (":".concat(JcrConstants.JCR_DATA).equals(key)) {
-                setJcrDataProperty(parentNode, json.getString(JcrConstants.JCR_LASTMODIFIED));
+                setNodeJcrDataProperty(node, json.getAsJsonPrimitive(JcrConstants.JCR_LASTMODIFIED).getAsString());
             } else if (key.startsWith(":")) {
                 // Skip binary properties, since they do not come across in JSON
                 return;
-            } else if (parentNode.hasProperty(key) && parentNode.getProperty(key).getString().equals(value)) {
+            } else if (node.hasProperty(key) && node.getProperty(key).getString().equals(value.getAsString())) {
                 // Skipping due to the property already existing and being equal
                 return;
             } else if (PROTECTED_PROPERTIES.contains(key)) {
                 // Skipping due to the property being unmodifiable.
                 return;
             } else {
-                setProperty(value, key, parentNode);
+                setNodeProperty(value.getAsJsonPrimitive(), key, node);
             }
         } catch (RepositoryException re) {
-            LOG.warn("Repository exception thrown. Skipping '{}' single property for node '{}'.", key, parentNode.getPath());
+            LOG.warn("Repository exception thrown. Skipping '{}' single property for node '{}'.", key, node.getPath());
         }
     }
 
     /**
      * Set mixins property for the property's node.
-     * @param json JSONObject
+     * @param jsonArray JsonArray
      * @param key String
      * @param node Node
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setMixinsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
-        JSONArray mixins = (JSONArray) json.get(key);
-        for (int i = 0; i < mixins.length(); i++) {
-            LOG.debug("Adding mixin '{}' for node '{}'.", mixins.getString(i), node.getPath());
-            node.addMixin(mixins.getString(i));
+    private void setNodeMixinsProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
+        for (JsonElement jsonElement : jsonArray) {
+            LOG.debug("Adding mixin '{}' for node '{}'.", jsonElement.getAsString(), node.getPath());
+            node.addMixin(jsonElement.getAsString());
         }
     }
 
     /**
      * Set tags property for the property's node.
-     * @param json JSONObject
+     * @param jsonArray JsonArray
      * @param key String
      * @param node Node
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setTagsProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
+    private void setNodeTagsProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
         TagManager tagManager = this.resourceResolver.adaptTo(TagManager.class);
-        JSONArray tags = (JSONArray) json.get(key);
         ArrayList<Tag> tagList = new ArrayList<>();
 
-        for (int i = 0; i < tags.length(); i++) {
-            Tag tag = tagManager.resolve(tags.getString(i));
+        for (JsonElement jsonElement : jsonArray) {
+            Tag tag = tagManager.resolve(jsonElement.getAsString());
             if (tag == null) {
-                LOG.warn("Tag '{}' could not be found. Skipping tag for node '{}'.", tags.getString(i), node.getPath());
+                LOG.warn("Tag '{}' could not be found. Skipping tag for node '{}'.", jsonElement.getAsString(), node.getPath());
                 continue;
             }
 
@@ -400,34 +390,33 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     /**
      * Set generic array property for the property's node.
-     * @param json JSONObject
+     * @param jsonArray JsonArray
      * @param key String
      * @param node Node
-     * @throws JSONException exception
      * @throws RepositoryException exception
      */
-    private void setArrayProperty(final JSONObject json, final String key, final Node node) throws JSONException, RepositoryException {
-        JSONArray rawValues = (JSONArray) json.get(key);
-        Object firstVal = rawValues.get(0);
-        Value[] propertyValues = new Value[rawValues.length()];
+    private void setNodeArrayProperty(final JsonArray jsonArray, final String key, final Node node) throws RepositoryException {
+        JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
+        Value[] propertyValues = new Value[jsonArray.size()];
 
         try {
-            if (firstVal instanceof Boolean) {
-                for (int i = 0; i < rawValues.length(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(rawValues.getBoolean(i));
+            if (firstVal.isBoolean()) {
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsBoolean());
                 }
-            } else if (firstVal instanceof Double) {
-                for (int i = 0; i < rawValues.length(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(rawValues.getDouble(i));
-                }
-            } else if (firstVal instanceof Integer || firstVal instanceof Long) {
-                // doing this in case the array has both Integers and Long objects.
-                for (int i = 0; i < rawValues.length(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(rawValues.getLong(i));
+            } else if (firstVal.isNumber()) {
+                if (DECIMAL_REGEX.matcher(firstVal.getAsString()).matches()) {
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsDouble());
+                    }
+                } else {
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsLong());
+                    }
                 }
             } else {
-                for (int i = 0; i < rawValues.length(); i++) {
-                    propertyValues[i] = this.valueFactory.createValue(rawValues.getString(i));
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    propertyValues[i] = this.valueFactory.createValue(jsonArray.get(i).getAsString());
                 }
             }
 
@@ -445,7 +434,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param rawResponseLastModified String
      * @throws RepositoryException exception
      */
-    private void setJcrDataProperty(final Node node, final String rawResponseLastModified) throws RepositoryException {
+    private void setNodeJcrDataProperty(final Node node, final String rawResponseLastModified) throws RepositoryException {
         // first checking to make sure existing node has lastModified and jcr:data properties then seeing if binaries should be updated
         // based off of whether the node's lastModified matches the JSON's lastModified
         if (node.hasProperty(JcrConstants.JCR_LASTMODIFIED) && node.hasProperty(JcrConstants.JCR_DATA)
@@ -574,16 +563,47 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     }
 
     /**
+     * Set generic property for the property's node.
+     * @param value Object
+     * @param key String
+     * @param node Node
+     * @throws RepositoryException exception
+     */
+    private void setNodeProperty(final JsonPrimitive value, final String key, final Node node) throws RepositoryException {
+        if (value.isString() && DATE_REGEX.matcher(value.getAsString()).matches()) {
+            try {
+                node.setProperty(key, GregorianCalendar.from(ZonedDateTime.parse(value.getAsString(), DATE_TIME_FORMATTER)));
+            } catch (DateTimeParseException e) {
+                LOG.warn("Unable to parse date '{}' for property:node '{}'.", value, key + ":" + node.getPath());
+            }
+        } else if (value.isString() && DECIMAL_REGEX.matcher(value.getAsString()).matches()) {
+            node.setProperty(key, value.getAsBigDecimal());
+        } else if (value.isBoolean()) {
+            node.setProperty(key, value.getAsBoolean());
+        } else if (value.isNumber()) {
+            if (DECIMAL_REGEX.matcher(value.getAsString()).matches()) {
+                node.setProperty(key, value.getAsDouble());
+            } else {
+                node.setProperty(key, value.getAsLong());
+            }
+        } else {
+            node.setProperty(key, value.isJsonNull() ? null : value.getAsString());
+        }
+
+        LOG.debug("Property '{}' added for node '{}'.", key, node.getPath());
+    }
+
+    /**
      * Get the correct temporary binary (file type) based on the renditions file extension
      * or the overall asset's file extension if it is the original rendition.
-     * @param parentNode Node
+     * @param fileNode Node
      * @param files String...
      * @return InputStream
      * @throws RepositoryException exception
      */
-    private InputStream getCorrectBinaryTypeStream(final Node parentNode, String... files) throws RepositoryException {
-        Node renditionNode = parentNode.getParent();
-        Node assetNode = parentNode;
+    private InputStream getCorrectBinaryTypeStream(final Node fileNode, String... files) throws RepositoryException {
+        Node renditionNode = fileNode.getParent();
+        Node assetNode = fileNode;
         while (!DamConstants.NT_DAM_ASSET.equals(assetNode.getPrimaryNodeType().getName())) {
             assetNode = assetNode.getParent();
         }
@@ -601,36 +621,5 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         }
 
         return this.dynamicClassLoaderManager.getDynamicClassLoader().getResourceAsStream(remoteAssetFileUri);
-    }
-
-    /**
-     * Set generic property for the property's node.
-     * @param value Object
-     * @param key String
-     * @param node Node
-     * @throws RepositoryException exception
-     */
-    private void setProperty(final Object value, final String key, final Node node) throws RepositoryException {
-        if (value instanceof String && DATE_REGEX.matcher((String) value).matches()) {
-            try {
-                node.setProperty(key, GregorianCalendar.from(ZonedDateTime.parse((String) value, DATE_TIME_FORMATTER)));
-            } catch (DateTimeParseException e) {
-                LOG.warn("Unable to parse date '{}' for property:node '{}'.", value, key + ":" + node.getPath());
-            }
-        } else if (value instanceof String && DECIMAL_REGEX.matcher((String) value).matches()) {
-            node.setProperty(key, new BigDecimal((String) value));
-        } else if (value instanceof Boolean) {
-            node.setProperty(key, (Boolean) value);
-        } else if (value instanceof Double) {
-            node.setProperty(key, (Double) value);
-        } else if (value instanceof Integer) {
-            node.setProperty(key, (Integer) value);
-        } else if (value instanceof Long) {
-            node.setProperty(key, (Long) value);
-        } else {
-            node.setProperty(key, value == null ? null : value.toString());
-        }
-
-        LOG.debug("Property '{}' added for node '{}'.", key, node.getPath());
     }
 }
