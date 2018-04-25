@@ -20,8 +20,10 @@ import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import com.adobe.acs.commons.workflow.synthetic.impl.SyntheticWorkflowProcess;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.core.process.ThumbnailProcess;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +41,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 public class RefreshFolderTumbnails extends ProcessDefinition {
     private static enum ThumbnailScanLogic {
         MISSING(RefreshFolderTumbnails::isThumbnailMissing),
-        PLACEHOLDERS(RefreshFolderTumbnails::isThumbnailMissing, 
+        PLACEHOLDERS(RefreshFolderTumbnails::isThumbnailMissing,
                 RefreshFolderTumbnails::isPlaceholderThumbnail),
         OUTDATED(RefreshFolderTumbnails::isThumbnailMissing, 
                 RefreshFolderTumbnails::isPlaceholderThumbnail,
@@ -57,15 +59,21 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         }
     }
     
+    private final ThumbnailProcess thumbnailProcess;
+    private SyntheticWorkflowProcess syntheticProcess;
     private static final int PLACEHOLDER_SIZE = 1024;
     private String startingPath;
     private ThumbnailScanLogic scanLogic = ThumbnailScanLogic.PLACEHOLDERS;
     
     private transient List<String> foldersToReplace = Collections.synchronizedList(new ArrayList<>());
     
+    public RefreshFolderTumbnails(ThumbnailProcess process) {
+        this.thumbnailProcess = process;
+    }
+    
     @Override
     public void init() throws RepositoryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SyntheticWorkflowProcess syntheticWorkflowProcess = new SyntheticWorkflowProcess(thumbnailProcess);
     }
 
     @Override
@@ -101,11 +109,10 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     private void rebuildThumbnails(ActionManager manager) {
         //Haven't figured out a clean way to regenerate the thumbnail but the .folderthumbnail.jpg selector/suffix does it from the browser.
         // If the folder thumbnail generation is in a "public" API then it would make sense to call it directly, otherwise an internal Sling Request will have to suffice to trigger that servlet.
-
+        FolderPreviewUpdater 
     }
     
     private static boolean isThumbnailMissing(Resource damFolder) {
-        //Thumbnail is under folder/jcr:content/folderThumbnail
         Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
         if (jcrContent == null) {
             return true;
@@ -125,7 +132,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         //Look at /jcr:content/folderThumbnail/jcr:content/@dam:folderThumbnailPaths that list 3 images in that folder.
         //jcr:lastModified property in the jcr:content might be a useful determining factor if a thumbnail is older than the content of the folder
         //Confirm if all assets exist and if any modified dates are later than thumbnail
-        
+        PreviewGenerator.validateExistingPreview
         return false;
     }
 }
