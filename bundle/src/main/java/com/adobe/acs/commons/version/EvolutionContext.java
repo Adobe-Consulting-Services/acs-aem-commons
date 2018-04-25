@@ -26,5 +26,13 @@ import java.util.List;
  */
 public interface EvolutionContext {
 
+    /**
+     * @return List of resource evolutions with artificial "Latest" evolution.
+     */
     List<Evolution> getEvolutionItems();
+
+    /**
+     * @return List of resource evolutions.
+     */
+    List<Evolution> getVersions();
 }

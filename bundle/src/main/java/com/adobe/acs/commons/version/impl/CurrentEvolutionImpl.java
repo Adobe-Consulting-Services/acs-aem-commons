@@ -40,6 +40,8 @@ import java.util.List;
 
 public class CurrentEvolutionImpl implements Evolution {
 
+    public static final String LATEST_VERSION = "Latest";
+
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionImpl.class);
 
     private final Resource resource;
@@ -63,7 +65,7 @@ public class CurrentEvolutionImpl implements Evolution {
 
     @Override
     public String getVersionName() {
-        return "Latest";
+        return LATEST_VERSION;
     }
 
     @Override
