@@ -7,7 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.0...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
+
+## [3.15.2] - 2018-04-25
+
 ### Changed
 - #1338 - Asset ingestion now visible to the groups: administrators, asset-ingest, dam-administrators
 
