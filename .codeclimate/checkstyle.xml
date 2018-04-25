@@ -154,4 +154,9 @@
             <property name="exceptionVariableName" value="expected"/>
         </module>
     </module>
+    <module name="RegexpHeader">
+        <property name="fileExtensions" value="java"/>
+        <property name="headerFile" value=".codeclimate/header.txt"/>
+        <property name="multiLines" value="2,18"/>
+    </module>
 </module>
