@@ -26,8 +26,16 @@ import java.io.IOException;
 @Component(immediate = true)
 @Properties({
         @Property(
-                name = "felix.webconsole.label",
+                name = "felix.webconsole.title",
                 value = "Ensure Oak Index"
+        ),
+        @Property(
+                name = "felix.webconsole.label",
+                value = "ensure-oak-index"
+        ),
+        @Property(
+                name = "felix.webconsole.category",
+                value = "Sling"
         )
 })
 @Service(Servlet.class)
