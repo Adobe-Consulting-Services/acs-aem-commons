@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
+### Fixed
+- #1278 - EvolutionContext refactored to contain a method returning version history
 
 ## [3.15.2] - 2018-04-25
 

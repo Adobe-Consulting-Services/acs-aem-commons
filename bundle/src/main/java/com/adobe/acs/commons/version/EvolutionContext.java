@@ -19,11 +19,14 @@
  */
 package com.adobe.acs.commons.version;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.List;
 
 /**
  * Stored context for a version history.
  */
+@ProviderType
 public interface EvolutionContext {
 
     /**
