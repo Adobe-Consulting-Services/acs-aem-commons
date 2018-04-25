@@ -32,7 +32,7 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionEntryImpl.class);
 
-    private static int MAX_CHARS = 200;
+    private static final int MAX_CHARS = 200;
 
     private EvolutionEntryType type;
     private String name;
