@@ -43,23 +43,23 @@ import com.google.gson.reflect.TypeToken;
  * Servlet rendering the redirect map to a JSON Array
  */
 @SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
-		"redirectentries" }, extensions = { "json" }, metatype = false)
+        "redirectentries" }, extensions = { "json" }, metatype = false)
 public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
 
-	private static final long serialVersionUID = -2825679173210628699L;
-	private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
-	private Gson gson = new Gson();
+    private static final long serialVersionUID = -2825679173210628699L;
+    private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
+    private Gson gson = new Gson();
 
-	protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		log.trace("doGet");
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        log.trace("doGet");
 
-		log.debug("Requesting redirect maps from {}", request.getResource());
-		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
+        log.debug("Requesting redirect maps from {}", request.getResource());
+        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-		response.setContentType(MediaType.JSON_UTF_8.toString());
+        response.setContentType(MediaType.JSON_UTF_8.toString());
 
-		IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-		}.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
-	}
+        IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
+    }
 }

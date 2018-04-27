@@ -47,43 +47,43 @@ import com.google.gson.reflect.TypeToken;
  * Servlet for adding a line into the redirect map text file
  */
 @SlingServlet(methods = { "POST" }, resourceTypes = {
-		"acs-commons/components/utilities/redirectmappage" }, selectors = {
-				"addentry" }, extensions = { "json" }, metatype = false)
+        "acs-commons/components/utilities/redirectmappage" }, selectors = {
+                "addentry" }, extensions = { "json" }, metatype = false)
 public class AddEntryServlet extends SlingAllMethodsServlet {
 
-	private static final long serialVersionUID = -1704915461516132101L;
-	private static final Logger log = LoggerFactory.getLogger(AddEntryServlet.class);
-	private Gson gson = new Gson();
+    private static final long serialVersionUID = -1704915461516132101L;
+    private static final Logger log = LoggerFactory.getLogger(AddEntryServlet.class);
+    private Gson gson = new Gson();
 
-	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		log.trace("doPost");
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        log.trace("doPost");
 
-		int idx = Integer.parseInt(request.getParameter("idx"), 10);
-		String source = request.getParameter("source");
-		String target = request.getParameter("target");
-		log.debug("Removing entry with {} {} at {}",source, target, idx);
+        int idx = Integer.parseInt(request.getParameter("idx"), 10);
+        String source = request.getParameter("source");
+        String target = request.getParameter("target");
+        log.debug("Removing entry with {} {} at {}",source, target, idx);
 
-		InputStream is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-		List<String> lines = IOUtils.readLines(is);
-		log.debug("Loaded {} lines", lines.size());
+        InputStream is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
+        List<String> lines = IOUtils.readLines(is);
+        log.debug("Loaded {} lines", lines.size());
 
-		lines.add(idx, source+" "+target);
-		log.debug("Added entry...");
+        lines.add(idx, source+" "+target);
+        log.debug("Added entry...");
 
-		ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-				.getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-		mvm.put(JcrConstants.JCR_DATA, StringUtils.join(lines, "\n"));
-		request.getResourceResolver().commit();
-		request.getResourceResolver().refresh();
-		log.debug("Changes saved...");
+        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
+                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
+        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(lines, "\n"));
+        request.getResourceResolver().commit();
+        request.getResourceResolver().refresh();
+        log.debug("Changes saved...");
 
-		log.debug("Requesting redirect maps from {}", request.getResource());
-		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
+        log.debug("Requesting redirect maps from {}", request.getResource());
+        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-		response.setContentType(MediaType.JSON_UTF_8.toString());
+        response.setContentType(MediaType.JSON_UTF_8.toString());
 
-		IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-		}.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
-	}
+        IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
+    }
 }
