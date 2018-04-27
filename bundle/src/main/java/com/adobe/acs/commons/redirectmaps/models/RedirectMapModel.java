@@ -86,7 +86,7 @@ public class RedirectMapModel {
 			String[] sources = properties.get(config.getProperty(), String[].class);
 			for (String source : sources) {
 				MapEntry entry = new MapEntry(source, pageUrl, item.getPath());
-				if (!entry.isValid()) {
+				if(source.matches(".*\\s+.*")) {
 					String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
 					log.warn(msg);
 					entry.setStatus(msg);

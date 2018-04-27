@@ -21,6 +21,7 @@ package com.adobe.acs.commons.redirectmaps.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.sling.api.resource.Resource;
@@ -56,8 +57,12 @@ public class MapEntryTest {
 		String source = "/vanity 2";
 		MapEntry invalid = new MapEntry(source, mockResource.getPath(), "File");
 
+		invalid.setValid(false);
+		invalid.setStatus("Invalid!");
+		
 		log.info("Asserting that entry is invalid");
 		assertFalse(invalid.isValid());
+		assertNotNull(invalid.getStatus());
 
 		log.info("Asserting that matches expected values");
 		assertEquals(invalid.getOrigin(), "File");
