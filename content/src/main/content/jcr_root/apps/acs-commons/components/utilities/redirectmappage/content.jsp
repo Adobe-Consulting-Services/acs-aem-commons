@@ -11,6 +11,7 @@
 		<coral-tablist target="main-panel-1">
 			<coral-tab><fmt:message key="Configure" /></coral-tab>
 			<coral-tab><fmt:message key="Edit Entries" /></coral-tab>
+			<coral-tab><fmt:message key="Preview" /></coral-tab>
 		</coral-tablist>
 		<coral-panelstack id="main-panel-1">
 			<coral-panel class="coral-Well">
@@ -70,44 +71,61 @@
 			<sling2:adaptTo adaptable="${resource}" adaptTo="com.adobe.acs.commons.redirectmaps.models.RedirectMapModel" var="redirectMapModel" />
 			<coral-panel class="coral-Well">
 				<section>
-					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="View / Edit Map" /></h2>
+					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Add Entry" /></h2>
+					<p>
+						<fmt:message key="Add an entry into the redirect map file in the specified location." />
+					</p>
 					<form ng-submit="addEntry()" id="entry-form">
-                        <fieldset>
-                            <h3>Add Entry</h3>
-                            <div class="form-row">
-                                <label acs-coral-heading>
-                                    Source
-                                </label>
-                                <span>
-                                    <input type="text" name="source" class="coral-Textfield"  ng-required="true" placeholder="Path to redirect"/>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <label acs-coral-heading>
-                                    Target
-                                </label>
-                                <span>
-                                    <input type="text" name="target" class="coral-Textfield"  ng-required="true" placeholder="URL to redirect to"/>
-                                </span>
-                            </div>
-                            <div class="form-row">
-                                <label acs-coral-heading>
-                                    Index
-                                </label>
-                                <span>
-                                    <input type="number" name="idx" list="idx" ng-required="true" class="coral-Textfield" placeholder="Index to add the entry within the file"/>
-                                    <datalist id="idx">
-                                        <option value="0">First</option>
-                                        <option value="{{entries.length}}">Last</option>
-                                    </datalist>
-                                </span>
-                            </div>
-                            <button is="coral-button" iconsize="S">
-                                Add Entry
-                            </button>
-                        </fieldset>
+                        <div class="form-row">
+                            <label acs-coral-heading>
+                                Source
+                            </label>
+                            <span>
+                                <input type="text" name="source" class="coral-Textfield"  ng-required="true" placeholder="Path to redirect"/>
+                            </span>
+                        </div>
+                        <div class="form-row">
+                            <label acs-coral-heading>
+                                Target
+                            </label>
+                            <span>
+                                <input type="text" name="target" class="coral-Textfield"  ng-required="true" placeholder="URL to redirect to"/>
+                            </span>
+                        </div>
+                        <div class="form-row">
+                            <label acs-coral-heading>
+                                Index
+                            </label>
+                            <span>
+                                <input type="number" name="idx" list="idx" ng-required="true" class="coral-Textfield" placeholder="Index to add the entry within the file"/>
+                                <datalist id="idx">
+                                    <option value="0">First</option>
+                                    <option value="{{entries.length}}">Last</option>
+                                </datalist>
+                            </span>
+                        </div>
+                        <button is="coral-button" iconsize="S">
+                            Add Entry
+                        </button>
 					</form>
-					<br/>
+				</section>
+				<section  ng-if="(entries | filter: {valid : false}).length > 0">
+					<coral-alert size="L" variant="warning">
+						<coral-alert-header><fmt:message key="Invalid Redirect Maps "/></coral-alert-header>
+						<coral-alert-content>
+							<ul>
+								<li ng-repeat="entry in entries | filter: {valid : false}">
+									{{entry.status}}
+								</li>
+							</ul>
+						</coral-alert-content>
+					</coral-alert>
+				</section>
+				<section>
+					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="View Entries" /></h2>
+					<p>
+						<fmt:message key="List of all of the entries in the redirect map files and gathered from the configuration. Click the button to remove / edit." />
+					</p>
 					<form ng-submit="filterEntries()" id="filter-form">
 						<input is="coral-textfield" placeholder="Filter by source or target" name="filter" value="">
 						<button is="coral-button" iconsize="S">
@@ -128,7 +146,7 @@
                                 </tr>
                             </thead>
                             <tbody >
-                                <tr ng-repeat="entry in entries" >
+                                <tr ng-repeat="entry in entries" class="{{entry.valid ? '' : 'entry-invalid'}}">
                                     <td class="narrow-cell">{{$index}}</td>
                                     <td title="{{entry.source}}">{{entry.source}}</td>
                                     <td title="{{entry.target}}">
@@ -150,6 +168,22 @@
                             </tbody>
                         </table>
                     </div>
+				</section>
+			</coral-panel>
+			<coral-panel class="coral-Well">
+				<section>
+					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Download Preview" /></h2>
+					<c:if test="${redirectMap != null}">
+						<a class="coral-Link" href="${resource.path}.redirectmap.txt">
+							<fmt:message key="Download Combined Redirect Map File" />
+						</a>
+						<br/>
+						Published Path: ${resource.path}.redirectmap.txt
+					</c:if>
+				</section>
+				<section>
+					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Preview" /></h2>
+					<pre class="fixed-height">{{redirectMap}}</pre>
 				</section>
 			</coral-panel>
     	</coral-panelstack>

@@ -27,6 +27,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 		};
     	
     	$scope.entries = [];
+    	$scope.redirectMap = '';
 
         $scope.updateRedirectMap = function (e) {
         	e.preventDefault();
@@ -72,13 +73,33 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 			}).success(function (data, status, headers, config) {
 
 				var time = new Date().getTime() - start;
-				data.time=time;
 				$scope.entries = data || {};
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Found '+data.length+' entries in '+time+'ms!');
+				$scope.loadRedirectMap();
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable load redirect entries!');
+			});
+			
+			
+		};
+		
+		$scope.loadRedirectMap = function(){
+			var start = new Date().getTime();
+			NotificationsService.running(true);
+			$scope.redirectMap = '';
+			$http({
+				method: 'GET',
+				url: $scope.app.uri+'.redirectmap.txt'
+			}).success(function (data, status, headers, config) {
+				var time = new Date().getTime() - start;
+				$scope.redirectMap = data || '';
+				NotificationsService.running(false);
+				NotificationsService.add('success', 'SUCCESS', 'Loaded redirect map in '+time+'ms!');
+			}).error(function (data, status, headers, config) {
+				NotificationsService.running(false);
+				NotificationsService.add('error', 'ERROR', 'Unable load redirect map!');
 			});
 		};
 
@@ -95,6 +116,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 				$scope.entries = data || {};
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Redirect map updated!');
+				$scope.loadRedirectMap();
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable remove entry '+idx+'!');
@@ -146,6 +168,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 				$scope.entries = data || {};
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Entry added!');
+				$scope.loadRedirectMap();
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable to add entry!');

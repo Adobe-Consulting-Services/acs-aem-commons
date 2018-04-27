@@ -22,6 +22,11 @@
 	padding: 1em 0;
 }
 
+.entry-invalid {
+	background-color: #fa7d73;
+	color: #323232;
+}
+
 .fixed-height {
 	max-height: 500px;
     overflow: scroll;
