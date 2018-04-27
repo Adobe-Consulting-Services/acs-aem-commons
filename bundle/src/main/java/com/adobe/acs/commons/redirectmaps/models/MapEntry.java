@@ -49,20 +49,23 @@ public class MapEntry {
         }
         MapEntry other = (MapEntry) obj;
         if (origin == null) {
-            if (other.origin != null)
+            if (other.origin != null) {
                 return false;
+            }
         } else if (!origin.equals(other.origin)) {
             return false;
         }
         if (source == null) {
-            if (other.source != null)
+            if (other.source != null) {
                 return false;
+            }
         } else if (!source.equals(other.source)) {
             return false;
         }
         if (target == null) {
-            if (other.target != null)
+            if (other.target != null) {
                 return false;
+            }
         } else if (!target.equals(other.target)) {
             return false;
         }
