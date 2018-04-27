@@ -19,50 +19,91 @@
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
-import org.apache.sling.api.resource.Resource;
-
 /**
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
 public class MapEntry {
-    private final Resource resource;
-    private final String source;
-    private final String target;
-    private final boolean valid;
+	private final String origin;
+	private final String source;
+	private String status;
+	private final String target;
+	private boolean valid = true;;
 
-    public MapEntry(Resource resource, String source, String target) {
-        source = source.trim();
-        if (source.matches(".*\\s.*")) {
-            RedirectMapModel.log.warn("Source path {} for content {} contains whitespace", source, resource);
-            valid = false;
-        } else {
-            valid = true;
-        }
-        this.source = source;
-        this.target = target;
-        this.resource = resource;
+	public MapEntry(String source, String target, String origin) {
+		source = source.trim();
+		this.source = source;
+		this.target = target;
+		this.origin = origin;
+	}
 
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MapEntry other = (MapEntry) obj;
+		if (origin == null) {
+			if (other.origin != null)
+				return false;
+		} else if (!origin.equals(other.origin))
+			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.equals(other.source))
+			return false;
+		if (target == null) {
+			if (other.target != null)
+				return false;
+		} else if (!target.equals(other.target))
+			return false;
+		return true;
+	}
 
-    public Resource getResource() {
-        return resource;
-    }
+	public String getOrigin() {
+		return origin;
+	}
 
-    public String getSource() {
-        return source;
-    }
+	public String getSource() {
+		return source;
+	}
 
-    public String getTarget() {
-        return target;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public boolean isValid() {
-        return valid;
-    }
+	public String getTarget() {
+		return target;
+	}
 
-    @Override
-    public String toString() {
-        return "MapEntry [resource=" + resource + ", source=" + source + ", target=" + target + ", valid=" + valid
-                + "]";
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + ((target == null) ? 0 : target.hashCode());
+		return result;
+	}
+
+	public boolean isValid() {
+		return valid;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public void setValid(boolean valid) {
+		this.valid = valid;
+	}
+
+	@Override
+	public String toString() {
+		return "MapEntry [origin=" + origin + ", source=" + source + ", status=" + status + ", target=" + target
+				+ ", valid=" + valid + "]";
+	}
 }
