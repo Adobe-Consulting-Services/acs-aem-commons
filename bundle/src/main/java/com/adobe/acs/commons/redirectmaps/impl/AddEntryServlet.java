@@ -21,7 +21,6 @@ package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -32,16 +31,11 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.redirectmaps.models.MapEntry;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.google.common.net.MediaType;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Servlet for adding a line into the redirect map text file
@@ -49,11 +43,10 @@ import com.google.gson.reflect.TypeToken;
 @SlingServlet(methods = { "POST" }, resourceTypes = {
         "acs-commons/components/utilities/redirectmappage" }, selectors = {
                 "addentry" }, extensions = { "json" }, metatype = false)
-public class AddEntryServlet extends SlingAllMethodsServlet {
+public class AddEntryServlet extends RedirectEntriesServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
     private static final Logger log = LoggerFactory.getLogger(AddEntryServlet.class);
-    private Gson gson = new Gson();
 
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
@@ -78,12 +71,6 @@ public class AddEntryServlet extends SlingAllMethodsServlet {
         request.getResourceResolver().refresh();
         log.debug("Changes saved...");
 
-        log.debug("Requesting redirect maps from {}", request.getResource());
-        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
-
-        response.setContentType(MediaType.JSON_UTF_8.toString());
-
-        IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-        }.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
+        super.doGet(request, response);
     }
 }

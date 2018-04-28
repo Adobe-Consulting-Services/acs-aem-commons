@@ -68,6 +68,7 @@ public class MapEntryTest {
 		assertEquals(invalid.getOrigin(), "File");
 		assertEquals(invalid.getSource(), source);
 		assertEquals(invalid.getTarget(), mockResource.getPath());
+		log.debug(invalid.toString());
 
 		log.info("Test successful!");
 	}
@@ -86,6 +87,7 @@ public class MapEntryTest {
 		assertEquals(valid.getOrigin(), mockResource.getPath());
 		assertEquals(valid.getSource(), source);
 		assertEquals(valid.getTarget(), mockResource.getPath());
+		log.debug(valid.toString());
 
 		log.info("Test successful!");
 	}

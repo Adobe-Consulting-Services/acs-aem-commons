@@ -1,39 +1,44 @@
 
 .form-row{
-	padding-bottom: 1em;
-	clear:both;
+    padding-bottom: 1em;
+    clear:both;
 }
 
 .form-row input{
-	width: 75%;
+    width: 75%;
 }
 
 .form-row label{
-	font-weight: bold;
+    font-weight: bold;
     padding: 10px 0;
     width: 100px;
     display: inline-block;
 }
 
 .form-row span{
-	margin-left: 75px;
+    margin-left: 75px;
 }
 .coral-Heading {
-	padding: 1em 0;
+    padding: 1em 0;
 }
 
 .entry-invalid {
-	background-color: #fa7d73;
-	color: #323232;
+    background-color: #fa7d73;
+    color: #323232;
 }
 
 .fixed-height {
-	max-height: 500px;
+    max-height: 500px;
     overflow: scroll;
 }
 
+pre {
+    background-color: white;
+    padding: .5em;
+}
+
 section {
-	padding: .5em;
+    padding: .5em;
 }
 
 #entry-table {

@@ -124,12 +124,12 @@
 				<section>
 					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="View Entries" /></h2>
 					<p>
-						<fmt:message key="List of all of the entries in the redirect map files and gathered from the configuration. Click the button to remove / edit." />
+						<fmt:message key="Select Find Entries to load a list of the entries in the redirect map files and gathered from the configuration. Click the button to remove / edit." />
 					</p>
 					<form ng-submit="filterEntries()" id="filter-form">
-						<input is="coral-textfield" placeholder="Filter by source or target" name="filter" value="">
+						<input is="coral-textfield" placeholder="* for all or search term" name="filter" value="">
 						<button is="coral-button" iconsize="S">
-							Filter
+							Find Entries
 						</button>
 					</form>
 					<br/>
@@ -146,7 +146,7 @@
                                 </tr>
                             </thead>
                             <tbody >
-                                <tr ng-repeat="entry in entries" class="{{entry.valid ? '' : 'entry-invalid'}}">
+                                <tr ng-repeat="entry in filteredEntries" class="{{entry.valid ? '' : 'entry-invalid'}}">
                                     <td class="narrow-cell">{{$index}}</td>
                                     <td title="{{entry.source}}">{{entry.source}}</td>
                                     <td title="{{entry.target}}">

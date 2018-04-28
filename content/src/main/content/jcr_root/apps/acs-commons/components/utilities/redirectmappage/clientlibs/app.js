@@ -27,6 +27,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 		};
     	
     	$scope.entries = [];
+    	$scope.filteredEntries = [];
     	$scope.redirectMap = '';
 
         $scope.updateRedirectMap = function (e) {
@@ -66,23 +67,22 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         $scope.load = function () {
 			var start = new Date().getTime();
 			NotificationsService.running(true);
-			$scope.entries = {};
+			$scope.filteredEntries = [];
+			$scope.entries = [];
 			$http({
 				method: 'GET',
 				url: $scope.app.uri+'.redirectentries.json'
 			}).success(function (data, status, headers, config) {
-
 				var time = new Date().getTime() - start;
 				$scope.entries = data || {};
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Found '+data.length+' entries in '+time+'ms!');
 				$scope.loadRedirectMap();
+				$scope.filterEntries();
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable load redirect entries!');
 			});
-			
-			
 		};
 		
 		$scope.loadRedirectMap = function(){
@@ -106,7 +106,8 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         $scope.removeLine = function(idx){
             var start = new Date().getTime();
 			NotificationsService.running(true);
-			$scope.entries = {};
+			$scope.entries = [];
+			$scope.filteredEntries = [];
 			$http({
 				method: 'POST',
 				url: $scope.app.uri+'.removeentry.json?idx='+idx
@@ -117,6 +118,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 				NotificationsService.running(false);
 				NotificationsService.add('success', 'SUCCESS', 'Redirect map updated!');
 				$scope.loadRedirectMap();
+				$scope.filterEntries();
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable remove entry '+idx+'!');
@@ -132,26 +134,25 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         };
         
         $scope.filterEntries = function(){
-            var found = 0;
+            $scope.filteredEntries = [];
         	var term = $('#filter-form').find('input[name=filter]').val().toLowerCase();
-    		$('#entry-table tbody tr').each(function(idx,el){
-    			if(term === ''){
-    				$(el).show();
-                    found = -1;
-    			} else {
-    				if($(el).text().toLowerCase().indexOf(term) != -1){
-    					$(el).show();
-                        found++;
-    				} else {
-    					$(el).hide();
-    				}
-    			}
-    		});
-            if(found > -1){
-				NotificationsService.add('success', 'SUCCESS', 'Found '+found+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
-            } else {
-                NotificationsService.add('success', 'SUCCESS', 'Filter reset!');
-            }
+        	if(term.trim() !== ''){
+	        	var count = 0;
+	        	$scope.entries.forEach(function(el, idx){
+	        		var found = (term.trim() === '*');
+	        		Object.values(el).forEach(function(val, idx2){
+	        			if(val.toString().toLowerCase().indexOf(term) !== -1){
+	        				found = true;
+	        			}
+	        		});
+	        		if(found){
+	        			$scope.filteredEntries.push(el);
+	        			count++;
+	        		}
+	        	});
+	        	
+	            NotificationsService.add('success', 'SUCCESS', 'Found '+count+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
+        	}
     		return false;
         };
 

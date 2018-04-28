@@ -49,11 +49,10 @@ import com.google.gson.reflect.TypeToken;
 @SlingServlet(methods = { "POST" }, resourceTypes = {
         "acs-commons/components/utilities/redirectmappage" }, selectors = {
                 "removeentry" }, extensions = { "json" }, metatype = false)
-public class RemoveEntryServlet extends SlingAllMethodsServlet {
+public class RemoveEntryServlet extends RedirectEntriesServlet {
 
     private static final long serialVersionUID = -5963945855717054678L;
     private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
-    private Gson gson = new Gson();
 
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
@@ -76,12 +75,6 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
         request.getResourceResolver().refresh();
         log.debug("Changes saved...");
 
-        log.debug("Requesting redirect maps from {}", request.getResource());
-        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
-
-        response.setContentType(MediaType.JSON_UTF_8.toString());
-
-        IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-        }.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
+        super.doGet(request, response);
     }
 }
