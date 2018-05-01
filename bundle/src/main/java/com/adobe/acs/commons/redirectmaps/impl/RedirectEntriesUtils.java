@@ -49,49 +49,52 @@ import com.google.gson.reflect.TypeToken;
  */
 public class RedirectEntriesUtils {
 
-	private static final Gson gson = new Gson();
+    private RedirectEntriesUtils() {
+    };
 
-	private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
+    private static final Gson gson = new Gson();
 
-	protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
-		List<String> lines = null;
-		InputStream is = null;
-		try {
-			is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-			lines = IOUtils.readLines(is);
-			log.debug("Loaded {} lines", lines.size());
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
-		return lines;
-	}
+    private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
 
-	protected static final void updateRedirectMap(SlingHttpServletRequest request, List<String> entries)
-			throws PersistenceException {
-		ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-				.getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-		mvm.put(JcrConstants.JCR_DATA, StringUtils.join(entries, "\n"));
-		request.getResourceResolver().commit();
-		request.getResourceResolver().refresh();
-		log.debug("Changes saved...");
-	}
+    protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
+        List<String> lines = null;
+        InputStream is = null;
+        try {
+            is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
+            lines = IOUtils.readLines(is);
+            log.debug("Loaded {} lines", lines.size());
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+        return lines;
+    }
 
-	protected static final void writeEntriesToResponse(SlingHttpServletRequest request,
-			SlingHttpServletResponse response) throws ServletException, IOException {
-		log.trace("writeEntriesToResponse");
+    protected static final void updateRedirectMap(SlingHttpServletRequest request, List<String> entries)
+            throws PersistenceException {
+        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
+                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
+        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(entries, "\n"));
+        request.getResourceResolver().commit();
+        request.getResourceResolver().refresh();
+        log.debug("Changes saved...");
+    }
 
-		log.debug("Requesting redirect maps from {}", request.getResource());
-		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
+    protected static final void writeEntriesToResponse(SlingHttpServletRequest request,
+            SlingHttpServletResponse response) throws ServletException, IOException {
+        log.trace("writeEntriesToResponse");
 
-		response.setContentType(MediaType.JSON_UTF_8.toString());
+        log.debug("Requesting redirect maps from {}", request.getResource());
+        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-		JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-		}.getType());
-		Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
-		for (int i = 0; it.hasNext(); i++) {
-			it.next().getAsJsonObject().addProperty("id", i);
-		}
+        response.setContentType(MediaType.JSON_UTF_8.toString());
 
-		IOUtils.write(entries.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
-	}
+        JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType());
+        Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            it.next().getAsJsonObject().addProperty("id", i);
+        }
+
+        IOUtils.write(entries.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
+    }
 }

@@ -35,27 +35,27 @@ import org.slf4j.LoggerFactory;
  * Servlet for removing a line from the redirect map text file
  */
 @SlingServlet(methods = { "POST" }, resourceTypes = {
-		"acs-commons/components/utilities/redirectmappage" }, selectors = {
-				"removeentry" }, extensions = { "json" }, metatype = false)
+        "acs-commons/components/utilities/redirectmappage" }, selectors = {
+                "removeentry" }, extensions = { "json" }, metatype = false)
 public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
-	private static final long serialVersionUID = -5963945855717054678L;
-	private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
+    private static final long serialVersionUID = -5963945855717054678L;
+    private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
 
-	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		log.trace("doPost");
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        log.trace("doPost");
 
-		int idx = Integer.parseInt(request.getParameter("idx"), 10);
-		log.debug("Removing index {}", idx);
+        int idx = Integer.parseInt(request.getParameter("idx"), 10);
+        log.debug("Removing index {}", idx);
 
-		List<String> lines = RedirectEntriesUtils.readEntries(request);
+        List<String> lines = RedirectEntriesUtils.readEntries(request);
 
-		lines.remove(idx);
-		log.debug("Removed line...");
+        lines.remove(idx);
+        log.debug("Removed line...");
 
         RedirectEntriesUtils.updateRedirectMap(request, lines);
 
         RedirectEntriesUtils.writeEntriesToResponse(request, response);
-	}
+    }
 }
