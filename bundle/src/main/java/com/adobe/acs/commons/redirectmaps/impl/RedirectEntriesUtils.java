@@ -50,7 +50,7 @@ import com.google.gson.reflect.TypeToken;
 public class RedirectEntriesUtils {
 
     private RedirectEntriesUtils() {
-    };
+    }
 
     private static final Gson gson = new Gson();
 
