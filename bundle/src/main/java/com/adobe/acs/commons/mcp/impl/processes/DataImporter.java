@@ -23,8 +23,10 @@ import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.adobe.acs.commons.mcp.util.CompositeVariant;
 import com.adobe.acs.commons.mcp.util.Spreadsheet;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -166,7 +168,7 @@ public class DataImporter extends ProcessDefinition {
             data = new Spreadsheet(importFile, PATH);
             if (presortData) {
 
-                Collections.sort(data.getDataRows(), (a, b) -> b.get(PATH).compareTo(a.get(PATH)));
+                Collections.sort(data.getDataRows(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
             }
             instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
         } catch (IOException ex) {
@@ -188,7 +190,7 @@ public class DataImporter extends ProcessDefinition {
     private void importData(ActionManager manager) {
         data.getDataRows().forEach((row) -> {
             manager.deferredWithResolver(rr -> {
-                String path = row.get(PATH);
+                String path = row.get(PATH).toString();
                 Resource r = rr.getResource(path);
                 if (r == null) {
                     handleMissingNode(path, rr, row);
@@ -204,7 +206,7 @@ public class DataImporter extends ProcessDefinition {
         });
     }
 
-    public void handleMissingNode(String path, ResourceResolver rr, Map<String, String> row) throws PersistenceException {
+    public void handleMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
         if (mergeMode.create) {
             if (!dryRunMode) {
                 createMissingNode(path, rr, row);
@@ -221,25 +223,25 @@ public class DataImporter extends ProcessDefinition {
         }
     }
 
-    public void createMissingNode(String path, ResourceResolver rr, Map<String, String> row) throws PersistenceException {
+    public void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
         String parentPath = StringUtils.substringBeforeLast(path, "/");
         Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
         String nodeName = StringUtils.substringAfterLast(path, "/");
         if (!row.containsKey(JCR_PRIMARY_TYPE)) {
-            row.put("JCR_TYPE", defaultNodeType);
+            row.put("JCR_TYPE", new CompositeVariant(String.class, defaultNodeType));
         }
         Map<String, Object> nodeProps = new HashMap(row);
         rr.refresh();
         rr.create(parent, nodeName, nodeProps);
     }
 
-    private void updateMetadata(ResourceResolver rr, Map<String, String> nodeInfo) throws PersistenceException {
-        ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH)).adaptTo(ModifiableValueMap.class);
+    private void updateMetadata(ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
+        ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH).toString()).adaptTo(ModifiableValueMap.class);
         populateMetadataFromRow(resourceProperties, nodeInfo);
         if (rr.hasChanges()) {
             incrementCount(updatedNodes, 1);
             if (detailedReport) {
-                trackActivity(nodeInfo.get(PATH), "Updated Properties", null);
+                trackActivity(nodeInfo.get(PATH).toString(), "Updated Properties", null);
             }
             if (!dryRunMode) {
                 rr.commit();
@@ -247,23 +249,21 @@ public class DataImporter extends ProcessDefinition {
             rr.refresh();
         } else {
             if (detailedReport) {
-                trackActivity(nodeInfo.get(PATH), "No Change", null);
+                trackActivity(nodeInfo.get(PATH).toString(), "No Change", null);
             }
             incrementCount(noChangeNodes, 1);
         }
     }
 
-    public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, String> nodeInfo) {
+    public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
         for (String prop : data.getHeaderRow()) {
             if (!prop.equals(PATH)
                     && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
-                String value = nodeInfo.get(prop);
-                if (value == null) {
+                CompositeVariant value = nodeInfo.get(prop);
+                if (value == null || value.isEmpty()) {
                     nodeInfo.remove(prop);
-                } else if (value.contains(",")) {
-                    resourceProperties.put(prop, value.split(","));
                 } else {
-                    resourceProperties.put(prop, value);
+                    resourceProperties.put(prop, value.toPropertyValue());
                 }
             }
         }
