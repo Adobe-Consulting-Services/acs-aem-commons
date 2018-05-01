@@ -21,6 +21,7 @@ package com.adobe.acs.commons.redirectmaps.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.sling.api.resource.Resource;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class MapEntryTest {
 
 	private Resource mockResource = null;
-	
+
 	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
 	@Before
@@ -51,37 +52,43 @@ public class MapEntryTest {
 
 	@Test
 	public void testInvalidMapEntry() {
-		
+
 		log.info("testInvalidMapEntry");
 		String source = "/vanity 2";
-		MapEntry invalid = new MapEntry(mockResource, source, mockResource.getPath());
+		MapEntry invalid = new MapEntry(source, mockResource.getPath(), "File");
+
+		invalid.setValid(false);
+		invalid.setStatus("Invalid!");
 		
 		log.info("Asserting that entry is invalid");
 		assertFalse(invalid.isValid());
-		
+		assertNotNull(invalid.getStatus());
+
 		log.info("Asserting that matches expected values");
-		assertEquals(invalid.getResource(),mockResource);
+		assertEquals(invalid.getOrigin(), "File");
 		assertEquals(invalid.getSource(), source);
 		assertEquals(invalid.getTarget(), mockResource.getPath());
-		
+		log.debug(invalid.toString());
+
 		log.info("Test successful!");
 	}
 
 	@Test
 	public void testValidMapEntry() {
-		
+
 		log.info("testValidMapEntry");
 		String source = "/vanity-2";
-		MapEntry valid = new MapEntry(mockResource, source, mockResource.getPath());
-		
+		MapEntry valid = new MapEntry(source, mockResource.getPath(), mockResource.getPath());
+
 		log.info("Asserting that entry is valid");
 		assertTrue(valid.isValid());
-		
+
 		log.info("Asserting that matches expected values");
-		assertEquals(valid.getResource(),mockResource);
+		assertEquals(valid.getOrigin(), mockResource.getPath());
 		assertEquals(valid.getSource(), source);
 		assertEquals(valid.getTarget(), mockResource.getPath());
-		
+		log.debug(valid.toString());
+
 		log.info("Test successful!");
 	}
 }

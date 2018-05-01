@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
 
+### Added
+- #1347 - Redirect Map Entry editor
+
 ### Changed
 - #1343 - CodeClimate now checks for license header
 
