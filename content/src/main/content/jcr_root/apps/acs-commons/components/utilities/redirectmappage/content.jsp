@@ -147,7 +147,7 @@
                             </thead>
                             <tbody >
                                 <tr ng-repeat="entry in filteredEntries" class="{{entry.valid ? '' : 'entry-invalid'}}">
-                                    <td class="narrow-cell">{{$index}}</td>
+                                    <td class="narrow-cell">{{entry.id}}</td>
                                     <td title="{{entry.source}}">{{entry.source}}</td>
                                     <td title="{{entry.target}}">
                                         {{entry.target}}

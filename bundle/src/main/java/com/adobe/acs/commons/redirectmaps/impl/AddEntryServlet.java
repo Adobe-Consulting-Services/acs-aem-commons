@@ -20,22 +20,16 @@
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
-import com.day.cq.commons.jcr.JcrConstants;
 
 /**
  * Servlet for adding a line into the redirect map text file
@@ -43,7 +37,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 @SlingServlet(methods = { "POST" }, resourceTypes = {
         "acs-commons/components/utilities/redirectmappage" }, selectors = {
                 "addentry" }, extensions = { "json" }, metatype = false)
-public class AddEntryServlet extends RedirectEntriesServlet {
+public class AddEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
     private static final Logger log = LoggerFactory.getLogger(AddEntryServlet.class);
@@ -55,22 +49,14 @@ public class AddEntryServlet extends RedirectEntriesServlet {
         int idx = Integer.parseInt(request.getParameter("idx"), 10);
         String source = request.getParameter("source");
         String target = request.getParameter("target");
-        log.debug("Removing entry with {} {} at {}",source, target, idx);
+        log.debug("Removing entry with {} {} at {}", source, target, idx);
 
-        InputStream is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-        List<String> lines = IOUtils.readLines(is);
-        log.debug("Loaded {} lines", lines.size());
+        List<String> lines = RedirectEntriesUtils.readEntries(request);
 
-        lines.add(idx, source+" "+target);
+        lines.add(idx, source + " " + target);
         log.debug("Added entry...");
 
-        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(lines, "\n"));
-        request.getResourceResolver().commit();
-        request.getResourceResolver().refresh();
-        log.debug("Changes saved...");
-
-        super.doGet(request, response);
+        RedirectEntriesUtils.updateRedirectMap(request, lines);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response);
     }
 }

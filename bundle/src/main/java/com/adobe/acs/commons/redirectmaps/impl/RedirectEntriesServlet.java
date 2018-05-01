@@ -20,24 +20,15 @@
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.redirectmaps.models.MapEntry;
-import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
-import com.google.common.net.MediaType;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Servlet rendering the redirect map to a JSON Array
@@ -48,18 +39,12 @@ public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = -2825679173210628699L;
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
-    private Gson gson = new Gson();
 
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doGet");
 
-        log.debug("Requesting redirect maps from {}", request.getResource());
-        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
-
-        response.setContentType(MediaType.JSON_UTF_8.toString());
-
-        IOUtils.write(gson.toJson(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-        }.getType()), response.getOutputStream(), StandardCharsets.UTF_8);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response);
     }
+    
 }

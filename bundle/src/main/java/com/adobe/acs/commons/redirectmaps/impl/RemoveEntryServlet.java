@@ -20,61 +20,42 @@
 package com.adobe.acs.commons.redirectmaps.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.redirectmaps.models.MapEntry;
-import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.google.common.net.MediaType;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Servlet for removing a line from the redirect map text file
  */
 @SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/redirectmappage" }, selectors = {
-                "removeentry" }, extensions = { "json" }, metatype = false)
-public class RemoveEntryServlet extends RedirectEntriesServlet {
+		"acs-commons/components/utilities/redirectmappage" }, selectors = {
+				"removeentry" }, extensions = { "json" }, metatype = false)
+public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
-    private static final long serialVersionUID = -5963945855717054678L;
-    private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
+	private static final long serialVersionUID = -5963945855717054678L;
+	private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
 
-    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws ServletException, IOException {
-        log.trace("doPost");
+	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+			throws ServletException, IOException {
+		log.trace("doPost");
 
-        int idx = Integer.parseInt(request.getParameter("idx"), 10);
-        log.debug("Removing index {}", idx);
+		int idx = Integer.parseInt(request.getParameter("idx"), 10);
+		log.debug("Removing index {}", idx);
 
-        InputStream is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-        List<String> lines = IOUtils.readLines(is);
-        log.debug("Loaded {} lines", lines.size());
+		List<String> lines = RedirectEntriesUtils.readEntries(request);
 
-        lines.remove(idx);
-        log.debug("Removed line...");
+		lines.remove(idx);
+		log.debug("Removed line...");
 
-        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(lines, "\n"));
-        request.getResourceResolver().commit();
-        request.getResourceResolver().refresh();
-        log.debug("Changes saved...");
+        RedirectEntriesUtils.updateRedirectMap(request, lines);
 
-        super.doGet(request, response);
-    }
+        RedirectEntriesUtils.writeEntriesToResponse(request, response);
+	}
 }
