@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class RemoteAssetDecorator implements ResourceDecorator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);
+    private static int SYNC_WAIT_SECONDS = 100;
 
     /**
      * This set stores resource paths for remote assets that are in the process
@@ -91,17 +92,11 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return resource;
         }
 
-        Resource ret = resource;
-        try {
-            remoteResourcesSyncing.add(resource.getPath());
-            LOG.info("Sync'ing remote asset binaries: {}", resource.getPath());
-            ret = this.assetSync.syncAsset(resource);
-        } catch (Exception e) {
-            LOG.error("Failed to sync binaries for remote asset: {} - {}", resource.getPath(), e);
-        } finally {
-            remoteResourcesSyncing.remove(resource.getPath());
+        if (remoteResourcesSyncing.contains(resource.getPath())) {
+            return waitForSyncInProgress(resource);
+        } else {
+            return syncAssetBinaries(resource);
         }
-        return ret;
     }
 
     /**
@@ -138,10 +133,6 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return false;
         }
 
-        if (remoteResourcesSyncing.contains(resource.getPath())) {
-            return false;
-        }
-
         Calendar lastFailure = props.get(RemoteAssets.REMOTE_SYNC_FAILED, (Calendar) null);
         if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (this.config.getRetryDelay() * 60000))) {
             return false;
@@ -174,5 +165,45 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         return false;
+    }
+
+    private Resource waitForSyncInProgress(Resource resource) {
+        String resourcePath = resource.getPath();
+
+        LOG.debug("Already sync'ing {} - waiting for parallel sync to complete", resourcePath);
+        try {
+            // Wait for asset already sync'ing
+            long originalTime = System.currentTimeMillis();
+            while (remoteResourcesSyncing.contains(resourcePath) && (System.currentTimeMillis() - originalTime) < (1000 * SYNC_WAIT_SECONDS)) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
+            }
+            if (remoteResourcesSyncing.contains(resourcePath)) {
+                LOG.warn("Waited {} seconds for parallel binary sync to complete for: {} - giving up", SYNC_WAIT_SECONDS, resourcePath);
+            } else {
+                LOG.debug("Parallel sync of {} complete, re-fetching resource", resourcePath);
+                resource.getResourceResolver().refresh();
+                return resource.getResourceResolver().getResource(resourcePath);
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to wait for parallel binary sync for remote asset: {} - {}", resourcePath, e);
+        }
+        return resource;
+    }
+
+    private Resource syncAssetBinaries(Resource resource) {
+        String resourcePath = resource.getPath();
+        try {
+            remoteResourcesSyncing.add(resourcePath);
+            LOG.info("Sync'ing remote asset binaries: {}", resourcePath);
+            return this.assetSync.syncAsset(resource);
+        } catch (Exception e) {
+            LOG.error("Failed to sync binaries for remote asset: {} - {}", resourcePath, e);
+        } finally {
+            remoteResourcesSyncing.remove(resourcePath);
+        }
+        return resource;
     }
 }
