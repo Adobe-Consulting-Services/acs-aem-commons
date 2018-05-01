@@ -238,7 +238,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         createOrUpdateNodes(remoteAssetsResolver, jsonObjectWithChildren, resource);
 
         ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
-        if (DamConstants.NT_DAM_ASSET.equals(parentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+        if (DamConstants.NT_DAM_ASSET.equals(parentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))
+                && DamConstants.NT_DAM_ASSETCONTENT.equals(resourceProperties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
             resourceProperties.put(RemoteAssets.IS_REMOTE_ASSET, true);
             LOG.debug("Property '{}' added for resource '{}'.", RemoteAssets.IS_REMOTE_ASSET, resource.getPath());
 
@@ -348,7 +349,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         }
 
         if (tagList.size() > 0) {
-            tagManager.setTags(resource.getParent(), tagList.toArray(new Tag[tagList.size()]));
+            tagManager.setTags(resource, tagList.toArray(new Tag[tagList.size()]));
             LOG.debug("Tags added for resource '{}'.", resource.getPath());
         }
     }
