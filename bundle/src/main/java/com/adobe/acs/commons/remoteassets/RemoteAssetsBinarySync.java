@@ -30,7 +30,7 @@ public interface RemoteAssetsBinarySync {
      * Sync an asset's binaries from a remote server.
      * All binaries (original + renditions) are sync'd.
      * @param resource Resource representing a dam:AssetContent
-     * @return The updated resource
+     * @return boolean true if sync successful, else false
      */
-    Resource syncAsset(Resource resource);
+    boolean syncAsset(Resource resource);
 }
