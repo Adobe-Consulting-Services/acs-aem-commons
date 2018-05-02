@@ -43,13 +43,15 @@ public class PageRootProviderMultiImplTest {
     private PageRootProviderConfig config2;
 
     private static final Map<String, Object> FIRST = new HashMap<String, Object>(){{
-        this.put(Constants.SERVICE_RANKING, 1);
-        this.put(Constants.SERVICE_ID, 1l);
-    }};
+            this.put(Constants.SERVICE_RANKING, 1);
+            this.put(Constants.SERVICE_ID, 1L);
+        }
+    };
     private static final Map<String, Object> SECOND = new HashMap<String, Object>(){{
-        this.put(Constants.SERVICE_RANKING, 2);
-        this.put(Constants.SERVICE_ID, 2l);
-    }};
+            this.put(Constants.SERVICE_RANKING, 2);
+            this.put(Constants.SERVICE_ID, 2L);
+        }
+    };
 
     PageRootProviderMultiImpl provider = null;
 

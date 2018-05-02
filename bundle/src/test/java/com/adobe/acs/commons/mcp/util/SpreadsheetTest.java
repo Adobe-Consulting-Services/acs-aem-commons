@@ -28,6 +28,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -45,7 +46,7 @@ public class SpreadsheetTest {
     static Date testDate = new Date();
 
     @BeforeClass
-    static public void setUp() throws IOException {
+    public static void setUp() throws IOException {
         testWorkbook = new XSSFWorkbook();
         XSSFSheet sheet = testWorkbook.createSheet("sheet 1");
         createRow(sheet, header);
@@ -128,7 +129,7 @@ public class SpreadsheetTest {
         List<Map<String, CompositeVariant>> result = instance.getDataRows();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
-
+<
     @Test
     public void testVariantTypes() throws IOException {
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
@@ -141,8 +142,8 @@ public class SpreadsheetTest {
         assertEquals(testDate, values.get("date-val").toPropertyValue());
     }
 
-    static private XSSFRow createRow(XSSFSheet sheet, String... values) {
-        int rowNum = sheet.getPhysicalNumberOfRows();
+    private static XSSFRow createRow(XSSFSheet sheet, String... values) {
+>       int rowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow row = sheet.createRow(rowNum);
         for (int i = 0; i < values.length; i++) {
             if (values[i] == null) {
@@ -153,5 +154,4 @@ public class SpreadsheetTest {
         }
         return row;
     }
-
 }

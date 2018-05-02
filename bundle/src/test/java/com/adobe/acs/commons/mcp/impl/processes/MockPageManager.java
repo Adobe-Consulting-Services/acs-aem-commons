@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -41,27 +45,6 @@ public class MockPageManager implements PageManager {
     public MockPageManager(ResourceResolver rr) {
         this.rr = rr;
     }
-    
-    @Override
-    public Page move(final Page page, final String destination, final String beforeName, final boolean shallow,
-            final boolean resolveConflict, final String[] adjustRefs) throws WCMException {
-        try {
-            if (rr == null) {
-                throw new RuntimeException("Resource resolver was null");
-            }
-            
-            if (replicator == null) {
-                throw new RuntimeException("Replicator was not changed out -- will not work properly");
-            }
-            
-            replicator.replicate(null, ReplicationActionType.DEACTIVATE, page.getPath());
-            replicator.replicate(null, ReplicationActionType.ACTIVATE, destination + "/" + page.getName());
-            
-            return page;
-        } catch (ReplicationException ex) {
-            throw new RuntimeException(ex);
-        }
-    }    
 
     @Override
     public Page getPage(String string) {
@@ -86,6 +69,27 @@ public class MockPageManager implements PageManager {
     @Override
     public Page create(String string, String string1, String string2, String string3, boolean bln) throws WCMException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Page move(final Page page, final String destination, final String beforeName, final boolean shallow,
+                     final boolean resolveConflict, final String[] adjustRefs) throws WCMException {
+        try {
+            if (rr == null) {
+                throw new RuntimeException("Resource resolver was null");
+            }
+
+            if (replicator == null) {
+                throw new RuntimeException("Replicator was not changed out -- will not work properly");
+            }
+
+            replicator.replicate(null, ReplicationActionType.DEACTIVATE, page.getPath());
+            replicator.replicate(null, ReplicationActionType.ACTIVATE, destination + "/" + page.getName());
+
+            return page;
+        } catch (ReplicationException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

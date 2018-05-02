@@ -37,58 +37,58 @@ import org.slf4j.LoggerFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class MapEntryTest {
 
-	private Resource mockResource = null;
+    private Resource mockResource = null;
 
-	private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(MapEntryTest.class);
 
-	@Before
-	public void init() {
-		log.info("init");
-		MockResourceResolver mockResourceResolver = new MockResourceResolver();
-		mockResource = new MockResource(mockResourceResolver,
-				"/etc/acs-commons/redirect-maps/redirectmap1/jcr:content/redirects/2_123",
-				"acs-commons/components/utilities/redirects");
-	}
+    @Before
+    public void init() {
+        log.info("init");
+        MockResourceResolver mockResourceResolver = new MockResourceResolver();
+        mockResource = new MockResource(mockResourceResolver,
+                "/etc/acs-commons/redirect-maps/redirectmap1/jcr:content/redirects/2_123",
+                "acs-commons/components/utilities/redirects");
+    }
 
-	@Test
-	public void testInvalidMapEntry() {
+    @Test
+    public void testInvalidMapEntry() {
 
-		log.info("testInvalidMapEntry");
-		String source = "/vanity 2";
-		MapEntry invalid = new MapEntry(source, mockResource.getPath(), "File");
+        log.info("testInvalidMapEntry");
+        String source = "/vanity 2";
+        MapEntry invalid = new MapEntry(source, mockResource.getPath(), "File");
 
-		invalid.setValid(false);
-		invalid.setStatus("Invalid!");
-		
-		log.info("Asserting that entry is invalid");
-		assertFalse(invalid.isValid());
-		assertNotNull(invalid.getStatus());
+        invalid.setValid(false);
+        invalid.setStatus("Invalid!");
 
-		log.info("Asserting that matches expected values");
-		assertEquals(invalid.getOrigin(), "File");
-		assertEquals(invalid.getSource(), source);
-		assertEquals(invalid.getTarget(), mockResource.getPath());
-		log.debug(invalid.toString());
+        log.info("Asserting that entry is invalid");
+        assertFalse(invalid.isValid());
+        assertNotNull(invalid.getStatus());
 
-		log.info("Test successful!");
-	}
+        log.info("Asserting that matches expected values");
+        assertEquals(invalid.getOrigin(), "File");
+        assertEquals(invalid.getSource(), source);
+        assertEquals(invalid.getTarget(), mockResource.getPath());
+        log.debug(invalid.toString());
 
-	@Test
-	public void testValidMapEntry() {
+        log.info("Test successful!");
+    }
 
-		log.info("testValidMapEntry");
-		String source = "/vanity-2";
-		MapEntry valid = new MapEntry(source, mockResource.getPath(), mockResource.getPath());
+    @Test
+    public void testValidMapEntry() {
 
-		log.info("Asserting that entry is valid");
-		assertTrue(valid.isValid());
+        log.info("testValidMapEntry");
+        String source = "/vanity-2";
+        MapEntry valid = new MapEntry(source, mockResource.getPath(), mockResource.getPath());
 
-		log.info("Asserting that matches expected values");
-		assertEquals(valid.getOrigin(), mockResource.getPath());
-		assertEquals(valid.getSource(), source);
-		assertEquals(valid.getTarget(), mockResource.getPath());
-		log.debug(valid.toString());
+        log.info("Asserting that entry is valid");
+        assertTrue(valid.isValid());
 
-		log.info("Test successful!");
-	}
+        log.info("Asserting that matches expected values");
+        assertEquals(valid.getOrigin(), mockResource.getPath());
+        assertEquals(valid.getSource(), source);
+        assertEquals(valid.getTarget(), mockResource.getPath());
+        log.debug(valid.toString());
+
+        log.info("Test successful!");
+    }
 }

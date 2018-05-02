@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -21,7 +25,6 @@ import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import java.util.Collections;
@@ -37,8 +40,10 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -62,7 +67,7 @@ public class FolderRelocatorTest {
     
     @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver();
+        final ResourceResolver rr = getEnhancedMockResolver();
         FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
@@ -80,7 +85,7 @@ public class FolderRelocatorTest {
     
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver();
+        final ResourceResolver rr = getEnhancedMockResolver();
         FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
@@ -109,7 +114,7 @@ public class FolderRelocatorTest {
     }
 
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
-        ResourceResolver rr = getFreshMockResolver();
+        final ResourceResolver rr = getFreshMockResolver();
         
         when(rr.hasChanges()).thenReturn(true);
 

@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2014 Adobe
  * %%
@@ -93,9 +93,9 @@ public class FileImporterTest {
 
     @Test
     public void testImportToFolderHavingFileWhichIsOlder() throws Exception {
-        Calendar earliest = Calendar.getInstance();
+        final Calendar earliest = Calendar.getInstance();
         earliest.setTimeInMillis(0L);
-        Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
+        final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
                 earliest);
 
         session.save();
@@ -111,9 +111,9 @@ public class FileImporterTest {
 
     @Test
     public void testImportToFolderHavingFileWhichIsNewer() throws Exception {
-        Calendar latest = Calendar.getInstance();
+        final Calendar latest = Calendar.getInstance();
         latest.add(Calendar.DATE, 2);
-        Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
+        final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
                 latest);
 
         session.save();

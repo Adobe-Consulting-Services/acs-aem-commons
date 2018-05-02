@@ -29,26 +29,23 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WFDataWorkflowProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(WFDataWorkflowProcess.class);
+import java.util.Map;
 
-    public WFDataWorkflowProcess() {
+public class WfArgsWorkflowProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(WfArgsWorkflowProcess.class);
 
+    Map<String, Object> expected;
+
+    public WfArgsWorkflowProcess(Map<String, Object> expected) {
+        this.expected = expected;
     }
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         // Workflow Data
-        Assert.assertEquals("JCR_PATH", workItem.getWorkflowData().getPayloadType());
-        Assert.assertEquals("/content/test", workItem.getWorkflowData().getPayload());
-
-        // Workitem
-        Assert.assertTrue(workItem.getId().matches("[a-z0-9]{8}-([a-z0-9]{4}-){3}[a-z0-9]{12}_.+"));
-        Assert.assertEquals(null, workItem.getNode());
-        Assert.assertTrue(workItem.getTimeStarted() != null);
-        Assert.assertTrue(workItem.getTimeEnded() == null);
-        Assert.assertTrue(workItem.getWorkflow() != null);
-        Assert.assertEquals("Synthetic Workflow", workItem.getCurrentAssignee());
-
+        for (final Map.Entry<String, Object> entry : expected.entrySet()) {
+            Assert.assertEquals(entry.getValue(),
+                    metaDataMap.get(entry.getKey(), String.class));
+        }
     }
 }
