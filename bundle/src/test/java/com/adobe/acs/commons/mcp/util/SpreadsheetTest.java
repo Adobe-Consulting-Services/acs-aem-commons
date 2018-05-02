@@ -19,8 +19,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -32,14 +34,16 @@ import static org.junit.Assert.*;
  * Various basic tests of the spreadsheet utility class
  */
 public class SpreadsheetTest {
-    
+
     public SpreadsheetTest() {
     }
 
     static XSSFWorkbook testWorkbook;
-    static String[] header = new String[]{"path", "title", "someOtherCol"};
+    static String[] header = new String[]{"path", "title", "someOtherCol", "int-val@integer", "string-list1@string[]", "string-list2@string[;]",
+        "double-val@double", "array", "array", "array", "date-val@date"};
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
-    
+    static Date testDate = new Date();
+
     @BeforeClass
     static public void setUp() throws IOException {
         testWorkbook = new XSSFWorkbook();
@@ -49,6 +53,10 @@ public class SpreadsheetTest {
         createRow(sheet, "/test/a2", "A-2", "val");
         createRow(sheet, "/test/a1/a1a", "A-1-A", "val");
         createRow(sheet, "/test/a3/a3a", "A-3-A", "val");
+        XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six", 
+                "12.345", "One Value", null, "Another Value");
+        XSSFCell dateCell = valuesRow.createCell(10);
+        dateCell.setCellValue(testDate);
         testWorkbook.write(workbookData);
         workbookData.close();
     }
@@ -58,7 +66,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetFileName() throws IOException {
-        System.out.println("getFileName");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
         String expResult = "unknown";
         String result = instance.getFileName();
@@ -70,9 +77,8 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetRowCount() throws IOException {
-        System.out.println("getRowCount");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
-        int expResult = 4;
+        int expResult = 5;
         int result = instance.getRowCount();
         assertEquals(expResult, result);
     }
@@ -82,7 +88,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetHeaderRow() throws IOException {
-        System.out.println("getHeaderRow");
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()));
         List<String> expResult = Arrays.asList(header);
         List<String> result = instance.getHeaderRow();
@@ -94,7 +99,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetDataRows() throws IOException {
-        System.out.println("getDataRows");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
         List<Map<String, CompositeVariant>> result = instance.getDataRows();
         assertEquals("/test/a1", result.get(0).get("path").toPropertyValue());
@@ -106,11 +110,10 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsNoConversion() throws IOException {
-        System.out.println("getRequiredColumns");
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someOtherCol", required.get(0));
-        List<Map<String,CompositeVariant>> result = instance.getDataRows();
+        List<Map<String, CompositeVariant>> result = instance.getDataRows();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
 
@@ -119,21 +122,36 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsWithConversion() throws IOException {
-        System.out.println("getRequiredColumns");
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someothercol", required.get(0));
-        List<Map<String,CompositeVariant>> result = instance.getDataRows();
+        List<Map<String, CompositeVariant>> result = instance.getDataRows();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
-    
+
+    @Test
+    public void testVariantTypes() throws IOException {
+        Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
+        Map<String, CompositeVariant> values = instance.getDataRows().get(4);
+        assertEquals((Integer) 12345, values.get("int-val").toPropertyValue());
+        assertArrayEquals(new String[]{"one", "two", "three"}, (Object[]) values.get("string-list1").toPropertyValue());
+        assertArrayEquals(new String[]{"four", "five", "six"}, (Object[]) values.get("string-list2").toPropertyValue());
+        assertArrayEquals(new String[]{"One Value", "Another Value"}, (Object[]) values.get("array").toPropertyValue());
+        assertEquals(12.345, (Double) values.get("double-val").toPropertyValue(), 0.000001);
+        assertEquals(testDate, values.get("date-val").toPropertyValue());
+    }
+
     static private XSSFRow createRow(XSSFSheet sheet, String... values) {
         int rowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow row = sheet.createRow(rowNum);
-        for (int i=0; i < values.length; i++) {
-            row.createCell(i).setCellValue(values[i]);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == null) {
+                row.createCell(i);
+            } else {
+                row.createCell(i).setCellValue(values[i]);
+            }
         }
         return row;
     }
-    
+
 }

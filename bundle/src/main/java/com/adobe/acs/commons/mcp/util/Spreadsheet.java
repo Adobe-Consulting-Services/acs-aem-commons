@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.StringUtils;
@@ -47,13 +48,14 @@ import org.apache.sling.api.request.RequestParameter;
  */
 public class Spreadsheet {
 
-    public static final String DEFAULT_DELIMITER = ".";
+    public static final String DEFAULT_DELIMITER = ",";
     public static final String ROW_NUMBER = "~~ROWNUM~~";
     private String fileName = "unknown";
     private int rowCount;
     private transient List<Map<String, CompositeVariant>> dataRows;
     private final List<String> requiredColumns;
-    private Map<String, Class> header;
+    private Map<String, Class> headerTypes;
+    private List<String> headerRow;
     private final Map<String, String> delimiters;
     private boolean enableHeaderNameConversion = true;
 
@@ -65,7 +67,8 @@ public class Spreadsheet {
      */
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         this.enableHeaderNameConversion = convertHeaderNames;
-        header = Arrays.stream(headerArray).collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
+        headerTypes = Arrays.stream(headerArray).collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
+        headerRow = new ArrayList(headerTypes.keySet());
         requiredColumns = Collections.EMPTY_LIST;
         dataRows = new ArrayList<>();
         delimiters = new HashMap<>();
@@ -109,13 +112,17 @@ public class Spreadsheet {
         rowCount = sheet.getLastRowNum();
         final Iterator<Row> rows = sheet.rowIterator();
 
-        header = readRow(rows.next()).stream()
-                .map(Variant::asString)
+        Row firstRow = rows.next();
+        headerRow = readRow(firstRow).stream()
+                .map(Variant::toString)
+                .map(this::convertHeaderName)
+                .collect(Collectors.toList());
+        headerTypes = readRow(firstRow).stream()
+                .map(Variant::toString)
                 .collect(Collectors.toMap(
                         this::convertHeaderName,
                         this::detectTypeFromName,
-                        this::upgradeToArray,
-                        LinkedHashMap::new
+                        this::upgradeToArray
                 ));
 
         Iterable<Row> remainingRows = () -> rows;
@@ -149,9 +156,18 @@ public class Spreadsheet {
             if (data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
                 if (!out.containsKey(colName)) {
-                    out.put(colName, new CompositeVariant(header.get(colName)));
+                    out.put(colName, new CompositeVariant(headerTypes.get(colName)));
                 }
-                out.get(colName).addValue(data.get(i));
+                if (headerTypes.get(colName).isArray()) {
+                    String[] values = data.get(i).toString().split(Pattern.quote(delimiters.getOrDefault(colName, DEFAULT_DELIMITER)));
+                    for (String value : values) {
+                        if (value != null && !value.isEmpty()) {
+                            out.get(colName).addValue(value.trim());
+                        }
+                    }
+                } else {
+                    out.get(colName).addValue(data.get(i));
+                }                    
             }
         }
         if (empty || (!requiredColumns.isEmpty() && !out.keySet().containsAll(requiredColumns))) {
@@ -179,7 +195,7 @@ public class Spreadsheet {
      * @return the headerRow
      */
     public List<String> getHeaderRow() {
-        return new ArrayList<>(header.keySet());
+        return headerRow;
     }
 
     /**
@@ -229,20 +245,14 @@ public class Spreadsheet {
         boolean isArray = false;
         Class detectedClass = String.class;
         if (name.contains("@")) {
-            String typeStr = name;
+            String typeStr = StringUtils.substringAfter(name, "@");
             if (name.endsWith("]")) {
                 String colName = convertHeaderName(name);
                 isArray = true;
                 String delimiter = StringUtils.substringBetween(name, "[", "]");
                 typeStr = StringUtils.substringBefore("[", delimiter);
-                if (StringUtils.isEmpty(delimiter)) {
-                    if (!delimiters.containsKey(colName)) {
-                        delimiters.put(colName, DEFAULT_DELIMITER);
-                    }
-                } else {
-                    if (!delimiters.containsKey(colName) || delimiters.get(colName).equals(DEFAULT_DELIMITER)) {
-                        delimiters.put(colName, delimiter);
-                    }
+                if (!StringUtils.isEmpty(delimiter)) {
+                    delimiters.put(colName, delimiter);
                 }
             }
             detectedClass = getClassFromName(typeStr);

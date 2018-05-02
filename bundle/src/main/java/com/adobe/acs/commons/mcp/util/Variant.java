@@ -154,7 +154,7 @@ public class Variant {
         dateVal = d == null ? Optional.empty() : Optional.of(d);
     }
 
-    public Long asLong() {
+    public Long toLong() {
         return longVal.orElse(dateVal.map(Date::getTime)
                 .orElse(doubleVal.map(Double::longValue)
                         .orElse(booleanVal.map(b -> (Long) (b ? 1L : 0L))
@@ -162,14 +162,14 @@ public class Variant {
                                         .orElse(null)))));
     }
 
-    public Double asDouble() {
+    public Double toDouble() {
         return doubleVal.orElse(longVal.map(Long::doubleValue)
                 .orElse(booleanVal.map(b -> (Double) (b ? 1.0 : 0.0))
                         .orElse(stringVal.map(Double::parseDouble)
                                 .orElse(null))));
     }
 
-    public String asString() {
+    public String toString() {
         return stringVal.orElse(dateVal.map(DATE_FORMAT::format)
                 .orElse(doubleVal.map(String::valueOf)
                         .orElse(longVal.map(String::valueOf)
@@ -177,7 +177,7 @@ public class Variant {
                                         .orElse(null)))));
     }
 
-    public Date asDate() {
+    public Date toDate() {
         return dateVal.orElse(longVal.map(Date::new)
                 .orElse(stringVal.map(s -> {
                     try {
@@ -188,7 +188,7 @@ public class Variant {
                 }).orElse(null)));
     }
 
-    public Boolean asBoolean() {
+    public Boolean toBoolean() {
         return booleanVal.orElse(longVal.map(l -> l != 0)
                 .orElse(doubleVal.map(d -> d != 0)
                         .orElse(stringVal.map(Boolean::parseBoolean)
@@ -197,28 +197,28 @@ public class Variant {
 
     public <T> T asType(Class<T> type) {
         if (type == Byte.TYPE || type == Byte.class) {
-            return (T) (Byte) asLong().byteValue();
+            return (T) (Byte) toLong().byteValue();
         } else if (type == Integer.TYPE || type == Integer.class) {
-            return (T) (Integer) asLong().intValue();
+            return (T) (Integer) toLong().intValue();
         } else if (type == Long.TYPE || type == Long.class) {
-            return (T) asLong();
+            return (T) toLong();
         } else if (type == Short.TYPE || type == Short.class) {
-            return (T) (Short) asLong().shortValue();
+            return (T) (Short) toLong().shortValue();
         } else if (type == Float.TYPE || type == Float.class) {
-            return (T) (Float) asDouble().floatValue();
+            return (T) (Float) toDouble().floatValue();
         } else if (type == Double.TYPE || type == Double.class) {
-            return (T) asDouble();
+            return (T) toDouble();
         } else if (type == Boolean.TYPE || type == Boolean.class) {
-            return (T) asBoolean();
+            return (T) toBoolean();
         } else if (type == String.class) {
-            return (T) asString();
+            return (T) toString();
         } else if (type == Date.class) {
-            return (T) asDate();
+            return (T) toDate();
         } else if (type == Instant.class) {
-            return (T) asDate().toInstant();
+            return (T) toDate().toInstant();
         } else if (type == Calendar.class) {
             Calendar c = Calendar.getInstance();
-            c.setTime(asDate());
+            c.setTime(toDate());
             return (T) c;
         } else {
             return null;
