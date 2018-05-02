@@ -33,7 +33,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -130,7 +135,7 @@ public class EmailServiceImplTest {
                                                  };
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
-        List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipients);
+        final List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipients);
 
         verify(messageGatewaySimpleEmail, times(recipients.length)).send(captor.capture());
 
@@ -164,7 +169,7 @@ public class EmailServiceImplTest {
 
         ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
 
-        List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipient);
+        final List<String> failureList = emailService.sendEmail(emailTemplatePath, params, recipient);
 
         verify(messageGatewaySimpleEmail, times(1)).send(captor.capture());
 
@@ -183,8 +188,8 @@ public class EmailServiceImplTest {
         final String expectedMessage = "This is just a message";
         final String expectedSenderName = "John Smith";
         final String expectedSenderEmailAddress = "john@smith.com";
-        String attachment = "This is a attachment.";
-        String attachmentName = "attachment.txt";
+        final String attachment = "This is a attachment.";
+        final String attachmentName = "attachment.txt";
         //Subject is provided inside the HtmlTemplate directly
         final String expectedSubject = "Greetings";
 
@@ -200,7 +205,7 @@ public class EmailServiceImplTest {
 
         ArgumentCaptor<HtmlEmail> captor = ArgumentCaptor.forClass(HtmlEmail.class);
 
-        List<String> failureList = emailService.sendEmail(emailTemplateAttachmentPath, params, attachments, recipient);
+        final List<String> failureList = emailService.sendEmail(emailTemplateAttachmentPath, params, attachments, recipient);
 
         verify(messageGatewayHtmlEmail, times(1)).send(captor.capture());
 

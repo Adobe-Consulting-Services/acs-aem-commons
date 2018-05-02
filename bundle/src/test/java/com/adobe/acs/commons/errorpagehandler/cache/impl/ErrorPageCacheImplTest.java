@@ -30,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.concurrent.ConcurrentHashMap;
 
 import junitx.util.PrivateAccessor;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -118,7 +119,7 @@ public class ErrorPageCacheImplTest {
     }
 
     @Test
-    public void testGetCacheSizeInKB() throws Exception {
+    public void testGetCacheSizeInKb() throws Exception {
         final long expResult = ("hello earth".getBytes().length
                 + "hello mars".getBytes().length) / 1000L;
 

@@ -50,7 +50,7 @@ public class OktaLogoutHandlerTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void activateWithoutHostThrowsIAE() {
+    public void activateWithoutHostThrowsIllegalArgumentException() {
         underTest.activate(Collections.emptyMap());
     }
 

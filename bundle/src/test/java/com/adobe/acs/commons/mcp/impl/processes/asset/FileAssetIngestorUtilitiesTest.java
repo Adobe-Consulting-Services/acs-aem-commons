@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -109,6 +107,7 @@ public class FileAssetIngestorUtilitiesTest {
 
         assertNull(parent.getParent());
     }
+
     @Test
     public void testHierarchialElementForFileInRoot() throws Exception {
         File image = new File(tempDirectory, "image.png");
