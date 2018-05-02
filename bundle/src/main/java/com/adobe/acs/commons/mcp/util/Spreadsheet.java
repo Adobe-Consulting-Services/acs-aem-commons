@@ -130,40 +130,9 @@ public class Spreadsheet {
             while (c.getColumnIndex() > rowOut.size()) {
                 rowOut.add(null);
             }
-            rowOut.add(getPolyvalueFromCell(c));
+            rowOut.add(c == null ? null : new Variant(c));
         }
         return rowOut;
-    }
-
-    private Variant getPolyvalueFromCell(Cell cell) {
-        if (cell == null) {
-            return null;
-        }
-        Variant var = new Variant();
-        int cellType = cell.getCellType();
-        if (cellType == Cell.CELL_TYPE_FORMULA) {
-            cellType = cell.getCachedFormulaResultType();
-        }
-        switch (cellType) {
-            case Cell.CELL_TYPE_BOOLEAN:
-                var.setVal(cell.getBooleanCellValue());
-                break;
-            case Cell.CELL_TYPE_NUMERIC:
-                double number = cell.getNumericCellValue();
-                if (Math.floor(number) == number) {
-                    var.setVal((long) number);
-                } else {
-                    var.setVal(number);
-                }
-                var.setVal(cell.getDateCellValue());
-                break;
-            case Cell.CELL_TYPE_STRING:
-                var.setVal(cell.getStringCellValue().trim());
-                break;
-            case Cell.CELL_TYPE_BLANK:
-                break;
-        }
-        return var;
     }
 
     private Optional<Map<String, CompositeVariant>> buildRow(Row row) {

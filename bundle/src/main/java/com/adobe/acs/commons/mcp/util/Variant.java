@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+import org.apache.poi.ss.usermodel.Cell;
 
 /**
  * Used to represent values that might be provided as one type but used as another. Avoids glue code and switch
@@ -40,7 +41,11 @@ public class Variant {
     }
 
     public <T> Variant(T src) {
-        setVal(src);
+        setValue(src);
+    }
+    
+    public Variant (Cell src) {
+        setValue(src);
     }
 
     public void clear() {
@@ -58,8 +63,35 @@ public class Variant {
                 && !dateVal.isPresent()
                 && !booleanVal.isPresent();
     }
+    
+    private void setValue(Cell cell) {
+        int cellType = cell.getCellType();
+        if (cellType == Cell.CELL_TYPE_FORMULA) {
+            cellType = cell.getCachedFormulaResultType();
+        }
+        switch (cellType) {
+            case Cell.CELL_TYPE_BOOLEAN:
+                setValue(cell.getBooleanCellValue());
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                double number = cell.getNumericCellValue();
+                if (Math.floor(number) == number) {
+                    setValue((long) number);
+                } else {
+                    setValue(number);
+                }
+                setValue(cell.getDateCellValue());
+                break;
+            case Cell.CELL_TYPE_STRING:
+                setValue(cell.getStringCellValue().trim());
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                clear();
+                break;
+        }
+    }    
 
-    public final <T> void setVal(T val) {
+    public final <T> void setValue(T val) {
         if (val == null) {
             return;
         }
