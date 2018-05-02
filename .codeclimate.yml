@@ -25,12 +25,17 @@ plugins:
   sonar-java:
     enabled: true
     channel: "beta"
+    exclude_patterns:
+      - "**/src/test/"
     config:
       sonar.java.source: 8
   checkstyle:
     enabled: true
     config:
       file: ".codeclimate/checkstyle.xml"
+    exclude_patterns:
+      - "**/src/test/java/com/amazonaws/"
+      - "**/src/test/java/ch/randelshofer/"
 #  csslint:
 #    enabled: true
 #  duplication:
@@ -50,7 +55,6 @@ exclude_patterns:
 - ".idea/"
 - "**/vendor/"
 - "**/extensions/contentfinder/"
-- "**/src/test/"
 - "*/target/"
 
 
