@@ -110,7 +110,8 @@ public class Spreadsheet {
                 .collect(Collectors.toMap(
                         this::convertHeaderName,
                         this::detectTypeFromName,
-                        this::upgradeToArray
+                        this::upgradeToArray,
+                        LinkedHashMap::new
                 ));
 
         Iterable<Row> remainingRows = () -> rows;
@@ -167,17 +168,16 @@ public class Spreadsheet {
 
     private Optional<Map<String, CompositeVariant>> buildRow(Row row) {
         Map<String, CompositeVariant> out = new LinkedHashMap<>();
-        CompositeVariant<Long> rowNum = new CompositeVariant(Long.class, row.getRowNum());
-        out.put(ROW_NUMBER, rowNum);
+        out.put(ROW_NUMBER, new CompositeVariant(row.getRowNum()));
         List<Variant> data = readRow(row);
         boolean empty = true;
         for (int i = 0; i < data.size() && i < getHeaderRow().size(); i++) {
             String colName = getHeaderRow().get(i);
-            if (!out.containsKey(colName)) {
-                out.put(colName, new CompositeVariant(header.get(colName)));
-            }
             if (data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
+                if (!out.containsKey(colName)) {
+                    out.put(colName, new CompositeVariant(header.get(colName)));
+                }
                 out.get(colName).addValue(data.get(i));
             }
         }
@@ -232,7 +232,7 @@ public class Spreadsheet {
             if (str.contains("@")) {
                 str = StringUtils.substringBefore(str, "@");
             }
-            return String.valueOf(str).toLowerCase().replaceAll("[^0-9a-zA-Z:]+", "_");
+            return String.valueOf(str).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
         } else {
             return String.valueOf(str);
         }

@@ -228,7 +228,7 @@ public class DataImporter extends ProcessDefinition {
         Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
         String nodeName = StringUtils.substringAfterLast(path, "/");
         if (!row.containsKey(JCR_PRIMARY_TYPE)) {
-            row.put("JCR_TYPE", new CompositeVariant(String.class, defaultNodeType));
+            row.put("JCR_TYPE", new CompositeVariant(defaultNodeType));
         }
         Map<String, Object> nodeProps = new HashMap(row);
         rr.refresh();

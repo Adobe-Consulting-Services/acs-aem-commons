@@ -31,13 +31,18 @@ public class CompositeVariant<T> {
     private final Class type;
     private final List<Variant> values = new ArrayList<>();
 
-    public CompositeVariant(Class type) {
-        this.type = type;
-    }
-
-    public CompositeVariant(Class<T> type, T value) {
-        this(type);
-        addValue(value);
+    /**
+     * Create a variant either as a preferred type (set value later with addValue) or
+     * with an initial value and the preferred type is assumed by the value provided.
+     * @param initial 
+     */
+    public CompositeVariant(T initial) {
+        if (initial instanceof Class) {
+            this.type = (Class) initial;
+        } else {
+            this.type = initial.getClass();
+            addValue(initial);
+        }
     }
 
     public boolean isArray() {
@@ -57,7 +62,11 @@ public class CompositeVariant<T> {
     }
 
     public final void addValue(Object val) {
-        values.add(new Variant(val));
+        if (val instanceof Variant) {
+            values.add((Variant) val);
+        } else {
+            values.add(new Variant(val));
+        }
     }
 
     public T getValue() {

@@ -64,7 +64,14 @@ public class Variant {
             return;
         }
         Class type = val.getClass();
-        if (type == Byte.TYPE || type == Byte.class) {
+        if (type == Variant.class) {
+            Variant v = (Variant) val;
+            longVal = v.longVal;
+            doubleVal = v.doubleVal;
+            stringVal = v.stringVal;
+            booleanVal = v.booleanVal;
+            dateVal = v.dateVal;
+        } else if (type == Byte.TYPE || type == Byte.class) {
             setLongVal(((Byte) val).longValue());
         } else if (type == Integer.TYPE || type == Integer.class) {
             setLongVal(((Integer) val).longValue());

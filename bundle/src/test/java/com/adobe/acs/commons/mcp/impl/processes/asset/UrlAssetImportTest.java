@@ -17,6 +17,7 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.util.CompositeVariant;
 import com.adobe.acs.commons.mcp.util.Spreadsheet;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
@@ -95,9 +96,9 @@ public class UrlAssetImportTest {
         
     private void addImportRow(String... cols) {
         List<String> header = importProcess.fileData.getHeaderRow();
-        Map<String, String> row = new HashMap<>();
+        Map<String, CompositeVariant> row = new HashMap<>();
         for (int i=0; i < cols.length && i < header.size(); i++) {
-            row.put(header.get(i), cols[i]);
+            row.put(header.get(i), new CompositeVariant(cols[i]));
         }
         importProcess.fileData.getDataRows().add(row);
     }
