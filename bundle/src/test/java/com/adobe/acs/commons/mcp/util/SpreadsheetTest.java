@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.util;
 
@@ -26,6 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -41,7 +46,7 @@ public class SpreadsheetTest {
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
     
     @BeforeClass
-    static public void setUp() throws IOException {
+    public static void setUp() throws IOException {
         testWorkbook = new XSSFWorkbook();
         XSSFSheet sheet = testWorkbook.createSheet("sheet 1");
         createRow(sheet, header);
@@ -58,7 +63,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetFileName() throws IOException {
-        System.out.println("getFileName");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
         String expResult = "unknown";
         String result = instance.getFileName();
@@ -70,7 +74,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetRowCount() throws IOException {
-        System.out.println("getRowCount");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
         int expResult = 4;
         int result = instance.getRowCount();
@@ -82,7 +85,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetHeaderRow() throws IOException {
-        System.out.println("getHeaderRow");
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()));
         List<String> expResult = Arrays.asList(header);
         List<String> result = instance.getHeaderRow();
@@ -94,7 +96,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetDataRows() throws IOException {
-        System.out.println("getDataRows");
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
         List<Map<String, String>> result = instance.getDataRows();
         assertEquals(result.get(0).get("path"), "/test/a1");
@@ -106,7 +107,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsNoConversion() throws IOException {
-        System.out.println("getRequiredColumns");
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someOtherCol", required.get(0));
@@ -119,7 +119,6 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsWithConversion() throws IOException {
-        System.out.println("getRequiredColumns");
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someothercol", required.get(0));
@@ -127,7 +126,7 @@ public class SpreadsheetTest {
         assertEquals("/test/a2", result.get(0).get("path"));
     }
     
-    static private XSSFRow createRow(XSSFSheet sheet, String... values) {
+    private static XSSFRow createRow(XSSFSheet sheet, String... values) {
         int rowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow row = sheet.createRow(rowNum);
         for (int i=0; i < values.length; i++) {

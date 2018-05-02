@@ -65,8 +65,8 @@ public class LongFormTextComponentImplTest {
     public void testGetTextParagraphs_2() throws Exception {
         final String input = "<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a lot</p></div>";
 
-        final String[] expected = new String[] {"<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a " +
-                "lot</p></div>"};
+        final String[] expected = new String[] {"<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a "
+                + "lot</p></div>"};
         final String[] result = longFormTextComponent.getTextParagraphs(input);
 
         Assert.assertArrayEquals(expected, result);

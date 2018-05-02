@@ -211,8 +211,8 @@ public class OnDeployExecutorImplTest {
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
         assertNotNull(status2);
-        Calendar start = status2.getValueMap().get("startDate", Calendar.class);
-        Calendar end = status2.getValueMap().get("endDate", Calendar.class);
+        final Calendar start = status2.getValueMap().get("startDate", Calendar.class);
+        final Calendar end = status2.getValueMap().get("endDate", Calendar.class);
         assertEquals("success", status2.getValueMap().get("status", ""));
         assertTrue(start.getTimeInMillis() <= System.currentTimeMillis());
         assertTrue(System.currentTimeMillis() - start.getTimeInMillis() < 10000);
@@ -256,11 +256,11 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException {
-        OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
+        final OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
 
         // Mimic the situation where a script initiated in the past is still running
-        Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
-        String status1ResourcePath = statusResource.getPath();
+        final Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
+        final String status1ResourcePath = statusResource.getPath();
         impl.trackScriptStart(statusResource);
         LogTester.reset();
 

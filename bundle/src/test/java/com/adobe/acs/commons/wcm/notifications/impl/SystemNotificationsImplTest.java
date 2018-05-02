@@ -90,9 +90,9 @@ public class SystemNotificationsImplTest {
     @Test
     public void testOnAuthorEmptyNotificationsFolder() throws Exception {
         setAuthorRunmode();
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
+        aemContext.build()
+                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
         commit();
         aemContext.registerInjectActivateService(notifications);
         assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
@@ -186,24 +186,24 @@ public class SystemNotificationsImplTest {
     };
 
     private void createEnabledNotification() throws PersistenceException {
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                siblingsMode().
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED).
-                hierarchyMode().
-                resource("enabled", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
+        aemContext.build()
+                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+                .siblingsMode()
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
+                .hierarchyMode()
+                .resource("enabled", JCR_PRIMARYTYPE, NT_PAGE)
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
         commit();
     }
 
     private void createDisabledNotification() throws PersistenceException {
-        aemContext.build().
-                resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE).
-                siblingsMode().
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED).
-                hierarchyMode().
-                resource("disabled", JCR_PRIMARYTYPE, NT_PAGE).
-                resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", false, "cq:lastModified", zeroHour);
+        aemContext.build()
+                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+                .siblingsMode()
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
+                .hierarchyMode()
+                .resource("disabled", JCR_PRIMARYTYPE, NT_PAGE)
+                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", false, "cq:lastModified", zeroHour);
         commit();
     }
 

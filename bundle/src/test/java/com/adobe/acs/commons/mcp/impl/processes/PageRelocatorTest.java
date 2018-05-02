@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
-import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
@@ -39,14 +42,16 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static org.junit.Assert.*;
 
 /**
  *
