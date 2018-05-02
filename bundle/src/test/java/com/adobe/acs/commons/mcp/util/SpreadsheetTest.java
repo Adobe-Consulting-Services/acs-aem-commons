@@ -129,7 +129,7 @@ public class SpreadsheetTest {
         List<Map<String, CompositeVariant>> result = instance.getDataRows();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
-<
+
     @Test
     public void testVariantTypes() throws IOException {
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
@@ -143,7 +143,7 @@ public class SpreadsheetTest {
     }
 
     private static XSSFRow createRow(XSSFSheet sheet, String... values) {
->       int rowNum = sheet.getPhysicalNumberOfRows();
+        int rowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow row = sheet.createRow(rowNum);
         for (int i = 0; i < values.length; i++) {
             if (values[i] == null) {
