@@ -36,7 +36,6 @@ import static com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler.
 
 import java.util.Map;
 
-@SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class GQLToQueryBuilderConverter {
 
     private static final String SUFFIX_ORDERBY = "_orderby";
