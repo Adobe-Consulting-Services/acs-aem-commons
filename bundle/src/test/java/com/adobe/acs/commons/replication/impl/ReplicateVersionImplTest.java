@@ -138,6 +138,7 @@ public class ReplicateVersionImplTest {
         Assert.assertEquals(Status.replicated, list.get(0).getStatus());
         Assert.assertEquals("version1", list.get(0).getVersion());
     }
+
     private Date getDate(String datetime) throws Exception {
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");

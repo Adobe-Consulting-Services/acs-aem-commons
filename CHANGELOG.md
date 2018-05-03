@@ -7,20 +7,62 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
+
+### Fixed
+- #1278 - EvolutionContext refactored to contain a method returning version history
+- #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+
+### Added
+- #1347 - Redirect Map Entry editor
+
+### Changed
+- #1343 - CodeClimate now checks for license header
+
+## [3.15.2] - 2018-04-25
+
+### Changed
+- #1338 - Asset ingestion now visible to the groups: administrators, asset-ingest, dam-administrators
+
+### Added
+- #1338 - Authorized Group process definition factory for MCP abstracts the basic authentication check, easier to customize now
+
+### Fixed
+- #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
+
+## [3.15.0] - 2018-04-13
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
+- #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
-
+- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1279 - New import tools for node metadata and file/url-based asset ingestion
+- #1307 - MCP now has error reporting and also XLSX export for errors.
+- #1238 - HTTP cache JCR storage 
+- #1245 - On-Deploy Scripts Framework
+
+### Fixed
+- #1262 - MCP race condition affects showing completion status for processes that finish very quickly
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
+- #1303 - Updated HTTP Cache test to handle all platforms more agnostically
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
+- #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
+- #1283 - Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
+- #1319 - Ensuring that PageRootProviderConfig references are sorted consistently.
+
+## [3.14.12] - 2018-04-03
 
 ### Fixed
 
 - #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
 - #1286 - Error page handler now verifies parent resource is not a NonExistingResource
 - #1288 - Restrict the redirect map file upload to .txt file extension
+- #1272 - Ensure Service User service is not restricted ACE by path
+- #1142 - Make sure report tabulation is thread-safe
 - #1298 - Ensure that dispatcher cache headers are only written once per header name
 
 ## [3.14.10] - 2018-03-08
@@ -50,6 +92,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
 - #1239 - Fixing issue which prevented ACS AEM Commons 3.14.0, 3.14.2 and 3.14.4 being installed on AEM 6.2.
+- #1244 - Added Ensure Group functionality.
 
 ## [3.14.4] - 2018-01-24
 

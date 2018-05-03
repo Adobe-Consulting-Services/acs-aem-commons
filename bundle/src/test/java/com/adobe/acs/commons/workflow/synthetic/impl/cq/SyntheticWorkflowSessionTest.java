@@ -36,8 +36,8 @@ import static org.mockito.Mockito.mock;
 public class SyntheticWorkflowSessionTest {
     @Test
     public void test_updateWorkflowData() throws Exception {
-        SyntheticWorkflowSession session = new SyntheticWorkflowSession(new SyntheticWorkflowRunnerImpl(), mock(Session.class));
-        SyntheticWorkflowData workflowData = new SyntheticWorkflowData("JCR_PATH", "/content/test");
+        final SyntheticWorkflowSession session = new SyntheticWorkflowSession(new SyntheticWorkflowRunnerImpl(), mock(Session.class));
+        final SyntheticWorkflowData workflowData = new SyntheticWorkflowData("JCR_PATH", "/content/test");
 
         workflowData.getMetaDataMap().put("cat", "meow");
         workflowData.getMetaDataMap().put("bird", "ka-kaw");

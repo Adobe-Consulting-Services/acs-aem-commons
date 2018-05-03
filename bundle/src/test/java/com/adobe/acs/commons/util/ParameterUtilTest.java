@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.util;
 
-import org.junit.*;
+import org.junit.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
@@ -28,25 +28,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class ParameterUtilTest {
-
-    public ParameterUtilTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     /**
      * Test of toSimpleEntry method, of class OsgiPropertyUtil.

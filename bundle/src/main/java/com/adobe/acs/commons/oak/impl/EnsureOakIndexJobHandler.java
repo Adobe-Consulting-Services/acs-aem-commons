@@ -192,8 +192,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
             final Resource ensureDefinition = ensureDefinitionsIterator.next();
             final Resource oakIndex = oakIndexes.getChild(ensureDefinition.getName());
 
-            log.debug("Ensuring Oak Index [ {} ] ~> [ {}/{} ]", new Object[]{
-                    ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName()});
+            log.debug("Ensuring Oak Index [ {} ] ~> [ {}/{} ]",
+                    ensureDefinition.getPath(), oakIndexesPath, ensureDefinition.getName());
 
             if (!handleLightWeightIndexOperations(
                     ensureDefinition, oakIndex)) {
@@ -296,9 +296,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 this.delete(oakIndex);
             } else {
                 // Oak index does not exist
-                log.info("Requesting deletion of a non-existent Oak Index at [ {} ].\n"
-                                + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
-                        oakIndexesPath + "/" + ensureDefinition.getName(),
+                log.info("Requesting deletion of a non-existent Oak Index at [ {}/{} ].\nConsider removing the Ensure Definition at [ {} ] if it is no longer needed.",
+                        oakIndexesPath, ensureDefinition.getName(),
                         ensureDefinition.getPath());
             }
         } else if (ensureDefinitionProperties.get(PN_DISABLE, false)) {
@@ -307,9 +306,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
                 this.disableIndex(oakIndex);
             } else {
                 // Oak index does not exist
-                log.info("Requesting disable of a non-existent Oak Index at [ {}/{} ].\n"
-                                + "Consider removing the Ensure Definition at [ {} ] if it is no longer needed.",
-                        new Object[]{oakIndexesPath, ensureDefinition.getName(), ensureDefinition.getPath()});
+                log.info("Requesting disable of a non-existent Oak Index at [ {}/{} ].\nConsider removing the Ensure Definition at [ {} ] if it is no longer needed.",
+                        oakIndexesPath, ensureDefinition.getName(), ensureDefinition.getPath());
             }
         } else {
             // handle updates, creates and all reindexing stuff in the second round

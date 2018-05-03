@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.jackrabbit.commons.iterator.NodeIteratorAdapter;
 import org.apache.jackrabbit.commons.iterator.PropertyIteratorAdapter;
@@ -130,10 +129,10 @@ public class PackageHelperImplTest {
     WorkspaceFilter packageTwoFilter;
 
     @Mock
-    PackageId packageOneID;
+    PackageId packageOneId;
 
     @Mock
-    PackageId packageTwoID;
+    PackageId packageTwoId;
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
@@ -178,8 +177,8 @@ public class PackageHelperImplTest {
         when(packageOne.getDefinition()).thenReturn(packageOneDef);
         when(packageTwo.getDefinition()).thenReturn(packageTwoDef);
 
-        when(packageOneDef.getId()).thenReturn(packageOneID);
-        when(packageTwoDef.getId()).thenReturn(packageTwoID);
+        when(packageOneDef.getId()).thenReturn(packageOneId);
+        when(packageTwoDef.getId()).thenReturn(packageTwoId);
 
         when(packageOneDef.getNode()).thenReturn(packageOneDefNode);
         when(packageTwoDef.getNode()).thenReturn(packageTwoDefNode);
@@ -196,16 +195,16 @@ public class PackageHelperImplTest {
         when(packageOne.getNode()).thenReturn(packageOneNode);
         when(packageTwo.getNode()).thenReturn(packageTwoNode);
 
-        when(packageOneNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
-                packageOneVersion + ".zip");
-        when(packageTwoNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
-                packageTwoVersion + ".zip");
+        when(packageOneNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-"
+                + packageOneVersion + ".zip");
+        when(packageTwoNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-"
+                + packageTwoVersion + ".zip");
 
-        when(packageOneID.getName()).thenReturn(packageName);
-        when(packageTwoID.getName()).thenReturn(packageName);
+        when(packageOneId.getName()).thenReturn(packageName);
+        when(packageTwoId.getName()).thenReturn(packageName);
 
-        when(packageOneID.getVersion()).thenReturn(Version.create(packageOneVersion));
-        when(packageTwoID.getVersion()).thenReturn(Version.create(packageTwoVersion));
+        when(packageOneId.getVersion()).thenReturn(Version.create(packageOneVersion));
+        when(packageTwoId.getVersion()).thenReturn(Version.create(packageTwoVersion));
     }
 
 
@@ -229,8 +228,8 @@ public class PackageHelperImplTest {
                 packageTwoMetaInf,
                 packageOneFilter,
                 packageTwoFilter,
-                packageOneID,
-                packageTwoID);
+                packageOneId,
+                packageTwoId);
     }
 
     @Test
@@ -304,7 +303,7 @@ public class PackageHelperImplTest {
 
     @Test
     public void testCreatePackageFromPathFilterSets() throws Exception {
-        Map<String, String> properties = new HashMap<String, String>();
+        final Map<String, String> properties = new HashMap<String, String>();
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
         pathFilterSets.add(new PathFilterSet("/a/b/c"));

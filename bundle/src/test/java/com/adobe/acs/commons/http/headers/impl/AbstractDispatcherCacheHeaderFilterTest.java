@@ -142,7 +142,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
     @Test
     public void testActivateSuccess() throws Exception {
 
-        BaseMatcher<Dictionary<String, Object>> filterPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> filterPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -152,7 +152,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
         filter.activate(componentContext);
@@ -167,13 +167,13 @@ public class AbstractDispatcherCacheHeaderFilterTest {
     @Test
     public void testActivateMultipleFilters() throws Exception {
 
-        ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
+        final ServiceRegistration secondRegistration = mock(ServiceRegistration.class);
 
         final String secondPattern = "/content/dam/.*";
         properties.put(AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
                 new String[] { pattern, secondPattern });
 
-        BaseMatcher<Dictionary<String, Object>> firstPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> firstPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -183,10 +183,10 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(pattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
-        BaseMatcher<Dictionary<String, Object>> secondPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
+        final BaseMatcher<Dictionary<String, Object>> secondPropsMatcher = new BaseMatcher<Dictionary<String, Object>>() {
             @Override
             public void describeTo(Description description) {
                 // do nothing
@@ -196,7 +196,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             @SuppressWarnings("unchecked")
             public boolean matches(Object item) {
                 return StringUtils.equals(secondPattern, ((Dictionary<String, Object>) item).get(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX).toString());
-            };
+            }
         };
 
         filter.activate(componentContext);
