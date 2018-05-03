@@ -141,11 +141,13 @@ public class Spreadsheet {
             while (c.getColumnIndex() > rowOut.size()) {
                 rowOut.add(null);
             }
-            rowOut.add(c == null ? null : new Variant(c));
+            Variant val = new Variant(c);
+            rowOut.add(val.isEmpty() ? null : val);
         }
         return rowOut;
     }
 
+    @SuppressWarnings("squid:S3776")
     private Optional<Map<String, CompositeVariant>> buildRow(Row row) {
         Map<String, CompositeVariant> out = new LinkedHashMap<>();
         out.put(ROW_NUMBER, new CompositeVariant(row.getRowNum()));

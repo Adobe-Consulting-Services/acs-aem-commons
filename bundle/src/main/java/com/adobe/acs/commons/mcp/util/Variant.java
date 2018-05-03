@@ -1,5 +1,9 @@
 /*
- * Copyright 2018 Adobe.
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +47,8 @@ public class Variant {
     public <T> Variant(T src) {
         setValue(src);
     }
-    
-    public Variant (Cell src) {
+
+    public Variant(Cell src) {
         setValue(src);
     }
 
@@ -55,7 +59,7 @@ public class Variant {
         booleanVal = Optional.empty();
         dateVal = Optional.empty();
     }
-    
+
     public boolean isEmpty() {
         return !stringVal.isPresent()
                 && !longVal.isPresent()
@@ -63,7 +67,7 @@ public class Variant {
                 && !dateVal.isPresent()
                 && !booleanVal.isPresent();
     }
-    
+
     private void setValue(Cell cell) {
         int cellType = cell.getCellType();
         if (cellType == Cell.CELL_TYPE_FORMULA) {
@@ -86,11 +90,13 @@ public class Variant {
                 setValue(cell.getStringCellValue().trim());
                 break;
             case Cell.CELL_TYPE_BLANK:
+            default:
                 clear();
                 break;
         }
-    }    
+    }
 
+    @SuppressWarnings("squid:S3776")
     public final <T> void setValue(T val) {
         if (val == null) {
             return;
@@ -195,6 +201,7 @@ public class Variant {
                                 .orElse(null))));
     }
 
+    @SuppressWarnings("squid:S3776")
     public <T> T asType(Class<T> type) {
         if (type == Byte.TYPE || type == Byte.class) {
             return (T) (Byte) toLong().byteValue();
@@ -224,8 +231,8 @@ public class Variant {
             return null;
         }
     }
-    
-    public static <S,D> D convert(S val, Class<D> destType) {
+
+    public static <S, D> D convert(S val, Class<D> destType) {
         Variant v = new Variant(val);
         return v.asType(destType);
     }

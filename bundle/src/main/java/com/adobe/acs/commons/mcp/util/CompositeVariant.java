@@ -74,11 +74,7 @@ public class CompositeVariant<T> {
     }
 
     public <U> U getValueAs(Class<U> otherType) {
-        if (isArray()) {
-            throw new RuntimeException("List values should be treated always as lists");
-        } else {
-            return values.isEmpty() ? null : (U) values.get(0).asType(otherType);
-        }
+        return values.isEmpty() ? null : (U) values.get(0).asType(otherType);
     }
 
     public List<T> getValues() {
