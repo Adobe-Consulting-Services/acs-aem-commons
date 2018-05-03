@@ -25,8 +25,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
-import com.joestelmach.natty.*;
-import java.util.List;
+import java.text.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -36,12 +35,24 @@ import org.apache.poi.ss.usermodel.Cell;
  */
 public class Variant {
 
-    private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateTimeInstance();
+    private static final DateFormat STANDARD_DATE_FORMAT = SimpleDateFormat.getDateTimeInstance();
     private Optional<Long> longVal = Optional.empty();
     private Optional<Double> doubleVal = Optional.empty();
     private Optional<String> stringVal = Optional.empty();
     private Optional<Boolean> booleanVal = Optional.empty();
     private Optional<Date> dateVal = Optional.empty();
+    
+    private static final DateFormat[] DATE_FORMATS = {
+        SimpleDateFormat.getDateInstance(DateFormat.SHORT),
+        SimpleDateFormat.getDateInstance(DateFormat.LONG),
+        SimpleDateFormat.getTimeInstance(DateFormat.SHORT),
+        SimpleDateFormat.getTimeInstance(DateFormat.LONG),
+        STANDARD_DATE_FORMAT,
+        SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT),
+        SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT),
+        SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG),
+        SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG),
+    };
 
     public Variant() {
     }
@@ -178,7 +189,7 @@ public class Variant {
     }
 
     public String toString() {
-        return stringVal.orElse(dateVal.map(DATE_FORMAT::format)
+        return stringVal.orElse(dateVal.map(STANDARD_DATE_FORMAT::format)
                 .orElse(doubleVal.map(String::valueOf)
                         .orElse(longVal.map(String::valueOf)
                                 .orElse(booleanVal.map(String::valueOf)
@@ -188,12 +199,11 @@ public class Variant {
     public Date toDate() {
         return dateVal.orElse(longVal.map(Date::new)
                 .orElse(stringVal.map(s -> {
-                    Parser p = new Parser();
-                    List<DateGroup> dateGroups = p.parse(s);
-                    if (dateGroups.size() > 0) {
-                        List<Date> dates = dateGroups.get(0).getDates();
-                        if (dates.size() > 0) {
-                            return dateGroups.get(0).getDates().get(0);
+                    for (DateFormat format : DATE_FORMATS) {
+                        try {
+                            return format.parse(s);
+                        } catch (ParseException ex) {
+                            // No good, go to the next pattern
                         }
                     }
                     return null;

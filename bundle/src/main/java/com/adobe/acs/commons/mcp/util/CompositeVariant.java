@@ -86,7 +86,12 @@ public class CompositeVariant<T> {
     }
 
     public <U> List<U> getValuesAs(Class<U> otherType) {
-        return values.stream().map(v -> v.asType(otherType)).collect(Collectors.toList());
+        return values.stream().map(v -> getValueAsType(v, otherType)).collect(Collectors.toList());
+    }
+    
+    private <U> U getValueAsType(Variant v, Class<U> type) {
+        // This shouldn't be necessary but it helps disambiguate a runtime lambda issue
+        return v.asType(type);
     }
 
     @Override

@@ -377,13 +377,6 @@
                 <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
-            
-            <!-- Variant dependency for flexible date parsing -->
-            <dependency> 
-                <groupId>com.joestelmach</groupId>
-                <artifactId>natty</artifactId>
-                <version>0.13</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
