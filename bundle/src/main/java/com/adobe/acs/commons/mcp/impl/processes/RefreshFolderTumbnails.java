@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
@@ -20,7 +24,11 @@ import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.PathfieldComponent;
+import com.adobe.acs.commons.mcp.form.RadioComponent;
+import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.contentsync.handler.util.RequestResponseFactory;
@@ -28,6 +36,8 @@ import com.day.cq.dam.api.DamConstants;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,45 +82,74 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     public static final String FOLDER_THUMBNAIL = "jcr:content/folderThumbnail";
 
-    private static final Map<String, Object> THUMBNAIL_PARAMS = new HashMap<String, Object>(){{
-        put("width", "200");
-        put("height", "120");
+    private static final Map<String, Object> THUMBNAIL_PARAMS = new HashMap<String, Object>() {{
+            put("width", "200");
+            put("height", "120");
     }};
     private static final int PLACEHOLDER_SIZE = 1024;
-    
 
     private RequestResponseFactory requestFactory;
     private SlingRequestProcessor slingProcessor;
-    
-    @FormField(name="Starting Path")
+
+    @FormField(name = "Starting Path",
+            component = PathfieldComponent.FolderSelectComponent.class)
     private String startingPath = "/content/dam";
-    
-    @FormField(name="Mode")
+
+    @FormField(name = "Mode",
+            component = RadioComponent.EnumerationSelector.class,
+            options = "default=placeholders"
+    )
     private ThumbnailScanLogic scanMode = ThumbnailScanLogic.PLACEHOLDERS;
+
+    @FormField(name = "Dry Run",
+            component = CheckboxComponent.class)
+    private boolean dryRun = false;
 
     private transient List<String> foldersToReplace = Collections.synchronizedList(new ArrayList<>());
 
     public RefreshFolderTumbnails(RequestResponseFactory reqRspFactory, SlingRequestProcessor slingProcessor) {
         this.requestFactory = reqRspFactory;
-        this.slingProcessor = this.slingProcessor;
+        this.slingProcessor = slingProcessor;
     }
-
+    
     @Override
     public void init() throws RepositoryException {
     }
-
+    
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         instance.defineCriticalAction("Scan folders", rr, this::scanFolders);
-        instance.defineAction("Remove old thumbnails", rr, this::removeOldThumbnails);
-        instance.defineAction("Rebuild thumbnails", rr, this::rebuildThumbnails);
+        if (!dryRun) {
+            instance.defineAction("Remove old thumbnails", rr, this::removeOldThumbnails);
+            instance.defineAction("Rebuild thumbnails", rr, this::rebuildThumbnails);
+        }
+    }
+
+    public static enum ReportColumns {
+        path, action, description
+    }
+
+    List<EnumMap<ReportColumns, String>> reportData = Collections.synchronizedList(new ArrayList<>());
+
+    private void record(String path, String action, String description) {
+        reportData.add(new EnumMap<ReportColumns, String>(ReportColumns.class) {
+            {
+                put(ReportColumns.path, path);
+                put(ReportColumns.action, action);
+                put(ReportColumns.description, description);
+            }
+        });
     }
 
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        GenericReport report = new GenericReport();
+        report.setName("Rebuild thumbnails " + startingPath);
+        report.setRows(reportData, ReportColumns.class);
+        report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
+    static ThreadLocal<String> scanResult = new ThreadLocal<>();
     private void scanFolders(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setBreadthFirstMode();
@@ -118,6 +157,9 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
             String path = folder.getPath();
             manager.deferredWithResolver(rrr -> {
                 if (scanMode.shouldReplace(rrr.getResource(path))) {
+                    String result = scanResult.get();
+                    scanResult.remove();
+                    record(path, "Flagged", result);
                     foldersToReplace.add(path);
                 }
             });
@@ -126,30 +168,38 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     private void removeOldThumbnails(ActionManager manager) {
         ActionBatch batch = new ActionBatch(manager, 20);
-        foldersToReplace.forEach(path -> { 
-            batch.add(rr->rr.delete(rr.getResource(path + FOLDER_THUMBNAIL)));
+        foldersToReplace.forEach(path -> {
+            batch.add(rr -> {
+                rr.delete(rr.getResource(path + FOLDER_THUMBNAIL));
+                record(path, "Deleted", "Existing thumbnail removed");                
+            });
         });
         batch.commitBatch();
     }
 
     private void rebuildThumbnails(ActionManager manager) {
-        foldersToReplace.forEach(path -> { 
+        foldersToReplace.forEach(path -> {
             manager.deferredWithResolver(rr -> rebuildThumbnail(rr, path));
         });
     }
-    
-    private void rebuildThumbnail(ResourceResolver rr, String folderPath) throws ServletException, IOException { 
+
+    private void rebuildThumbnail(ResourceResolver rr, String folderPath) throws ServletException, IOException {
         HttpServletRequest req = requestFactory.createRequest("GET", folderPath + FOLDER_THUMBNAIL + ".png", THUMBNAIL_PARAMS);
         HttpServletResponse res = requestFactory.createResponse(new NullOutputStream());
         slingProcessor.processRequest(req, res, rr);
+        record(folderPath, "Rebuild", "Folder was rebuilt, code " + res.getStatus());
     }
 
     private static boolean isThumbnailMissing(Resource damFolder) {
         Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
         if (jcrContent == null) {
+            scanResult.set("Thumbnail missing");
             return true;
         }
         Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
+        if (thumbnail == null) {
+            scanResult.set("Thumbnail missing");
+        }
         return thumbnail == null;
     }
 
@@ -157,18 +207,67 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
         Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
         byte[] thumbnailData = thumbnail.getValueMap().get(JcrConstants.JCR_DATA, byte[].class);
-        return thumbnailData == null || thumbnailData.length <= PLACEHOLDER_SIZE;
+        if (thumbnailData == null || thumbnailData.length <= PLACEHOLDER_SIZE) {
+            scanResult.set("Placeholder detected, " + thumbnailData == null ? "no thumbnail data" : "size is " + thumbnailData.length + " bytes");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private static boolean isThumbnailContentsOutdated(Resource damFolder) {
-        //Look at /jcr:content/folderThumbnail/jcr:content/@dam:folderThumbnailPaths that list 3 images in that folder.
-        //jcr:lastModified property in the jcr:content might be a useful determining factor if a thumbnail is older than the content of the folder
-        //Confirm if all assets exist and if any modified dates are later than thumbnail
-//        PreviewGenerator.validateExistingPreview
+        Resource contents = damFolder.getChild("jcr:content/folderThumbnail/jcr:content");
+        if (contents == null) {
+            scanResult.set("No folder metadata, assuming contents outdated");
+            return true;
+        } else {
+            Date thumbnailModified = (Date) contents.getValueMap().getOrDefault("jcr:lastModified", Date.class);
+            String[] paths = contents.getValueMap().get("dam:folderThumbnailPaths", String[].class);
+            if (thumbnailModified == null || paths == null || paths.length == 0) {
+                scanResult.set("No folder thumbnails being tracked, assuming contents outdated");
+                return true;                
+            } else {
+                for (String assetPath : paths) {
+                    Resource assetResource = damFolder.getResourceResolver().getResource(assetPath);
+                    if (assetMissingOrNewer(assetResource, thumbnailModified)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean assetMissingOrNewer(Resource asset, Date compareDate) {
+        if (asset == null) {
+            scanResult.set("Referenced asset missing");
+            return true;
+        } else {
+            Resource content = asset.getChild("jcr:content");
+            if (content == null) {
+                scanResult.set("Referenced asset has no content node; " + asset.getPath());
+                return true;
+            }
+            Date assetModified = content.getValueMap().get("jcr:lastModified", Date.class);
+            if (assetModified == null ) {
+                scanResult.set("Referenced asset has no modified date; " + asset.getPath());
+                return true;
+            } else if (assetModified.after(compareDate)) {
+                scanResult.set("Referenced newer than folder; " + asset.getPath());
+                return true;
+            }
+        }
         return false;
     }
     
     private static boolean isThumbnailAutomatic(Resource damFolder) {
+        if (damFolder.getChild("jcr:content/manualThumbnail.jpg") != null ||
+                damFolder.getChild("jcr:content/manualThumbnail.png") != null) {
+            return false;
+        } else if (damFolder.getChild("jcr:content/folderThumbnail") != null) {
+            scanResult.set("Detected automatic thumbnail and no manual thumbnail");
+            return true;
+        }
         return false;
     }
 }
