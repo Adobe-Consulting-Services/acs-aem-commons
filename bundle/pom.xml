@@ -468,6 +468,7 @@
         <dependency> 
             <groupId>com.joestelmach</groupId>
             <artifactId>natty</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
