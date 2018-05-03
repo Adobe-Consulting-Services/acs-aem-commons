@@ -164,6 +164,10 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
                 }
             });
         });
+        manager.deferredWithResolver(rr -> {
+            record(startingPath, "Start", "Starting folder scan");
+            visitor.accept(rr.getResource(startingPath));
+        });
     }
 
     private void removeOldThumbnails(ActionManager manager) {
@@ -187,7 +191,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         HttpServletRequest req = requestFactory.createRequest("GET", folderPath + FOLDER_THUMBNAIL + ".png", THUMBNAIL_PARAMS);
         HttpServletResponse res = requestFactory.createResponse(new NullOutputStream());
         slingProcessor.processRequest(req, res, rr);
-        record(folderPath, "Rebuild", "Folder was rebuilt, code " + res.getStatus());
+        record(folderPath, "Rebuild", "Folder was rebuilt");
     }
 
     private static boolean isThumbnailMissing(Resource damFolder) {
