@@ -68,7 +68,7 @@ public class Spreadsheet {
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         this.enableHeaderNameConversion = convertHeaderNames;
         headerTypes = Arrays.stream(headerArray).collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
-        headerRow = new ArrayList(headerTypes.keySet());
+        headerRow = Arrays.asList(headerArray);
         requiredColumns = Collections.EMPTY_LIST;
         dataRows = new ArrayList<>();
         delimiters = new HashMap<>();

@@ -299,15 +299,15 @@ public class UrlAssetImport extends AssetIngestor {
         FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
-                assetData.get(RENDITION_NAME).toString(),
-                assetData.get(ORIGINAL_FILE_NAME).toString()
+                assetData.get(RENDITION_NAME) == null ? null : assetData.get(RENDITION_NAME).toString(),
+                assetData.get(ORIGINAL_FILE_NAME) == null ? null : assetData.get(ORIGINAL_FILE_NAME).toString()
         );
 
         return file;
     }
 
     private String getTargetFolder(Map<String, CompositeVariant> assetData) {
-        String target = assetData.get(TARGET_FOLDER).toString();
+        String target = assetData.get(TARGET_FOLDER) == null ? null : assetData.get(TARGET_FOLDER).toString();
         if (target == null || target.isEmpty()) {
             return UNKNOWN_TARGET_FOLDER;
         } else if (!target.startsWith(CONTENT_BASE)) {
