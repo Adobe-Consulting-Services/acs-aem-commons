@@ -20,12 +20,14 @@
 package com.adobe.acs.commons.mcp.util;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+import com.joestelmach.natty.*;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
 /**
@@ -164,7 +166,7 @@ public class Variant {
         return longVal.orElse(dateVal.map(Date::getTime)
                 .orElse(doubleVal.map(Double::longValue)
                         .orElse(booleanVal.map(b -> (Long) (b ? 1L : 0L))
-                                .orElse(stringVal.map(Long::parseLong)
+                                .orElse(stringVal.map(s -> (long) Double.parseDouble(s))
                                         .orElse(null)))));
     }
 
@@ -186,19 +188,39 @@ public class Variant {
     public Date toDate() {
         return dateVal.orElse(longVal.map(Date::new)
                 .orElse(stringVal.map(s -> {
-                    try {
-                        return DATE_FORMAT.parse(s);
-                    } catch (ParseException ex) {
-                        return null;
+                    Parser p = new Parser();
+                    List<DateGroup> dateGroups = p.parse(s);
+                    if (dateGroups.size() > 0) {
+                        List<Date> dates = dateGroups.get(0).getDates();
+                        if (dates.size() > 0) {
+                            return dateGroups.get(0).getDates().get(0);
+                        }
                     }
+                    return null;
                 }).orElse(null)));
     }
 
     public Boolean toBoolean() {
         return booleanVal.orElse(longVal.map(l -> l != 0)
                 .orElse(doubleVal.map(d -> d != 0)
-                        .orElse(stringVal.map(Boolean::parseBoolean)
+                        .orElse(stringVal.map(this::isStringTruthy)
                                 .orElse(null))));
+    }
+    
+    /**
+     * Truthiness is any non-empty string that looks like a non-zero number or looks like it is True, Yes, or X
+     * @param s String to evaluate
+     * @return True if it is truthy, otherwise false
+     */
+    public boolean isStringTruthy(String s) {
+        if (s == null || s.trim().isEmpty()) {
+            return false;
+        } else if (StringUtils.isNumeric(s)) {
+            return Long.parseLong(s) != 0;
+        } else {
+            char c = s.trim().toLowerCase().charAt(0);
+            return (c == 't' || c == 'y' || c == 'x');
+        }
     }
 
     @SuppressWarnings("squid:S3776")

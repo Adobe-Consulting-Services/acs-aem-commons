@@ -65,7 +65,7 @@
                             org.apache.poi.xssf.usermodel;version="[2.0,4)",
                             *
                         </Import-Package>
-                        <Embed-Dependency>guava</Embed-Dependency>
+                        <Embed-Dependency>guava,natty</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -459,11 +459,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-		    <groupId>com.github.jknack</groupId>
-		    <artifactId>handlebars</artifactId>
-		    <version>4.0.6</version>
-		    <scope>provided</scope>
-		</dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.0.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Used for flexible date parsing in Variant -->
+        <dependency> 
+            <groupId>com.joestelmach</groupId>
+            <artifactId>natty</artifactId>
+        </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>

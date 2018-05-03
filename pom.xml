@@ -377,6 +377,13 @@
                 <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
+            
+            <!-- Variant dependency for flexible date parsing -->
+            <dependency> 
+                <groupId>com.joestelmach</groupId>
+                <artifactId>natty</artifactId>
+                <version>0.13</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -496,10 +503,10 @@
     </profiles>
 
     <!--
-        Inclusion of repositories in POMs is controversial, to say the least.
-        It would be best if you proxied the Adobe repository using a Maven
-        Repository Manager. Once you do that, remove these sections.
-     -->
+       Inclusion of repositories in POMs is controversial, to say the least.
+       It would be best if you proxied the Adobe repository using a Maven
+       Repository Manager. Once you do that, remove these sections.
+    -->
     <repositories>
         <repository>
             <id>adobe-public-releases</id>
