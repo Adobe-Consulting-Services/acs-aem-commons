@@ -22,50 +22,48 @@ package com.adobe.acs.commons.mcp.util;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class VariantTest {
+
     @Test
     public void numericConversion() {
-        assert(Variant.convert("12345", Integer.class) instanceof Integer);
+        assert (Variant.convert("12345", Integer.class) instanceof Integer);
         assertEquals(12345L, (long) Variant.convert("12345", Integer.class));
-        assert(Variant.convert("12345", Short.class) instanceof Short);
+        assert (Variant.convert("12345", Short.class) instanceof Short);
         assertEquals(12345L, (long) Variant.convert("12345", Short.class));
-        assert(Variant.convert("12345.123", Long.class) instanceof Long);
+        assert (Variant.convert("12345.123", Long.class) instanceof Long);
         assertEquals(12345L, (long) Variant.convert("12345", Long.class));
-        assert(Variant.convert("12345.123", Double.class) instanceof Double);
+        assert (Variant.convert("12345.123", Double.class) instanceof Double);
         assertEquals(12345.123, Variant.convert("12345.123", Double.class), 0.0000001);
-        assert(Variant.convert("12345.123", Float.class) instanceof Float);
+        assert (Variant.convert("12345.123", Float.class) instanceof Float);
         assertEquals(12345.123, Variant.convert("12345.123", Float.class), 0.001);
-        assert(Variant.convert(1, Boolean.class));
+        assert (Variant.convert(1, Boolean.class));
         assertFalse(Variant.convert("0", Boolean.class));
         assertEquals(1L, (long) Variant.convert(true, Long.class));
     }
-    
+
     @Test
     public void booleanConversion() {
-        assert(Variant.convert("1", Boolean.class));
+        assert (Variant.convert("1", Boolean.class));
         assertFalse(Variant.convert("0", Boolean.class));
-        assert(Variant.convert(1.1234, Boolean.class));
+        assert (Variant.convert(1.1234, Boolean.class));
         assertFalse(Variant.convert(0.0, Boolean.class));
-        assert(Variant.convert("true", Boolean.class));
+        assert (Variant.convert("true", Boolean.class));
         assertFalse(Variant.convert("FaLsE", Boolean.class));
-        assert(Variant.convert("tRuE", Boolean.class));
-        assert(Variant.convert("y", Boolean.class));
+        assert (Variant.convert("tRuE", Boolean.class));
+        assert (Variant.convert("y", Boolean.class));
         assertFalse(Variant.convert("n", Boolean.class));
     }
-    
+
     @Test
     public void calendarConversion() {
         long now = System.currentTimeMillis();
         Date nowDate = new Date(now);
         Instant nowInstant = nowDate.toInstant();
-        
+
         assertEquals(nowDate, Variant.convert(now, Date.class));
         assertEquals(nowInstant, Variant.convert(now, Instant.class));
         assertEquals(nowInstant, Variant.convert(nowDate, Instant.class));
@@ -76,7 +74,7 @@ public class VariantTest {
         assertNotNull(Variant.convert(nowStringShort, Date.class).getTime());
         assertNotNull(Variant.convert("12:00 AM", Date.class).getTime());
     }
-    
+
     @Test
     public void emptyBehavior() {
         assertTrue((new Variant()).isEmpty());
@@ -86,7 +84,7 @@ public class VariantTest {
         assertNull(Variant.convert("", String.class));
         assertNull(Variant.convert(null, String.class));
     }
-    
+
     @Test
     public void unsupportedTypes() {
         assertNull(Variant.convert("Known type", Exception.class));
