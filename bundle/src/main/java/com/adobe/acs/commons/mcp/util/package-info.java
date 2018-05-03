@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@Version("3.11.0")
+@Version("4.0.0")
 package com.adobe.acs.commons.mcp.util;
 
 import aQute.bnd.annotation.Version;
