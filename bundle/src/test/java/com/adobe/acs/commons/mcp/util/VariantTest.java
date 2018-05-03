@@ -22,7 +22,11 @@ package com.adobe.acs.commons.mcp.util;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 public class VariantTest {
@@ -61,12 +65,13 @@ public class VariantTest {
         long now = System.currentTimeMillis();
         Date nowDate = new Date(now);
         Instant nowInstant = nowDate.toInstant();
-        String nowStringShort = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.LONG).format(nowDate);
-        String nowStringLong = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.LONG, SimpleDateFormat.LONG).format(nowDate);
         
         assertEquals(nowDate, Variant.convert(now, Date.class));
         assertEquals(nowInstant, Variant.convert(now, Instant.class));
         assertEquals(nowInstant, Variant.convert(nowDate, Instant.class));
+
+        String nowStringShort = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.LONG).format(nowDate);
+        String nowStringLong = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.LONG, SimpleDateFormat.LONG).format(nowDate);
         assertNotNull(Variant.convert(nowStringLong, Date.class).getTime());
         assertNotNull(Variant.convert(nowStringShort, Date.class).getTime());
         assertNotNull(Variant.convert("12:00 AM", Date.class).getTime());
