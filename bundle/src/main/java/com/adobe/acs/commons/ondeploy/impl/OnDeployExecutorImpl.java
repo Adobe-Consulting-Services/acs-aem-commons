@@ -2,14 +2,14 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,52 +19,68 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
-import com.day.cq.commons.jcr.JcrConstants;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import com.day.cq.commons.jcr.JcrConstants;
 
 /**
  * A service that triggers scripts on deployment to an AEM server.
  * <p>
- * This class manages scripts so that they only run once (unless the script
- * fails).  Script execution statuses are stored in the JCR @
- * /var/acs-commons/on-deploy-scripts-status.
+ * This class manages scripts so that they only run once (unless the script fails). Script execution statuses are
+ * stored in the JCR @ /var/acs-commons/on-deploy-scripts-status.
  * <p>
  * Scripts are specified via OSGi config, are are run in the order specified.
  * <p>
- * NOTE: Since it's always a possibility that
- * /var/acs-commons/on-deploy-scripts-status will be deleted in the JCR,
- * scripts should be written defensively in case they are actually run more
- * than once.  This also covers the scenario where a script is run a second
- * time after failing the first time.
+ * NOTE: Since it's always a possibility that /var/acs-commons/on-deploy-scripts-status will be deleted in the JCR,
+ * scripts should be written defensively in case they are actually run more than once. This also covers the scenario
+ * where a script is run a second time after failing the first time.
  */
 @Component(
         label = "ACS AEM Commons - On-Deploy Scripts Executor",
         description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
-        metatype = true,
-        policy = ConfigurationPolicy.REQUIRE
-)
-public class OnDeployExecutorImpl {
+        metatype = true, policy = ConfigurationPolicy.REQUIRE)
+@Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
+        value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
+@Service(value = DynamicMBean.class)
+public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutor {
+
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
 
     private static final String SCRIPT_DATE_END = "endDate";
@@ -78,11 +94,40 @@ public class OnDeployExecutorImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(OnDeployExecutorImpl.class);
 
+    private static transient String[] scriptsItemNames;
+    private static transient CompositeType scriptsCompositeType;
+    private static transient TabularType scriptsTabularType;
+
+    static {
+        try {
+            scriptsItemNames = new String[] { "_provider", "_script", "startDate", "endDate", "status" };
+            scriptsCompositeType =
+                    new CompositeType("Script Row", "single script status row", scriptsItemNames, new String[] {
+                            "Provider", "Script", "Start Date", "End Date", "Status" },
+                            new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.DATE, SimpleType.DATE,
+                                    SimpleType.STRING });
+            scriptsTabularType =
+                    new TabularType("Scripts", "On-Deploy Scripts", scriptsCompositeType, new String[] { "_provider",
+                            "_script" });
+
+        } catch (OpenDataException ex) {
+            logger.error("Unable to build MBean composite types", ex);
+        }
+    }
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class,
+            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    private List<OnDeployScriptProvider> scriptProviders = new ArrayList<>();
 
-    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private List<OnDeployScriptProvider> scriptProviders;
+    public OnDeployExecutorImpl() throws NotCompliantMBeanException {
+        super(OnDeployExecutor.class);
+    }
+
+    private static TabularType getScriptsTableType() {
+        return scriptsTabularType;
+    }
 
     protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
         this.resourceResolverFactory = resourceResolverFactory;
@@ -93,6 +138,8 @@ public class OnDeployExecutorImpl {
      */
     protected void bindScriptProvider(OnDeployScriptProvider scriptProvider) {
         logger.info("Executing on-deploy scripts from scriptProvider: {}", scriptProvider.getClass().getName());
+        scriptProviders.add(scriptProvider);
+
         List<OnDeployScript> scripts = scriptProvider.getScripts();
         if (scripts.size() == 0) {
             logger.debug("No on-deploy scripts found.");
@@ -114,7 +161,7 @@ public class OnDeployExecutorImpl {
     }
 
     protected void unbindScriptProvider(OnDeployScriptProvider scriptProvider) {
-        // noop
+        scriptProviders.remove(scriptProvider);
     }
 
     protected Resource getOrCreateStatusTrackingResource(ResourceResolver resourceResolver, Class<?> scriptClass) {
@@ -123,9 +170,13 @@ public class OnDeployExecutorImpl {
         if (resource == null) {
             Resource folder = resourceResolver.getResource(SCRIPT_STATUS_JCR_FOLDER);
             try {
-                resource = resourceResolver.create(folder, scriptClassName, Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED));
+                resource =
+                        resourceResolver.create(folder, scriptClassName,
+                                Collections.singletonMap(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED));
             } catch (PersistenceException re) {
-                logger.error("On-deploy script cannot be run because the system could not find or create the script status node: {}/{}", SCRIPT_STATUS_JCR_FOLDER, scriptClassName);
+                logger.error(
+                        "On-deploy script cannot be run because the system could not find or create the script status node: {}/{}",
+                        SCRIPT_STATUS_JCR_FOLDER, scriptClassName);
                 throw new OnDeployEarlyTerminationException(re);
             }
         }
@@ -164,7 +215,9 @@ public class OnDeployExecutorImpl {
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
         } else if (!status.equals(SCRIPT_STATUS_SUCCESS)) {
-            String errMsg = "On-deploy script is already running or in an otherwise unknown state: " + statusResource.getPath() + " - status: " + status;
+            String errMsg =
+                    "On-deploy script is already running or in an otherwise unknown state: "
+                            + statusResource.getPath() + " - status: " + status;
             logger.error(errMsg);
             throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
         } else {
@@ -189,7 +242,8 @@ public class OnDeployExecutorImpl {
             properties.put(SCRIPT_DATE_END, Calendar.getInstance());
             statusResource.getResourceResolver().commit();
         } catch (PersistenceException e) {
-            logger.error("On-deploy script status node could not be updated: {} - status: {}", statusResource.getPath(), status);
+            logger.error("On-deploy script status node could not be updated: {} - status: {}",
+                    statusResource.getPath(), status);
             throw new OnDeployEarlyTerminationException(e);
         }
     }
@@ -203,8 +257,70 @@ public class OnDeployExecutorImpl {
             properties.remove(SCRIPT_DATE_END);
             statusResource.getResourceResolver().commit();
         } catch (PersistenceException e) {
-            logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusResource.getPath());
+            logger.error(
+                    "On-deploy script cannot be run because the system could not write to the script status node: {}",
+                    statusResource.getPath());
             throw new OnDeployEarlyTerminationException(e);
+        }
+    }
+
+    @Override
+    public TabularDataSupport getScripts() throws OpenDataException {
+        TabularDataSupport scriptStatus = new TabularDataSupport(OnDeployExecutorImpl.getScriptsTableType());
+
+        try (ResourceResolver resourceResolver = logIn()) {
+            if (scriptProviders != null) {
+                for (OnDeployScriptProvider provider : scriptProviders) {
+                    List<OnDeployScript> scripts = provider.getScripts();
+                    for (OnDeployScript script : scripts) {
+                        Resource trackingResource =
+                                getOrCreateStatusTrackingResource(resourceResolver, script.getClass());
+
+                        ValueMap scriptStatusProps = trackingResource.adaptTo(ValueMap.class);
+
+                        Date startDate = scriptStatusProps.get(SCRIPT_DATE_START, Date.class);
+                        Date endDate = scriptStatusProps.get(SCRIPT_DATE_END, Date.class);
+                        String status = scriptStatusProps.get(SCRIPT_STATUS, "");
+
+                        CompositeDataSupport scriptStatusData =
+                                new CompositeDataSupport(scriptsCompositeType, scriptsItemNames, new Object[] {
+                                        provider.getClass().getCanonicalName(), script.getClass().getCanonicalName(),
+                                        startDate, endDate, status });
+                        scriptStatus.put(scriptStatusData);
+
+                    }
+                }
+            }
+        }
+
+        return scriptStatus;
+    }
+
+    @Override
+    public void executeScript(String scriptName, boolean force) {
+        try (ResourceResolver resourceResolver = logIn()) {
+            if (scriptProviders != null) {
+                for (OnDeployScriptProvider provider : scriptProviders) {
+                    List<OnDeployScript> scripts = provider.getScripts();
+                    for (OnDeployScript script : scripts) {
+                        if (script.getClass().getCanonicalName().equals(scriptName)) {
+                            if (force) {
+                                logger.info("resetting the status of script {}", script.getClass().getCanonicalName());
+                                Resource trackingRes =
+                                        getOrCreateStatusTrackingResource(resourceResolver, script.getClass());
+                                try {
+                                    resourceResolver.delete(trackingRes);
+                                    resourceResolver.commit();
+                                } catch (PersistenceException e) {
+                                    logger.error("failed while resetting script status.", e);
+                                }
+                            }
+
+                            runScript(resourceResolver, script);
+                        }
+                    }
+                }
+            }
         }
     }
 }

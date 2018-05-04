@@ -17,32 +17,8 @@
  * limitations under the License.
  * #L%
  */
+
 package com.adobe.acs.commons.ondeploy.impl;
-
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
-import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
@@ -61,7 +37,34 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+
+import javax.jcr.RepositoryException;
+import javax.management.NotCompliantMBeanException;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
+import com.adobe.acs.commons.testutil.LogTester;
+import com.day.cq.search.QueryBuilder;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
 public class OnDeployExecutorImplTest {
+
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -75,7 +78,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResources() {
+    public void testCloseResources() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -83,6 +86,7 @@ public class OnDeployExecutorImplTest {
         doNothing().when(impl).runScripts(same(resourceResolver), anyList());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
@@ -94,7 +98,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResourcesIsFailSafe() {
+    public void testCloseResourcesIsFailSafe() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -104,6 +108,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
@@ -115,7 +120,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResourcesOnException() {
+    public void testCloseResourcesOnException() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -123,6 +128,7 @@ public class OnDeployExecutorImplTest {
         doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), anyList());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
@@ -138,10 +144,11 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteNoScripts() {
+    public void testExecuteNoScripts() throws NotCompliantMBeanException {
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Collections.emptyList();
@@ -154,14 +161,17 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteRerunsFailedScripts() throws RepositoryException {
+    public void testExecuteRerunsFailedScripts() throws RepositoryException, NotCompliantMBeanException {
         OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
         ResourceResolver resourceResolver = context.resourceResolver();
 
         // Mimic the situation where a script initiated in the past failed
-        Resource statusResource = impl.getOrCreateStatusTrackingResource(resourceResolver, OnDeployScriptTestExampleSuccess1.class);
+        Resource statusResource =
+                impl.getOrCreateStatusTrackingResource(resourceResolver, OnDeployScriptTestExampleSuccess1.class);
         String status1ResourcePath = statusResource.getPath();
-        assertEquals(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/" + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
+        assertEquals(
+                OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/"
+                        + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
         impl.trackScriptStart(statusResource);
         impl.trackScriptEnd(statusResource, "fail");
         Resource originalStatus1 = resourceResolver.getResource(status1ResourcePath);
@@ -170,6 +180,7 @@ public class OnDeployExecutorImplTest {
 
         // Here's where the real test begins
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
@@ -181,35 +192,49 @@ public class OnDeployExecutorImplTest {
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
-        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        Resource status2 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
         assertEquals("success", status2.getValueMap().get("status", ""));
     }
 
     @Test
-    public void testExecuteSuccessfulScripts() {
+    public void testExecuteSuccessfulScripts() throws NotCompliantMBeanException {
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccessWithPause());
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(),
+                        new OnDeployScriptTestExampleSuccessWithPause());
             }
         });
         context.registerInjectActivateService(new OnDeployExecutorImpl());
 
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccessWithPause.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1", OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("Executing test script: OnDeployScriptTestExampleSuccessWithPause", OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1",
+                OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleSuccessWithPause",
+                OnDeployScriptTestExampleSuccessWithPause.class.getName());
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        Resource status1 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
-        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
+        Resource status2 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccessWithPause.class.getName());
         assertNotNull(status2);
         final Calendar start = status2.getValueMap().get("startDate", Calendar.class);
         final Calendar end = status2.getValueMap().get("endDate", Calendar.class);
@@ -221,9 +246,10 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException {
+    public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException, NotCompliantMBeanException {
         // Run the script successfully the first time
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
@@ -234,32 +260,42 @@ public class OnDeployExecutorImplTest {
 
         // Here's where the real test begins
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
             }
         });
 
-        assertLogText("Skipping on-deploy script, as it is already complete: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertLogText("Skipping on-deploy script, as it is already complete: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess2.class.getName());
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        Resource status1 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
-        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        Resource status2 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
         assertEquals("success", status2.getValueMap().get("status", ""));
     }
 
     @Test
-    public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException {
+    public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException, NotCompliantMBeanException {
         final OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
 
         // Mimic the situation where a script initiated in the past is still running
-        final Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
+        final Resource statusResource =
+                impl.getOrCreateStatusTrackingResource(context.resourceResolver(),
+                        OnDeployScriptTestExampleSuccess1.class);
         final String status1ResourcePath = statusResource.getPath();
         impl.trackScriptStart(statusResource);
         LogTester.reset();
@@ -267,6 +303,7 @@ public class OnDeployExecutorImplTest {
         // Here's where the real test begins
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
                 return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
@@ -280,25 +317,34 @@ public class OnDeployExecutorImplTest {
             assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
         }
 
-        assertLogText("On-deploy script is already running or in an otherwise unknown state: " + status1ResourcePath + " - status: running");
-        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertLogText("On-deploy script is already running or in an otherwise unknown state: " + status1ResourcePath
+                + " - status: running");
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess2.class.getName());
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        Resource status1 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("running", status1.getValueMap().get("status", ""));
 
-        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        Resource status2 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status2);
     }
 
     @Test
     public void testExecuteTerminatesWhenScriptFails() {
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+
             @Override
             public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleFailExecute(), new OnDeployScriptTestExampleSuccess2());
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(),
+                        new OnDeployScriptTestExampleFailExecute(), new OnDeployScriptTestExampleSuccess2());
             }
         });
 
@@ -309,27 +355,41 @@ public class OnDeployExecutorImplTest {
             assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
         }
 
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
-        assertNotLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
-        assertLogText("On-deploy script failed: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
-        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleFailExecute.class.getName());
+        assertNotLogText("On-deploy script completed successfully: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleFailExecute.class.getName());
+        assertLogText("On-deploy script failed: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleFailExecute.class.getName());
+        assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/"
+                + OnDeployScriptTestExampleSuccess2.class.getName());
 
-        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1", OnDeployScriptTestExampleSuccess1.class.getName());
-        assertLogText("Executing test script: OnDeployScriptTestExampleFailExecute", OnDeployScriptTestExampleFailExecute.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleSuccess1",
+                OnDeployScriptTestExampleSuccess1.class.getName());
+        assertLogText("Executing test script: OnDeployScriptTestExampleFailExecute",
+                OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotLogText("Executing test script: OnDeployScriptTestExampleSuccess2");
 
         ResourceResolver resourceResolver = context.resourceResolver();
-        Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
+        Resource status1 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
 
-        Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
+        Resource status2 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotNull(status2);
         assertEquals("fail", status2.getValueMap().get("status", ""));
 
-        Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
+        Resource status3 =
+                resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/"
+                        + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
     }
 }
