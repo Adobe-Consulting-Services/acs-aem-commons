@@ -80,7 +80,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         }
     }
 
-    public static final String FOLDER_THUMBNAIL = "jcr:content/folderThumbnail";
+    public static final String FOLDER_THUMBNAIL = "/jcr:content/folderThumbnail";
 
     private static final Map<String, Object> THUMBNAIL_PARAMS = new HashMap<String, Object>() {{
             put("width", "200");
@@ -155,8 +155,8 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         visitor.setBreadthFirstMode();
         visitor.setResourceVisitor((folder, level) -> {
             String path = folder.getPath();
-            manager.deferredWithResolver(rrr -> {
-                if (scanMode.shouldReplace(rrr.getResource(path))) {
+            manager.deferredWithResolver(rr -> {
+                if (scanMode.shouldReplace(rr.getResource(path))) {
                     String result = scanResult.get();
                     scanResult.remove();
                     record(path, "Flagged", result);
@@ -174,8 +174,11 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         ActionBatch batch = new ActionBatch(manager, 20);
         foldersToReplace.forEach(path -> {
             batch.add(rr -> {
-                rr.delete(rr.getResource(path + FOLDER_THUMBNAIL));
-                record(path, "Deleted", "Existing thumbnail removed");                
+                Resource res = rr.getResource(path + FOLDER_THUMBNAIL);
+                if (res != null) {
+                    rr.delete(res);
+                    record(path, "Deleted", "Existing thumbnail removed");                
+                }
             });
         });
         batch.commitBatch();
@@ -188,10 +191,13 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     }
 
     private void rebuildThumbnail(ResourceResolver rr, String folderPath) throws ServletException, IOException {
-        HttpServletRequest req = requestFactory.createRequest("GET", folderPath + FOLDER_THUMBNAIL + ".png", THUMBNAIL_PARAMS);
-        HttpServletResponse res = requestFactory.createResponse(new NullOutputStream());
+        HttpServletRequest req = requestFactory.createRequest("GET", folderPath + ".folderthumbnail.jpg", THUMBNAIL_PARAMS);
+        NullOutputStream out = new NullOutputStream();
+        HttpServletResponse res = requestFactory.createResponse(out);
         slingProcessor.processRequest(req, res, rr);
-        record(folderPath, "Rebuild", "Folder was rebuilt");
+        res.flushBuffer();
+        out.close();
+        record(folderPath, "Rebuild", "Thumbnail was rebuilt");
     }
 
     private static boolean isThumbnailMissing(Resource damFolder) {
@@ -212,7 +218,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
         byte[] thumbnailData = thumbnail.getValueMap().get(JcrConstants.JCR_DATA, byte[].class);
         if (thumbnailData == null || thumbnailData.length <= PLACEHOLDER_SIZE) {
-            scanResult.set("Placeholder detected, " + thumbnailData == null ? "no thumbnail data" : "size is " + thumbnailData.length + " bytes");
+            scanResult.set("Placeholder detected, " + ( thumbnailData == null ? "no thumbnail data" : "size is " + thumbnailData.length + " bytes"));
             return true;
         } else {
             return false;
