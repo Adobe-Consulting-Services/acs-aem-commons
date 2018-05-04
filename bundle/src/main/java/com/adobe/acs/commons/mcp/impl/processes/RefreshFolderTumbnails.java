@@ -193,11 +193,11 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     private void rebuildThumbnail(ResourceResolver rr, String folderPath) throws ServletException, IOException {
         HttpServletRequest req = requestFactory.createRequest("GET", folderPath + ".folderthumbnail.jpg", THUMBNAIL_PARAMS);
-        NullOutputStream out = new NullOutputStream();
-        HttpServletResponse res = requestFactory.createResponse(out);
-        slingProcessor.processRequest(req, res, rr);
-        res.flushBuffer();
-        out.close();
+        try (NullOutputStream out = new NullOutputStream()) {
+            HttpServletResponse res = requestFactory.createResponse(out);
+            slingProcessor.processRequest(req, res, rr);
+            res.flushBuffer();
+        }
         record(folderPath, "Rebuild", "Thumbnail was rebuilt");
     }
 
@@ -234,7 +234,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         long size = 0;
         long count = 0;
         byte[] buf = new byte[1024];
-        while ((count = thumbnailData.read()) > 0) {
+        while ((count = thumbnailData.read(buf)) > 0) {
             size += count;
         }
         thumbnailData.close();
