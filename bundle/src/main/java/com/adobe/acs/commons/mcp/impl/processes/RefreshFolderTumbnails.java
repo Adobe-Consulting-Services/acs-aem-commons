@@ -34,6 +34,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.contentsync.handler.util.RequestResponseFactory;
 import com.day.cq.dam.api.DamConstants;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -213,16 +214,31 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         return thumbnail == null;
     }
 
-    private static boolean isPlaceholderThumbnail(Resource damFolder) {
+    private static boolean isPlaceholderThumbnail(Resource damFolder) throws IOException {
         Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
         Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
-        byte[] thumbnailData = thumbnail.getValueMap().get(JcrConstants.JCR_DATA, byte[].class);
-        if (thumbnailData == null || thumbnailData.length <= PLACEHOLDER_SIZE) {
-            scanResult.set("Placeholder detected, " + ( thumbnailData == null ? "no thumbnail data" : "size is " + thumbnailData.length + " bytes"));
+        long size = getBinarySize(thumbnail);
+        if (size <= PLACEHOLDER_SIZE) {
+            scanResult.set("Placeholder detected, " + ( size <= 0 ? "no thumbnail data" : "size is " + size + " bytes"));
             return true;
         } else {
             return false;
         }
+    }
+    
+    private static long getBinarySize(Resource res) throws IOException {
+        InputStream thumbnailData = res.adaptTo(InputStream.class);
+        if (thumbnailData == null) {
+            return -1;
+        }
+        long size = 0;
+        long count = 0;
+        byte[] buf = new byte[1024];
+        while ((count = thumbnailData.read()) > 0) {
+            size += count;
+        }
+        thumbnailData.close();
+        return size;
     }
 
     private static boolean isThumbnailContentsOutdated(Resource damFolder) {
