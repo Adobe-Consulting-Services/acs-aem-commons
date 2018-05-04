@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
 
 ## [3.15.2] - 2018-04-25
 
