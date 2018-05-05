@@ -32,7 +32,7 @@ public interface OnDeployExecutor {
     TabularDataSupport getScripts() throws OpenDataException;
 
     @Description("Execute the script, given it's fully-qualified class name.  If force==true, script is executed even if it has previously succeeded.")
-    void executeScript(@Name(value = "scriptName") String scriptName,
- @Name(value = "force") boolean force);
+    boolean executeScript(@Name(value = "scriptName") String scriptName,
+            @Name(value = "force") boolean force);
 
 }
