@@ -77,6 +77,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
             this.test = CheckedFunction.or(tests);
         }
 
+        @SuppressWarnings("squid:S00112")
         public boolean shouldReplace(Resource r) throws Exception {
             return this.test.apply(r);
         }
@@ -85,6 +86,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     public static final String FOLDER_THUMBNAIL = "/jcr:content/folderThumbnail";
 
     private static Map<String, Object> THUMBNAIL_PARAMS = new HashMap<>();
+
     static {
         THUMBNAIL_PARAMS.put("width", "200");
         THUMBNAIL_PARAMS.put("height", "120");
