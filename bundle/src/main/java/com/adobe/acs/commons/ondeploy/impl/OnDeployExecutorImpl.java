@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A service that triggers scripts on deployment to an AEM server.
@@ -294,33 +295,28 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     @Override
     public boolean executeScript(String scriptName, boolean force) {
+        AtomicBoolean executed= new AtomicBoolean(false);
         try (ResourceResolver resourceResolver = logIn()) {
-            if (scriptProviders != null) {
-                for (OnDeployScriptProvider provider : scriptProviders) {
-                    List<OnDeployScript> scripts = provider.getScripts();
-                    for (OnDeployScript script : scripts) {
-                        if (script.getClass().getCanonicalName().equals(scriptName)) {
-                            if (force) {
-                                logger.info("resetting the status of script {}", script.getClass().getCanonicalName());
-                                Resource trackingRes =
-                                        getOrCreateStatusTrackingResource(resourceResolver, script.getClass());
-                                try {
-                                    resourceResolver.delete(trackingRes);
-                                    resourceResolver.commit();
-                                } catch (PersistenceException e) {
-                                    logger.error("failed while resetting script status.", e);
-                                }
-                            }
 
-                            return runScript(resourceResolver, script);
-                        }
-                    }
-                }
-            }
+            scriptProviders.stream().map(OnDeployScriptProvider::getScripts).flatMap(List::stream)
+                           .filter(s -> s.getClass().getCanonicalName().equals(scriptName)).findFirst().ifPresent(script -> {
+                                       if(force) {
+                                           logger.info("resetting the status of script {}", script.getClass().getCanonicalName());
+                                           Resource trackingRes =
+                                                   getOrCreateStatusTrackingResource(resourceResolver, script.getClass());
+                                           try {
+                                               resourceResolver.delete(trackingRes);
+                                               resourceResolver.commit();
+                                           } catch (PersistenceException e) {
+                                               logger.error("failed while resetting script status.", e);
+                                           }
+                                       }
+
+                executed.set(runScript(resourceResolver, script));
+            });
         }
 
-        //if no script is found to run
-        return false;
+        return executed.get();
     }
 
     private static TabularType getScriptsTableType() {
