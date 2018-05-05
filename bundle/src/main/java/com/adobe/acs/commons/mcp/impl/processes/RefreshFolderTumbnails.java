@@ -59,7 +59,7 @@ import org.apache.sling.engine.SlingRequestProcessor;
  */
 public class RefreshFolderTumbnails extends ProcessDefinition {
 
-    private static enum ThumbnailScanLogic {
+    protected static enum ThumbnailScanLogic {
         MISSING(RefreshFolderTumbnails::isThumbnailMissing),
         PLACEHOLDERS(RefreshFolderTumbnails::isThumbnailMissing,
                 RefreshFolderTumbnails::isPlaceholderThumbnail),
@@ -201,28 +201,31 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         record(folderPath, "Rebuild", "Thumbnail was rebuilt");
     }
 
-    private static boolean isThumbnailMissing(Resource damFolder) {
-        Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
-        if (jcrContent == null) {
+    protected static boolean isThumbnailMissing(Resource damFolder) {
+        if (isThumbnailManual(damFolder) || isThumbnailAutomatic(damFolder)) {
+            return false;
+        } else {            
             scanResult.set("Thumbnail missing");
             return true;
+        }
+    }
+
+    protected static boolean isPlaceholderThumbnail(Resource damFolder) throws IOException {
+        Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
+        if (jcrContent == null) {
+            return false;
         }
         Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
         if (thumbnail == null) {
-            scanResult.set("Thumbnail missing");
-        }
-        return thumbnail == null;
-    }
-
-    private static boolean isPlaceholderThumbnail(Resource damFolder) throws IOException {
-        Resource jcrContent = damFolder.getChild(JcrConstants.JCR_CONTENT);
-        Resource thumbnail = jcrContent.getChild(DamConstants.THUMBNAIL_NODE);
-        long size = getBinarySize(thumbnail);
-        if (size <= PLACEHOLDER_SIZE) {
-            scanResult.set("Placeholder detected, " + ( size <= 0 ? "no thumbnail data" : "size is " + size + " bytes"));
-            return true;
-        } else {
             return false;
+        } else {
+            long size = getBinarySize(thumbnail);
+            if (size <= PLACEHOLDER_SIZE) {
+                scanResult.set("Placeholder detected, " + ( size <= 0 ? "no thumbnail data" : "size is " + size + " bytes"));
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     
@@ -241,8 +244,11 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         return size;
     }
 
-    private static boolean isThumbnailContentsOutdated(Resource damFolder) {
+    protected static boolean isThumbnailContentsOutdated(Resource damFolder) {
         Resource contents = damFolder.getChild("jcr:content/folderThumbnail/jcr:content");
+        if (isThumbnailManual(damFolder)) {
+            return false;
+        }
         if (contents == null) {
             scanResult.set("No folder metadata, assuming contents outdated");
             return true;
@@ -255,7 +261,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
             } else {
                 for (String assetPath : paths) {
                     Resource assetResource = damFolder.getResourceResolver().getResource(assetPath);
-                    if (assetMissingOrNewer(assetResource, thumbnailModified)) {
+                    if (isAssetMissingOrNewer(assetResource, thumbnailModified)) {
                         return true;
                     }
                 }
@@ -264,7 +270,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         return false;
     }
 
-    private static boolean assetMissingOrNewer(Resource asset, Date compareDate) {
+    protected static boolean isAssetMissingOrNewer(Resource asset, Date compareDate) {
         if (asset == null) {
             scanResult.set("Referenced asset missing");
             return true;
@@ -286,9 +292,13 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
         return false;
     }
     
-    private static boolean isThumbnailAutomatic(Resource damFolder) {
-        if (damFolder.getChild("jcr:content/manualThumbnail.jpg") != null ||
-                damFolder.getChild("jcr:content/manualThumbnail.png") != null) {
+    protected static boolean isThumbnailManual(Resource damFolder) {
+        return damFolder.getChild("jcr:content/manualThumbnail.jpg") != null ||
+                damFolder.getChild("jcr:content/manualThumbnail.png") != null;        
+    }
+    
+    protected static boolean isThumbnailAutomatic(Resource damFolder) {
+        if (isThumbnailManual(damFolder)) {
             return false;
         } else if (damFolder.getChild("jcr:content/folderThumbnail") != null) {
             scanResult.set("Detected automatic thumbnail and no manual thumbnail");
