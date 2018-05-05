@@ -22,11 +22,11 @@ package com.adobe.acs.commons.ondeploy.impl;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
 import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
@@ -36,9 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import javax.management.NotCompliantMBeanException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -48,6 +46,7 @@ import java.util.List;
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -332,5 +331,76 @@ public class OnDeployExecutorImplTest {
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
+    }
+
+    @Test
+    public void testExecuteScriptSuccess() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        context.registerInjectActivateService(onDeployExecutor);
+
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleSuccess1.class.getName(), false);
+        assertFalse("Already successful script shouldn't be re-executed.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptFail() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleFlipFlop());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        try {
+            context.registerInjectActivateService(onDeployExecutor);
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+        }
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleFlipFlop.class.getName(), false);
+        assertTrue("failed script should be re-executed.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptSuccessForce() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        context.registerInjectActivateService(onDeployExecutor);
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleSuccess1.class.getName(), true);
+        assertTrue("Already successful script should be re-executed when force is set to true.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptDoesNotExist() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+
+        context.registerInjectActivateService(onDeployExecutor);
+
+        boolean executed = onDeployExecutor.executeScript("this.class.does.not.Exist", false);
+        assertFalse("Should always return false if the script doesn't exist.", executed);
     }
 }
