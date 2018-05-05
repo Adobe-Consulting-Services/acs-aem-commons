@@ -38,7 +38,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
