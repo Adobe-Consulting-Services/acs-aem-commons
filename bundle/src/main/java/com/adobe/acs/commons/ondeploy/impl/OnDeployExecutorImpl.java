@@ -1,25 +1,15 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2016 Adobe
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+ * #%L ACS AEM Commons Bundle %% Copyright (C) 2018 Adobe %% Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License. #L%
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -80,7 +70,6 @@ import com.day.cq.commons.jcr.JcrConstants;
         value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
 @Service(value = DynamicMBean.class)
 public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutor {
-
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
 
     private static final String SCRIPT_DATE_END = "endDate";
@@ -93,6 +82,13 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     private static final String SERVICE_NAME = "on-deploy-scripts";
 
     private static final Logger logger = LoggerFactory.getLogger(OnDeployExecutorImpl.class);
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class,
+            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    private List<OnDeployScriptProvider> scriptProviders;
 
     private static transient String[] scriptsItemNames;
     private static transient CompositeType scriptsCompositeType;
@@ -115,18 +111,8 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         }
     }
 
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class,
-            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private List<OnDeployScriptProvider> scriptProviders = new ArrayList<>();
-
     public OnDeployExecutorImpl() throws NotCompliantMBeanException {
         super(OnDeployExecutor.class);
-    }
-
-    private static TabularType getScriptsTableType() {
-        return scriptsTabularType;
     }
 
     protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
@@ -138,8 +124,6 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
      */
     protected void bindScriptProvider(OnDeployScriptProvider scriptProvider) {
         logger.info("Executing on-deploy scripts from scriptProvider: {}", scriptProvider.getClass().getName());
-        scriptProviders.add(scriptProvider);
-
         List<OnDeployScript> scripts = scriptProvider.getScripts();
         if (scripts.size() == 0) {
             logger.debug("No on-deploy scripts found.");
@@ -161,7 +145,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     }
 
     protected void unbindScriptProvider(OnDeployScriptProvider scriptProvider) {
-        scriptProviders.remove(scriptProvider);
+        // noop
     }
 
     protected Resource getOrCreateStatusTrackingResource(ResourceResolver resourceResolver, Class<?> scriptClass) {
@@ -297,7 +281,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     }
 
     @Override
-    public void executeScript(String scriptName, boolean force) {
+    public boolean executeScript(String scriptName, boolean force) {
         try (ResourceResolver resourceResolver = logIn()) {
             if (scriptProviders != null) {
                 for (OnDeployScriptProvider provider : scriptProviders) {
@@ -322,5 +306,12 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
                 }
             }
         }
+
+        // fix this
+        return false;
+    }
+
+    private static TabularType getScriptsTableType() {
+        return scriptsTabularType;
     }
 }
