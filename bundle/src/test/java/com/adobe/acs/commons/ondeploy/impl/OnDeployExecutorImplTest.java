@@ -38,9 +38,14 @@ import org.junit.Test;
 
 import javax.jcr.RepositoryException;
 import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
@@ -397,10 +402,38 @@ public class OnDeployExecutorImplTest {
         });
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
-
         context.registerInjectActivateService(onDeployExecutor);
 
         boolean executed = onDeployExecutor.executeScript("this.class.does.not.Exist", false);
         assertFalse("Should always return false if the script doesn't exist.", executed);
+    }
+
+    @Test
+    public void testTabularData() throws OpenDataException, NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2(), new OnDeployScriptTestExampleSuccessWithPause(), new OnDeployScriptTestExampleFailExecute());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        try {
+            context.registerInjectActivateService(onDeployExecutor);
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+        }
+
+        TabularData scriptsData = onDeployExecutor.getScripts();
+        assertEquals("wrong number of scripts registered in JXM data", 4, scriptsData.size());
+        for(Object o : scriptsData.values()) {
+            CompositeData row = (CompositeData)o;
+            String status = (String) row.get("status");
+            String script = (String) row.get("_script");
+            if(script.contains("Success")) {
+                assertEquals("fail", "success", status);
+            }
+        }
     }
 }
