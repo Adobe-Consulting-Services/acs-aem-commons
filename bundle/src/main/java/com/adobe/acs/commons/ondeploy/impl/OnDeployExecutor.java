@@ -25,9 +25,6 @@ import javax.management.openmbean.TabularDataSupport;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
-import aQute.bnd.annotation.ProviderType;
-
-@ProviderType
 @Description("ACS AEM Commons - On Deploy Script Executor MBean")
 public interface OnDeployExecutor {
 
@@ -36,6 +33,6 @@ public interface OnDeployExecutor {
 
     @Description("Execute the script, given it's fully-qualified class name.  If force==true, script is executed even if it has previously succeeded.")
     void executeScript(@Name(value = "scriptName") String scriptName,
-                    @Name(value = "force") boolean force);
+ @Name(value = "force") boolean force);
 
 }
