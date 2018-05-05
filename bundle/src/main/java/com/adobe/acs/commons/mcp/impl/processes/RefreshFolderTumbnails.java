@@ -72,6 +72,7 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
         CheckedFunction<Resource, Boolean> test;
 
+        @SuppressWarnings("squid:UnusedPrivateMethod")
         private ThumbnailScanLogic(CheckedFunction<Resource, Boolean>... tests) {
             this.test = CheckedFunction.or(tests);
         }
@@ -83,7 +84,12 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
 
     public static final String FOLDER_THUMBNAIL = "/jcr:content/folderThumbnail";
 
-    private static Map<String, Object> THUMBNAIL_PARAMS;
+    private static Map<String, Object> THUMBNAIL_PARAMS = new HashMap<>();
+    static {
+        THUMBNAIL_PARAMS.put("width", "200");
+        THUMBNAIL_PARAMS.put("height", "120");
+    }
+
     private static final int PLACEHOLDER_SIZE = 1024;
 
     private RequestResponseFactory requestFactory;
@@ -108,14 +114,11 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     public RefreshFolderTumbnails(RequestResponseFactory reqRspFactory, SlingRequestProcessor slingProcessor) {
         this.requestFactory = reqRspFactory;
         this.slingProcessor = slingProcessor;
-        THUMBNAIL_PARAMS = new HashMap<>();
-        THUMBNAIL_PARAMS.put("width", "200");
-        THUMBNAIL_PARAMS.put("height", "120");
     }
 
     @Override
     public void init() {
-        
+        // Nothing to do here
     }
 
     @Override
