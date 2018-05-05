@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.mcp.util;
 
 import aQute.bnd.annotation.ProviderType;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +27,7 @@ import java.util.Optional;
 import java.text.ParseException;
 import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
 
 /**
@@ -38,23 +37,22 @@ import org.apache.poi.ss.usermodel.Cell;
 @ProviderType
 public final class Variant {
 
-    private static final DateFormat STANDARD_DATE_FORMAT = SimpleDateFormat.getDateTimeInstance();
+    private static final FastDateFormat STANDARD_DATE_FORMAT = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.SHORT);
     private Optional<Long> longVal = Optional.empty();
     private Optional<Double> doubleVal = Optional.empty();
     private Optional<String> stringVal = Optional.empty();
     private Optional<Boolean> booleanVal = Optional.empty();
     private Optional<Date> dateVal = Optional.empty();
     
-    private static final DateFormat[] DATE_FORMATS = {
-        SimpleDateFormat.getDateInstance(DateFormat.SHORT),
-        SimpleDateFormat.getDateInstance(DateFormat.LONG),
-        SimpleDateFormat.getTimeInstance(DateFormat.SHORT),
-        SimpleDateFormat.getTimeInstance(DateFormat.LONG),
+    private static final FastDateFormat[] DATE_FORMATS = {
+        FastDateFormat.getDateInstance(FastDateFormat.SHORT),
+        FastDateFormat.getDateInstance(FastDateFormat.LONG),
+        FastDateFormat.getTimeInstance(FastDateFormat.SHORT),
+        FastDateFormat.getTimeInstance(FastDateFormat.LONG),
         STANDARD_DATE_FORMAT,
-        SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT),
-        SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT),
-        SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG),
-        SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG),
+        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT),
+        FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG),
+        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),
     };
 
     public Variant() {
@@ -202,7 +200,7 @@ public final class Variant {
     public Date toDate() {
         return dateVal.orElse(longVal.map(Date::new)
                 .orElse(stringVal.map(s -> {
-                    for (DateFormat format : DATE_FORMATS) {
+                    for (FastDateFormat format : DATE_FORMATS) {
                         try {
                             return format.parse(s);
                         } catch (ParseException ex) {
