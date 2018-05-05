@@ -191,7 +191,13 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         }
     }
 
-    protected void runScript(ResourceResolver resourceResolver, OnDeployScript script) {
+    /**
+     * Run the {@link OnDeployScript}, if it has not previously been run successfully.
+     * @param resourceResolver the resource resolver to use when running
+     * @param script the script to run.
+     * @return true if the script is executed, false if it has previous been run successfully
+     */
+    protected boolean runScript(ResourceResolver resourceResolver, OnDeployScript script) {
         Resource statusResource = getOrCreateStatusTrackingResource(resourceResolver, script.getClass());
         String status = getScriptStatus(statusResource);
         if (status == null || status.equals(SCRIPT_STATUS_FAIL)) {
@@ -200,6 +206,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
                 script.execute(resourceResolver);
                 logger.info("On-deploy script completed successfully: {}", statusResource.getPath());
                 trackScriptEnd(statusResource, SCRIPT_STATUS_SUCCESS);
+                return true;
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + statusResource.getPath();
                 logger.error(errMsg, e);
@@ -213,6 +220,8 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         } else {
             logger.debug("Skipping on-deploy script, as it is already complete: {}", statusResource.getPath());
         }
+
+        return false;
     }
 
     protected void runScripts(ResourceResolver resourceResolver, List<OnDeployScript> scripts) {
@@ -303,14 +312,14 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
                                 }
                             }
 
-                            runScript(resourceResolver, script);
+                            return runScript(resourceResolver, script);
                         }
                     }
                 }
             }
         }
 
-        // fix this
+        //if no script is found to run
         return false;
     }
 
