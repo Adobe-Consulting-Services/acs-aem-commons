@@ -105,7 +105,7 @@ public class SpreadsheetTest {
     @Test
     public void testGetDataRows() throws IOException {
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
-        List<Map<String, CompositeVariant>> result = instance.getDataRows();
+        List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
         assertEquals("/test/a1", result.get(0).get("path").toPropertyValue());
         assertEquals("/test/a3/a3a", result.get(3).get("path").toString());
     }
@@ -118,7 +118,7 @@ public class SpreadsheetTest {
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someOtherCol", required.get(0));
-        List<Map<String, CompositeVariant>> result = instance.getDataRows();
+        List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
 
@@ -130,14 +130,14 @@ public class SpreadsheetTest {
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
         List<String> required = instance.getRequiredColumns();
         assertEquals("someothercol", required.get(0));
-        List<Map<String, CompositeVariant>> result = instance.getDataRows();
+        List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
         assertEquals("/test/a2", result.get(0).get("path").toString());
     }
 
     @Test
     public void testVariantTypes() throws IOException {
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
-        Map<String, CompositeVariant> values = instance.getDataRows().get(4);
+        Map<String, CompositeVariant> values = instance.getDataRowsAsCompositeVariants().get(4);
         assertEquals((Integer) 12345, values.get("int-val").toPropertyValue());
         assertArrayEquals(new String[]{"one", "two", "three"}, (Object[]) values.get("string-list1").toPropertyValue());
         assertArrayEquals(new String[]{"four", "five", "six"}, (Object[]) values.get("string-list2").toPropertyValue());

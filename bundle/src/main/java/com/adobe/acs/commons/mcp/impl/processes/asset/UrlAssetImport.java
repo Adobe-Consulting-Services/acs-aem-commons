@@ -130,7 +130,7 @@ public class UrlAssetImport extends AssetIngestor {
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
             fileData = new Spreadsheet(importFile);
-            files = extractFilesAndFolders(fileData.getDataRows());
+            files = extractFilesAndFolders(fileData.getDataRowsAsCompositeVariants());
             instance.getInfo().setDescription("Import " + fileData.getFileName() + " (" + fileData.getRowCount() + " rows)");
         } catch (IOException ex) {
             LOG.error("Unable to process import", ex);

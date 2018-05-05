@@ -192,7 +192,7 @@ public class DataImporter extends ProcessDefinition {
     }
 
     private void importData(ActionManager manager) {
-        data.getDataRows().forEach((row) -> {
+        data.getDataRowsAsCompositeVariants().forEach((row) -> {
             manager.deferredWithResolver(rr -> {
                 String path = row.get(PATH).toString();
                 Resource r = rr.getResource(path);

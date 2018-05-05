@@ -35,7 +35,7 @@ import org.apache.poi.ss.usermodel.Cell;
  * statements in other parts of the code expecially dealing with data from spreadsheets.
  */
 @ProviderType
-public class Variant {
+public final class Variant {
 
     private static final DateFormat STANDARD_DATE_FORMAT = SimpleDateFormat.getDateTimeInstance();
     private Optional<Long> longVal = Optional.empty();

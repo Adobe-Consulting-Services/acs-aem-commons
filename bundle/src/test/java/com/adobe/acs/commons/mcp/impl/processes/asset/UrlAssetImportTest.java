@@ -105,7 +105,7 @@ public class UrlAssetImportTest {
         for (int i=0; i < cols.length && i < header.size(); i++) {
             row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRows().add(row);
+        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
     }
     
     @Test
@@ -113,7 +113,7 @@ public class UrlAssetImportTest {
         importProcess.init();
         URL testImg = getClass().getResource("/img/test.png");        
         addImportRow(testImg.toString(), "/content/dam/myTestImg.png");
-        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRows());
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);
         importProcess.importAssets(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));

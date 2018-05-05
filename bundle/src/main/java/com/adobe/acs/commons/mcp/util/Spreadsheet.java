@@ -204,8 +204,20 @@ public class Spreadsheet {
 
     /**
      * @return the dataRows
+     *
+     * @deprecated use getDataRowsAsCompositeVariants
      */
-    public List<Map<String, CompositeVariant>> getDataRows() {
+    @Deprecated
+    public List<Map<String, String>> getDataRows() {
+        return dataRows.stream().map(m -> {
+            return m.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e ->  e.getValue().toString()));
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * @return the dataRows
+     */
+    public List<Map<String, CompositeVariant>> getDataRowsAsCompositeVariants() {
         return dataRows;
     }
     

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * @param <T> Can be of any class supported by Variant, used for direct conversion in getValue, etc.
  */
 @ProviderType
-public class CompositeVariant<T> {
+public final class CompositeVariant<T> {
 
     private final Class type;
     private final List<Variant> values = new ArrayList<>();
