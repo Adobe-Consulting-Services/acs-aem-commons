@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
+import aQute.bnd.annotation.ProviderType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -46,6 +47,7 @@ import org.apache.sling.api.request.RequestParameter;
  * Simple abstraction of reading a single spreadsheet of values. Expects a header row of named columns (case-sensitive)
  * If provided, will also filter data rows missing required columns to prevent processing errors.
  */
+@ProviderType
 public class Spreadsheet {
 
     public static final String DEFAULT_DELIMITER = ",";

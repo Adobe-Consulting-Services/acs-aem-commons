@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
+import aQute.bnd.annotation.ProviderType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -33,6 +34,7 @@ import org.apache.poi.ss.usermodel.Cell;
  * Used to represent values that might be provided as one type but used as another. Avoids glue code and switch
  * statements in other parts of the code expecially dealing with data from spreadsheets.
  */
+@ProviderType
 public class Variant {
 
     private static final DateFormat STANDARD_DATE_FORMAT = SimpleDateFormat.getDateTimeInstance();

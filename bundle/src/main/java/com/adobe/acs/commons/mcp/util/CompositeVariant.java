@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
+import aQute.bnd.annotation.ProviderType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  *
  * @param <T> Can be of any class supported by Variant, used for direct conversion in getValue, etc.
  */
+@ProviderType
 public class CompositeVariant<T> {
 
     private final Class type;
