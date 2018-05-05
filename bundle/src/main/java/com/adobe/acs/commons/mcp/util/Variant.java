@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.text.ParseException;
+import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -235,18 +236,22 @@ public final class Variant {
         }
     }
 
+    private <U, T> T apply(U value, Function<U,T> func) {
+        return value == null ? null : func.apply(value);
+    }
+    
     @SuppressWarnings("squid:S3776")
     public <T> T asType(Class<T> type) {
         if (type == Byte.TYPE || type == Byte.class) {
-            return (T) (Byte) toLong().byteValue();
+            return (T) apply(toLong(), Long::byteValue);
         } else if (type == Integer.TYPE || type == Integer.class) {
-            return (T) (Integer) toLong().intValue();
+            return (T) apply(toLong(), Long::intValue);
         } else if (type == Long.TYPE || type == Long.class) {
             return (T) toLong();
         } else if (type == Short.TYPE || type == Short.class) {
-            return (T) (Short) toLong().shortValue();
+            return (T) apply(toLong(), Long::shortValue);
         } else if (type == Float.TYPE || type == Float.class) {
-            return (T) (Float) toDouble().floatValue();
+            return (T) apply(toDouble(), Double::floatValue);
         } else if (type == Double.TYPE || type == Double.class) {
             return (T) toDouble();
         } else if (type == Boolean.TYPE || type == Boolean.class) {
