@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
@@ -88,7 +89,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class,
             cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private List<OnDeployScriptProvider> scriptProviders;
+    private List<OnDeployScriptProvider> scriptProviders = new CopyOnWriteArrayList<>();
 
     private static transient String[] scriptsItemNames;
     private static transient CompositeType scriptsCompositeType;
@@ -124,6 +125,8 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
      */
     protected void bindScriptProvider(OnDeployScriptProvider scriptProvider) {
         logger.info("Executing on-deploy scripts from scriptProvider: {}", scriptProvider.getClass().getName());
+        scriptProviders.add(scriptProvider);
+
         List<OnDeployScript> scripts = scriptProvider.getScripts();
         if (scripts.size() == 0) {
             logger.debug("No on-deploy scripts found.");
@@ -145,7 +148,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     }
 
     protected void unbindScriptProvider(OnDeployScriptProvider scriptProvider) {
-        // noop
+        scriptProviders.remove(scriptProvider);
     }
 
     protected Resource getOrCreateStatusTrackingResource(ResourceResolver resourceResolver, Class<?> scriptClass) {
