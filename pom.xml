@@ -496,10 +496,10 @@
     </profiles>
 
     <!--
-        Inclusion of repositories in POMs is controversial, to say the least.
-        It would be best if you proxied the Adobe repository using a Maven
-        Repository Manager. Once you do that, remove these sections.
-     -->
+       Inclusion of repositories in POMs is controversial, to say the least.
+       It would be best if you proxied the Adobe repository using a Maven
+       Repository Manager. Once you do that, remove these sections.
+    -->
     <repositories>
         <repository>
             <id>adobe-public-releases</id>
