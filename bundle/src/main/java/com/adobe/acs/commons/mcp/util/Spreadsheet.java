@@ -30,6 +30,7 @@ import org.apache.sling.api.request.RequestParameter;
 /**
  * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
  */
+@Deprecated 
 @ProviderType
 public class Spreadsheet extends com.adobe.acs.commons.data.Spreadsheet {
 
