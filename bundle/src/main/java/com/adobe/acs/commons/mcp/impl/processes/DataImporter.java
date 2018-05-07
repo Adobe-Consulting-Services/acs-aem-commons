@@ -171,8 +171,7 @@ public class DataImporter extends ProcessDefinition {
         try {
             data = new Spreadsheet(importFile, PATH);
             if (presortData) {
-
-                Collections.sort(data.getDataRows(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
+                Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
             }
             instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
         } catch (IOException ex) {

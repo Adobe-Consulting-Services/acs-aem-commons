@@ -19,31 +19,64 @@
  */
 package com.adobe.acs.commons.mcp.util;
 
+import aQute.bnd.annotation.ProviderType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.sling.api.request.RequestParameter;
 
 /**
- * @Deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+ * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
  */
-public class Spreadsheet extends com.adobe.acs.commons.data.Spreadsheet {    
+@ProviderType
+public class Spreadsheet extends com.adobe.acs.commons.data.Spreadsheet {
+
+    /**
+     * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+     */
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         super(convertHeaderNames, headerArray);
     }
 
+    /**
+     * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+     */
     public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) throws IOException {
         super(convertHeaderNames, file, required);
     }
 
+    /**
+     * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+     */
     public Spreadsheet(boolean convertHeaderNames, RequestParameter file, String... required) throws IOException {
         super(convertHeaderNames, file, required);
     }
 
+    /**
+     * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+     */
     public Spreadsheet(InputStream file, String... required) throws IOException {
         super(file, required);
     }
 
+    /**
+     * @deprecated Class was moved to com.adobe.acs.commons.data.Spreadsheet
+     */
     public Spreadsheet(RequestParameter file, String... required) throws IOException {
         super(file, required);
-    }    
+    }
+
+    /**
+     * @return the dataRows
+     *
+     * @deprecated use getDataRowsAsCompositeVariants
+     */
+    @Deprecated
+    public List<Map<String, String>> getDataRows() {
+        return getDataRowsAsCompositeVariants().stream().map(m -> {
+            return m.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().toString()));
+        }).collect(Collectors.toList());
+    }
 }

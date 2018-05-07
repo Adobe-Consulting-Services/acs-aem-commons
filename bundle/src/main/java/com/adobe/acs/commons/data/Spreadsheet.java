@@ -204,18 +204,6 @@ public class Spreadsheet {
 
     /**
      * @return the dataRows
-     *
-     * @deprecated use getDataRowsAsCompositeVariants
-     */
-    @Deprecated
-    public List<Map<String, String>> getDataRows() {
-        return dataRows.stream().map(m -> {
-            return m.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e ->  e.getValue().toString()));
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * @return the dataRows
      */
     public List<Map<String, CompositeVariant>> getDataRowsAsCompositeVariants() {
         return dataRows;
@@ -257,7 +245,7 @@ public class Spreadsheet {
      * @param name
      * @return
      */
-    protected Class detectTypeFromName(String name) {
+    private Class detectTypeFromName(String name) {
         boolean isArray = false;
         Class detectedClass = String.class;
         if (name.contains("@")) {
@@ -280,7 +268,7 @@ public class Spreadsheet {
         }
     }
 
-    protected Class getClassFromName(String typeStr) {
+    private Class getClassFromName(String typeStr) {
         switch (typeStr.toLowerCase()) {
             case "int":
             case "integer":
@@ -314,7 +302,7 @@ public class Spreadsheet {
      * @param b
      * @return
      */
-    protected Class upgradeToArray(Class a, Class b) {
+    private Class upgradeToArray(Class a, Class b) {
         if (a == null) {
             return b;
         }
@@ -328,7 +316,7 @@ public class Spreadsheet {
         }
     }
 
-    public static Class getArrayType(Class clazz) {
+    private static Class getArrayType(Class clazz) {
         if (clazz.isArray()) {
             return clazz;
         } else {
