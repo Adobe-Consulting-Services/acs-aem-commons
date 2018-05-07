@@ -17,8 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.util;
+package com.adobe.acs.commons.data;
 
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

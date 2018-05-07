@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.util;
+package com.adobe.acs.commons.data;
 
 import aQute.bnd.annotation.ProviderType;
 import java.time.Instant;

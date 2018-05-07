@@ -21,7 +21,7 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.HierarchialElement;
 import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.Source;
-import com.adobe.acs.commons.mcp.util.CompositeVariant;
+import com.adobe.acs.commons.data.CompositeVariant;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
