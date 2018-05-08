@@ -294,10 +294,17 @@ public abstract class AssetIngestor extends ProcessDefinition {
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
             Node folderNode = s.getNode(folderPath);
-            if (folderPath.equals(jcrBasePath) || (folderNode.hasProperty(JcrConstants.JCR_TITLE) && folderNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
+            Node folderContentNode = null;
+            if(folderNode.hasNode(JcrConstants.JCR_CONTENT)){
+                folderContentNode = folderNode.getNode(JcrConstants.JCR_CONTENT);
+            }
+            if (folderPath.equals(jcrBasePath) || (null != folderContentNode &&
+                    folderContentNode.hasProperty(JcrConstants.JCR_TITLE) &&
+                    folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                folderNode.setProperty(JcrConstants.JCR_TITLE, name);
+                folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
+                folderContentNode.setProperty(JcrConstants.JCR_TITLE, name);
                 r.commit();
                 r.refresh();
                 return true;
@@ -317,7 +324,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
         trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
         incrementCount(createdFolders, 1L);
         if (!folderPath.equals(jcrBasePath)) {
-            child.setProperty(JcrConstants.JCR_TITLE, name);
+            if(child.hasNode(JcrConstants.JCR_CONTENT)){
+                child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, name);
+            }else{
+                child.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_UNSTRUCTURED).setProperty(JcrConstants.JCR_TITLE, name);
+            }
         }
         r.commit();
         r.refresh();
@@ -436,7 +447,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
             if (isFile() && name.contains(".")) {
                 String baseName = StringUtils.substringBeforeLast(name, ".");
                 String extension = StringUtils.substringAfterLast(name, ".");
-                return JcrUtil.createValidName(baseName) + "." + JcrUtil.createValidName(extension);
+                return JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-") +
+                        "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             } else {
                 return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
