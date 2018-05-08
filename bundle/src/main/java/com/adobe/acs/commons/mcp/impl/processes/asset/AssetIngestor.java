@@ -438,7 +438,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 String extension = StringUtils.substringAfterLast(name, ".");
                 return JcrUtil.createValidName(baseName) + "." + JcrUtil.createValidName(extension);
             } else {
-                return JcrUtil.createValidName(name);
+                return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
         }
     }
