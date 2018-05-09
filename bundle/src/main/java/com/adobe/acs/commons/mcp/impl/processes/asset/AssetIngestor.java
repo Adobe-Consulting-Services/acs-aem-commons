@@ -303,7 +303,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         if (s.nodeExists(folderPath)) {
             Node folderNode = s.getNode(folderPath);
             Node folderContentNode = folderNode.hasNode(JcrConstants.JCR_CONTENT) ? folderNode.getNode(JcrConstants.JCR_CONTENT) : null;
-            if (folderPath.equals(jcrBasePath) || (null != folderContentNode
+            if (folderNode.getPath().equals(jcrBasePath) || (null != folderContentNode
                     && folderContentNode.hasProperty(JcrConstants.JCR_TITLE)
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
@@ -327,17 +327,21 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
         Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
         trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
+        setFolderTitle(child,folderPath,name);
         incrementCount(createdFolders, 1L);
-        if (!folderPath.equals(jcrBasePath)) {
-            if(child.hasNode(JcrConstants.JCR_CONTENT)){
-                child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, name);
-            }else{
-                child.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_UNSTRUCTURED).setProperty(JcrConstants.JCR_TITLE, name);
-            }
-        }
         r.commit();
         r.refresh();
         return true;
+    }
+
+    private void setFolderTitle (Node child,String folderPath,String title) throws RepositoryException{
+        if (!folderPath.equals(jcrBasePath)) {
+            if(child.hasNode(JcrConstants.JCR_CONTENT)){
+                child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, title);
+            }else{
+                child.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_UNSTRUCTURED).setProperty(JcrConstants.JCR_TITLE, title);
+            }
+        }
     }
 
     @SuppressWarnings("squid:S00112")
