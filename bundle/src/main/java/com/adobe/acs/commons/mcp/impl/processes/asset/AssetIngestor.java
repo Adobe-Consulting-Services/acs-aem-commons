@@ -289,6 +289,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 versionExistingAsset(source, assetPath, r);
         }
     }
+
     @SuppressWarnings("squid:S3776")
     protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
@@ -334,7 +335,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return true;
     }
 
-    private void setFolderTitle (Node child,String folderPath,String title) throws RepositoryException{
+    private void setFolderTitle(Node child,String folderPath,String title) throws RepositoryException{
         if (!folderPath.equals(jcrBasePath)) {
             if(child.hasNode(JcrConstants.JCR_CONTENT)){
                 child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, title);
