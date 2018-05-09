@@ -289,7 +289,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 versionExistingAsset(source, assetPath, r);
         }
     }
-
+    @SuppressWarnings("squid:S3776")
     protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
             return false;
