@@ -54,9 +54,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     public static final String ALL_ASSETS = "All Assets";
     static final String[] AUTHORIZED_GROUPS = new String[]{
-        "administrators",
-        "asset-ingest",
-        "dam-administrators"
+            "administrators",
+            "asset-ingest",
+            "dam-administrators"
     };
 
     protected final transient MimeTypeService mimetypeService;
@@ -355,7 +355,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
                 String extension = StringUtils.substringAfterLast(el.getName(), ".");
                 path = (el.getParent() == null ? el.getJcrBasePath() : el.getParent().getNodePath()) + "/"
-                + JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-")
+                        + JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-")
                         + "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
             handleExistingAsset(source, path, r);
