@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1363 - Corrects permissions allowing HTTP Cache to write to the JCR Cache space under /var/acs-commons/httpcache
 
 ### Added
 - #1292 - New MCP Tool to refresh asset folder thumbnails
