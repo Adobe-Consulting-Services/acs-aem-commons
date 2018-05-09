@@ -94,6 +94,14 @@ public abstract class AssetIngestor extends ProcessDefinition {
     boolean inhibitWorkflow = true;
 
     @FormField(
+            name = "Preserve Filename",
+            description = "If checked, file name is preserved as asset name.  If unchecked, asset name is converted to a JCR-friendly name.",
+            component = CheckboxComponent.class,
+            options = "checked"
+    )
+    boolean preserveFileName = true;
+
+    @FormField(
             name = "Target JCR Folder",
             description = "Prepended to target path if it does not begin with /content",
             hint = "/content/dam",
@@ -294,13 +302,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
             Node folderNode = s.getNode(folderPath);
-            Node folderContentNode = null;
-            if(folderNode.hasNode(JcrConstants.JCR_CONTENT)){
-                folderContentNode = folderNode.getNode(JcrConstants.JCR_CONTENT);
-            }
-            if (folderPath.equals(jcrBasePath) || (null != folderContentNode &&
-                    folderContentNode.hasProperty(JcrConstants.JCR_TITLE) &&
-                    folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
+            Node folderContentNode = folderNode.hasNode(JcrConstants.JCR_CONTENT) ? folderNode.getNode(JcrConstants.JCR_CONTENT) : null;
+            if (folderPath.equals(jcrBasePath) || (null != folderContentNode
+                    && folderContentNode.hasProperty(JcrConstants.JCR_TITLE)
+                    && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
                 folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
@@ -342,9 +347,17 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
-            String path = source.getElement().getNodePath();
             createFolderNode(source.getElement().getParent(), r);
             actionManager.setCurrentItem(source.getElement().getItemName());
+            HierarchialElement el = source.getElement();
+            String path = source.getElement().getNodePath();
+            if(null != el && el.isFile() && el.getName().contains(".") && !preserveFileName){
+                String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
+                String extension = StringUtils.substringAfterLast(el.getName(), ".");
+                path = (el.getParent() == null ? el.getJcrBasePath() : el.getParent().getNodePath()) + "/"
+                + JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-")
+                        + "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
+            }
             handleExistingAsset(source, path, r);
         };
     }
@@ -445,10 +458,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         default String getNodeName() {
             String name = getName();
             if (isFile() && name.contains(".")) {
-                String baseName = StringUtils.substringBeforeLast(name, ".");
-                String extension = StringUtils.substringAfterLast(name, ".");
-                return JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-") +
-                        "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
+                return name;
             } else {
                 return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
