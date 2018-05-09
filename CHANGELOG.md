@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1292 - New MCP Tool to refresh asset folder thumbnails
 - #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
 - #1347 - Redirect Map Entry editor
+- #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
