@@ -156,7 +156,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public static final int     DEFAULT_SAVEDELTA           = 500;
 
     // 1 week.
-    public static final int     DEFAULT_EXPIRETIMEINSECONDS = 604800;
+    public static final int     DEFAULT_EXPIRETIMEINSECONDS = -1;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
