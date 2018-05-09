@@ -22,11 +22,11 @@ package com.adobe.acs.commons.ondeploy.impl;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
 import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
@@ -36,17 +36,22 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -75,7 +80,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResources() {
+    public void testCloseResources() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -94,7 +99,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResourcesIsFailSafe() {
+    public void testCloseResourcesIsFailSafe() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -115,7 +120,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testCloseResourcesOnException() {
+    public void testCloseResourcesOnException() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
@@ -138,7 +143,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteNoScripts() {
+    public void testExecuteNoScripts() throws NotCompliantMBeanException {
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
 
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
@@ -154,7 +159,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteRerunsFailedScripts() throws RepositoryException {
+    public void testExecuteRerunsFailedScripts() throws RepositoryException, NotCompliantMBeanException {
         OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
         ResourceResolver resourceResolver = context.resourceResolver();
 
@@ -187,7 +192,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteSuccessfulScripts() {
+    public void testExecuteSuccessfulScripts() throws NotCompliantMBeanException {
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
             @Override
             public List<OnDeployScript> getScripts() {
@@ -211,8 +216,8 @@ public class OnDeployExecutorImplTest {
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccessWithPause.class.getName());
         assertNotNull(status2);
-        Calendar start = status2.getValueMap().get("startDate", Calendar.class);
-        Calendar end = status2.getValueMap().get("endDate", Calendar.class);
+        final Calendar start = status2.getValueMap().get("startDate", Calendar.class);
+        final Calendar end = status2.getValueMap().get("endDate", Calendar.class);
         assertEquals("success", status2.getValueMap().get("status", ""));
         assertTrue(start.getTimeInMillis() <= System.currentTimeMillis());
         assertTrue(System.currentTimeMillis() - start.getTimeInMillis() < 10000);
@@ -221,7 +226,7 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException {
+    public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException, NotCompliantMBeanException {
         // Run the script successfully the first time
         context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
             @Override
@@ -255,12 +260,12 @@ public class OnDeployExecutorImplTest {
     }
 
     @Test
-    public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException {
-        OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
+    public void testExecuteTerminatesWhenScriptAlreadyRunning() throws RepositoryException, NotCompliantMBeanException {
+        final OnDeployExecutorImpl impl = new OnDeployExecutorImpl();
 
         // Mimic the situation where a script initiated in the past is still running
-        Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
-        String status1ResourcePath = statusResource.getPath();
+        final Resource statusResource = impl.getOrCreateStatusTrackingResource(context.resourceResolver(), OnDeployScriptTestExampleSuccess1.class);
+        final String status1ResourcePath = statusResource.getPath();
         impl.trackScriptStart(statusResource);
         LogTester.reset();
 
@@ -331,5 +336,104 @@ public class OnDeployExecutorImplTest {
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
+    }
+
+    @Test
+    public void testExecuteScriptSuccess() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        context.registerInjectActivateService(onDeployExecutor);
+
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleSuccess1.class.getName(), false);
+        assertFalse("Already successful script shouldn't be re-executed.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptFail() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleFlipFlop());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        try {
+            context.registerInjectActivateService(onDeployExecutor);
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+        }
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleFlipFlop.class.getName(), false);
+        assertTrue("failed script should be re-executed.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptSuccessForce() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        context.registerInjectActivateService(onDeployExecutor);
+
+        boolean executed = onDeployExecutor.executeScript(OnDeployScriptTestExampleSuccess1.class.getName(), true);
+        assertTrue("Already successful script should be re-executed when force is set to true.", executed);
+    }
+
+    @Test
+    public void testExecuteScriptDoesNotExist() throws NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        context.registerInjectActivateService(onDeployExecutor);
+
+        boolean executed = onDeployExecutor.executeScript("this.class.does.not.Exist", false);
+        assertFalse("Should always return false if the script doesn't exist.", executed);
+    }
+
+    @Test
+    public void testTabularData() throws OpenDataException, NotCompliantMBeanException {
+        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
+            @Override
+            public List<OnDeployScript> getScripts() {
+                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2(), new OnDeployScriptTestExampleSuccessWithPause(), new OnDeployScriptTestExampleFailExecute());
+            }
+        });
+
+        OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
+        try {
+            context.registerInjectActivateService(onDeployExecutor);
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(OnDeployEarlyTerminationException.class.isAssignableFrom(e.getCause().getClass()));
+        }
+
+        TabularData scriptsData = onDeployExecutor.getScripts();
+        assertEquals("wrong number of scripts registered in JXM data", 4, scriptsData.size());
+        for(Object o : scriptsData.values()) {
+            CompositeData row = (CompositeData)o;
+            String status = (String) row.get("status");
+            String script = (String) row.get("_script");
+            if(script.contains("Success")) {
+                assertEquals("fail", "success", status);
+            }
+        }
     }
 }

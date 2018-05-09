@@ -242,12 +242,12 @@ public class EnsureOakIndexJobHandlerTest {
 
     @Ignore("This test passes locally but fails on TravisCI; Figure out how to make this test pass on TravisCI")
     public void testUpdateOperation() throws RepositoryException, IOException {
-        String PN_IGNORE_ME = "ignoreMe";
+        String pnIgnoreMe = "ignoreMe";
 
         ChecksumGenerator checksumGenerator = mock(ChecksumGenerator.class);
 
         List<String> ignoreProperties = new ArrayList<String>();
-        ignoreProperties.add(PN_IGNORE_ME);
+        ignoreProperties.add(pnIgnoreMe);
         EnsureOakIndex eoi = mock(EnsureOakIndex.class);
         when(eoi.getIgnoreProperties()).thenReturn(ignoreProperties);
         when(eoi.getChecksumGenerator()).thenReturn(checksumGenerator);
@@ -258,7 +258,7 @@ public class EnsureOakIndexJobHandlerTest {
 
         Map<String, Object> oakProps = spy(new HashMap<String, Object>());
         oakProps.put(EnsureOakIndexJobHandler.PN_RECREATE_ON_UPDATE, true);
-        oakProps.put(PN_IGNORE_ME, "true");
+        oakProps.put(pnIgnoreMe, "true");
         Resource oak = getOakDefinition(oakProps);
 
         Map<String,String> defChecksum = new HashMap<String, String>();
@@ -273,6 +273,6 @@ public class EnsureOakIndexJobHandlerTest {
 
         handler.update(def, oakIndexResource, false);
 
-        verify(oakProps, never()).remove(PN_IGNORE_ME);
+        verify(oakProps, never()).remove(pnIgnoreMe);
     }
 }

@@ -32,10 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 
-import junitx.util.PrivateAccessor;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
@@ -46,128 +44,128 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.jcr.JcrConstants;
 
+import junitx.util.PrivateAccessor;
+
 @RunWith(MockitoJUnitRunner.class)
 public class RedirectMapModelTest {
 
-	private static final String[] vanities = new String[] { "/vanity1", "/vanity 2" };
-	private Resource searchResultsResource;
+    private static final String[] vanities = new String[] { "/vanity1", "/vanity 2" };
+    private Resource searchResultsResource;
 
-	@Mock
-	private ResourceResolver resolver;
+    @Mock
+    private ResourceResolver resolver;
 
-	@Mock
-	private Resource redirectMapResource;
+    @Mock
+    private Resource redirectMapResource;
 
-	private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
-		private static final long serialVersionUID = 1L;
+    private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
+        private static final long serialVersionUID = 1L;
 
-		{
-			add(new RedirectConfigModel() {
+        {
+            add(new RedirectConfigModel() {
 
-				@Override
-				public String getDomain() {
-					return "www.adobe.com";
-				}
+                @Override
+                public String getDomain() {
+                    return "www.adobe.com";
+                }
 
-				@Override
-				public String getPath() {
-					return "/content/adobe";
-				}
+                @Override
+                public String getPath() {
+                    return "/content/adobe";
+                }
 
-				@Override
-				public String getProperty() {
-					return "vanity";
-				}
+                @Override
+                public String getProperty() {
+                    return "vanity";
+                }
 
-				@Override
-				public String getProtocol() {
-					return "https";
-				}
+                @Override
+                public String getProtocol() {
+                    return "https";
+                }
 
-				@Override
-				public Resource getResource() {
-					return mock(Resource.class);
-				}
-			});
-		}
-	};
+                @Override
+                public Resource getResource() {
+                    return mock(Resource.class);
+                }
+            });
+        }
+    };
 
-	@InjectMocks
-	private RedirectMapModel model;
+    @InjectMocks
+    private RedirectMapModel model;
 
-	private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
+    private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
 
-	@Before
-	public void init() throws Exception {
-		log.info("init");
+    @Before
+    public void init() throws Exception {
+        log.info("init");
 
-		PrivateAccessor.setField(model, "redirects", redirectConfigs);
+        PrivateAccessor.setField(model, "redirects", redirectConfigs);
 
-		searchResultsResource = mock(Resource.class);
+        searchResultsResource = mock(Resource.class);
 
-		Resource childResource = mock(Resource.class);
-		doReturn(childResource).when(searchResultsResource).getChild(JcrConstants.JCR_CONTENT);
+        Resource childResource = mock(Resource.class);
+        doReturn(childResource).when(searchResultsResource).getChild(JcrConstants.JCR_CONTENT);
 
-		ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("vanity", vanities);
-			}
-		});
-		doReturn(properties).when(childResource).getValueMap();
-		doReturn("/content/adobe/en").when(searchResultsResource).getPath();
+        ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("vanity", vanities);
+            }
+        });
+        doReturn(properties).when(childResource).getValueMap();
+        doReturn("/content/adobe/en").when(searchResultsResource).getPath();
 
-		doReturn(IOUtils.toInputStream("/vanity3\thttp://www.adobe.com")).when(redirectMapResource)
-				.adaptTo(InputStream.class);
+        doReturn(IOUtils.toInputStream("/vanity3\thttp://www.adobe.com")).when(redirectMapResource)
+                .adaptTo(InputStream.class);
 
-		doReturn(new ArrayList<Resource>() {
-			private static final long serialVersionUID = 1L;
-			{
-				add(searchResultsResource);
-			}
-		}.iterator()).when(resolver).findResources(
-				"SELECT * FROM [cq:Page] WHERE [jcr:content/vanity] IS NOT NULL AND (ISDESCENDANTNODE([/content/adobe]) OR [jcr:path]='/content/adobe')",
-				Query.JCR_SQL2);
+        doReturn(new ArrayList<Resource>() {
+            private static final long serialVersionUID = 1L;
+            {
+                add(searchResultsResource);
+            }
+        }.iterator()).when(resolver).findResources(
+                "SELECT * FROM [cq:Page] WHERE [jcr:content/vanity] IS NOT NULL AND (ISDESCENDANTNODE([/content/adobe]) OR [jcr:path]='/content/adobe')",
+                Query.JCR_SQL2);
 
-		doReturn(new ArrayList<Resource>().iterator()).when(resolver).findResources(
-				"SELECT * FROM [dam:Asset] WHERE [jcr:content/vanity] IS NOT NULL AND (ISDESCENDANTNODE([/content/adobe]) OR [jcr:path]='/content/adobe')",
-				Query.JCR_SQL2);
+        doReturn(new ArrayList<Resource>().iterator()).when(resolver).findResources(
+                "SELECT * FROM [dam:Asset] WHERE [jcr:content/vanity] IS NOT NULL AND (ISDESCENDANTNODE([/content/adobe]) OR [jcr:path]='/content/adobe')",
+                Query.JCR_SQL2);
 
-	}
+    }
 
-	@Test
-	public void testGetInvalidEntries() {
+    @Test
+    public void testGetInvalidEntries() {
 
-		log.info("testGetInvalidEntries");
-		List<MapEntry> mapEntries = model.getInvalidEntries();
+        log.info("testGetInvalidEntries");
+        List<MapEntry> mapEntries = model.getInvalidEntries();
 
-		log.info("Asserting that the invalid results are found");
-		assertNotNull(mapEntries);
-		assertEquals(1, mapEntries.size());
-		assertEquals("/vanity 2", mapEntries.get(0).getSource());
+        log.info("Asserting that the invalid results are found");
+        assertNotNull(mapEntries);
+        assertEquals(1, mapEntries.size());
+        assertEquals("/vanity 2", mapEntries.get(0).getSource());
 
-		log.info("Test successful!");
-	}
+        log.info("Test successful!");
+    }
 
-	@Test
-	public void testGetRedirectMap() throws IOException {
+    @Test
+    public void testGetRedirectMap() throws IOException {
 
-		log.info("testGetInvalidEntries");
-		String redirectMap = model.getRedirectMap();
+        log.info("testGetInvalidEntries");
+        String redirectMap = model.getRedirectMap();
 
-		log.info("Asserting the expected redirect map found");
-		assertNotNull(redirectMap);
-		assertFalse(redirectMap.contains("/vanity 2"));
-		assertTrue(redirectMap.contains("/vanity1"));
-		assertTrue(redirectMap.contains("/vanity3"));
-		log.info("Test successful!");
-	}
+        log.info("Asserting the expected redirect map found");
+        assertNotNull(redirectMap);
+        assertFalse(redirectMap.contains("/vanity 2"));
+        assertTrue(redirectMap.contains("/vanity1"));
+        assertTrue(redirectMap.contains("/vanity3"));
+        log.info("Test successful!");
+    }
 }

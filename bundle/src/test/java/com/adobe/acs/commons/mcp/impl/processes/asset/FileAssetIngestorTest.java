@@ -143,8 +143,6 @@ public class FileAssetIngestorTest {
         File folder3 = mkdir(folder2, "folder3");
         addFile(folder3, "image.png", "/img/test.png");
 
-        java.nio.file.Files.walk(tempDirectory.toPath()).forEach(p -> System.out.println(p.toString()));
-
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -193,12 +191,12 @@ public class FileAssetIngestorTest {
     @Test
     public void testImportAssets() throws Exception {
         ingestor.init();
-        File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
-        File folder1 = mkdir(tempDirectory, "folder1");
-        File folder1Image = addFile(folder1, "image.png", "/img/test.png");
-        File folder2 = mkdir(tempDirectory, "folder2");
-        File folder3 = mkdir(folder2, "folder3");
-        File folder3Image = addFile(folder3, "image.png", "/img/test.png");
+        final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+        final File folder1 = mkdir(tempDirectory, "folder1");
+        final File folder1Image = addFile(folder1, "image.png", "/img/test.png");
+        final File folder2 = mkdir(tempDirectory, "folder2");
+        final File folder3 = mkdir(folder2, "folder3");
+        final File folder3Image = addFile(folder3, "image.png", "/img/test.png");
 
         ingestor.importAssets(actionManager);
 
@@ -220,7 +218,7 @@ public class FileAssetIngestorTest {
     public void testImportAssetsToNewRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
         ingestor.init();
-        File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+        final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
 
         ingestor.importAssets(actionManager);
 
@@ -244,7 +242,7 @@ public class FileAssetIngestorTest {
         ingestor.jcrBasePath = "/content/dam/test";
         ingestor.init();
         context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
-        File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+        final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
 
         ingestor.importAssets(actionManager);
 

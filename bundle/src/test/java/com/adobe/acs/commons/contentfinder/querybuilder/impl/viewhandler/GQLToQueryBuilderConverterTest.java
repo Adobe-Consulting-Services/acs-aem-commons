@@ -389,7 +389,6 @@ public class GQLToQueryBuilderConverterTest {
         MockSlingHttpServletRequest request = context.request();
         request.setParameterMap(ImmutableMap.<String, Object>builder().put("wcmmode", "preview").build());
         GQLToQueryBuilderConverter.addProperty(request, map, "wcmmode", 1);
-        System.out.println(map);
         assertEquals(0, map.size());
     }
 

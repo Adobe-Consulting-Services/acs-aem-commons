@@ -17,5 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.14.4")
+@aQute.bnd.annotation.Version("4.0.0")
 package com.adobe.acs.commons.redirectmaps.models;

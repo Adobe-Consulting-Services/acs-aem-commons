@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.util.Spreadsheet;
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
@@ -35,16 +40,17 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Provide code coverage for URL Asset Import
@@ -95,11 +101,11 @@ public class UrlAssetImportTest {
         
     private void addImportRow(String... cols) {
         List<String> header = importProcess.fileData.getHeaderRow();
-        Map<String, String> row = new HashMap<>();
+        Map<String, CompositeVariant> row = new HashMap<>();
         for (int i=0; i < cols.length && i < header.size(); i++) {
-            row.put(header.get(i), cols[i]);
+            row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRows().add(row);
+        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
     }
     
     @Test
@@ -107,7 +113,7 @@ public class UrlAssetImportTest {
         importProcess.init();
         URL testImg = getClass().getResource("/img/test.png");        
         addImportRow(testImg.toString(), "/content/dam/myTestImg.png");
-        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRows());
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);
         importProcess.importAssets(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));
