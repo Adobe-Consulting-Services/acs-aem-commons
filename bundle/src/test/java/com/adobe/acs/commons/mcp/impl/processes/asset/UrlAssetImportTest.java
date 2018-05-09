@@ -21,7 +21,8 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.util.Spreadsheet;
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
@@ -100,11 +101,11 @@ public class UrlAssetImportTest {
         
     private void addImportRow(String... cols) {
         List<String> header = importProcess.fileData.getHeaderRow();
-        Map<String, String> row = new HashMap<>();
+        Map<String, CompositeVariant> row = new HashMap<>();
         for (int i=0; i < cols.length && i < header.size(); i++) {
-            row.put(header.get(i), cols[i]);
+            row.put(header.get(i), new CompositeVariant(cols[i]));
         }
-        importProcess.fileData.getDataRows().add(row);
+        importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
     }
     
     @Test
@@ -112,7 +113,7 @@ public class UrlAssetImportTest {
         importProcess.init();
         URL testImg = getClass().getResource("/img/test.png");        
         addImportRow(testImg.toString(), "/content/dam/myTestImg.png");
-        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRows());
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);
         importProcess.importAssets(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));
