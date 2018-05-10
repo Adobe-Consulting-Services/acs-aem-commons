@@ -37,9 +37,14 @@ import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -88,7 +93,21 @@ public class SharedValueMapValueInjectorImpl implements Injector {
                         break;
                 }
                 if (valueMap != null) {
-                    return valueMap.get(name, (Class) declaredType);
+                    if (declaredType instanceof Class) {
+                        return valueMap.get(name, (Class) declaredType);
+                    } else if (declaredType instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) declaredType;
+                        if (parameterizedType.getActualTypeArguments().length == 1) {
+                            Class collectionType = (Class) parameterizedType.getRawType();
+                            if (collectionType.equals(Collection.class) || collectionType.equals(List.class)) {
+                                Class itemType = (Class) parameterizedType.getActualTypeArguments()[0];
+                                Object valuesArray = valueMap.get(name, Array.newInstance(itemType, 0).getClass());
+                                if (valuesArray != null) {
+                                    return Arrays.asList((Object[]) valuesArray);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
