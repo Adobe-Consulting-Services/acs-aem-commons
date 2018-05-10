@@ -1,12 +1,13 @@
 var promptInstall;
 
 if ('serviceWorker' in navigator) {
+    //The search params would be read from the content resource
     navigator.serviceWorker
-    .register('/etc/clientlibs/acs-commons/clientlib-sw.js')
+    .register('/content/we-retail-pwa/us/service-worker.js?html=/content/we-retail-pwa/us/en|/content/we-retail-pwa/us/en/men&fallback=/content/we-retail-pwa/us/en/fallback')
     .then(function(response) {
         console.log('[Service Worker] registered!');
     }).catch(function(error){
-        console.log("Resgistration failed ", error);
+        console.log("[Service Worker] Registration failed ", error);
     });
 }
 /*
