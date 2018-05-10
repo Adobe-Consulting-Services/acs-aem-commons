@@ -83,6 +83,8 @@ public class SharedValueMapValueInjectorImpl implements Injector {
                         return getSharedProperties(pageRoot, resource).get(name);
                     case GLOBAL:
                         return getGlobalProperties(pageRoot, resource).get(name);
+                    default:
+                        break;
                 }
             }
         }
@@ -91,21 +93,21 @@ public class SharedValueMapValueInjectorImpl implements Injector {
     }
 
     /**
-     * Get global properties resource for the current resource.
-     */
-    protected ValueMap getGlobalProperties(Page pageRoot, Resource resource) {
-        String globalPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
-        Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
-        return globalPropsResource != null ? globalPropsResource.getValueMap() : new ValueMapDecorator(Collections.emptyMap());
-    }
-
-    /**
-     * Get global properties resource for the current resource.
+     * Get shared properties ValueMap the current resource.
      */
     protected ValueMap getSharedProperties(Page pageRoot, Resource resource) {
         String sharedPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/" + resource.getResourceType();
         Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
         return sharedPropsResource != null ? sharedPropsResource.getValueMap() : new ValueMapDecorator(Collections.emptyMap());
+    }
+
+    /**
+     * Get global properties ValueMap for the current resource.
+     */
+    protected ValueMap getGlobalProperties(Page pageRoot, Resource resource) {
+        String globalPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
+        Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
+        return globalPropsResource != null ? globalPropsResource.getValueMap() : new ValueMapDecorator(Collections.emptyMap());
     }
 
     /**
