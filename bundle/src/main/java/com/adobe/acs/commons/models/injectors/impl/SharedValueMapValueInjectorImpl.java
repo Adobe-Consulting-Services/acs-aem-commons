@@ -35,6 +35,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -76,15 +77,19 @@ public class SharedValueMapValueInjectorImpl implements Injector {
         if (resource != null) {
             Page pageRoot = pageRootProvider.getRootPage(resource);
             if (pageRoot != null) {
+                ValueMap valueMap = null;
                 switch (element.getAnnotation(SharedValueMapValue.class).type()) {
                     case MERGED:
-                        return getMergedProperties(pageRoot, resource).get(name);
+                        valueMap = getMergedProperties(pageRoot, resource);
                     case SHARED:
-                        return getSharedProperties(pageRoot, resource).get(name);
+                        valueMap = getSharedProperties(pageRoot, resource);
                     case GLOBAL:
-                        return getGlobalProperties(pageRoot, resource).get(name);
+                        valueMap = getGlobalProperties(pageRoot, resource);
                     default:
                         break;
+                }
+                if (valueMap != null) {
+                    return valueMap.get(name, (Class) declaredType);
                 }
             }
         }
