@@ -85,10 +85,13 @@ public class SharedValueMapValueInjectorImpl implements Injector {
                 switch (element.getAnnotation(SharedValueMapValue.class).type()) {
                     case MERGED:
                         valueMap = getMergedProperties(pageRoot, resource);
+                        break;
                     case SHARED:
                         valueMap = getSharedProperties(pageRoot, resource);
+                        break;
                     case GLOBAL:
                         valueMap = getGlobalProperties(pageRoot, resource);
+                        break;
                     default:
                         break;
                 }
