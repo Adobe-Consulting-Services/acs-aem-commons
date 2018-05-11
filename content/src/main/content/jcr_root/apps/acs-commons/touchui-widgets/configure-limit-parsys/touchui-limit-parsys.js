@@ -100,7 +100,7 @@
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
         if (currentLimit === null) {
-            return false;
+            return true;
         }
         var limit = parseInt(currentLimit);
         isWithin = children.length <= limit;
