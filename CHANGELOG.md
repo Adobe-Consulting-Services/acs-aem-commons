@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component 
 
 ### Added
 - #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which means so do URL Asset Ingest and Data Importer as well.
