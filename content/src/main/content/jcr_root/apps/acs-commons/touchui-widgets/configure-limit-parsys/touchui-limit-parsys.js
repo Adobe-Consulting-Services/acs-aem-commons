@@ -154,21 +154,25 @@
                 }(compDragDrop.handleDrop);
             }
 
-            //handle insert action
-            Granite.author.edit.actions.openInsertDialog = function(openDlgFn){
-                return function (editable) {
-                    if(!isWithinLimit(editable.getParent())){
-                        return;
-                    }
-
-                    return openDlgFn.call(this, editable);
-                };
-            }(Granite.author.edit.actions.openInsertDialog);
-
             //handle paste action
-            var insertAction = Granite.author.edit.Toolbar.defaultActions.INSERT;
+            var pasteAction = Granite.author.edit.Toolbar.defaultActions.PASTE;
+            // overwrite both execute and handler as both seem to be used
+            pasteAction.execute = pasteAction.handler = function(pasteHandlerFn){
+                return function (editableBefore) {
+                    // only prevent copy but not move operations (if previous operation was cut)
+                    if(!Granite.author.clipboard.shouldCut()) {
+                        if(!isWithinLimit(editableBefore.getParent())){
+                            return;
+                        }
+                    }
+                    return pasteHandlerFn.call(this, editableBefore);
+                };
+            }(pasteAction.execute);
 
-            insertAction.handler = function(insertHandlerFn){
+            // handle insert action
+            var insertAction = Granite.author.edit.Toolbar.defaultActions.INSERT;
+            // overwrite both execute and handler (for doubleclick and "+" icon click functionality)
+            insertAction.execute = insertAction.handler = function(insertHandlerFn){
                 return function(editableBefore, param, target){
                     if(!isWithinLimit(editableBefore.getParent())){
                         return;
@@ -176,7 +180,7 @@
 
                     return insertHandlerFn.call(this, editableBefore, param, target);
                 };
-            }(insertAction.handler);
+            }(insertAction.execute);
         }
     }
 
