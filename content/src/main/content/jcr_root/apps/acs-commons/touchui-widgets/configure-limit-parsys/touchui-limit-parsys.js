@@ -30,16 +30,6 @@
 
     /**
      * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromPolicy
-     * Find the limits of the given Editable based on a policy path
-     *
-     * @memberof Granite.author.components
-     * @alias _findAllowedComponentsFromPolicy
-     * @private
-     * @ignore
-     *
-     * @param {Granite.author.Editable} editable    - The editable for which to find allowed components from
-     * @param {{}} design                           - Configuration object from where to find allowed components
-     * @returns {Array.<Granite.author.Component>}
      */
     function _findPropertyFromPolicy(editable, design, propertyName) {
         var cell = Granite.author.util.resolveProperty(design, editable.config.policyPath);
@@ -52,18 +42,7 @@
 
     /**
      * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromDesign
-     * Returns an array of strings representing the list of allowed components extracted from the given design configuration object
-     *
-     * <p>Those could be either a path, a resource type or component group</p>
-     *
-     * @memberof Granite.author.components
-     * @alias _findAllowedComponentsFromDesign
-     * @private
-     * @ignore
-     *
-     * @param {Granite.author.Editable} editable    - Editable for which to compute a list of allowed components
-     * @param {{}} design                           - Design configuration object from which to get the actual configuration
-     * @returns {string[]|undefined}                - An array of string in case of a configuration object has been found. Undefined otherwise
+     * Returns the value of the given property name extracted from the given design configuration object (also supports content policies)
      */
      function _findPropertyFromDesign(editable, design, propertyName) {
         if (editable && editable.config) {
@@ -148,7 +127,6 @@
                         if(!isWithinLimit(event.currentDropTarget.targetEditable.getParent())){
                             return;
                         }
-
                         return dropFn.call(this, event);
                     };
                 }(compDragDrop.handleDrop);
@@ -177,7 +155,6 @@
                     if(!isWithinLimit(editableBefore.getParent())){
                         return;
                     }
-
                     return insertHandlerFn.call(this, editableBefore, param, target);
                 };
             }(insertAction.execute);
