@@ -28,30 +28,63 @@
 
     var ACS_COMPONENTS_LIMIT = "acsComponentsLimit";
 
-    function getDesignPath(editable){
-        var parsys = editable.getParent(),
-            designSrc = parsys.config.designDialogSrc,
-            result = {}, param;
+    /**
+     * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromPolicy
+     * Find the limits of the given Editable based on a policy path
+     *
+     * @memberof Granite.author.components
+     * @alias _findAllowedComponentsFromPolicy
+     * @private
+     * @ignore
+     *
+     * @param {Granite.author.Editable} editable    - The editable for which to find allowed components from
+     * @param {{}} design                           - Configuration object from where to find allowed components
+     * @returns {Array.<Granite.author.Component>}
+     */
+    function _findPropertyFromPolicy(editable, design, propertyName) {
+        var cell = Granite.author.util.resolveProperty(design, editable.config.policyPath);
 
-        if (designSrc === undefined) {
-            return undefined;
+        if (cell && cell[propertyName]) {
+            return cell[propertyName];
         }
+        return null;
+    }
 
-        designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
+    /**
+     * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromDesign
+     * Returns an array of strings representing the list of allowed components extracted from the given design configuration object
+     *
+     * <p>Those could be either a path, a resource type or component group</p>
+     *
+     * @memberof Granite.author.components
+     * @alias _findAllowedComponentsFromDesign
+     * @private
+     * @ignore
+     *
+     * @param {Granite.author.Editable} editable    - Editable for which to compute a list of allowed components
+     * @param {{}} design                           - Design configuration object from which to get the actual configuration
+     * @returns {string[]|undefined}                - An array of string in case of a configuration object has been found. Undefined otherwise
+     */
+     function _findPropertyFromDesign(editable, design, propertyName) {
+        if (editable && editable.config) {
+            if (editable.config.policyPath) {
+                return _findPropertyFromPolicy(editable, design, propertyName);
+            } else {
+                // All cell search paths
+                var cellSearchPaths = editable.config.cellSearchPath;
 
-        designSrc.split(/&/).forEach( function(it) {
-            if (_.isEmpty(it)) {
-                return;
+                if (cellSearchPaths) {
+                    for (var i = 0; i < cellSearchPaths.length; i++) {
+                        var cell = Granite.author.util.resolveProperty(design, cellSearchPaths[i]);
+
+                        if (cell && cell[propertyName]) {
+                            return cell[propertyName];
+                        }
+                    }
+                }
             }
-            param = it.split("=");
-            result[param[0]] = param[1];
-        });
-
-        if (result.content === undefined) {
-            return undefined;
         }
-
-        return decodeURIComponent(result.content);
+        return null;
     }
 
     function showErrorAlert(message, title){
@@ -82,27 +115,19 @@
         return children;
     }
 
-    function isWithinLimit(editable){
-        var path = getDesignPath(editable),
-            children = getChildEditables(editable.getParent()),
+    function isWithinLimit(parsysEditable){
+        var children = getChildEditables(parsysEditable),
             isWithin = true, currentLimit = "";
 
-        if (path !== undefined) {
-            $.ajax({url: path + ".2.json", async: false}).done(function (data) {
-                if (_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]) {
-                    return;
-                }
-
-                currentLimit = data[ACS_COMPONENTS_LIMIT];
-
-                var limit = parseInt(currentLimit);
-
-                isWithin = children.length <= limit;
-            });
+        currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
+        if (currentLimit === null) {
+            return false;
         }
+        var limit = parseInt(currentLimit);
+        isWithin = children.length <= limit;
 
         if(!isWithin){
-            showErrorAlert("Limit exceeded, allowed - " + currentLimit);
+            showErrorAlert("Limit of paragraphs within this paragraph system exceeded, allowed only up to " + currentLimit + " paragraphs.");
         }
 
         return isWithin;
@@ -120,7 +145,7 @@
                 //handle drop action
                 compDragDrop.handleDrop = function(dropFn){
                     return function (event) {
-                        if(!isWithinLimit(event.currentDropTarget.targetEditable)){
+                        if(!isWithinLimit(event.currentDropTarget.targetEditable.getParent())){
                             return;
                         }
 
@@ -132,7 +157,7 @@
             //handle insert action
             Granite.author.edit.actions.openInsertDialog = function(openDlgFn){
                 return function (editable) {
-                    if(!isWithinLimit(editable)){
+                    if(!isWithinLimit(editable.getParent())){
                         return;
                     }
 
@@ -145,7 +170,7 @@
 
             insertAction.handler = function(insertHandlerFn){
                 return function(editableBefore, param, target){
-                    if(!isWithinLimit(editableBefore)){
+                    if(!isWithinLimit(editableBefore.getParent())){
                         return;
                     }
 
