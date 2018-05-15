@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1370 - Fixed Invalid Entries display in FireFox
+- #1371 - Fixed Incorrect Entry Deletion when Filtering
 
 ### Added
 - #1347 - Redirect Map Entry editor
