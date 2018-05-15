@@ -34,6 +34,15 @@
     function _findPropertyFromPolicy(editable, design, propertyName) {
         var cell = Granite.author.util.resolveProperty(design, editable.config.policyPath);
 
+        if (!cell || !cell[propertyName]) {
+            // Inherit property also from its parent (if not set in the local policy path)
+            var parent = ns.editables.getParent(editable);
+
+            while (parent && !(cell && cell[propertyName])) {
+                cell = Granite.author.util.resolveProperty(design, parent.config.policyPath);
+                parent = Granite.author.editables.getParent(parent);
+            }
+        }
         if (cell && cell[propertyName]) {
             return cell[propertyName];
         }
