@@ -92,18 +92,6 @@
                                 <input type="text" name="target" class="coral-Textfield"  ng-required="true" placeholder="URL to redirect to"/>
                             </span>
                         </div>
-                        <div class="form-row">
-                            <label acs-coral-heading>
-                                Index
-                            </label>
-                            <span>
-                                <input type="number" name="idx" list="idx" ng-required="true" class="coral-Textfield" placeholder="Index to add the entry within the file"/>
-                                <datalist id="idx">
-                                    <option value="0">First</option>
-                                    <option value="{{entries.length}}">Last</option>
-                                </datalist>
-                            </span>
-                        </div>
                         <button is="coral-button" iconsize="S">
                             Add Entry
                         </button>

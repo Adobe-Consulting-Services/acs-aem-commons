@@ -30,39 +30,59 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         $scope.filteredEntries = [];
         $scope.invalidEntries = [];
         $scope.redirectMap = '';
+        
 
-        $scope.updateRedirectMap = function (e) {
-            e.preventDefault();
-            
+        $scope.addEntry = function(){
+            var start = new Date().getTime();
             NotificationsService.running(true);
-
-            var $form = $('#fn-acsCommons-update-redirect');
-
-            $.ajax({
-                url: $form.attr('action'),
-                data: new FormData($form[0]),
-                cache: false,
-                contentType: false,
-                processData: false,
-                type: 'POST',
-                success: function(data){
-                    location.reload(true);
-                }
+            $scope.entries = [];
+            $scope.invalidEntries = [];
+            $http({
+                method: 'POST',
+                url: $scope.app.uri+'.addentry.json?'+$('#entry-form').serialize()
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                data.time=time;
+                $scope.entries = data.entries || [];
+                $scope.invalidEntries = data.invalidEntries || [];
+                $scope.filterEntries();
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Entry added!');
+                $scope.loadRedirectMap();
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable to add entry!');
             });
-            return false;
         };
         
-        $scope.postValues = function (e, id) {
-            e.preventDefault();
+        $scope.filterEntries = function(){
+            $scope.filteredEntries = [];
             
-            NotificationsService.running(true);
-
-            var $form = $('#'+id);
-
-            $.post($form.attr('action'), $form.serialize(), function() {
-                location.reload(true);
-            });
+            var term = $('#filter-form').find('input[name=filter]').val().toLowerCase();
+            if(term.trim() !== ''){
+                var count = 0;
+                $scope.entries.forEach(function(el, idx){
+                    var found = (term.trim() === '*');
+                    Object.values(el).forEach(function(val, idx2){
+                        if(val.toString().toLowerCase().indexOf(term) !== -1){
+                            found = true;
+                        }
+                    });
+                    if (found) {
+                        $scope.filteredEntries.push(el);
+                        count++;
+                    }
+                });
+                
+                NotificationsService.add('success', 'SUCCESS', 'Found '+count+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
+            }
+            
             return false;
+        };
+
+        $scope.init = function () {
+            $('.endor-Crumbs-item[href="/miscadmin"]').html('Redirects').attr('href','/miscadmin#/etc/acs-commons/redirect-maps');
+            $scope.load();
         };
         
         $scope.load = function () {
@@ -76,7 +96,8 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
                 url: $scope.app.uri+'.redirectentries.json'
             }).success(function (data, status, headers, config) {
                 var time = new Date().getTime() - start;
-                $scope.entries = data || {};
+                $scope.entries = data.entries || [];
+                $scope.invalidEntries = data.invalidEntries || [];
                 NotificationsService.running(false);
                 NotificationsService.add('success', 'SUCCESS', 'Found '+data.length+' entries in '+time+'ms!');
                 $scope.loadRedirectMap();
@@ -105,18 +126,41 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             });
         };
 
+        $scope.openEditor = function(path){
+            if(path.indexOf('/content/dam') === -1){
+                window.open('/editor.html'+path+'.html','_blank');
+            } else {
+                window.open('/mnt/overlay/dam/gui/content/assets/metadataeditor.external.html?_charset_=utf-8&item='+path,'_blank');
+            }
+        };
+        
+        $scope.postValues = function (e, id) {
+            e.preventDefault();
+            
+            NotificationsService.running(true);
+
+            var $form = $('#'+id);
+
+            $.post($form.attr('action'), $form.serialize(), function() {
+                location.reload(true);
+            });
+            return false;
+        };
+
         $scope.removeLine = function(idx){
             var start = new Date().getTime();
             NotificationsService.running(true);
             $scope.entries = [];
             $scope.filteredEntries = [];
+            $scope.invalidEntries = [];
             $http({
                 method: 'POST',
                 url: $scope.app.uri+'.removeentry.json?idx='+idx
             }).success(function (data, status, headers, config) {
                 var time = new Date().getTime() - start;
                 data.time=time;
-                $scope.entries = data || {};
+                $scope.entries = data.entries || [];
+                $scope.invalidEntries = data.invalidEntries || [];
                 NotificationsService.running(false);
                 NotificationsService.add('success', 'SUCCESS', 'Redirect map updated!');
                 $scope.loadRedirectMap();
@@ -127,72 +171,26 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             });
         };
 
-        $scope.openEditor = function(path){
-            if(path.indexOf('/content/dam') === -1){
-                window.open('/editor.html'+path+'.html','_blank');
-            } else {
-                window.open('/mnt/overlay/dam/gui/content/assets/metadataeditor.external.html?_charset_=utf-8&item='+path,'_blank');
-            }
-        };
-        
-        $scope.filterEntries = function(){
-            $scope.filteredEntries = [];
+        $scope.updateRedirectMap = function (e) {
+            e.preventDefault();
             
-            var term = $('#filter-form').find('input[name=filter]').val().toLowerCase();
-            if(term.trim() !== ''){
-                var count = 0;
-                $scope.entries.forEach(function(el, idx){
-                    var found = (term.trim() === '*');
-                    Object.values(el).forEach(function(val, idx2){
-                        if(val.toString().toLowerCase().indexOf(term) !== -1){
-                            found = true;
-                        }
-                    });
-                    if (found) {
-                        $scope.filteredEntries.push(el);
-                        count++;
-                    }
-                });
-                
-                NotificationsService.add('success', 'SUCCESS', 'Found '+count+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
-            }
-            
-            $scope.invalidEntries = [];
-            
-            $scope.entries.forEach(function(entry){
-                if(entry.valid === false) {
-                    $scope.invalidEntries.push(entry);
+            NotificationsService.running(true);
+
+            var $form = $('#fn-acsCommons-update-redirect');
+
+            $.ajax({
+                url: $form.attr('action'),
+                data: new FormData($form[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                success: function(data){
+                    location.reload(true);
                 }
             });
             return false;
         };
 
-        $scope.addEntry = function(){
-            var start = new Date().getTime();
-            NotificationsService.running(true);
-            $scope.entries = {};
-            $http({
-                method: 'POST',
-                url: $scope.app.uri+'.addentry.json?'+$('#entry-form').serialize()
-            }).success(function (data, status, headers, config) {
-                var time = new Date().getTime() - start;
-                data.time=time;
-                $scope.entries = data || [];
-                $scope.filterEntries();
-                NotificationsService.running(false);
-                NotificationsService.add('success', 'SUCCESS', 'Entry added!');
-                $scope.loadRedirectMap();
-            }).error(function (data, status, headers, config) {
-                NotificationsService.running(false);
-                NotificationsService.add('error', 'ERROR', 'Unable to add entry!');
-            });
-        };
-
-        $scope.init = function () {
-            $('.endor-Crumbs-item[href="/miscadmin"]').html('Redirects').attr('href','/miscadmin#/etc/acs-commons/redirect-maps');
-            
-            $scope.load();
-
-        };
     }]);
 
