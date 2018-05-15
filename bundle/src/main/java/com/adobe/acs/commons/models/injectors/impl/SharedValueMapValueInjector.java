@@ -50,7 +50,7 @@ import java.util.Map;
 @Component
 @Service
 @Property(name = Constants.SERVICE_RANKING, intValue = 4500)
-public class SharedValueMapValueInjectorImpl implements Injector {
+public class SharedValueMapValueInjector implements Injector {
     @Reference
     private PageRootProvider pageRootProvider;
 
@@ -96,21 +96,7 @@ public class SharedValueMapValueInjectorImpl implements Injector {
                         break;
                 }
                 if (valueMap != null) {
-                    if (declaredType instanceof Class) {
-                        return valueMap.get(name, (Class) declaredType);
-                    } else if (declaredType instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) declaredType;
-                        if (parameterizedType.getActualTypeArguments().length == 1) {
-                            Class collectionType = (Class) parameterizedType.getRawType();
-                            if (collectionType.equals(Collection.class) || collectionType.equals(List.class)) {
-                                Class itemType = (Class) parameterizedType.getActualTypeArguments()[0];
-                                Object valuesArray = valueMap.get(name, Array.newInstance(itemType, 0).getClass());
-                                if (valuesArray != null) {
-                                    return Arrays.asList((Object[]) valuesArray);
-                                }
-                            }
-                        }
-                    }
+                    return getValue(valueMap, name, declaredType);
                 }
             }
         }
@@ -124,7 +110,7 @@ public class SharedValueMapValueInjectorImpl implements Injector {
     protected ValueMap getSharedProperties(Page pageRoot, Resource resource) {
         String sharedPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/" + resource.getResourceType();
         Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
-        return sharedPropsResource != null ? sharedPropsResource.getValueMap() : new ValueMapDecorator(Collections.emptyMap());
+        return sharedPropsResource != null ? sharedPropsResource.getValueMap() : ValueMapDecorator.EMPTY;
     }
 
     /**
@@ -133,7 +119,7 @@ public class SharedValueMapValueInjectorImpl implements Injector {
     protected ValueMap getGlobalProperties(Page pageRoot, Resource resource) {
         String globalPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
         Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
-        return globalPropsResource != null ? globalPropsResource.getValueMap() : new ValueMapDecorator(Collections.emptyMap());
+        return globalPropsResource != null ? globalPropsResource.getValueMap() : ValueMapDecorator.EMPTY;
     }
 
     /**
@@ -147,5 +133,24 @@ public class SharedValueMapValueInjectorImpl implements Injector {
         mergedProperties.putAll(resource.getValueMap());
 
         return new ValueMapDecorator(mergedProperties);
+    }
+
+    protected Object getValue(ValueMap valueMap, String name, Type type) {
+        if (type instanceof Class) {
+            return valueMap.get(name, (Class) type);
+        } else if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            if (parameterizedType.getActualTypeArguments().length == 1) {
+                Class collectionType = (Class) parameterizedType.getRawType();
+                if (collectionType.equals(Collection.class) || collectionType.equals(List.class)) {
+                    Class itemType = (Class) parameterizedType.getActualTypeArguments()[0];
+                    Object valuesArray = valueMap.get(name, Array.newInstance(itemType, 0).getClass());
+                    if (valuesArray != null) {
+                        return Arrays.asList((Object[]) valuesArray);
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

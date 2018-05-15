@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -54,6 +55,11 @@ public class SharedValueMapValueAnnotationProcessorFactory implements StaticInje
 
         public SharedValueMapValueAnnotationProcessor(final SharedValueMapValue annotation) {
             this.annotation = annotation;
+        }
+
+        @Override
+        public String getName() {
+            return StringUtils.isNotBlank(annotation.name()) ? annotation.name() : super.getName();
         }
 
         @Override

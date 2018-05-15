@@ -40,6 +40,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @InjectAnnotation
 @Source("shared-component-properties-valuemap")
 public @interface SharedValueMapValue {
+    String name() default "";
+
     public InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
 
     public SharedComponentProperties.ValueTypes type() default SharedComponentProperties.ValueTypes.MERGED;
