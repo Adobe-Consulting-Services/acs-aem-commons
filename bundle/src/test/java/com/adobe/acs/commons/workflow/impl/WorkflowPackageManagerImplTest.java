@@ -55,9 +55,9 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ResourceCollectionUtil.class, JcrUtil.class})
 public class WorkflowPackageManagerImplTest {
-    private final String NORMAL_PAGE_PATH = "/content/test";
-    private final String WORKFLOW_PACKAGE_PATH = "/etc/packages/test";
-    private final String[] PAYLOAD_PATHS = {"/content/one", "/content/two"};
+    private static final String NORMAL_PAGE_PATH = "/content/test";
+    private static final String WORKFLOW_PACKAGE_PATH = "/etc/packages/test";
+    private static final String[] PAYLOAD_PATHS = {"/content/one", "/content/two"};
 
     @Mock
     ResourceCollectionManager resourceCollectionManager;

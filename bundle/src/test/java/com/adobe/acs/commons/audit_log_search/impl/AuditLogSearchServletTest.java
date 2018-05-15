@@ -120,8 +120,8 @@ public class AuditLogSearchServletTest {
 
     @Test
     public void testDateWindow() throws Exception {
-        MockSlingHttpServletRequest request = context.request();
-        Map<String, Object> params = new HashMap<>();
+        final MockSlingHttpServletRequest request = context.request();
+        final Map<String, Object> params = new HashMap<>();
         params.put("contentRoot", "/content");
         params.put("includeChildren", "true");
         params.put("startDate", "2017-11-01T01:00");
@@ -136,9 +136,9 @@ public class AuditLogSearchServletTest {
     }
 
     @Test
-    public void testDateWindowPM() throws Exception {
-        MockSlingHttpServletRequest request = context.request();
-        Map<String, Object> params = new HashMap<>();
+    public void testDateWindowAfterNoon() throws Exception {
+        final MockSlingHttpServletRequest request = context.request();
+        final Map<String, Object> params = new HashMap<>();
         params.put("contentRoot", "/content");
         params.put("includeChildren", "true");
         params.put("startDate", "2017-11-01T16:00");

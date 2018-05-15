@@ -26,10 +26,12 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
-import com.adobe.acs.commons.mcp.util.Spreadsheet;
+import com.adobe.acs.commons.data.Spreadsheet;
+import com.adobe.acs.commons.data.CompositeVariant;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +104,7 @@ public class UrlAssetImport extends AssetIngestor {
     private int timeout = 30000;
 
     transient Set<FileOrRendition> files;
-    transient Map<String, Folder> folders = new TreeMap<>((a,b)->b.compareTo(a));
+    transient Map<String, Folder> folders = new TreeMap<>((a, b) -> b.compareTo(a));
 
     Spreadsheet fileData;
 
@@ -128,7 +130,7 @@ public class UrlAssetImport extends AssetIngestor {
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
             fileData = new Spreadsheet(importFile);
-            files = extractFilesAndFolders(fileData.getDataRows());
+            files = extractFilesAndFolders(fileData.getDataRowsAsCompositeVariants());
             instance.getInfo().setDescription("Import " + fileData.getFileName() + " (" + fileData.getRowCount() + " rows)");
         } catch (IOException ex) {
             LOG.error("Unable to process import", ex);
@@ -139,7 +141,7 @@ public class UrlAssetImport extends AssetIngestor {
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
     }
 
-    protected Set<FileOrRendition> extractFilesAndFolders(List<Map<String, String>> fileData) {
+    protected Set<FileOrRendition> extractFilesAndFolders(List<Map<String, CompositeVariant>> fileData) {
         Set<FileOrRendition> allFiles = fileData.stream()
                 .peek(this::extractFolder)
                 .map(this::extractFile)
@@ -217,15 +219,11 @@ public class UrlAssetImport extends AssetIngestor {
     public void updateMetadataFromRow(FileOrRendition file, ModifiableValueMap meta) {
         for (String prop : fileData.getHeaderRow()) {
             if (prop.contains(":")) {
-                String value = file.getProperty(prop);
-                if (value == null) {
+                CompositeVariant value = file.getProperty(prop);
+                if (value == null || value.isEmpty()) {
                     meta.remove(prop);
                 } else {
-                    if (value.contains(":") || value.contains(",")) {
-                        meta.put(prop, value.split(","));
-                    } else {
-                        meta.put(prop, value);
-                    }
+                    meta.put(prop, value.toPropertyValue());
                 }
             }
         }
@@ -264,7 +262,7 @@ public class UrlAssetImport extends AssetIngestor {
         };
     }
 
-    private Folder extractFolder(Map<String, String> assetData) {
+    private Folder extractFolder(Map<String, CompositeVariant> assetData) {
         String folderPath = getTargetFolder(assetData);
         if (!folders.containsKey(folderPath)) {
             String rootFolder = folderPath.replace(jcrBasePath, "");
@@ -288,8 +286,8 @@ public class UrlAssetImport extends AssetIngestor {
         return folders.get(folderPath);
     }
 
-    private FileOrRendition extractFile(Map<String, String> assetData) {
-        String source = assetData.get(SOURCE);
+    private FileOrRendition extractFile(Map<String, CompositeVariant> assetData) {
+        String source = assetData.get(SOURCE).toString();
         if (source == null) {
             return null;
         }
@@ -301,15 +299,15 @@ public class UrlAssetImport extends AssetIngestor {
         FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
-                assetData.get(RENDITION_NAME),
-                assetData.get(ORIGINAL_FILE_NAME)
+                assetData.get(RENDITION_NAME) == null ? null : assetData.get(RENDITION_NAME).toString(),
+                assetData.get(ORIGINAL_FILE_NAME) == null ? null : assetData.get(ORIGINAL_FILE_NAME).toString()
         );
 
         return file;
     }
 
-    private String getTargetFolder(Map<String, String> assetData) {
-        String target = assetData.get(TARGET_FOLDER);
+    private String getTargetFolder(Map<String, CompositeVariant> assetData) {
+        String target = assetData.get(TARGET_FOLDER) == null ? null : assetData.get(TARGET_FOLDER).toString();
         if (target == null || target.isEmpty()) {
             return UNKNOWN_TARGET_FOLDER;
         } else if (!target.startsWith(CONTENT_BASE)) {

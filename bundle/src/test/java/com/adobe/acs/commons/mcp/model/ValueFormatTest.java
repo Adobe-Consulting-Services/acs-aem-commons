@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.model;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -25,7 +30,7 @@ public class ValueFormatTest {
 
     private static String ONE = String.format("%.1f", 1f);
 
-    enum fieldEnum {
+    enum FieldEnum {
         @FieldFormat(ValueFormat.plain)
         somePlainField,
         @FieldFormat(ValueFormat.storageSize)
@@ -35,13 +40,13 @@ public class ValueFormatTest {
     
     @Test
     public void testDefinedAnnotations() {
-        assertEquals(ValueFormat.plain, ValueFormat.forField(fieldEnum.somePlainField));
-        assertEquals(ValueFormat.storageSize, ValueFormat.forField(fieldEnum.someStorageSizeField));
+        assertEquals(ValueFormat.plain, ValueFormat.forField(FieldEnum.somePlainField));
+        assertEquals(ValueFormat.storageSize, ValueFormat.forField(FieldEnum.someStorageSizeField));
     }
     
     @Test
     public void testUndefinedAnnotations() {
-        assertEquals(ValueFormat.plain, ValueFormat.forField(fieldEnum.someUnannotatedField));
+        assertEquals(ValueFormat.plain, ValueFormat.forField(FieldEnum.someUnannotatedField));
     }
     
     @Test

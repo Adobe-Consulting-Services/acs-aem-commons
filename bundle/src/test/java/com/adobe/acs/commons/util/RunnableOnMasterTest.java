@@ -21,6 +21,7 @@ package com.adobe.acs.commons.util;
 
 import org.apache.commons.lang.mutable.MutableInt;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class RunnableOnMasterTest {
