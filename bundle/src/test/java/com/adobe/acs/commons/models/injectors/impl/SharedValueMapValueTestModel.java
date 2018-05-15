@@ -100,10 +100,6 @@ public class SharedValueMapValueTestModel {
     @SharedValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = SharedValueMapValueInjectorTest.LONG_PROP)
     private List<Long> longListPropFromNonArray;
 
-    public String getHomePath() {
-        return prp.getRootPagePath(resource.getPath());
-    }
-
     public String getGlobalStringProp() {
         return globalStringProp;
     }

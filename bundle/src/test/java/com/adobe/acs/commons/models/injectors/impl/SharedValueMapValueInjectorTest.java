@@ -183,7 +183,7 @@ public class SharedValueMapValueInjectorTest {
     }
 
     @Test
-    public void testAdaptedFromRequest() {
+    public void testModelAdaptedFromRequest() {
         MockSlingHttpServletRequest mockRequest = new MockSlingHttpServletRequest(this.resourceResolver, this.context.bundleContext());
         mockRequest.setResource(this.modelResource);
         SharedValueMapValueTestModel modelFromRequest = mockRequest.adaptTo(SharedValueMapValueTestModel.class);
