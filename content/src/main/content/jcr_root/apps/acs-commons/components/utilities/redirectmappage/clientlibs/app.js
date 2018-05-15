@@ -21,19 +21,20 @@
 angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
-    	
-    	$scope.app = {
-			uri: ''
-		};
-    	
-    	$scope.entries = [];
-    	$scope.filteredEntries = [];
-    	$scope.redirectMap = '';
+        
+        $scope.app = {
+            uri: ''
+        };
+        
+        $scope.entries = [];
+        $scope.filteredEntries = [];
+        $scope.invalidEntries = [];
+        $scope.redirectMap = '';
 
         $scope.updateRedirectMap = function (e) {
-        	e.preventDefault();
-        	
-			NotificationsService.running(true);
+            e.preventDefault();
+            
+            NotificationsService.running(true);
 
             var $form = $('#fn-acsCommons-update-redirect');
 
@@ -45,84 +46,85 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
                 processData: false,
                 type: 'POST',
                 success: function(data){
-                	location.reload(true);
+                    location.reload(true);
                 }
             });
             return false;
         };
         
         $scope.postValues = function (e, id) {
-        	e.preventDefault();
-        	
-			NotificationsService.running(true);
+            e.preventDefault();
+            
+            NotificationsService.running(true);
 
             var $form = $('#'+id);
 
             $.post($form.attr('action'), $form.serialize(), function() {
-            	location.reload(true);
+                location.reload(true);
             });
             return false;
         };
         
         $scope.load = function () {
-			var start = new Date().getTime();
-			NotificationsService.running(true);
-			$scope.filteredEntries = [];
-			$scope.entries = [];
-			$http({
-				method: 'GET',
-				url: $scope.app.uri+'.redirectentries.json'
-			}).success(function (data, status, headers, config) {
-				var time = new Date().getTime() - start;
-				$scope.entries = data || {};
-				NotificationsService.running(false);
-				NotificationsService.add('success', 'SUCCESS', 'Found '+data.length+' entries in '+time+'ms!');
-				$scope.loadRedirectMap();
-				$scope.filterEntries();
-			}).error(function (data, status, headers, config) {
-				NotificationsService.running(false);
-				NotificationsService.add('error', 'ERROR', 'Unable load redirect entries!');
-			});
-		};
-		
-		$scope.loadRedirectMap = function(){
-			var start = new Date().getTime();
-			NotificationsService.running(true);
-			$scope.redirectMap = '';
-			$http({
-				method: 'GET',
-				url: $scope.app.uri+'.redirectmap.txt'
-			}).success(function (data, status, headers, config) {
-				var time = new Date().getTime() - start;
-				$scope.redirectMap = data || '';
-				NotificationsService.running(false);
-				NotificationsService.add('success', 'SUCCESS', 'Loaded redirect map in '+time+'ms!');
-			}).error(function (data, status, headers, config) {
-				NotificationsService.running(false);
-				NotificationsService.add('error', 'ERROR', 'Unable load redirect map!');
-			});
-		};
+            var start = new Date().getTime();
+            NotificationsService.running(true);
+            $scope.filteredEntries = [];
+            $scope.entries = [];
+            $scope.invalidEntries = [];
+            $http({
+                method: 'GET',
+                url: $scope.app.uri+'.redirectentries.json'
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                $scope.entries = data || {};
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Found '+data.length+' entries in '+time+'ms!');
+                $scope.loadRedirectMap();
+                $scope.filterEntries();
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable load redirect entries!');
+            });
+        };
+        
+        $scope.loadRedirectMap = function(){
+            var start = new Date().getTime();
+            NotificationsService.running(true);
+            $scope.redirectMap = '';
+            $http({
+                method: 'GET',
+                url: $scope.app.uri+'.redirectmap.txt'
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                $scope.redirectMap = data || '';
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Loaded redirect map in '+time+'ms!');
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable load redirect map!');
+            });
+        };
 
         $scope.removeLine = function(idx){
             var start = new Date().getTime();
-			NotificationsService.running(true);
-			$scope.entries = [];
-			$scope.filteredEntries = [];
-			$http({
-				method: 'POST',
-				url: $scope.app.uri+'.removeentry.json?idx='+idx
-			}).success(function (data, status, headers, config) {
-				var time = new Date().getTime() - start;
-				data.time=time;
-				$scope.entries = data || {};
-				NotificationsService.running(false);
-				NotificationsService.add('success', 'SUCCESS', 'Redirect map updated!');
-				$scope.loadRedirectMap();
-				$scope.filterEntries();
-			}).error(function (data, status, headers, config) {
-				NotificationsService.running(false);
-				NotificationsService.add('error', 'ERROR', 'Unable remove entry '+idx+'!');
-			});
+            NotificationsService.running(true);
+            $scope.entries = [];
+            $scope.filteredEntries = [];
+            $http({
+                method: 'POST',
+                url: $scope.app.uri+'.removeentry.json?idx='+idx
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                data.time=time;
+                $scope.entries = data || {};
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Redirect map updated!');
+                $scope.loadRedirectMap();
+                $scope.filterEntries();
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable remove entry '+idx+'!');
+            });
         };
 
         $scope.openEditor = function(path){
@@ -135,51 +137,61 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         
         $scope.filterEntries = function(){
             $scope.filteredEntries = [];
-        	var term = $('#filter-form').find('input[name=filter]').val().toLowerCase();
-        	if(term.trim() !== ''){
-	        	var count = 0;
-	        	$scope.entries.forEach(function(el, idx){
-	        		var found = (term.trim() === '*');
-	        		Object.values(el).forEach(function(val, idx2){
-	        			if(val.toString().toLowerCase().indexOf(term) !== -1){
-	        				found = true;
-	        			}
-	        		});
-	        		if(found){
-	        			$scope.filteredEntries.push(el);
-	        			count++;
-	        		}
-	        	});
-	        	
-	            NotificationsService.add('success', 'SUCCESS', 'Found '+count+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
-        	}
-    		return false;
+            
+            var term = $('#filter-form').find('input[name=filter]').val().toLowerCase();
+            if(term.trim() !== ''){
+                var count = 0;
+                $scope.entries.forEach(function(el, idx){
+                    var found = (term.trim() === '*');
+                    Object.values(el).forEach(function(val, idx2){
+                        if(val.toString().toLowerCase().indexOf(term) !== -1){
+                            found = true;
+                        }
+                    });
+                    if (found) {
+                        $scope.filteredEntries.push(el);
+                        count++;
+                    }
+                });
+                
+                NotificationsService.add('success', 'SUCCESS', 'Found '+count+' entries for '+$('#filter-form').find('input[name=filter]').val()+'!');
+            }
+            
+            $scope.invalidEntries = [];
+            
+            $scope.entries.forEach(function(entry){
+                if(entry.valid === false) {
+                    $scope.invalidEntries.push(entry);
+                }
+            });
+            return false;
         };
 
         $scope.addEntry = function(){
-        	var start = new Date().getTime();
-			NotificationsService.running(true);
-			$scope.entries = {};
-			$http({
-				method: 'POST',
-				url: $scope.app.uri+'.addentry.json?'+$('#entry-form').serialize()
-			}).success(function (data, status, headers, config) {
-				var time = new Date().getTime() - start;
-				data.time=time;
-				$scope.entries = data || {};
-				NotificationsService.running(false);
-				NotificationsService.add('success', 'SUCCESS', 'Entry added!');
-				$scope.loadRedirectMap();
-			}).error(function (data, status, headers, config) {
-				NotificationsService.running(false);
-				NotificationsService.add('error', 'ERROR', 'Unable to add entry!');
-			});
+            var start = new Date().getTime();
+            NotificationsService.running(true);
+            $scope.entries = {};
+            $http({
+                method: 'POST',
+                url: $scope.app.uri+'.addentry.json?'+$('#entry-form').serialize()
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                data.time=time;
+                $scope.entries = data || [];
+                $scope.filterEntries();
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Entry added!');
+                $scope.loadRedirectMap();
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable to add entry!');
+            });
         };
 
         $scope.init = function () {
-        	$('.endor-Crumbs-item[href="/miscadmin"]').html('Redirects').attr('href','/miscadmin#/etc/acs-commons/redirect-maps');
-        	
-        	$scope.load();
+            $('.endor-Crumbs-item[href="/miscadmin"]').html('Redirects').attr('href','/miscadmin#/etc/acs-commons/redirect-maps');
+            
+            $scope.load();
 
         };
     }]);
