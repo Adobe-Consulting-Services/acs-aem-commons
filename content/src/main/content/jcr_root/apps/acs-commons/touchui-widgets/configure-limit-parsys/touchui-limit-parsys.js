@@ -36,7 +36,7 @@
 
         if (!cell || !cell[propertyName]) {
             // Inherit property also from its parent (if not set in the local policy path)
-            var parent = ns.editables.getParent(editable);
+            var parent = Granite.author.editables.getParent(editable);
 
             while (parent && !(cell && cell[propertyName])) {
                 cell = Granite.author.util.resolveProperty(design, parent.config.policyPath);
