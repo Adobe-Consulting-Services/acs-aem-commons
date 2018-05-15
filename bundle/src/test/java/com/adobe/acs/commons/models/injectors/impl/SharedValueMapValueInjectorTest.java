@@ -26,7 +26,6 @@ import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.jackrabbit.vault.util.JcrConstants;
-import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
@@ -41,6 +40,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -109,7 +109,7 @@ public class SharedValueMapValueInjectorTest {
         sharedPropertiesNode.setProperty(BOOL_PROP_FALSE, false);
         sharedPropertiesNode.setProperty(BOOL_PROP_TRUE_STR, "true");
         sharedPropertiesNode.setProperty(BOOL_PROP_FALSE_STR, "false");
-        globalPropertiesNode.setProperty(LONG_ARRAY_PROP, new String[] {"345", "456"});
+        sharedPropertiesNode.setProperty(LONG_ARRAY_PROP, new String[] {"345", "456"});
 
         modelResource = this.resourceResolver.getResource("/content/mysite/en/mypage/jcr:content/mycomponent");
         model = modelResource.adaptTo(SharedValueMapValueTestModel.class);
@@ -174,6 +174,12 @@ public class SharedValueMapValueInjectorTest {
     public void testPropertyCollectionWithTypeConversion() {
         assertEquals(Arrays.asList(345L, 456L), model.getLongListProp());
         assertEquals(Arrays.asList(345L, 456L), model.getLongCollectionProp());
+    }
+
+    @Test
+    public void testPropertyArrayFromNonArray() {
+        assertArrayEquals(new Long[] {123L}, model.getLongArrayPropFromNonArray());
+        assertEquals(Collections.singletonList(123L), model.getLongListPropFromNonArray());
     }
 
     @Test

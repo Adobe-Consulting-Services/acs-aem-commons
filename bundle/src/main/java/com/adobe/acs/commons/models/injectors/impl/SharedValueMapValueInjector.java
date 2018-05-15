@@ -42,7 +42,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +95,7 @@ public class SharedValueMapValueInjector implements Injector {
                         break;
                 }
                 if (valueMap != null) {
-                    return getValue(valueMap, name, declaredType);
+                    return getValueMapValue(valueMap, name, declaredType);
                 }
             }
         }
@@ -135,7 +134,13 @@ public class SharedValueMapValueInjector implements Injector {
         return new ValueMapDecorator(mergedProperties);
     }
 
-    protected Object getValue(ValueMap valueMap, String name, Type type) {
+    /**
+     * Get the property value from the value map.
+     *
+     * This function has special logic to handle parameterized types
+     * such as List<?> which can be addapted to from array properties.
+     */
+    protected Object getValueMapValue(ValueMap valueMap, String name, Type type) {
         if (type instanceof Class) {
             return valueMap.get(name, (Class) type);
         } else if (type instanceof ParameterizedType) {
