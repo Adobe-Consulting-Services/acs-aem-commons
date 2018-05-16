@@ -29,6 +29,8 @@ import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 /**
  * Used to represent values that might be provided as one type but used as another. Avoids glue code and switch
@@ -43,7 +45,7 @@ public final class Variant {
     private Optional<String> stringVal = Optional.empty();
     private Optional<Boolean> booleanVal = Optional.empty();
     private Optional<Date> dateVal = Optional.empty();
-    
+
     private static final FastDateFormat[] DATE_FORMATS = {
         FastDateFormat.getDateInstance(FastDateFormat.SHORT),
         FastDateFormat.getDateInstance(FastDateFormat.LONG),
@@ -52,8 +54,7 @@ public final class Variant {
         STANDARD_DATE_FORMAT,
         FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT),
         FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG),
-        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),
-    };
+        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),};
 
     public Variant() {
     }
@@ -98,7 +99,11 @@ public final class Variant {
                 } else {
                     setValue(number);
                 }
-                setValue(cell.getDateCellValue());
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    setValue(cell.getDateCellValue());
+                }
+                DataFormatter dateFormatter = new DataFormatter();
+                setValue(dateFormatter.formatCellValue(cell));
                 break;
             case Cell.CELL_TYPE_STRING:
                 setValue(cell.getStringCellValue().trim());
@@ -178,15 +183,25 @@ public final class Variant {
         return longVal.orElse(dateVal.map(Date::getTime)
                 .orElse(doubleVal.map(Double::longValue)
                         .orElse(booleanVal.map(b -> (Long) (b ? 1L : 0L))
-                                .orElse(stringVal.map(s -> (long) Double.parseDouble(s))
-                                        .orElse(null)))));
+                                .orElseGet(() -> {
+                                    try {
+                                        return stringVal.map(s -> (long) Double.parseDouble(s)).orElse(null);
+                                    } catch (NumberFormatException ex) {
+                                        return null;
+                                    }
+                                }))));
     }
 
     public Double toDouble() {
         return doubleVal.orElse(longVal.map(Long::doubleValue)
                 .orElse(booleanVal.map(b -> (Double) (b ? 1.0 : 0.0))
-                        .orElse(stringVal.map(Double::parseDouble)
-                                .orElse(null))));
+                        .orElseGet(() -> {
+                            try {
+                                return stringVal.map(Double::parseDouble).orElse(null);
+                            } catch (NumberFormatException ex) {
+                                return null;
+                            }
+                        })));
     }
 
     public String toString() {
@@ -217,9 +232,10 @@ public final class Variant {
                         .orElse(stringVal.map(this::isStringTruthy)
                                 .orElse(null))));
     }
-    
+
     /**
      * Truthiness is any non-empty string that looks like a non-zero number or looks like it is True, Yes, or X
+     *
      * @param s String to evaluate
      * @return True if it is truthy, otherwise false
      */
@@ -234,10 +250,10 @@ public final class Variant {
         }
     }
 
-    private <U, T> T apply(U value, Function<U,T> func) {
+    private <U, T> T apply(U value, Function<U, T> func) {
         return value == null ? null : func.apply(value);
     }
-    
+
     @SuppressWarnings("squid:S3776")
     public <T> T asType(Class<T> type) {
         if (type == Byte.TYPE || type == Byte.class) {
