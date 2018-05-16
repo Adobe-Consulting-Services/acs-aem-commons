@@ -1,5 +1,5 @@
-const STATIC_CACHE_NAME = 'STATIC_CACHE';
-const DYNAMIC_CACHE_NAME = 'DYNAMIC_CACHE';
+var STATIC_CACHE_NAME = 'STATIC_CACHE';
+var DYNAMIC_CACHE_NAME = 'DYNAMIC_CACHE';
 var urlsToCache = [];
 var fallbackCache ='';
 
@@ -7,6 +7,7 @@ self.addEventListener('install', function(event) {
 
     var urlParams =  new URLSearchParams(new URL(location).search);
     var counter =0;
+    /*jshint esnext: true */
 
     for(var key of urlParams.keys()) {
         if(key !== 'fallback'){

@@ -77,9 +77,9 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
     private String handleManifest(Page page, SlingHttpServletResponse response) {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-
-        return page.getContentResource().getValueMap().get("pwa/manifestPath",
-                "/apps/acs-commons/pwa/manifest.json");
+        String manifestPath = page.getContentResource().getValueMap().get("cq:conf",
+                "/apps/acs-commons/pwa")+ "/manifest.json";
+        return manifestPath;
     }
 
     /**
