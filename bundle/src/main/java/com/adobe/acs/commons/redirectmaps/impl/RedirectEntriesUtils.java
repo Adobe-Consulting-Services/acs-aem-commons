@@ -50,58 +50,58 @@ import com.google.gson.reflect.TypeToken;
  */
 public class RedirectEntriesUtils {
 
-	private RedirectEntriesUtils() {
-	}
+    private RedirectEntriesUtils() {
+    }
 
-	private static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
-	private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
 
-	protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
-		List<String> lines = null;
-		InputStream is = null;
-		try {
-			is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-			lines = IOUtils.readLines(is);
-			log.debug("Loaded {} lines", lines.size());
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
-		return lines;
-	}
+    protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
+        List<String> lines = null;
+        InputStream is = null;
+        try {
+            is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
+            lines = IOUtils.readLines(is);
+            log.debug("Loaded {} lines", lines.size());
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+        return lines;
+    }
 
-	protected static final void updateRedirectMap(SlingHttpServletRequest request, List<String> entries)
-			throws PersistenceException {
-		ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-				.getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-		mvm.put(JcrConstants.JCR_DATA, StringUtils.join(entries, "\n"));
-		request.getResourceResolver().commit();
-		request.getResourceResolver().refresh();
-		log.debug("Changes saved...");
-	}
+    protected static final void updateRedirectMap(SlingHttpServletRequest request, List<String> entries)
+            throws PersistenceException {
+        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
+                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
+        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(entries, "\n"));
+        request.getResourceResolver().commit();
+        request.getResourceResolver().refresh();
+        log.debug("Changes saved...");
+    }
 
-	protected static final void writeEntriesToResponse(SlingHttpServletRequest request,
-			SlingHttpServletResponse response, String message) throws ServletException, IOException {
-		log.trace("writeEntriesToResponse");
+    protected static final void writeEntriesToResponse(SlingHttpServletRequest request,
+            SlingHttpServletResponse response, String message) throws ServletException, IOException {
+        log.trace("writeEntriesToResponse");
 
-		log.debug("Requesting redirect maps from {}", request.getResource());
-		RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
+        log.debug("Requesting redirect maps from {}", request.getResource());
+        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
-		response.setContentType(MediaType.JSON_UTF_8.toString());
+        response.setContentType(MediaType.JSON_UTF_8.toString());
 
-		JsonObject res = new JsonObject();
-		res.addProperty("message", message);
+        JsonObject res = new JsonObject();
+        res.addProperty("message", message);
 
-		JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
-		}.getType());
-		Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
-		for (int i = 0; it.hasNext(); i++) {
-			it.next().getAsJsonObject().addProperty("id", i);
-		}
-		res.add("entries", entries);
-		res.add("invalidEntries", gson.toJsonTree(redirectMap.getInvalidEntries(), new TypeToken<List<MapEntry>>() {
-		}.getType()));
+        JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType());
+        Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            it.next().getAsJsonObject().addProperty("id", i);
+        }
+        res.add("entries", entries);
+        res.add("invalidEntries", gson.toJsonTree(redirectMap.getInvalidEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType()));
 
-		IOUtils.write(res.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
-	}
+        IOUtils.write(res.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
+    }
 }
