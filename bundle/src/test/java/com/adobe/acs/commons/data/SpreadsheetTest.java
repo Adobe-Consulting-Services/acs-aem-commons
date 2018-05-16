@@ -54,7 +54,7 @@ public class SpreadsheetTest {
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
     static Date testDate = new Date();
     static Spreadsheet dataTypesSheet;
-    
+
     @BeforeClass
     public static void setUp() throws IOException {
         testWorkbook = new XSSFWorkbook();
@@ -64,7 +64,7 @@ public class SpreadsheetTest {
         createRow(sheet, "/test/a2", "A-2", "val");
         createRow(sheet, "/test/a1/a1a", "A-1-A", "val");
         createRow(sheet, "/test/a3/a3a", "A-3-A", "val");
-        XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six", 
+        XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six",
                 "12.345", "One Value", null, "Another Value");
         XSSFCell dateCell = valuesRow.createCell(10);
         dateCell.setCellValue(testDate);
@@ -157,20 +157,22 @@ public class SpreadsheetTest {
         assertEquals(12.345, (Double) values.get("double-val").toPropertyValue(), 0.000001);
         assertEquals(testDate, values.get("date-val").toPropertyValue());
     }
-    
+
     @Test
     public void testSheetTypesAsStrings() {
-        assertEquals(1, dataTypesSheet.getRowCount());
-        Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(0);
-        assertEquals("123", row.get("Integer").toString());
-        assertEquals("123", row.get("Integer string").toString());
-        assertEquals("123.456", row.get("Floating point").toString());
-        assertEquals("123.456", row.get("Floating point string").toString());
-        assertEquals("11/26/85", row.get("Short date").toString());
-        assertEquals("Tuesday, November 26, 1985", row.get("Long date").toString());
-        assertEquals("9:00:00 AM", row.get("Time").toString());
-        assertEquals("110.00%", row.get("Percent").toString());
-        assertEquals("This is just a regular string", row.get("String").toString());
+        assertEquals(2, dataTypesSheet.getRowCount());
+        for (int i = 0; i < dataTypesSheet.getRowCount(); i++) {
+            Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(i);
+            assertEquals("123", row.get("Integer").toString());
+            assertEquals("123", row.get("Integer string").toString());
+            assertEquals("123.456", row.get("Floating point").toString());
+            assertEquals("123.456", row.get("Floating point string").toString());
+            assertEquals("11/26/85", row.get("Short date").toString());
+            assertEquals("Tuesday, November 26, 1985", row.get("Long date").toString());
+            assertEquals("9:00:00 AM", row.get("Time").toString());
+            assertEquals("110.00%", row.get("Percent").toString());
+            assertEquals("This is just a regular string", row.get("String").toString());
+        }
     }
 
     @Test
@@ -194,20 +196,22 @@ public class SpreadsheetTest {
         timeCal.set(Calendar.SECOND, 0);
         timeCal.set(Calendar.MILLISECOND, 0);
         Date someTime = timeCal.getTime();
-        
-        assertEquals(1, dataTypesSheet.getRowCount());
-        Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(0);
-        assertEquals(123, row.get("Integer").getValueAs(Integer.class));
-        assertEquals(123, row.get("Integer string").getValueAs(Integer.class));
-        assertEquals(123.456, (double) row.get("Floating point").getValueAs(Double.class), 0.0001);
-        assertEquals(123.456, (double) row.get("Floating point string").getValueAs(Double.class), 0.0001);
-        assertEquals(fluxCapacitorBirthday, row.get("Short date").getValueAs(Date.class));
-        assertEquals(fluxCapacitorBirthday, row.get("Long date").getValueAs(Date.class));
-        assertEquals(someTime, row.get("Time").getValueAs(Date.class));
-        assertEquals(1.1, (double) row.get("Percent").getValueAs(Double.class), 0.0001);
-        assertEquals("This is just a regular string", row.get("String").toPropertyValue());
+
+        assertEquals(2, dataTypesSheet.getRowCount());
+        for (int i = 0; i < dataTypesSheet.getRowCount(); i++) {
+            Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(i);
+            assertEquals(123, row.get("Integer").getValueAs(Integer.class));
+            assertEquals(123, row.get("Integer string").getValueAs(Integer.class));
+            assertEquals(123.456, (double) row.get("Floating point").getValueAs(Double.class), 0.0001);
+            assertEquals(123.456, (double) row.get("Floating point string").getValueAs(Double.class), 0.0001);
+            assertEquals(fluxCapacitorBirthday, row.get("Short date").getValueAs(Date.class));
+            assertEquals(fluxCapacitorBirthday, row.get("Long date").getValueAs(Date.class));
+            assertEquals(someTime, row.get("Time").getValueAs(Date.class));
+            assertEquals(1.1, (double) row.get("Percent").getValueAs(Double.class), 0.0001);
+            assertEquals("This is just a regular string", row.get("String").toPropertyValue());
+        }
     }
-    
+
     private static XSSFRow createRow(XSSFSheet sheet, String... values) {
         int rowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow row = sheet.createRow(rowNum);
@@ -219,5 +223,5 @@ public class SpreadsheetTest {
             }
         }
         return row;
-    }    
+    }
 }

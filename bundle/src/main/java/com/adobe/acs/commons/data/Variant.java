@@ -29,6 +29,7 @@ import java.util.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 
@@ -102,8 +103,17 @@ public final class Variant {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     setValue(cell.getDateCellValue());
                 }
-                DataFormatter dateFormatter = new DataFormatter();
-                setValue(dateFormatter.formatCellValue(cell));
+                DataFormatter dataFormatter = new DataFormatter();
+                if (cellType == Cell.CELL_TYPE_FORMULA) {
+                    setValue(dataFormatter.formatCellValue(cell));
+                } else {
+                    CellStyle cellStyle = cell.getCellStyle();
+                    setValue(dataFormatter.formatRawCellContents(
+                            cell.getNumericCellValue(),
+                            cellStyle.getDataFormat(),
+                            cellStyle.getDataFormatString()
+                    ));
+                }
                 break;
             case Cell.CELL_TYPE_STRING:
                 setValue(cell.getStringCellValue().trim());
