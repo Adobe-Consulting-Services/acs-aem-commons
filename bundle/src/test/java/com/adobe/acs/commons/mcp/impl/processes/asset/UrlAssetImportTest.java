@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -78,6 +79,14 @@ public class UrlAssetImportTest {
                 return assetManager;
             }
         });
+        
+        context.registerAdapter(Resource.class, Asset.class, new Function<Resource, Asset>() {
+            @Nullable
+            @Override
+            public Asset apply(@Nullable Resource input) {
+                return mock(Asset.class);
+            }
+        });        
 
         context.create().resource("/content/dam", JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         context.resourceResolver().commit();
@@ -90,7 +99,7 @@ public class UrlAssetImportTest {
         }).when(assetManager).createAsset(any(String.class), any(InputStream.class), any(String.class), any(Boolean.class));
 
         importProcess = new UrlAssetImport(context.getService(MimeTypeService.class), null);
-        importProcess.fileData = new Spreadsheet(true, "source", "target", "dc:title", "dc:attr");
+        importProcess.fileData = new Spreadsheet(true, "source", "target", "rendition", "original","dc:title", "dc:attr");
 
         doAnswer(invocation -> {
             CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];
@@ -112,10 +121,13 @@ public class UrlAssetImportTest {
     public void testImportFile() throws IOException, RepositoryException {
         importProcess.init();
         URL testImg = getClass().getResource("/img/test.png");
-        addImportRow(testImg.toString(), "/content/dam/myTestImg.png");
+        addImportRow(testImg.toString(), "/content/dam/test");
+        addImportRow(testImg.toString(), "/content/dam/test", "rendition", "test.png");
         importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);
         importProcess.importAssets(actionManager);
+        importProcess.updateMetadata(actionManager);
+        importProcess.importRenditions(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));
         assertEquals(1, importProcess.getCount(importProcess.createdFolders));
     }
