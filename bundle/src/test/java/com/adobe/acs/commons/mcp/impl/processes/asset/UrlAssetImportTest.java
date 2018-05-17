@@ -66,7 +66,7 @@ public class UrlAssetImportTest {
 
     @Mock
     private AssetManager assetManager;
-    
+
     private UrlAssetImport importProcess = null;
 
     @Before
@@ -86,32 +86,32 @@ public class UrlAssetImportTest {
             context.create().resource(path, JcrConstants.JCR_PRIMARYTYPE, "dam:Asset");
             context.create().resource(path + "/jcr:content", JcrConstants.JCR_PRIMARYTYPE, "nt:unstructured");
             context.create().resource(path + "/jcr:content/metadata", JcrConstants.JCR_PRIMARYTYPE, "nt:unstructured");
-            return mock(Asset.class);            
+            return mock(Asset.class);
         }).when(assetManager).createAsset(any(String.class), any(InputStream.class), any(String.class), any(Boolean.class));
 
         importProcess = new UrlAssetImport(context.getService(MimeTypeService.class), null);
         importProcess.fileData = new Spreadsheet(true, "source", "target", "dc:title", "dc:attr");
-        
+
         doAnswer(invocation -> {
             CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];
             method.accept(context.resourceResolver());
             return null;
-        }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));        
+        }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
     }
-        
+
     private void addImportRow(String... cols) {
         List<String> header = importProcess.fileData.getHeaderRow();
         Map<String, CompositeVariant> row = new HashMap<>();
-        for (int i=0; i < cols.length && i < header.size(); i++) {
+        for (int i = 0; i < cols.length && i < header.size(); i++) {
             row.put(header.get(i), new CompositeVariant(cols[i]));
         }
         importProcess.fileData.getDataRowsAsCompositeVariants().add(row);
     }
-    
+
     @Test
     public void testImportFile() throws IOException, RepositoryException {
         importProcess.init();
-        URL testImg = getClass().getResource("/img/test.png");        
+        URL testImg = getClass().getResource("/img/test.png");
         addImportRow(testImg.toString(), "/content/dam/myTestImg.png");
         importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);

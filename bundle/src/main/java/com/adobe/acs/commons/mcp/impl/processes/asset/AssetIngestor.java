@@ -202,8 +202,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @SuppressWarnings("squid:S2445")
     private void increment(EnumMap<ReportColumns, Object> row, ReportColumns col, long amt) {
-        synchronized (row) {
-            row.put(col, (Long) row.getOrDefault(col, 0) + amt);
+        if (row != null) {
+            synchronized (row) {
+                row.put(col, (Long) row.getOrDefault(col, 0) + amt);
+            }
         }
     }
 
@@ -309,7 +311,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
+                if (folderNode == null) {
+                    folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
+                }
                 folderContentNode.setProperty(JcrConstants.JCR_TITLE, name);
                 r.commit();
                 r.refresh();
