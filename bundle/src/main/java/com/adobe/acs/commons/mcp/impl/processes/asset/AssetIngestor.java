@@ -311,7 +311,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                if (folderNode == null) {
+                if (folderContentNode == null) {
                     folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
                 }
                 folderContentNode.setProperty(JcrConstants.JCR_TITLE, name);
