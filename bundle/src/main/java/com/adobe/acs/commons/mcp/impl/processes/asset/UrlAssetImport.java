@@ -187,7 +187,7 @@ public class UrlAssetImport extends AssetIngestor {
             if (asset.isPresent()) {
                 asset.get().addRendition(r);
             } else {
-                unmatchedRenditions.add(asset.get().getProperties());
+                unmatchedRenditions.add(r.getProperties());
             }
         });
         return allFiles;

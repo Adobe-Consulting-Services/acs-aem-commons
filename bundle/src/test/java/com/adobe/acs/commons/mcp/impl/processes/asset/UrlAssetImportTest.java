@@ -123,12 +123,13 @@ public class UrlAssetImportTest {
         URL testImg = getClass().getResource("/img/test.png");
         addImportRow(testImg.toString(), "/content/dam/test");
         addImportRow(testImg.toString(), "/content/dam/test", "rendition", "test.png");
+        addImportRow(testImg.toString() + "-404", "/content/dam/other", "rendition", "no-original-found");
         importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
         importProcess.createFolders(actionManager);
         importProcess.importAssets(actionManager);
         importProcess.updateMetadata(actionManager);
         importProcess.importRenditions(actionManager);
         assertEquals(1, importProcess.getCount(importProcess.importedAssets));
-        assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+        assertEquals(2, importProcess.getCount(importProcess.createdFolders));
     }
 }
