@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Fixed
+- #1370 - Fixed Invalid Entries display in FireFox
+- #1371 - Fixed Incorrect Entry Deletion when Filtering
+
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
 

@@ -142,7 +142,7 @@ public class RedirectMapModelTest {
     }
 
     @Test
-    public void testGetInvalidEntries() {
+    public void testGetInvalidEntries() throws IOException {
 
         log.info("testGetInvalidEntries");
         List<MapEntry> mapEntries = model.getInvalidEntries();

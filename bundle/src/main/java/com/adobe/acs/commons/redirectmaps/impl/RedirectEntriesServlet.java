@@ -44,7 +44,7 @@ public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
             throws ServletException, IOException {
         log.trace("doGet");
 
-        RedirectEntriesUtils.writeEntriesToResponse(request, response);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response,"Retrieved Redirect Maps");
     }
     
 }
