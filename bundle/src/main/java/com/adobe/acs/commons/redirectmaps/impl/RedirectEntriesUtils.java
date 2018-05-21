@@ -42,6 +42,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -80,7 +81,7 @@ public class RedirectEntriesUtils {
     }
 
     protected static final void writeEntriesToResponse(SlingHttpServletRequest request,
-            SlingHttpServletResponse response) throws ServletException, IOException {
+            SlingHttpServletResponse response, String message) throws ServletException, IOException {
         log.trace("writeEntriesToResponse");
 
         log.debug("Requesting redirect maps from {}", request.getResource());
@@ -88,13 +89,19 @@ public class RedirectEntriesUtils {
 
         response.setContentType(MediaType.JSON_UTF_8.toString());
 
+        JsonObject res = new JsonObject();
+        res.addProperty("message", message);
+
         JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
         }.getType());
         Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
         for (int i = 0; it.hasNext(); i++) {
             it.next().getAsJsonObject().addProperty("id", i);
         }
+        res.add("entries", entries);
+        res.add("invalidEntries", gson.toJsonTree(redirectMap.getInvalidEntries(), new TypeToken<List<MapEntry>>() {
+        }.getType()));
 
-        IOUtils.write(entries.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
+        IOUtils.write(res.toString(), response.getOutputStream(), StandardCharsets.UTF_8);
     }
 }

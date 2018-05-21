@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -126,6 +127,14 @@ public class FileOrRendition implements HierarchialElement {
     public String getJcrBasePath() {
         return folder.getJcrBasePath();
     }
+    
+    public String getUrl() {
+        return url;
+    }
+    
+    public Map<String, CompositeVariant> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
 
     public CompositeVariant getProperty(String prop) {
         return properties.get(prop);
@@ -182,6 +191,7 @@ public class FileOrRendition implements HierarchialElement {
             return thizz;
         }
 
+        @Override
         public void close() throws IOException {
             if (lastOpenStream != null) {
                 lastOpenStream.close();
@@ -240,6 +250,7 @@ public class FileOrRendition implements HierarchialElement {
             return thizz;
         }
 
+        @Override
         public void close() throws IOException {
             if (lastRequest != null) {
                 lastRequest.releaseConnection();

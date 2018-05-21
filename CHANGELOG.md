@@ -7,20 +7,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
-
 ### Fixed
-- #1278 - EvolutionContext refactored to contain a method returning version history
-- #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1370 - Fixed Invalid Entries display in FireFox
+- #1371 - Fixed Incorrect Entry Deletion when Filtering
 - #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
 - #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component 
 
 ### Added
-- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which means so do URL Asset Ingest and Data Importer as well.
+- #1365 - Sling model injector for Shared Component Property values.
+
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
+
+## [3.16.0] - 2018-05-10
+
+### Fixed
+- #1278 - EvolutionContext refactored to contain a method returning version history
+- #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1363 - Corrects permissions allowing HTTP Cache to write to the JCR Cache space under /var/acs-commons/httpcache
+
+### Added
+- #1292 - New MCP Tool to refresh asset folder thumbnails
+- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
 - #1347 - Redirect Map Entry editor
+- #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
 
 ## [3.15.2] - 2018-04-25
 

@@ -24,10 +24,13 @@ import com.adobe.acs.commons.data.Spreadsheet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -50,6 +53,7 @@ public class SpreadsheetTest {
         "double-val@double", "array", "array", "array", "date-val@date"};
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
     static Date testDate = new Date();
+    static Spreadsheet dataTypesSheet;
 
     @BeforeClass
     public static void setUp() throws IOException {
@@ -60,12 +64,18 @@ public class SpreadsheetTest {
         createRow(sheet, "/test/a2", "A-2", "val");
         createRow(sheet, "/test/a1/a1a", "A-1-A", "val");
         createRow(sheet, "/test/a3/a3a", "A-3-A", "val");
-        XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six", 
+        XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six",
                 "12.345", "One Value", null, "Another Value");
         XSSFCell dateCell = valuesRow.createCell(10);
         dateCell.setCellValue(testDate);
+        CellStyle dateStyle = testWorkbook.createCellStyle();
+        dateStyle.setDataFormat(testWorkbook.createDataFormat().getFormat("YYYY-mm-dd"));
+        dateCell.setCellStyle(dateStyle);
         testWorkbook.write(workbookData);
         workbookData.close();
+
+        InputStream dataTypesFile = SpreadsheetTest.class.getResourceAsStream("/com/adobe/acs/commons/data/spreadsheet-data-types.xlsx");
+        dataTypesSheet = new Spreadsheet(false, dataTypesFile);
     }
 
     /**
@@ -146,6 +156,60 @@ public class SpreadsheetTest {
         assertArrayEquals(new String[]{"One Value", "Another Value"}, (Object[]) values.get("array").toPropertyValue());
         assertEquals(12.345, (Double) values.get("double-val").toPropertyValue(), 0.000001);
         assertEquals(testDate, values.get("date-val").toPropertyValue());
+    }
+
+    @Test
+    public void testSheetTypesAsStrings() {
+        assertEquals(2, dataTypesSheet.getRowCount());
+        for (int i = 0; i < dataTypesSheet.getRowCount(); i++) {
+            Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(i);
+            assertEquals("123", row.get("Integer").toString());
+            assertEquals("123", row.get("Integer string").toString());
+            assertEquals("123.456", row.get("Floating point").toString());
+            assertEquals("123.456", row.get("Floating point string").toString());
+            assertEquals("11/26/85", row.get("Short date").toString());
+            assertEquals("Tuesday, November 26, 1985", row.get("Long date").toString());
+            assertEquals("9:00:00 AM", row.get("Time").toString());
+            assertEquals("110.00%", row.get("Percent").toString());
+            assertEquals("This is just a regular string", row.get("String").toString());
+        }
+    }
+
+    @Test
+    public void testSheetTypesAsNativeValues() {
+        Calendar flux = Calendar.getInstance();
+        flux.set(Calendar.YEAR, 1985);
+        flux.set(Calendar.MONTH, Calendar.NOVEMBER);
+        flux.set(Calendar.DAY_OF_MONTH, 26);
+        flux.set(Calendar.HOUR_OF_DAY, 0);
+        flux.set(Calendar.MINUTE, 0);
+        flux.set(Calendar.SECOND, 0);
+        flux.set(Calendar.MILLISECOND, 0);
+        Date fluxCapacitorBirthday = flux.getTime();
+        // Note time formatted cells are always relative to Dec 31, 1899 in Excel.
+        Calendar timeCal = Calendar.getInstance();
+        timeCal.set(Calendar.YEAR, 1899);
+        timeCal.set(Calendar.MONTH, Calendar.DECEMBER);
+        timeCal.set(Calendar.DAY_OF_MONTH, 31);
+        timeCal.set(Calendar.HOUR_OF_DAY, 9);
+        timeCal.set(Calendar.MINUTE, 0);
+        timeCal.set(Calendar.SECOND, 0);
+        timeCal.set(Calendar.MILLISECOND, 0);
+        Date someTime = timeCal.getTime();
+
+        assertEquals(2, dataTypesSheet.getRowCount());
+        for (int i = 0; i < dataTypesSheet.getRowCount(); i++) {
+            Map<String, CompositeVariant> row = dataTypesSheet.getDataRowsAsCompositeVariants().get(i);
+            assertEquals(123, row.get("Integer").getValueAs(Integer.class));
+            assertEquals(123, row.get("Integer string").getValueAs(Integer.class));
+            assertEquals(123.456, (double) row.get("Floating point").getValueAs(Double.class), 0.0001);
+            assertEquals(123.456, (double) row.get("Floating point string").getValueAs(Double.class), 0.0001);
+            assertEquals(fluxCapacitorBirthday, row.get("Short date").getValueAs(Date.class));
+            assertEquals(fluxCapacitorBirthday, row.get("Long date").getValueAs(Date.class));
+            assertEquals(someTime, row.get("Time").getValueAs(Date.class));
+            assertEquals(1.1, (double) row.get("Percent").getValueAs(Double.class), 0.0001);
+            assertEquals("This is just a regular string", row.get("String").toPropertyValue());
+        }
     }
 
     private static XSSFRow createRow(XSSFSheet sheet, String... values) {

@@ -22,8 +22,10 @@ package com.adobe.acs.commons.redirectmaps.models;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -56,8 +58,8 @@ public class RedirectMapModel {
     private static final String NO_TARGET_MSG = "No target found in entry %s";
     private static final String SOURCE_WHITESPACE_MSG = "Source path %s for content %s contains whitespace";
     private static final String WHITESPACE_MSG = "Extra whitespace found in entry %s";
-    
-    public static final String MAP_FILE_NODE="redirectMap.txt";
+
+    public static final String MAP_FILE_NODE = "redirectMap.txt";
 
     @Inject
     @Optional
@@ -86,7 +88,7 @@ public class RedirectMapModel {
             String[] sources = properties.get(config.getProperty(), String[].class);
             for (String source : sources) {
                 MapEntry entry = new MapEntry(source, pageUrl, item.getPath());
-                if(source.matches(".*\\s+.*")) {
+                if (source.matches(".*\\s+.*")) {
                     String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
                     log.warn(msg);
                     entry.setStatus(msg);
@@ -135,6 +137,25 @@ public class RedirectMapModel {
         } else {
             log.debug("No redirect configurations specified");
         }
+
+        Map<String, Integer> sources = new HashMap<String, Integer>();
+
+        for (MapEntry entry : entries) {
+            if (!sources.containsKey(entry.getSource())) {
+                sources.put(entry.getSource(), 1);
+            } else {
+                log.trace("Found duplicate entry for {}", entry.getSource());
+                sources.put(entry.getSource(), sources.get(entry.getSource()) + 1);
+            }
+        }
+        sources.entrySet().removeIf(e -> e.getValue() <= 1);
+        log.debug("Found {} duplicate entries", sources.keySet().size());
+
+        entries.stream().filter(e -> sources.containsKey(e.getSource())).forEach(e -> {
+            e.setValid(false);
+            e.setStatus("Duplicate entry for " + e.getSource() + ", found redirect to " + e.getTarget());
+        });
+
         return entries;
     }
 
@@ -143,17 +164,17 @@ public class RedirectMapModel {
      * whitespace in their vanity URL.
      *
      * @return
+     * @throws IOException
      */
-    public List<MapEntry> getInvalidEntries() {
+    public List<MapEntry> getInvalidEntries() throws IOException {
         log.trace("getInvalidEntries");
         List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
         if (redirects != null) {
-            for (RedirectConfigModel config : redirects) {
-                invalidEntries
-                        .addAll(gatherEntries(config).stream().filter(e -> !e.isValid()).collect(Collectors.toList()));
-            }
+            List<MapEntry> entries = getEntries();
+
+            invalidEntries.addAll(entries.stream().filter(e -> !e.isValid()).collect(Collectors.toList()));
+            log.debug("Found {} invalid entries", invalidEntries.size());
         }
-        log.debug("Found {} invalid entries", invalidEntries.size());
         return invalidEntries;
     }
 
