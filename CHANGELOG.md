@@ -7,11 +7,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+## [3.17.0] - 2018-05-22
+
 ### Fixed
-- #1370 - Fixed Invalid Entries display in FireFox
-- #1371 - Fixed Incorrect Entry Deletion when Filtering
+- #1370 - Fixed Invalid Entries display in FireFox for Redirect Map
+- #1371 - Fixed Incorrect Entry Deletion when Filtering for Redirect Map
 - #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
-- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component 
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component
+- #1383 - URL asset import now reports renditions which cannot be matched correctly
+- #1379 - URL asset import improvements for reporting and error handling
+- #1376 - Spreadsheet API data handling improvements
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
