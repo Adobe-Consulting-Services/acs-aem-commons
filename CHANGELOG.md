@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1370 - Fixed Invalid Entries display in FireFox
 - #1371 - Fixed Incorrect Entry Deletion when Filtering
+- #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component 
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
