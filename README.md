@@ -39,7 +39,7 @@ Watch this space.
 
 * Spaces, not tabs.
 * Provide documentation in the parent org GH project: https://github.com/Adobe-Consulting-Services/adobe-consulting-services.github.io
-* Target AEM 6.2+. Check the [compatability table](http://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html) for compatibility of older versions.
+* Target AEM 6.2+. Check the [compatibility table](http://adobe-consulting-services.github.io/acs-aem-commons/pages/compatibility.html) for compatibility of older versions.
 * API classes and interfaces must have JavaDocs. Not necessary for implementation classes.
 * Don't use author tags. This is a community project.
 
