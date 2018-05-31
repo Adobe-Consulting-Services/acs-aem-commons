@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Fixed
+- #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
