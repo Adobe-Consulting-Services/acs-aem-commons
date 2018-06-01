@@ -40,19 +40,17 @@
             designSrc = parsys.config.designDialogSrc,
             result = {}, param;
 
-        if (designSrc === undefined) {
-            return undefined;
+        if (designSrc !== undefined) {
+            designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
+
+            designSrc.split(/&/).forEach(function (it) {
+                if (_.isEmpty(it)) {
+                    return undefined;
+                }
+                param = it.split("=");
+                result[param[0]] = param[1];
+            });
         }
-
-        designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
-
-        designSrc.split(/&/).forEach( function(it) {
-            if (_.isEmpty(it)) {
-                return;
-            }
-            param = it.split("=");
-            result[param[0]] = param[1];
-        });
 
         if (result.content === undefined) {
             return undefined;
