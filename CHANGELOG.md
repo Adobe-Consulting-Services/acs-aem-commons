@@ -7,7 +7,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
+### Fixed
+- #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+
+## [3.17.0] - 2018-05-22
+
+### Fixed
+- #1370 - Fixed Invalid Entries display in FireFox for Redirect Map
+- #1371 - Fixed Incorrect Entry Deletion when Filtering for Redirect Map
+- #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component
+- #1383 - URL asset import now reports renditions which cannot be matched correctly
+- #1379 - URL asset import improvements for reporting and error handling
+- #1376 - Spreadsheet API data handling improvements
+
+### Added
+- #1365 - Sling model injector for Shared Component Property values.
+
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
+
+## [3.16.0] - 2018-05-10
 
 ### Fixed
 - #1278 - EvolutionContext refactored to contain a method returning version history
@@ -18,6 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1292 - New MCP Tool to refresh asset folder thumbnails
 - #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
 - #1347 - Redirect Map Entry editor
+- #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
 
 ### Changed
 - #1343 - CodeClimate now checks for license header

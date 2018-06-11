@@ -210,7 +210,11 @@ public class Spreadsheet {
     }
     
     public Long getRowNum(Map<String, CompositeVariant> row) {
-        return (Long) row.get(ROW_NUMBER).getValueAs(Long.class);
+        if (row.containsKey(ROW_NUMBER)) {
+            return (Long) row.get(ROW_NUMBER).getValueAs(Long.class);
+        } else {
+            return (long) dataRows.indexOf(row);
+        }
     }
 
     /**

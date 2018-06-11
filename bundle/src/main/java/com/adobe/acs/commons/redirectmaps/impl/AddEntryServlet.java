@@ -46,17 +46,16 @@ public class AddEntryServlet extends SlingAllMethodsServlet {
             throws ServletException, IOException {
         log.trace("doPost");
 
-        int idx = Integer.parseInt(request.getParameter("idx"), 10);
         String source = request.getParameter("source");
         String target = request.getParameter("target");
-        log.debug("Removing entry with {} {} at {}", source, target, idx);
+        log.debug("Adding entry with {} {}", source, target);
 
         List<String> lines = RedirectEntriesUtils.readEntries(request);
 
-        lines.add(idx, source + " " + target);
+        lines.add(source + " " + target);
         log.debug("Added entry...");
 
         RedirectEntriesUtils.updateRedirectMap(request, lines);
-        RedirectEntriesUtils.writeEntriesToResponse(request, response);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response, "Added entry " + source + " " + target);
     }
 }

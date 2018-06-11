@@ -28,30 +28,51 @@
 
     var ACS_COMPONENTS_LIMIT = "acsComponentsLimit";
 
-    function getDesignPath(editable){
-        var parsys = editable.getParent(),
-            designSrc = parsys.config.designDialogSrc,
-            result = {}, param;
+    /**
+     * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromPolicy
+     */
+    function _findPropertyFromPolicy(editable, design, propertyName) {
+        var cell = Granite.author.util.resolveProperty(design, editable.config.policyPath);
 
-        if (designSrc === undefined) {
-            return undefined;
-        }
+        if (!cell || !cell[propertyName]) {
+            // Inherit property also from its parent (if not set in the local policy path)
+            var parent = Granite.author.editables.getParent(editable);
 
-        designSrc = designSrc.substring(designSrc.indexOf("?") + 1);
-
-        designSrc.split(/&/).forEach( function(it) {
-            if (_.isEmpty(it)) {
-                return;
+            while (parent && !(cell && cell[propertyName])) {
+                cell = Granite.author.util.resolveProperty(design, parent.config.policyPath);
+                parent = Granite.author.editables.getParent(parent);
             }
-            param = it.split("=");
-            result[param[0]] = param[1];
-        });
-
-        if (result.content === undefined) {
-            return undefined;
         }
+        if (cell && cell[propertyName]) {
+            return cell[propertyName];
+        }
+        return null;
+    }
 
-        return decodeURIComponent(result.content);
+    /**
+     * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromDesign
+     * Returns the value of the given property name extracted from the given design configuration object (also supports content policies)
+     */
+     function _findPropertyFromDesign(editable, design, propertyName) {
+        if (editable && editable.config) {
+            if (editable.config.policyPath) {
+                return _findPropertyFromPolicy(editable, design, propertyName);
+            } else {
+                // All cell search paths
+                var cellSearchPaths = editable.config.cellSearchPath;
+
+                if (cellSearchPaths) {
+                    for (var i = 0; i < cellSearchPaths.length; i++) {
+                        var cell = Granite.author.util.resolveProperty(design, cellSearchPaths[i]);
+
+                        if (cell && cell[propertyName]) {
+                            return cell[propertyName];
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     function showErrorAlert(message, title){
@@ -82,27 +103,19 @@
         return children;
     }
 
-    function isWithinLimit(editable){
-        var path = getDesignPath(editable),
-            children = getChildEditables(editable.getParent()),
+    function isWithinLimit(parsysEditable){
+        var children = getChildEditables(parsysEditable),
             isWithin = true, currentLimit = "";
 
-        if (path !== undefined) {
-            $.ajax({url: path + ".2.json", async: false}).done(function (data) {
-                if (_.isEmpty(data) || !data[ACS_COMPONENTS_LIMIT]) {
-                    return;
-                }
-
-                currentLimit = data[ACS_COMPONENTS_LIMIT];
-
-                var limit = parseInt(currentLimit);
-
-                isWithin = children.length <= limit;
-            });
+        currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
+        if (currentLimit === null) {
+            return true;
         }
+        var limit = parseInt(currentLimit);
+        isWithin = children.length <= limit;
 
         if(!isWithin){
-            showErrorAlert("Limit exceeded, allowed - " + currentLimit);
+            showErrorAlert("Limit of paragraphs within this paragraph system exceeded, allowed only up to " + currentLimit + " paragraphs.");
         }
 
         return isWithin;
@@ -120,38 +133,40 @@
                 //handle drop action
                 compDragDrop.handleDrop = function(dropFn){
                     return function (event) {
-                        if(!isWithinLimit(event.currentDropTarget.targetEditable)){
+                        if(!isWithinLimit(event.currentDropTarget.targetEditable.getParent())){
                             return;
                         }
-
                         return dropFn.call(this, event);
                     };
                 }(compDragDrop.handleDrop);
             }
 
-            //handle insert action
-            Granite.author.edit.actions.openInsertDialog = function(openDlgFn){
-                return function (editable) {
-                    if(!isWithinLimit(editable)){
-                        return;
-                    }
-
-                    return openDlgFn.call(this, editable);
-                };
-            }(Granite.author.edit.actions.openInsertDialog);
-
             //handle paste action
-            var insertAction = Granite.author.edit.Toolbar.defaultActions.INSERT;
+            var pasteAction = Granite.author.edit.Toolbar.defaultActions.PASTE;
+            // overwrite both execute and handler as both seem to be used
+            pasteAction.execute = pasteAction.handler = function(pasteHandlerFn){
+                return function (editableBefore) {
+                    // only prevent copy but not move operations (if previous operation was cut)
+                    if(!Granite.author.clipboard.shouldCut()) {
+                        if(!isWithinLimit(editableBefore.getParent())){
+                            return;
+                        }
+                    }
+                    return pasteHandlerFn.call(this, editableBefore);
+                };
+            }(pasteAction.execute);
 
-            insertAction.handler = function(insertHandlerFn){
+            // handle insert action
+            var insertAction = Granite.author.edit.Toolbar.defaultActions.INSERT;
+            // overwrite both execute and handler (for doubleclick and "+" icon click functionality)
+            insertAction.execute = insertAction.handler = function(insertHandlerFn){
                 return function(editableBefore, param, target){
-                    if(!isWithinLimit(editableBefore)){
+                    if(!isWithinLimit(editableBefore.getParent())){
                         return;
                     }
-
                     return insertHandlerFn.call(this, editableBefore, param, target);
                 };
-            }(insertAction.handler);
+            }(insertAction.execute);
         }
     }
 

@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.data;
 
-import com.adobe.acs.commons.data.CompositeVariant;
-import com.adobe.acs.commons.data.Variant;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;

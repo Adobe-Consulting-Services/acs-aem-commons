@@ -152,7 +152,7 @@ public final class Actions {
                     LOG.info("Error commit, retry count is " + remaining, e);
                     r.revert();
                     r.refresh();
-                    if (remaining-- <= 0) {
+                    if (--remaining <= 0) {
                         throw e;
                     } else {
                         Thread.sleep(pausePerRetry);

@@ -56,6 +56,6 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
         RedirectEntriesUtils.updateRedirectMap(request, lines);
 
-        RedirectEntriesUtils.writeEntriesToResponse(request, response);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response, "Removed entry "+idx);
     }
 }
