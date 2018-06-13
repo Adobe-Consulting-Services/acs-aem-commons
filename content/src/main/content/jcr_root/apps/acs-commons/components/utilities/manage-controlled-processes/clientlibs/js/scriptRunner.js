@@ -90,9 +90,11 @@ var ScriptRunner = {
             url: url,
             dataType: "html",
             success: function (response) {
-                var inputForm = window.top.jQuery("#processDefinitionInput");
-                var $html, html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinitionInput", false, true);
-                $html = window.top.jQuery(html);
+                var inputForm = window.top.jQuery("#processDefinitionInput"),
+                    // Removed this processing as it results in double-application of CoralUI logic
+                    // html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinsitionInput", false, true),
+                    $html = jQuery(response);
+
                 $html.find("#processName").text(ScriptRunner.definitionName);
                 $html.find("#process").val(ScriptRunner.definition);
                 $html.find("coral-icon").each(function () {
