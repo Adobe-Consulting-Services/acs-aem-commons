@@ -20,7 +20,7 @@
 <%@include file="/libs/foundation/global.jsp" %><%
 %><%@page session="false" %>
 <cq:includeClientLib css="acs-commons.manage-controlled-processes.app"/>
-<cq:includeClientLib categories="coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation,granite.ui.shell"/>
+<cq:includeClientLib categories="coralui3,granite.ui.coral.foundation,granite.ui.shell"/>
 <link rel="shortcut icon" href="/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/images/favicon.ico" />
 <coral-shell>
     <coral-shell-header class="coral--dark">
