@@ -1,59 +1,102 @@
 package com.adobe.acs.commons.wcm.pwa.impl;
 
+import com.adobe.granite.confmgr.Conf;
+import com.adobe.granite.confmgr.ConfMgr;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.OptingServlet;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 
-@SlingServlet(
-        methods = {"GET"},
-        resourceTypes = {"cq/Page"},
-        selectors = {"pwa"},
-        extensions = {"load"}
+@Component(
+        immediate = true,
+        service = Servlet.class,
+        property = {
+                "sling.servlet.extensions=load",
+                "sling.servlet.extensions=js",
+                "sling.servlet.selectors=pwa",
+                "sling.servlet.selectors=service-worker",
+                "sling.servlet.methods="+ HttpConstants.METHOD_GET,
+                "sling.servlet.resourceTypes=cq:Page"
+        }
 )
 public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private static final Logger log = LoggerFactory.getLogger(PWAProxyServlet.class);
+    @Reference
+    private ResourceResolverFactory resolverFactory;
+
+    @Reference
+    ConfMgr confMgr;
+
 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException, IOException {
 
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+/*
 
         PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-        Page page = pageManager.getContainingPage(request.getResource());
-
-        Resource proxyResource = null;
-
-        if ("/manifest.json".equalsIgnoreCase(requestPathInfo.getSuffix())) {
-            proxyResource = request.getResourceResolver().getResource(handleManifest(page, response));
-        } else if ("/service-worker.js".equalsIgnoreCase(requestPathInfo.getSuffix())) {
-            proxyResource = request.getResourceResolver().getResource(handleServiceWorker(page, response));
-
-        }
-        if (proxyResource != null) {
-            final InputStream in = proxyResource.adaptTo(InputStream.class);
-
-            if (in != null) {
-                IOUtils.copy(in, response.getOutputStream());
-                response.flushBuffer();
-                return;
+*/
+        boolean swRequest =false;
+        String[] selectors =requestPathInfo.getSelectors();
+        for(String selector : selectors){
+            if("service-worker".equals(selector)){
+                swRequest = true;
+                break;
             }
         }
+        Resource proxyResource = null;
+        if ("/manifest.json".equalsIgnoreCase(requestPathInfo.getSuffix())) {
+            response.getWriter().write(handleManifest(request, response));
 
-        response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+        } else if (swRequest){
+            proxyResource= request.getResourceResolver().getResource(handleServiceWorker(response));
+
+            if (proxyResource != null) {
+                final InputStream in = proxyResource.adaptTo(InputStream.class);
+
+                if (in != null) {
+                    IOUtils.copy(in, response.getOutputStream());
+                    response.flushBuffer();
+                    return;
+                }
+            }
+            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+        } else if ("/root-service-worker.json".equalsIgnoreCase(requestPathInfo.getSuffix())) {
+            response.getWriter().write(handleRootServiceWorker(request, response));
+        }
+
+    }
+
+    private String handleServiceWorker(SlingHttpServletResponse response) {
+        response.setContentType("application/javascript");
+        response.setHeader("Content-Disposition", "attachment");
+        response.setCharacterEncoding("UTF-8");
+        return  "/etc/clientlibs/acs-commons/clientlib-sw/service-worker.js";
     }
 
 
@@ -70,16 +113,50 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
      *
      * TODO: Ideally this JSON could be built from edittable page properties instead of a file.
      *
-     * @param page
+     * @param request
      * @param response
      * @return
      */
-    private String handleManifest(Page page, SlingHttpServletResponse response) {
+    private String handleManifest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        String manifestPath = page.getContentResource().getValueMap().get("cq:conf",
-                "/apps/acs-commons/pwa")+ "/manifest.json";
-        return manifestPath;
+        JSONObject jsonObject = new JSONObject();
+
+        ValueMap manifestSettings = getConfigProperties(request);
+        if(manifestSettings !=null){
+            try {
+
+                jsonObject.put("short_name", manifestSettings.get("name", "PWA ShortName"));
+                jsonObject.put("name", manifestSettings.get("name", "PWAName"));
+                jsonObject.put("icons", getManifestIcons(manifestSettings));
+                jsonObject.put("start_url", manifestSettings.get("start_url", "."));
+                jsonObject.put("background_color", manifestSettings.get("background_color", "#3367D6"));
+                jsonObject.put("display", manifestSettings.get("display", "standalone"));
+                jsonObject.put("scope", manifestSettings.get("scope", manifestSettings.get("rootPath")));
+                jsonObject.put("theme_color", manifestSettings.get("theme_color", "#3367D6"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            String appName=manifestSettings.get("name", "PWAName");
+            log.error("AppName ::{}", appName);
+        }
+
+        return jsonObject.toString();
+    }
+
+    private JSONArray getManifestIcons(ValueMap manifestSettings) {
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("src", manifestSettings.get("src", "/content/dam/we-retail/en/products/activities/equipment_3.png"));
+            jsonObject.put("type", manifestSettings.get("type", "image/png"));
+            jsonObject.put("sizes", manifestSettings.get("sizes", "144x144"));
+        }catch (JSONException ex){
+            ex.printStackTrace();
+        }
+
+        JSONArray jsonArray =new JSONArray();
+        jsonArray.put(jsonObject);
+        return  jsonArray;
     }
 
     /**
@@ -93,16 +170,50 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
      *
      * This could let different PWA's on an AEM instance have different service worker implementations.
      *
-     * @param page
+     * @param request
      * @param response
      * @return
      */
-    private String handleServiceWorker(Page page, SlingHttpServletResponse response) {
-        response.setContentType("application/javascript");
+    private String handleRootServiceWorker(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+        response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
+        String navRootPath = StringUtils.EMPTY;
+        ValueMap configProps = getConfigProperties(request);
+        if(configProps != null && configProps.containsKey("rootPath")){
+            navRootPath = configProps.get("rootPath").toString();
+        }
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("path", navRootPath) ;
+        }catch (JSONException ex){
+            ex.printStackTrace();
+        }
+        return  jsonObject.toString();
+    }
 
-        return page.getContentResource().getValueMap().get("pwa/serviceWorkerJSPath",
-                "/apps/acs-commons/pwa/service-worker.js");
+    private ValueMap getConfigProperties(SlingHttpServletRequest request) {
+        PageManager pageManager = getServiceResolver().adaptTo(PageManager.class);
+       // PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        Page page = pageManager.getContainingPage(request.getResource());
+        Conf conf = confMgr.getConf(page.adaptTo(Resource.class), getServiceResolver());
+        return conf.getItem("cloudconfigs/pwa-manifest/dfsag");
+
+
+    }
+    private ResourceResolver getServiceResolver() {
+        final Map<String, Object> authInfo =
+                Collections.singletonMap(ResourceResolverFactory.SUBSERVICE,
+                        "pwa-service-handler");
+        ResourceResolver resourceResolver = null;
+        try{
+        resourceResolver = resolverFactory.getServiceResourceResolver(authInfo);}
+        catch (Exception e){
+            log.debug(e.getMessage());
+        }
+
+
+
+        return resourceResolver;
     }
 
     /**

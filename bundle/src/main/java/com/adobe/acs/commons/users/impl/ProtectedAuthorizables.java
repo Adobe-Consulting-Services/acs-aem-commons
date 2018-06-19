@@ -150,6 +150,7 @@ public final class ProtectedAuthorizables {
                 "acs-commons-form-helper-service",
                 "acs-commons-bulk-workflow-service",
                 "acs-commons-error-page-handler-service",
+                "acs-commons-pwa-handler-service",
                 "acs-commons-wcm-inbox-cleanup-service",
                 "acs-commons-email-service",
                 "acs-commons-package-replication-status-event-service",

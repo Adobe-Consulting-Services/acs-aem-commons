@@ -1,6 +1,5 @@
-var STATIC_CACHE_NAME = 'STATIC_CACHE';
-var DYNAMIC_CACHE_NAME = 'DYNAMIC_CACHE';
-var urlsToCache = [];
+(function(){
+	var urlsToCache = [];
 var fallbackCache ='';
 
 self.addEventListener('install', function(event) {
@@ -18,7 +17,7 @@ self.addEventListener('install', function(event) {
             }
         }
         else{
-			fallbackCache = urlParams.get(key)+ '.html';
+			fallbackCache = urlParams.get(key).replace('js','')+ '.html';
             urlsToCache.push(fallbackCache);
             counter++;
         }
@@ -27,7 +26,7 @@ self.addEventListener('install', function(event) {
 
     console.log("[Service Worker] caching static urls: ", urlsToCache);
     event.waitUntil(
-        caches.open(STATIC_CACHE_NAME+counter)
+        caches.open("STATIC"+counter)
         .then(function(cache) {
             return cache.addAll(urlsToCache);
         })
@@ -39,7 +38,7 @@ self.addEventListener('activate', function(event){
     event.waitUntil(function(){
 		caches.keys().then(function(keyList) {
               return Promise.all(keyList.map(function(key) {
-                  if (key !== STATIC_CACHE_NAME+counter && key !== DYNAMIC_CACHE_NAME) {
+                  if (key !== "STATIC"+counter && key !== "DYNAMIC") {
                     return caches.delete(key);
                   }
               }));
@@ -78,7 +77,7 @@ function fetchAndCache(url) {
           .then(function(response) {
             // Check if we received a valid response
               if(response){
-                  return caches.open(DYNAMIC_CACHE_NAME)
+                  return caches.open("DYNAMIC")
                   .then(function(cache) {
                       cache.put(url, response.clone());
                       return response;
@@ -105,3 +104,6 @@ function fetchAndCache(url) {
     }
 
 }
+
+
+})();
