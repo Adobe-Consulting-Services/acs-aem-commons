@@ -82,6 +82,10 @@
     	if(select){
     		return "select";
     	}
+	//Check if field is a CoralUI3 checkbox
+	if($(element).hasClass("coral-Checkbox")){
+        	return "checkbox";
+    	}
     }
 
     // make sure all unselected target elements are hidden.
