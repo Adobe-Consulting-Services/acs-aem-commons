@@ -82,6 +82,10 @@
     	if(select){
     		return "select";
     	}
+	    
+	if($(element).hasClass("coral-Checkbox")){
+        	return "checkbox";
+    	}
     }
 
     // make sure all unselected target elements are hidden.
