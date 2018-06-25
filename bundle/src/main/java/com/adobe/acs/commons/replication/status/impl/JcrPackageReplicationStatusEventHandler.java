@@ -131,6 +131,18 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     "sling:OrderedFolder/nt:unstructured"
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
+    
+    private static final String[] DEFAULT_REPLICATION_STATUS_BLACKLISTED_PATHS_REGEX = {
+        "/conf/.*/settings/wcm/templates/[^/]*/initial(/.*)" // initial content below editable templates
+    };
+    
+    private String[] replicationStatusBlacklistedPathsRegex = DEFAULT_REPLICATION_STATUS_BLACKLISTED_PATHS_REGEX;
+
+    @Property(label = "Blacklisted Paths",
+            description = "The resources whose Replication Status is (potentially) updated must not match any of the provided regular expressions here.",
+            cardinality = Integer.MAX_VALUE,
+            value = { "/conf/.*/settings/wcm/templates/[^/]*/initial(/.*)" })
+    public static final String PROP_REPLICATION_STATUS_BLACKLISTED_PATHS_REGEX = "blacklisted-paths";
 
     protected static final String JOB_TOPIC = "acs-commons/replication/package";
 
@@ -398,6 +410,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             return false;
         }
 
+        // first check for covered node types
         for (final String nodeTypes : this.replicationStatusNodeTypes) {
             final String[] hierarchyNodeTypes = StringUtils.split(nodeTypes, "/");
 
@@ -422,6 +435,13 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
 
             if (match) {
+                // second check for blacklisted paths
+                for (final String blacklistedPathRegex : replicationStatusBlacklistedPathsRegex) {
+                    if (resource.getPath().matches(blacklistedPathRegex)) {
+                      log.debug("Skip resource {} from updating the replication status because its path is blacklisted ({})", resource.getPath(), blacklistedPathRegex);
+                      return false;
+                    }
+                }
                 return true;
             }
         }
@@ -462,10 +482,15 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
+        this.replicationStatusBlacklistedPathsRegex = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_BLACKLISTED_PATHS_REGEX),
+                DEFAULT_REPLICATION_STATUS_BLACKLISTED_PATHS_REGEX);
+
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types: [ {} ]",
                 StringUtils.join(this.replicationStatusNodeTypes, ", "));
+        log.info("Package Replication Status - Blacklisted Path Patterns: [ {} ]",
+            StringUtils.join(this.replicationStatusBlacklistedPathsRegex, ", "));
     }
 
     @Override

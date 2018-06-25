@@ -150,6 +150,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
         when(resourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
+        when(contentResource1.getPath()).thenReturn("/content/foo/jcr:content");
         when(contentResource1.adaptTo(Node.class)).thenReturn(contentNode1);
         when(contentNode1.isNodeType("cq:PageContent")).thenReturn(true);
         when(contentResource1.getParent()).thenReturn(contentResource1parent);
@@ -157,10 +158,12 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentNode1parent.isNodeType("cq:Page")).thenReturn(true);
 
         when(resourceResolver.getResource("/content/bar")).thenReturn(contentResource2);
+        when(contentResource2.getPath()).thenReturn("/content/bar");
         when(contentResource2.adaptTo(Node.class)).thenReturn(contentNode2);
         when(contentNode2.isNodeType("dam:AssetContent")).thenReturn(true);
 
         when(resourceResolver.getResource("/content/dam/folder/jcr:content")).thenReturn(contentResource3);
+        when(contentResource3.getPath()).thenReturn("/content/dam/folder/jcr:content");
         when(contentResource3.adaptTo(Node.class)).thenReturn(contentNode3);
         when(contentNode3.isNodeType("nt:unstructured")).thenReturn(true);
 
@@ -174,7 +177,8 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, String> config = new HashMap<>();
 
         config.put("replicated-by.override", "Package Replication");
-
+        // blacklist contentResource2 by path
+        config.put("blacklisted-paths", "/content/bar(.*)");
         eventHandler.activate(config);
         eventHandler.process(job);
 
@@ -183,7 +187,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
                 eq("Package Replication"),
                 eq(calendar),
                 eq(ReplicationStatusManager.Status.ACTIVATED),
-                eq(contentResource1), eq(contentResource2), eq(contentResource3));
+                eq(contentResource1), eq(contentResource3));
     }
 
     @Test
