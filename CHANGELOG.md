@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 
+### Added
+- #1334 - Added blacklist possibility by path regex for replication status updater (to make sure initial content below editable templates never has replication metadata)
+
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
