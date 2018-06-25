@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+- #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 
 ## [3.17.0] - 2018-05-22
 
