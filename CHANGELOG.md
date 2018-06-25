@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 
+### Added
+- #1334 - Added blacklist possibility by path regex for replication status updater (to make sure initial content below editable templates never has replication metadata)
+
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
