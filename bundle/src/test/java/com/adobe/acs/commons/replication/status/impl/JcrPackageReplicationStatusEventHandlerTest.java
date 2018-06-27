@@ -19,11 +19,24 @@
  */
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.day.cq.replication.ReplicationAction;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationEvent;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.jcr.Node;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -38,6 +51,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,20 +61,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 
-import javax.jcr.Node;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JcrPackageReplicationStatusEventHandlerTest {
@@ -150,6 +155,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
         when(resourceResolver.getResource("/content/foo/jcr:content")).thenReturn(contentResource1);
+        when(contentResource1.getPath()).thenReturn("/content/foo/jcr:content");
         when(contentResource1.adaptTo(Node.class)).thenReturn(contentNode1);
         when(contentNode1.isNodeType("cq:PageContent")).thenReturn(true);
         when(contentResource1.getParent()).thenReturn(contentResource1parent);
@@ -157,10 +163,12 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(contentNode1parent.isNodeType("cq:Page")).thenReturn(true);
 
         when(resourceResolver.getResource("/content/bar")).thenReturn(contentResource2);
+        when(contentResource2.getPath()).thenReturn("/content/bar");
         when(contentResource2.adaptTo(Node.class)).thenReturn(contentNode2);
         when(contentNode2.isNodeType("dam:AssetContent")).thenReturn(true);
 
         when(resourceResolver.getResource("/content/dam/folder/jcr:content")).thenReturn(contentResource3);
+        when(contentResource3.getPath()).thenReturn("/content/dam/folder/jcr:content");
         when(contentResource3.adaptTo(Node.class)).thenReturn(contentNode3);
         when(contentNode3.isNodeType("nt:unstructured")).thenReturn(true);
 
@@ -243,5 +251,20 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Map<String, Object> actual = eventHandler.getInfoFromEvent(event);
         assertEquals(expectedPaths, actual.get("paths"));
         assertEquals(expectedUserId, actual.get("replicatedBy"));
+    }
+
+    @Test
+    public void testDefaultNodeTypeAndPathRestrictions() {
+        Map.Entry<String, Pattern> nodeTypeAndPathRestrictionForPageContent = eventHandler.extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[0]);
+        // initial content below editable templates must not match
+        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/mytemplates/deeplynested/settings/wcm/templates/mytemplate/initial/somechild").matches());
+        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/onemarketing/azde-default/settings/wcm/templates/azde-experience-fragment-tabs-accordion/initial/jcr:content").matches());
+        Assert.assertTrue(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/content/mypage/path").matches());
+        Map.Entry<String, Pattern> nodeTypeAndPathRestrictionForNtUnstructured = eventHandler.extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[6]);
+        // only policies for editable templates must match
+        Assert.assertFalse(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/content/some/otherpath").matches());
+        Assert.assertTrue(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
     }
 }

@@ -59,12 +59,15 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component(
@@ -108,29 +111,34 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         PACKAGE_LAST_MODIFIED;
     }
 
-    private static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
-            ReplicationStatus.NODE_TYPE,
-            "cq:Page/cq:PageContent",
-            "dam:AssetContent",
-            "rep:User",
-            "rep:Group",
-            "sling:OrderedFolder/nt:unstructured"
+    static final String[] DEFAULT_REPLICATION_STATUS_NODE_TYPES = {
+        "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
+        "dam:AssetContent",
+        "rep:User",
+        "rep:Group",
+        "sling:OrderedFolder/nt:unstructured",
+        ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+        "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
     };
 
-    private String[] replicationStatusNodeTypes = DEFAULT_REPLICATION_STATUS_NODE_TYPES;
-
-    @Property(label = "Replication Status Types",
-            description = "Node types that are candidates to update Replication Status on",
+    @Property(label = "Replication Status Node Type and Path Restrictions",
+            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'." ,
             cardinality = Integer.MAX_VALUE,
             value = {
-                    ReplicationStatus.NODE_TYPE,
-                    "cq:PageContent",
+                    "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
                     "dam:AssetContent",
                     "rep:User",
                     "rep:Group",
-                    "sling:OrderedFolder/nt:unstructured"
+                    "sling:OrderedFolder/nt:unstructured",
+                    ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+                    "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
+    
+    /**
+     * key = allowed node type (hierarchy), value = optional path restriction (may be null).
+     */
+    private Map<String, Pattern> pathRestrictionByNodeType;
 
     protected static final String JOB_TOPIC = "acs-commons/replication/package";
 
@@ -398,8 +406,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             return false;
         }
 
-        for (final String nodeTypes : this.replicationStatusNodeTypes) {
-            final String[] hierarchyNodeTypes = StringUtils.split(nodeTypes, "/");
+        for (final Map.Entry<String, Pattern> nodeTypeAndPathRestriction : this.pathRestrictionByNodeType.entrySet()) {
+            final String[] hierarchyNodeTypes = StringUtils.split(nodeTypeAndPathRestriction.getKey(), "/");
 
             boolean match = true;
             Resource walkingResource = resource;
@@ -422,6 +430,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             }
 
             if (match) {
+                // check path restrictions
+                Pattern pathRestriction = nodeTypeAndPathRestriction.getValue();
+                if (pathRestriction != null && !pathRestriction.matcher(resource.getPath()).matches()) {
+                    log.debug("Path restriction '{}' prevents the resource at '{}' from getting its replication status updated!", pathRestriction, resource.getPath());
+                    return false;
+                }
                 return true;
             }
         }
@@ -459,13 +473,34 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             this.replicatedAt = ReplicatedAt.PACKAGE_LAST_MODIFIED;
         }
 
-        this.replicationStatusNodeTypes = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
+        final String[] nodeTypeAndPathRestrictions = PropertiesUtil.toStringArray(config.get(PROP_REPLICATION_STATUS_NODE_TYPES),
                 DEFAULT_REPLICATION_STATUS_NODE_TYPES);
 
+        // the map must keep the order!
+        pathRestrictionByNodeType = new LinkedHashMap<>();
+        for (String nodeTypeAndPathRestrictionEntry : nodeTypeAndPathRestrictions) {
+            Map.Entry<String, Pattern> nodeTypeAndPathRestriction = extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(nodeTypeAndPathRestrictionEntry);
+            pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), nodeTypeAndPathRestriction.getValue());
+        }
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
-        log.info("Package Replication Status - Node Types: [ {} ]",
-                StringUtils.join(this.replicationStatusNodeTypes, ", "));
+        log.info("Package Replication Status - Node Types and Path Restrictions: [ {} ]", pathRestrictionByNodeType);
+    }
+
+    protected Map.Entry<String, Pattern> extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(String entry) {
+        // split up between node types and paths
+        int separatorPos = entry.indexOf(' ');
+        final String nodeTypeRestriction;
+        final Pattern pathRestrictionPattern;
+        if (separatorPos > 1 && separatorPos < entry.length()-1) {
+          nodeTypeRestriction = entry.substring(0, separatorPos);
+          String pathRestriction = entry.substring(separatorPos+1);
+          pathRestrictionPattern = Pattern.compile(pathRestriction);
+        } else {
+          nodeTypeRestriction = entry.trim();
+          pathRestrictionPattern = null;
+        }
+        return new AbstractMap.SimpleEntry<String, Pattern>(nodeTypeRestriction, pathRestrictionPattern);
     }
 
     @Override

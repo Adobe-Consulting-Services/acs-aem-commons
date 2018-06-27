@@ -8,8 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 ### Fixed
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+- #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+
 
 ## [3.17.0] - 2018-05-22
 
