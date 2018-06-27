@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 ### Fixed
+- #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
 - #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
 - #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly

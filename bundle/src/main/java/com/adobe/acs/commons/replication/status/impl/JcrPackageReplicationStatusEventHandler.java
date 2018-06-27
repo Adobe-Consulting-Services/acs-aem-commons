@@ -255,7 +255,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             }
         } catch (LoginException e) {
-            log.error("Could not obtain a resource resolver for applying replication status updates", e);
+            logJobError(job, "Could not obtain a resource resolver for applying replication status updates", e);
+            return JobResult.FAILED;
+        } catch (RepositoryException e) {
+            logJobError(job, "Could not update replication metadata", e);
             return JobResult.FAILED;
         } finally {
             if (resourceResolver != null) {
@@ -266,20 +269,35 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         return JobResult.OK;
     }
 
-    private void setReplicationStatus(JcrPackage jcrPackage, String replicatedBy, ResourceResolver resourceResolver) {
+    /**
+     * Emits the given error and exception either with level WARN or ERROR depending on whether the job is retried.
+     * This method can be removed once <a href="https://issues.apache.org/jira/browse/SLING-7756">SLING-7756</a> is resolved.
+     * @param job
+     * @param errorMessage
+     * @param e
+     * 
+     */
+    private void logJobError(Job job, String errorMessage, Exception e) {
+        if (job.getRetryCount() < job.getNumberOfRetries()) {
+            log.warn("Job failed with error '{}' in attempt '{}', retry later.", errorMessage, job.getRetryCount(), e);
+        } else {
+            log.error("Job permanently failed with error '{}' in attempt '{}', no more retries", errorMessage, job.getRetryCount(), e);
+        }
+    }
+    
+    
+    private void setReplicationStatus(JcrPackage jcrPackage, String replicatedBy, ResourceResolver resourceResolver) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final String packageId;
         try {
             JcrPackageDefinition packageDefinition = jcrPackage.getDefinition();
             if (packageDefinition == null) {
-                log.error("Could not determine the ID for just replicated package (package invalid?)");
-                return;
+                throw new RepositoryException("Could not determine the ID for just replicated package (package invalid?)");
             } else {
                 packageId = packageDefinition.getId().toString();
             }
         } catch (RepositoryException e) {
-            log.error("Could not determine the ID for just replicated package (package invalid?). ", e);
-            return;
+            throw new RepositoryException("Could not determine the ID for just replicated package (package invalid?).", e);
         } 
         
         try {
@@ -290,8 +308,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             }
         } catch (RepositoryException|PackageException|IOException e) {
-            log.error("Could not retrieve the Packages contents for package '" + packageId + "'", e);
-            return;
+            throw new RepositoryException("Could not retrieve the Packages contents for package '" + packageId + "'", e);
         }
         try {
             if (resources.size() > 0) {
@@ -307,8 +324,9 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                         packageId);
             }
         } catch (RepositoryException|IOException e) {
-            String paths = resources.stream().map( r -> r.getPath() ).collect( Collectors.joining( "," ) );
-            log.error("Exception occurred updating replication status for contents of package '" + packageId + "' covering paths '" + paths + "'.", e);
+            // enrich exception with path information (limited to 10 paths only)
+            String paths = resources.stream().map( r -> r.getPath() ).limit(10).collect( Collectors.joining( ", " ) );
+            throw new RepositoryException("Exception occurred updating replication status for contents of package '" + packageId + "' covering paths: '" + paths + ", ...'", e);
         }
     }
 
