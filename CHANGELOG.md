@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 
+### Added
+- #1410 - Added support to hide/show dialog fields and tabs based on values selected for dropdown and or checkbox.
+
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
