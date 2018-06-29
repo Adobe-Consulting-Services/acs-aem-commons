@@ -20,7 +20,7 @@ $.validator
         var hidden = $(field).hasClass('hide') || $(field).closest('.hide').hasClass('hide');
 
         // if field or its parent not hidden, validate
-        if (!hidden && (value == null || value === '')) {
+        if (!hidden && (value === null || value === '')) {
           return Granite.I18n.get('The field is required');
         }
         return null;
