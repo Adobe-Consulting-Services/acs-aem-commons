@@ -93,8 +93,7 @@
    */
   function shouldBeVisible($elem, dropdownValue, checkboxValue) {
     if ($elem.is('[data-dropdownshowhidetargetvalue]') && $elem.is('[data-checkboxshowhidetargetvalue]')) {
-      return $elem.attr('data-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0
-          && $elem.attr('data-checkboxshowhidetargetvalue') === checkboxValue;
+      return $elem.attr('data-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0 && $elem.attr('data-checkboxshowhidetargetvalue') === checkboxValue;
     } else if ($elem.is('[data-dropdownshowhidetargetvalue]')) {
       return $elem.attr('data-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0;
     } else if ($elem.is('[data-checkboxshowhidetargetvalue]')) {
@@ -107,9 +106,9 @@
    * Hides/unhides the element
    */
   function hideElement($elem, hide) {
-    const $field_wrapper = $elem.closest('.coral-Form-fieldwrapper');
-    const tab_panel = $elem.parent().parent("coral-panel[role='tabpanel']");
-    const tab_label_id = $(tab_panel).attr('aria-labelledby');
+    var $field_wrapper = $elem.closest('.coral-Form-fieldwrapper');
+    var tab_panel = $elem.parent().parent("coral-panel[role='tabpanel']");
+    var tab_label_id = $(tab_panel).attr('aria-labelledby');
 
     if (hide) {
       // If target is a container, hides the container
