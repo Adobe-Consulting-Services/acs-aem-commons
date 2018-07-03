@@ -38,6 +38,7 @@ import java.util.Map;
                 "sling.servlet.extensions=load",
                 "sling.servlet.extensions=js",
                 "sling.servlet.selectors=pwa",
+                "sling.servlet.selectors=manifest",
                 "sling.servlet.selectors=service-worker",
                 "sling.servlet.methods="+ HttpConstants.METHOD_GET,
                 "sling.servlet.resourceTypes=cq:Page"
@@ -57,17 +58,18 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
             ServletException, IOException {
 
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-/*
 
-        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-*/
         boolean swRequest =false;
+
         String[] selectors =requestPathInfo.getSelectors();
         for(String selector : selectors){
             if("service-worker".equals(selector)){
                 swRequest = true;
-                break;
             }
+
+        }
+        if("/".equalsIgnoreCase(requestPathInfo.getSuffix()) && "load".equalsIgnoreCase(requestPathInfo.getExtension())){
+            request.getRequestDispatcher(requestPathInfo.getResourcePath()+".html").forward(request, response);
         }
         Resource proxyResource = null;
         if ("/manifest.json".equalsIgnoreCase(requestPathInfo.getSuffix())) {
@@ -125,37 +127,42 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
         ValueMap manifestSettings = getConfigProperties(request);
         if(manifestSettings !=null){
             try {
-
-                jsonObject.put("short_name", manifestSettings.get("name", "PWA ShortName"));
-                jsonObject.put("name", manifestSettings.get("name", "PWAName"));
+                jsonObject.put("name", manifestSettings.get("applicationName", "PWAName"));
+                jsonObject.put("short_name", manifestSettings.get("shortName", "PWA ShortName"));
                 jsonObject.put("icons", getManifestIcons(manifestSettings));
-                jsonObject.put("start_url", manifestSettings.get("start_url", "."));
-                jsonObject.put("background_color", manifestSettings.get("background_color", "#3367D6"));
+                jsonObject.put("start_url", manifestSettings.get("startUrl", "."));
+                jsonObject.put("background_color", manifestSettings.get("bgColor", "#FFFFFF"));
                 jsonObject.put("display", manifestSettings.get("display", "standalone"));
-                jsonObject.put("scope", manifestSettings.get("scope", manifestSettings.get("rootPath")));
-                jsonObject.put("theme_color", manifestSettings.get("theme_color", "#3367D6"));
+                jsonObject.put("scope", manifestSettings.get("scope", ""));
+                jsonObject.put("theme_color", manifestSettings.get("themeColor", "#000000"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            String appName=manifestSettings.get("name", "PWAName");
-            log.error("AppName ::{}", appName);
+
         }
 
         return jsonObject.toString();
     }
 
     private JSONArray getManifestIcons(ValueMap manifestSettings) {
-        JSONObject jsonObject = new JSONObject();
-        try{
-            jsonObject.put("src", manifestSettings.get("src", "/content/dam/we-retail/en/products/activities/equipment_3.png"));
-            jsonObject.put("type", manifestSettings.get("type", "image/png"));
-            jsonObject.put("sizes", manifestSettings.get("sizes", "144x144"));
-        }catch (JSONException ex){
-            ex.printStackTrace();
+
+        String[] iconImages = manifestSettings.get("src", new String[]{});
+        String[] iconSizes = manifestSettings.get("sizes", new String[]{});
+        JSONArray jsonArray =new JSONArray();
+        if(iconImages.length == iconSizes.length){
+            for(int i=0; i< iconImages.length; i++){
+                JSONObject jsonObject = new JSONObject();
+                try{
+                    jsonObject.put("src", iconImages[i]);
+                    jsonObject.put("type", "image/png");
+                    jsonObject.put("sizes", iconSizes[i]);
+                }catch (JSONException ex){
+                    ex.printStackTrace();
+                }
+                jsonArray.put(jsonObject);
+            }
         }
 
-        JSONArray jsonArray =new JSONArray();
-        jsonArray.put(jsonObject);
         return  jsonArray;
     }
 
@@ -196,7 +203,7 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
        // PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());
         Conf conf = confMgr.getConf(page.adaptTo(Resource.class), getServiceResolver());
-        return conf.getItem("cloudconfigs/pwa-manifest/dfsag");
+        return conf.getItem("cloudconfigs/pwa/pwa-configuration");
 
 
     }
