@@ -22,6 +22,7 @@ package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
@@ -59,7 +60,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -497,28 +497,19 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         // the map must keep the order!
         pathRestrictionByNodeType = new LinkedHashMap<>();
         for (String nodeTypeAndPathRestrictionEntry : nodeTypeAndPathRestrictions) {
-            Map.Entry<String, Pattern> nodeTypeAndPathRestriction = extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(nodeTypeAndPathRestrictionEntry);
-            pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), nodeTypeAndPathRestriction.getValue());
+            Map.Entry<String, String> nodeTypeAndPathRestriction = ParameterUtil.toMapEntryWithOptionalValue(nodeTypeAndPathRestrictionEntry, " ");
+            final Pattern pathRestrictionPattern;
+            if (StringUtils.isNotBlank(nodeTypeAndPathRestriction.getValue())) {
+                pathRestrictionPattern = Pattern.compile(nodeTypeAndPathRestriction.getValue());
+            } else {
+                pathRestrictionPattern = null;
+            }
+            
+            pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), pathRestrictionPattern);
         }
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
         log.info("Package Replication Status - Node Types and Path Restrictions: [ {} ]", pathRestrictionByNodeType);
-    }
-
-    protected Map.Entry<String, Pattern> extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(String entry) {
-        // split up between node types and paths
-        int separatorPos = entry.indexOf(' ');
-        final String nodeTypeRestriction;
-        final Pattern pathRestrictionPattern;
-        if (separatorPos > 1 && separatorPos < entry.length()-1) {
-          nodeTypeRestriction = entry.substring(0, separatorPos);
-          String pathRestriction = entry.substring(separatorPos+1);
-          pathRestrictionPattern = Pattern.compile(pathRestriction);
-        } else {
-          nodeTypeRestriction = entry.trim();
-          pathRestrictionPattern = null;
-        }
-        return new AbstractMap.SimpleEntry<String, Pattern>(nodeTypeRestriction, pathRestrictionPattern);
     }
 
     @Override

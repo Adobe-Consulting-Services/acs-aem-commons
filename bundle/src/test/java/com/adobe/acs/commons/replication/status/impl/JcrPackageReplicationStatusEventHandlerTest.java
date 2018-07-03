@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 
 import javax.jcr.Node;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -63,6 +62,7 @@ import org.osgi.service.event.Event;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationEvent;
@@ -255,16 +255,18 @@ public class JcrPackageReplicationStatusEventHandlerTest {
 
     @Test
     public void testDefaultNodeTypeAndPathRestrictions() {
-        Map.Entry<String, Pattern> nodeTypeAndPathRestrictionForPageContent = eventHandler.extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[0]);
+        Map.Entry<String, String> nodeTypeAndPathRestrictionForPageContent = ParameterUtil.toMapEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[0], " ");
+        Pattern pathPattern = Pattern.compile(nodeTypeAndPathRestrictionForPageContent.getValue());
         // initial content below editable templates must not match
-        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
-        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/mytemplates/deeplynested/settings/wcm/templates/mytemplate/initial/somechild").matches());
-        Assert.assertFalse(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/conf/onemarketing/azde-default/settings/wcm/templates/azde-experience-fragment-tabs-accordion/initial/jcr:content").matches());
-        Assert.assertTrue(nodeTypeAndPathRestrictionForPageContent.getValue().matcher("/content/mypage/path").matches());
-        Map.Entry<String, Pattern> nodeTypeAndPathRestrictionForNtUnstructured = eventHandler.extractNodeTypeRestrictionAndPathRestrictionFromConfigEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[6]);
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/deeplynested/settings/wcm/templates/mytemplate/initial/somechild").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/onemarketing/azde-default/settings/wcm/templates/azde-experience-fragment-tabs-accordion/initial/jcr:content").matches());
+        Assert.assertTrue(pathPattern.matcher("/content/mypage/path").matches());
+        Map.Entry<String, String> nodeTypeAndPathRestrictionForNtUnstructured = ParameterUtil.toMapEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[6], " ");
+        pathPattern = Pattern.compile(nodeTypeAndPathRestrictionForNtUnstructured.getValue());
         // only policies for editable templates must match
-        Assert.assertFalse(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
-        Assert.assertFalse(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/content/some/otherpath").matches());
-        Assert.assertTrue(nodeTypeAndPathRestrictionForNtUnstructured.getValue().matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
+        Assert.assertFalse(pathPattern.matcher("/content/some/otherpath").matches());
+        Assert.assertTrue(pathPattern.matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
     }
 }
