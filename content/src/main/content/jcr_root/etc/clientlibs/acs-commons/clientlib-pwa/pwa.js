@@ -19,18 +19,21 @@ if ('serviceWorker' in navigator) {
         url : rootSWPath,
     }).then(function(data) {
 
-         if(data && data.path !== ""){
+         if(data && data.path){
 			loadServiceWorker(data.path);
          }
          else{
-             loadServiceWorker('/content/we-retail/us/en');
+             console.log('Failed to load from Root SW');
          }
-    });
+     }, function(error){
+		console.log('Failed to load Root SW');
+     });
 
 }
+ 
 function loadServiceWorker(data){
 	 navigator.serviceWorker
-            .register(data+'.pwa.load/service-worker.js?html=/content/we-retail-pwa/us/en|/content/we-retail-pwa/us/en/men&fallback=/content/we-retail-pwa/us/en/fallback.js')
+            .register(data+'.pwa.'+'service-worker.js')
             .then(function(response) {
             //load Manifest after service worker only
                 addManifestToDOM();
