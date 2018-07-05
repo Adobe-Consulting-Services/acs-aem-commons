@@ -48,7 +48,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
+                       <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
@@ -74,6 +74,9 @@
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
+                        <Export-Package>
+                            com.adobe.acs.commons.wcm.pwa.impl
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -272,6 +275,12 @@
             <version>1.0.0</version>
             <scope>provided</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
