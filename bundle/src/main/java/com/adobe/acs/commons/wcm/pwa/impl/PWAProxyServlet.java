@@ -147,7 +147,7 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
     private JSONArray getManifestIcons(ValueMap manifestSettings) {
 
         String[] iconImages = manifestSettings.get("src", new String[]{});
-        String[] iconSizes = manifestSettings.get("sizes", new String[]{});
+        String[] iconSizes = manifestSettings.get("size", new String[]{});
         JSONArray jsonArray =new JSONArray();
         if(iconImages.length == iconSizes.length){
             for(int i=0; i< iconImages.length; i++){
