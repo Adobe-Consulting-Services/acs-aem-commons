@@ -12,7 +12,7 @@ function addManifestToDOM(){
 }
 
 if ('serviceWorker' in navigator) {
-    //The search params would be read from the content resource
+    
     var rootSWPath = pathName.replace('.html','')+'.pwa.load/root-service-worker.json';
 	 Granite.$.ajax({
         type : "GET",
@@ -37,6 +37,7 @@ function loadServiceWorker(data){
             .then(function(response) {
             //load Manifest after service worker only
                 addManifestToDOM();
+                 
                 console.log('[Service Worker] registered!');
             }).catch(function(error){
                 console.log("[Service Worker] Registration failed ", error);
