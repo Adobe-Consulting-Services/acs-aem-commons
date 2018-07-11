@@ -21,7 +21,7 @@
 %><%@page session="false" %>
 <html>
     <head>
-        <title>Manage Controlled Process</title>>
+        <title>Manage Controlled Process</title>
 <cq:includeClientLib css="acs-commons.manage-controlled-processes.app"/>
 <cq:includeClientLib categories="coralui3,granite.ui.coral.foundation,granite.ui.shell"/>
 <link rel="shortcut icon" href="/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/images/favicon.ico" />
