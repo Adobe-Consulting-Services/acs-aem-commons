@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 
+### Changed
+
+- #1420 - MCP page component no longer extends "final" GraniteUI shell component
+
 
 ## [3.17.0] - 2018-05-22
 
