@@ -34,14 +34,18 @@ public interface HttpCacheStore {
     String KEY_CACHE_STORE_TYPE = "httpcache.cachestore.type";
     /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_MEM_CACHE_STORE_TYPE = "MEM";
+    /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_CAFFEINE_MEM_CACHE_STORE_TYPE = "CAFFEINE";
     /** Value representing disk type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_DISK_CACHE_STORE_TYPE = "DISK";
     /** Value representing JCR type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_JCR_CACHE_STORE_TYPE = "JCR";
+    /** Value representing HYBRID (ehcache) type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE = "EHCACHE-MEM";
 
     /**
      * Put an item into the cache.
-     *
+     *oh.
      * @param key     Object holding the key attributes.
      * @param content Object holding the content which needs to be cached.
      * @throws HttpCacheDataStreamException Failure when reading the input stream.
