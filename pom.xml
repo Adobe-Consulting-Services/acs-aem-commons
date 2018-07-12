@@ -377,6 +377,25 @@
                 <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
+            <dependency>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>3.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.cache</groupId>
+                <artifactId>cache-api</artifactId>
+                <version>1.0.0</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -534,6 +553,8 @@
     <modules>
         <module>bundle</module>
         <module>bundle-twitter</module>
+        <module>bundle-caffeine</module>
+        <module>bundle-ehcache</module>
         <module>content</module>
     </modules>
 </project>

@@ -67,6 +67,16 @@
                             <artifactId>acs-aem-commons-bundle-twitter</artifactId>
                             <target>/apps/acs-commons/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-bundle-httpcache-caffeine</artifactId>
+                            <target>/apps/acs-commons/install</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-bundle-httpcache-ehcache</artifactId>
+                            <target>/apps/acs-commons/install</target>
+                        </embedded>
                     </embeddeds>
                     <dependencies>
                         <dependency>
