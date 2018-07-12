@@ -16,6 +16,7 @@
 
 package com.adobe.acs.commons.httpcache.store.ehcache.impl.statistics;
 
+import org.apache.felix.scr.annotations.Component;
 import org.ehcache.Cache;
 import org.ehcache.Status;
 import org.ehcache.config.CacheConfiguration;
@@ -29,10 +30,8 @@ import org.ehcache.core.spi.time.TimeSource;
 import org.ehcache.core.spi.time.TimeSourceService;
 import org.ehcache.core.statistics.CacheStatistics;
 import org.ehcache.spi.service.Service;
-import org.ehcache.spi.service.ServiceDependencies;
 import org.ehcache.spi.service.ServiceProvider;
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,9 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Default implementation using the statistics calculated by the observers set on the caches.
  */
-@Component
+@Component(label = "DefaultStatisticsService - ehcache StatisticsService implementation",
+        metatype = true)
+@org.apache.felix.scr.annotations.Service
 public class DefaultStatisticsService implements StatisticsService, CacheManagerListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStatisticsService.class);

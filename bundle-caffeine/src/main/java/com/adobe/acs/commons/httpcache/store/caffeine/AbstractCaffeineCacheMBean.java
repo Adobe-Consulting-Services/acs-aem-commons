@@ -19,12 +19,7 @@ import java.util.Map;
 
 /**
  * AbstractCaffeineCacheMBean
- * <p>
- * WHAT PURPOSE THAT IT HAS ???
- * </p>
- *
- * @author niek.raaijmakers@adobe.com
- * @since 2018-07-10
+ * Contains common logic for Caffeine MBean purposes, for exposing stores.
  */
 public abstract class AbstractCaffeineCacheMBean <K, V> extends AbstractCacheMBean<K,V> implements CacheMBean {
 

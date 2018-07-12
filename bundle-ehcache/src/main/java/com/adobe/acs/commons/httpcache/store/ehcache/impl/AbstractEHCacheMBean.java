@@ -1,9 +1,9 @@
 package com.adobe.acs.commons.httpcache.store.ehcache.impl;
 
 import com.adobe.acs.commons.util.AbstractCacheMBean;
-import com.google.common.cache.CacheStats;
 import org.ehcache.Cache;
 import org.ehcache.core.statistics.CacheStatistics;
+import org.ehcache.core.statistics.TierStatistics;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -20,13 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * WHAT IS IT ???
- * <p>
- * WHAT PURPOSE THAT IT HAS ???
- * </p>
- *
- * @author niek.raaijkmakers@external.cybercon.de
- * @since 2018-07-12
+ * AbstractEHCacheMBean
+ * Contains common logic for EHCache MBean purposes, for exposing the content stores.
  */
 public abstract class AbstractEHCacheMBean<K, V> extends AbstractCacheMBean<K,V> {
 
@@ -65,56 +60,41 @@ public abstract class AbstractEHCacheMBean<K, V> extends AbstractCacheMBean<K,V>
         final TabularDataSupport tabularData = new TabularDataSupport(
                 new TabularType(JMX_PN_CACHESTATS, JMX_PN_CACHESTATS, cacheEntryType, new String[] { JMX_PN_STAT }));
 
-        CacheStatistics cacheStats = getStatistics();
-
-        final Map<String, Object> row = new HashMap<String, Object>();
+        final CacheStatistics cacheStats = getStatistics();
+        final TierStatistics tierStatistics = cacheStats.getTierStatistics().get("OnHeap");
+        final Map<String, Object> row = new HashMap<>();
+        
 
         row.put(JMX_PN_STAT, "Request Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getMappings()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Hit Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put(JMX_PN_STAT, "Hit Rate");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getHits()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Miss Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put(JMX_PN_STAT, "Miss Rate");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getMisses()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Eviction Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getEvictions()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Load Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getPuts()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put(JMX_PN_STAT, "Load Exception Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_STAT, "Explicit flushes");
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getRemovals()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put(JMX_PN_STAT, "Load Exception Rate");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_STAT, "Total allocated in bytes");
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getAllocatedByteSize()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
-        row.put(JMX_PN_STAT, "Load Success Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put(JMX_PN_STAT, "Average Load Penalty");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
-        tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-
-        row.put(JMX_PN_STAT, "Total Load Time");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.getTierStatistics().get("OnHeap").getMappings()));
+        row.put(JMX_PN_STAT, "Total occupied in bytes");
+        row.put(JMX_PN_VALUE, String.valueOf(tierStatistics.getOccupiedByteSize()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         return tabularData;

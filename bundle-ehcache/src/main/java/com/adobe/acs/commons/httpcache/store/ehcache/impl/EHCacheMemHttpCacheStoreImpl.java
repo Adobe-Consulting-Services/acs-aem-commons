@@ -129,7 +129,6 @@ public class EHCacheMemHttpCacheStoreImpl extends AbstractEHCacheMBean<CacheKey,
         Dictionary<String, Object> configs = context.getProperties();
         ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
         maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
-
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .using(statisticsService)
                 .withClassLoader(dynamicClassLoaderManager.getDynamicClassLoader())
