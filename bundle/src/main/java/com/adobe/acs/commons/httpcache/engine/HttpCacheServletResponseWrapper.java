@@ -43,7 +43,6 @@ import java.util.Collections;
 public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWrapper {
     private static final Logger log = LoggerFactory.getLogger(HttpServletResponseWrapper.class);
 
-    private SlingHttpServletResponse wrappedResponse;
     private PrintWriter printWriter;
     private ServletOutputStream servletOutputStream;
     private final TempSink tempSink;
@@ -51,7 +50,6 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
     public HttpCacheServletResponseWrapper(SlingHttpServletResponse wrappedResponse, TempSink tempSink) throws
             IOException {
         super(wrappedResponse);
-        this.wrappedResponse = wrappedResponse;
         this.tempSink = tempSink;
     }
 
