@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.util.impl;
 
+import com.adobe.acs.commons.util.AbstractCacheMBean;
+
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;

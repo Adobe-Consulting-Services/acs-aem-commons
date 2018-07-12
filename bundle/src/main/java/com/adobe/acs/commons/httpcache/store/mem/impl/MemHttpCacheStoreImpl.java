@@ -26,8 +26,11 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
-import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.acs.commons.httpcache.store.mem.MemCacheMBean;
+import com.adobe.acs.commons.httpcache.store.mem.MemCachePersistenceObject;
+import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
+import com.adobe.acs.commons.util.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.exception.CacheMBeanException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -71,8 +74,8 @@ import java.util.concurrent.TimeUnit;
                     value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
                     propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "TTL: {httpcache.cachestore.memcache.ttl}, "
-                            + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
+                    value = "TTL: {httpcache.cachestore.ttl}, "
+                            + "Max size in MB: {httpcache.cachestore.maxsize}",
                     propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, HttpCacheStore.class})

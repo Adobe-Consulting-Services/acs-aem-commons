@@ -20,9 +20,9 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.impl.CacheMBean;
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.acs.commons.util.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.CacheMBean;
+import com.adobe.acs.commons.util.exception.CacheMBeanException;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
