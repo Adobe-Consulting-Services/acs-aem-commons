@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.handler;
 
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.PN_EXPIRES_ON;
 import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
 import java.io.IOException;
@@ -43,15 +44,21 @@ public class BucketNodeHandler
         this.dynamicClassLoaderManager = dynamicClassLoaderManager;
     }
 
-    public Node createOrRetrieveEntryNode(CacheKey key)
+    public Node createOrRetrieveEntryNode(CacheKey key, long engineDefaultExpiryInMS)
             throws RepositoryException, IOException, ClassNotFoundException
     {
         final Node existingEntryNode = getEntryIfExists(key);
 
         if(null != existingEntryNode) {
+            if(key.getExpiryForUpdate() > 0){
+                existingEntryNode.setProperty(PN_EXPIRES_ON, System.currentTimeMillis() + key.getExpiryForUpdate());
+            }
+
             return existingEntryNode;
         }else {
-            return getOrCreateUniqueByPath(bucketNode, JCRHttpCacheStoreConstants.PATH_ENTRY, JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED);
+            Node created =  getOrCreateUniqueByPath(bucketNode, JCRHttpCacheStoreConstants.PATH_ENTRY, JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED);
+            created.setProperty(PN_EXPIRES_ON, System.currentTimeMillis() + engineDefaultExpiryInMS);
+            return created;
         }
     }
 

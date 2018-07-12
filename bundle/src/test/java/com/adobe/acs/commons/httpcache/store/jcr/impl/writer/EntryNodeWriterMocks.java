@@ -37,6 +37,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.ValueFactory;
 
+import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.value.BinaryImpl;
 import org.mockito.invocation.InvocationOnMock;
@@ -46,7 +47,6 @@ import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 
@@ -73,7 +73,6 @@ public class EntryNodeWriterMocks
 
     public static class MockArguments{
         Node entryNode;
-        int expiryTime;
         int cacheKeyHashCode;
         int status;
 
@@ -99,7 +98,7 @@ public class EntryNodeWriterMocks
         mockStatic(JcrUtil.class);
         mockJCRUtil();
 
-        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, arguments.expiryTime);
+        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent);
         entryNodeWriter = spy(writer);
     }
 
