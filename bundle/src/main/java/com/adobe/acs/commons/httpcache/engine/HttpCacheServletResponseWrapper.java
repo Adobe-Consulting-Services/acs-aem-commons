@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Wrapper for <code>SlingHttpServletResponse</code>. Wrapped to get hold of the copy of servlet response stream.
@@ -41,6 +43,7 @@ import java.io.Writer;
 public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWrapper {
     private static final Logger log = LoggerFactory.getLogger(HttpServletResponseWrapper.class);
 
+    private SlingHttpServletResponse wrappedResponse;
     private PrintWriter printWriter;
     private ServletOutputStream servletOutputStream;
     private final TempSink tempSink;
@@ -48,6 +51,7 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
     public HttpCacheServletResponseWrapper(SlingHttpServletResponse wrappedResponse, TempSink tempSink) throws
             IOException {
         super(wrappedResponse);
+        this.wrappedResponse = wrappedResponse;
         this.tempSink = tempSink;
     }
 
@@ -83,6 +87,16 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
         }
 
         return this.printWriter;
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+         try {
+            return super.getHeaderNames();
+        } catch (AbstractMethodError e) {
+             log.debug("Known issue when internal sling redirects are made - the call to getHeaders() will throw an exception.", e);
+            return Collections.EMPTY_LIST;
+        }
     }
 
     public TempSink getTempSink() {
