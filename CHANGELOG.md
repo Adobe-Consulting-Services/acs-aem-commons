@@ -8,11 +8,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 ### Fixed
+- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
+- #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
 - #1417 - Fixed xss vulnerabilities in generic lists
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+- #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+
+### Changed
+
+- #1420 - MCP page component no longer extends "final" GraniteUI shell component
+
 
 ## [3.17.0] - 2018-05-22
 
