@@ -537,7 +537,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 // #1415 - If the resource is not available at the direct path, then try to resolve (handle sling:alias).
                 // First map the path, as the resolve could duplicate pathing.
                 resource = resourceResolver.resolve(request, resourceResolver.map(request, path));
-            }        }
+            }
+        }
 
         // If the resource exists, then use it!
         if (!ResourceUtil.isNonExistingResource(resource)) {
