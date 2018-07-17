@@ -64,6 +64,9 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
             if ("service-worker".equals(selector)) {
                 swRequest = true;
             }
+            if ("manifest".equals(selector)) {
+                swRequest = true;
+            }
 
         }
         if ("/".equalsIgnoreCase(requestPathInfo.getSuffix()) && "load".equalsIgnoreCase(requestPathInfo.getExtension())) {
@@ -221,13 +224,16 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         String navRootPath = StringUtils.EMPTY;
+        String versionNumber = StringUtils.EMPTY;
         ValueMap configProps = getConfigProperties(request);
         if (configProps != null && configProps.containsKey("rootPath")) {
             navRootPath = configProps.get("rootPath").toString();
+            versionNumber = configProps.get("versionNum").toString();
         }
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("path", navRootPath);
+            jsonObject.put("version", versionNumber);
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
