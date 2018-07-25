@@ -27,7 +27,7 @@ public class IntegrationServiceFactoryImpl implements IntegrationServiceFactory 
         LOGGER.debug("Started Binding");
         if (service != null) {
             synchronized (this.integrationServices) {
-                this.integrationServices.put(service.getTenant() + service.getService(), service);
+                this.integrationServices.put(service.getTenant() + service.getIntegrationID(), service);
             }
         }
     }
@@ -37,7 +37,7 @@ public class IntegrationServiceFactoryImpl implements IntegrationServiceFactory 
         LOGGER.debug("Started Unbinding");
         if (service!= null) {
             synchronized (this.integrationServices) {
-                this.integrationServices.remove(service.getTenant() + service.getService());
+                this.integrationServices.remove(service.getTenant() + service.getIntegrationID());
             }
         }
     }

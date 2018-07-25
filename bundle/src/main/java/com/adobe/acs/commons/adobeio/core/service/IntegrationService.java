@@ -26,7 +26,7 @@ public interface IntegrationService {
 	/**
 	 * @return The domain of the integration
 	 */
-	String getIODomain();
+//	String getIODomain();
 
 	/**
 	 * @return The tenant of the integration
@@ -36,5 +36,10 @@ public interface IntegrationService {
 	/**
 	 * @return The service of the integration
 	 */
-	String getService();
+//	String getService();
+	
+	/**
+	 * @return The ID of the integration
+	 */
+	String getIntegrationID();
 }

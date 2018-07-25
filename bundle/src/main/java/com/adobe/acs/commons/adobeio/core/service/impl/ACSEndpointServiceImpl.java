@@ -10,6 +10,9 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -73,7 +76,7 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
         LOGGER.debug("Start ACTIVATE ACS Endpoint {}", config.getId());
         this.config = config;
         this.endpointId = config.getId();
-        this.integrationService = integrationServiceFactory.getService(config.getTenant(), CAMPAIGN_SERVICE);
+        this.integrationService = integrationServiceFactory.getService(config.getTenant(), config.getEndPointConfigID());
         LOGGER.debug("End ACTIVATE ACS Endpoint {}", endpointId);
 
         if (null == this.integrationService) {
@@ -236,6 +239,9 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
         get.setHeader("cache-control", "no-cache");
         get.setHeader("x-api-key", integrationService.getAPIKey());
         get.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
+        for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
+        	get.setHeader(headerEntry.getKey(), headerEntry.getValue());
+		}
 
         return responseAsJson(httpClient.execute(get));
     }
@@ -258,6 +264,10 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
         base.setHeader("cache-control", "no-cache");
         base.setHeader("x-api-key", integrationService.getAPIKey());
         base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
+        
+		for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
+			base.setHeader(headerEntry.getKey(), headerEntry.getValue());
+		}
 
         StringEntity input = new StringEntity(payload.toString());
         input.setContentType(CONTENT_TYPE_APPLICATION_JSON);
@@ -293,13 +303,24 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
      */
     private String getActionUrl(@NotNull final PKey pKey) {
         String endpoint = getEndpoint();
+        String url = this.config.getIODomain();
 
         // add pKey as a parameter
         if ((pKey != null) && StringUtils.isNotBlank(pKey.getValue())) {
             endpoint = endpoint + "/" + pKey.getValue();
         }
-
-        return integrationService.getIODomain() + "/" + integrationService.getTenant() + "/" + integrationService.getService() + "/" + endpoint;
+        
+        if (StringUtils.isNotBlank(integrationService.getTenant())) {
+        	url = url.concat("/").concat(integrationService.getTenant());
+		}
+        
+        if (StringUtils.isNotBlank(this.config.getService())) {
+        	url = url.concat("/").concat(this.config.getService());
+		}
+        
+        url = url.concat("/").concat(endpoint);
+        
+        return url;
     }
 
     /**
@@ -340,4 +361,35 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
         }
         return new JsonObject();
     }
+
+	@Override
+	public String getIODomain() {
+		return this.config.getIODomain();
+	}
+
+	@Override
+	public String getEndPointConfigID() {
+		return this.config.getEndPointConfigID();
+	}
+
+	@Override
+	public Map<String, String> getSpecificServiceHeader() {
+		Map<String, String> mapHeader = new HashMap<String, String>();
+		String headerAsString = this.config.getSpecificServiceHeader();
+		
+		if (StringUtils.isNotBlank(headerAsString)) {
+			StringTokenizer st = new StringTokenizer(headerAsString, ",");
+			while (st.hasMoreTokens()) {
+			    String token = st.nextToken();
+			    mapHeader.put(StringUtils.substringBefore(token, ":"), StringUtils.substringAfter(token, ":"));
+			}
+		}
+		
+		return mapHeader;
+	}
+
+	@Override
+	public String getService() {
+		return this.config.getService();
+	}
 }

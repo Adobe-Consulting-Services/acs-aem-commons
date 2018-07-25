@@ -1,5 +1,7 @@
 package com.adobe.acs.commons.adobeio.core.service;
 
+import java.util.Map;
+
 import com.adobe.acs.commons.adobeio.core.types.Filter;
 import com.adobe.acs.commons.adobeio.core.types.PKey;
 import com.google.gson.JsonObject;
@@ -13,8 +15,6 @@ import com.google.gson.JsonObject;
  *   private ACSEndpointService endpointService;
  */
 public interface ACSEndpointService {
-
-    static final String CAMPAIGN_SERVICE = "campaign";
 
     /**
      * @return The ID of the endpoint
@@ -30,6 +30,26 @@ public interface ACSEndpointService {
      * @return The endpoint that can be used in the url
      */
     String getEndpoint();
+    
+    /**
+     * @return The IO domain that can be used in the url
+     */
+    String getIODomain();
+    
+    /**
+     * @return The IO service name that can be used to map to right integration configuration
+     */
+    String getEndPointConfigID();
+    
+    /**
+     * @return The IO service name that can be used in url
+     */
+    String getService();
+    
+    /**
+     * @return Specific Header used for this service
+     */
+    Map<String, String> getSpecificServiceHeader();
 
     /**
      * @param pKey The provided pKey

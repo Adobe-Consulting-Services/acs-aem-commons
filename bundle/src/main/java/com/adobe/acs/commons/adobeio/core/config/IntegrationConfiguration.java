@@ -36,14 +36,17 @@ public @interface IntegrationConfiguration {
 			             defaultValue="7200",type= AttributeType.INTEGER)
 	int getExpirationTimeInSeconds();
 
-	@AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O", defaultValue = "https://mc.adobe.io")
-	String getIODomain();
+//	@AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O", defaultValue = "https://mc.adobe.io")
+//	String getIODomain();
 
 	@AttributeDefinition(name = "Tenant", description = "Tenant")
 	String getTenant();
 
-	@AttributeDefinition(name = "Service", description = "Service. Enter campaign, analytics, etc...")
-	String getService();
+//	@AttributeDefinition(name = "Service", description = "Service. Enter campaign, analytics, etc...")
+//	String getService();
+	
+	@AttributeDefinition(name = "Adobe I/O Integration ID", description = "ID used to bind endpoint configuration with I/O integration configuration", defaultValue="test")
+	String getIntegrationID();
 
 	String webconsole_configurationFactory_nameHint() default "Integration <b>{getTenant} - {getService}</b><br/> {getAMCOrgId}";
 }

@@ -18,6 +18,19 @@ public @interface ACSEndpointConfiguration {
 
     @AttributeDefinition(name = "URL Endpoint", description = "ACS Endpoint, without /campaign/, but starting with /")
     String getEndpoint();
+    
+    @AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O. egg: https://[mc|stock|...].adobe.io", defaultValue = "https://mc.adobe.io")
+	String getIODomain();
+    
+    @AttributeDefinition(name = "Adobe I/O Endpoint ID", description = "ID used to bind service configuration with I/O integration configuration", defaultValue = "test")
+    String getEndPointConfigID();
+    
+	@AttributeDefinition(name = "Service", description = "Service. Enter campaign, stock, analytics, etc...", defaultValue = "")
+	String getService();
+    
+    @AttributeDefinition(name = "Service specific Header", description = "egg: x-product:app-name,custom-header:custom,...", defaultValue = "")
+    String getSpecificServiceHeader();
 
     String webconsole_configurationFactory_nameHint() default "ACS Endpoint <b>{getTenant} - {getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
+
 }

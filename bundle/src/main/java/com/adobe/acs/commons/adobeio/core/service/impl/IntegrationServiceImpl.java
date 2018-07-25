@@ -81,20 +81,25 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtServiceConfig.getClientId();
     }
 
-    @Override
-    public String getIODomain() {
-        return jwtServiceConfig.getIODomain();
-    }
+//    @Override
+//    public String getIODomain() {
+//        return jwtServiceConfig.getIODomain();
+//    }
 
     @Override
     public String getTenant() {
         return jwtServiceConfig.getTenant();
     }
-
+    
     @Override
-    public String getService() {
-        return jwtServiceConfig.getService();
-    }
+	public String getIntegrationID() {
+		return jwtServiceConfig.getIntegrationID();
+	}
+
+//    @Override
+//    public String getService() {
+//        return jwtServiceConfig.getService();
+//    }
 
     // --------    PRIVATE METHODS    ----------
     private String fetchAccessToken() {
@@ -198,4 +203,5 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         cal.add(Calendar.SECOND, jwtServiceConfig.getExpirationTimeInSeconds());
         return cal.getTime();
     }
+
 }
