@@ -1,9 +1,9 @@
 package com.adobe.acs.commons.adobeio.core.model.impl;
 
 import com.adobe.acs.commons.adobeio.core.internal.Constants;
-import com.adobe.acs.commons.adobeio.core.model.AcsEndpointsList;
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointServiceFactory;
+import com.adobe.acs.commons.adobeio.core.model.EndpointsList;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
+import com.adobe.acs.commons.adobeio.core.service.EndpointServiceFactory;
 import com.google.common.collect.Lists;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.models.annotations.Exporter;
@@ -15,15 +15,15 @@ import java.util.List;
 
 @SuppressWarnings("PackageAccessibility")
 @Model(adaptables = SlingHttpServletRequest.class,
-        adapters = AcsEndpointsList.class)
+        adapters = EndpointsList.class)
 @Exporter(name = Constants.EXPORTER_NAME,
         extensions = Constants.EXPORTER_EXTENSION)
-public class AcsEndpointListImpl implements AcsEndpointsList {
+public class EndpointListImpl implements EndpointsList {
 
     @Reference
-    private ACSEndpointServiceFactory configurationFactory;
+    private EndpointServiceFactory configurationFactory;
 
-    private List<ACSEndpointService> endpointServices;
+    private List<EndpointService> endpointServices;
 
     @PostConstruct
     private void initModel() {
@@ -31,7 +31,7 @@ public class AcsEndpointListImpl implements AcsEndpointsList {
     }
 
     @Override
-    public List<ACSEndpointService> getEndpoints() {
+    public List<EndpointService> getEndpoints() {
         return endpointServices;
     }
 }

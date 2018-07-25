@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.adobeio.core.servlets;
 
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -31,7 +31,7 @@ public class SetCampaignDataWS extends SlingAllMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SetCampaignDataWS.class);
 
     @Reference(target = "(getId=setCampaignData)")
-    private ACSEndpointService acsEndpointService;
+    private EndpointService acsEndpointService;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {

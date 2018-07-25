@@ -33,8 +33,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.config.ACSEndpointConfiguration;
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
+import com.adobe.acs.commons.adobeio.core.config.EndpointConfiguration;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.acs.commons.adobeio.core.service.HttpClientService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationServiceFactory;
@@ -48,18 +48,18 @@ import com.google.gson.JsonParser;
 
 @SuppressWarnings("PackageAccessibility")
 @Component(
-        service = ACSEndpointService.class,
+        service = EndpointService.class,
         immediate = true,
         property = {
-                Constants.SERVICE_DESCRIPTION + "=Adobe I/O. ACS Endpoint",
+                Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint",
                 Constants.SERVICE_VENDOR + "=Adobe I/O",
-                "webconsole.configurationFactory.nameHint" + "=ACS Endpoint"}
+                "webconsole.configurationFactory.nameHint" + "=Endpoint"}
 )
-@Designate(ocd = ACSEndpointConfiguration.class, factory = true)
-public class ACSEndpointServiceImpl implements ACSEndpointService {
+@Designate(ocd = EndpointConfiguration.class, factory = true)
+public class EndpointServiceImpl implements EndpointService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ACSEndpointServiceImpl.class);
-    private ACSEndpointConfiguration config;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceImpl.class);
+    private EndpointConfiguration config;
     private IntegrationService integrationService;
 
     @Reference
@@ -72,12 +72,12 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
 
     @Activate
     @Modified
-    protected void activate(final ACSEndpointConfiguration config) throws AdobeIOException {
-        LOGGER.debug("Start ACTIVATE ACS Endpoint {}", config.getId());
+    protected void activate(final EndpointConfiguration config) throws AdobeIOException {
+        LOGGER.debug("Start ACTIVATE Endpoint {}", config.getId());
         this.config = config;
         this.endpointId = config.getId();
         this.integrationService = integrationServiceFactory.getService(config.getTenant(), config.getEndPointConfigID());
-        LOGGER.debug("End ACTIVATE ACS Endpoint {}", endpointId);
+        LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
 
         if (null == this.integrationService) {
             throw new AdobeIOException("Integration-service not defined for tenant "+config.getTenant());
@@ -182,7 +182,7 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
 
     /**
      * This method performs the Adobe I/O action
-     * @param pKey Pkey to identify the entry in ACS
+     * @param pKey Pkey to identify the entry
      * @param payload Payload of the call
      * @return JsonObject containing the result
      */
@@ -291,14 +291,14 @@ public class ACSEndpointServiceImpl implements ACSEndpointService {
             resultJson.addProperty(RESULT_ERROR, result);
         }
 
-        LOGGER.debug("JSON result from ACS: " + resultJson);
+        LOGGER.debug("JSON result from Service: " + resultJson);
         return resultJson;
     }
 
     /**
      * This method constructs the action url that performs the Adobe I/O action
      *
-     * @param pKey Pkey is the id of an entry in ACS. The PKey can be added to update a specific entry in ACS
+     * @param pKey Pkey is the id of an entry in Service. The PKey can be added to update a specific entry in Service
      * @return String containing the full action url
      */
     private String getActionUrl(@NotNull final PKey pKey) {

@@ -8,7 +8,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.forms.common.service.DataXMLOptions;
 import com.adobe.forms.common.service.DataXMLProvider;
 import com.adobe.forms.common.service.FormsException;
@@ -21,12 +21,12 @@ import com.google.gson.JsonObject;
  *
  */
 @Component(service = DataXMLProvider.class)
-public class ACSPrefill implements DataXMLProvider {
+public class Prefill implements DataXMLProvider {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ACSPrefill.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Prefill.class);
 
 	@Reference(target = "(getId=getPrefillData)")
-	private ACSEndpointService acsEndpointService;
+	private EndpointService acsEndpointService;
 
 	@Override
 	public String getServiceDescription() {

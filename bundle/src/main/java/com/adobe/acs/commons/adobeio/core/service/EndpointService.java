@@ -7,14 +7,14 @@ import com.adobe.acs.commons.adobeio.core.types.PKey;
 import com.google.gson.JsonObject;
 
 /**
- * This is the interface for the ACSEndPointService
- * Using this service, the calling component can post to and retrieve from ACS.
+ * This is the interface for the EndPointService
+ * Using this service, the calling component can post to and retrieve from Service.
  *
  * Example how to use in the calling component:
  *   @Reference(target = "(getId=///put your id here///)")
- *   private ACSEndpointService endpointService;
+ *   private EndpointService endpointService;
  */
-public interface ACSEndpointService {
+public interface EndpointService {
 
     /**
      * @return The ID of the endpoint

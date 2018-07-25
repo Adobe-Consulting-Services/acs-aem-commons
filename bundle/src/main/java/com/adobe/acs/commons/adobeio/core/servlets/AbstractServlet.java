@@ -16,7 +16,7 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.auth.core.AuthUtil;
 import org.slf4j.Logger;
 
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.JsonArray;
@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
   This abstract servlet can be extended and used for communication
   with a specified
  */
-public abstract class AbstractAcsServlet extends SlingAllMethodsServlet {
+public abstract class AbstractServlet extends SlingAllMethodsServlet {
 
     protected static final String PARAM_URL = "url";
     protected static final String PARAM_EXCEPTION = "exception";
@@ -42,7 +42,7 @@ public abstract class AbstractAcsServlet extends SlingAllMethodsServlet {
     /**
      * @return Configuration Service
      */
-    protected abstract ACSEndpointService getEndpointService();
+    protected abstract EndpointService getEndpointService();
 
     /**
      * @return Current Logger
@@ -52,17 +52,17 @@ public abstract class AbstractAcsServlet extends SlingAllMethodsServlet {
     /**
      * @return ACS Service for retrieving subscriptions
      */
-    protected abstract ACSEndpointService getSubScriptionsService();
+    protected abstract EndpointService getSubScriptionsService();
 
     /**
      * @return ACS Service for setting the subscription
      */
-    protected abstract ACSEndpointService getSetSubScriptionsService();
+    protected abstract EndpointService getSetSubScriptionsService();
 
     /**
      * @return ACS Service for sending Email
     */
-    protected abstract ACSEndpointService sendMailService();
+    protected abstract EndpointService sendMailService();
 
     /**
      * @param response SlingHttpServlet Response

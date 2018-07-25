@@ -5,13 +5,13 @@ import com.drew.lang.annotations.NotNull;
 
 
 /**
- * Interface for the ACS Endpoint service Factory
+ * Interface for the Endpoint service Factory
  */
-public interface ACSEndpointServiceFactory {
+public interface EndpointServiceFactory {
 
     /**
      * @param action Provided action
-     * @return The ACSEndpointService of the provided action
+     * @return The EndpointService of the provided action
      */
-    ACSEndpointService getEndpoint(@NotNull Action action);
+    EndpointService getEndpoint(@NotNull Action action);
 }

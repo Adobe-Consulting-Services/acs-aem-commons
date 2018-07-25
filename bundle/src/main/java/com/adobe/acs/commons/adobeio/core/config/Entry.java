@@ -3,12 +3,12 @@ package com.adobe.acs.commons.adobeio.core.config;
 import org.apache.commons.lang.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
-public class AcsEntry {
+public class Entry {
 
     private final String method;
     private final String endpoint;
 
-    public AcsEntry(String method, String endpoint) {
+    public Entry(String method, String endpoint) {
         if (StringUtils.isNotBlank(method)) {
             this.method = method;
         } else {

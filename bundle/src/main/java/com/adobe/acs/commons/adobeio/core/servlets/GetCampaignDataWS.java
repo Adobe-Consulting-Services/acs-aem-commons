@@ -14,7 +14,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.service.ACSEndpointService;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.google.gson.JsonObject;
 
 /**
@@ -32,7 +32,7 @@ public class GetCampaignDataWS extends SlingSafeMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetCampaignDataWS.class);
 
     @Reference(target = "(getId=getCampaignData)")
-    private ACSEndpointService acsEndpointService;
+    private EndpointService acsEndpointService;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
