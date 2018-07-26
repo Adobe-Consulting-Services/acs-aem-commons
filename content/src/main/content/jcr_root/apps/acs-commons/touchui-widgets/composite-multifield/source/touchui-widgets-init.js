@@ -138,6 +138,10 @@
             return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
         },
 
+        isFoundationAutocomplete: function($field) {
+            return !_.isEmpty($field) && ($field.parents('foundation-autocomplete').length > 0);
+        },
+
         setAutocomplete: function($field,value) {
             var cmf = this;
 
@@ -152,6 +156,10 @@
                     $tagList._appendItem({"display": selectedItem.text(), "value": item});
                 });
             }
+        },
+
+        setFoundationAutocomplete: function($field,value) {
+            $field.parents('foundation-autocomplete').val(value);
         },
         
         isTagsField: function ($field) {
@@ -199,6 +207,8 @@
                 this.setAutocomplete($field,value);
             } else if (this.isTagsField($field)) {
                 this.setTagsField($field,value);
+            } else if (this.isFoundationAutocomplete($field)) {
+                this.setFoundationAutocomplete($field,value);
             } else {
                 $field.val(value);
             }
