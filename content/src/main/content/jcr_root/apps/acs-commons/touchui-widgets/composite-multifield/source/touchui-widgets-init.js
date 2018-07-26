@@ -99,6 +99,14 @@
                 select.setValue(value);
             }
         },
+		
+		isCoralSelect: function ($field) {
+            return !_.isEmpty($field) && ($field.parent().prop('tagName') === "CORAL-SELECT");
+        },
+
+        setCoralSelect: function ($field, value) {
+            $field.parent().get(0).set("value",value);
+        },
 
         isCheckbox: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
@@ -199,6 +207,8 @@
                 this.setAutocomplete($field,value);
             } else if (this.isTagsField($field)) {
                 this.setTagsField($field,value);
+            } else if (this.isCoralSelect($field)) {
+                this.setCoralSelect($field, value);
             } else {
                 $field.val(value);
             }
