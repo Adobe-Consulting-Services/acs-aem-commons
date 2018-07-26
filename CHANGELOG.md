@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
 ### Fixed
 - #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
 - #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
