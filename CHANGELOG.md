@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1429 - Fixed Composite Multifield support for pathfield
 
 ### Changed
 
