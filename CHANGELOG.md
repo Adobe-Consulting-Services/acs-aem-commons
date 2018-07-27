@@ -22,7 +22,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1431 - Fixed Composite Multifield support for Coral3 Select
 - #1433 - Fixed issue with Coral 3 UI Checkbox
+
 ### Changed
 
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component

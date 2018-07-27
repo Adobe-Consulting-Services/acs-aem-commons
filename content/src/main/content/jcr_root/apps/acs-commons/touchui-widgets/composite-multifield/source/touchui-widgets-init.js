@@ -99,7 +99,16 @@
                 select.setValue(value);
             }
         },
-		//To support coral 3 UI checkbox, add property granite:class=coral-Form-fieldwrapper to the field in dialog.
+		
+		    isCoralSelect: function ($field) {
+            return !_.isEmpty($field) && ($field.parent().prop('tagName') === "CORAL-SELECT");
+        },
+
+        setCoralSelect: function ($field, value) {
+            $field.parent().get(0).set("value",value);
+        },
+
+		    // To support coral 3 UI checkbox, add property granite:class=coral-Form-fieldwrapper to the field in dialog.
         isCheckbox: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "checkbox" || $field.hasClass("coral-Checkbox"));
         },
@@ -203,6 +212,8 @@
                 this.setAutocomplete($field,value);
             } else if (this.isTagsField($field)) {
                 this.setTagsField($field,value);
+            } else if (this.isCoralSelect($field)) {
+                this.setCoralSelect($field, value);
             } else {
                 $field.val(value);
             }
