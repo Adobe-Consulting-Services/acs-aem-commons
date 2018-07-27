@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Fixed
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
 - #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
 - #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
 - #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
