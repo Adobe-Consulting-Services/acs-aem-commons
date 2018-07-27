@@ -29,6 +29,7 @@
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
         <include pattern="/etc/cloudservices/sharethis/rep:policy"/>
     </filter>
+    <filter root="/etc/rep:policy"/>
     <filter root="/etc/acs-commons">
     	<include pattern="/etc/acs-commons/jcr:content" />
         <include pattern="/etc/acs-commons/oak-index-manager(.*)?" />

@@ -7,7 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
 ### Fixed
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
 - #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
 - #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
 - #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
@@ -16,8 +20,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
+- #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
 - #1431 - Fixed Composite Multifield support for Coral3 Select
+- #1433 - Fixed issue with Coral 3 UI Checkbox
+
 ### Changed
 
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component

@@ -103,8 +103,9 @@ public class CacheContent {
 
         // Extracting header K,V.
         List<String> headerNames = new ArrayList<String>();
+
         headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName : headerNames) {
+        for (String headerName: headerNames) {
             List<String> values = new ArrayList<String>();
             values.addAll(responseWrapper.getHeaders(headerName));
             headers.put(headerName, values);
