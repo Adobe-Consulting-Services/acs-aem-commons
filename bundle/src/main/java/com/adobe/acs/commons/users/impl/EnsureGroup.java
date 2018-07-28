@@ -230,7 +230,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
             log.debug("Requesting creation of group [ {} ] at [ {} ]", group.getPrincipalName(),
                     group.getIntermediatePath());
 
-            jcrGroup = userManager.createGroup(new PrincipalImpl(group.getPrincipalName()), group.getPrincipalName());
+            jcrGroup = userManager.createGroup(new PrincipalImpl(group.getPrincipalName()), group.getIntermediatePath());
             log.debug("Created group at [ {} ]", jcrGroup.getPath());
         }
 
