@@ -92,34 +92,20 @@
                                 <input type="text" name="target" class="coral-Textfield"  ng-required="true" placeholder="URL to redirect to"/>
                             </span>
                         </div>
-                        <div class="form-row">
-                            <label acs-coral-heading>
-                                Index
-                            </label>
-                            <span>
-                                <input type="number" name="idx" list="idx" ng-required="true" class="coral-Textfield" placeholder="Index to add the entry within the file"/>
-                                <datalist id="idx">
-                                    <option value="0">First</option>
-                                    <option value="{{entries.length}}">Last</option>
-                                </datalist>
-                            </span>
-                        </div>
                         <button is="coral-button" iconsize="S">
                             Add Entry
                         </button>
 					</form>
 				</section>
-				<section  ng-if="(entries | filter: {valid : false}).length > 0">
-					<coral-alert size="L" variant="warning">
-						<coral-alert-header><fmt:message key="Invalid Redirect Maps "/></coral-alert-header>
-						<coral-alert-content>
-							<ul>
-								<li ng-repeat="entry in entries | filter: {valid : false}">
-									{{entry.status}}
-								</li>
-							</ul>
-						</coral-alert-content>
-					</coral-alert>
+				<section ng-if="invalidEntries.length">
+                    <div class="invalid-entries">
+						<h4><fmt:message key="Invalid Redirect Entries"/></h4>
+                        <ul>
+                            <li ng-repeat="entry in invalidEntries">
+                                {{entry.status}}
+                            </li>
+                        </ul>
+					</div>
 				</section>
 				<section>
 					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="View Entries" /></h2>
@@ -157,7 +143,7 @@
                                     <td class="narrow-cell">
                                         <div ng-switch on="entry.origin">
                                             <div ng-switch-when="File">
-                                                <button is="coral-button" icon="delete" iconsize="S" ng-click="removeLine($index)"></button>
+                                                <button is="coral-button" icon="delete" iconsize="S" ng-click="removeLine(entry.id)"></button>
                                             </div>
                                             <div ng-switch-default>
                                                 <button is="coral-button" icon="edit" iconsize="S" ng-click="openEditor(entry.origin)"></button>

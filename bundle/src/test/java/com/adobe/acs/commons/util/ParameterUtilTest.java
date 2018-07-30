@@ -60,6 +60,15 @@ public class ParameterUtilTest {
     }
 
     @Test
+    public void testToMapEntryWithOptionalValueWithOnlyKey() {
+        String value = "key";
+        String separator = ":";
+        Map.Entry<String, String> expResult = new SimpleEntry<>(value, null);
+        Map.Entry<String, String> result = ParameterUtil.toMapEntryWithOptionalValue(value, separator);
+        assertEquals(expResult, result);
+    }
+
+    @Test
     public void testToSimpleEntryWithOnlyValue() {
         String value = ":value";
         String separator = ":";
@@ -72,7 +81,7 @@ public class ParameterUtilTest {
     public void testToSimpleEntryWithMultipleSeparators() {
         String value = "key:val:ue";
         String separator = ":";
-        SimpleEntry<String, String> expResult = null;
+        SimpleEntry<String, String> expResult = new SimpleEntry<String, String>("key", "val:ue");
         SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
         assertEquals(expResult, result);
     }

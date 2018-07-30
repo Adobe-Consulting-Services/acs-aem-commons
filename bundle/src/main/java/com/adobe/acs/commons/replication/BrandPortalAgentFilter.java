@@ -99,9 +99,7 @@ public class BrandPortalAgentFilter implements AgentFilter {
                 break;
             }
 
-            if (content.getParent() != null) {
-                content = content.getParent();
-            }
+            content = content.getParent();
 
         } while (content != null);
 

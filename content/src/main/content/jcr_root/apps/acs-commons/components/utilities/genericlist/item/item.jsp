@@ -28,7 +28,7 @@ if (title.equals("")) {
     %><span style="color: red;">Please enter a title</span>
 	<%
 } else { %>
-Title: <%=title%> <br />
-Value: <%=value%> <br />
+Title: <%=xssAPI.encodeForHTML(title)%> <br />
+Value: <%=xssAPI.encodeForHTML(value)%> <br />
 <% } %>
 </li>

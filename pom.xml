@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>3.15.3-SNAPSHOT</version>
+    <version>3.17.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -496,10 +496,10 @@
     </profiles>
 
     <!--
-        Inclusion of repositories in POMs is controversial, to say the least.
-        It would be best if you proxied the Adobe repository using a Maven
-        Repository Manager. Once you do that, remove these sections.
-     -->
+       Inclusion of repositories in POMs is controversial, to say the least.
+       It would be best if you proxied the Adobe repository using a Maven
+       Repository Manager. Once you do that, remove these sections.
+    -->
     <repositories>
         <repository>
             <id>adobe-public-releases</id>
