@@ -42,14 +42,50 @@ public class ParameterUtil {
     }
 
     /**
-     * Util for parsing Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
      *
-     * @param value     must be in the format => x<separator>y  ... ex. foo:bar
+     * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
      * @param separator separator between the values
-     * @return Returns a SimpleEntry representing the key/value pair
+     * @return Returns a {@link Map.Entry} representing the key/value pair. The entry's value may be {@code null} in case no separator is found.
      */
+    public static Map.Entry<String, String> toMapEntryWithOptionalValue(final String value, final String separator) {
+        return toSimpleEntry(value, separator, true);
+    }
+    
+    /**
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
+     *
+     * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
+     * @param separator separator between the values
+     * @return Returns a {@link Map.Entry} representing the key/value pair. It may be {@code null} in case no separator is found.
+     */
+    public static Map.Entry<String, String> toMapEntry(final String value, final String separator) {
+        return toSimpleEntry(value, separator, false);
+    }
+
+    /**
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
+     *
+     * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
+     * @param separator separator between the values
+     * @return Returns a SimpleEntry representing the key/value pair. It may be {@code null} in case no separator is found.
+     * @deprecated Rather use {@link #toMapEntry(String, String)}.
+     */
+    @Deprecated
     public static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator) {
-        final String[] tmp = StringUtils.split(value, separator);
+        return toSimpleEntry(value, separator, false);
+    }
+    
+    /**
+     * Util for parsing Service properties in the form {@code <value><separator><value>}
+     *
+     * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
+     * @param separator separator between the values
+     * @param isValueOptional if {@code false} returns {@code null} in case there is not at least one separator found (not at the last position) 
+     * @return Returns a SimpleEntry representing the key/value pair. The value may be {@null} in case no separator is found and {@code isValueOptional} is {@code true}.
+     */
+    private static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator, boolean isValueOptional) {
+        final String[] tmp = StringUtils.split(value, separator, 2);
 
         if (tmp == null) {
             return null;
@@ -58,9 +94,13 @@ public class ParameterUtil {
         if (tmp.length == 2) {
             return new AbstractMap.SimpleEntry<String, String>(tmp[0], tmp[1]);
         } else {
+            if (isValueOptional && tmp.length == 1) {
+                return new AbstractMap.SimpleEntry<String, String>(tmp[0], null);
+            }
             return null;
         }
     }
+    
 
     /**
      * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;separator&lt;&gt;value&lt;

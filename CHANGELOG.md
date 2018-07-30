@@ -7,17 +7,63 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.15.2...HEAD
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
+### Fixed
+- #1438 - Ensured Groups do not honor intermediate paths
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
+- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
+- #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
+- #1417 - Fixed xss vulnerabilities in generic lists
+- #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+- #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
+- #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+- #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
+- #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1429 - Fixed Composite Multifield support for pathfield
+- #1431 - Fixed Composite Multifield support for Coral3 Select
+- #1433 - Fixed issue with Coral 3 UI Checkbox
+
+### Changed
+
+- #1420 - MCP page component no longer extends "final" GraniteUI shell component
+
+
+## [3.17.0] - 2018-05-22
+
+### Fixed
+- #1370 - Fixed Invalid Entries display in FireFox for Redirect Map
+- #1371 - Fixed Incorrect Entry Deletion when Filtering for Redirect Map
+- #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component
+- #1383 - URL asset import now reports renditions which cannot be matched correctly
+- #1379 - URL asset import improvements for reporting and error handling
+- #1376 - Spreadsheet API data handling improvements
+
+### Added
+- #1365 - Sling model injector for Shared Component Property values.
+
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
+
+## [3.16.0] - 2018-05-10
 
 ### Fixed
 - #1278 - EvolutionContext refactored to contain a method returning version history
 - #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1363 - Corrects permissions allowing HTTP Cache to write to the JCR Cache space under /var/acs-commons/httpcache
 
 ### Added
+- #1292 - New MCP Tool to refresh asset folder thumbnails
+- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
 - #1347 - Redirect Map Entry editor
+- #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
 
 ## [3.15.2] - 2018-04-25
 

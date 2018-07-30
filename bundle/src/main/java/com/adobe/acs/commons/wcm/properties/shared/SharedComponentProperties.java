@@ -33,4 +33,10 @@ public interface SharedComponentProperties {
 
     String NN_GLOBAL_COMPONENT_PROPERTIES = "global-component-properties";
     String NN_SHARED_COMPONENT_PROPERTIES = "shared-component-properties";
+
+    enum ValueTypes {
+        SHARED,
+        GLOBAL,
+        MERGED
+    }
 }

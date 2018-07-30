@@ -204,7 +204,10 @@
                 cmf = this;
 
             $multifields.each(function(counter, multifield){
-                $fields = $(multifield).children().children(cmf.CFFW);
+                // This looks for children inside children, there is a problem if we try to put in 
+                // tabs can be fixed
+                //$fields = $(multifield).children().children(cmf.CFFW);
+                $fields = $(multifield).find(cmf.CFFW);
 
                 $fields.each(function (j, field) {
                     fillValue($form, $(multifield).data("name"), $(field).find("[name]").not("[name*='@']"), (counter + 1));
