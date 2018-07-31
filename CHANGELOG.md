@@ -7,7 +7,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
 ### Fixed
+- #1438 - Ensured Groups do not honor intermediate paths
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
 - #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
 - #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
 - #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
@@ -19,6 +24,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
 - #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
+- #1429 - Fixed Composite Multifield support for pathfield
+- #1431 - Fixed Composite Multifield support for Coral3 Select
+- #1433 - Fixed issue with Coral 3 UI Checkbox
 
 ### Changed
 
