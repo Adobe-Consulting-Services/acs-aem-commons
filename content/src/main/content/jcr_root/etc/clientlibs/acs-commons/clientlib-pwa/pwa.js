@@ -2,7 +2,7 @@ var promptInstall;
 
 var currentPath = window.location.pathname;
 var pathName = currentPath;
-
+/*
 function addManifestToDOM(rootPath) {
     var el, head = document.getElementsByTagName("head")[0];
     el = document.createElement("link");
@@ -10,7 +10,7 @@ function addManifestToDOM(rootPath) {
     el.href = rootPath + '.pwa.load/manifest.json'; //pathName.replace('.html','') +'.pwa.load/manifest.json';
     head.appendChild(el);
 }
-
+*/
 if ('serviceWorker' in navigator) {
 
     var rootSWPath = pathName.replace('.html', '') + '.pwa.load/root-service-worker.json';
@@ -75,9 +75,10 @@ function checkIDB(versionNum) {
 function updateCacheAndSW(){
 	caches.delete('STATIC_CACHE');
     caches.delete('DYNAMIC_CACHE');
+    /*jshint esnext: true */
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
  		for(let registration of registrations) {
-  			registration.unregister()
+  			registration.unregister();
 		} 
     });
 
@@ -87,7 +88,7 @@ function loadServiceWorker(dataPath) {
         .register(dataPath + '.pwa.load.service-worker.js')
         .then(function(response) {
             //load Manifest after service worker only
-              addManifestToDOM(dataPath);
+             // addManifestToDOM(dataPath);
             // var manifestElement = document.querySelector('link[rel="manifest"]');
 
             console.log('[Service Worker] registered!');
