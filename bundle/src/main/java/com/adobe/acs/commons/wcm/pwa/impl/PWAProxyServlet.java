@@ -172,7 +172,7 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
                 jsonObject.put("start_url", manifestSettings.get("startUrl", "."));
                 jsonObject.put("background_color", manifestSettings.get("bgColor", "#FFFFFF"));
                 jsonObject.put("display", manifestSettings.get("display", "standalone"));
-                jsonObject.put("scope", manifestSettings.get("scope", ""));
+                jsonObject.put("scope", manifestSettings.get("scope", manifestSettings.get("rootPath", ".")));
                 jsonObject.put("theme_color", manifestSettings.get("themeColor", "#000000"));
             } catch (JSONException e) {
                 e.printStackTrace();

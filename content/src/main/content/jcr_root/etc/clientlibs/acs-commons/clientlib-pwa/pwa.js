@@ -1,16 +1,6 @@
-var promptInstall;
-
 var currentPath = window.location.pathname;
 var pathName = currentPath;
-/*
-function addManifestToDOM(rootPath) {
-    var el, head = document.getElementsByTagName("head")[0];
-    el = document.createElement("link");
-    el.rel = "manifest";
-    el.href = rootPath + '.pwa.load/manifest.json'; //pathName.replace('.html','') +'.pwa.load/manifest.json';
-    head.appendChild(el);
-}
-*/
+ 
 if ('serviceWorker' in navigator) {
 
     var rootSWPath = pathName.replace('.html', '') + '.pwa.load/root-service-worker.json';
@@ -93,42 +83,4 @@ function loadServiceWorker(dataPath) {
             console.log("[Service Worker] Registration failed ", error);
         });
 }
-
-/*
-
-window.addEventListener("beforeinstallprompt", function(event) {
-	event.preventDefault();
-    promptInstall = event;
-    var headerNav = document.querySelector(".navbar-brand");
-    headerNav.addEventListener("click", function(){
-		promptInstall.prompt();
-        promptInstall.userChoice
-    	.then(function(choiceResult){
-           if (choiceResult.outcome === 'accepted') {
-                console.log('Home screen added');
-              } else {
-                console.log('Otherwise');
-              }
-        
-          promptInstall = null;
-
-		});
-
-    });
-
-
-});
-
- window.addEventListener("load", function(event) {
-     console.log('Window loaded ', event);
-     if(promptInstall){
-		promptInstall.prompt()
-        .then(function(outcome){
-            console.log("Outcome: ", outcome);
-        });
-
-     }
-
-  });
-
-*/
+ 
