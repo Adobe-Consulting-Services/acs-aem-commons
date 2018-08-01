@@ -80,6 +80,7 @@
     <filter root="/etc/acs-commons/manage-controlled-processes/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/apps/rep:policy"/>
+    <filter root="/conf/rep:policy"/>
     <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy"/>
     <filter root="/etc/notification/email">

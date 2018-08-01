@@ -14,6 +14,7 @@ function addManifestToDOM(rootPath) {
 if ('serviceWorker' in navigator) {
 
     var rootSWPath = pathName.replace('.html', '') + '.pwa.load/root-service-worker.json';
+    console.log('RootSW Path ::', rootSWPath);
     Granite.$.ajax({
         type: "GET",
         url: rootSWPath,
@@ -87,10 +88,6 @@ function loadServiceWorker(dataPath) {
     navigator.serviceWorker
         .register(dataPath + '.pwa.load.service-worker.js')
         .then(function(response) {
-            //load Manifest after service worker only
-             // addManifestToDOM(dataPath);
-            // var manifestElement = document.querySelector('link[rel="manifest"]');
-
             console.log('[Service Worker] registered!');
         }).catch(function(error) {
             console.log("[Service Worker] Registration failed ", error);

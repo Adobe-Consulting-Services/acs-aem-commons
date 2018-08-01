@@ -246,7 +246,7 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
         // PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());
         Conf conf = confMgr.getConf(page.adaptTo(Resource.class), serviceResolver);
-        return conf.getItem("cloudconfigs/pwa/pwa-configuration");
+        return conf.getItem("cloudconfigs/pwa");
 
 
     }
