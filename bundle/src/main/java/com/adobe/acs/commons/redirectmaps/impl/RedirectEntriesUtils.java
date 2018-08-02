@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -86,22 +87,19 @@ public class RedirectEntriesUtils {
 
         log.info("Updating redirect map at {}", request.getResource().getPath());
 
+        Map<String, Object> fileParams = new HashMap<String, Object>();
+        fileParams.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE);
         Resource fileResource = ResourceUtil.getOrCreateResource(request.getResourceResolver(),
-                resource.getPath() + "/" + RedirectMapModel.MAP_FILE_NODE, new HashMap<String, Object>() {
-                    private static final long serialVersionUID = 1L;
-                    {
-                        put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE);
-                    }
-                }, JcrConstants.NT_UNSTRUCTURED, false);
+                resource.getPath() + "/" + RedirectMapModel.MAP_FILE_NODE, fileParams, JcrConstants.NT_UNSTRUCTURED,
+                false);
 
+        Map<String, Object> contentParams = new HashMap<String, Object>();
+        contentParams.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
+        contentParams.put(JcrConstants.JCR_MIMETYPE, "text/plain");
         Resource contentResource = ResourceUtil.getOrCreateResource(resource.getResourceResolver(),
-                fileResource.getPath() + "/" + JcrConstants.JCR_CONTENT, new HashMap<String, Object>() {
-                    private static final long serialVersionUID = 1L;
-                    {
-                        put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
-                        put(JcrConstants.JCR_MIMETYPE, "text/plain");
-                    }
-                }, JcrConstants.NT_UNSTRUCTURED, false);
+                fileResource.getPath() + "/" + JcrConstants.JCR_CONTENT, contentParams, JcrConstants.NT_UNSTRUCTURED,
+                false);
+        
         ModifiableValueMap mvm = contentResource.adaptTo(ModifiableValueMap.class);
         mvm.put(JcrConstants.JCR_DATA,
                 new ByteArrayInputStream(StringUtils.join(entries, "\n").getBytes(Charsets.UTF_8)));
