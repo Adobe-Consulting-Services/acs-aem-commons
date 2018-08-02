@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Fixed
