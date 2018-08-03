@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1413 - Added ACL to make the redirect maps globally readable
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Fixed
