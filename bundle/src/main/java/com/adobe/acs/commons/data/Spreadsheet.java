@@ -116,8 +116,7 @@ public class Spreadsheet {
 
         Row firstRow = rows.next();
         headerRow = readRow(firstRow).stream()
-                .map(Variant::toString)
-                .map(this::convertHeaderName)
+                .map(v -> v != null ? convertHeaderName(v.toString()) : null)
                 .collect(Collectors.toList());
         headerTypes = readRow(firstRow).stream()
                 .map(Variant::toString)
@@ -157,7 +156,7 @@ public class Spreadsheet {
         boolean empty = true;
         for (int i = 0; i < data.size() && i < getHeaderRow().size(); i++) {
             String colName = getHeaderRow().get(i);
-            if (data.get(i) != null && !data.get(i).isEmpty()) {
+            if (colName != null && data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
                 if (!out.containsKey(colName)) {
                     out.put(colName, new CompositeVariant(headerTypes.get(colName)));
