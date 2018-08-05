@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.wcm.pwa.impl;
+package com.adobe.acs.commons.cloudservices.pwa;
 
 import java.util.Calendar;
 import java.util.Set;
@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * </p>
  */
 @ProviderType
-public interface PWAConfiguration {
+public interface Configuration {
 
     /**
      * Returns the title of the item.
@@ -58,5 +58,9 @@ public interface PWAConfiguration {
      */
     @Nonnull
     Set<String> getQuickactionsRels();
+
+    String getIcon();
+
+    boolean show();
 
 }

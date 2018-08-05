@@ -1,0 +1,27 @@
+<sly data-sly-use.configuration="com.adobe.acs.commons.cloudservices.pwa.Configuration">
+
+    <tr is="coral-table-row"
+        class="foundation-collection-item ${resource['jcr:primaryType'] == 'cq:Page' ? '' : 'foundation-collection-navigator'}"
+        data-foundation-collection-item-id="${resource.path}">
+        <td is="coral-table-cell" coral-table-rowselect>
+            <coral-icon data-sly-test="${resource['jcr:primaryType'] != 'cq:Page'}"
+                        class="foundation-collection-item-thumbnail" icon="folder"></coral-icon>
+            <coral-icon data-sly-test="${resource['jcr:primaryType'] == 'cq:Page'}"
+                        class="foundation-collection-page-thumbnail" icon="${configuration.icon}"></coral-icon>
+        </td>
+        <td is="coral-table-cell" class="foundation-collection-item-title" value="${configuration.title}">
+            ${configuration.title}
+            <meta class="foundation-collection-quickactions"
+                  data-foundation-collection-quickactions-rel="${configuration.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
+        </td>
+        <td is="coral-table-cell"
+            data-sly-use.modified="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=configuration.lastModifiedDate, relativeFormat='r'}">
+            ${modified.date}
+        </td>
+        <td is="coral-table-cell"
+            data-sly-use.published="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=configuration.lastPublishedDate, relativeFormat='r'}">
+            ${published.date}
+        </td>
+    </tr>
+
+</sly>

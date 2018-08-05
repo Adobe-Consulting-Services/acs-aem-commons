@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="PWA Cloud Configuration Properties"
+        sling:resourceType="granite/ui/components/shell/propertiespage"
+        backHref="${empty header.Referer ? granite:concat(&quot;/apps/acs-commons/cloudservices/pwa/content/configurations.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 3))) : header.Referer}"
+        coral2="{Boolean}true"
+        formId="cq-sites-properties-form"
+        simpleSave="{Boolean}false">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[cq.conf.admin.acs-commons.pwa]"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/properties/title"
+            path="${param.item}"/>
+        <content
+            granite:class="cq-siteadmin-admin-properties cq-confadmin-create-acs-commons-pwa-item"
+            granite:id="cq-sites-properties-form"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/properties/form"
+            maximized="{Boolean}true"
+            path="${param.item}"
+            style="vertical">
+            <items jcr:primaryType="nt:unstructured">
+                <tabs
+                    granite:rel="cq-confadmin-create-acs-commons-pwa-item"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    maximized="{Boolean}true"
+                    size="L">
+                    <items jcr:primaryType="nt:unstructured">
+                        <service-worker
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="acs-commons/cloudservices/pwa/content/configurations/createcloudconfigwizard/jcr:content/body/items/form/items/wizard/items/service-worker-wizard-container"
+                            resourceType="granite/ui/components/coral/foundation/fixedcolumns"/>
+                        <manifest
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="acs-commons/cloudservices/pwa/content/configurations/createcloudconfigwizard/jcr:content/body/items/form/items/wizard/items/manifest-wizard-container"
+                            resourceType="granite/ui/components/coral/foundation/fixedcolumns"/>
+                    </items>
+                </tabs>
+            </items>
+        </content>
+    </jcr:content>
+</jcr:root>

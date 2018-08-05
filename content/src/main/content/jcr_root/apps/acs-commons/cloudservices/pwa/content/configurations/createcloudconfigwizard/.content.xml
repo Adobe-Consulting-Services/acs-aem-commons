@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Create PWA Configuration"
+        sling:resourceType="cq/gui/components/siteadmin/admin/createpagewizard/page">
+        <head jcr:primaryType="nt:unstructured">
+            <viewport
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/admin/page/viewport"/>
+            <favicon
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/page/favicon"/>
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[coralui3,granite.ui.coral.foundation]"/>
+        </head>
+        <body
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/page/body">
+            <items jcr:primaryType="nt:unstructured">
+                <form
+                    granite:class="cq-confadmin-create-acs-commons-pwa-item"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/form"
+                    action="/apps/acs-commons/cloudservices/pwa/content/configurations/createcloudconfigwizard/jcr:content"
+                    foundationForm="{Boolean}true"
+                    maximized="{Boolean}true"
+                    method="post"
+                    novalidate="{Boolean}true"
+                    style="vertical">
+                    <successresponse
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/responses/redirect"
+                        href="/apps/acs-commons/cloudservices/pwa/content/configurations.html${granite:encodeURIPath(requestPathInfo.suffix)}"/>
+                    <items jcr:primaryType="nt:unstructured">
+                        <charset
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="_charset_"
+                            value="utf-8"/>
+                        <parentPath
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="parentPath"
+                            value="${requestPathInfo.suffix}/settings/cloudconfigs"/>
+                        <name
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="pageName"
+                            value="pwa"/>
+                        <page-description
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./jcr:description"
+                            value="ACS Commons PWA cloud service configuration"/>
+                        <tagheader
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentHeader"
+                            value="acs-commons/cloudservices/pwa/components/scripttag/header"/>
+                        <tagfooter
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentFooter"
+                            value="acs-commons/cloudservices/pwa/scripttag/footer"/>
+                        <componentFooterRank
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentFooterRank"
+                            value="100"/>
+                        <componentFooterRankTypeHint
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentFooterRank@TypeHint"
+                            value="Long"/>
+                        <componentHeaderRank
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentHeaderRank"
+                            value="100"/>
+                        <componentHeaderRankTypeHint
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                            name="./tagComponentHeaderRank@TypeHint"
+                            value="Long"/>
+                        <wizard
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Create PWA Configuration"
+                            sling:resourceType="granite/ui/components/coral/foundation/wizard"
+                            cancelHref="${empty header.Referer ? granite:concat(&quot;/apps/acs-commons/cloudservices/pwa/content/configurations.html&quot;, granite:encodeURIPath(requestPathInfo.suffix)) : header.Referer}">
+                            <items jcr:primaryType="nt:unstructured">
+                                <service-worker-wizard-container
+                                    granite:class="general"
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Service Worker"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    maximized="{Boolean}true">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fixedcolumns
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                                            maximized="{Boolean}true">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <container
+                                                    granite:class="properties"
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <general
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
+                                                            <items jcr:primaryType="nt:unstructured">
+                                                                <root-path
+                                                                        granite:id="pwa-cloudconfiguration-root-path"
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                        fieldDescription="Location in the content hierarchy below which the service worker would cache the content"
+                                                                        fieldLabel="Service Worker Root Path"
+                                                                        name="./rootPath"
+                                                                        required="{Boolean}true"
+                                                                        rootPath="/content"
+                                                                        value="/"/>
+                                                                <fallback-path
+                                                                        granite:id="pwa-cloudconfiguration-fallback-url"
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                        fieldDescription="Content Page that would display when the requested url is not available when the user is offline"
+                                                                        fieldLabel="Fallback page"
+                                                                        name="./fallbackUrl"
+                                                                        rootPath="/content"/>
+
+                                                                <version
+                                                                        granite:id="pwa-cloudconfiguration-version"
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                                        fieldDescription="Use the convention Vx, where x is a number for e.g. V1 or V2. When updated, this field would reset the cache on the client's browser. Use it to invalidate the existing PWA configuration on client browser"
+                                                                        fieldLabel="Version Number"
+                                                                        name="./versionNum"
+                                                                        required="{Boolean}true"/>
+
+                                                                <dynamic-html-cache-restricted
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                                        fieldDescription="Click Add to add paths under content that should never be cached"
+                                                                        fieldLabel="Denied HTML Cache Paths">
+                                                                    <field
+                                                                            jcr:primaryType="nt:unstructured"
+                                                                            sling:resourceType="granite/ui/components/foundation/form/fieldset"
+                                                                            name="./deniedCachePaths">
+                                                                        <layout
+                                                                                jcr:primaryType="nt:unstructured"
+                                                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                                                method="absolute"/>
+                                                                        <items jcr:primaryType="nt:unstructured">
+                                                                            <column
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/foundation/container">
+                                                                                <items jcr:primaryType="nt:unstructured">
+                                                                                    <denied-html-cache
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                                            fieldLabel="Denied HTML Cache Paths"
+                                                                                            name="./deniedHTMLCache"/>
+                                                                                </items>
+                                                                            </column>
+                                                                        </items>
+                                                                    </field>
+                                                                </dynamic-html-cache-restricted>
+                                                                <dynamic-path-cache-restricted
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                                        fieldDescription="Click Add to add paths(css/js or any filetypes) that should never be cached"
+                                                                        fieldLabel="Denied Cache Paths">
+                                                                    <field
+                                                                            jcr:primaryType="nt:unstructured"
+                                                                            sling:resourceType="granite/ui/components/foundation/form/fieldset"
+                                                                            name="./deniedCachePaths">
+                                                                        <layout
+                                                                                jcr:primaryType="nt:unstructured"
+                                                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                                                method="absolute"/>
+                                                                        <items jcr:primaryType="nt:unstructured">
+                                                                            <column
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/foundation/container">
+                                                                                <items jcr:primaryType="nt:unstructured">
+                                                                                    <denied-assets-cache
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                                            fieldLabel="Denied Assets Path"
+                                                                                            name="./deniedAssetsCache"/>
+                                                                                </items>
+                                                                            </column>
+                                                                        </items>
+                                                                    </field>
+                                                                </dynamic-path-cache-restricted>
+                                                                <static-html-cache-restricted
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                                        fieldDescription="Click Add to add paths that should be cached on page load"
+                                                                        fieldLabel="HTML Cache Paths">
+                                                                    <field
+                                                                            jcr:primaryType="nt:unstructured"
+                                                                            sling:resourceType="granite/ui/components/foundation/form/fieldset">
+                                                                        <layout
+                                                                                jcr:primaryType="nt:unstructured"
+                                                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                                                method="absolute"/>
+                                                                        <items jcr:primaryType="nt:unstructured">
+                                                                            <column
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/foundation/container">
+                                                                                <items jcr:primaryType="nt:unstructured">
+                                                                                    <html-cache-path
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                                            fieldLabel="Pre-cached HTML Cache Path"
+                                                                                            name="./staticHTMLCache"/>
+                                                                                </items>
+                                                                            </column>
+                                                                        </items>
+                                                                    </field>
+                                                                </static-html-cache-restricted>
+                                                                <static-path-cache-restricted
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                                        fieldDescription="Click Add to add paths that should be cached on page load"
+                                                                        fieldLabel="Static Assets Cache Paths">
+                                                                    <field
+                                                                            jcr:primaryType="nt:unstructured"
+                                                                            sling:resourceType="granite/ui/components/foundation/form/fieldset">
+                                                                        <layout
+                                                                                jcr:primaryType="nt:unstructured"
+                                                                                sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                                                method="absolute"/>
+                                                                        <items jcr:primaryType="nt:unstructured">
+                                                                            <column
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/foundation/container">
+                                                                                <items jcr:primaryType="nt:unstructured">
+                                                                                    <static-cache-paths
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                                            fieldLabel="Pre-cached Cache Path"
+                                                                                            name="./staticAssetsCache"/>
+                                                                                </items>
+                                                                            </column>
+                                                                        </items>
+                                                                    </field>
+                                                                </static-path-cache-restricted>
+
+                                                                <resourceType
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                                                    name="./sling:resourceType"
+                                                                    value="acs-commons/cloudservices/pwa/components/conf/page"/>
+                                                            </items>
+                                                        </general>
+                                                    </items>
+                                                </container>
+                                            </items>
+                                        </fixedcolumns>
+                                    </items>
+                                    <parentConfig jcr:primaryType="nt:unstructured">
+                                        <next
+                                            granite:class="foundation-wizard-control"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/button"
+                                            disabled="{Boolean}false"
+                                            text="Next"
+                                            variant="primary">
+                                            <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                foundation-wizard-control-action="next"/>
+                                        </next>
+                                    </parentConfig>
+                                </service-worker-wizard-container>
+                                <manifest-wizard-container
+                                    granite:class="manifest"
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Manifest"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container"
+                                    maximized="{Boolean}true">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fixedcolumns
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                                            maximized="{Boolean}true">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <container
+                                                    granite:class="properties"
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <application-name
+                                                                granite:id="pwa-cloudconfiguration-name"
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                                fieldDescription="The Application name to be displayed when the site launches from the splash screen"
+                                                                fieldLabel="Application Name"
+                                                                name="./jcr:title"
+                                                                required="{Boolean}true"/>
+                                                        <application-short-name
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                                fieldDescription="The Short name to be displayed when the site launches from the splash screen"
+                                                                fieldLabel="Application Short Name"
+                                                                name="./shortName"
+                                                                required="{Boolean}true"/>
+                                                        <start-url
+                                                                granite:id="pwa-cloudconfiguration-start-url"
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                fieldDescription="Unless otherwise required. Keep '/'"
+                                                                fieldLabel="Start Url"
+                                                                name="./startUrl"
+                                                                required="{Boolean}true"
+                                                                rootPath="/content"
+                                                                value="/"/>
+                                                        <background-color
+                                                                granite:id="pwa-cloudconfiguration-bg-color"
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/colorfield"
+                                                                fieldDescription="The default color that would display when the application launches from the splash screen"
+                                                                fieldLabel="Background Color"
+                                                                name="./bgColor"
+                                                                required="{Boolean}true"/>
+                                                        <theme-color
+                                                                granite:id="pwa-cloudconfiguration-theme-color"
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/colorfield"
+                                                                fieldLabel="Theme Color"
+                                                                name="./themeColor"
+                                                                required="{Boolean}true"/>
+                                                        <display-type
+                                                                granite:id="pwa-cloudconfiguration-display-type"
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                                fieldDescription="The application display behavior when launched"
+                                                                fieldLabel="Display Type"
+                                                                name="./display"
+                                                                required="{Boolean}true">
+                                                            <items jcr:primaryType="nt:unstructured">
+                                                                <standalone
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        text="Standalone"
+                                                                        value="standalone"/>
+                                                                <fullscreen
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        text="Fullscreen"
+                                                                        value="fullscreen"/>
+                                                                <browser
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        text="Browser"
+                                                                        value="browser"/>
+                                                            </items>
+                                                        </display-type>
+                                                        <icons
+                                                                jcr:primaryType="nt:unstructured"
+                                                                sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                                                fieldDescription="Click on Add Field to add more Icons. "
+                                                                fieldLabel=" Icon Info"
+                                                                required="{Boolean}true">
+                                                            <field
+                                                                    jcr:primaryType="nt:unstructured"
+                                                                    sling:resourceType="granite/ui/components/foundation/form/fieldset"
+                                                                    name="./iconsDetails">
+                                                                <layout
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"
+                                                                        method="absolute"/>
+                                                                <items jcr:primaryType="nt:unstructured">
+                                                                    <column
+                                                                            jcr:primaryType="nt:unstructured"
+                                                                            sling:resourceType="granite/ui/components/foundation/container">
+                                                                        <items jcr:primaryType="nt:unstructured">
+                                                                            <src
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
+                                                                                    fieldLabel="Icon Image Path"
+                                                                                    name="./src"
+                                                                                    required="{Boolean}true"/>
+                                                                            <sizes
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                                                    fieldLabel="Size"
+                                                                                    name="./size">
+                                                                                <items jcr:primaryType="nt:unstructured">
+                                                                                    <one-four-four
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            text="144x144"
+                                                                                            value="144x144"/>
+                                                                                    <one-nine-two
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            text="192x192"
+                                                                                            value="192x192"/>
+                                                                                    <five-one-two
+                                                                                            jcr:primaryType="nt:unstructured"
+                                                                                            text="512x512"
+                                                                                            value="512x512"/>
+                                                                                </items>
+                                                                            </sizes>
+                                                                            <types
+                                                                                    jcr:primaryType="nt:unstructured"
+                                                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield/readonly"
+                                                                                    fieldLabel="Type"
+                                                                                    name="./type"
+                                                                                    readOnly="{Boolean}true"
+                                                                                    value="image/png"/>
+                                                                        </items>
+                                                                    </column>
+                                                                </items>
+                                                            </field>
+                                                        </icons>
+                                                    </items>
+                                                </container>
+                                            </items>
+                                        </fixedcolumns>
+                                    </items>
+                                    <parentConfig jcr:primaryType="nt:unstructured">
+                                        <prev
+                                            granite:class="foundation-wizard-control"
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                                            text="Back">
+                                            <granite:data
+                                                jcr:primaryType="nt:unstructured"
+                                                foundation-wizard-control-action="prev"/>
+                                        </prev>
+                                        <next
+                                                granite:class="foundation-wizard-control"
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/button"
+                                                disabled="{Boolean}false"
+                                                text="Create"
+                                                type="submit"
+                                                variant="primary">
+                                            <granite:data
+                                                    jcr:primaryType="nt:unstructured"
+                                                    foundation-wizard-control-action="next"/>
+                                        </next>
+                                    </parentConfig>
+                                </manifest-wizard-container>
+                            </items>
+                        </wizard>
+                    </items>
+                </form>
+            </items>
+        </body>
+    </jcr:content>
+    <properties
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="cq/gui/components/siteadmin/admin/createpagewizard/properties"
+        template="${requestPathInfo.suffix}"/>
+</jcr:root>
