@@ -72,11 +72,10 @@
                             com.adobe.acs.commons.wcm.comparisons.model,
                             com.adobe.acs.commons.workflow.bulk.execution.model,
                             com.adobe.acs.commons.mcp.model,
-                            com.adobe.acs.commons.reports.models
+                            com.adobe.acs.commons.reports.models,
+                            com.adobe.acs.commons.cloudservices,
+                            com.adobe.acs.commons.cloudservices.pwa,
                         </Sling-Model-Packages>
-                        <Export-Package>
-                            com.adobe.acs.commons.wcm.pwa.impl
-                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

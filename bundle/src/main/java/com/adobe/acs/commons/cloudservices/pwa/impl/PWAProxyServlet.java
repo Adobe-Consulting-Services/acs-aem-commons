@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.wcm.pwa.impl;
+package com.adobe.acs.commons.cloudservices.pwa.impl;
 
 import com.adobe.granite.confmgr.Conf;
 import com.adobe.granite.confmgr.ConfMgr;
