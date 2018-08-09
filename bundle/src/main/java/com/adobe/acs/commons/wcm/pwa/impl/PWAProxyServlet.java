@@ -166,7 +166,7 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
         ValueMap manifestSettings = getConfigProperties(request);
         if (manifestSettings != null) {
             try {
-                jsonObject.put("name", manifestSettings.get("applicationName", "PWAName"));
+                jsonObject.put("name", manifestSettings.get("appName", "PWAName"));
                 jsonObject.put("short_name", manifestSettings.get("shortName", "PWA ShortName"));
                 jsonObject.put("icons", getManifestIcons(manifestSettings));
                 jsonObject.put("start_url", manifestSettings.get("startUrl", "."));
