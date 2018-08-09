@@ -1,0 +1,23 @@
+<sly data-sly-use.configuration="com.adobe.acs.commons.cloudservices.pwa.Configuration">
+    <coral-columnview-item class="foundation-collection-item"
+                           data-sly-test="${configuration.show}"
+                           data-sly-attribute.variant="${configuration.hasChildren ? 'drilldown' : ''}"
+                           data-foundation-collection-item-id="${resource.path}">
+        <!-- CVI: ${configuration.hasChildren} -->
+        <coral-columnview-item-thumbnail>
+            <coral-icon data-sly-test="${resource['jcr:primaryType'] != 'cq:Page'}"
+                        class="foundation-collection-item-thumbnail" icon="folder"></coral-icon>
+            <coral-icon data-sly-test="${resource['jcr:primaryType'] == 'cq:Page'}"
+                        class="foundation-collection-page-thumbnail" icon="${configuration.icon}"></coral-icon>
+        </coral-columnview-item-thumbnail>
+        <coral-columnview-item-content>
+            <div class="foundation-collection-item-title" itemprop="title" title="${configuration.title}">
+                ${configuration.title}
+            </div>
+        </coral-columnview-item-content>
+        <meta class="foundation-collection-quickactions"
+              data-foundation-collection-quickactions-rel="${configuration.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
+        <meta itemprop="lastmodified" content="${configuration.lastModifiedDate}">
+        <meta itemprop="lastmodifiedby" content="${configuration.lastModifiedBy}">
+    </coral-columnview-item>
+</sly>

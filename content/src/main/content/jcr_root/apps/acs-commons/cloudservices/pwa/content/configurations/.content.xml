@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="AEM | PWA Cloud Service Configurations"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        consoleId="cq-acs-commons-pwa-configurations"
+        contentPath="${requestPathInfo.suffix}"
+        currentView="${state[&quot;acs-commons.pwa.shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="cq-confadmin-admin-childpages"
+        pageURITemplate="/apps/acs-commons/cloudservices/pwa/content/configurations.html{+id}"
+        targetCollection=".cq-confadmin-admin-childpages">
+        <redirector
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/admin/contentchecker"
+            allowed="^(/conf|/conf/(.*))$"
+            path="${requestPathInfo.suffix}"
+            redirectWhenEmpty="/apps/acs-commons/cloudservices/pwa/content/configurations.html/conf"/>
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/includeclientlibs"
+                categories="[cq.common.wcm,cq.conf.admin.acs-commons.pwa]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <column
+                granite:rel="cq-confadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Column View"
+                sling:resourceType="granite/ui/components/coral/foundation/columnview"
+                icon="viewColumn"
+                limit="{Long}40"
+                loadAncestors="{Boolean}true"
+                metaResourceType="acs-commons/cloudservices/pwa/components/admin/meta"
+                modeGroup="cq-confadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                previewSrc="/mnt/overlay/acs-commons/cloudservices/pwa/content/commons/columnpreview.html{+id}"
+                rootPath="/conf"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/acs-commons/cloudservices/pwa/content/configurations/jcr:content/views/column{.offset,limit}.html{+id}">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    allowedResourceTypes="[acs-commons/cloudservices/pwa/components/conf/page]"/>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/cloudconfig/components/admin/datasources/configurations"
+                    itemResourceType="acs-commons/cloudservices/pwa/components/admin/views/column"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${requestPathInfo.suffix}"/>
+            </column>
+            <card
+                granite:rel="cq-confadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Card View"
+                sling:resourceType="granite/ui/components/coral/foundation/masonry"
+                icon="viewCard"
+                layoutId="card"
+                limit="{Long}20"
+                metaResourceType="acs-commons/cloudservices/pwa/components/admin/meta"
+                modeGroup="cq-confadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                selectionMode="${state[&quot;acs-commons.pwa.shell.collectionpage.selectionMode&quot;].boolean}"
+                size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/acs-commons/cloudservices/pwa/content/configurations/jcr:content/views/card{.offset,limit}.html{+id}"
+                stateId="acs-commons.pwa.shell.collectionpage">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    allowedResourceTypes="[acs-commons/cloudservices/pwa/components/conf/page]"/>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/cloudconfig/components/admin/datasources/configurations"
+                    itemResourceType="acs-commons/cloudservices/pwa/components/admin/views/card"/>
+            </card>
+            <list
+                granite:rel="cq-confadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="List View"
+                sling:resourceType="granite/ui/components/coral/foundation/table"
+                icon="viewList"
+                layoutId="list"
+                limit="{Long}40"
+                metaResourceType="acs-commons/cloudservices/pwa/components/admin/meta"
+                modeGroup="cq-confadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                selectionMode="row"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                sortMode="remote"
+                src="/mnt/overlay/acs-commons/cloudservices/pwa/content/configurations/jcr:content/views/list{.offset,limit}.html{+id}{?sortName,sortDir}"
+                stateId="acs-commons.pwa.shell.collectionpage">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    allowedResourceTypes="[acs-commons/cloudservices/pwa/components/conf/page]"/>
+                <columns jcr:primaryType="nt:unstructured">
+                    <select
+                        jcr:primaryType="nt:unstructured"
+                        select="{Boolean}true"/>
+                    <title
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Title"
+                        sortable="{Boolean}true"/>
+                    <modified
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Modified"
+                        sortable="{Boolean}true"
+                        sortType="date"/>
+                    <published
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Published"
+                        sortable="{Boolean}true"
+                        sortType="date"/>
+                </columns>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/cloudconfig/components/admin/datasources/configurations"
+                    itemResourceType="acs-commons/cloudservices/pwa/components/admin/views/row"/>
+            </list>
+        </views>
+        <breadcrumbs
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/cloudconfig/components/admin/datasources/breadcrumbs"
+            rootPath="/conf"
+            rootTitle="PWA Cloud Service Configurations"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <primary jcr:primaryType="nt:unstructured"/>
+            <secondary jcr:primaryType="nt:unstructured">
+                <create
+                    granite:class="cq-confadmin-actions-createconfig-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    relScope="collection"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Create"
+                    variant="primary">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/apps/acs-commons/cloudservices/pwa/content/configurations/createcloudconfigwizard.html{+id}"/>
+                    <granite:rendercondition
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/renderconditions/privilege"
+                        path="/conf"
+                        privileges="[jcr:write]"/>
+                </create>
+            </secondary>
+            <selection jcr:primaryType="nt:unstructured">
+                <viewproperties
+                    granite:class="cq-confadmin-actions-properties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    icon="infoCircle"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Properties"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/acs-commons/cloudservices/pwa/content/configurations/properties.html{?item*}"/>
+                </viewproperties>
+                <publish
+                    granite:rel="cq-confadmin-actions-publish-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.publish"
+                    activeSelectionCount="multiple"
+                    icon="globe"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Publish"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-confadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        referenceSrc.url="/libs/wcm/core/content/reference.json?_charset_=utf-8{&amp;path*}"
+                        wizardSrc.uritemplate="/mnt/overlay/wcm/core/content/sites/publishpagewizard.html?_charset_=utf-8{&amp;item*}"/>
+                </publish>
+                <unpublish
+                    granite:class="foundation-collection-action"
+                    granite:rel="cq-confadmin-actions-unpublish-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.unpublish"
+                    icon="globeStrike"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Unpublish"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        referenceSrc.url="/bin/wcm/references.json?_charset_=utf-8{&amp;path*}"/>
+                </unpublish>
+                <delete
+                    granite:rel="cq-confadmin-actions-delete-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.delete"
+                    activeSelectionCount="multiple"
+                    icon="delete"
+                    target=".cq-confadmin-admin-childpages"
+                    text="Delete"
+                    variant="actionBar"/>
+            </selection>
+        </actions>
+        <rails jcr:primaryType="nt:unstructured">
+            <references
+                granite:class="cq-rail-references"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="References"
+                sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel">
+                <items jcr:primaryType="nt:unstructured">
+                    <references
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="References"
+                        sling:resourceType="granite/ui/references/components/coral/references"
+                        adminUrl="/apps/acs-commons/cloudservices/pwa/content/configurations.html/conf"
+                        text="References">
+                        <items jcr:primaryType="nt:unstructured">
+                            <list
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/contsys"
+                                class="list">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <contents
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/references/components/coral/group"
+                                        title="Content References">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <contentreferences
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/references/components/coral/type"
+                                                itemResourceType="cq/cloudconfig/components/admin/references"
+                                                title="Pages Using Configuration"
+                                                type="confReference"/>
+                                        </items>
+                                    </contents>
+                                </items>
+                            </list>
+                        </items>
+                    </references>
+                </items>
+            </references>
+        </rails>
+    </jcr:content>
+    <createcloudconfigwizard/>
+    <properties/>
+</jcr:root>
