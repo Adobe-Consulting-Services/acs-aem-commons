@@ -1,23 +1,23 @@
-<sly data-sly-use.configuration="com.adobe.acs.commons.cloudservices.pwa.Configuration">
+<sly data-sly-use.conf="com.adobe.acs.commons.cloudservices.pwa.ConfItem"
+     data-sly-test="${conf.valid}">
     <coral-columnview-item class="foundation-collection-item"
-                           data-sly-test="${configuration.show}"
-                           data-sly-attribute.variant="${configuration.hasChildren ? 'drilldown' : ''}"
+                           data-sly-attribute.variant="${conf.hasChildren ? 'drilldown' : ''}"
                            data-foundation-collection-item-id="${resource.path}">
-        <!-- CVI: ${configuration.hasChildren} -->
         <coral-columnview-item-thumbnail>
             <coral-icon data-sly-test="${resource['jcr:primaryType'] != 'cq:Page'}"
                         class="foundation-collection-item-thumbnail" icon="folder"></coral-icon>
             <coral-icon data-sly-test="${resource['jcr:primaryType'] == 'cq:Page'}"
-                        class="foundation-collection-page-thumbnail" icon="${configuration.icon}"></coral-icon>
+                        class="foundation-collection-page-thumbnail" icon="${conf.icon}"></coral-icon>
         </coral-columnview-item-thumbnail>
         <coral-columnview-item-content>
-            <div class="foundation-collection-item-title" itemprop="title" title="${configuration.title}">
-                ${configuration.title}
+            <div class="foundation-collection-item-title" itemprop="title" title="${conf.title}">
+                ${conf.title}
             </div>
         </coral-columnview-item-content>
         <meta class="foundation-collection-quickactions"
-              data-foundation-collection-quickactions-rel="${configuration.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
-        <meta itemprop="lastmodified" content="${configuration.lastModifiedDate}">
-        <meta itemprop="lastmodifiedby" content="${configuration.lastModifiedBy}">
+              data-foundation-collection-quickactions-rel="${conf.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
+        <meta itemprop="lastmodified" content="${conf.lastModifiedDate}">
+        <meta itemprop="lastmodifiedby" content="${conf.lastModifiedBy}">
     </coral-columnview-item>
 </sly>
+<!-- VALID ${conf.valid} -->

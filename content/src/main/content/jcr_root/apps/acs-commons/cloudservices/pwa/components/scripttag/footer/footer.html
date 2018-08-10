@@ -1,15 +1,10 @@
-<sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration' @ useResource=request.requestPathInfo.suffixResource}"></sly>
+<sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration'}"
+    data-sly-test.ready="${configuration.ready}"
+    data-sly-test.categories="${configuration.pwaJsCategories}">
+    <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+         data-sly-call="${clientlib.js @ categories=categories}"/>
+</sly>
 
-<script>
-console.log("Add the PWA Service Worker JS include here. It should pull from the PWA root");
-</script>
-
-<!--/*
-TODO: This should probably be configurable wrt to what it pulls in.
-
-<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
-     data-sly-call="${clientlib.js @ categories=['acs-commons.pwa']}"/>
-*-->
-
-
-
+<sly data-sly-test="${!ready && categories}">
+    <!-- PWA footer includes disabled on AEM Author. These will only be added on AEM Publish. -->
+</sly>

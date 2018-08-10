@@ -1,4 +1,4 @@
-<sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration' @ useResource=request.requestPathInfo.suffixResource}"
+<sly data-sly-use.conf="${'com.adobe.acs.commons.cloudservices.ConfItem' @ useResource=request.requestPathInfo.suffixResource}"
      data-sly-use.meta="${'com.adobe.acs.commons.cloudservices.Meta'}">
     <coral-columnview-preview>
         <coral-columnview-preview-content>
@@ -7,37 +7,37 @@
                             class="foundation-collection-item-thumbnail" icon="folder" size="XL"
                             role="img"></coral-icon>
                 <coral-icon data-sly-test="${request.requestPathInfo.suffixResource['jcr:primaryType'] == 'cq:Page'}"
-                            class="foundation-collection-page-thumbnail" icon="${configuration.icon}" size="XL"
+                            class="foundation-collection-page-thumbnail" icon="${conf.icon}" size="XL"
                             role="img"></coral-icon>
             </coral-columnview-preview-asset>
 
             <coral-columnView-preview-label>${"Config Type" @ i18n, locale=request.locale}</coral-columnView-preview-label>
             <coral-columnview-preview-value>${"Progressive Web Application" @ i18n, locale=request.locale}&nbsp;</coral-columnview-preview-value>
             <coral-columnView-preview-label
-                    data-sly-test="${configuration.title}">${"Title" @ i18n, locale=request.locale}
+                    data-sly-test="${conf.title}">${"Title" @ i18n, locale=request.locale}
             </coral-columnView-preview-label>
             <coral-columnview-preview-value
-                    data-sly-test="${configuration.title}">${configuration.title}&nbsp;
+                    data-sly-test="${conf.title}">${conf.title}&nbsp;
             </coral-columnview-preview-value>
             <coral-columnView-preview-label>${"Name" @ i18n, locale=request.locale}</coral-columnView-preview-label>
             <coral-columnview-preview-value>${request.requestPathInfo.suffixResource.name}&nbsp;
             </coral-columnview-preview-value>
             <coral-columnView-preview-label
-                    data-sly-test="${configuration.lastModifiedDate}">${"Modified" @ i18n, locale=request.locale}
+                    data-sly-test="${conf.lastModifiedDate}">${"Modified" @ i18n, locale=request.locale}
             </coral-columnView-preview-label>
-            <coral-columnview-preview-value data-sly-test="${configuration.lastModifiedDate}"
-                                            data-sly-use.modified="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=configuration.lastModifiedDate, relativeFormat='r'}"
-                                            datetime="${configuration.lastModifiedDate.timeInMillis}">
+            <coral-columnview-preview-value data-sly-test="${conf.lastModifiedDate}"
+                                            data-sly-use.modified="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=conf.lastModifiedDate, relativeFormat='r'}"
+                                            datetime="${conf.lastModifiedDate.timeInMillis}">
                 ${modified.date}&nbsp;
             </coral-columnview-preview-value>
-            <coral-columnView-preview-label data-sly-test="${configuration.lastModifiedBy}">${"Modified By" @ i18n,
+            <coral-columnView-preview-label data-sly-test="${conf.lastModifiedBy}">${"Modified By" @ i18n,
                 locale=request.locale}
             </coral-columnView-preview-label>
-            <coral-columnview-preview-value data-sly-test="${configuration.lastModifiedBy}">
-                ${configuration.lastModifiedBy}&nbsp;
+            <coral-columnview-preview-value data-sly-test="${conf.lastModifiedBy}">
+                ${conf.lastModifiedBy}&nbsp;
             </coral-columnview-preview-value>
             <div hidden="hidden" class="foundation-collection-meta"
-                 data-foundation-collection-meta-title="${configuration.title}"
+                 data-foundation-collection-meta-title="${conf.title}"
                  data-foundation-collection-meta-rel="${meta.actionsRels.isEmpty ? 'none' : meta.actionsRels @join=' '}">
                 <coral-icon class="foundation-collection-item-thumbnail" icon="folder" size="XL"
                             role="img"></coral-icon>

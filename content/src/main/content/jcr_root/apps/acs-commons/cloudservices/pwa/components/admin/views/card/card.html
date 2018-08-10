@@ -1,4 +1,4 @@
-<sly data-sly-use.configuration="com.adobe.acs.commons.cloudservices.pwa.Configuration">
+<sly data-sly-use.conf="com.adobe.acs.commons.cloudservices.pwa.ConfItem">
 
 <!--/* Folder */-->
 <coral-card data-sly-test="${resource['jcr:primaryType'] != 'cq:Page'}"
@@ -6,9 +6,9 @@
      data-foundation-collection-item-id="${resource.path}">
     <coral-card-content>
         <coral-card-context data-sly-test="${resource['jcr:primaryType'] != 'cq:Page'}" class="coral-Card-context">${'Folder' @ i18n, locale=request.locale}</coral-card-context>
-        <coral-card-title class="foundation-collection-item-title">${configuration.title}</coral-card-title>
+        <coral-card-title class="foundation-collection-item-title">${conf.title}</coral-card-title>
     </coral-card-content>
-    <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="${configuration.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
+    <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="${conf.quickactionsRels.isEmpty ? 'none' : conf.quickactionsRels @join=' '}">
 </coral-card>
 
 
@@ -16,36 +16,36 @@
 <coral-card data-sly-test="${resource['jcr:primaryType'] == 'cq:Page'}"
             data-foundation-collection-item-id="${resource.path}">
     <coral-card-asset>
-        <coral-icon icon="${configuration.icon}" size="XXL"></coral-icon>
+        <coral-icon icon="${conf.icon}" size="XXL"></coral-icon>
     </coral-card-asset>
     <coral-card-info></coral-card-info>
     <coral-card-content>
         <coral-card-context class="coral-Card-context">${'PWA Configuration' @ i18n, locale=request.locale}</coral-card-context>
-        <coral-card-title class="foundation-collection-item-title">${configuration.title}</coral-card-title>
+        <coral-card-title class="foundation-collection-item-title">${conf.title}</coral-card-title>
         <coral-card-propertylist>
-            <coral-card-property data-sly-test="${configuration.lastModifiedDate}" icon="edit" title="${'Modified' @ i18n, locale=request.locale}">
-                <time data-sly-use.modified="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=configuration.lastModifiedDate, relativeFormat='r'}"
-                      datetime="${configuration.lastModifiedDate.timeInMillis}">
+            <coral-card-property data-sly-test="${conf.lastModifiedDate}" icon="edit" title="${'Modified' @ i18n, locale=request.locale}">
+                <time data-sly-use.modified="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=conf.lastModifiedDate, relativeFormat='r'}"
+                      datetime="${conf.lastModifiedDate.timeInMillis}">
                     ${modified.date}
                 </time>
             </coral-card-property>
-            <coral-card-property data-sly-test="${configuration.lastPublishedDate}" icon="globe" title="${'Published' @ i18n, locale=request.locale}">
-                <time data-sly-use.published="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=configuration.lastPublishedDate, relativeFormat='r'}"
-                      datetime="${configuration.lastPublishedDate.timeInMillis}">
+            <coral-card-property data-sly-test="${conf.lastPublishedDate}" icon="globe" title="${'Published' @ i18n, locale=request.locale}">
+                <time data-sly-use.published="${'com.adobe.cq.cloudconfig.ui.commons.DateFormatter' @ date=conf.lastPublishedDate, relativeFormat='r'}"
+                      datetime="${conf.lastPublishedDate.timeInMillis}">
                     ${published.date}
                 </time>
             </coral-card-property>
-            <coral-card-property data-sly-test="${!configuration.lastPublishedDate}" icon="globeRemove">
+            <coral-card-property data-sly-test="${!conf.lastPublishedDate}" icon="globeRemove">
                 ${'Not published' @ i18n, locale=request.locale}
             </coral-card-property>
         </coral-card-propertylist>
     </coral-card-content>
-    <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="${configuration.quickactionsRels.isEmpty ? 'none' : configuration.quickactionsRels @join=' '}">
+    <meta class="foundation-collection-quickactions" data-foundation-collection-quickactions-rel="${conf.quickactionsRels.isEmpty ? 'none' : conf.quickactionsRels @join=' '}">
 </coral-card>
 
 <coral-quickactions target="_prev" alignmy="left top" alignat="left top">
     <coral-quickactions-item icon="check" class="foundation-collection-item-activator">${'Select' @ i18n, locale=request.locale}</coral-quickactions-item>
-    <div data-sly-list.quickaction="${configuration.quickactionsRels}" data-sly-unwrap>
+    <div data-sly-list.quickaction="${conf.quickactionsRels}" data-sly-unwrap>
         <coral-quickactions-item
                 icon="edit" class="foundation-collection-action"
                 data-sly-test="${quickaction == 'cq-confadmin-admin-actions-edit-activator'}"

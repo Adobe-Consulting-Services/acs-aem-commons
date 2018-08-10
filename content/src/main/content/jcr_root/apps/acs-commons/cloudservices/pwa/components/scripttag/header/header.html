@@ -1,4 +1,10 @@
-<sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration' @ useResource=request.requestPathInfo.suffixResource}"></sly>
+<sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration'}"
+     data-sly-test.ready="${configuration.ready}"
+     data-sly-test.path="${configuration.scopePath}">
+    <link rel="manifest" href="${path}.pwa.manifest.json" type="application/manifest+json" crossOrigin="use-credentials">
+    <meta name="pwa.root" value="${path}">
+</sly>
 
-<!--/* TODO: Implement this */-->
-<meta name="pwa.root" value="configuration.scope"></meta>
+<sly data-sly-test="${!ready && path}">
+    <!-- PWA head includes disabled on AEM Author. These will only be added on AEM Publish. -->
+</sly>
