@@ -2,18 +2,26 @@ package com.adobe.acs.commons.adobeio.core.config;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 
-@ObjectClassDefinition(name = "Adobe I/O. Endpoint Factory Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Endpoint Factory Configuration",
         description = "Configuration of Adobe.io endpoints")
 public @interface EndpointConfiguration {
 
     @AttributeDefinition(name = "ID", description = "Id of the endpoint")
     String getId();
 
-    @AttributeDefinition(name = "Tenant", description = "Tenant used for this endpoint")
-    String getTenant();
-
-    @AttributeDefinition(name = "Method", description = "Used method for the endpoint")
+    @AttributeDefinition(
+    	name = "Method",
+    	description = "Used method for the endpoint",
+		options = {
+                @Option(label = "GET", value = "GET"),
+                @Option(label = "POST", value = "POST"),
+                @Option(label = "PUT", value = "PUT"),
+                @Option(label = "DELETE", value = "DELETE"),
+                @Option(label = "PATCH", value = "PATCH")
+        }
+    )
     String getMethod();
 
     @AttributeDefinition(name = "URL Endpoint", description = "Endpoint, without /campaign/, but starting with /")
@@ -22,14 +30,8 @@ public @interface EndpointConfiguration {
     @AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O. egg: https://[mc|stock|...].adobe.io", defaultValue = "https://mc.adobe.io")
 	String getIODomain();
     
-    @AttributeDefinition(name = "Adobe I/O Endpoint ID", description = "ID used to bind service configuration with I/O integration configuration", defaultValue = "test")
-    String getEndPointConfigID();
-    
-	@AttributeDefinition(name = "Service", description = "Service. Enter campaign, stock, analytics, etc...", defaultValue = "")
-	String getService();
-    
-    @AttributeDefinition(name = "Service specific Header", description = "egg: x-product:app-name,custom-header:custom,...", defaultValue = "")
-    String getSpecificServiceHeader();
+    @AttributeDefinition(name = "Service specific Header", description = "{header_key:header_value} egg: x-product:app-name")
+    String[] getSpecificServiceHeader();
 
     String webconsole_configurationFactory_nameHint() default "Endpoint <b>{getTenant} - {getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
 

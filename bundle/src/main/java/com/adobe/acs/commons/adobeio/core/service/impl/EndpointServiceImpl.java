@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
@@ -37,7 +36,6 @@ import com.adobe.acs.commons.adobeio.core.config.EndpointConfiguration;
 import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.acs.commons.adobeio.core.service.HttpClientService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
-import com.adobe.acs.commons.adobeio.core.service.IntegrationServiceFactory;
 import com.adobe.acs.commons.adobeio.core.types.Filter;
 import com.adobe.acs.commons.adobeio.core.types.PKey;
 import com.adobe.acs.commons.adobeio.exception.AdobeIOException;
@@ -60,13 +58,12 @@ public class EndpointServiceImpl implements EndpointService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceImpl.class);
     private EndpointConfiguration config;
+    
+    @Reference
     private IntegrationService integrationService;
 
     @Reference
     private HttpClientService httpClientService;
-
-    @Reference
-    private IntegrationServiceFactory integrationServiceFactory;
 
     private String endpointId;
 
@@ -76,11 +73,10 @@ public class EndpointServiceImpl implements EndpointService {
         LOGGER.debug("Start ACTIVATE Endpoint {}", config.getId());
         this.config = config;
         this.endpointId = config.getId();
-        this.integrationService = integrationServiceFactory.getService(config.getTenant(), config.getEndPointConfigID());
         LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
 
         if (null == this.integrationService) {
-            throw new AdobeIOException("Integration-service not defined for tenant "+config.getTenant());
+            throw new AdobeIOException("Integration-service not defined");
         }
     }
 
@@ -310,14 +306,6 @@ public class EndpointServiceImpl implements EndpointService {
             endpoint = endpoint + "/" + pKey.getValue();
         }
         
-        if (StringUtils.isNotBlank(integrationService.getTenant())) {
-        	url = url.concat("/").concat(integrationService.getTenant());
-		}
-        
-        if (StringUtils.isNotBlank(this.config.getService())) {
-        	url = url.concat("/").concat(this.config.getService());
-		}
-        
         url = url.concat("/").concat(endpoint);
         
         return url;
@@ -368,28 +356,15 @@ public class EndpointServiceImpl implements EndpointService {
 	}
 
 	@Override
-	public String getEndPointConfigID() {
-		return this.config.getEndPointConfigID();
-	}
-
-	@Override
 	public Map<String, String> getSpecificServiceHeader() {
 		Map<String, String> mapHeader = new HashMap<String, String>();
-		String headerAsString = this.config.getSpecificServiceHeader();
+		String[] headerAsTabOfString = this.config.getSpecificServiceHeader();
 		
-		if (StringUtils.isNotBlank(headerAsString)) {
-			StringTokenizer st = new StringTokenizer(headerAsString, ",");
-			while (st.hasMoreTokens()) {
-			    String token = st.nextToken();
-			    mapHeader.put(StringUtils.substringBefore(token, ":"), StringUtils.substringAfter(token, ":"));
-			}
+		for (String headerAsString : headerAsTabOfString) {
+			mapHeader.put(StringUtils.substringBefore(headerAsString, ":"), StringUtils.substringAfter(headerAsString, ":"));
 		}
 		
 		return mapHeader;
 	}
 
-	@Override
-	public String getService() {
-		return this.config.getService();
-	}
 }

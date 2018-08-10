@@ -46,7 +46,7 @@ import io.jsonwebtoken.Jwts;
 @SuppressWarnings("PackageAccessibility")
 @Component(service = {IntegrationService.class, Runnable.class},
         property = "scheduler.expression=0 0 0/1 1/1 * ? *")
-@Designate(ocd = IntegrationConfiguration.class, factory=true)
+@Designate(ocd = IntegrationConfiguration.class, factory=false)
 public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
@@ -80,27 +80,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     public String getAPIKey() {
         return jwtServiceConfig.getClientId();
     }
-
-//    @Override
-//    public String getIODomain() {
-//        return jwtServiceConfig.getIODomain();
-//    }
-
-    @Override
-    public String getTenant() {
-        return jwtServiceConfig.getTenant();
-    }
     
-    @Override
-	public String getIntegrationID() {
-		return jwtServiceConfig.getIntegrationID();
-	}
-
-//    @Override
-//    public String getService() {
-//        return jwtServiceConfig.getService();
-//    }
-
     // --------    PRIVATE METHODS    ----------
     private String fetchAccessToken() {
         String token = StringUtils.EMPTY;
@@ -163,7 +143,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     }
 
     private static byte[] buildPKCS8Key(String privateKey) throws AdobeIOException {
-        LOGGER.info("From file : " + privateKey);
+//        LOGGER.info("From file : " + privateKey);
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }

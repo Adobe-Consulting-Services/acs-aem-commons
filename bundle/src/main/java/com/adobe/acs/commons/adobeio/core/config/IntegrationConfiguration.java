@@ -4,7 +4,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(name = "Adobe I/O. Integration Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Integration Configuration",
 		description = "Configuration of Adobe.IO access")
 public @interface IntegrationConfiguration {
 
@@ -35,18 +35,4 @@ public @interface IntegrationConfiguration {
 	@AttributeDefinition(name = "ExpirationTime", description = "Expiration time of the access token in seconds",
 			             defaultValue="7200",type= AttributeType.INTEGER)
 	int getExpirationTimeInSeconds();
-
-//	@AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O", defaultValue = "https://mc.adobe.io")
-//	String getIODomain();
-
-	@AttributeDefinition(name = "Tenant", description = "Tenant")
-	String getTenant();
-
-//	@AttributeDefinition(name = "Service", description = "Service. Enter campaign, analytics, etc...")
-//	String getService();
-	
-	@AttributeDefinition(name = "Adobe I/O Integration ID", description = "ID used to bind endpoint configuration with I/O integration configuration", defaultValue="test")
-	String getIntegrationID();
-
-	String webconsole_configurationFactory_nameHint() default "Integration <b>{getTenant} - {getService}</b><br/> {getAMCOrgId}";
 }

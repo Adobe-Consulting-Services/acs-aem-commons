@@ -37,16 +37,6 @@ public interface EndpointService {
     String getIODomain();
     
     /**
-     * @return The IO service name that can be used to map to right integration configuration
-     */
-    String getEndPointConfigID();
-    
-    /**
-     * @return The IO service name that can be used in url
-     */
-    String getService();
-    
-    /**
      * @return Specific Header used for this service
      */
     Map<String, String> getSpecificServiceHeader();

@@ -22,24 +22,5 @@ public interface IntegrationService {
 	 * @return the access token
 	 */
 	String getAccessToken();
-
-	/**
-	 * @return The domain of the integration
-	 */
-//	String getIODomain();
-
-	/**
-	 * @return The tenant of the integration
-	 */
-	String getTenant();
-
-	/**
-	 * @return The service of the integration
-	 */
-//	String getService();
 	
-	/**
-	 * @return The ID of the integration
-	 */
-	String getIntegrationID();
 }
