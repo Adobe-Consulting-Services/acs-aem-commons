@@ -41,7 +41,7 @@ The best pull request are small and focused. Don't try to change the world in on
 * Ensure license is applied correctly by running `mvn license:update-file-header`
 * Add JUnit test for Java code. Our coverage ratio isn't great, but we don't want it to get worse.
 * Until explicitly enabled, features should be invisible to AEM users and excluded from any execution stack.
-  * OSGi Services automatically registered as part of the stack should be annotated w `policy = ConfigurationPolicy.REQUIRE`. *Common candidates include (but not limited to): Filters, Scheduled Services, Event Listeners and Authentication handlers.*
+  * OSGi Services automatically registered as part of the stack should be annotated with `policy = ConfigurationPolicy.REQUIRE`. *Common candidates include (but not limited to): Filters, Scheduled Services, Event Listeners and Authentication handlers.*
   * Ex. Until a OSGi Configuration is added for the feature "Component Error Handler", this Sling Filter will remain inactive making it impossible to effect Request processing.
 
 ## Version Compatibility

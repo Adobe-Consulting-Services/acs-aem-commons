@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
@@ -115,7 +119,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getErrorCount() {
-        return tasksError.get();
+        return Math.max(tasksError.get(), failures.size());
     }
 
     @Override
@@ -125,7 +129,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
 
     @Override
     public int getRemainingCount() {
-        return getAddedCount() - (getSuccessCount() + getErrorCount());
+        return getAddedCount() - (getSuccessCount() + tasksError.get());
     }
 
     @Override
@@ -151,26 +155,38 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             tasksAdded.incrementAndGet();
         }
         taskRunner.scheduleWork(() -> {
-            started.compareAndSet(0, System.currentTimeMillis());
-            try {
-                withResolver(action);
-                if (!closesResolver) {
-                    logCompletetion();
-                }
-            } catch (Exception ex) {
-                LOG.error("Error in error handler for action " + getName(), ex);
-                if (!closesResolver) {
-                    logError(ex);
-                }
-            } catch (Throwable t) {
-                LOG.error("Fatal uncaught error in error handler for action " + getName(), t);
-                if (!closesResolver) {
-                    logError(new RuntimeException(t));
-                }
-                throw t;
-            }
+            runActionAndLogErrors(action, closesResolver);
         }, this);
-
+    }
+    
+    @SuppressWarnings("squid:S1181")
+    private void runActionAndLogErrors(CheckedConsumer<ResourceResolver> action, Boolean closesResolver) {
+        started.compareAndSet(0, System.currentTimeMillis());
+        try {
+            withResolver(action);
+            if (!closesResolver) {
+                logCompletetion();
+            }
+        } catch (Error e) {
+            // These are very fatal errors but we should log them if we can
+            LOG.error("Fatal uncaught error in action " + getName(), e);
+            if (!closesResolver) {
+                logError(new RuntimeException(e));
+            }
+            throw e;
+        } catch (Exception t) {
+            // Less fatal errors, but still need to explicitly catch them
+            LOG.error("Error in action " + getName(), t);
+            if (!closesResolver) {
+                logError(t);
+            }
+        } catch (Throwable t) {
+            // There are some slippery runtime errors (unchecked) which slip through the cracks
+            LOG.error("Fatal uncaught error in action " + getName(), t);
+            if (!closesResolver) {
+                logError(new RuntimeException(t));
+            }
+        }
     }
 
     @Override
@@ -251,6 +267,14 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
+    public void cancel(boolean useForce) {
+        super.cancel(useForce);
+        if (getErrorCount() > 0) {
+            processErrorHandlers();
+        }
+    }
+
+    @Override
     public void addCleanupTask() {
         // This is deprecated, only included for backwards-compatibility.
     }
@@ -282,19 +306,26 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 });
             }
         } else {
-            synchronized (errorHandlers) {
-                errorHandlers.forEach(handler -> {
-                    try {
-                        this.withResolver(res -> handler.accept(getFailureList(), res));
-                    } catch (Exception ex) {
-                        LOG.error("Error in error handler for action " + getName(), ex);
-                    }
-                });
-            }
+            processErrorHandlers();
         }
         synchronized (finishHandlers) {
             finishHandlers.forEach(Runnable::run);
         }
+    }
+
+    private void processErrorHandlers() {
+        List<CheckedBiConsumer<List<Failure>, ResourceResolver>> handlerList = new ArrayList();
+        synchronized (errorHandlers) {
+            handlerList.addAll(errorHandlers);
+            errorHandlers.clear();
+        }
+        handlerList.forEach(handler -> {
+            try {
+                this.withResolver(res -> handler.accept(getFailureList(), res));
+            } catch (Exception ex) {
+                LOG.error("Error in error handler for action " + getName(), ex);
+            }
+        });
     }
 
     @SuppressWarnings("squid:S2142")

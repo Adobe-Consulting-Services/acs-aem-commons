@@ -64,7 +64,7 @@ public class HttpClientFactoryImplTest {
         config = new HashMap<String, Object>();
         username = RandomStringUtils.randomAlphabetic(5);
         password = RandomStringUtils.randomAlphabetic(6);
-        String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
+        final String authHeaderValue = Base64.encodeBase64String((username + ":" + password).getBytes());
 
         config.put("hostname", "localhost");
         config.put("port", mockServerRule.getPort().intValue());
@@ -80,8 +80,8 @@ public class HttpClientFactoryImplTest {
                 response().withStatusCode(200).withBody("{ 'foo' : 'bar' }")
         );
         mockServerClient.when(
-                request().withMethod("GET").withPath("/auth").
-                        withHeader("Authorization", "Basic " + authHeaderValue)
+                request().withMethod("GET").withPath("/auth")
+                        .withHeader("Authorization", "Basic " + authHeaderValue)
         ).respond(
                 response().withStatusCode(200).withBody("OK")
         );

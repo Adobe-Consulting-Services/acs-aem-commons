@@ -56,9 +56,9 @@ public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(DynamicSelectDataSource.class);
 
-    final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
-    final String PN_DROP_DOWN_QUERY = "dropDownQuery";
-    final String PN_ALLOW_PROPERTY_NAMES = "allowedPropertyNames";
+    static final String PN_DROP_DOWN_QUERY_LANGUAGE = "dropDownQueryLanguage";
+    static final String PN_DROP_DOWN_QUERY = "dropDownQuery";
+    static final String PN_ALLOW_PROPERTY_NAMES = "allowedPropertyNames";
 
     @Reference
     private DataSourceBuilder dataSourceBuilder;

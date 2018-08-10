@@ -19,29 +19,42 @@ limitations under the License.
         <title>Error Report: ${process.name}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
-             data-sly-call="${clientlib.all @ categories='coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation'}"
-             />
+
+        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+             data-sly-call="${clientlib.all @ categories='coralui3'}"/>
     </head>
     <body>
-        <h3>Errors: ${process.name}</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Path</th>
-                    <th>Error</th>
-                    <th>Stack Trace</th>
-                </tr>
-            </thead>
-            <tbody data-sly-list.err="${process.reportedErrors}">
-                <tr>
-                    <td>${err}?</td>
-                    <td>${err.nodePath}</td>
-                    <td>${err.error}</td>
-                    <td>${err.stackTrace}</td>
-                </tr>
-            </tbody>
-        </table>        
+        <div style="padding: 1rem 2rem;">
+            <table is="coral-table" lockable>
+                <colgroup>
+                    <col is="coral-table-column" sortable orderable/>
+                    <col is="coral-table-column" sortable orderable/>
+                    <col is="coral-table-column" sortable orderable/>
+                    <col is="coral-table-column" sortable orderable/>
+                    <col is="coral-table-column"/>
+                </colgroup>
+                <thead is="coral-table-head" sticky>
+                    <tr is="coral-table-row">
+                        <th is="coral-table-headercell">Time</th>
+                        <th is="coral-table-headercell">Path</th>
+                        <th is="coral-table-headercell">Error</th>
+                        <th is="coral-table-headercell">Stack Trace</th>
+                        <th is="coral-table-headercell"></th>
+                    </tr>
+                </thead>
+                <tbody is="coral-table-body"
+                       data-sly-list.err="${process.reportedErrorsList}">
+                    <tr is="coral-table-row">
+                        <td is="coral-table-cell">${'yyyy-MM-dd HH:mm:ss' @ format=err.time}</td>
+                        <td is="coral-table-cell">${err.nodePath}</td>
+                        <td is="coral-table-cell">${err.error}</td>
+                        <td is="coral-table-cell">${err.stackTrace}</td>
+                        <td is="coral-table-cell">
+                            <button is="coral-button" type="button" icon="lockOn" variant="minimal" coral-table-rowlock></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </body>
 </html>

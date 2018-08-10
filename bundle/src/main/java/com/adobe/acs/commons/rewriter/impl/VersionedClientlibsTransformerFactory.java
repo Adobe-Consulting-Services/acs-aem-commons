@@ -418,7 +418,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                             filterChain.doFilter(request, response);
                         } else {
                             log.info("MD5 differs for '{}' in Versioned ClientLibs cache. Expected {}. Sending 404 for '{}'",
-                                    new Object[] { uriInfo.cleanedUri, md5FromCache, uri });
+                                    uriInfo.cleanedUri, md5FromCache, uri);
                             slingResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
                         }
                     }

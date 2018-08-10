@@ -90,9 +90,11 @@ var ScriptRunner = {
             url: url,
             dataType: "html",
             success: function (response) {
-                var inputForm = window.top.jQuery("#processDefinitionInput");
-                var $html, html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinitionInput", false, true);
-                $html = window.top.jQuery(html);
+                var inputForm = window.top.jQuery("#processDefinitionInput"),
+                    // Removed this processing as it results in double-application of CoralUI logic
+                    // html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinsitionInput", false, true),
+                    $html = jQuery(response);
+
                 $html.find("#processName").text(ScriptRunner.definitionName);
                 $html.find("#process").val(ScriptRunner.definition);
                 $html.find("coral-icon").each(function () {
@@ -111,7 +113,10 @@ var ScriptRunner = {
     startProcess: function () {
         /* Use FormData object to support file uploads */
         var data = new FormData($('#processDefinitionInput form', window.top.document)[0]);
-
+        ScriptRunner.startDialog.header.innerHTML = 'Starting Process, please wait';
+        ScriptRunner.startDialog.content.innerHTML = '<coral-masonry layout="fixed-centered" columnwidth="200" spacing="20">'+
+                '<coral-masonry-item><coral-wait size="L"></coral-wait></coral-masony-item></coral-masonry-item>';
+        ScriptRunner.startDialog.footer.innerHTML = "";
         jQuery.ajax({
             url: ScriptRunner.SERVLET_URL + ".start.json",
             method: "POST",
@@ -141,12 +146,15 @@ var ScriptRunner = {
             url: ScriptRunner.SERVLET_URL + ".list.json",
             dataType: "json",
             success: function (response) {
-                var processDom, process, i, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
+                var processDom, process, i, noErrors = true, tableBody = jQuery(ScriptRunner.processTable).find("tbody");
                 tableBody.empty();
                 ScriptRunner.watchList = [];
                 for (i = 0; i < response.length; i++) {
                     process = response[i];
-                    ScriptRunner.cleanProcessObject(process);
+                    noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                    if (!noErrors) {
+                        break;
+                    }
                     if (process.infoBean.isRunning) {
                         ScriptRunner.watchList.push(process.id);
                     }
@@ -161,25 +169,34 @@ var ScriptRunner = {
                                     ) +
                             "</td>" +
                             "<td is='coral-table-cell' class='process-tasks-completed'>" + process.infoBean.result.tasksCompleted + "</td>" +
-                            "<td is='coral-table-cell' class='process-reported-errors'>" + process.infoBean.reportedErrors.length + "</td>" +
+                            "<td is='coral-table-cell' class='process-reported-errors'>" + process.infoBean.reportedErrors + "</td>" +
                             "</tr>"
                             );
                     processDom.click(ScriptRunner.viewProcessCallback(process.id, process.path));
                     tableBody.append(processDom);
                 }
-                jQuery("#processListing").trigger("foundation-contentloaded");
-                ScriptRunner.pollingLoop();
+                if (noErrors) {
+                    jQuery("#processListing").trigger("foundation-contentloaded");
+                    ScriptRunner.pollingLoop();
+                } else {
+                    ScriptRunner.rebuildProcessList();
+                }
             }
         });
     },
     cleanProcessObject: function (process) {
-        if (!process.infoBean.result) {
-            process.infoBean.result = {
-                tasksCompleted: '???'
-            };
-        }
-        if (!process.infoBean.reportedErrors) {
-            process.infoBean.reportedErrors = [];
+        if (!process || !process.infoBean) {
+            return false;
+        } else {
+            if (!process.infoBean.result) {
+                process.infoBean.result = {
+                    tasksCompleted: '???'
+                };
+            }
+            if (!process.infoBean.reportedErrors) {
+                process.infoBean.reportedErrors = [];
+            }
+            return true;
         }
     },
     pollingLoop: function () {
@@ -190,11 +207,14 @@ var ScriptRunner = {
                     url: ScriptRunner.SERVLET_URL + ".status.json",
                     dataType: "json",
                     success: function (statusList) {
-                        var i, process, processRow;
+                        var i, process, processRow, noErrors = true;
                         ScriptRunner.watchList = [];
                         for (i = 0; i < statusList.length; i++) {
                             process = statusList[i];
-                            ScriptRunner.cleanProcessObject(process);
+                            noErrors = noErrors && ScriptRunner.cleanProcessObject(process);
+                            if (!noErrors) {
+                                break;
+                            }
                             processRow = jQuery(ScriptRunner.processTable).find("#process-" + process.id);
                             if (process.infoBean.isRunning) {
                                 ScriptRunner.watchList.push(process.id);
@@ -206,14 +226,18 @@ var ScriptRunner = {
                             processRow.find(".process-reported-errors").html(process.infoBean.reportedErrors.length);
                             processRow.find(".process-tasks-completed").html(process.infoBean.result.tasksCompleted);
                         }
-                        ScriptRunner.pollingLoop();
+                        if (noErrors) {
+                            ScriptRunner.pollingLoop();
+                        } else {
+                            ScriptRunner.rebuildProcessList();
+                        }
                     },
                     error: ScriptRunner.error,
                     data: {
                         ids: ScriptRunner.watchList
                     }
                 });
-            }, 250);
+            }, 500);
         }
     },
     error: function (e) {

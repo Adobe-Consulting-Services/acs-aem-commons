@@ -7,16 +7,110 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.14.10...HEAD
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
+### Fixed
+- #1438 - Ensured Groups do not honor intermediate paths
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
+- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
+- #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
+- #1417 - Fixed xss vulnerabilities in generic lists
+- #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+- #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
+- #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+- #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
+- #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
+- #1429 - Fixed Composite Multifield support for pathfield
+- #1431 - Fixed Composite Multifield support for Coral3 Select
+- #1433 - Fixed issue with Coral 3 UI Checkbox
+
+### Changed
+
+- #1420 - MCP page component no longer extends "final" GraniteUI shell component
+
+
+## [3.17.0] - 2018-05-22
+
+### Fixed
+- #1370 - Fixed Invalid Entries display in FireFox for Redirect Map
+- #1371 - Fixed Incorrect Entry Deletion when Filtering for Redirect Map
+- #1359 - Limiting the parsys in touch UI only works with static templates but not with editable templates
+- #1360 - Limiting the parsys does not work when doubleclicking into the dropzone to add a new component
+- #1383 - URL asset import now reports renditions which cannot be matched correctly
+- #1379 - URL asset import improvements for reporting and error handling
+- #1376 - Spreadsheet API data handling improvements
 
 ### Added
+- #1365 - Sling model injector for Shared Component Property values.
 
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
+
+## [3.16.0] - 2018-05-10
+
+### Fixed
+- #1278 - EvolutionContext refactored to contain a method returning version history
+- #1344 - Update Felix Plugin URL for Ensure Oak Index to match documentation/example code.
+- #1363 - Corrects permissions allowing HTTP Cache to write to the JCR Cache space under /var/acs-commons/httpcache
+
+### Added
+- #1292 - New MCP Tool to refresh asset folder thumbnails
+- #1346 - New Variant/CompositeVariant api for greater type fluidity in data conversion; Spreadsheet API handles proper data type conversion, which improves URL Asset Import and Data Importer as well.
+- #1347 - Redirect Map Entry editor
+- #1357 - Asset ingestion now uses hypen in folder names by default and offers option controlling asset naming behavior.
+
+### Changed
+- #1343 - CodeClimate now checks for license header
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
+
+## [3.15.2] - 2018-04-25
+
+### Changed
+- #1338 - Asset ingestion now visible to the groups: administrators, asset-ingest, dam-administrators
+
+### Added
+- #1338 - Authorized Group process definition factory for MCP abstracts the basic authentication check, easier to customize now
+
+### Fixed
+- #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
+
+## [3.15.0] - 2018-04-13
+
+### Changed
+- #1284 - Expose the shared and global properties resources via bindings.
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
+- #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
+
+### Added
+- #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
 - #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1279 - New import tools for node metadata and file/url-based asset ingestion
+- #1307 - MCP now has error reporting and also XLSX export for errors.
+- #1238 - HTTP cache JCR storage 
+- #1245 - On-Deploy Scripts Framework
+
+### Fixed
+- #1262 - MCP race condition affects showing completion status for processes that finish very quickly
+- #1276 - Bulk workflow now works with 6.4 and the user-event-data is pre-selected (commit button not grayed out anymore)
+- #1303 - Updated HTTP Cache test to handle all platforms more agnostically
+- #1265 - Set default Replicated At and Replicated By values when the parameterized values are null in ReplicationStatusManagerImpl to prevent NPEs.
+- #1235 - Fixed issue with QR Code loading (and disrupting) non-/content based touch ui editors (ie. Workflow Model editor)
+- #1283 - Updated PagesReferenceProvider to return the path to the cq:Page rather than cq:PageContent as the reference.
+- #1319 - Ensuring that PageRootProviderConfig references are sorted consistently.
+
+## [3.14.12] - 2018-04-03
 
 ### Fixed
 
+- #1291 - S3 Asset Ingestor stops after 1000 Assets attempting to be imported
 - #1286 - Error page handler now verifies parent resource is not a NonExistingResource
 - #1288 - Restrict the redirect map file upload to .txt file extension
+- #1272 - Ensure Service User service is not restricted ACE by path
+- #1142 - Make sure report tabulation is thread-safe
+- #1298 - Ensure that dispatcher cache headers are only written once per header name
 
 ## [3.14.10] - 2018-03-08
 
@@ -45,6 +139,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1230 - Fixed issue causing XHR requests to undefined.2.json from TouchUI Parsys-related ClientLibs
 - #1239 - Fixing issue which prevented ACS AEM Commons 3.14.0, 3.14.2 and 3.14.4 being installed on AEM 6.2.
+- #1244 - Added Ensure Group functionality.
 
 ## [3.14.4] - 2018-01-24
 

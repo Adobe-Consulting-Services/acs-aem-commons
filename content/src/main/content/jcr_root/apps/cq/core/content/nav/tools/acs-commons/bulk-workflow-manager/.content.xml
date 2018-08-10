@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Bulk Workflow Manager"
+    jcr:description="Execute AEM Workflow at scale."
+    icon="workflow"
+    href="/miscadmin#/etc/acs-commons/bulk-workflow-manager"
+    id="acs-commons__bulk-workflow-manager"
+    target="_blank"/>
