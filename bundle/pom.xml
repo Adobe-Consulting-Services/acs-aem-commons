@@ -151,26 +151,10 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.cmpn</artifactId>
 		</dependency>
-		
-		<!-- For Osgi Annotations. Felix annotations are deprecated in next versions of AEM BEGIN-->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component.annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.metatype.annotations</artifactId>
-        </dependency>
-        <!-- For Osgi Annotations. Felix annotations are deprecated in next versions of AEM END-->
         
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
-			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -548,26 +532,22 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.component.annotations</artifactId>
-			<version>1.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.annotation</artifactId>
-			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.metatype.annotations</artifactId>
-			<version>1.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Jwt Token -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
-			<version>0.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.sling</groupId>
@@ -593,19 +573,7 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>1.56</version>
-		</dependency>
-		
-		
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3</version>
 			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 </project>
