@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1429 - Fixed Composite Multifield support for pathfield
 - #1431 - Fixed Composite Multifield support for Coral3 Select
 - #1433 - Fixed issue with Coral 3 UI Checkbox
+- Add ns-scoped flags to function to fix repeated toolbar buttons in Edit mode (Shared Component Properties).
 
 ### Changed
 
