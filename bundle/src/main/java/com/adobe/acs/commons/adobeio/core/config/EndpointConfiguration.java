@@ -15,11 +15,11 @@ public @interface EndpointConfiguration {
     	name = "Method",
     	description = "Used method for the endpoint",
 		options = {
+				@Option(label = "DELETE", value = "DELETE"),
                 @Option(label = "GET", value = "GET"),
+                @Option(label = "PATCH", value = "PATCH"),
                 @Option(label = "POST", value = "POST"),
-                @Option(label = "PUT", value = "PUT"),
-                @Option(label = "DELETE", value = "DELETE"),
-                @Option(label = "PATCH", value = "PATCH")
+                @Option(label = "PUT", value = "PUT"),  
         }
     )
     String getMethod();
