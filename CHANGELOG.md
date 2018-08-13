@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 
 - #1413 - Added ACL to make the redirect maps globally readable
+- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Fixed
@@ -28,6 +29,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1429 - Fixed Composite Multifield support for pathfield
 - #1431 - Fixed Composite Multifield support for Coral3 Select
 - #1433 - Fixed issue with Coral 3 UI Checkbox
+- Add ns-scoped flags to function to fix repeated toolbar buttons in Edit mode (Shared Component Properties).
 
 ### Changed
 
