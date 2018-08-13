@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1441 - Fixed issue with the Report Runner loading custom Report Executors
 - #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
 - #1429 - Fixed Composite Multifield support for pathfield
 - #1431 - Fixed Composite Multifield support for Coral3 Select
