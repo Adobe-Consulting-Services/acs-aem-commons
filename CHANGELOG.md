@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+## [3.17.2] - 2018-08-13
 
 ### Fixed
 - #1438 - Ensured Groups do not honor intermediate paths
@@ -20,17 +20,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
 - #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
-- #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1441 - Fixed issue with the Report Runner loading custom Report Executors
 - #1429 - Fixed Composite Multifield support for pathfield
 - #1431 - Fixed Composite Multifield support for Coral3 Select
 - #1433 - Fixed issue with Coral 3 UI Checkbox
+- #1443 - Fixed issue with Coral 3 UI datepicker
+- #1451 - Add ns-scoped flags to function to fix repeated toolbar buttons in Edit mode (Shared Component Properties).
+- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ### Changed
-
+- #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component
-
+- #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
 
 ## [3.17.0] - 2018-05-22
 

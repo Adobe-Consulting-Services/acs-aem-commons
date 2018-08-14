@@ -159,13 +159,11 @@
 			<coral-panel class="coral-Well">
 				<section>
 					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Download Preview" /></h2>
-					<c:if test="${redirectMap != null}">
-						<a class="coral-Link" href="${resource.path}.redirectmap.txt">
-							<fmt:message key="Download Combined Redirect Map File" />
-						</a>
-						<br/>
-						Published Path: ${resource.path}.redirectmap.txt
-					</c:if>
+					<a class="coral-Link" href="${resource.path}.redirectmap.txt">
+						<fmt:message key="Download Combined Redirect Map File" />
+					</a>
+					<br/>
+					Published Path: ${resource.path}.redirectmap.txt
 				</section>
 				<section>
 					<h2 class="coral-Heading coral-Heading--2"><fmt:message key="Preview" /></h2>
