@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+- #1413 - Added ACL to make the redirect maps globally readable
+- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
 ## [3.17.2] - 2018-08-13
 
 ### Fixed
