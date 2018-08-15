@@ -5,11 +5,9 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
-## [Unreleased]
+## [3.17.4] - 2018-08-15
 
 - #1413 - Added ACL to make the redirect maps globally readable
-- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
-- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
 
 ## [3.17.2] - 2018-08-13
 
