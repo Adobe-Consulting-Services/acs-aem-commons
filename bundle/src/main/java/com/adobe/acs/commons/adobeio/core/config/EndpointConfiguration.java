@@ -8,7 +8,7 @@ import org.osgi.service.metatype.annotations.Option;
         description = "Configuration of Adobe.io endpoints")
 public @interface EndpointConfiguration {
 
-    @AttributeDefinition(name = "ID", description = "Id of the endpoint")
+    @AttributeDefinition(name = "ID", description = "Id of the endpoint", required = true)
     String getId();
 
     @AttributeDefinition(
@@ -20,19 +20,17 @@ public @interface EndpointConfiguration {
                 @Option(label = "PATCH", value = "PATCH"),
                 @Option(label = "POST", value = "POST"),
                 @Option(label = "PUT", value = "PUT"),  
-        }
+        },
+    	required = true
     )
     String getMethod();
 
-    @AttributeDefinition(name = "URL Endpoint", description = "Endpoint, without /campaign/, but starting with /")
+    @AttributeDefinition(name = "URL Endpoint", description = "Full Endpoint URL including domain", required = true)
     String getEndpoint();
     
-    @AttributeDefinition(name = "Adobe I/O Domain", description = "Domain of Adobe I/O. egg: https://[mc|stock|...].adobe.io", defaultValue = "https://mc.adobe.io")
-	String getIODomain();
-    
-    @AttributeDefinition(name = "Service specific Header", description = "{header_key:header_value} egg: x-product:app-name")
+    @AttributeDefinition(name = "Service specific Header", description = "{header_key:header_value} E.g.: x-product:app-name")
     String[] getSpecificServiceHeader();
 
-    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{getTenant} - {getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
+    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
 
 }

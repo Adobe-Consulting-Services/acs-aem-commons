@@ -1,9 +1,12 @@
 package com.adobe.acs.commons.adobeio.core.servlets;
 
-import com.adobe.acs.commons.adobeio.core.service.EndpointService;
-import com.drew.lang.annotations.NotNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.CONTENT_TYPE_APPLICATION_JSON;
+
+import java.io.IOException;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -13,12 +16,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.CONTENT_TYPE_APPLICATION_JSON;
-
-import java.io.IOException;
+import com.adobe.acs.commons.adobeio.core.service.EndpointService;
+import com.drew.lang.annotations.NotNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 @Component(
         service = Servlet.class,
@@ -31,7 +32,7 @@ public class SetCampaignDataWS extends SlingAllMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SetCampaignDataWS.class);
 
     @Reference(target = "(getId=setCampaignData)")
-    private EndpointService acsEndpointService;
+    private EndpointService endpointService;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
@@ -43,7 +44,7 @@ public class SetCampaignDataWS extends SlingAllMethodsServlet {
         payload.addProperty("firstName", "Frank");
         payload.addProperty("website", "http://www.test.test");
 
-        JsonObject result = acsEndpointService.performIOAction(payload);
+        JsonObject result = endpointService.performIOAction(payload);
 
         response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
         response.getWriter().write(result.toString());

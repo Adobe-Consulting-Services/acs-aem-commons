@@ -32,12 +32,12 @@ public class GetCampaignDataWS extends SlingSafeMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetCampaignDataWS.class);
 
     @Reference(target = "(getId=getCampaignData)")
-    private EndpointService acsEndpointService;
+    private EndpointService endpointService;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         // perform action
-        JsonObject result = acsEndpointService.performIOAction();
+        JsonObject result = endpointService.performIOAction();
 
         response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
         response.getWriter().write(result.toString());

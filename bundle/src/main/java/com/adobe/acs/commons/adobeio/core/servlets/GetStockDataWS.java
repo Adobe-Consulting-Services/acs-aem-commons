@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 
 /**
  * This is an example of an endpoint doing a call
- * to ACS and returning a JsonObject
+ * to Stock and returning a JsonObject
  */
 @Component(
         service = Servlet.class,
@@ -32,12 +32,12 @@ public class GetStockDataWS extends SlingSafeMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetStockDataWS.class);
 
     @Reference(target = "(getId=getStockData)")
-    private EndpointService acsEndpointService;
+    private EndpointService endpointService;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         // perform action
-        JsonObject result = acsEndpointService.performIOAction();
+        JsonObject result = endpointService.performIOAction();
 
         response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
         response.getWriter().write(result.toString());

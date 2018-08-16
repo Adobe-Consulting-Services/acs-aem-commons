@@ -32,11 +32,6 @@ public interface EndpointService {
     String getEndpoint();
     
     /**
-     * @return The IO domain that can be used in the url
-     */
-    String getIODomain();
-    
-    /**
      * @return Specific Header used for this service
      */
     Map<String, String> getSpecificServiceHeader();

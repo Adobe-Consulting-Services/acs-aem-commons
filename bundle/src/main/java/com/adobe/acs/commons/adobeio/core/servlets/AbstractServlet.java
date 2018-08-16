@@ -1,11 +1,6 @@
 package com.adobe.acs.commons.adobeio.core.servlets;
 
 import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.CONTENT_TYPE_APPLICATION_JSON;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.JK_PKEY;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.JK_SUBSCRIBER;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.SERVICE_CONTENT;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.SERVICE_HREF;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.SERVICE_SUBSCRIPTIONS;
 import static com.adobe.acs.commons.adobeio.core.util.JsonUtils.getProperty;
 
 import java.io.IOException;
@@ -19,7 +14,6 @@ import org.slf4j.Logger;
 import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.drew.lang.annotations.NotNull;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @SuppressWarnings("NullableProblems")
@@ -49,20 +43,6 @@ public abstract class AbstractServlet extends SlingAllMethodsServlet {
      */
     protected abstract Logger getLogger();
 
-    /**
-     * @return ACS Service for retrieving subscriptions
-     */
-    protected abstract EndpointService getSubScriptionsService();
-
-    /**
-     * @return ACS Service for setting the subscription
-     */
-    protected abstract EndpointService getSetSubScriptionsService();
-
-    /**
-     * @return ACS Service for sending Email
-    */
-    protected abstract EndpointService sendMailService();
 
     /**
      * @param response SlingHttpServlet Response
@@ -135,61 +115,4 @@ public abstract class AbstractServlet extends SlingAllMethodsServlet {
         response.getWriter().write(result.toString());
     }
 
-    /**
-     * Set subscription for the specified pkey
-     * @param pKey Pkey of the ACS-entry
-     */
-    protected void handleSubscription(@NotNull final String pKey) {
-        String subscription = getSubscription();
-        addSubScription(pKey, subscription);
-    }
-
-    /**
-     * Handles Email transactional event
-     * @param mailForm JsonObject with email data
-     * @return Response received from ACS
-     */
-    protected JsonObject handleMail(@NotNull final JsonObject mailForm) {
-        return sendMailService().performIOAction(mailForm);
-    }
-
-    // ------------- PRIVATE METHODS ------------
-
-    /**
-     * Get the subscription
-     * @return Url to the subscriptions
-     */
-    private String getSubscription() {
-        JsonObject result = getSubScriptionsService().performIOAction();
-        String url = "";
-
-        if ((result != null) && (result.has(SERVICE_CONTENT))) {
-            JsonArray content = result.getAsJsonArray(SERVICE_CONTENT);
-            JsonObject firstElement = (JsonObject) content.get(0);
-
-            if (firstElement.has(SERVICE_SUBSCRIPTIONS)) {
-                JsonObject subscription = (JsonObject) firstElement.get(SERVICE_SUBSCRIPTIONS);
-                return subscription.has(SERVICE_HREF) ? subscription.get(SERVICE_HREF).getAsString() : "";
-            }
-        }
-        return url;
-    }
-
-    /**
-     * Add a subscription
-     * @param pkey Pkey to set the subscription for
-     * @param url Url of the subscription
-     */
-    private void addSubScription(final String pkey, final String url) {
-        JsonObject payload = new JsonObject();
-        JsonObject subscriber = new JsonObject();
-
-        subscriber.addProperty(JK_PKEY, pkey);
-
-        //TODO: Check if this is required or can be removed.
-        subscriber.addProperty("campaignSubscription", "1");
-        payload.add(JK_SUBSCRIBER, subscriber);
-
-        getSetSubScriptionsService().postIOAction(url, payload);
-    }
 }

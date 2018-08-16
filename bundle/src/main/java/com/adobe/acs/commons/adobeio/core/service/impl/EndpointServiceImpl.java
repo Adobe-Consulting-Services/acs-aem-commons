@@ -133,7 +133,7 @@ public class EndpointServiceImpl implements EndpointService {
         try {
             result = process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
         } catch (Exception e) {
-            LOGGER.error("Problem processing action " + actionUrl, e);
+            LOGGER.error("Problem processing action {}", actionUrl, e);
         }
         return parseToClass(result, classOfT);
     }
@@ -169,7 +169,7 @@ public class EndpointServiceImpl implements EndpointService {
             JsonObject response = processGet(getActionUrl(null));
             return !response.has(RESULT_ERROR);
         } catch (Exception e) {
-            LOGGER.error("Problem testing the connection for " + endpointId, e);
+            LOGGER.error("Problem testing the connection for {}", endpointId, e);
         }
         return false;
     }
@@ -189,12 +189,12 @@ public class EndpointServiceImpl implements EndpointService {
         // perform action, if the action is defined in the configuration
         String actionUrl = getActionUrl(pKey);
         try {
-            LOGGER.debug("ActionUrl = " + actionUrl + ". method = " + getMethod());
+            LOGGER.debug("ActionUrl = {} . method = {}", actionUrl, getMethod());
             // process the Adobe I/O action
             processResponse = process(actionUrl, getMethod(), payload);
         } catch (Exception e) {
             processResponse.addProperty(RESULT_ERROR, "Problem processing");
-            LOGGER.error("Problem processing action " + actionUrl);
+            LOGGER.error("Problem processing action {}", actionUrl);
         }
 
 
@@ -214,7 +214,7 @@ public class EndpointServiceImpl implements EndpointService {
             return new JsonObject();
         }
 
-        LOGGER.debug("Performing method = " + method + " . actionUrl = " + actionUrl + ". payload = " + payload);
+        LOGGER.debug("Performing method = {}. actionUrl = {} . actionUrl = {}", method, actionUrl, payload);
 
         if (StringUtils.equalsIgnoreCase(method, METHOD_POST)) {
             return processPost(actionUrl, payload);
@@ -272,7 +272,7 @@ public class EndpointServiceImpl implements EndpointService {
             base.setEntity(input);
         }
 
-        LOGGER.debug("Process call. uri = " + base.getURI().toString() + ". payload = " + payload + base.getURI());
+        LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload, base.getURI());
         return responseAsJson(httpClient.execute(base));
     }
 
@@ -281,13 +281,13 @@ public class EndpointServiceImpl implements EndpointService {
         JsonParser parser = new JsonParser();
         JsonObject resultJson = new JsonObject();
         try {
-            LOGGER.debug("Call result = " + result);
+            LOGGER.debug("Call result = {}",result);
             resultJson = parser.parse(result).getAsJsonObject();
         } catch (Exception e) {
             resultJson.addProperty(RESULT_ERROR, result);
         }
 
-        LOGGER.debug("JSON result from Service: " + resultJson);
+        LOGGER.debug("JSON result from Service: {}", resultJson);
         return resultJson;
     }
 
@@ -298,15 +298,12 @@ public class EndpointServiceImpl implements EndpointService {
      * @return String containing the full action url
      */
     private String getActionUrl(@NotNull final PKey pKey) {
-        String endpoint = getEndpoint();
-        String url = this.config.getIODomain();
+        String url = getEndpoint();
 
         // add pKey as a parameter
         if ((pKey != null) && StringUtils.isNotBlank(pKey.getValue())) {
-            endpoint = endpoint + "/" + pKey.getValue();
+        	url = url + "/" + pKey.getValue();
         }
-        
-        url = url.concat("/").concat(endpoint);
         
         return url;
     }
@@ -345,15 +342,10 @@ public class EndpointServiceImpl implements EndpointService {
         try {
             return process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
         } catch (Exception e) {
-            LOGGER.error("Problem processing action " + actionUrl, e);
+            LOGGER.error("Problem processing action {}",actionUrl, e);
         }
         return new JsonObject();
     }
-
-	@Override
-	public String getIODomain() {
-		return this.config.getIODomain();
-	}
 
 	@Override
 	public Map<String, String> getSpecificServiceHeader() {

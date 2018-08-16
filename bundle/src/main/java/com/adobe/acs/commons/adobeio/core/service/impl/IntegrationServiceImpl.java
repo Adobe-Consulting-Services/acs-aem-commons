@@ -143,7 +143,6 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     }
 
     private static byte[] buildPKCS8Key(String privateKey) throws AdobeIOException {
-//        LOGGER.info("From file : " + privateKey);
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
