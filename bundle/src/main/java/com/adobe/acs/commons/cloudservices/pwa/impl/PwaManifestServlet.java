@@ -7,9 +7,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.mime.MimeTypeService;
@@ -46,12 +44,27 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/x-web-app-manifest+json; charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        response.getWriter().write(getManifest(request).toString());
+        ResourceResolver serviceResourceResolver = null;
+        try {
+            serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+
+            response.getWriter().write(getManifest(new ServiceUserRequest(request, serviceResourceResolver)).toString());
+        } catch (LoginException e) {
+            log.error("Could not obtain service user [ {} ]", SERVICE_NAME, e);
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            if (serviceResourceResolver != null) {
+                serviceResourceResolver.close();
+            }
+        }
     }
 
     private JsonObject getManifest(SlingHttpServletRequest request) throws ServletException {
@@ -64,14 +77,12 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
          * // TODO collect?
          * description: "...",
          * dir: "ltr",
-         * lang: "en-US", // Could come from page..
          */
         final String scope = configuration.getScopePath();
 
-
         json.addProperty(KEY_NAME,
-                manifest.get(PN_NAME
-                        , "AEM Progressive Web App"));
+                manifest.get(PN_NAME,
+                         "AEM Progressive Web App"));
 
         json.addProperty(KEY_SHORT_NAME,
                 manifest.get(PN_SHORT_NAME, "AEM PWA"));
@@ -87,13 +98,16 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
         json.addProperty(KEY_DISPLAY,
                 manifest.get(PN_DISPLAY, "standalone"));
 
+        json.addProperty(KEY_LANGUAGE,
+                configuration.getConfPage().getLanguage(false).getVariant());
+
+
         json.addProperty(KEY_SCOPE,".");
 
         String startPath = manifest.get(PN_START_PATH, configuration.getScopePath());
         if (!StringUtils.equals(scope, startPath) && !StringUtils.startsWith(startPath, scope + "/")) {
             startPath = scope;
         }
-
 
         json.addProperty(KEY_START_URL, resourceResolver.map(request, addHtmlExtension(startPath)));
 
@@ -121,7 +135,6 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
 
                         icons.add(json);
                     });
-
         }
         return icons;
     }

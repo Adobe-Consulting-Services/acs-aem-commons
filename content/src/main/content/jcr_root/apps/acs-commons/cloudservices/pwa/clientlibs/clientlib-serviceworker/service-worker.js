@@ -50,6 +50,7 @@ function getServiceWorkerConfig() {
     return fetch(configJson).then(function (response) {
         return response.json().then(function (json) {
             config = json;
+            return json;
         });
     });
 }
@@ -72,7 +73,7 @@ self.addEventListener('install', function (e) {
                 }).concat(config.pre_cache);
 
                 return cache.addAll(urlsToCache);
-            })
+            });
         })
     );
 });
@@ -90,7 +91,7 @@ self.addEventListener('fetch', function (event) {
                     return response;
                 }).catch(function() {
                     return cache.match(getFallback(event.request)).then(function(cachedResponse) {
-                        return cachedResponse
+                        return cachedResponse;
                     });
                 });
             });

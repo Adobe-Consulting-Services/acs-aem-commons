@@ -7,8 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.models.factory.ModelFactory;
@@ -41,12 +40,27 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        response.getWriter().write(getConfig(request).toString());
+        ResourceResolver serviceResourceResolver = null;
+        try {
+            serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+
+            response.getWriter().write(getConfig(new ServiceUserRequest(request, serviceResourceResolver)).toString());
+        } catch (LoginException e) {
+            log.error("Could not obtain service user [ {} ]", SERVICE_NAME, e);
+            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            if (serviceResourceResolver != null) {
+                serviceResourceResolver.close();
+            }
+        }
     }
 
     private JsonObject getConfig(SlingHttpServletRequest request) throws ServletException {

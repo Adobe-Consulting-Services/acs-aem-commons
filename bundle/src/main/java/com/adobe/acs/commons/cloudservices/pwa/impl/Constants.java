@@ -1,9 +1,22 @@
 package com.adobe.acs.commons.cloudservices.pwa.impl;
 
 import com.day.cq.commons.jcr.JcrConstants;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class Constants {
+
     private Constants() {}
+
+    /** Service User **/
+
+    public static final String SERVICE_NAME = "pwa-service";
+    public static final Map<String, Object> AUTH_INFO;
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     public static final String HTML_EXTENSION = ".html";
 
@@ -37,6 +50,8 @@ public class Constants {
     public static final String KEY_ICON_SRC = "src";
     public static final String KEY_ICON_SIZE = "sizes";
     public static final String KEY_ICON_TYPE = "type";
+    public static final String KEY_LANGUAGE = "lang";
+
 
     /***
      *  Service Worker Configuration

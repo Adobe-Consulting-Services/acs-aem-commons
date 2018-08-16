@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="ab5b26ef-60f4-3b12-8430-04dbf67e883a"
+    rep:authorizableId="acs-commons-pwa-service"
+    rep:principalName="acs-commons-pwa-service"/>
