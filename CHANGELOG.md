@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1451 - Add ns-scoped flags to function to fix repeated toolbar buttons in Edit mode (Shared Component Properties).
 - #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
 - #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+- #1455 - Fixed issue with validation on coral3 ui fields
 
 ### Changed
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
