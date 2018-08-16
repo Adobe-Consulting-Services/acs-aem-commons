@@ -309,7 +309,7 @@
                         isValid = false;
 
                     }else if (cmf.isCheckboxValid($input)) {
-                        $input.parent().addClass("is-invalid");;
+                        $input.parent().addClass("is-invalid");
                         isValid = false;
                     }else if(cmf.isFoundationAutocompleteValid($input)) {
                         $input.addClass("is-invalid");
