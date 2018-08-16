@@ -4,5 +4,5 @@
     jcr:primaryType="nt:unstructured"
     jcr:title="PWA"
     href="/apps/acs-commons/cloudservices/pwa/content/configurations.html/conf"
-    icon="gauge5"
+    icon="gauge4"
     id="acs-commons-pwa"/>

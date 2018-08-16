@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
-
+/*
 @Component(
         immediate = true,
         service = Servlet.class,
@@ -43,7 +43,7 @@ import java.util.Map;
                 "sling.servlet.methods=" + HttpConstants.METHOD_GET,
                 "sling.servlet.resourceTypes=cq:Page"
         }
-)
+)*/
 public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingServlet {
     private static final Logger log = LoggerFactory.getLogger(PWAProxyServlet.class);
     @Reference
@@ -279,6 +279,8 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
      */
     @Override
     public final boolean accepts(SlingHttpServletRequest request) {
+        return true;
+        /*
         PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(request.getResource());
 
@@ -288,5 +290,6 @@ public class PWAProxyServlet extends SlingSafeMethodsServlet implements OptingSe
         }
 
         return false;
+        */
     }
 }

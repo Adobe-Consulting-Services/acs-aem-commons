@@ -1,66 +1,21 @@
 package com.adobe.acs.commons.cloudservices.pwa;
 
-import java.util.Calendar;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.day.cq.wcm.api.Page;
+import org.apache.sling.api.resource.ValueMap;
 import org.osgi.annotation.versioning.ProviderType;
 
-/**
- * Represents an FDM configuration item from {@code /conf}.
- * <p>
- * The configuration might be of type {@code sling:Folder} or cq:Page
- *
- * </p>
- */
 @ProviderType
 public interface Configuration {
 
-    /**
-     * Returns the title of the item.
-     *
-     * @return Item title or resource name if none found. Returns never
-     *         {@code null}
-     */
-    @Nonnull
-    String getTitle();
+    boolean isReady();
 
-    /**
-     * Indicates if item has children.
-     *
-     * @return {@code true} if item has children
-     */
-    @Nonnull
-    boolean hasChildren();
+    Page getConfPage();
 
-    /**
-     * Returns the last modified time stamp.
-     *
-     * @return Last modified time in milliseconds or {@code null}
-     */
-    @Nullable
-    Calendar getLastModifiedDate();
+    ValueMap getProperties();
 
-    /**
-     * Returns the user which last modified the item
-     *
-     * @return User identifier or {@code null}
-     */
-    @Nullable
-    String getLastModifiedBy();
+    String getScopePath();
 
-    /**
-     * Returns the last published time stamp.
-     *
-     * @return Last published time in milliseconds or {@code null}
-     */
-    @Nonnull
-    Set<String> getQuickactionsRels();
+    String[] getServiceWorkerJsCategories();
 
-    String getIcon();
-
-    boolean show();
-
+    String[] getPwaJsCategories();
 }

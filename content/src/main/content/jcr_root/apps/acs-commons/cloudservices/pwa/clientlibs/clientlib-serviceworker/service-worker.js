@@ -1,83 +1,99 @@
-(function() {
-        var urlsToCache = [];
-        var fallbackCache = '';
-        var versionNumber = 'V1';
+/* Global state */
+var config = {
+    cache_name: 'pwa__uninitialized-v0',
+    version: 0
+};
 
-        self.addEventListener('install', function(event) {
+/* Helpers */
 
-            var urlLocation = new URL(location).toString();
-            //      fetch(urlLocation+'.pwa.load/cacheDetails.json');
-            var urlParams = new URLSearchParams(new URL(location).search);
-            var counter = 0;
+function init() {
+    return getServiceWorkerConfig();
+}
 
-            /*jshint esnext: true */
-            /*
+function isCacheable(request) {
+    var cacheable = true;
 
-                    for (var key of urlParams.keys()) {
-                        if (key === 'version') {
-                            versionNumber = urlParams.get(key);
-                        } else if (key === 'html') {
-                            var keyUrl = urlParams.get(key).split('|');
-                            for (var x = 0; x < keyUrl.length; x++) {
-                                urlsToCache.push(keyUrl[x] + '.' + key);
-                            }
-                        } else if (key === 'fallback') {
-                            fallbackCache = urlParams.get(key).replace('.js', '') + '.html';
-                            urlsToCache.push(fallbackCache);
-                        }
+    if (request.method !== "GET") {
+        return false;
+    }
 
-                    }
-            */
+    (config.no_cache || []).forEach(function (pattern) {
+        if (cacheable && request.url.match(pattern)) {
+            cacheable = false;
+            //console.log("Unable to cache [ " + request.url + " ] due to pattern [ " + pattern + " ]");
+        }
+    });
 
-            console.log("[Service Worker] caching static urls: ", urlsToCache);
-            event.waitUntil(
-                caches.open("STATIC_CACHE")
-                .then(function(cache) {
-                    return cache.addAll(urlsToCache);
-                })
-            );
+    return cacheable;
+}
+
+
+function getFallback(request) {
+    var fallback = null;
+
+    (config.fallback || []).forEach(function (entry) {
+        if (!fallback && request.url.match(entry.pattern)) {
+            fallback = entry.path;
+        }
+    });
+
+    if (!fallback) {
+        fallback = config.fallback_default;
+    }
+
+    return fallback;
+}
+
+function getServiceWorkerConfig() {
+    var configJson = new URL(location).searchParams.get('config');
+
+    return fetch(configJson).then(function (response) {
+        return response.json().then(function (json) {
+            config = json;
         });
+    });
+}
 
+/* Events */
 
-        self.addEventListener('activate', function(event) {
-            /*        event.waitUntil(function() {
-                        caches.keys().then(function(keyList) {
-                            return Promise.all(keyList.map(function(key) {
-                                if (key !== "STATIC_CACHE"  && key !== "DYNAMIC_CACHE") {
-                                    return caches.delete(key);
-                                }
-                            }));
+/**
+ * Install should initialize the cache..
+ * - Get the SW Config
+ * - Set the cacheName
+ * - Request the Fallback URLs
+ * - Request the Pre-cache URLs
+ */
+self.addEventListener('install', function (e) {
+    e.waitUntil(
+        init().then(function () {
+            caches.open(config.cache_name).then(function (cache) {
+                var urlsToCache = config.fallback.map(function (entry) {
+                    return entry.path;
+                }).concat(config.pre_cache);
 
-                        });
-                    });*/
-            return self.clients.claim();
-        });
+                return cache.addAll(urlsToCache);
+            })
+        })
+    );
+});
 
+self.addEventListener('fetch', function (event) {
+    if (!isCacheable(event.request)) {
+        return;
+    }
 
-        self.addEventListener('fetch', function(event) {
-            if (event.request.method === 'GET' && event.request.url.indexOf('.pwa.load/root-service-worker.json') === -1) {
-                event.respondWith(
-                    fetch(event.request)
-                    .then(function(response) {
-
-                        return caches.open("DYNAMIC_CACHE")
-                            .then(function(cache) {
-                                cache.put(event.request, response.clone());
-                                return response;
-                            });
-
-                    }).catch(function(err) {
-                        return caches.match(event.request);
-                    })
-                );
-            }
-
-
-            if (event.request.method === 'POST') {
-                if (!navigator.onLine) { //intercept the request and store for bgSync
-                    //TODO code here
-                }
-            }
-
-        });
-})();
+    event.respondWith(
+        caches.open(config.cache_name).then(function(cache) {
+            return cache.match(event.request).then(function (cachedResponse) {
+                return cachedResponse || fetch(event.request).then(function(response) {
+                    cache.put(event.request, response.clone());
+                    return response;
+                }).catch(function() {
+                    return cache.match(getFallback(event.request)).then(function(cachedResponse) {
+                        return cachedResponse
+                    });
+                });
+            });
+        })
+    );
+});
