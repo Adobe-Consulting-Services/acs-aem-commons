@@ -166,7 +166,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         jwtClaims.put("sub", jwtServiceConfig.getTechAccountId());
         jwtClaims.put("exp", getExpirationDate());
         jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.getLoginEndpoint(), jwtServiceConfig.getClientId()));
-        jwtClaims.put("https://ims-na1.adobelogin.com/s/ent_campaign_sdk", Boolean.TRUE);
+        jwtClaims.put(jwtServiceConfig.getAdobeLoginClaimKey(), Boolean.TRUE);
 
         if (LOGGER.isDebugEnabled()) {
             Gson gson = new Gson();

@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -228,6 +229,9 @@ public class EndpointServiceImpl implements EndpointService {
     }
 
     private JsonObject processGet(@NotNull final String actionUrl) throws Exception {
+    	StopWatch stopWatch = new StopWatch();
+    	LOGGER.debug("STARTING STOPWATCH {}", actionUrl);
+		stopWatch.start();
         CloseableHttpClient httpClient = httpClientService.getHttpClient();
         HttpGet get = new HttpGet(actionUrl);
 
@@ -238,7 +242,10 @@ public class EndpointServiceImpl implements EndpointService {
         for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
         	get.setHeader(headerEntry.getKey(), headerEntry.getValue());
 		}
-
+        LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
+		stopWatch.stop();
+		LOGGER.debug("Stopwatch time: {}", stopWatch);
+		stopWatch.reset();
         return responseAsJson(httpClient.execute(get));
     }
 
@@ -253,6 +260,10 @@ public class EndpointServiceImpl implements EndpointService {
     }
 
     private JsonObject processBase(@NotNull final HttpEntityEnclosingRequestBase base, @NotNull final JsonObject payload) throws Exception {
+    	
+    	StopWatch stopWatch = new StopWatch();
+    	LOGGER.debug("STARTING STOPWATCH processBase");
+		stopWatch.start();
 
         CloseableHttpClient httpClient = httpClientService.getHttpClient();
 
@@ -271,6 +282,11 @@ public class EndpointServiceImpl implements EndpointService {
         if (!base.getClass().isInstance(HttpGet.class)) {
             base.setEntity(input);
         }
+        
+        LOGGER.debug("STOPPING STOPWATCH processBase");
+		stopWatch.stop();
+		LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
+		stopWatch.reset();
 
         LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload, base.getURI());
         return responseAsJson(httpClient.execute(base));

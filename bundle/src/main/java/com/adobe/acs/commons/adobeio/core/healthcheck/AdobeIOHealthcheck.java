@@ -10,9 +10,9 @@ import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 
 @SuppressWarnings("WeakerAccess")
 @Component(service = HealthCheck.class,
-        property = {HealthCheck.NAME + "=Adobe I/O configuration",
+        property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
                 HealthCheck.TAGS + "=adobeio",
-                HealthCheck.MBEAN_NAME + "=Adobe I/O health check"})
+                HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
 public class AdobeIOHealthcheck implements HealthCheck {
 
     @Reference
