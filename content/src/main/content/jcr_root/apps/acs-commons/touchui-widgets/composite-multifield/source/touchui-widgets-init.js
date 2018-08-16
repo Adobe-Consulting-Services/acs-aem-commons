@@ -122,7 +122,7 @@
         },
 
         isDateField: function ($field) {
-            return !_.isEmpty($field) && $field.prop("type") === "hidden" && $field.parent().hasClass("coral-DatePicker");
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && ($field.parent().hasClass("coral-DatePicker") || $field.parent().prop('tagName') === "CORAL-DATEPICKER");
         },
 
         setDateField: function ($field, value) {
@@ -131,10 +131,15 @@
             if (date.isValid()) {
                 $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
                 $field.val(date.format($parent.attr("data-stored-format")));
+				if ($parent.prop('tagName') === "CORAL-DATEPICKER") {
+                	$field.val(date.format($parent.attr("displayformat")));
+                    $parent.get(0).set("value",date.format($parent.attr("valueformat")));
+                }
             }
             else {
                 $parent.find("input.coral-Textfield").val(value);
                 $field.val(value);
+				$parent.get(0).set("value",value);
             }
         },
 
