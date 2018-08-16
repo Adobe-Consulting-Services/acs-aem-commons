@@ -98,6 +98,7 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
         json.addProperty(KEY_DISPLAY,
                 manifest.get(PN_DISPLAY, "standalone"));
 
+        // TODO figure out the right getter
         json.addProperty(KEY_LANGUAGE,
                 configuration.getConfPage().getLanguage(false).getVariant());
 
