@@ -30,12 +30,12 @@ public class ConfigurationImpl implements Configuration {
     @Self
     private SlingHttpServletRequest request;
 
-    @SlingObject
-    private ResourceResolver resourceResolver;
-
 
     @OSGiService
     private SlingSettingsService slingSettingsService;
+
+    // Do not use the @SlingObject for this since we want to get it from the Request so we can get the service RR.
+    private ResourceResolver resourceResolver;
 
     private Page currentPage;
     private PageManager pageManager;
@@ -46,6 +46,9 @@ public class ConfigurationImpl implements Configuration {
 
     @PostConstruct
     protected void init() {
+
+        resourceResolver = request.getResourceResolver();
+
         pageManager = resourceResolver.adaptTo(PageManager.class);
         currentPage = pageManager.getContainingPage(request.getResource());
 

@@ -50,6 +50,9 @@ function getServiceWorkerConfig() {
     return fetch(configJson).then(function (response) {
         return response.json().then(function (json) {
             config = json;
+ 
+            return json;
+ 
         });
     });
 }
