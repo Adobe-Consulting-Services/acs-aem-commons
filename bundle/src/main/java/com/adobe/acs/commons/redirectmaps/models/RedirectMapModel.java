@@ -124,11 +124,13 @@ public class RedirectMapModel {
         log.trace("getEntries");
 
         List<MapEntry> entries = new ArrayList<MapEntry>();
-        InputStream is = redirectMap.adaptTo(InputStream.class);
-        for (String line : IOUtils.readLines(is)) {
-            MapEntry entry = toEntry(line);
-            if (entry != null) {
-                entries.add(entry);
+        if (redirectMap != null) {
+            InputStream is = redirectMap.adaptTo(InputStream.class);
+            for (String line : IOUtils.readLines(is)) {
+                MapEntry entry = toEntry(line);
+                if (entry != null) {
+                    entries.add(entry);
+                }
             }
         }
 
