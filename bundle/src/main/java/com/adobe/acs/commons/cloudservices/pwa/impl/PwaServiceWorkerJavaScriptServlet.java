@@ -7,9 +7,11 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+ 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+ 
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.models.factory.ModelFactory;
@@ -23,10 +25,10 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
-
+ 
 import static com.adobe.acs.commons.cloudservices.pwa.impl.Constants.AUTH_INFO;
 import static com.adobe.acs.commons.cloudservices.pwa.impl.Constants.SERVICE_NAME;
-
+ 
 @Component(
         service = Servlet.class,
         property = {
@@ -45,9 +47,10 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
+ 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
+ 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException, IOException {
@@ -56,6 +59,7 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
         response.setHeader("Content-Disposition", "attachment");
         response.setCharacterEncoding("UTF-8");
 
+ 
 
         ResourceResolver serviceResourceResolver = null;
         try {
@@ -73,6 +77,7 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeJavaScript(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+ 
         final Configuration configuration = modelFactory.createModel(request, Configuration.class);
 
         final Collection<ClientLibrary> htmlLibraries =

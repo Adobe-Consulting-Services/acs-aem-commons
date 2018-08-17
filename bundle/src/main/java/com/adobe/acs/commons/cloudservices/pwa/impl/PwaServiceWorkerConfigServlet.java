@@ -8,6 +8,7 @@ import com.google.gson.JsonPrimitive;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.*;
+  
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.models.factory.ModelFactory;
@@ -40,14 +41,16 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
+ 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
+ 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
+ 
         ResourceResolver serviceResourceResolver = null;
         try {
             serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
@@ -61,6 +64,7 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
                 serviceResourceResolver.close();
             }
         }
+ 
     }
 
     private JsonObject getConfig(SlingHttpServletRequest request) throws ServletException {

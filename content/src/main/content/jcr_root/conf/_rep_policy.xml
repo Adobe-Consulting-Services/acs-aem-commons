@@ -3,6 +3,8 @@
           jcr:primaryType="rep:ACL">
     <allow
             jcr:primaryType="rep:GrantACE"
+ 
             rep:principalName="acs-commons-pwa-service"
+ 
             rep:privileges="{Name}[jcr:read]"/>
 </jcr:root>

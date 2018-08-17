@@ -1,6 +1,7 @@
 package com.adobe.acs.commons.cloudservices.pwa.impl;
 
 import com.day.cq.commons.jcr.JcrConstants;
+
 import org.apache.sling.api.resource.ResourceResolverFactory;
 
 import java.util.Collections;
@@ -51,8 +52,7 @@ public class Constants {
     public static final String KEY_ICON_SIZE = "sizes";
     public static final String KEY_ICON_TYPE = "type";
     public static final String KEY_LANGUAGE = "lang";
-
-
+ 
     /***
      *  Service Worker Configuration
      ***/
