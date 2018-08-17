@@ -90,9 +90,6 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
         json.addProperty(KEY_NAME,
                 manifest.get(PN_NAME,
                          "AEM Progressive Web App"));
- 
-    
-        final String scope = configuration.getScopePath();
 
 
         json.addProperty(KEY_NAME,
