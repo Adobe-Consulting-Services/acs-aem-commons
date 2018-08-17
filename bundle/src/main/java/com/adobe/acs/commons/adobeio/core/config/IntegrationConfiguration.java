@@ -43,7 +43,7 @@ public @interface IntegrationConfiguration {
 	String getClientSecret();
     
 	@AttributeDefinition(name = "OrgId", description = "Organization id")
-	String getAMCOrgId();
+	String getAmcOrgId();
     
 	@AttributeDefinition(name = "TechAccountId", description = "Technical Account Id")
 	String getTechAccountId();

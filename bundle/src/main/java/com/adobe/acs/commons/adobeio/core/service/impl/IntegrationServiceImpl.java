@@ -181,7 +181,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private Map getJwtClaims() {
         Map jwtClaims = new HashMap<>();
 
-        jwtClaims.put("iss", jwtServiceConfig.getAMCOrgId());
+        jwtClaims.put("iss", jwtServiceConfig.getAmcOrgId());
         jwtClaims.put("sub", jwtServiceConfig.getTechAccountId());
         jwtClaims.put("exp", getExpirationDate());
         jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.getLoginEndpoint(), jwtServiceConfig.getClientId()));
