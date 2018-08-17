@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.core.service.impl;
 
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.JSON_ACCESS_TOKEN;
+import static com.adobe.acs.commons.adobeio.core.constants.AdobeioConstants.JSON_ACCESS_TOKEN;
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static org.apache.http.impl.client.HttpClients.createDefault;
 
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.adobeio.core.config.IntegrationConfiguration;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
-import com.adobe.acs.commons.adobeio.exception.AdobeIOException;
+import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -96,7 +96,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     }
 
     @Override
-    public String getAPIKey() {
+    public String getApiKey() {
         return jwtServiceConfig.getClientId();
     }
     
@@ -112,7 +112,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
             List<BasicNameValuePair> params = Lists.newArrayList();
             params.add(new BasicNameValuePair("client_id", jwtServiceConfig.getClientId()));
             params.add(new BasicNameValuePair("client_secret", jwtServiceConfig.getClientSecret()));
-            params.add(new BasicNameValuePair("jwt_token", getJWTtoken()));
+            params.add(new BasicNameValuePair("jwt_token", getJwtToken()));
 
             post.setEntity(new UrlEncodedFormEntity(params));
 
@@ -140,7 +140,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return token;
     }
 
-    private String getJWTtoken() {
+    private String getJwtToken() {
         String jwtToken = StringUtils.EMPTY;
         try {
             jwtToken = Jwts
@@ -155,18 +155,18 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtToken;
     }
 
-    private PrivateKey getPrivateKey() throws AdobeIOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPKCS8Key(jwtServiceConfig.getPrivateKey()));
+    private PrivateKey getPrivateKey() throws AdobeioException, NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.getPrivateKey()));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    private static byte[] buildPKCS8Key(String privateKey) throws AdobeIOException {
+    private static byte[] buildPkcs8Key(String privateKey) throws AdobeioException {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
-            throw new AdobeIOException("Invalid cert format: " + privateKey);
+            throw new AdobeioException("Invalid cert format: " + privateKey);
         }
 
         final byte[] innerKey = DECODER.decode(privateKey.replaceAll("-----\\w+ RSA PRIVATE KEY-----", ""));

@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.adobeio.core.service.impl;
 
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.CONTENT_TYPE_APPLICATION_JSON;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.RESULT_ERROR;
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeIOConstants.RESULT_NO_DATA;
+import static com.adobe.acs.commons.adobeio.core.constants.AdobeioConstants.CONTENT_TYPE_APPLICATION_JSON;
+import static com.adobe.acs.commons.adobeio.core.constants.AdobeioConstants.RESULT_ERROR;
+import static com.adobe.acs.commons.adobeio.core.constants.AdobeioConstants.RESULT_NO_DATA;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
@@ -37,6 +37,7 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -58,7 +59,7 @@ import com.adobe.acs.commons.adobeio.core.service.HttpClientService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.core.types.Filter;
 import com.adobe.acs.commons.adobeio.core.types.PKey;
-import com.adobe.acs.commons.adobeio.exception.AdobeIOException;
+import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -89,14 +90,14 @@ public class EndpointServiceImpl implements EndpointService {
 
     @Activate
     @Modified
-    protected void activate(final EndpointConfiguration config) throws AdobeIOException {
+    protected void activate(final EndpointConfiguration config) throws AdobeioException {
         LOGGER.debug("Start ACTIVATE Endpoint {}", config.getId());
         this.config = config;
         this.endpointId = config.getId();
         LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
 
         if (null == this.integrationService) {
-            throw new AdobeIOException("Integration-service not defined");
+            throw new AdobeioException("Integration-service not defined");
         }
     }
 
@@ -116,50 +117,50 @@ public class EndpointServiceImpl implements EndpointService {
     }
 
     @Override
-    public JsonObject performIOAction(@NotNull PKey pkey) {
+    public JsonObject performIO_Action(@NotNull PKey pkey) {
         return performIO(getActionUrl(pkey));
     }
 
     @Override
-    public JsonObject performIOAction() {
+    public JsonObject performIO_Action() {
         return performIO(getActionUrl(null));
     }
 
     @Override
-    public JsonObject performIOAction(@NotNull Filter filter) {
+    public JsonObject performIO_Action(@NotNull Filter filter) {
         return performIO(getActionUrl(null) + "?" + filter.getFilter());
     }
 
     @Override
-    public JsonObject performIOAction(@NotNull PKey pkey, @NotNull JsonObject payload) {
-        return handleAdobeIOAction(pkey, payload);
+    public JsonObject performIO_Action(@NotNull PKey pkey, @NotNull JsonObject payload) {
+        return handleAdobeIO_Action(pkey, payload);
     }
 
     @Override
-    public JsonObject performIOAction(@NotNull JsonObject payload) {
-        return handleAdobeIOAction(null, payload);
+    public JsonObject performIO_Action(@NotNull JsonObject payload) {
+        return handleAdobeIO_Action(null, payload);
     }
 
     @Override
-    public <T> T performIOAction(@NotNull PKey pkey, @NotNull JsonObject payload, @NotNull Class<T> classOfT) {
-        return parseToClass(handleAdobeIOAction(pkey, payload), classOfT);
+    public <T> T performIO_Action(@NotNull PKey pkey, @NotNull JsonObject payload, @NotNull Class<T> classOfT) {
+        return parseToClass(handleAdobeIO_Action(pkey, payload), classOfT);
     }
 
     @Override
-    public <T> T performIOAction(@NotNull PKey pkey, @NotNull Class<T> classOfT) {
+    public <T> T performIO_Action(@NotNull PKey pkey, @NotNull Class<T> classOfT) {
         String actionUrl = getActionUrl(pkey);
         JsonObject result = new JsonObject();
 
         try {
             result = process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
         } catch (Exception e) {
-            LOGGER.error("Problem processing action {}", actionUrl, e);
+            LOGGER.error("Problem processing action {} in performIO_Action", actionUrl, e);
         }
         return parseToClass(result, classOfT);
     }
 
     @Override
-    public JsonObject postIOAction(@NotNull String url, @NotNull JsonObject payload) {
+    public JsonObject postIO_Action(@NotNull String url, @NotNull JsonObject payload) {
         // initialize jsonobject
         JsonObject processResponse = new JsonObject();
 
@@ -202,7 +203,7 @@ public class EndpointServiceImpl implements EndpointService {
      * @param payload Payload of the call
      * @return JsonObject containing the result
      */
-    private JsonObject handleAdobeIOAction(@NotNull final PKey pKey, @NotNull final JsonObject payload) {
+    private JsonObject handleAdobeIO_Action(@NotNull final PKey pKey, @NotNull final JsonObject payload) {
         // initialize jsonobject
         JsonObject processResponse = new JsonObject();
 
@@ -214,7 +215,7 @@ public class EndpointServiceImpl implements EndpointService {
             processResponse = process(actionUrl, getMethod(), payload);
         } catch (Exception e) {
             processResponse.addProperty(RESULT_ERROR, "Problem processing");
-            LOGGER.error("Problem processing action {}", actionUrl);
+            LOGGER.error("Problem processing action {} in handleAdobeIO_Action", actionUrl);
         }
 
 
@@ -247,28 +248,31 @@ public class EndpointServiceImpl implements EndpointService {
         }
     }
 
-    private JsonObject processGet(@NotNull final String actionUrl) throws Exception {
+    private JsonObject processGet(@NotNull final String actionUrl) throws ClientProtocolException, IOException {
     	StopWatch stopWatch = new StopWatch();
     	LOGGER.debug("STARTING STOPWATCH {}", actionUrl);
 		stopWatch.start();
-        CloseableHttpClient httpClient = httpClientService.getHttpClient();
+		
         HttpGet get = new HttpGet(actionUrl);
-
         get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
         get.setHeader("cache-control", "no-cache");
-        get.setHeader("x-api-key", integrationService.getAPIKey());
+        get.setHeader("x-api-key", integrationService.getApiKey());
         get.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
         for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
         	get.setHeader(headerEntry.getKey(), headerEntry.getValue());
 		}
+        
         LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
 		stopWatch.stop();
 		LOGGER.debug("Stopwatch time: {}", stopWatch);
 		stopWatch.reset();
+		
+		CloseableHttpClient httpClient = httpClientService.getHttpClient();
+		
         return responseAsJson(httpClient.execute(get));
     }
 
-    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload) throws Exception {
+    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload) throws ClientProtocolException, IOException {
         HttpPost post = new HttpPost(actionUrl);
         return (payload != null) && isNotBlank(payload.toString()) ? processBase(post, payload) : new JsonObject();
     }
@@ -278,7 +282,7 @@ public class EndpointServiceImpl implements EndpointService {
         return (payload != null) && isNotBlank(payload.toString()) ? processBase(patch, payload) : new JsonObject();
     }
 
-    private JsonObject processBase(@NotNull final HttpEntityEnclosingRequestBase base, @NotNull final JsonObject payload) throws Exception {
+    private JsonObject processBase(@NotNull final HttpEntityEnclosingRequestBase base, @NotNull final JsonObject payload) throws ClientProtocolException, IOException {
     	
     	StopWatch stopWatch = new StopWatch();
     	LOGGER.debug("STARTING STOPWATCH processBase");
@@ -288,7 +292,7 @@ public class EndpointServiceImpl implements EndpointService {
 
         base.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
         base.setHeader("cache-control", "no-cache");
-        base.setHeader("x-api-key", integrationService.getAPIKey());
+        base.setHeader("x-api-key", integrationService.getApiKey());
         base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
         
 		for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
@@ -307,7 +311,7 @@ public class EndpointServiceImpl implements EndpointService {
 		LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
 		stopWatch.reset();
 
-        LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload, base.getURI());
+        LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
         return responseAsJson(httpClient.execute(base));
     }
 
@@ -377,7 +381,7 @@ public class EndpointServiceImpl implements EndpointService {
         try {
             return process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
         } catch (Exception e) {
-            LOGGER.error("Problem processing action {}",actionUrl, e);
+            LOGGER.error("Problem processing action {} in performIO",actionUrl, e);
         }
         return new JsonObject();
     }

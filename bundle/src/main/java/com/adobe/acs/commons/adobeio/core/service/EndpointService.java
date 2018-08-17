@@ -65,28 +65,28 @@ public interface EndpointService {
      * Performs the GET-action connected to the endpoint
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIOAction();
+    JsonObject performIO_Action();
 
     /**
      * Performs the GET-action connected to the endpoint
      * @param pkey The provided pkey
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIOAction(PKey pkey);
+    JsonObject performIO_Action(PKey pkey);
 
     /**
      * Performs the GET-action connected to the endpoint
      * @param filter Filter that will be applied
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIOAction(Filter filter);
+    JsonObject performIO_Action(Filter filter);
 
     /**
      * Performs the action connected to the endpoint
      * @param payload JsonObject containing the data that is used in the action
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIOAction(JsonObject payload);
+    JsonObject performIO_Action(JsonObject payload);
 
     /**
      * Performs the action connected to the endpoint
@@ -94,7 +94,7 @@ public interface EndpointService {
      * @param payload JsonObject containing the data that is used in the action
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIOAction(PKey pkey, JsonObject payload);
+    JsonObject performIO_Action(PKey pkey, JsonObject payload);
 
     /**
      * Performs the GET-action connected to the endpoint
@@ -102,7 +102,7 @@ public interface EndpointService {
      * @param classOfT Type of object that will be returned
      * @return Object containing the result of the action
      */
-    <T> T performIOAction(PKey pkey, Class<T> classOfT);
+    <T> T performIO_Action(PKey pkey, Class<T> classOfT);
 
     /**
      * Performs the action connected to the endpoint
@@ -111,7 +111,7 @@ public interface EndpointService {
      * @param classOfT Type of object that will be returned
      * @return Object containing the result of the action
      */
-    <T> T performIOAction(PKey pkey, JsonObject payload, Class<T> classOfT);
+    <T> T performIO_Action(PKey pkey, JsonObject payload, Class<T> classOfT);
 
     /**
      * Straight post-action to the provided url,
@@ -120,7 +120,7 @@ public interface EndpointService {
      * @param payload Body of the POST-call
      * @return JsonObject with the result of the call
      */
-    JsonObject postIOAction(String url, JsonObject payload);
+    JsonObject postIO_Action(String url, JsonObject payload);
 
     /**
      * This is a test for the connection to the endpoint.

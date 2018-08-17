@@ -32,7 +32,7 @@ import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
                 HealthCheck.TAGS + "=adobeio",
                 HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
-public class AdobeIOHealthcheck implements HealthCheck {
+public class AdobeioHealthcheck implements HealthCheck {
 
     @Reference
     private IntegrationService jwtService;
@@ -42,8 +42,8 @@ public class AdobeIOHealthcheck implements HealthCheck {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
         resultLog.debug("Health check for adobe.io");
-        if (jwtService.getAPIKey() != null) {
-            resultLog.debug("Starting validation for x-api-key {}", jwtService.getAPIKey());
+        if (jwtService.getApiKey() != null) {
+            resultLog.debug("Starting validation for x-api-key {}", jwtService.getApiKey());
         } else {
             resultLog.critical("No api key is specified in the OSGi-config");
         }

@@ -19,13 +19,13 @@
  */
 package com.adobe.acs.commons.adobeio.exception;
 
-public class AdobeIOException extends Exception {
+public class AdobeioException extends Exception {
 
-    public AdobeIOException(String message) {
+    public AdobeioException(String message) {
         super(message);
     }
 
-    public AdobeIOException(String message, Throwable cause) {
+    public AdobeioException(String message, Throwable cause) {
         super(message, cause);
     }
 }

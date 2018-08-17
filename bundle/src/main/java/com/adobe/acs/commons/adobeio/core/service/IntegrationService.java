@@ -33,7 +33,7 @@ public interface IntegrationService {
 	 * Get the api-key, can be used as the X-Api-Key header
 	 * @return the configured api-key
 	 */
-	String getAPIKey();
+	String getApiKey();
 	
 	/**
 	 * Get the access-token used as the Authorization header.
