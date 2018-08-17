@@ -19,11 +19,15 @@
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -33,12 +37,15 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.redirectmaps.models.MapEntry;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
+import com.google.common.base.Charsets;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -58,11 +65,15 @@ public class RedirectEntriesUtils {
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
 
     protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
-        List<String> lines = null;
+        List<String> lines = new ArrayList<String>();
         InputStream is = null;
         try {
-            is = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE).adaptTo(InputStream.class);
-            lines = IOUtils.readLines(is);
+            Resource resource = request.getResource();
+            Resource fileResource = resource.getChild(RedirectMapModel.MAP_FILE_NODE);
+            if (fileResource != null && fileResource.adaptTo(InputStream.class) != null) {
+                is = fileResource.adaptTo(InputStream.class);
+                lines = IOUtils.readLines(is);
+            }
             log.debug("Loaded {} lines", lines.size());
         } finally {
             IOUtils.closeQuietly(is);
@@ -72,9 +83,26 @@ public class RedirectEntriesUtils {
 
     protected static final void updateRedirectMap(SlingHttpServletRequest request, List<String> entries)
             throws PersistenceException {
-        ModifiableValueMap mvm = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE)
-                .getChild(JcrConstants.JCR_CONTENT).adaptTo(ModifiableValueMap.class);
-        mvm.put(JcrConstants.JCR_DATA, StringUtils.join(entries, "\n"));
+        Resource resource = request.getResource();
+
+        log.info("Updating redirect map at {}", request.getResource().getPath());
+
+        Map<String, Object> fileParams = new HashMap<String, Object>();
+        fileParams.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE);
+        Resource fileResource = ResourceUtil.getOrCreateResource(request.getResourceResolver(),
+                resource.getPath() + "/" + RedirectMapModel.MAP_FILE_NODE, fileParams, JcrConstants.NT_UNSTRUCTURED,
+                false);
+
+        Map<String, Object> contentParams = new HashMap<String, Object>();
+        contentParams.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_RESOURCE);
+        contentParams.put(JcrConstants.JCR_MIMETYPE, "text/plain");
+        Resource contentResource = ResourceUtil.getOrCreateResource(resource.getResourceResolver(),
+                fileResource.getPath() + "/" + JcrConstants.JCR_CONTENT, contentParams, JcrConstants.NT_UNSTRUCTURED,
+                false);
+        
+        ModifiableValueMap mvm = contentResource.adaptTo(ModifiableValueMap.class);
+        mvm.put(JcrConstants.JCR_DATA,
+                new ByteArrayInputStream(StringUtils.join(entries, "\n").getBytes(Charsets.UTF_8)));
         request.getResourceResolver().commit();
         request.getResourceResolver().refresh();
         log.debug("Changes saved...");
