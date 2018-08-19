@@ -206,6 +206,36 @@
             }
         },
 
+        isColorField: function ($field) {
+            return $field.attr("is") === "coral-textfield";
+        },
+
+        setColorField: function ($field, value) {
+            if (value && value.trim() !== "") {
+                value = value.trim();
+                if (!value.startsWith("#")) {
+                    value = "#" + value;
+                }
+                $field.val(value);
+
+                //set value
+                $field.parent().attr("value", value);
+
+                //set background color
+                $field.parent().removeClass("coral-ColorInput--novalue");
+                var hexToRGB = CUI.util.color.HexToRGB(value);
+                var rgbColor = "background-color: rgb(" + hexToRGB.r + ", " + hexToRGB.g + ", " + hexToRGB.b + ");";
+                $field.parent().find("div[role='presentation'] button[is='coral-button']").attr("style", rgbColor);
+                $field.parent().find("coral-overlay button[is='coral-button']").attr("style", rgbColor);
+
+                //set selected
+                var colorItem = $field.parent().find("coral-colorinput-item[value='#" + value.replace('#', '').toUpperCase() + "']");
+                colorItem.attr("aria-selected", true);
+                colorItem.attr("selected", "");
+                colorItem.addClass("is-selected");
+            }
+        },
+
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
                 return;
@@ -229,6 +259,8 @@
                 this.setFoundationAutocomplete($field,value);
             } else if (this.isCoralSelect($field)) {
                 this.setCoralSelect($field, value);
+            } else if (this.isColorField($field)) {
+                this.setColorField($field, value);
             } else {
                 $field.val(value);
             }
