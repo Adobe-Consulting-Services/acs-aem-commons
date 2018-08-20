@@ -295,8 +295,7 @@
                 
                 var isValid = true;
                 $inputs.each(function(index, input) {
-                    $input = $(input);
-                    
+                    $input = $(input);                    
                     isRequired = $input.attr("required") || ($input.attr("aria-required") === "true");
 
                     if (isRequired && $input.val().length === 0) {
