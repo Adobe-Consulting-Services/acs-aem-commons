@@ -19,38 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.functions.Consumer;
 import com.adobe.acs.commons.functions.Function;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -70,9 +38,40 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateAllNodes
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateByCacheConfigVisitor;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
+import com.adobe.acs.commons.util.exception.CacheMBeanException;
 import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
 import com.adobe.acs.commons.util.impl.JcrCacheMBean;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
@@ -127,8 +126,8 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
         @Property(
             label = "Expire time in seconds",
             description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
-            name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
-            intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
+            name = JCRHttpCacheStoreImpl.PN_EXPIRETIME,
+            longValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIME
         )
 })
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
@@ -137,7 +136,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public static final String  PN_ROOTPATH            = "httpcache.config.jcr.rootpath";
     public static final String  PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth";
     public static final String  PN_SAVEDELTA           = "httpcache.config.jcr.savedelta";
-    public static final String  PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinseconds";
+    public static final String  PN_EXPIRETIME           = "httpcache.config.jcr.expiretimeinseconds";
 
     //defaults
     public static final String  DEFAULT_ROOTPATH            = "/var/acs-commons/httpcache";
@@ -156,7 +155,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public static final int     DEFAULT_SAVEDELTA           = 500;
 
     // 1 week.
-    public static final int     DEFAULT_EXPIRETIMEINSECONDS = 604800;
+    public static final long DEFAULT_EXPIRETIME = 604800;
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
@@ -164,7 +163,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     private String              cacheRootPath;
     private int                 bucketTreeDepth;
     private int                 deltaSaveThreshold;
-    private int                 expireTimeInSeconds;
+    private long                expireTimeInMS;
 
     @Reference private ResourceResolverFactory   resourceResolverFactory;
     @Reference private DynamicClassLoaderManager dclm;
@@ -182,7 +181,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
         bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
         deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
-        expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PN_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
+        expireTimeInMS = PropertiesUtil.toLong(properties.get(PN_EXPIRETIME), DEFAULT_EXPIRETIME);
     }
 
     @Override
@@ -196,9 +195,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                     final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
                     final Node bucketNode = factory.getBucketNode();
 
-                    final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key);
-
-                    new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
+                    final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMS);
+                    new EntryNodeWriter(session, entryNode, key, content).write();
                     session.save();
 
                     incrementLoadSuccessCount();
@@ -213,6 +211,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             }
         );
     }
+
+
 
     @Override
     public boolean contains(final CacheKey key) {
@@ -261,6 +261,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                     final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
 
                     if(content != null){
+                        if(key.getExpiryForAccess() > 0){
+                            updateEntryNodeExpiry(session, entryNode, key.getExpiryForAccess());
+                        }
                         incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
                         incrementHitCount();
                         return content;
@@ -274,6 +277,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             }
         });
     }
+
+
 
     @Override
     public long size() {
@@ -366,7 +371,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override public long getTtl()
     {
-        return expireTimeInSeconds;
+        return expireTimeInMS;
     }
 
     @Override public void clearCache()
@@ -394,15 +399,52 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
 
-    protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
-        cacheKeyFactories.add(cacheKeyFactory);
+
+    public void withSession(final Consumer<Session> onSuccess){
+        withSession(onSuccess, null);
     }
 
-    protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
-        if(cacheKeyFactories.contains(cacheKeyFactory)) {
-            cacheKeyFactories.remove(cacheKeyFactory);
-        }
+    public void withSession(final Consumer<Session> onSuccess, final Consumer<Exception> onError)
+    {
+        withSession(new Function<Session, Object>()
+        {
+            @Override public Object apply(Session session) throws Exception
+            {
+                onSuccess.accept(session);
+                return null;
+            }
+        },
+        onError);
     }
+
+    public <T> T withSession(final Function<Session, T> onSuccess){
+        return withSession(onSuccess, null);
+    }
+
+    public <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
+        ResourceResolver resourceResolver = null;
+        try {
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            final Session session = resourceResolver.adaptTo(Session.class);
+            return onSuccess.apply(session);
+
+        } catch (Exception e) {
+            log.error("Error in executing the session", e);
+            try {
+                if(onError != null) {
+                    onError.accept(e);
+                }
+            } catch (Exception subException) {
+                log.error("Error in handling the exception", subException);
+            }
+        } finally {
+            if(resourceResolver != null && resourceResolver.isLive()){
+                resourceResolver.close();
+            }
+        }
+        return null;
+    }
+
 
     @Override protected Map<CacheKey, CacheContent> getCacheAsMap()
     {
@@ -461,48 +503,23 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     }
 
-    public void withSession(final Consumer<Session> onSuccess){
-        withSession(onSuccess, null);
+    protected void bindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        cacheKeyFactories.add(cacheKeyFactory);
     }
 
-    public void withSession(final Consumer<Session> onSuccess, final Consumer<Exception> onError)
-    {
-        withSession(new Function<Session, Object>()
-        {
-            @Override public Object apply(Session session) throws Exception
-            {
-                onSuccess.accept(session);
-                return null;
-            }
-        },
-        onError);
-    }
-
-    public <T> T withSession(final Function<Session, T> onSuccess){
-        return withSession(onSuccess, null);
-    }
-
-    public <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-            final Session session = resourceResolver.adaptTo(Session.class);
-            return onSuccess.apply(session);
-
-        } catch (Exception e) {
-            log.error("Error in executing the session", e);
-            try {
-                if(onError != null) {
-                    onError.accept(e);
-                }
-            } catch (Exception subException) {
-                log.error("Error in handling the exception", subException);
-            }
-        } finally {
-            if(resourceResolver != null && resourceResolver.isLive()){
-                resourceResolver.close();
-            }
+    protected void unbindCacheKeyFactory(CacheKeyFactory cacheKeyFactory){
+        if(cacheKeyFactories.contains(cacheKeyFactory)) {
+            cacheKeyFactories.remove(cacheKeyFactory);
         }
-        return null;
+    }
+
+    private void updateEntryNodeExpiry(Session session, Node entryNode, long expiryForAccess) {
+        try{
+            entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON, System.currentTimeMillis() + expiryForAccess);
+            session.save();
+        }catch(RepositoryException ex){
+            log.error("Error updating the entry node expiry", ex);
+        }
+
     }
 }

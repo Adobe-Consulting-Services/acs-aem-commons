@@ -38,6 +38,9 @@ public abstract class AbstractCacheKey implements Serializable{
     protected String uri;
     protected String resourcePath;
     protected String hierarchyResourcePath;
+    protected long customExpiryTime;
+    protected long expiryForAccessTime;
+    protected long expiryForUpdateTime;
 
     public AbstractCacheKey(){
 
@@ -48,6 +51,10 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = request.getRequestURI();
         this.resourcePath = unmangle(request.getResource().getPath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
+        this.customExpiryTime = cacheConfig.getCustomExpiryOnCreate();
+        this.expiryForAccessTime = cacheConfig.getCustomExpiryOnCreate();
+        this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
+        this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
 
     public AbstractCacheKey(String uri, HttpCacheConfig cacheConfig) {
@@ -55,6 +62,9 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = uri;
         this.resourcePath = unmangle(new PathInfo(uri).getResourcePath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
+        this.customExpiryTime = cacheConfig.getCustomExpiryOnCreate();
+        this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
+        this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
 
     protected void parentWriteObject(ObjectOutputStream o) throws IOException
@@ -112,6 +122,18 @@ public abstract class AbstractCacheKey implements Serializable{
 
     public boolean isInvalidatedBy(CacheKey cacheKey) {
         return StringUtils.equals(hierarchyResourcePath, cacheKey.getHierarchyResourcePath());
+    }
+
+    public long getExpiryForCreation(){
+        return customExpiryTime;
+    }
+
+    public long getExpiryForAccess(){
+        return expiryForAccessTime;
+    }
+
+    public long getExpiryForUpdate(){
+        return expiryForUpdateTime;
     }
 
     protected String makeHierarchyResourcePath(String resourcePath) {

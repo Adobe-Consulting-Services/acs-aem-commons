@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util.impl;
+package com.adobe.acs.commons.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +30,13 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.acs.commons.util.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
-public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements  CacheMBean
+public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements CacheMBean
 {
     /** jmx labels **/
     protected static final String JMX_PN_CACHESTATS = "Cache Stats";

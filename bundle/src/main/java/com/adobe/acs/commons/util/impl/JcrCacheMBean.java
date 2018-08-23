@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.util.impl;
 
+import com.adobe.acs.commons.util.CacheMBean;
 import com.adobe.granite.jmx.annotation.Description;
 
 @Description("ACS AEM Commons - Http Cache - JCR Cache")

@@ -45,9 +45,9 @@ public class ExpiredNodesVisitorTest
         final ExpiredNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
         visitor.visit(rootNode);
         visitor.close();
-        assertEquals(20, visitor.getEvictionCount());
+        assertEquals(30, visitor.getEvictionCount());
 
-        Mockito.verify(rootNode.getSession(), Mockito.times(3)).save();
+        Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
     }
 
     @Test public void testEmptyBucketNodes() throws Exception
@@ -61,9 +61,9 @@ public class ExpiredNodesVisitorTest
         final ExpiredNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
         visitor.visit(rootNode);
         visitor.close();
-            assertEquals(30, visitor.getEvictionCount());
+            assertEquals(40, visitor.getEvictionCount());
 
-        Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
+        Mockito.verify(rootNode.getSession(), Mockito.times(5)).save();
     }
 
     public ExpiredNodesVisitor getMockedExpiredNodesVisitor(int deltaSaveThreshold)

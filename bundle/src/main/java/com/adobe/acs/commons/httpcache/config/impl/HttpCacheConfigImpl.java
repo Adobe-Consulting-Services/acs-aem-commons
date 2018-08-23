@@ -146,9 +146,14 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
               options = {
                       @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                                          value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
+                      @PropertyOption(name = HttpCacheStore.VALUE_CAFFEINE_MEM_CACHE_STORE_TYPE,
+                              value = HttpCacheStore.VALUE_CAFFEINE_MEM_CACHE_STORE_TYPE),
+                      @PropertyOption(name = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE,
+                              value = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE),
                       // Only MEM and JCR implementations are available now.
                       //@PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
                       //                value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
+
                       @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
                                       value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)
               },
@@ -175,6 +180,26 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String PROP_FILTER_SCOPE = "httpcache.config.filter-scope";
     private FilterScope filterScope;
 
+    private static final long DEFAULT_EXPIRY_ON_CREATE = 0l;
+    @Property(label = "Expiry on create",
+            description = "If specified higher then 0, it will overrule the default expiry time with config specific value. Not supported for MEM cache, but supported for all others.",
+            longValue = DEFAULT_EXPIRY_ON_CREATE)
+    private static final String PROP_EXPIRY_ON_CREATE = "httpcache.config.expiry-on-create";
+    private long expiryOnCreate;
+
+    private static final long DEFAULT_EXPIRY_ON_ACCESS = 0l;
+    @Property(label = "Expiry on access",
+            description = "If specified higher then 0, will refresh the expiry time with given value if accessed. Not supported for MEM cache, but supported for all others.",
+            longValue = DEFAULT_EXPIRY_ON_ACCESS)
+    private static final String PROP_EXPIRY_ON_ACCESS = "httpcache.config.expiry-on-access";
+    private long expiryOnAccess;
+
+    private static final long DEFAULT_EXPIRY_ON_UPDATE = 0l;
+    @Property(label = "Expiry on update",
+            description = "If specified higher then 0, will refresh the expiry time when the entry is updated. Not supported for MEM cache, but supported for all others.",
+            longValue = DEFAULT_EXPIRY_ON_UPDATE)
+    private static final String PROP_EXPIRY_ON_UPDATE = "httpcache.config.expiry-on-update";
+    private long expiryOnUpdate;
 
     // Making the cache config extension configurable.
     @Property(name = "cacheConfigExtension.target",
@@ -228,6 +253,11 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
         // Cache store
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), DEFAULT_CACHE_STORE);
+
+        // Custom expiry
+        expiryOnCreate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_CREATE), DEFAULT_EXPIRY_ON_CREATE);
+        expiryOnAccess = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_ACCESS), DEFAULT_EXPIRY_ON_ACCESS);
+        expiryOnUpdate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_UPDATE), DEFAULT_EXPIRY_ON_UPDATE);
 
         // Cache invalidation paths.
         cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -388,6 +418,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public int getOrder() {
         return this.order;
+    }
+
+    @Override
+    public long getCustomExpiryOnCreate() {
+        return expiryOnCreate;
+    }
+
+    @Override
+    public long getExpiryForAccess() {
+        return expiryOnAccess;
+    }
+
+    @Override
+    public long getExpiryForUpdate() {
+        return expiryOnUpdate;
     }
 
     @Override

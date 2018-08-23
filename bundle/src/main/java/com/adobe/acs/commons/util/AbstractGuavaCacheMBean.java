@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util.impl;
+package com.adobe.acs.commons.util;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;

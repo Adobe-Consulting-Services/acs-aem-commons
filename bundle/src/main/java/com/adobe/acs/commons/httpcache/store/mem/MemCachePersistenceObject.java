@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.store.mem.impl;
+package com.adobe.acs.commons.httpcache.store.mem;
 
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.google.common.collect.HashMultimap;
@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Value for cache item in mem store.
  */
-class MemCachePersistenceObject {
+public class MemCachePersistenceObject implements Serializable {
     /** Response status **/
     private int status;
     /** Response character encoding */
@@ -53,7 +54,7 @@ class MemCachePersistenceObject {
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
      */
-    MemCachePersistenceObject() {
+    public MemCachePersistenceObject() {
     }
 
     /**

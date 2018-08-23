@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.store.mem.impl;
+package com.adobe.acs.commons.httpcache.store.mem;
 
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.store.TempSink;

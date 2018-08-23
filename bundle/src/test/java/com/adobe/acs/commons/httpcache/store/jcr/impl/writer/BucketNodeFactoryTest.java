@@ -160,6 +160,7 @@ public class BucketNodeFactoryTest
 
     private CacheKey mockCacheKey(final MockSettings mockSettings){
         return new CacheKey()
+
         {
             @Override
             public String getUri()
@@ -171,6 +172,21 @@ public class BucketNodeFactoryTest
             public String getHierarchyResourcePath()
             {
                 return mockSettings.cacheKeyHierarchyResourcePath;
+            }
+
+            @Override
+            public long getExpiryForCreation() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForAccess() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForUpdate() {
+                return -1;
             }
 
             @Override
