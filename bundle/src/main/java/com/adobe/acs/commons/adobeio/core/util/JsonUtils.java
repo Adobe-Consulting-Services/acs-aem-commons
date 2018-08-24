@@ -19,9 +19,13 @@
  */
 package com.adobe.acs.commons.adobeio.core.util;
 
-import com.drew.lang.annotations.NotNull;
-import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
+
+import com.drew.lang.annotations.NotNull;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Class containing static methods to handle Json-objects and arrays
@@ -91,6 +95,19 @@ public final class JsonUtils {
         }
         return new JsonObject();
     }
+    
+    
+    /**
+     * @param key Key
+     * @param value Value
+     * @return A JsonObject created from key and value
+     */
+    public static JsonObject getJsonObject(@NotNull final String key, @NotNull final String value) {
+        JsonObject object = new JsonObject();
+        object.addProperty(key, value);
+        return object;
+    }
+    
 
     /**
      * This method returns the property of a jsonObject as a String
@@ -110,14 +127,4 @@ public final class JsonUtils {
         return result;
     }
 
-    /**
-     * @param key Key
-     * @param value Value
-     * @return A JsonObject created from key and value
-     */
-    public static JsonObject getJsonObject(@NotNull final String key, @NotNull final String value) {
-        JsonObject object = new JsonObject();
-        object.addProperty(key, value);
-        return object;
-    }
 }

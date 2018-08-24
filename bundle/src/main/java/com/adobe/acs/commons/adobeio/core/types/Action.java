@@ -22,9 +22,15 @@ package com.adobe.acs.commons.adobeio.core.types;
 /**
  * This interface is used to specify the action in the operation
  */
-public interface Action {
+public final class Action {
 
-    void setValue(String actionType);
+    private String action;
 
-    String getValue();
+    public void setValue(String actionType) {
+        this.action = actionType;
+    }
+
+    public String getValue() {
+        return action;
+    }
 }

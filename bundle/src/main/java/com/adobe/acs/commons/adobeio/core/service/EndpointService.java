@@ -21,6 +21,8 @@ package com.adobe.acs.commons.adobeio.core.service;
 
 import java.util.Map;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import com.adobe.acs.commons.adobeio.core.types.Filter;
 import com.adobe.acs.commons.adobeio.core.types.PKey;
 import com.google.gson.JsonObject;
@@ -128,4 +130,9 @@ public interface EndpointService {
      * @return TRUE if connection is successful
      */
     boolean isConnected();
+    
+    /**
+     * @return HTTP Client
+     */
+    CloseableHttpClient getHttpClient();
 }

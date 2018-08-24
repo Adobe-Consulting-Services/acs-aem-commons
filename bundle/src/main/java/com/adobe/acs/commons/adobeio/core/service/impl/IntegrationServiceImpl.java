@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.core.service.impl;
 
-import static com.adobe.acs.commons.adobeio.core.constants.AdobeioConstants.JSON_ACCESS_TOKEN;
+import static com.adobe.acs.commons.adobeio.core.service.impl.AdobeioConstants.JSON_ACCESS_TOKEN;
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static org.apache.http.impl.client.HttpClients.createDefault;
 

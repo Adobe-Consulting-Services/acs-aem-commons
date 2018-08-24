@@ -19,14 +19,38 @@
  */
 package com.adobe.acs.commons.adobeio.core.types;
 
+import java.util.Map;
+
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
+
+import com.drew.lang.annotations.NotNull;
+
 /**
  * This filter can be used in the Adobe I/O call
  * to filter the results
  */
-public interface Filter {
+public final class Filter {
+
+	private final Map<String, String> filter = new HashedMap();
 
     /**
-     * @return String containing the filter
+     * Create new Filter
+     * @param key Key
+     * @param value Value
      */
-    String getFilter();
+    public Filter(@NotNull String key, @NotNull String value) {
+        filter.put(key, value);
+    }
+
+    public String getFilter() {
+
+        String result = StringUtils.EMPTY;
+
+        for(Map.Entry<String, String> entry: filter.entrySet()) {
+            result = entry.getKey() + "=" + entry.getValue();
+        }
+
+        return result;
+    }
 }
