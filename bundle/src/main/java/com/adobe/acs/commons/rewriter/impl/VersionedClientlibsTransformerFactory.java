@@ -23,6 +23,7 @@ import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -262,9 +263,13 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
             for (final String prefix : resourceResolver.getSearchPath()) {
                 final String absolutePath = prefix + relativePath;
-                htmlLibrary = htmlLibraryManager.getLibrary(libraryType, absolutePath);
-                if (htmlLibrary != null) {
-                    break;
+                // check whether the ClientLibrary exists before calling HtmlLibraryManager#getLibrary in order
+                // to avoid WARN log messages that are written when an unknown HtmlLibrary is requested
+                if (hasProxyClientLibrary(htmlLibraryManager, libraryType, absolutePath)) {
+                    htmlLibrary = htmlLibraryManager.getLibrary(libraryType, absolutePath);
+                    if (htmlLibrary != null) {
+                        break;
+                    }
                 }
             }
 
@@ -272,6 +277,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
         }
         return htmlLibrary;
+    }
+
+    private static boolean hasProxyClientLibrary(final HtmlLibraryManager mgr, final LibraryType type, final String path) {
+        ClientLibrary clientLibrary = mgr.getLibraries().get(path);
+        return clientLibrary != null && clientLibrary.allowProxy() && clientLibrary.getTypes().contains(type);
     }
 
     @Nonnull private String getMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
