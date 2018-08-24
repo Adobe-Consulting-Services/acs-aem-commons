@@ -35,29 +35,29 @@ import org.slf4j.LoggerFactory;
  * Servlet for updating a line in the redirect map text file
  */
 @SlingServlet(methods = { "POST" }, resourceTypes = {
-		"acs-commons/components/utilities/redirectmappage" }, selectors = {
-				"updateentry" }, extensions = { "json" }, metatype = false)
+        "acs-commons/components/utilities/redirectmappage" }, selectors = {
+                "updateentry" }, extensions = { "json" }, metatype = false)
 public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
-	private static final long serialVersionUID = -1704915461516132101L;
-	private static final Logger log = LoggerFactory.getLogger(UpdateEntryServlet.class);
+    private static final long serialVersionUID = -1704915461516132101L;
+    private static final Logger log = LoggerFactory.getLogger(UpdateEntryServlet.class);
 
-	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		log.trace("doPost");
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        log.trace("doPost");
 
-		String source = request.getParameter("edit-source");
-		String target = request.getParameter("edit-target");
-		int idx = Integer.parseInt(request.getParameter("edit-id"), 10);
-		log.debug("Updating entry {} with {} {}", idx, source, target);
+        String source = request.getParameter("edit-source");
+        String target = request.getParameter("edit-target");
+        int idx = Integer.parseInt(request.getParameter("edit-id"), 10);
+        log.debug("Updating entry {} with {} {}", idx, source, target);
 
-		List<String> lines = RedirectEntriesUtils.readEntries(request);
+        List<String> lines = RedirectEntriesUtils.readEntries(request);
 
-		lines.set(idx, source + " " + target);
-		log.debug("Updated entry...");
+        lines.set(idx, source + " " + target);
+        log.debug("Updated entry...");
 
-		RedirectEntriesUtils.updateRedirectMap(request, lines);
-		RedirectEntriesUtils.writeEntriesToResponse(request, response,
-				"Updated entry " + idx + " to " + source + " " + target);
-	}
+        RedirectEntriesUtils.updateRedirectMap(request, lines);
+        RedirectEntriesUtils.writeEntriesToResponse(request, response,
+                "Updated entry " + idx + " to " + source + " " + target);
+    }
 }
