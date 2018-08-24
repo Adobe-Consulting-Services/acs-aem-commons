@@ -22,6 +22,10 @@
 	padding: 1em 0;
 }
 
+.coral-Dialog-header .coral-Heading {
+	padding: 0;
+}
+
 .entry-invalid {
 	background-color: #fa7d73;
 	color: #323232;
