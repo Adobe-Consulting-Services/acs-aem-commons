@@ -7,7 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
-- #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes.
+
+- #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
+- #1458 - Fixed issue where page date was not updated when modifying redirect map file
 
 ## [3.17.4] - 2018-08-15
 
