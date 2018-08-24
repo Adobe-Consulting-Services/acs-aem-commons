@@ -75,6 +75,9 @@ public class TestServlets {
     @Mock
     private Resource mockMapContentResource;
 
+    @Mock
+    private ModifiableValueMap contentProperties;
+
     private String value = null;
 
     private ModifiableValueMap mvm = new ModifiableValueMap() {
@@ -123,14 +126,16 @@ public class TestServlets {
 
         @Override
         public Object put(String key, Object v) {
-            if (v instanceof InputStream) {
-                try {
-                    value = IOUtils.toString((InputStream) v);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+            if (key.equals(JcrConstants.JCR_DATA)) {
+                if (v instanceof InputStream) {
+                    try {
+                        value = IOUtils.toString((InputStream) v);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    value = String.valueOf(v);
                 }
-            } else {
-                value = String.valueOf(v);
             }
             return v;
         }
@@ -227,8 +232,16 @@ public class TestServlets {
             public Iterator<Resource> findResources(String query, String language) {
                 return new ArrayList<Resource>().iterator();
             }
+
+            public String getUserID() {
+                return "admin";
+            }
+
         };
         mockResolver.addResource(mockResource);
+
+        doReturn(contentProperties).when(mockResource).adaptTo(ModifiableValueMap.class);
+        doReturn(null).when(contentProperties).put(org.mockito.Matchers.anyString(), org.mockito.Matchers.any());
 
         log.debug("Setting up the request...");
         doReturn(mockResource).when(mockSlingRequest).getResource();
@@ -242,6 +255,7 @@ public class TestServlets {
         log.debug("Setting up the resource /etc");
         doReturn("/etc").when(mockResource).getPath();
         mockResolver.addResource(mockResource);
+
         doReturn(mockFileResource).when(mockResource).getChild(RedirectMapModel.MAP_FILE_NODE);
         doReturn(model).when(mockResource).adaptTo(RedirectMapModel.class);
 

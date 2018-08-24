@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.redirectmaps.models.MapEntry;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.wcm.api.NameConstants;
 import com.google.common.base.Charsets;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
@@ -87,6 +89,11 @@ public class RedirectEntriesUtils {
 
         log.info("Updating redirect map at {}", request.getResource().getPath());
 
+        Calendar now = Calendar.getInstance();
+        ModifiableValueMap contentProperties = resource.adaptTo(ModifiableValueMap.class);
+        contentProperties.put(NameConstants.PN_PAGE_LAST_MOD, now);
+        contentProperties.put(NameConstants.PN_PAGE_LAST_MOD_BY, request.getResourceResolver().getUserID());
+
         Map<String, Object> fileParams = new HashMap<String, Object>();
         fileParams.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FILE);
         Resource fileResource = ResourceUtil.getOrCreateResource(request.getResourceResolver(),
@@ -99,10 +106,12 @@ public class RedirectEntriesUtils {
         Resource contentResource = ResourceUtil.getOrCreateResource(resource.getResourceResolver(),
                 fileResource.getPath() + "/" + JcrConstants.JCR_CONTENT, contentParams, JcrConstants.NT_UNSTRUCTURED,
                 false);
-        
+
         ModifiableValueMap mvm = contentResource.adaptTo(ModifiableValueMap.class);
         mvm.put(JcrConstants.JCR_DATA,
                 new ByteArrayInputStream(StringUtils.join(entries, "\n").getBytes(Charsets.UTF_8)));
+        mvm.put(JcrConstants.JCR_LASTMODIFIED, now);
+        mvm.put(JcrConstants.JCR_LAST_MODIFIED_BY, request.getResourceResolver().getUserID());
         request.getResourceResolver().commit();
         request.getResourceResolver().refresh();
         log.debug("Changes saved...");
