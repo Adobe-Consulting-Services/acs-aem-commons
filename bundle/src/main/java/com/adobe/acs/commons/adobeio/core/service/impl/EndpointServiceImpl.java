@@ -230,7 +230,7 @@ public class EndpointServiceImpl implements EndpointService {
 	 *             Thrown when process-action throws an exception
 	 */
 	private JsonObject process(@NotNull final String actionUrl, @NotNull final String method,
-			@NotNull final JsonObject payload) throws Exception {
+			@NotNull final JsonObject payload) throws IOException {
 		if (isBlank(actionUrl) || isBlank(method)) {
 			return new JsonObject();
 		}
@@ -291,8 +291,6 @@ public class EndpointServiceImpl implements EndpointService {
 		LOGGER.debug("STARTING STOPWATCH processBase");
 		stopWatch.start();
 
-		CloseableHttpClient httpClient = getHttpClient();
-
 		base.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
 		base.setHeader("cache-control", "no-cache");
 		base.setHeader("x-api-key", integrationService.getApiKey());
@@ -313,7 +311,8 @@ public class EndpointServiceImpl implements EndpointService {
 		stopWatch.stop();
 		LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
 		stopWatch.reset();
-
+		
+		CloseableHttpClient httpClient = getHttpClient();
 		LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
 		return responseAsJson(httpClient.execute(base));
 	}

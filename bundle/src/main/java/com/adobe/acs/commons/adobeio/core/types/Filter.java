@@ -32,7 +32,7 @@ import com.drew.lang.annotations.NotNull;
  */
 public final class Filter {
 
-	private final Map<String, String> filter = new HashedMap();
+	private final Map<String, String> filterMap = new HashedMap();
 
     /**
      * Create new Filter
@@ -40,14 +40,14 @@ public final class Filter {
      * @param value Value
      */
     public Filter(@NotNull String key, @NotNull String value) {
-        filter.put(key, value);
+    	filterMap.put(key, value);
     }
 
     public String getFilter() {
 
         String result = StringUtils.EMPTY;
 
-        for(Map.Entry<String, String> entry: filter.entrySet()) {
+        for(Map.Entry<String, String> entry: filterMap.entrySet()) {
             result = entry.getKey() + "=" + entry.getValue();
         }
 

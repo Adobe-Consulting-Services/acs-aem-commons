@@ -24,13 +24,13 @@ package com.adobe.acs.commons.adobeio.core.types;
  */
 public final class Action {
 
-    private String action;
+    private String actionType;
 
     public void setValue(String actionType) {
-        this.action = actionType;
+        this.actionType = actionType;
     }
 
     public String getValue() {
-        return action;
+        return actionType;
     }
 }
