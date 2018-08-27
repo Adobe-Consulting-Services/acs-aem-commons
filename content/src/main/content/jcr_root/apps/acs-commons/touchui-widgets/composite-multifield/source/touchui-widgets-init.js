@@ -99,17 +99,30 @@
                 select.setValue(value);
             }
         },
+		
+		    isCoralSelect: function ($field) {
+            return !_.isEmpty($field) && ($field.parent().prop('tagName') === "CORAL-SELECT");
+        },
 
+        setCoralSelect: function ($field, value) {
+            $field.parent().get(0).set("value",value);
+        },
+
+		    // To support coral 3 UI checkbox, add property granite:class=coral-Form-fieldwrapper to the field in dialog.
         isCheckbox: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
+            return !_.isEmpty($field) && ($field.prop("type") === "checkbox" || $field.hasClass("coral-Checkbox"));
         },
 
         setCheckBox: function ($field, value) {
-            $field.prop("checked", $field.attr("value") === value);
+            if($field.parent().hasClass("coral-Checkbox")){
+                $field.parent().prop("checked", $field.attr("value") === value);
+            }else {
+            	$field.prop("checked", $field.attr("value") === value);
+            }
         },
 
         isDateField: function ($field) {
-            return !_.isEmpty($field) && $field.prop("type") === "hidden" && $field.parent().hasClass("coral-DatePicker");
+            return !_.isEmpty($field) && $field.prop("type") === "hidden" && ($field.parent().hasClass("coral-DatePicker") || $field.parent().prop('tagName') === "CORAL-DATEPICKER");
         },
 
         setDateField: function ($field, value) {
@@ -118,10 +131,15 @@
             if (date.isValid()) {
                 $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
                 $field.val(date.format($parent.attr("data-stored-format")));
+				if ($parent.prop('tagName') === "CORAL-DATEPICKER") {
+                	$field.val(date.format($parent.attr("displayformat")));
+                    $parent.get(0).set("value",date.format($parent.attr("valueformat")));
+                }
             }
             else {
                 $parent.find("input.coral-Textfield").val(value);
                 $field.val(value);
+				$parent.get(0).set("value",value);
             }
         },
 
@@ -138,6 +156,10 @@
             return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
         },
 
+        isFoundationAutocomplete: function($field) {
+            return !_.isEmpty($field) && ($field.parents('foundation-autocomplete').length > 0);
+        },
+
         setAutocomplete: function($field,value) {
             var cmf = this;
 
@@ -152,6 +174,10 @@
                     $tagList._appendItem({"display": selectedItem.text(), "value": item});
                 });
             }
+        },
+
+        setFoundationAutocomplete: function($field,value) {
+            $field.parents('foundation-autocomplete').val(value);
         },
         
         isTagsField: function ($field) {
@@ -199,6 +225,10 @@
                 this.setAutocomplete($field,value);
             } else if (this.isTagsField($field)) {
                 this.setTagsField($field,value);
+            } else if (this.isFoundationAutocomplete($field)) {
+                this.setFoundationAutocomplete($field,value);
+            } else if (this.isCoralSelect($field)) {
+                this.setCoralSelect($field, value);
             } else {
                 $field.val(value);
             }

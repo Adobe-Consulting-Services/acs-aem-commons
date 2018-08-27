@@ -18,6 +18,14 @@
  * #L%
  */
 (function ($, ns, channel, window, undefined) {
+    // check and set flag to prevent other instances of this script from executing
+    // when embedded in multiple app clientlibs.
+    if (ns.acsSharedComponentPropertiesIsListening) {
+        return;
+    } else {
+        ns.acsSharedComponentPropertiesIsListening = true;
+    }
+
     function initDialog(type) {
         var dialogSrc = "dialog" + type;
         var dialogIcon = 'coral-Icon--' + (type === "shared" ? "layersForward" : "globe");
@@ -100,7 +108,9 @@
     // to figure out when a layer got activated
     channel.on('cq-layer-activated', function (ev) {
         // we continue if the user switched to the Edit layer
-        if (ev.layer === 'Edit') {
+        if (ev.layer === 'Edit' && !ns.acsSharedComponentPropertiesIsRegistered) {
+            // set flag to prevent multiple firings of this event from triggering our action registration
+            ns.acsSharedComponentPropertiesIsRegistered = true;
             // we use the editable toolbar and register an additional action
             ns.EditorFrame.editableToolbar.registerAction('SHARED-COMPONENT-PROPS', initDialog("shared"));
             ns.EditorFrame.editableToolbar.registerAction('GLOBAL-COMPONENT-PROPS', initDialog("global"));
