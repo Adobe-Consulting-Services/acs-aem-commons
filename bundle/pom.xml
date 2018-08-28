@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.17.5-SNAPSHOT</version>
+        <version>3.18.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -63,9 +63,11 @@
                             org.apache.poi.ss.usermodel;version="[2.0,4)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,4)",
                             org.apache.poi.xssf.usermodel;version="[2.0,4)",
+                            !org.bouncycastle.jce.*, 
+                            !android.util.*,
                             *
                         </Import-Package>
-                        <Embed-Dependency>guava</Embed-Dependency>
+                        <Embed-Dependency>guava,jjwt;inline=true</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -470,6 +472,24 @@
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
         </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.3.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.3.2</version>
+            <scope>provided</scope>
+        </dependency>
+
 
         <!--  Build Dependencies -->
         <dependency>

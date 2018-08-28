@@ -27,7 +27,6 @@ import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -103,7 +102,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
-    private static final String PROPERTY_PATHS = "paths";
+    private static final String PROPERTY_PATHS = "paths"; // this is not used for the actual Sling Job
+    private static final String PROPERTY_PATH = "path";
     private static final String PROPERTY_REPLICATED_BY = "replicatedBy";
 
     private enum ReplicatedAt {
@@ -118,11 +118,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         "rep:Group",
         "sling:OrderedFolder/nt:unstructured",
         ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+        "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
         "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
     };
 
     @Property(label = "Replication Status Node Type and Path Restrictions",
-            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'." ,
+            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate nodetypes will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome." ,
             cardinality = Integer.MAX_VALUE,
             value = {
                     "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
@@ -131,6 +132,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     "rep:Group",
                     "sling:OrderedFolder/nt:unstructured",
                     ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+                    "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
                     "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
@@ -197,31 +199,32 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     public final void handleEvent(final Event event) {
         if (this.isMaster) {
             // Only run on master
-
             final Map<String, Object> jobConfig = getInfoFromEvent(event);
             final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
-            if (this.containsJcrPackagePath(paths)) {
-                ResourceResolver resourceResolver = null;
-                try {
-                    resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-
-                    final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
-                    if (CollectionUtils.isNotEmpty(jcrPackages)) {
-
-                        for (final JcrPackage jcrPackage : jcrPackages) {
-                            // Close jcrPackages after they've been used to check if a Job should be invoked.
-                            jcrPackage.close();
-                        }
-
+            ResourceResolver resourceResolver = null;
+            try {
+                for (String path : paths) {
+                    if (!this.containsJcrPackagePath(path)) {
+                        continue;
+                    }
+                    if (resourceResolver == null) {
+                        resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+                    }
+                    final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
+                    if (jcrPackage != null) {
+                        // Close jcrPackages after they've been used to check if a Job should be invoked.
+                        jcrPackage.close();
+                        jobConfig.put(PROPERTY_PATH, path);
+                        // trigger one job per package to make one exception not affect other packages
                         jobManager.addJob(JOB_TOPIC, jobConfig);
                     }
-                } catch (LoginException e) {
-                    log.error("Could not obtain a resource resolver.", e);
-                } finally {
-                    if (resourceResolver != null) {
-                        resourceResolver.close();
-                    }
+                }
+            } catch (LoginException e) {
+                log.error("Could not obtain a resource resolver.", e);
+            } finally {
+                if (resourceResolver != null) {
+                    resourceResolver.close();
                 }
             }
         }
@@ -229,34 +232,32 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     @Override
     public final JobResult process(final Job job) {
-        final String[] paths = (String[]) job.getProperty(PROPERTY_PATHS);
+        final String path = (String) job.getProperty(PROPERTY_PATH);
         final String replicatedBy =
                 StringUtils.defaultIfEmpty(this.replicatedByOverride, (String) job.getProperty(PROPERTY_REPLICATED_BY));
 
-        log.debug("Processing Replication Status Update for JCR Package: {}", paths);
+        log.debug("Processing Replication Status Update for JCR Package: {}", path);
 
         ResourceResolver resourceResolver = null;
         try {
             resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
-            final List<JcrPackage> jcrPackages = this.getJcrPackages(resourceResolver, paths);
-
-            if (CollectionUtils.isEmpty(jcrPackages)) {
-                log.warn("JCR Package is unavailable for Replication Status Update at: {}", paths);
+            final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
+            if (jcrPackage == null) {
+                log.warn("JCR Package is unavailable for Replication Status Update at: {}", path);
                 return JobResult.OK;
             }
-
-            for (final JcrPackage jcrPackage : jcrPackages) {
-                try {
-                    setReplicationStatus(jcrPackage, replicatedBy, resourceResolver);
-                } finally {
-                    // Close each package when we are done.
-                    jcrPackage.close();
-                }
+            
+            try {
+                setReplicationStatus(jcrPackage, replicatedBy, resourceResolver);
+            } finally {
+                // Close  package when we are done.
+                jcrPackage.close();
             }
+            
         } catch (LoginException e) {
-            logJobError(job, "Could not obtain a resource resolver for applying replication status updates", e);
-            return JobResult.FAILED;
+            log.error("Could not obtain a resource resolver for applying replication status updates", e);
+            return JobResult.CANCEL;
         } catch (RepositoryException e) {
             logJobError(job, "Could not update replication metadata", e);
             return JobResult.FAILED;
@@ -364,21 +365,19 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     /**
-     * Checks if any path in the array of paths looks like a Jcr Package path.
+     * Checks if the given path looks like a Jcr Package path.
      *
      * Provides a very fast, String-based, in-memory check to weed out most false positives and avoid
      * resolving the path to a Jcr Package and ensure it is valid.
      *
-     * @param paths the array of paths
+     * @param path
      * @return true if at least one path looks like a Jcr Package path
      */
-    private boolean containsJcrPackagePath(final String[] paths) {
-        for (final String path : paths) {
-            if (StringUtils.startsWith(path, "/etc/packages/")
-                    && StringUtils.endsWith(path, ".zip")) {
-                // At least 1 entry looks like a package
-                return true;
-            }
+    private boolean containsJcrPackagePath(final String path) {
+        if (StringUtils.startsWith(path, "/etc/packages/")
+                && StringUtils.endsWith(path, ".zip")) {
+            // At least 1 entry looks like a package
+            return true;
         }
 
         // Nothing looks like a package...
@@ -386,29 +385,23 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     /**
-     * Resolves paths to Jcr Packages. If any path does not resolve to a valid Jcr Package, it is discarded.
+     * Resolves path to Jcr Package.
      *
-     * @param paths the list of paths to resolve to Jcr Packages
-     * @return a list of Jcr Packages that correspond to the provided paths
+     * @param path the path to resolve to Jcr Package
+     * @return the Jcr Package that corresponds to the provided path or {@code null}
      */
-    private List<JcrPackage> getJcrPackages(final ResourceResolver resourceResolver, final String[] paths) {
-        final List<JcrPackage> packages = new ArrayList<JcrPackage>();
+    private JcrPackage getJcrPackage(final ResourceResolver resourceResolver, final String path) {
 
-        for (final String path : paths) {
-            final Resource eventResource = resourceResolver.getResource(path);
+        final Resource eventResource = resourceResolver.getResource(path);
+        JcrPackage jcrPackage = null;
 
-            JcrPackage jcrPackage = null;
-
-            try {
-                jcrPackage = packaging.open(eventResource.adaptTo(Node.class), false);
-                if (jcrPackage != null) {
-                    packages.add(jcrPackage);
-                }
-            } catch (RepositoryException e) {
-                log.warn("Error checking if the path [ {} ] is a JCR Package.", path);
-            }
+        try {
+            jcrPackage = packaging.open(eventResource.adaptTo(Node.class), false);
+        } catch (RepositoryException e) {
+            log.warn("Error checking if the path [ {} ] is a JCR Package.", path);
         }
-        return packages;
+        
+        return jcrPackage;
     }
 
     /**

@@ -38,10 +38,14 @@ import static org.junit.Assert.assertTrue;
 public class LogTester extends AppenderBase<LoggingEvent> {
     private static final String ALL = "overall";
 
-    private static Map<String, List<LoggingEvent>> loggingEvents;
+    private static ThreadLocal<Map<String, List<LoggingEvent>>> loggingEventsThreadLocal = ThreadLocal.withInitial(() -> {
+        Map<String, List<LoggingEvent>> events = new HashMap<>();
+        events.put(ALL, new ArrayList<>());
+        return events;
+    });
 
-    static {
-        reset();
+    private static Map<String, List<LoggingEvent>> loggingEvents() {
+        return loggingEventsThreadLocal.get();
     }
 
     /**
@@ -78,7 +82,7 @@ public class LogTester extends AppenderBase<LoggingEvent> {
         }
         if (!found) {
             msg += " - Log Contents:";
-            List<LoggingEvent> events = loggingEvents.get(loggerName);
+            List<LoggingEvent> events = loggingEvents().get(loggerName);
             if (events != null && events.size() > 0) {
                 for (LoggingEvent event : events) {
                     msg += "\n" + event.getFormattedMessage();
@@ -110,7 +114,7 @@ public class LogTester extends AppenderBase<LoggingEvent> {
         String msg = "Expected " + loggerName + " log to not contain '" + unexpected + "'";
         if (found) {
             msg += " - Log Contents:";
-            List<LoggingEvent> events = loggingEvents.get(loggerName);
+            List<LoggingEvent> events = loggingEvents().get(loggerName);
             for (LoggingEvent event : events) {
                 msg += "\n" + event.getFormattedMessage();
             }
@@ -120,14 +124,14 @@ public class LogTester extends AppenderBase<LoggingEvent> {
 
     private static boolean foundInLogs(String expected, String loggerName, Integer line) {
         boolean found = false;
-        if (loggingEvents.containsKey(loggerName)) {
-            List<LoggingEvent> events = loggingEvents.get(loggerName);
+        if (loggingEvents().containsKey(loggerName)) {
+            List<LoggingEvent> events = loggingEvents().get(loggerName);
             if (line != null) {
                 if (events.size() >= line) {
                     found = events.get(line - 1).getFormattedMessage().equals(expected);
                 }
             } else {
-                for (LoggingEvent event : loggingEvents.get(loggerName)) {
+                for (LoggingEvent event : loggingEvents().get(loggerName)) {
                     if (event.getFormattedMessage().equals(expected)) {
                         found = true;
                         break;
@@ -146,8 +150,7 @@ public class LogTester extends AppenderBase<LoggingEvent> {
      * body of the test.
      */
     public static void reset() {
-        loggingEvents = new HashMap<String, List<LoggingEvent>>();
-        loggingEvents.put(ALL, new ArrayList<LoggingEvent>());
+        loggingEventsThreadLocal.remove();
     }
 
     /**
@@ -155,13 +158,13 @@ public class LogTester extends AppenderBase<LoggingEvent> {
      */
     @Override
     protected void append(LoggingEvent loggingEvent) {
-        loggingEvents.get(ALL).add(loggingEvent);
+        loggingEvents().get(ALL).add(loggingEvent);
 
         String loggerName = loggingEvent.getLoggerName();
-        if (!loggingEvents.containsKey(loggerName)) {
-            loggingEvents.put(loggerName, new ArrayList<LoggingEvent>());
+        if (!loggingEvents().containsKey(loggerName)) {
+            loggingEvents().put(loggerName, new ArrayList<>());
         }
-        loggingEvents.get(loggerName).add(loggingEvent);
+        loggingEvents().get(loggerName).add(loggingEvent);
     }
 
 }
