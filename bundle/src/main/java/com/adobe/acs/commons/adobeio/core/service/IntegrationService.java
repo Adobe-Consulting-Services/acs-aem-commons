@@ -28,18 +28,17 @@ package com.adobe.acs.commons.adobeio.core.service;
  *
  */
 public interface IntegrationService {
-	
-	/**
-	 * Get the api-key, can be used as the X-Api-Key header
-	 * @return the configured api-key
-	 */
-	String getApiKey();
-	
-	/**
-	 * Get the access-token used as the Authorization header.
-	 * This is fetched once per hour via a scheduler.
-	 * @return the access token
-	 */
-	String getAccessToken();
-	
+   
+   /**
+    * Get the api-key, can be used as the X-Api-Key header
+    * @return the configured api-key
+    */
+   String getApiKey();
+   
+   /**
+    * Get the access-token used as the Authorization header.
+    * This is fetched once per hour via a scheduler.
+    * @return the access token
+    */
+   String getAccessToken();
 }
