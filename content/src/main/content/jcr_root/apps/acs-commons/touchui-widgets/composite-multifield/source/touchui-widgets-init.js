@@ -206,6 +206,10 @@
                 });
             }
         },
+		
+		isCoralNumberField: function ($field) {
+            return !_.isEmpty($field) && $field.parent().hasClass("coral3-NumberInput");
+        },
 
         setWidgetValue: function ($field, value) {
             if (_.isEmpty($field)) {
@@ -300,7 +304,7 @@
 
                     if (isRequired && $input.val().length === 0) {
 
-                        if (cmf.isCoralSelect($input) ) {
+                        if (cmf.isCoralSelect($input) || cmf.isCoralNumberField($input)) {
                             $input.parent().addClass("is-invalid");                            
                         }else {
                             $input.addClass("is-invalid");
