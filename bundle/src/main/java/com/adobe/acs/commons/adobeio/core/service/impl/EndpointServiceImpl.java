@@ -110,17 +110,17 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Override
    public JsonObject performIO_Action(@NotNull PKey pkey) {
-      return performIO(getActionUrl(pkey));
+      return performio(getActionUrl(pkey));
    }
 
    @Override
    public JsonObject performIO_Action() {
-      return performIO(getActionUrl(null));
+      return performio(getActionUrl(null));
    }
 
    @Override
    public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performIO(getActionUrl(null) + "?" + filter.getFilter());
+      return performio(getActionUrl(null) + "?" + filter.getFilter());
    }
 
    @Override
@@ -385,7 +385,7 @@ public class EndpointServiceImpl implements EndpointService {
       return null;
    }
 
-   private JsonObject performIO(@NotNull String actionUrl) {
+   private JsonObject performio(@NotNull String actionUrl) {
       try {
          return process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
       } catch (Exception e) {
