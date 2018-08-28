@@ -31,16 +31,16 @@ public @interface EndpointConfiguration {
     String getId();
 
     @AttributeDefinition(
-    	name = "Method",
-    	description = "Used method for the endpoint",
-		options = {
-				@Option(label = "DELETE", value = "DELETE"),
+       name = "Method",
+       description = "Used method for the endpoint",
+      options = {
+            @Option(label = "DELETE", value = "DELETE"),
                 @Option(label = "GET", value = "GET"),
                 @Option(label = "PATCH", value = "PATCH"),
                 @Option(label = "POST", value = "POST"),
                 @Option(label = "PUT", value = "PUT"),  
         },
-    	required = true
+       required = true
     )
     String getMethod();
 
