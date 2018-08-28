@@ -35,10 +35,6 @@ public final class AdobeioConstants {
 	public static final String RESULT_ERROR = "error";
 	public static final String RESULT_NO_DATA = "nodata";
 
-	public static final String SERVICE_CONTENT = "content";
-	public static final String SERVICE_SUBSCRIPTIONS = "subscriptions";
-	public static final String SERVICE_HREF = "href";
-
 	private AdobeioConstants() {
 	}
 
