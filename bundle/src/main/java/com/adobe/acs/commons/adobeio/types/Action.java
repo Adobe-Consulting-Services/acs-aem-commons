@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.adobeio.types;
 
 /**
- * This interface is used to specify the action in the operation
+ * This class is used to specify the action in the operation
  */
 public final class Action {
 
