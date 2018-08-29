@@ -38,39 +38,39 @@ import com.google.common.collect.Maps;
 @Component(immediate = true, service = EndpointServiceFactory.class)
 public class EndpointServiceFactoryImpl implements EndpointServiceFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceFactoryImpl.class);
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private final Map<String, EndpointService> endpointServices = Maps.newHashMap();
+   private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceFactoryImpl.class);
+   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+   private final Map<String, EndpointService> endpointServices = Maps.newHashMap();
 
-    @Reference(name = "configurationFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind="unbind")
-    protected synchronized void addEndpointService(final EndpointService config) {
-        LOGGER.debug("Started Binding");
-        if (config != null) {
-            synchronized (this.endpointServices) {
-                this.endpointServices.put(config.getId(), config);
-            }
-        }
-    }
+   @Reference(name = "configurationFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind = "unbind")
+   protected synchronized void addEndpointService(final EndpointService config) {
+      LOGGER.debug("Started Binding");
+      if (config != null) {
+         synchronized (this.endpointServices) {
+            this.endpointServices.put(config.getId(), config);
+         }
+      }
+   }
 
-    protected synchronized void removeAcsEndpointService(final EndpointService endpointService) {
-        LOGGER.debug("Started Unbinding");
-        if (endpointService != null) {
-            synchronized (this.endpointServices) {
-                this.endpointServices.remove(endpointService.getId());
-            }
-        }
-    }
-    
-    protected void unbind(final EndpointService endpointService) {
-    	
-    }
+   protected synchronized void removeAcsEndpointService(final EndpointService endpointService) {
+      LOGGER.debug("Started Unbinding");
+      if (endpointService != null) {
+         synchronized (this.endpointServices) {
+            this.endpointServices.remove(endpointService.getId());
+         }
+      }
+   }
 
-    @Override
-    public EndpointService getEndpoint(@NotNull Action action) {
+   protected void unbind(final EndpointService endpointService) {
+      endpointServices.remove(endpointService.getId());
+   }
 
-        if ((action != null) && StringUtils.isNotBlank(action.getValue())) {
-            return endpointServices.get(action.getValue());
-        }
-        return null;
-    }
+   @Override
+   public EndpointService getEndpoint(@NotNull Action action) {
+
+      if ((action != null) && StringUtils.isNotBlank(action.getValue())) {
+         return endpointServices.get(action.getValue());
+      }
+      return null;
+   }
 }
