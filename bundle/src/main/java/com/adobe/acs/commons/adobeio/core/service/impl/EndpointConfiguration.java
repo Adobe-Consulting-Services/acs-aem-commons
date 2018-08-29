@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.config;
+package com.adobe.acs.commons.adobeio.core.service.impl;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;

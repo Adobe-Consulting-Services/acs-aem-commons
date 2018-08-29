@@ -54,7 +54,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.config.EndpointConfiguration;
 import com.adobe.acs.commons.adobeio.core.service.EndpointService;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.core.types.Filter;

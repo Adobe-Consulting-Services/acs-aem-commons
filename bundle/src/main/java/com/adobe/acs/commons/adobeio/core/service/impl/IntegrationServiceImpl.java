@@ -50,7 +50,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.config.IntegrationConfiguration;
 import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.google.common.collect.Lists;
