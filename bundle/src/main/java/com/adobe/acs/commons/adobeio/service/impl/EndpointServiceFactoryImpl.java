@@ -42,7 +42,7 @@ public class EndpointServiceFactoryImpl implements EndpointServiceFactory {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final Map<String, EndpointService> endpointServices = Maps.newHashMap();
 
-    @Reference(name = "configurationFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    @Reference(name = "configurationFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind="unbind")
     protected synchronized void addEndpointService(final EndpointService config) {
         LOGGER.debug("Started Binding");
         if (config != null) {
@@ -59,6 +59,10 @@ public class EndpointServiceFactoryImpl implements EndpointServiceFactory {
                 this.endpointServices.remove(endpointService.getId());
             }
         }
+    }
+    
+    protected void unbind(final EndpointService endpointService) {
+    	
     }
 
     @Override
