@@ -43,7 +43,7 @@ public class EndpointServiceFactoryImpl implements EndpointServiceFactory {
     private final Map<String, EndpointService> endpointServices = Maps.newHashMap();
 
     @Reference(name = "configurationFactory", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected synchronized void addAcsEndpointService(final EndpointService config) {
+    protected synchronized void addEndpointService(final EndpointService config) {
         LOGGER.debug("Started Binding");
         if (config != null) {
             synchronized (this.endpointServices) {
