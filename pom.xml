@@ -560,18 +560,6 @@
 			<url>https://repo.adobe.com/nexus/content/groups/public/</url>
 			<layout>default</layout>
 		</repository>
-		<repository>
-            <id>sonatype</id>
-            <name>Sonatype - Force to Central</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>sonatype-apache</id>
-            <name>Sonatype Apache - Force to Central</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-        </repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -580,18 +568,6 @@
 			<url>https://repo.adobe.com/nexus/content/groups/public/</url>
 			<layout>default</layout>
 		</pluginRepository>
-		<pluginRepository>
-            <id>sonatype</id>
-            <name>Sonatype - Force to Central</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>sonatype-apache</id>
-            <name>Sonatype Apache - Force to Central</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-        </pluginRepository>
 	</pluginRepositories>
 
 	<distributionManagement>
