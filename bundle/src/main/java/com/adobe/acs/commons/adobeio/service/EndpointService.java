@@ -21,10 +21,7 @@ package com.adobe.acs.commons.adobeio.service;
 
 import java.util.Map;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import com.adobe.acs.commons.adobeio.types.Filter;
-import com.adobe.acs.commons.adobeio.types.PKey;
 import com.google.gson.JsonObject;
 
 /**
@@ -57,24 +54,12 @@ public interface EndpointService {
      */
     Map<String, String> getSpecificServiceHeader();
 
-    /**
-     * @param pKey The provided pKey
-     * @return The full url of the call.
-     */
-    String getUrl(PKey pKey);
 
     /**
      * Performs the GET-action connected to the endpoint
      * @return JsonObject containing the result of the action
      */
     JsonObject performIO_Action();
-
-    /**
-     * Performs the GET-action connected to the endpoint
-     * @param pkey The provided pkey
-     * @return JsonObject containing the result of the action
-     */
-    JsonObject performIO_Action(PKey pkey);
 
     /**
      * Performs the GET-action connected to the endpoint
@@ -90,30 +75,6 @@ public interface EndpointService {
      */
     JsonObject performIO_Action(JsonObject payload);
 
-    /**
-     * Performs the action connected to the endpoint
-     * @param pkey The provided pkey
-     * @param payload JsonObject containing the data that is used in the action
-     * @return JsonObject containing the result of the action
-     */
-    JsonObject performIO_Action(PKey pkey, JsonObject payload);
-
-    /**
-     * Performs the GET-action connected to the endpoint
-     * @param pkey The provided pkey
-     * @param classOfT Type of object that will be returned
-     * @return Object containing the result of the action
-     */
-    <T> T performIO_Action(PKey pkey, Class<T> classOfT);
-
-    /**
-     * Performs the action connected to the endpoint
-     * @param pkey The provided pkey
-     * @param payload JsonObject containing the data that is used in the action
-     * @param classOfT Type of object that will be returned
-     * @return Object containing the result of the action
-     */
-    <T> T performIO_Action(PKey pkey, JsonObject payload, Class<T> classOfT);
 
     /**
      * Straight post-action to the provided url,
@@ -131,8 +92,4 @@ public interface EndpointService {
      */
     boolean isConnected();
     
-    /**
-     * @return HTTP Client
-     */
-    CloseableHttpClient getHttpClient();
 }

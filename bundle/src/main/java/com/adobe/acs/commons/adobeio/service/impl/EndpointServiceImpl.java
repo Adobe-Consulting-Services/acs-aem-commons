@@ -28,7 +28,6 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +57,7 @@ import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.types.Filter;
-import com.adobe.acs.commons.adobeio.types.PKey;
 import com.drew.lang.annotations.NotNull;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -107,47 +104,21 @@ public class EndpointServiceImpl implements EndpointService {
       return this.config.getEndpoint();
    }
 
-   @Override
-   public JsonObject performIO_Action(@NotNull PKey pkey) {
-      return performio(getActionUrl(pkey));
-   }
 
    @Override
    public JsonObject performIO_Action() {
-      return performio(getActionUrl(null));
+      return performio(getEndpoint());
    }
 
    @Override
    public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performio(getActionUrl(null) + "?" + filter.getFilter());
+      return performio(getEndpoint() + "?" + filter.getFilter());
    }
 
-   @Override
-   public JsonObject performIO_Action(@NotNull PKey pkey, @NotNull JsonObject payload) {
-      return handleAdobeIO_Action(pkey, payload);
-   }
 
    @Override
    public JsonObject performIO_Action(@NotNull JsonObject payload) {
-      return handleAdobeIO_Action(null, payload);
-   }
-
-   @Override
-   public <T> T performIO_Action(@NotNull PKey pkey, @NotNull JsonObject payload, @NotNull Class<T> classOfT) {
-      return parseToClass(handleAdobeIO_Action(pkey, payload), classOfT);
-   }
-
-   @Override
-   public <T> T performIO_Action(@NotNull PKey pkey, @NotNull Class<T> classOfT) {
-      String actionUrl = getActionUrl(pkey);
-      JsonObject result = new JsonObject();
-
-      try {
-         result = process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
-      } catch (Exception e) {
-         LOGGER.error("Problem processing action {} in performIO_Action", actionUrl, e);
-      }
-      return parseToClass(result, classOfT);
+      return handleAdobeIO_Action( payload);
    }
 
    @Override
@@ -171,14 +142,9 @@ public class EndpointServiceImpl implements EndpointService {
    }
 
    @Override
-   public String getUrl(@NotNull PKey pKey) {
-      return getActionUrl(pKey);
-   }
-
-   @Override
    public boolean isConnected() {
       try {
-         JsonObject response = processGet(getActionUrl(null));
+         JsonObject response = processGet(getEndpoint());
          return !response.has(RESULT_ERROR);
       } catch (Exception e) {
          LOGGER.error("Problem testing the connection for {}", endpointId, e);
@@ -197,12 +163,12 @@ public class EndpointServiceImpl implements EndpointService {
     *            Payload of the call
     * @return JsonObject containing the result
     */
-   private JsonObject handleAdobeIO_Action(@NotNull final PKey pKey, @NotNull final JsonObject payload) {
+   private JsonObject handleAdobeIO_Action( @NotNull final JsonObject payload) {
       // initialize jsonobject
       JsonObject processResponse = new JsonObject();
 
       // perform action, if the action is defined in the configuration
-      String actionUrl = getActionUrl(pKey);
+      String actionUrl = getEndpoint();
       try {
          LOGGER.debug("ActionUrl = {} . method = {}", actionUrl, getMethod());
          // process the Adobe I/O action
@@ -331,58 +297,6 @@ public class EndpointServiceImpl implements EndpointService {
       return resultJson;
    }
 
-   /**
-    * This method constructs the action url that performs the Adobe I/O action
-    *
-    * @param pKey
-    *            Pkey is the id of an entry in Service. The PKey can be added
-    *            to update a specific entry in Service
-    * @return String containing the full action url
-    */
-   private String getActionUrl(@NotNull final PKey pKey) {
-      String url = getEndpoint();
-
-      // add pKey as a parameter
-      if ((pKey != null) && StringUtils.isNotBlank(pKey.getValue())) {
-         url = url + "/" + pKey.getValue();
-      }
-
-      return url;
-   }
-
-   /**
-    * Parse the result to the provided class type
-    * 
-    * @param result
-    *            JsonObject containing the result
-    * @param classOfT
-    *            Class to parse to
-    * @param <T>
-    *            Class
-    * @return Object of Class T containing the results of the jsonobject
-    */
-   private <T> T parseToClass(@NotNull JsonObject result, @NotNull Class<T> classOfT) {
-      final Gson gson = new Gson();
-
-      try {
-         // (try to) parse the jsonobject to a class
-         if (result != null) {
-            return gson.fromJson(result, (Type) classOfT);
-         }
-      } catch (Exception e) {
-         LOGGER.error("Problem retrieving stored data for result {}", result.toString(), e);
-      }
-
-      // in case of an exception
-      try {
-         return classOfT.newInstance();
-      } catch (InstantiationException | IllegalAccessException e) {
-         LOGGER.error("Problemn creating stored data", e);
-      }
-
-      // in case of an exception
-      return null;
-   }
 
    private JsonObject performio(@NotNull String actionUrl) {
       try {
@@ -406,8 +320,7 @@ public class EndpointServiceImpl implements EndpointService {
       return mapHeader;
    }
 
-   @Override
-   public CloseableHttpClient getHttpClient() {
+   private CloseableHttpClient getHttpClient() {
       return HttpClientBuilder.create().build();
    }
 
