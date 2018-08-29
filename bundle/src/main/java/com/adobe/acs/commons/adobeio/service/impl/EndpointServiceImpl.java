@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service.impl;
+package com.adobe.acs.commons.adobeio.service.impl;
 
-import static com.adobe.acs.commons.adobeio.core.service.impl.AdobeioConstants.CONTENT_TYPE_APPLICATION_JSON;
-import static com.adobe.acs.commons.adobeio.core.service.impl.AdobeioConstants.RESULT_ERROR;
-import static com.adobe.acs.commons.adobeio.core.service.impl.AdobeioConstants.RESULT_NO_DATA;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.CONTENT_TYPE_APPLICATION_JSON;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.RESULT_ERROR;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.RESULT_NO_DATA;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
@@ -54,11 +54,11 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.service.EndpointService;
-import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
-import com.adobe.acs.commons.adobeio.core.types.Filter;
-import com.adobe.acs.commons.adobeio.core.types.PKey;
 import com.adobe.acs.commons.adobeio.exception.AdobeioException;
+import com.adobe.acs.commons.adobeio.service.EndpointService;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import com.adobe.acs.commons.adobeio.types.Filter;
+import com.adobe.acs.commons.adobeio.types.PKey;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

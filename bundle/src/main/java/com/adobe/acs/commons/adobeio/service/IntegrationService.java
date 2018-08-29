@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service;
+package com.adobe.acs.commons.adobeio.service;
 
 /**
  * Service to communicate to Adobe I/O with regards to authentication. 

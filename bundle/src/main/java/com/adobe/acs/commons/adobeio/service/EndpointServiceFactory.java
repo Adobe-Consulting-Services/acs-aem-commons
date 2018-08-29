@@ -17,11 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.types;
+package com.adobe.acs.commons.adobeio.service;
+
+import com.adobe.acs.commons.adobeio.types.Action;
+import com.drew.lang.annotations.NotNull;
+
 
 /**
- * This interface is used to specify the pkey in the operation
+ * Interface for the Endpoint service Factory
  */
-public interface PKey {
-   String getValue();
+public interface EndpointServiceFactory {
+
+    /**
+     * @param action Provided action
+     * @return The EndpointService of the provided action
+     */
+    EndpointService getEndpoint(@NotNull Action action);
 }

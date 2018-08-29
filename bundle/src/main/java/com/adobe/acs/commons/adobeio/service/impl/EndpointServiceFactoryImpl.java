@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service.impl;
+package com.adobe.acs.commons.adobeio.service.impl;
 
 import java.util.Map;
 
@@ -29,9 +29,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.service.EndpointService;
-import com.adobe.acs.commons.adobeio.core.service.EndpointServiceFactory;
-import com.adobe.acs.commons.adobeio.core.types.Action;
+import com.adobe.acs.commons.adobeio.service.EndpointService;
+import com.adobe.acs.commons.adobeio.service.EndpointServiceFactory;
+import com.adobe.acs.commons.adobeio.types.Action;
 import com.drew.lang.annotations.NotNull;
 import com.google.common.collect.Maps;
 

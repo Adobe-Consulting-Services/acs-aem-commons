@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service.impl;
+package com.adobe.acs.commons.adobeio.service.impl;
 
-import static com.adobe.acs.commons.adobeio.core.service.impl.AdobeioConstants.JSON_ACCESS_TOKEN;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.JSON_ACCESS_TOKEN;
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static org.apache.http.impl.client.HttpClients.createDefault;
 
@@ -50,8 +50,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.exception.AdobeioException;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

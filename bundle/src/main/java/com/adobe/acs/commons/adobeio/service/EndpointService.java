@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service;
+package com.adobe.acs.commons.adobeio.service;
 
 import java.util.Map;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import com.adobe.acs.commons.adobeio.core.types.Filter;
-import com.adobe.acs.commons.adobeio.core.types.PKey;
+import com.adobe.acs.commons.adobeio.types.Filter;
+import com.adobe.acs.commons.adobeio.types.PKey;
 import com.google.gson.JsonObject;
 
 /**

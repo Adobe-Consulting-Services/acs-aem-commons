@@ -17,20 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.types;
+package com.adobe.acs.commons.adobeio.types;
 
 /**
- * This interface is used to specify the action in the operation
+ * This interface is used to specify the pkey in the operation
  */
-public final class Action {
-
-    private String actionType;
-
-    public void setValue(String actionType) {
-        this.actionType = actionType;
-    }
-
-    public String getValue() {
-        return actionType;
-    }
+public interface PKey {
+   String getValue();
 }

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service.impl;
+package com.adobe.acs.commons.adobeio.service.impl;
 
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
@@ -25,7 +25,7 @@ import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.adobe.acs.commons.adobeio.core.service.IntegrationService;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
 
 @SuppressWarnings("WeakerAccess")
 @Component(service = HealthCheck.class,

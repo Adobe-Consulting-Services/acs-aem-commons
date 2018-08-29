@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.types;
+package com.adobe.acs.commons.adobeio.types;
 
 import java.util.Map;
 

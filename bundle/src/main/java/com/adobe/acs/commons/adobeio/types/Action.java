@@ -17,20 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.adobeio.core.service;
-
-import com.adobe.acs.commons.adobeio.core.types.Action;
-import com.drew.lang.annotations.NotNull;
-
+package com.adobe.acs.commons.adobeio.types;
 
 /**
- * Interface for the Endpoint service Factory
+ * This interface is used to specify the action in the operation
  */
-public interface EndpointServiceFactory {
+public final class Action {
 
-    /**
-     * @param action Provided action
-     * @return The EndpointService of the provided action
-     */
-    EndpointService getEndpoint(@NotNull Action action);
+    private String actionType;
+
+    public void setValue(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getValue() {
+        return actionType;
+    }
 }

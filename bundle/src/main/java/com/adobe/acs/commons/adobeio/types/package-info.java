@@ -20,4 +20,4 @@
 /**
  * Adobe I/O Types.
  */
-package com.adobe.acs.commons.adobeio.core.types;
+package com.adobe.acs.commons.adobeio.types;
