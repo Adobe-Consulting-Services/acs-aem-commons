@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.util.FormattingResultLog;
@@ -50,7 +51,7 @@ public class AdobeioHealthcheck implements HealthCheck {
         resultLog.debug("Obtaining the access token");
         String accessToken = jwtService.getAccessToken();
 
-        if (accessToken != null) {
+        if ( StringUtils.isNotEmpty(accessToken)) {
             resultLog.info("Access token succesfully obtained {}", accessToken);
         } else {
             resultLog.critical("Could not obtain the access token");

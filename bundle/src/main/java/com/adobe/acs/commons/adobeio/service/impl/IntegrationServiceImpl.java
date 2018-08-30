@@ -148,6 +148,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
                     .signWith(RS256, getPrivateKey())
                     .compact();
         } catch (Exception e) {
+            LOGGER.error("JWT claims {}", getJwtClaims());
             LOGGER.error(e.getMessage());
         }
         LOGGER.info("JWT Token : \n {}", jwtToken);
@@ -184,7 +185,12 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         jwtClaims.put("sub", jwtServiceConfig.getTechAccountId());
         jwtClaims.put("exp", getExpirationDate());
         jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.getLoginEndpoint(), jwtServiceConfig.getClientId()));
-        jwtClaims.put(jwtServiceConfig.getAdobeLoginClaimKey(), Boolean.TRUE);
+        String [] claims = jwtServiceConfig.getAdobeLoginClaimKey();
+        if (claims != null && claims.length > 0) {
+        	  for( int i=0; i < claims.length; i++) {
+        		  jwtClaims.put(jwtServiceConfig.getAdobeLoginClaimKey()[i], Boolean.TRUE);
+        	  }
+        }
 
         if (LOGGER.isDebugEnabled()) {
             Gson gson = new Gson();
