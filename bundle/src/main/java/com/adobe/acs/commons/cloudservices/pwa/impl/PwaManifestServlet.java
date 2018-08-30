@@ -44,17 +44,17 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
- 
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
- 
- 
+
+
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/x-web-app-manifest+json; charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
- 
+
         ResourceResolver serviceResourceResolver = null;
         try {
             serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
@@ -68,9 +68,9 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
                 serviceResourceResolver.close();
             }
         }
- 
-        response.getWriter().write(getManifest(request).toString());
- 
+
+       // response.getWriter().write(getManifest(request).toString());
+
     }
 
     private JsonObject getManifest(SlingHttpServletRequest request) throws ServletException {
@@ -83,19 +83,20 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
          * // TODO collect?
          * description: "...",
          * dir: "ltr",
- 
+
          */
         final String scope = configuration.getScopePath();
+        final String language = configuration.getRootPage() != null ? configuration.getRootPage().getProperties().get(JcrConstants.JCR_LANGUAGE).toString() : "en";
 
         json.addProperty(KEY_NAME,
                 manifest.get(PN_NAME,
-                         "AEM Progressive Web App"));
+                        "AEM Progressive Web App"));
 
 
         json.addProperty(KEY_NAME,
                 manifest.get(PN_NAME
                         , "AEM Progressive Web App"));
- 
+
 
         json.addProperty(KEY_SHORT_NAME,
                 manifest.get(PN_SHORT_NAME, "AEM PWA"));
@@ -111,21 +112,19 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
         json.addProperty(KEY_DISPLAY,
                 manifest.get(PN_DISPLAY, "standalone"));
 
- 
+
         // TODO figure out the right getter
-        json.addProperty(KEY_LANGUAGE,
-                configuration.getConfPage().getLanguage(false).getVariant());
+        json.addProperty(KEY_LANGUAGE, language
+        );
 
 
- 
- 
-        json.addProperty(KEY_SCOPE,".");
+        json.addProperty(KEY_SCOPE, scope);
 
         String startPath = manifest.get(PN_START_PATH, configuration.getScopePath());
         if (!StringUtils.equals(scope, startPath) && !StringUtils.startsWith(startPath, scope + "/")) {
             startPath = scope;
         }
- 
+
         json.addProperty(KEY_START_URL, resourceResolver.map(request, addHtmlExtension(startPath)));
 
         json.add(KEY_ICONS, getIcons(configuration));
@@ -148,11 +147,11 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
 
                         json.addProperty(KEY_ICON_SRC, path);
                         json.addProperty(KEY_ICON_SIZE, p.get(PN_ICON_SIZE, String.class));
-                        json.addProperty(KEY_ICON_TYPE, mimeTypeService.getMimeType(path));
+                        json.addProperty(KEY_ICON_TYPE, "png");
 
                         icons.add(json);
                     });
- 
+
         }
         return icons;
     }

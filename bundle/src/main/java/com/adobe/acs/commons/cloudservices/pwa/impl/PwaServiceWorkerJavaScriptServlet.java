@@ -7,11 +7,9 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
- 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
- 
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.models.factory.ModelFactory;
@@ -25,16 +23,17 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
- 
+
 import static com.adobe.acs.commons.cloudservices.pwa.impl.Constants.AUTH_INFO;
 import static com.adobe.acs.commons.cloudservices.pwa.impl.Constants.SERVICE_NAME;
- 
+
 @Component(
         service = Servlet.class,
         property = {
                 "sling.servlet.resourceTypes=cq:Page",
                 "sling.servlet.methods=" + HttpConstants.METHOD_GET,
                 "sling.servlet.selectors=pwa.service-worker",
+                "sling.servlet.selectors=pwa",
                 "sling.servlet.extensions=js",
         }
 )
@@ -47,10 +46,10 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
     @Reference
     private ModelFactory modelFactory;
 
- 
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
- 
+
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException, IOException {
@@ -59,7 +58,6 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
         response.setHeader("Content-Disposition", "attachment");
         response.setCharacterEncoding("UTF-8");
 
- 
 
         ResourceResolver serviceResourceResolver = null;
         try {
@@ -77,14 +75,26 @@ public class PwaServiceWorkerJavaScriptServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeJavaScript(SlingHttpServletRequest request, SlingHttpServletResponse response) {
- 
+
         final Configuration configuration = modelFactory.createModel(request, Configuration.class);
+        boolean serviceWorkerJsFlag = false;
+        Collection<ClientLibrary> htmlLibraries ;
+        for (String selector : request.getRequestPathInfo().getSelectors()) {
+            if ("service-worker".equals(selector)) {
+                serviceWorkerJsFlag = true;
 
-        final Collection<ClientLibrary> htmlLibraries =
-                htmlLibraryManager.getLibraries(configuration.getServiceWorkerJsCategories(),
-                        LibraryType.JS, true, false);
-
-        if (htmlLibraries.size() > 0) {
+            }
+        }
+        if (serviceWorkerJsFlag) {
+            htmlLibraries =
+                    htmlLibraryManager.getLibraries(configuration.getServiceWorkerJsCategories(),
+                            LibraryType.JS, true, false);
+        } else {
+            htmlLibraries =
+                    htmlLibraryManager.getLibraries(configuration.getPwaJsCategories(),
+                            LibraryType.JS, true, false);
+        }
+        if (htmlLibraries != null && htmlLibraries.size() > 0) {
             htmlLibraries.stream()
                     .map(hl -> htmlLibraryManager.getLibrary(LibraryType.JS, hl.getPath()))
                     .filter(Objects::nonNull)

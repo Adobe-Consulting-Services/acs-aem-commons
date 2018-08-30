@@ -1,8 +1,7 @@
 <sly data-sly-use.configuration="${'com.adobe.acs.commons.cloudservices.pwa.Configuration'}"
-    data-sly-test.ready="${configuration.ready}"
-    data-sly-test.categories="${configuration.pwaJsCategories}">
-    <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
-         data-sly-call="${clientlib.js @ categories=categories}"/>
+     data-sly-test.ready="${configuration.ready}" data-sly-test.path="${configuration.scopePath}">
+    <script type="text/javascript" src="${path}.pwa.js"></script>
+
 </sly>
 
 <sly data-sly-test="${!ready && categories}">

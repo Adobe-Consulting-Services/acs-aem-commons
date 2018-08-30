@@ -12,7 +12,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
-import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.settings.SlingSettingsService;
 
 import javax.annotation.Nullable;
@@ -34,12 +33,7 @@ public class ConfigurationImpl implements Configuration {
     @OSGiService
     private SlingSettingsService slingSettingsService;
 
-    // Do not use the @SlingObject for this since we want to get it from the Request so we can get the service RR.
     private ResourceResolver resourceResolver;
-
-    private Page currentPage;
-    private PageManager pageManager;
-
     // These are resolved in init()
     private Page rootPage;
     private Page confPage;
@@ -49,22 +43,22 @@ public class ConfigurationImpl implements Configuration {
 
         resourceResolver = request.getResourceResolver();
 
-        pageManager = resourceResolver.adaptTo(PageManager.class);
-        currentPage = pageManager.getContainingPage(request.getResource());
+        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        Page page = currentPage;
+        Page page = pageManager.getContainingPage(request.getResource());
 
         while (page != null) {
             final String confPath = page.getProperties().get("cq:conf", String.class);
 
             if (StringUtils.isNotBlank(confPath)) {
+                rootPage = page;
                 Resource cloudConfigsResource = resourceResolver.getResource(confPath + "/settings/cloudconfigs");
                 if (cloudConfigsResource != null) {
                     for (final Resource cloudConfigResource : cloudConfigsResource.getChildren()) {
                         Resource jcrContentResource = cloudConfigResource.getChild(JcrConstants.JCR_CONTENT);
                         if (jcrContentResource != null && jcrContentResource.isResourceType(RESOURCE_TYPE)) {
                             confPage = pageManager.getContainingPage(jcrContentResource);
-                            rootPage = page;
+                            //rootPage = page;
                             return;
                         }
                     }
@@ -77,14 +71,17 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public boolean isReady() {
-        return true;
+        return rootPage != null;
         // TODO Uncomment
         //return slingSettingsService.getRunModes().contains("publish");
     }
 
     @Override
     public ValueMap getProperties() {
-        return confPage.getContentResource().getValueMap();
+        if (confPage != null) {
+            return confPage.getContentResource().getValueMap();
+        }
+        return null;
     }
 
     @Override
@@ -119,6 +116,10 @@ public class ConfigurationImpl implements Configuration {
 
     public Page getConfPage() {
         return confPage;
+    }
+
+    public Page getRootPage() {
+        return rootPage;
     }
 
 }

@@ -18,4 +18,6 @@ public interface Configuration {
     String[] getServiceWorkerJsCategories();
 
     String[] getPwaJsCategories();
+
+    Page getRootPage();
 }
