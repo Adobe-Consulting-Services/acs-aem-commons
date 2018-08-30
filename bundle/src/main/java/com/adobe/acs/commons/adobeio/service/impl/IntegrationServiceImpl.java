@@ -187,9 +187,9 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.getLoginEndpoint(), jwtServiceConfig.getClientId()));
         String [] claims = jwtServiceConfig.getAdobeLoginClaimKey();
         if (claims != null && claims.length > 0) {
-        	  for( int i=0; i < claims.length; i++) {
+             for( int i=0; i < claims.length; i++) {
              jwtClaims.put(jwtServiceConfig.getAdobeLoginClaimKey()[i], Boolean.TRUE);
-        	  }
+             }
         }
 
         if (LOGGER.isDebugEnabled()) {
