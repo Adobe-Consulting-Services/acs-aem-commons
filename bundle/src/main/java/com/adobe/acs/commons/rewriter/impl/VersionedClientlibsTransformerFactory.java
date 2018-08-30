@@ -77,6 +77,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -136,6 +137,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
+    private volatile Map<String, ClientLibrary> clientLibrariesCache;
+
     private boolean disableVersioning;
 
     private boolean enforceMd5;
@@ -170,11 +173,12 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     @Deactivate
     protected void deactivate() {
-        this.md5Cache = null;
         if (filterReg != null) {
             filterReg.unregister();;
             filterReg = null;
         }
+        this.md5Cache = null;
+        this.clientLibrariesCache = null;
     }
 
     public Transformer createTransformer() {
@@ -257,31 +261,47 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private HtmlLibrary getLibrary(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
-        HtmlLibrary htmlLibrary = null;
-        if (libraryPath.startsWith(PROXY_PREFIX)) {
-            final String relativePath = libraryPath.substring(PROXY_PREFIX.length());
-
-            for (final String prefix : resourceResolver.getSearchPath()) {
-                final String absolutePath = prefix + relativePath;
-                // check whether the ClientLibrary exists before calling HtmlLibraryManager#getLibrary in order
-                // to avoid WARN log messages that are written when an unknown HtmlLibrary is requested
-                if (hasProxyClientLibrary(htmlLibraryManager, libraryType, absolutePath)) {
-                    htmlLibrary = htmlLibraryManager.getLibrary(libraryType, absolutePath);
-                    if (htmlLibrary != null) {
-                        break;
-                    }
-                }
-            }
-
-        } else {
-            htmlLibrary = htmlLibraryManager.getLibrary(libraryType, libraryPath);
-        }
-        return htmlLibrary;
+        String resolvedLibraryPath = resolvePathIfProxied(libraryType, libraryPath, resourceResolver);
+        return resolvedLibraryPath == null ? null : htmlLibraryManager.getLibrary(libraryType, resolvedLibraryPath);
     }
 
-    private static boolean hasProxyClientLibrary(final HtmlLibraryManager mgr, final LibraryType type, final String path) {
-        ClientLibrary clientLibrary = mgr.getLibraries().get(path);
+    private String resolvePathIfProxied(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
+        if (!libraryPath.startsWith(PROXY_PREFIX)) {
+            return libraryPath;
+        }
+        return resolveProxiedClientLibrary(libraryType, libraryPath, resourceResolver, true);
+    }
+
+    private String resolveProxiedClientLibrary(LibraryType libraryType, String proxiedPath, ResourceResolver resourceResolver, boolean refreshCacheIfNotFound) {
+        final String relativePath = proxiedPath.substring(PROXY_PREFIX.length());
+        for (final String prefix : resourceResolver.getSearchPath()) {
+            final String absolutePath = prefix + relativePath;
+            // check whether the ClientLibrary exists before calling HtmlLibraryManager#getLibrary in order
+            // to avoid WARN log messages that are written when an unknown HtmlLibrary is requested
+            if (hasProxyClientLibrary(libraryType, absolutePath)) {
+                return absolutePath;
+            }
+        }
+
+        if (refreshCacheIfNotFound) {
+            // maybe the library has appeared and our copy of the cache is stale
+            log.info("Refreshing client libraries cache, because {} could not be found", proxiedPath);
+            clientLibrariesCache = null;
+            return resolveProxiedClientLibrary(libraryType, proxiedPath, resourceResolver, false);
+        }
+        return null;
+    }
+
+    private boolean hasProxyClientLibrary(final LibraryType type, final String path) {
+        ClientLibrary clientLibrary = getClientLibrary(path);
         return clientLibrary != null && clientLibrary.allowProxy() && clientLibrary.getTypes().contains(type);
+    }
+
+    private ClientLibrary getClientLibrary(String path) {
+        if (clientLibrariesCache == null) {
+            clientLibrariesCache = Collections.unmodifiableMap(htmlLibraryManager.getLibraries());
+        }
+        return clientLibrariesCache.get(path);
     }
 
     @Nonnull private String getMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException, ExecutionException {
@@ -330,6 +350,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
         md5Cache.invalidate(new VersionedClientLibraryMd5CacheKey(path, LibraryType.JS));
         md5Cache.invalidate(new VersionedClientLibraryMd5CacheKey(path, LibraryType.CSS));
+        clientLibrariesCache = null;
     }
 
     @Override
@@ -377,6 +398,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 } else {
                     libraryType = LibraryType.JS;
                 }
+
                 final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, resourceResolver);
                 return new UriInfo(libraryPath + "." + extension, md5, libraryType, htmlLibrary);
             }
