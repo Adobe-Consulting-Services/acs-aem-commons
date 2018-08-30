@@ -63,10 +63,10 @@
                             org.apache.poi.ss.usermodel;version="[2.0,4)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,4)",
                             org.apache.poi.xssf.usermodel;version="[2.0,4)",
-                            com.fasterxml.jackson.core;resolution:=optional,
-                            com.fasterxml.jackson.databind;resolution:=optional,
-                            org.bouncycastle.jce;resolution:=optional,
-                            org.bouncycastle.jce.spec;resolution:=optional,
+                            com.fasterxml.jackson.core;resolution:=optional, <!-- jjwt -->
+                            com.fasterxml.jackson.databind;resolution:=optional, <!-- jjwt -->
+                            org.bouncycastle.jce;resolution:=optional, <!-- jjwt -->
+                            org.bouncycastle.jce.spec;resolution:=optional, <!-- jjwt -->
                             android.util;resolution:=optional,
                             *
                         </Import-Package>
