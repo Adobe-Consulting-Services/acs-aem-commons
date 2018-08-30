@@ -20,5 +20,5 @@
 /**
  * Form components for MCP
  */
-@aQute.bnd.annotation.Version("3.11.0")
+@aQute.bnd.annotation.Version("3.12.0")
 package com.adobe.acs.commons.mcp.form;

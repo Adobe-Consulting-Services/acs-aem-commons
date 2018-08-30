@@ -21,6 +21,7 @@ import com.day.cq.wcm.commons.ReferenceSearch;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -49,8 +50,10 @@ public abstract class MovingNode {
     public abstract boolean isAbleToHaveChildren();
 
     public void addChild(MovingNode child) {
-        children.add(child);
-        child.setParent(this);
+        if (child != this) {
+            children.add(child);
+            child.setParent(this);
+        }
     }
 
     public boolean isLeaf() {
@@ -101,7 +104,9 @@ public abstract class MovingNode {
      */
     public void setParent(MovingNode parent) {
         this.parent = parent;
-        setDestinationPath(sourcePath.replaceFirst(Pattern.quote(parent.getSourcePath()), parent.getDestinationPath()));
+        if (parent != null && parent != this) {
+            setDestinationPath(sourcePath.replaceFirst(Pattern.quote(parent.getSourcePath()), parent.getDestinationPath()));
+        }
     }
 
     /**
@@ -191,16 +196,19 @@ public abstract class MovingNode {
 
         while (!stack.isEmpty()) {
             MovingNode node = stack.poll();
-            consumer.accept(node);
             if (traversalFilter == null || traversalFilter.apply(node)) {
                 stack.addAll(toList(node.getChildren()));
+                consumer.accept(node);
             } else if (leafConsumer != null) {
                 leafConsumer.accept(node);
             }
         }
     }
 
-    public MovingNode findByPath(String path) {
+    public Optional<MovingNode> findByPath(String path) {
+        if (path.equals(getSourcePath())) {
+            return Optional.of(this);
+        }
         String[] parts = path.replaceFirst(getSourcePath() + "/", "").split("/");
         MovingNode current = this;
         for (String part : parts) {
@@ -213,9 +221,9 @@ public abstract class MovingNode {
                 }
             }
             if (!found) {
-                return null;
+                return Optional.empty();
             }
         }
-        return current;
+        return Optional.of(current);
     }
 }

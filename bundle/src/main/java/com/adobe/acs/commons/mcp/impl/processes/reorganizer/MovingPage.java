@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -61,7 +62,7 @@ public class MovingPage extends MovingNode {
         FieldUtils.writeField(replicatorField, manager, replicatorQueue);
 
         // Some simple transformations
-        String contentPath = getSourcePath() + "/jcr:content";
+        String contentPath = getSourcePath() + "/" + JcrConstants.JCR_CONTENT;
         String destinationParent = StringUtils.substringBeforeLast(getDestinationPath(), "/");
 
         // Attempt move operation

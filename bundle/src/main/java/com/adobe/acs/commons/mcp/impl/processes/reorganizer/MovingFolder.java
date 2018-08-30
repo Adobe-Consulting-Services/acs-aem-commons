@@ -21,10 +21,9 @@ import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resource
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.PersistenceException;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -64,10 +63,10 @@ public class MovingFolder extends MovingNode {
             rr.commit();
             rr.refresh();
         }
-        String sourceJcrContent = getSourcePath() + "/jcr:content";
+        String sourceJcrContent = getSourcePath() + "/" + JcrConstants.JCR_CONTENT;
         if (resourceExists(rr, sourceJcrContent)) {
             Actions.getCurrentActionManager().deferredWithResolver(Actions.retry(5, 50, (rrr) -> {
-                if (!resourceExists(rrr, getDestinationPath() + "/jcr:content")) {
+                if (!resourceExists(rrr, getDestinationPath() + "/" + JcrConstants.JCR_CONTENT)) {
                     waitUntilResourceFound(rrr, getDestinationPath());
                     rrr.copy(sourceJcrContent, getDestinationPath());
                     rrr.commit();

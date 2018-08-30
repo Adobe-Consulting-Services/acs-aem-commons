@@ -27,7 +27,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
-import com.adobe.acs.commons.mcp.form.PathfieldComponent;
+import com.adobe.acs.commons.mcp.form.PathfieldComponent.NodeSelectComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
@@ -35,6 +35,7 @@ import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.*;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.DamConstants;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
@@ -42,15 +43,16 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -80,9 +82,6 @@ public class Reorganizer extends ProcessDefinition {
     private final PageManagerFactory pageManagerFactory;
     private final Replicator replicator;
 
-//    public enum Mode {
-//        RENAME, MOVE
-//    }
     public enum PublishMethod {
         NONE, SELF_MANAGED, QUEUE
     }
@@ -95,14 +94,14 @@ public class Reorganizer extends ProcessDefinition {
     @FormField(name = "Source",
             description = "Select page/site to be moved for single move",
             hint = "/content/my-site/en/my-page",
-            component = PathfieldComponent.class,
+            component = NodeSelectComponent.class,
             options = {"base=/content"})
     private String sourceJcrPath;
 
     @FormField(name = "Destination",
             description = "Destination location (must include new name for source node even if same)",
             hint = "Move: /content/new-place/my-page | Rename: /content/new-place/new-name",
-            component = PathfieldComponent.class,
+            component = NodeSelectComponent.class,
             options = {"base=/content"})
     private String destinationJcrPath;
 
@@ -154,6 +153,11 @@ public class Reorganizer extends ProcessDefinition {
             options = {"checked"})
     private boolean dryRun = true;
 
+    @FormField(name = "Detailed report",
+            description = "Record extra details in the report, can be rather extensive.  Not recommended for large jobs.",
+            component = CheckboxComponent.class)
+    private boolean detailedReport = false;
+
     private final transient String[] requiredMovePrivilegeNames = {
         Privilege.JCR_READ,
         Privilege.JCR_WRITE,
@@ -201,7 +205,7 @@ public class Reorganizer extends ProcessDefinition {
     }
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {
-        if (sourceFile != null) {
+        if (sourceFile != null && sourceFile.getSize() > 0) {
             Spreadsheet sheet;
             try {
                 sheet = new Spreadsheet(sourceFile, "Source", "Destination");
@@ -263,8 +267,8 @@ public class Reorganizer extends ProcessDefinition {
         instance.defineCriticalAction("Eval Refs", rr, this::identifyReferences);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
         if (!dryRun) {
-            instance.defineAction("Build destination", rr, this::buildStructures);
-            instance.defineAction("Move Tree", rr, this::moveTree);
+            instance.defineCriticalAction("Build destination", rr, this::buildStructures);
+            instance.defineCriticalAction("Move Tree", rr, this::moveTree);
             if (publishMethod != PublishMethod.NONE) {
                 instance.defineAction("Activate Tree", rr, this::activateTreeStructure);
                 instance.defineAction("Activate New", rr, this::activateNew);
@@ -277,39 +281,56 @@ public class Reorganizer extends ProcessDefinition {
 
     protected void identifyStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
+            AtomicInteger visitedSourceNodes = new AtomicInteger();
             movePaths.forEach((source, dest) -> {
                 manager.deferredWithResolver(rr2 -> {
                     Resource res = rr2.getResource(source);
-                    MovingNode root = buildMoveNode(res);
-                    root.setDestinationPath(dest);
-                    moves.add(root);
-                            
-                    TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
-                            JcrConstants.NT_FOLDER,
-                            JcrResourceConstants.NT_SLING_FOLDER,
-                            JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
-                            "cq:page"
-                    );
-                    
-                    visitor.setResourceVisitor((r, level) -> {
-                        MovingNode childNode = buildMoveNode(r);
-                        MovingNode parent = root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"));
-                        parent.addChild(childNode);
+                    buildMoveNode(res).ifPresent(root -> {
+                        root.setDestinationPath(dest);
+                        moves.add(root);
+                        note(source, Report.misc, "Root path");
+                        note(source, Report.target, dest);
+
+                        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
+                                JcrConstants.NT_FOLDER,
+                                JcrResourceConstants.NT_SLING_FOLDER,
+                                JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
+                                NameConstants.NT_PAGE
+                        );
+
+                        visitor.setResourceVisitor((r, level) -> {
+                            if (!r.getPath().equals(res.getPath())) {
+                                buildMoveNode(r).ifPresent(childNode -> {
+                                    root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"))
+                                            .ifPresent(parent -> parent.addChild(childNode));
+                                    if (detailedReport) {
+                                        note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
+                                    }
+                                });
+                                visitedSourceNodes.addAndGet(1);
+                            }
+                        });
+
+                        visitor.setLeafVisitor((r, level) -> {
+                            buildMoveNode(r).ifPresent(childNode -> {
+                                root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"))
+                                        .ifPresent(parent -> parent.addChild(childNode));
+                                if (detailedReport) {
+                                    note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
+                                }
+                            });
+                            visitedSourceNodes.addAndGet(1);
+                        });
+
+                        visitor.accept(res);
+                        note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
                     });
-                    
-                    visitor.setLeafVisitor((r, level) -> {
-                        MovingNode childNode = buildMoveNode(r);
-                        MovingNode parent = root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"));
-                        parent.addChild(childNode);                        
-                    });                    
-                    
-                    visitor.accept(res);
                 });
             });
         });
     }
-    
-    private MovingNode buildMoveNode(Resource res) {
+
+    private Optional<MovingNode> buildMoveNode(Resource res) {
         String type = res.getResourceType();
         MovingNode node;
         switch (type) {
@@ -318,22 +339,23 @@ public class Reorganizer extends ProcessDefinition {
             case JcrResourceConstants.NT_SLING_ORDERED_FOLDER:
                 node = new MovingFolder();
                 break;
-            case "cq:page":
-            case "cq:Page":
+            case NameConstants.NT_PAGE:
                 node = new MovingPage(pageManagerFactory);
                 break;
-            case "dam:Asset":
+            case DamConstants.NT_DAM_ASSET:
                 node = new MovingAsset();
                 break;
             default:
-                throw new IllegalArgumentException("Not able to support type " + type);
+                return Optional.empty();
+            //throw new IllegalArgumentException("Not able to support type " + type);
         }
-        
+
         node.setSourcePath(res.getPath());
-        return node;
+        return Optional.of(node);
     }
-        
+
     protected void identifyReferences(ActionManager manager) {
+        AtomicInteger discoveredReferences = new AtomicInteger();
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
                 manager.deferredWithResolver(rr2 -> {
@@ -342,13 +364,21 @@ public class Reorganizer extends ProcessDefinition {
                             manager.deferredWithResolver(rr3 -> {
                                 Actions.setCurrentItem("Looking for references to " + childNode.getSourcePath());
                                 childNode.findReferences(rr3, referenceSearchRoot, maxReferences);
+                                discoveredReferences.addAndGet(childNode.getAllReferences().size());
+                                if (detailedReport) {
+                                    note(childNode.getSourcePath(), Report.all_references, childNode.getAllReferences().size());
+                                    note(childNode.getSourcePath(), Report.published_references, childNode.getPublishedReferences().size());
+                                }
                             });
                         }
                     });
                 });
             });
         });
-    }    
+        manager.onFinish(() -> {
+            note("All discovered references", Report.misc, "Discovered " + discoveredReferences.get() + " references.");
+        });
+    }
 
     protected void validateAllAcls(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
@@ -356,16 +386,24 @@ public class Reorganizer extends ProcessDefinition {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
                         manager.deferredWithResolver(rr3 -> {
-                            Actions.setCurrentItem("Checking ACLs on " + childNode.getSourcePath());
-                            checkNodeAcls(rr3, childNode.getSourcePath(), requiredMovePrivileges);
-                            for (String ref : childNode.getAllReferences()) {
-                                Actions.setCurrentItem("Checking ACLs on " + ref + " which references " + childNode.getSourcePath());
-                                if (publishMethod != PublishMethod.NONE
-                                        && childNode.getPublishedReferences().contains(ref)) {
-                                    checkNodeAcls(rr3, childNode.getSourcePath(), requiredPublishPrivileges);
-                                } else {
-                                    checkNodeAcls(rr3, childNode.getSourcePath(), requiredUpdatePrivileges);
+                            try {
+                                Actions.setCurrentItem("Checking ACLs on " + childNode.getSourcePath());
+                                checkNodeAcls(rr3, childNode.getSourcePath(), requiredMovePrivileges);
+                                for (String ref : childNode.getAllReferences()) {
+                                    Actions.setCurrentItem("Checking ACLs on " + ref + " which references " + childNode.getSourcePath());
+                                    if (publishMethod != PublishMethod.NONE
+                                            && childNode.getPublishedReferences().contains(ref)) {
+                                        checkNodeAcls(rr3, childNode.getSourcePath(), requiredPublishPrivileges);
+                                    } else {
+                                        checkNodeAcls(rr3, childNode.getSourcePath(), requiredUpdatePrivileges);
+                                    }
                                 }
+                                if (detailedReport) {
+                                    note(childNode.getSourcePath(), Report.acl_check, "Passed");
+                                }
+                            } catch (Exception e) {
+                                note(childNode.getSourcePath(), Report.acl_check, "Failed");
+                                throw e;
                             }
                         });
                     });
@@ -377,15 +415,13 @@ public class Reorganizer extends ProcessDefinition {
     protected void buildStructures(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
-                if (node.getClass().equals(MovingFolder.class)) {
-                    manager.deferredWithResolver(rr2 -> {
-                        node.visit(childNode -> {
-                            manager.deferredWithResolver(rr3 -> {
-                                childNode.move(replicatorQueue, rr3);
-                            });
-                        }, null, MovingNode::isCopiedBeforeMove);
-                    });
-                }
+                manager.deferredWithResolver(rr2 -> {
+                    node.visit(childNode -> {
+                        manager.deferredWithResolver(rr3 -> {
+                            childNode.move(replicatorQueue, rr3);
+                        });
+                    }, null, MovingNode::isCopiedBeforeMove);
+                });
             });
         });
     }
@@ -409,15 +445,13 @@ public class Reorganizer extends ProcessDefinition {
     protected void activateTreeStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
-                if (node.getClass().equals(MovingFolder.class)) {
-                    manager.deferredWithResolver(rr2 -> {
-                        node.visit(childNode -> {
-                            manager.deferredWithResolver(rr3 -> {
-                                performNecessaryReplication(rr3, childNode.getDestinationPath());
-                            });
-                        }, null, MovingNode::isCopiedBeforeMove);
-                    });
-                }
+                manager.deferredWithResolver(rr2 -> {
+                    node.visit(childNode -> {
+                        manager.deferredWithResolver(rr3 -> {
+                            performNecessaryReplication(rr3, childNode.getDestinationPath());
+                        });
+                    }, null, MovingNode::isCopiedBeforeMove);
+                });
             });
         });
     }
@@ -496,10 +530,10 @@ public class Reorganizer extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00115")
     enum Report {
-        target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time
+        misc, target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time
     }
 
-    private final Map<String, EnumMap<Report, Object>> reportData = new TreeMap<>();
+    private final Map<String, EnumMap<Report, Object>> reportData = new LinkedHashMap<>();
 
     private void note(String page, Report col, Object value) {
         synchronized (reportData) {

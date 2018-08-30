@@ -47,6 +47,15 @@ public abstract class PathfieldComponent extends FieldComponent {
             getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
         }
     }
+    
+    public static class NodeSelectComponent extends PathfieldComponent {
+
+        @Override
+        public void init() {
+            super.init();
+            getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
+        }
+    }    
 
     public static class PageSelectComponent extends PathfieldComponent {
 

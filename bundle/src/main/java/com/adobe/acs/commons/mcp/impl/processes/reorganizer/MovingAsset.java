@@ -17,8 +17,11 @@ package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
+import com.day.cq.wcm.api.NameConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jcr.Session;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -45,7 +48,11 @@ public class MovingAsset extends MovingNode {
 
     @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, Exception {
-        rr.move(getSourcePath(), getDestinationPath());
+         Session session = rr.adaptTo(Session.class);
+        // Inhibits some workflows
+        session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+        session.move(getSourcePath(), getDestinationPath());
+        session.save();
         updateReferences(replicatorQueue, rr);
     }
     
@@ -63,7 +70,7 @@ public class MovingAsset extends MovingNode {
         });
         
         for (Resource child : res.getChildren()) {
-            if (!child.isResourceType("cq:Page")) {
+            if (!child.isResourceType(NameConstants.NT_PAGE)) {
                 updateReferences(rep, rr, child.getPath());
             }
         }
