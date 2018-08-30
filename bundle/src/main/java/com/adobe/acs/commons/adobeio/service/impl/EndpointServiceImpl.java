@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -219,6 +220,7 @@ public class EndpointServiceImpl implements EndpointService {
       stopWatch.start();
 
       HttpGet get = new HttpGet(actionUrl);
+      get.setConfig(requestConfigWithTimeout(10000));
       get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
       get.setHeader("cache-control", "no-cache");
       get.setHeader("x-api-key", integrationService.getApiKey());
@@ -233,6 +235,7 @@ public class EndpointServiceImpl implements EndpointService {
       stopWatch.reset();
 
       CloseableHttpClient httpClient = getHttpClient();
+ 
 
       return responseAsJson(httpClient.execute(get));
    }
@@ -240,12 +243,14 @@ public class EndpointServiceImpl implements EndpointService {
    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws ClientProtocolException, IOException {
       HttpPost post = new HttpPost(actionUrl);
+      post.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(post, payload) : new JsonObject();
    }
 
    private JsonObject processPatch(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws IOException {
       HttpPatch patch = new HttpPatch(actionUrl);
+      patch.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(patch, payload) : new JsonObject();
    }
 
@@ -323,5 +328,14 @@ public class EndpointServiceImpl implements EndpointService {
    private CloseableHttpClient getHttpClient() {
       return HttpClientBuilder.create().build();
    }
+   
+   private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
+       return RequestConfig.copy(RequestConfig.DEFAULT)
+               .setSocketTimeout(timeoutInMilliseconds)
+               .setConnectTimeout(timeoutInMilliseconds)
+               .setConnectionRequestTimeout(timeoutInMilliseconds)
+               .build();
+   }
+
 
 }

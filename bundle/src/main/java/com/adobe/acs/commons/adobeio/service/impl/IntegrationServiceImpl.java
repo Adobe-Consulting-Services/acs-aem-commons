@@ -39,6 +39,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -114,6 +115,9 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
             params.add(new BasicNameValuePair("jwt_token", getJwtToken()));
 
             post.setEntity(new UrlEncodedFormEntity(params));
+            
+            //setting timeout
+            post.setConfig(requestConfigWithTimeout(10000));
 
             HttpResponse response = client.execute(post);
 
@@ -205,6 +209,14 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.getExpirationTimeInSeconds());
         return cal.getTime();
+    }
+    
+    private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
+        return RequestConfig.copy(RequestConfig.DEFAULT)
+                .setSocketTimeout(timeoutInMilliseconds)
+                .setConnectTimeout(timeoutInMilliseconds)
+                .setConnectionRequestTimeout(timeoutInMilliseconds)
+                .build();
     }
 
 }
