@@ -18,10 +18,10 @@ package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.NameConstants;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jcr.Session;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -63,9 +63,11 @@ public class MovingAsset extends MovingNode {
     private void updateReferences(ReplicatorQueue rep, ResourceResolver rr, String ref) {
         Resource res = rr.getResource(ref);
         ModifiableValueMap map = res.adaptTo(ModifiableValueMap.class);
+        AtomicBoolean changedProperty = new AtomicBoolean(false);
         map.forEach((key,val)-> {
             if (val != null && val.equals(getSourcePath())) {
                 map.put(key, getDestinationPath());
+                changedProperty.set(true);
             }
         });
         
@@ -76,7 +78,9 @@ public class MovingAsset extends MovingNode {
         }
         
         try {
-            rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
+            if (changedProperty.get()) {
+                rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
+            }
         } catch (ReplicationException ex) {
             Logger.getLogger(MovingAsset.class.getName()).log(Level.SEVERE, null, ex);
         }
