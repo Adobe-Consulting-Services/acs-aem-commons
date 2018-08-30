@@ -26,10 +26,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.drew.lang.annotations.NotNull;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * This filter can be used in the Adobe I/O call
  * to filter the results
  */
+@ProviderType
 public final class Filter {
 
    private final Map<String, String> filterMap = new HashedMap();
