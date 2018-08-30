@@ -80,9 +80,9 @@ public class EndpointServiceImpl implements EndpointService {
    @Activate
    @Modified
    protected void activate(final EndpointConfiguration config) throws AdobeioException {
-      LOGGER.debug("Start ACTIVATE Endpoint {}", config.getId());
+      LOGGER.debug("Start ACTIVATE Endpoint {}", config.id());
       this.config = config;
-      this.endpointId = config.getId();
+      this.endpointId = config.id();
       LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
 
       if (null == this.integrationService) {
@@ -92,17 +92,17 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Override
    public String getId() {
-      return this.config.getId();
+      return this.config.id();
    }
 
    @Override
    public String getMethod() {
-      return this.config.getMethod();
+      return this.config.method();
    }
 
    @Override
    public String getEndpoint() {
-      return this.config.getEndpoint();
+      return this.config.endpoint();
    }
 
 
@@ -305,7 +305,7 @@ public class EndpointServiceImpl implements EndpointService {
 
    private JsonObject performio(@NotNull String actionUrl) {
       try {
-         return process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
+         return process(actionUrl, StringUtils.upperCase(config.method()), null);
       } catch (Exception e) {
          LOGGER.error("Problem processing action {} in performIO", actionUrl, e);
       }
@@ -315,7 +315,7 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public Map<String, String> getSpecificServiceHeader() {
       Map<String, String> mapHeader = new HashMap<String, String>();
-      String[] headerAsTabOfString = this.config.getSpecificServiceHeader();
+      String[] headerAsTabOfString = this.config.specificServiceHeader();
 
       for (String headerAsString : headerAsTabOfString) {
          mapHeader.put(StringUtils.substringBefore(headerAsString, ":"),
@@ -336,6 +336,4 @@ public class EndpointServiceImpl implements EndpointService {
                .setConnectionRequestTimeout(timeoutInMilliseconds)
                .build();
    }
-
-
 }
