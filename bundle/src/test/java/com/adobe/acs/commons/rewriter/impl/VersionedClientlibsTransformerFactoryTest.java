@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -57,6 +58,7 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -327,6 +329,10 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Test
     public void testProxiedJavaScriptClientLibrary() throws Exception {
 
+        ClientLibrary clientLibrary = mock(ClientLibrary.class);
+        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
+        when(clientLibrary.allowProxy()).thenReturn(true);
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
 
         final AttributesImpl in = new AttributesImpl();
