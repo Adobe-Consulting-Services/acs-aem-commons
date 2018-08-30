@@ -42,8 +42,8 @@ public class AdobeioHealthcheck implements HealthCheck {
     public Result execute() {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
-        resultLog.debug("Health check for adobe.io");
-        if (jwtService.getApiKey() != null) {
+        resultLog.debug("Health check for Adobe I/O");
+        if ( StringUtils.isNotEmpty(jwtService.getApiKey())) {
             resultLog.debug("Starting validation for x-api-key {}", jwtService.getApiKey());
         } else {
             resultLog.critical("No api key is specified in the OSGi-config");
