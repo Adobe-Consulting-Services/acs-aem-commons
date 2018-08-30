@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -27,6 +28,7 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 import junitx.util.PrivateAccessor;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -41,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
@@ -57,6 +60,7 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -325,8 +329,41 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testBadProxiedJavaScriptClientLibrary() throws Exception {
+
+        String badProxyPath = PROXY_PATH + "/bad";
+
+        ClientLibrary clientLibrary = mock(ClientLibrary.class);
+        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
+        when(clientLibrary.allowProxy()).thenReturn(true);
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", badProxyPath + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+                attributesCaptor.capture());
+
+        // because the path isn't correct, we refresh the cache, so there should be exactly two retrievals of the list
+        verify(htmlLibraryManager, times(2)).getLibraries();
+
+        // and since neither are found, the original path is returned unchanged
+        assertEquals(badProxyPath + ".js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testProxiedJavaScriptClientLibrary() throws Exception {
 
+        ClientLibrary clientLibrary = mock(ClientLibrary.class);
+        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
+        when(clientLibrary.allowProxy()).thenReturn(true);
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
 
         final AttributesImpl in = new AttributesImpl();
@@ -340,9 +377,31 @@ public class VersionedClientlibsTransformerFactoryTest {
         verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
                 attributesCaptor.capture());
 
+        verify(htmlLibraryManager, times(1)).getLibraries();
+
         assertEquals(PROXY_PATH + "."+ PROXIED_FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
     }
 
+    @Test
+    public void testEventHandling() throws Exception {
+        ClientLibrary clientLibrary = mock(ClientLibrary.class);
+        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
+        when(clientLibrary.allowProxy()).thenReturn(true);
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
+        when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", PROXY_PATH + ".js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        factory.handleEvent(new Event("com/adobe/granite/ui/librarymanager/INVALIDATED", Collections.singletonMap(SlingConstants.PROPERTY_PATH, PROXIED_PATH)));
+
+        transformer.startElement(null, "script", null, in);
+
+        verify(htmlLibraryManager, times(2)).getLibraries();
+    }
 
 
     @Test
