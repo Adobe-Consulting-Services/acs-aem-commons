@@ -213,9 +213,6 @@
         setColorField: function ($field, value) {
             if (value && value.trim() !== "") {
                 value = value.trim();
-                if (!value.startsWith("#")) {
-                    value = "#" + value;
-                }
                 $field.val(value);
 
                 //set value
