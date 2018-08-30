@@ -63,9 +63,14 @@
                             org.apache.poi.ss.usermodel;version="[2.0,4)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,4)",
                             org.apache.poi.xssf.usermodel;version="[2.0,4)",
+                            com.fasterxml.jackson.core;resolution:=optional,
+                            com.fasterxml.jackson.databind;resolution:=optional,
+                            org.bouncycastle.jce;resolution:=optional,
+                            org.bouncycastle.jce.spec;resolution:=optional,
+                            android.util;resolution:=optional,
                             *
                         </Import-Package>
-                        <Embed-Dependency>guava</Embed-Dependency>
+                        <Embed-Dependency>*;scope=compile|runtime;inline=false;guava,jjwt;inline=true</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -474,8 +479,6 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.7.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
