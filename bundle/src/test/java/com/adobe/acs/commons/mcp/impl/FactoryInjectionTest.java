@@ -27,8 +27,6 @@ import com.adobe.acs.commons.mcp.impl.processes.AssetReport;
 import com.adobe.acs.commons.mcp.impl.processes.AssetReportFactory;
 import com.adobe.acs.commons.mcp.impl.processes.DeepPrune;
 import com.adobe.acs.commons.mcp.impl.processes.DeepPruneFactory;
-import com.adobe.acs.commons.mcp.impl.processes.FolderRelocator;
-import com.adobe.acs.commons.mcp.impl.processes.FolderRelocatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
 import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestor;
@@ -92,14 +90,7 @@ public class FactoryInjectionTest {
         assertNotNull(def);
         assertTrue(def instanceof DeepPrune);
     }
-
-    @Test
-    public void testFolderRelocatorFactory() throws Exception {
-        ProcessDefinition def = cpm.findDefinitionByNameOrPath("Folder Relocator");
-        assertNotNull(def);
-        assertTrue(def instanceof FolderRelocator);
-    }
-
+   
     @Test
     public void testProcessCleanupFactory() throws Exception {
         ProcessDefinition def = cpm.findDefinitionByNameOrPath("Process Cleanup");
@@ -111,7 +102,6 @@ public class FactoryInjectionTest {
         slingContext.registerInjectActivateService(new FileAssetIngestorFactory());
         slingContext.registerInjectActivateService(new AssetReportFactory());
         slingContext.registerInjectActivateService(new DeepPruneFactory());
-        slingContext.registerInjectActivateService(new FolderRelocatorFactory());
         slingContext.registerInjectActivateService(new ProcessCleanupFactory());
         slingContext.registerInjectActivateService(new S3AssetIngestorFactory());
     }

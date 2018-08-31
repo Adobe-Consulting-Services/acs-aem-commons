@@ -43,39 +43,37 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Test;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import com.adobe.acs.commons.mcp.impl.processes.reorganizer.Reorganizer;
+import com.adobe.acs.commons.mcp.impl.processes.reorganizer.ReorganizerFactory;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Tests a few cases for folder relocator
  */
-public class FolderRelocatorTest {
-    @Test
+public class ReorganizerTest {
+    @Test(expected = RepositoryException.class)
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
         ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
+        Reorganizer tool = new ReorganizerFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder Relocator: relocator test", instance.getName());
-        try {
-            instance.init(rr, Collections.EMPTY_MAP);
-            fail("That should have thrown an error");
-        } catch (DeserializeException ex) {
-            // Expected
-        }
+        assertEquals("Reorganizer: relocator test", instance.getName());
+        instance.init(rr, Collections.EMPTY_MAP);
+        tool.buildProcess(instance, rr);            
+        fail("That should have thrown an error");
     }
     
     @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
         final ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
+        Reorganizer tool = new ReorganizerFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder Relocator: relocator test", instance.getName());
+        assertEquals("Reorganizer: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
-        values.put("sourcePaths", "/content/folderA");
-        values.put("destinationPath", "/content/folderB");
-        values.put("mode", FolderRelocator.Mode.MOVE.toString());
+        values.put("sourceJcrPath", "/content/folderA");
+        values.put("destinationJcrPath", "/content/folderB");
         instance.init(rr, values);
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
@@ -86,14 +84,13 @@ public class FolderRelocatorTest {
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
         final ResourceResolver rr = getEnhancedMockResolver();
-        FolderRelocator tool = new FolderRelocatorFactory().createProcessDefinition();
+        Reorganizer tool = new ReorganizerFactory().createProcessDefinition();
         ProcessInstance instance = new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test");
 
-        assertEquals("Folder Relocator: relocator test", instance.getName());
+        assertEquals("Reorganizer: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
-        values.put("sourcePaths", "/content/folderA");
-        values.put("destinationPath", "/content/folderB");
-        values.put("mode", FolderRelocator.Mode.MOVE.toString());
+        values.put("sourceJcrPath", "/content/folderA");
+        values.put("destinationJcrPath", "/content/folderB");
         instance.init(rr, values);
         
         CompletableFuture<Boolean> f = new CompletableFuture<>();

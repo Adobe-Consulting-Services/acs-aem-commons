@@ -16,7 +16,6 @@
 package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.impl.processes.FolderRelocator;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
 import java.util.logging.Level;
@@ -58,7 +57,7 @@ public class MovingFolder extends MovingNode {
             String targetName = StringUtils.substringAfterLast(getDestinationPath(), "/");
             waitUntilResourceFound(rr, targetParentPath);
             Resource destParent = rr.getResource(targetParentPath);
-            Logger.getLogger(FolderRelocator.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
+            Logger.getLogger(MovingFolder.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
             rr.create(destParent, targetName, source.getValueMap());
             rr.commit();
             rr.refresh();

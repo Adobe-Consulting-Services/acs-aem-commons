@@ -88,13 +88,15 @@ public class Reorganizer extends ProcessDefinition {
 
     @FormField(name = "File",
             description = "Excel spreadsheet for performing multiple moves",
-            component = FileUploadComponent.class)
+            component = FileUploadComponent.class,
+            required = false)
     private RequestParameter sourceFile;
 
     @FormField(name = "Source",
             description = "Select page/site to be moved for single move",
             hint = "/content/my-site/en/my-page",
             component = NodeSelectComponent.class,
+            required = false,
             options = {"base=/content"})
     private String sourceJcrPath;
 
@@ -102,6 +104,7 @@ public class Reorganizer extends ProcessDefinition {
             description = "Destination location (must include new name for source node even if same)",
             hint = "Move: /content/new-place/my-page | Rename: /content/new-place/new-name",
             component = NodeSelectComponent.class,
+            required = false,
             options = {"base=/content"})
     private String destinationJcrPath;
 
@@ -128,7 +131,7 @@ public class Reorganizer extends ProcessDefinition {
             required = false,
             component = RadioComponent.EnumerationSelector.class,
             options = {"horizontal", "default=SELF_MANAGED"})
-    public PublishMethod publishMethod;
+    public PublishMethod publishMethod = PublishMethod.SELF_MANAGED;
 
     @FormField(name = "Create versions",
             description = "Create versions for anything being updated/replicated",
