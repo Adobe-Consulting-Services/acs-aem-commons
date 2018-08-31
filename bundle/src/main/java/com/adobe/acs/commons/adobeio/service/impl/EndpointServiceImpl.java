@@ -65,8 +65,7 @@ import com.google.gson.JsonParser;
 
 @SuppressWarnings("PackageAccessibility")
 @Component(service = EndpointService.class, immediate = true, property = {
-      Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O",
-      "webconsole.configurationFactory.nameHint" + "={id}" })
+      Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O"})
 @Designate(ocd = EndpointConfiguration.class, factory = true)
 public class EndpointServiceImpl implements EndpointService {
 
