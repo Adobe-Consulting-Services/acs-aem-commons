@@ -38,6 +38,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -198,10 +199,11 @@ public class EndpointServiceImpl implements EndpointService {
    private JsonObject process(@NotNull final String actionUrl, @NotNull final String method,
          @NotNull final JsonObject payload) throws IOException {
       if (isBlank(actionUrl) || isBlank(method)) {
+    	     LOGGER.error("Method or action is null");
          return new JsonObject();
       }
 
-      LOGGER.debug("Performing method = {}. actionUrl = {} . actionUrl = {}", method, actionUrl, payload);
+      LOGGER.debug("Performing method = {}. actionUrl = {} . payload = {}", method, actionUrl, payload);
 
       if (StringUtils.equalsIgnoreCase(method, METHOD_POST)) {
          return processPost(actionUrl, payload);
@@ -228,16 +230,19 @@ public class EndpointServiceImpl implements EndpointService {
       for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
          get.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
-
+      
+      CloseableHttpClient httpClient = getHttpClient();
+       
+      CloseableHttpResponse response = httpClient.execute(get);
+      JsonObject result = responseAsJson(response);
+      
+      LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
       LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
       stopWatch.stop();
       LOGGER.debug("Stopwatch time: {}", stopWatch);
       stopWatch.reset();
 
-      CloseableHttpClient httpClient = getHttpClient();
- 
-
-      return responseAsJson(httpClient.execute(get));
+      return result;
    }
 
    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload)
@@ -277,14 +282,17 @@ public class EndpointServiceImpl implements EndpointService {
          base.setEntity(input);
       }
 
+      LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
+      
+      CloseableHttpClient httpClient = getHttpClient();
+      CloseableHttpResponse response = httpClient.execute(base);
+      JsonObject result = responseAsJson(response);
+
       LOGGER.debug("STOPPING STOPWATCH processBase");
       stopWatch.stop();
       LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
       stopWatch.reset();
-      
-      CloseableHttpClient httpClient = getHttpClient();
-      LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
-      return responseAsJson(httpClient.execute(base));
+      return result;
    }
 
    private JsonObject responseAsJson(@NotNull final HttpResponse response) throws IOException {
