@@ -207,7 +207,7 @@
         },
 
         isColorField: function ($field) {
-            return $field.attr("is") === "coral-textfield";
+            return $field.attr("is") === "coral-textfield" && $field.hasClass("coral-ColorInput-input");
         },
 
         setColorField: function ($field, value) {
