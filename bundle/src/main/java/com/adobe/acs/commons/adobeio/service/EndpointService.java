@@ -24,6 +24,8 @@ import java.util.Map;
 import com.adobe.acs.commons.adobeio.types.Filter;
 import com.google.gson.JsonObject;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * This is the interface for the EndPointService
  * Using this service, the calling component can post to and retrieve from Service.
@@ -32,6 +34,7 @@ import com.google.gson.JsonObject;
  *   @Reference(target = "(getId=///put your id here///)")
  *   private EndpointService endpointService;
  */
+@ProviderType
 public interface EndpointService {
 
     /**

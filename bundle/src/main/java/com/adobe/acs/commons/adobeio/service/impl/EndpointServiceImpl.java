@@ -270,7 +270,7 @@ public class EndpointServiceImpl implements EndpointService {
       base.setHeader("x-api-key", integrationService.getApiKey());
       base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
 
-      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
+      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader()  .entrySet()) {
          base.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
 

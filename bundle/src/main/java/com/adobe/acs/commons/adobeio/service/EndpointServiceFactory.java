@@ -22,10 +22,13 @@ package com.adobe.acs.commons.adobeio.service;
 import com.adobe.acs.commons.adobeio.types.Action;
 import com.drew.lang.annotations.NotNull;
 
+import aQute.bnd.annotation.ProviderType;
+
 
 /**
  * Interface for the Endpoint service Factory
  */
+@ProviderType
 public interface EndpointServiceFactory {
 
     /**

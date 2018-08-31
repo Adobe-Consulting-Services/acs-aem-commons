@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.adobeio.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * Service to communicate to Adobe I/O with regards to authentication. 
  * 
@@ -27,6 +29,7 @@ package com.adobe.acs.commons.adobeio.service;
  * openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout private.key -out certificate_pub.crt
  *
  */
+@ProviderType
 public interface IntegrationService {
    
    /**
