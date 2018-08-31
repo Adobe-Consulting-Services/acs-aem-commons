@@ -66,7 +66,7 @@ import com.google.gson.JsonParser;
 @SuppressWarnings("PackageAccessibility")
 @Component(service = EndpointService.class, immediate = true, property = {
       Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O",
-      "webconsole.configurationFactory.nameHint" + "=Endpoint" })
+      "webconsole.configurationFactory.nameHint" + "={id}" })
 @Designate(ocd = EndpointConfiguration.class, factory = true)
 public class EndpointServiceImpl implements EndpointService {
 
@@ -199,7 +199,7 @@ public class EndpointServiceImpl implements EndpointService {
    private JsonObject process(@NotNull final String actionUrl, @NotNull final String method,
          @NotNull final JsonObject payload) throws IOException {
       if (isBlank(actionUrl) || isBlank(method)) {
-    	     LOGGER.error("Method or action is null");
+            LOGGER.error("Method or action is null");
          return new JsonObject();
       }
 

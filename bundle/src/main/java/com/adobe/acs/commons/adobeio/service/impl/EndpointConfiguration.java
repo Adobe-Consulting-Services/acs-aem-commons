@@ -47,9 +47,6 @@ public @interface EndpointConfiguration {
     @AttributeDefinition(name = "URL Endpoint", description = "Full Endpoint URL including domain", required = true)
     String endpoint();
     
-    @AttributeDefinition(name = "Service specific Header", description = "{header_key:header_value} E.g.: x-product:app-name")
+    @AttributeDefinition(name = "Service specific Header", description = "name:value} E.g.: x-product:app-name")
     String[] specificServiceHeader();
-
-    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
-
 }

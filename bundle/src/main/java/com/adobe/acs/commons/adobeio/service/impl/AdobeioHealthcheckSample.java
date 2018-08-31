@@ -45,15 +45,15 @@ public class AdobeioHealthcheckSample implements HealthCheck {
 
         resultLog.debug("Health check for Adobe I/O, executing sample API-call");
         if (endpoint == null) {
-        	resultLog.critical("No endpointservice found, check that an endpoint is with id=sample");
-        	return new Result(resultLog);
+           resultLog.critical("No endpointservice found, check that an endpoint is with id=sample");
+           return new Result(resultLog);
         }
         resultLog.debug("Executing Adobe I/O call to {}", endpoint.getEndpoint());
         JsonObject json = endpoint.performIO_Action();
         if ( json != null) {
             resultLog.debug("JSON-response {}", json.toString());
             if (StringUtils.contains(json.toString(), "error")) {
-                resultLog.critical("Error returned from the API-call");          	
+                resultLog.critical("Error returned from the API-call");             
             }
         } else {
             resultLog.info("Healthcheck completed");
