@@ -233,7 +233,7 @@ public class EndpointServiceImpl implements EndpointService {
       CloseableHttpClient httpClient = getHttpClient();
        
       CloseableHttpResponse response = httpClient.execute(get);
-      JsonObject result = responseAsJson(response);
+      final JsonObject result = responseAsJson(response);
       
       LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
       LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
@@ -285,7 +285,7 @@ public class EndpointServiceImpl implements EndpointService {
       
       CloseableHttpClient httpClient = getHttpClient();
       CloseableHttpResponse response = httpClient.execute(base);
-      JsonObject result = responseAsJson(response);
+      final JsonObject result = responseAsJson(response);
 
       LOGGER.debug("STOPPING STOPWATCH processBase");
       stopWatch.stop();
