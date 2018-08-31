@@ -32,7 +32,7 @@ import com.google.gson.JsonObject;
 @SuppressWarnings("WeakerAccess")
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
-                HealthCheck.TAGS + "=adobeiosample",
+                HealthCheck.TAGS + "=adobeio-sample",
                 HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
 public class AdobeioHealthcheckSample implements HealthCheck {
 

@@ -31,7 +31,7 @@ import com.adobe.acs.commons.adobeio.service.IntegrationService;
 @SuppressWarnings("WeakerAccess")
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
-                HealthCheck.TAGS + "=adobeio",
+                HealthCheck.TAGS + "=adobeio-jwt",
                 HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
 public class AdobeioHealthcheck implements HealthCheck {
 
