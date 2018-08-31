@@ -63,8 +63,8 @@
                             org.apache.poi.ss.usermodel;version="[2.0,4)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,4)",
                             org.apache.poi.xssf.usermodel;version="[2.0,4)",
-                            org.bouncycastle.jce;resolution:=optional, <!-- jjwt -->
-                            org.bouncycastle.jce.spec;resolution:=optional, <!-- jjwt -->
+                            org.bouncycastle.jce;resolution:=optional,  <!-- jjwt -->
+                            org.bouncycastle.jce.spec;resolution:=optional,  <!-- jjwt -->
                             android.util;resolution:=optional,
                             *
                         </Import-Package>
