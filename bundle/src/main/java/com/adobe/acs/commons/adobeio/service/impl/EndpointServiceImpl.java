@@ -281,7 +281,7 @@ public class EndpointServiceImpl implements EndpointService {
          base.setEntity(input);
       }
 
-      LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
+      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
       
       CloseableHttpClient httpClient = getHttpClient();
       CloseableHttpResponse response = httpClient.execute(base);
