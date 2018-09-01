@@ -158,9 +158,7 @@ public class EndpointServiceImpl implements EndpointService {
 
    /**
     * This method performs the Adobe I/O action
-    * 
-    * @param pKey
-    *            Pkey to identify the entry
+    *
     * @param payload
     *            Payload of the call
     * @return JsonObject containing the result
