@@ -29,7 +29,6 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.adobe.acs.commons.util.ParameterUtil;
@@ -46,10 +45,8 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
@@ -62,9 +59,7 @@ import com.drew.lang.annotations.NotNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@SuppressWarnings("PackageAccessibility")
-@Component(service = EndpointService.class, immediate = true, property = {
-      Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O"})
+@Component(service = EndpointService.class)
 @Designate(ocd = EndpointConfiguration.class, factory = true)
 public class EndpointServiceImpl implements EndpointService {
 

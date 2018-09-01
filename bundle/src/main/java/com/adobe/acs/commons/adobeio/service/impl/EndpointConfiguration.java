@@ -23,7 +23,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 
-@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Endpoint Factory Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O Endpoint Factory Configuration",
         description = "Configuration of Adobe.io endpoints")
 public @interface EndpointConfiguration {
 

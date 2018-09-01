@@ -61,7 +61,6 @@ import io.jsonwebtoken.Jwts;
 
 //scheduler is set to once per hour
 //you can use cronmaker.com for generating cron expressions
-@SuppressWarnings("PackageAccessibility")
 @Component(service = {IntegrationService.class, Runnable.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = "scheduler.expression=0 0 0/1 1/1 * ? *")
