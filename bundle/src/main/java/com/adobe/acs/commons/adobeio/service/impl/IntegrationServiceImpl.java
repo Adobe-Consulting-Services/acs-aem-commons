@@ -44,6 +44,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
@@ -62,8 +63,9 @@ import io.jsonwebtoken.Jwts;
 //you can use cronmaker.com for generating cron expressions
 @SuppressWarnings("PackageAccessibility")
 @Component(service = {IntegrationService.class, Runnable.class},
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = "scheduler.expression=0 0 0/1 1/1 * ? *")
-@Designate(ocd = IntegrationConfiguration.class, factory=false)
+@Designate(ocd = IntegrationConfiguration.class)
 public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
