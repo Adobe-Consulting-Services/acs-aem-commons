@@ -28,9 +28,11 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +70,10 @@ public class EndpointServiceImpl implements EndpointService {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceImpl.class);
 
-   private EndpointConfiguration config;
+   private String id;
+   private String url;
+   private String method;
+   private Map<String, String> specificServiceHeaders;
 
    @Reference
    private IntegrationService integrationService;
@@ -76,41 +81,40 @@ public class EndpointServiceImpl implements EndpointService {
    @Reference
    private AdobeioHelper helper;
 
-   private String endpointId;
-
    @Activate
-   @Modified
    protected void activate(final EndpointConfiguration config) throws Exception {
       LOGGER.debug("Start ACTIVATE Endpoint {}", config.id());
-      this.config = config;
-      this.endpointId = config.id();
-      LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
+      this.id = config.id();
+      this.url = config.endpoint();
+      this.method = config.method();
+      this.specificServiceHeaders = Collections.unmodifiableMap(ParameterUtil.toMap(config.specificServiceHeader(), ":"));
+      LOGGER.debug("End ACTIVATE Endpoint {}", id);
    }
 
    @Override
    public String getId() {
-      return this.config.id();
+      return this.id;
    }
 
    @Override
    public String getMethod() {
-      return this.config.method();
+      return this.method;
    }
 
    @Override
    public String getUrl() {
-      return this.config.endpoint();
+      return this.url;
    }
 
 
    @Override
    public JsonObject performIO_Action() {
-      return performio(getUrl());
+      return performio(url);
    }
 
    @Override
    public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performio(getUrl() + "?" + filter.getFilter());
+      return performio(url + "?" + filter.getFilter());
    }
 
 
@@ -142,10 +146,10 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public boolean isConnected() {
       try {
-         JsonObject response = processGet(getUrl());
+         JsonObject response = processGet(url);
          return !response.has(RESULT_ERROR);
       } catch (Exception e) {
-         LOGGER.error("Problem testing the connection for {}", endpointId, e);
+         LOGGER.error("Problem testing the connection for {}", id, e);
       }
       return false;
    }
@@ -166,14 +170,13 @@ public class EndpointServiceImpl implements EndpointService {
       JsonObject processResponse = new JsonObject();
 
       // perform action, if the action is defined in the configuration
-      String actionUrl = getUrl();
       try {
-         LOGGER.debug("ActionUrl = {} . method = {}", actionUrl, getMethod());
+         LOGGER.debug("ActionUrl = {} . method = {}", url, method);
          // process the Adobe I/O action
-         processResponse = process(actionUrl, getMethod(), payload);
+         processResponse = process(url, method, payload);
       } catch (Exception e) {
          processResponse.addProperty(RESULT_ERROR, "Problem processing");
-         LOGGER.error("Problem processing action {} in handleAdobeIO_Action", actionUrl);
+         LOGGER.error("Problem processing action {} in handleAdobeIO_Action", url);
       }
 
       return processResponse;
@@ -222,7 +225,7 @@ public class EndpointServiceImpl implements EndpointService {
       get.setHeader("cache-control", "no-cache");
       get.setHeader("x-api-key", integrationService.getApiKey());
       get.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
-      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
+      for (Map.Entry<String, String> headerEntry : this.specificServiceHeaders.entrySet()) {
          get.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
       
@@ -307,7 +310,7 @@ public class EndpointServiceImpl implements EndpointService {
 
    private JsonObject performio(@NotNull String actionUrl) {
       try {
-         return process(actionUrl, StringUtils.upperCase(config.method()), null);
+         return process(actionUrl, StringUtils.upperCase(method), null);
       } catch (Exception e) {
          LOGGER.error("Problem processing action {} in performIO", actionUrl, e);
       }
@@ -316,14 +319,6 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Override
    public Map<String, String> getSpecificServiceHeader() {
-      Map<String, String> mapHeader = new HashMap<String, String>();
-      String[] headerAsTabOfString = this.config.specificServiceHeader();
-
-      for (String headerAsString : headerAsTabOfString) {
-         mapHeader.put(StringUtils.substringBefore(headerAsString, ":"),
-               StringUtils.substringAfter(headerAsString, ":"));
-      }
-
-      return mapHeader;
+      return this.specificServiceHeaders;
    }
 }
