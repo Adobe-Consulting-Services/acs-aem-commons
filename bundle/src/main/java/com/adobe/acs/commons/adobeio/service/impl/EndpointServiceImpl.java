@@ -122,7 +122,7 @@ public class EndpointServiceImpl implements EndpointService {
       // initialize jsonobject
       JsonObject processResponse = new JsonObject();
 
-      if (isBlank(url) || (payload == null) || isBlank(payload.toString())) {
+      if (isBlank(url) || (payload == null) || payload.isJsonNull()) {
          processResponse.addProperty(RESULT_NO_DATA, "no payload available");
          return processResponse;
       }

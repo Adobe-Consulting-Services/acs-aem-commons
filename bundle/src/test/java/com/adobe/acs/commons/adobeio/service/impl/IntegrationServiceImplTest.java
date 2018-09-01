@@ -73,7 +73,7 @@ public class IntegrationServiceImplTest {
    }
    
    @Test
-   public void testJWTToken() {
+   public void testJwtToken() {
       String jwt = impl.getJwtToken();
       assertNotNull(jwt);
    }
