@@ -27,11 +27,12 @@ import com.google.gson.JsonObject;
 import aQute.bnd.annotation.ProviderType;
 
 /**
- * This is the interface for the EndPointService
+ * This is the interface for the EndpointService
  * Using this service, the calling component can post to and retrieve from Service.
+ * All the plumbing around authentication will be taken care of.
  *
  * Example how to use in the calling component:
- *   @Reference(target = "(getId=///put your id here///)")
+ *   @Reference(target = "(id=///put your id here///)")
  *   private EndpointService endpointService;
  */
 @ProviderType
@@ -48,12 +49,12 @@ public interface EndpointService {
     String getMethod();
 
     /**
-     * @return The endpoint that can be used in the url
+     * @return The url of this endpoint
      */
-    String getEndpoint();
+    String getUrl();
     
     /**
-     * @return Specific Header used for this service
+     * @return Specific headers used for this endpoint
      */
     Map<String, String> getSpecificServiceHeader();
 

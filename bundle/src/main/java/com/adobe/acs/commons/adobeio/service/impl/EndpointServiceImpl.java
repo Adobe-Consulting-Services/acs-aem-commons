@@ -96,19 +96,19 @@ public class EndpointServiceImpl implements EndpointService {
    }
 
    @Override
-   public String getEndpoint() {
+   public String getUrl() {
       return this.config.endpoint();
    }
 
 
    @Override
    public JsonObject performIO_Action() {
-      return performio(getEndpoint());
+      return performio(getUrl());
    }
 
    @Override
    public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performio(getEndpoint() + "?" + filter.getFilter());
+      return performio(getUrl() + "?" + filter.getFilter());
    }
 
 
@@ -140,7 +140,7 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public boolean isConnected() {
       try {
-         JsonObject response = processGet(getEndpoint());
+         JsonObject response = processGet(getUrl());
          return !response.has(RESULT_ERROR);
       } catch (Exception e) {
          LOGGER.error("Problem testing the connection for {}", endpointId, e);
@@ -164,7 +164,7 @@ public class EndpointServiceImpl implements EndpointService {
       JsonObject processResponse = new JsonObject();
 
       // perform action, if the action is defined in the configuration
-      String actionUrl = getEndpoint();
+      String actionUrl = getUrl();
       try {
          LOGGER.debug("ActionUrl = {} . method = {}", actionUrl, getMethod());
          // process the Adobe I/O action
