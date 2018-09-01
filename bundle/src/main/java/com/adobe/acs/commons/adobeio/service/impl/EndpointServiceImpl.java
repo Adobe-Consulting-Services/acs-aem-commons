@@ -83,10 +83,6 @@ public class EndpointServiceImpl implements EndpointService {
       this.config = config;
       this.endpointId = config.id();
       LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
-
-      if (null == this.integrationService) {
-         throw new Exception("Integration-service not defined");
-      }
    }
 
    @Override

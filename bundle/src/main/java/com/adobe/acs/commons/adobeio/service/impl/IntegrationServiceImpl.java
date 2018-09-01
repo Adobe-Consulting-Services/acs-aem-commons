@@ -158,18 +158,18 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtToken;
     }
 
-    private PrivateKey getPrivateKey() throws Exception, NoSuchAlgorithmException, InvalidKeySpecException {
+    private PrivateKey getPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    private static byte[] buildPkcs8Key(String privateKey) throws Exception {
+    private static byte[] buildPkcs8Key(String privateKey)  {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
-            throw new Exception("Invalid cert format: " + privateKey);
+            LOGGER.error("Invalid cert format: {}", privateKey);
         }
 
         final byte[] innerKey = DECODER.decode(privateKey.replaceAll("-----\\w+ RSA PRIVATE KEY-----", ""));
