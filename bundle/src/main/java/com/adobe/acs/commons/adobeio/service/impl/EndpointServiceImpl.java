@@ -37,7 +37,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -45,7 +44,6 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -69,10 +67,14 @@ import com.google.gson.JsonParser;
 public class EndpointServiceImpl implements EndpointService {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(EndpointServiceImpl.class);
+
    private EndpointConfiguration config;
 
    @Reference
    private IntegrationService integrationService;
+
+   @Reference
+   private AdobeioHelper helper;
 
    private String endpointId;
 
@@ -216,7 +218,6 @@ public class EndpointServiceImpl implements EndpointService {
       stopWatch.start();
 
       HttpGet get = new HttpGet(actionUrl);
-      get.setConfig(requestConfigWithTimeout(10000));
       get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
       get.setHeader("cache-control", "no-cache");
       get.setHeader("x-api-key", integrationService.getApiKey());
@@ -225,31 +226,29 @@ public class EndpointServiceImpl implements EndpointService {
          get.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
       
-      CloseableHttpClient httpClient = getHttpClient();
-       
-      CloseableHttpResponse response = httpClient.execute(get);
-      final JsonObject result = responseAsJson(response);
-      
-      LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
-      LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
-      stopWatch.stop();
-      LOGGER.debug("Stopwatch time: {}", stopWatch);
-      stopWatch.reset();
+      try (CloseableHttpClient httpClient = helper.getHttpClient()) {
+         CloseableHttpResponse response = httpClient.execute(get);
+         final JsonObject result = responseAsJson(response);
 
-      return result;
+         LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
+         LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
+         stopWatch.stop();
+         LOGGER.debug("Stopwatch time: {}", stopWatch);
+         stopWatch.reset();
+
+         return result;
+      }
    }
 
    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws ClientProtocolException, IOException {
       HttpPost post = new HttpPost(actionUrl);
-      post.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(post, payload) : new JsonObject();
    }
 
    private JsonObject processPatch(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws IOException {
       HttpPatch patch = new HttpPatch(actionUrl);
-      patch.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(patch, payload) : new JsonObject();
    }
 
@@ -277,16 +276,17 @@ public class EndpointServiceImpl implements EndpointService {
       }
 
       LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
-      
-      CloseableHttpClient httpClient = getHttpClient();
-      CloseableHttpResponse response = httpClient.execute(base);
-      final JsonObject result = responseAsJson(response);
 
-      LOGGER.debug("STOPPING STOPWATCH processBase");
-      stopWatch.stop();
-      LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
-      stopWatch.reset();
-      return result;
+      try (CloseableHttpClient httpClient = helper.getHttpClient()) {
+         CloseableHttpResponse response = httpClient.execute(base);
+         final JsonObject result = responseAsJson(response);
+
+         LOGGER.debug("STOPPING STOPWATCH processBase");
+         stopWatch.stop();
+         LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
+         stopWatch.reset();
+         return result;
+      }
    }
 
    private JsonObject responseAsJson(@NotNull final HttpResponse response) throws IOException {
@@ -325,17 +325,5 @@ public class EndpointServiceImpl implements EndpointService {
       }
 
       return mapHeader;
-   }
-
-   private CloseableHttpClient getHttpClient() {
-      return HttpClientBuilder.create().build();
-   }
-   
-   private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
-       return RequestConfig.copy(RequestConfig.DEFAULT)
-               .setSocketTimeout(timeoutInMilliseconds)
-               .setConnectTimeout(timeoutInMilliseconds)
-               .setConnectionRequestTimeout(timeoutInMilliseconds)
-               .build();
    }
 }
