@@ -28,30 +28,30 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 public @interface IntegrationConfiguration {
 
    @AttributeDefinition(name = "Endpoint", description = "Endpoint for the JWT-check", defaultValue = "https://ims-na1.adobelogin.com/ims/exchange/jwt")
-   String getEndpoint();
+   String endpoint();
 
    @AttributeDefinition(name = "Login Endpoint", description = "Login Endpoint for the JWT-check", defaultValue = "https://ims-na1.adobelogin.com/c/")
-   String getLoginEndpoint();
+   String loginEndpoint();
 
    @AttributeDefinition(name = "PrivateKey", description = "Contents of the private.key file")
-   String getPrivateKey();
+   String privateKey();
 
    @AttributeDefinition(name = "ClientId", description = "Client Id")
-   String getClientId();
+   String clientId();
  
    @AttributeDefinition(name = "ClientSecret", description = "Client Secret")
-   String getClientSecret();
+   String clientSecret();
     
    @AttributeDefinition(name = "OrgId", description = "Organization id")
-   String getAmcOrgId();
+   String amcOrgId();
     
    @AttributeDefinition(name = "TechAccountId", description = "Technical Account Id")
-   String getTechAccountId();
+   String techAccountId();
         
    @AttributeDefinition(name = "LoginClaim", description = "Login claims", defaultValue="https://ims-na1.adobelogin.com/s/ent_campaign_sdk")
-   String[] getAdobeLoginClaimKey();
+   String[] adobeLoginClaimKey();
    
    @AttributeDefinition(name = "ExpirationTime", description = "Expiration time of the access token in seconds",
                       defaultValue="7200",type= AttributeType.INTEGER)
-   int getExpirationTimeInSeconds();
+   int expirationTimeInSeconds();
 }

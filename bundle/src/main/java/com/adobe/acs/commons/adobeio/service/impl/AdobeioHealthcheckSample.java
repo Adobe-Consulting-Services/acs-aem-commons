@@ -26,38 +26,38 @@ import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import com.adobe.acs.commons.adobeio.service.EndpointService;
+import com.google.gson.JsonObject;
 
 @SuppressWarnings("WeakerAccess")
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
-                HealthCheck.TAGS + "=adobeio-jwt",
+                HealthCheck.TAGS + "=adobeio-sample",
                 HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
-public class AdobeioHealthcheck implements HealthCheck {
+public class AdobeioHealthcheckSample implements HealthCheck {
 
-    @Reference
-    private IntegrationService jwtService;
+    @Reference(target = "(id=sample)")
+    private EndpointService endpoint;
 
     @Override
     public Result execute() {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
-        resultLog.debug("Health check for Adobe I/O");
-        if ( StringUtils.isNotEmpty(jwtService.getApiKey())) {
-            resultLog.debug("Starting validation for x-api-key {}", jwtService.getApiKey());
-        } else {
-            resultLog.critical("No api key is specified in the OSGi-config");
+        resultLog.debug("Health check for Adobe I/O, executing sample API-call");
+        if (endpoint == null) {
+           resultLog.critical("No endpointservice found, check that an endpoint is with id=sample");
+           return new Result(resultLog);
         }
-        resultLog.debug("Obtaining the access token");
-        String accessToken = jwtService.getAccessToken();
-
-        if ( StringUtils.isNotEmpty(accessToken)) {
-            resultLog.info("Access token succesfully obtained {}", accessToken);
+        resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
+        JsonObject json = endpoint.performIO_Action();
+        if ( json != null) {
+            resultLog.debug("JSON-response {}", json.toString());
+            if (StringUtils.contains(json.toString(), "error")) {
+                resultLog.critical("Error returned from the API-call");             
+            }
         } else {
-            resultLog.critical("Could not obtain the access token");
+            resultLog.info("Healthcheck completed");
         }
-
-        resultLog.info("Healthcheck completed");
 
         return new Result(resultLog);
     }

@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.adobeio.types;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * This class is used to specify the action in the operation
  */
+@ProviderType
 public final class Action {
 
     private String actionType;

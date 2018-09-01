@@ -28,7 +28,7 @@ import org.osgi.service.metatype.annotations.Option;
 public @interface EndpointConfiguration {
 
     @AttributeDefinition(name = "ID", description = "Id of the endpoint", required = true)
-    String getId();
+    String id();
 
     @AttributeDefinition(
        name = "Method",
@@ -42,14 +42,14 @@ public @interface EndpointConfiguration {
         },
        required = true
     )
-    String getMethod();
+    String method();
 
     @AttributeDefinition(name = "URL Endpoint", description = "Full Endpoint URL including domain", required = true)
-    String getEndpoint();
+    String endpoint();
     
-    @AttributeDefinition(name = "Service specific Header", description = "{header_key:header_value} E.g.: x-product:app-name")
-    String[] getSpecificServiceHeader();
+    @AttributeDefinition(name = "Service specific Header", description = "name:value E.g.: x-product:app-name")
+    String[] specificServiceHeader();
 
-    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{getId}</b><br/> {getMethod} -&gt; {getEndpoint}";
+    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{id}</b><br/> {endpoint}";
 
 }

@@ -37,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -53,7 +55,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.types.Filter;
@@ -63,8 +64,7 @@ import com.google.gson.JsonParser;
 
 @SuppressWarnings("PackageAccessibility")
 @Component(service = EndpointService.class, immediate = true, property = {
-      Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O",
-      "webconsole.configurationFactory.nameHint" + "=Endpoint" })
+      Constants.SERVICE_DESCRIPTION + "=Adobe I/O. Endpoint", Constants.SERVICE_VENDOR + "=Adobe I/O"})
 @Designate(ocd = EndpointConfiguration.class, factory = true)
 public class EndpointServiceImpl implements EndpointService {
 
@@ -78,41 +78,37 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Activate
    @Modified
-   protected void activate(final EndpointConfiguration config) throws AdobeioException {
-      LOGGER.debug("Start ACTIVATE Endpoint {}", config.getId());
+   protected void activate(final EndpointConfiguration config) throws Exception {
+      LOGGER.debug("Start ACTIVATE Endpoint {}", config.id());
       this.config = config;
-      this.endpointId = config.getId();
+      this.endpointId = config.id();
       LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
-
-      if (null == this.integrationService) {
-         throw new AdobeioException("Integration-service not defined");
-      }
    }
 
    @Override
    public String getId() {
-      return this.config.getId();
+      return this.config.id();
    }
 
    @Override
    public String getMethod() {
-      return this.config.getMethod();
+      return this.config.method();
    }
 
    @Override
-   public String getEndpoint() {
-      return this.config.getEndpoint();
+   public String getUrl() {
+      return this.config.endpoint();
    }
 
 
    @Override
    public JsonObject performIO_Action() {
-      return performio(getEndpoint());
+      return performio(getUrl());
    }
 
    @Override
    public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performio(getEndpoint() + "?" + filter.getFilter());
+      return performio(getUrl() + "?" + filter.getFilter());
    }
 
 
@@ -126,7 +122,7 @@ public class EndpointServiceImpl implements EndpointService {
       // initialize jsonobject
       JsonObject processResponse = new JsonObject();
 
-      if (isBlank(url) || (payload == null) || isBlank(payload.toString())) {
+      if (isBlank(url) || (payload == null) || payload.isJsonNull()) {
          processResponse.addProperty(RESULT_NO_DATA, "no payload available");
          return processResponse;
       }
@@ -144,7 +140,7 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public boolean isConnected() {
       try {
-         JsonObject response = processGet(getEndpoint());
+         JsonObject response = processGet(getUrl());
          return !response.has(RESULT_ERROR);
       } catch (Exception e) {
          LOGGER.error("Problem testing the connection for {}", endpointId, e);
@@ -168,7 +164,7 @@ public class EndpointServiceImpl implements EndpointService {
       JsonObject processResponse = new JsonObject();
 
       // perform action, if the action is defined in the configuration
-      String actionUrl = getEndpoint();
+      String actionUrl = getUrl();
       try {
          LOGGER.debug("ActionUrl = {} . method = {}", actionUrl, getMethod());
          // process the Adobe I/O action
@@ -197,10 +193,11 @@ public class EndpointServiceImpl implements EndpointService {
    private JsonObject process(@NotNull final String actionUrl, @NotNull final String method,
          @NotNull final JsonObject payload) throws IOException {
       if (isBlank(actionUrl) || isBlank(method)) {
+            LOGGER.error("Method or action is null");
          return new JsonObject();
       }
 
-      LOGGER.debug("Performing method = {}. actionUrl = {} . actionUrl = {}", method, actionUrl, payload);
+      LOGGER.debug("Performing method = {}. actionUrl = {} . payload = {}", method, actionUrl, payload);
 
       if (StringUtils.equalsIgnoreCase(method, METHOD_POST)) {
          return processPost(actionUrl, payload);
@@ -219,6 +216,7 @@ public class EndpointServiceImpl implements EndpointService {
       stopWatch.start();
 
       HttpGet get = new HttpGet(actionUrl);
+      get.setConfig(requestConfigWithTimeout(10000));
       get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
       get.setHeader("cache-control", "no-cache");
       get.setHeader("x-api-key", integrationService.getApiKey());
@@ -226,26 +224,32 @@ public class EndpointServiceImpl implements EndpointService {
       for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
          get.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
-
+      
+      CloseableHttpClient httpClient = getHttpClient();
+       
+      CloseableHttpResponse response = httpClient.execute(get);
+      final JsonObject result = responseAsJson(response);
+      
+      LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
       LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
       stopWatch.stop();
       LOGGER.debug("Stopwatch time: {}", stopWatch);
       stopWatch.reset();
 
-      CloseableHttpClient httpClient = getHttpClient();
-
-      return responseAsJson(httpClient.execute(get));
+      return result;
    }
 
    private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws ClientProtocolException, IOException {
       HttpPost post = new HttpPost(actionUrl);
+      post.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(post, payload) : new JsonObject();
    }
 
    private JsonObject processPatch(@NotNull final String actionUrl, @NotNull final JsonObject payload)
          throws IOException {
       HttpPatch patch = new HttpPatch(actionUrl);
+      patch.setConfig(requestConfigWithTimeout(10000));
       return (payload != null) && isNotBlank(payload.toString()) ? processBase(patch, payload) : new JsonObject();
    }
 
@@ -261,7 +265,7 @@ public class EndpointServiceImpl implements EndpointService {
       base.setHeader("x-api-key", integrationService.getApiKey());
       base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
 
-      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader().entrySet()) {
+      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader()  .entrySet()) {
          base.setHeader(headerEntry.getKey(), headerEntry.getValue());
       }
 
@@ -272,14 +276,17 @@ public class EndpointServiceImpl implements EndpointService {
          base.setEntity(input);
       }
 
+      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
+      
+      CloseableHttpClient httpClient = getHttpClient();
+      CloseableHttpResponse response = httpClient.execute(base);
+      final JsonObject result = responseAsJson(response);
+
       LOGGER.debug("STOPPING STOPWATCH processBase");
       stopWatch.stop();
       LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
       stopWatch.reset();
-      
-      CloseableHttpClient httpClient = getHttpClient();
-      LOGGER.debug("Process call. uri = {}. payload = {}{}", base.getURI().toString(), payload, base.getURI());
-      return responseAsJson(httpClient.execute(base));
+      return result;
    }
 
    private JsonObject responseAsJson(@NotNull final HttpResponse response) throws IOException {
@@ -300,7 +307,7 @@ public class EndpointServiceImpl implements EndpointService {
 
    private JsonObject performio(@NotNull String actionUrl) {
       try {
-         return process(actionUrl, StringUtils.upperCase(config.getMethod()), null);
+         return process(actionUrl, StringUtils.upperCase(config.method()), null);
       } catch (Exception e) {
          LOGGER.error("Problem processing action {} in performIO", actionUrl, e);
       }
@@ -310,7 +317,7 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public Map<String, String> getSpecificServiceHeader() {
       Map<String, String> mapHeader = new HashMap<String, String>();
-      String[] headerAsTabOfString = this.config.getSpecificServiceHeader();
+      String[] headerAsTabOfString = this.config.specificServiceHeader();
 
       for (String headerAsString : headerAsTabOfString) {
          mapHeader.put(StringUtils.substringBefore(headerAsString, ":"),
@@ -323,5 +330,12 @@ public class EndpointServiceImpl implements EndpointService {
    private CloseableHttpClient getHttpClient() {
       return HttpClientBuilder.create().build();
    }
-
+   
+   private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
+       return RequestConfig.copy(RequestConfig.DEFAULT)
+               .setSocketTimeout(timeoutInMilliseconds)
+               .setConnectTimeout(timeoutInMilliseconds)
+               .setConnectionRequestTimeout(timeoutInMilliseconds)
+               .build();
+   }
 }

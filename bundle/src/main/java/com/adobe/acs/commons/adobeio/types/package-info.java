@@ -20,4 +20,5 @@
 /**
  * Adobe I/O Types.
  */
+@aQute.bnd.annotation.Version("1.0.0")
 package com.adobe.acs.commons.adobeio.types;

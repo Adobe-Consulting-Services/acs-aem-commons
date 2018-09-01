@@ -39,6 +39,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -50,7 +51,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -70,7 +70,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
     private static final Base64.Decoder DECODER = Base64.getMimeDecoder();
     private String accessToken = null;
-    private IntegrationConfiguration jwtServiceConfig;
+    protected IntegrationConfiguration jwtServiceConfig;
 
     @Activate
     @Modified
@@ -96,7 +96,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
     @Override
     public String getApiKey() {
-        return jwtServiceConfig.getClientId();
+        return jwtServiceConfig.clientId();
     }
     
     // --------    PRIVATE METHODS    ----------
@@ -104,16 +104,19 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         String token = StringUtils.EMPTY;
 
         try(CloseableHttpClient client = createDefault()) {
-            HttpPost post = new HttpPost(jwtServiceConfig.getEndpoint());
+            HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
             post.addHeader("Cache-Control", "no-cache");
             post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             List<BasicNameValuePair> params = Lists.newArrayList();
-            params.add(new BasicNameValuePair("client_id", jwtServiceConfig.getClientId()));
-            params.add(new BasicNameValuePair("client_secret", jwtServiceConfig.getClientSecret()));
+            params.add(new BasicNameValuePair("client_id", jwtServiceConfig.clientId()));
+            params.add(new BasicNameValuePair("client_secret", jwtServiceConfig.clientSecret()));
             params.add(new BasicNameValuePair("jwt_token", getJwtToken()));
 
             post.setEntity(new UrlEncodedFormEntity(params));
+            
+            //setting timeout
+            post.setConfig(requestConfigWithTimeout(10000));
 
             HttpResponse response = client.execute(post);
 
@@ -139,7 +142,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return token;
     }
 
-    private String getJwtToken() {
+    protected String getJwtToken() {
         String jwtToken = StringUtils.EMPTY;
         try {
             jwtToken = Jwts
@@ -148,24 +151,26 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
                     .signWith(RS256, getPrivateKey())
                     .compact();
         } catch (Exception e) {
+            LOGGER.error("JWT claims {}", getJwtClaims());
             LOGGER.error(e.getMessage());
         }
         LOGGER.info("JWT Token : \n {}", jwtToken);
         return jwtToken;
     }
 
-    private PrivateKey getPrivateKey() throws AdobeioException, NoSuchAlgorithmException, InvalidKeySpecException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.getPrivateKey()));
+    private PrivateKey getPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    private static byte[] buildPkcs8Key(String privateKey) throws AdobeioException {
+    protected static byte[] buildPkcs8Key(String privateKey)  {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
-            throw new AdobeioException("Invalid cert format: " + privateKey);
+            LOGGER.error("Invalid cert format: {}", privateKey);
+            return StringUtils.EMPTY.getBytes();
         }
 
         final byte[] innerKey = DECODER.decode(privateKey.replaceAll("-----\\w+ RSA PRIVATE KEY-----", ""));
@@ -180,11 +185,16 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private Map getJwtClaims() {
         Map jwtClaims = new HashMap<>();
 
-        jwtClaims.put("iss", jwtServiceConfig.getAmcOrgId());
-        jwtClaims.put("sub", jwtServiceConfig.getTechAccountId());
+        jwtClaims.put("iss", jwtServiceConfig.amcOrgId());
+        jwtClaims.put("sub", jwtServiceConfig.techAccountId());
         jwtClaims.put("exp", getExpirationDate());
-        jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.getLoginEndpoint(), jwtServiceConfig.getClientId()));
-        jwtClaims.put(jwtServiceConfig.getAdobeLoginClaimKey(), Boolean.TRUE);
+        jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.loginEndpoint(), jwtServiceConfig.clientId()));
+        String [] claims = jwtServiceConfig.adobeLoginClaimKey();
+        if (claims != null && claims.length > 0) {
+             for( int i=0; i < claims.length; i++) {
+             jwtClaims.put(claims[i], Boolean.TRUE);
+             }
+        }
 
         if (LOGGER.isDebugEnabled()) {
             Gson gson = new Gson();
@@ -197,8 +207,16 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private Date getExpirationDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
-        cal.add(Calendar.SECOND, jwtServiceConfig.getExpirationTimeInSeconds());
+        cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
         return cal.getTime();
+    }
+    
+    private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
+        return RequestConfig.copy(RequestConfig.DEFAULT)
+                .setSocketTimeout(timeoutInMilliseconds)
+                .setConnectTimeout(timeoutInMilliseconds)
+                .setConnectionRequestTimeout(timeoutInMilliseconds)
+                .build();
     }
 
 }
