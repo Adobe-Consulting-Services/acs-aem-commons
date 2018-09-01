@@ -70,7 +70,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
     private static final Base64.Decoder DECODER = Base64.getMimeDecoder();
     private String accessToken = null;
-    private IntegrationConfiguration jwtServiceConfig;
+    protected IntegrationConfiguration jwtServiceConfig;
 
     @Activate
     @Modified
@@ -142,7 +142,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return token;
     }
 
-    private String getJwtToken() {
+    protected String getJwtToken() {
         String jwtToken = StringUtils.EMPTY;
         try {
             jwtToken = Jwts
