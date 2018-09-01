@@ -48,7 +48,7 @@ public @interface IntegrationConfiguration {
    @AttributeDefinition(name = "TechAccountId", description = "Technical Account Id")
    String techAccountId();
         
-   @AttributeDefinition(name = "LoginClaim", description = "Login claims", defaultValue="https://ims-na1.adobelogin.com/s/ent_campaign_sdk")
+   @AttributeDefinition(name = "LoginClaim", description = "Login claims")
    String[] adobeLoginClaimKey();
    
    @AttributeDefinition(name = "ExpirationTime", description = "Expiration time of the access token in seconds",
