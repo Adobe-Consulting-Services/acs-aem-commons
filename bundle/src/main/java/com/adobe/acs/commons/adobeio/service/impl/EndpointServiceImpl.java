@@ -55,7 +55,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.adobe.acs.commons.adobeio.types.Filter;
@@ -79,14 +78,14 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Activate
    @Modified
-   protected void activate(final EndpointConfiguration config) throws AdobeioException {
+   protected void activate(final EndpointConfiguration config) throws Exception {
       LOGGER.debug("Start ACTIVATE Endpoint {}", config.id());
       this.config = config;
       this.endpointId = config.id();
       LOGGER.debug("End ACTIVATE Endpoint {}", endpointId);
 
       if (null == this.integrationService) {
-         throw new AdobeioException("Integration-service not defined");
+         throw new Exception("Integration-service not defined");
       }
    }
 

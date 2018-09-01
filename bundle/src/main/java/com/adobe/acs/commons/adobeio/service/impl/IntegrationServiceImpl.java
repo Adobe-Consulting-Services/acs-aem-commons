@@ -51,7 +51,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.adobeio.exception.AdobeioException;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -159,18 +158,18 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtToken;
     }
 
-    private PrivateKey getPrivateKey() throws AdobeioException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private PrivateKey getPrivateKey() throws Exception, NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    private static byte[] buildPkcs8Key(String privateKey) throws AdobeioException {
+    private static byte[] buildPkcs8Key(String privateKey) throws Exception {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
-            throw new AdobeioException("Invalid cert format: " + privateKey);
+            throw new Exception("Invalid cert format: " + privateKey);
         }
 
         final byte[] innerKey = DECODER.decode(privateKey.replaceAll("-----\\w+ RSA PRIVATE KEY-----", ""));
