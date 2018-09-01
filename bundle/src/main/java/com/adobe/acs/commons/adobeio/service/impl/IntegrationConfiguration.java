@@ -23,7 +23,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Integration Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O Integration Configuration",
                      description = "Configuration of Adobe.IO access")
 public @interface IntegrationConfiguration {
 
