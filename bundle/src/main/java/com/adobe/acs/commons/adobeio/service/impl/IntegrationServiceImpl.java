@@ -164,12 +164,13 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return kf.generatePrivate(keySpec);
     }
 
-    private static byte[] buildPkcs8Key(String privateKey)  {
+    protected static byte[] buildPkcs8Key(String privateKey)  {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
             LOGGER.error("Invalid cert format: {}", privateKey);
+            return StringUtils.EMPTY.getBytes();
         }
 
         final byte[] innerKey = DECODER.decode(privateKey.replaceAll("-----\\w+ RSA PRIVATE KEY-----", ""));
