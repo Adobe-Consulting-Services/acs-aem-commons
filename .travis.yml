@@ -17,7 +17,7 @@ cache:
   - $HOME/.m2
 before_cache:
 # don't cache snapshots
-  - find $HOME/.m2 -name *SNAPSHOT* -delete
+  - find $HOME/.m2 -name *SNAPSHOT* -exec rm -r "{}" \;
 notifications:
   slack:
     secure: aC4TRo2EiPb0LUA5L1+7JhLzmSFw8Uiqzr3ycDpMc+PMQLM9pOKxZ1OckJZIQBcCnmgcnTMuNXrcuZAY0GIwJ65hu8uRxJGjLROb0KsVCvuJnvBdAjE+MlPIHbegyRA9YLupdRUdpuHAtYmy/Fdub33SHZ9ZXYpiOfYVFfaUpSk=
