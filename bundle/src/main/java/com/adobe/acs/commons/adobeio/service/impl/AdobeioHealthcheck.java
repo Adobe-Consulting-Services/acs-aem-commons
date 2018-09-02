@@ -19,21 +19,18 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
-import com.adobe.acs.commons.adobeio.service.EndpointService;
-import com.google.gson.JsonObject;
+import java.util.Collection;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Reference;
 
+import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-
-import java.util.Collection;
+import com.google.gson.JsonObject;
 
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
