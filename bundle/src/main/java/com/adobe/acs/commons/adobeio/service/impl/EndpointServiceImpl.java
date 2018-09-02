@@ -86,12 +86,7 @@ public class EndpointServiceImpl implements EndpointService {
       this.id = config.id();
       this.url = config.endpoint();
       this.method = config.method();
-      if (config.specificServiceHeaders() == null) {
-         this.specificServiceHeaders = Collections.emptyList();
-      } else {
-         this.specificServiceHeaders = Arrays.asList(config.specificServiceHeaders()).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
-             filter(e -> e != null).collect(Collectors.toList());
-      }
+      setServiceSpecificHeaders(config.specificServiceHeaders());
       LOGGER.debug("End ACTIVATE Endpoint {}", id);
    }
 
@@ -112,10 +107,20 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Override
    public void setUrl(String url) {
-	   this.url = url;
+      this.url = url;
+   }
+   
+   @Override
+   public void setServiceSpecificHeaders(String[] specificServiceHeaders) {
+      if (specificServiceHeaders == null) {
+         this.specificServiceHeaders = Collections.emptyList();
+      } else {
+         this.specificServiceHeaders = Arrays.asList(specificServiceHeaders).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
+	              filter(e -> e != null).collect(Collectors.toList());
+      }
    }
 
-@Override
+   @Override
    public JsonObject performIO_Action() {
       return performio(url, Collections.emptyMap());
    }

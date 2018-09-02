@@ -135,7 +135,7 @@ public class EndpointServiceImplTest {
     @Test
     public void testGetWithServiceSpecificHeaders() throws Exception {
         when(config.method()).thenReturn("GET");
-        when(config.specificServiceHeader()).thenReturn(new String[] {
+        when(config.specificServiceHeaders()).thenReturn(new String[] {
            "",
            ":",
            "foo:",

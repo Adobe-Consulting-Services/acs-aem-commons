@@ -87,4 +87,13 @@ public interface EndpointService {
      */
     void setUrl(String url);
     
+    /**
+     * To override the headers specified via the configuration.
+     * 
+     * This needs to be specified in the format <name:value>
+     * 
+     * @param specificServiceHeaders array with headers
+     */
+    void setServiceSpecificHeaders(String[] specificServiceHeaders);
+    
 }
