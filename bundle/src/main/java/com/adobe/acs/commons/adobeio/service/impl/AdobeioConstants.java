@@ -25,8 +25,26 @@ package com.adobe.acs.commons.adobeio.service.impl;
 public final class AdobeioConstants {
 
    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+   
+   public static final String CONTENT_TYPE_URL_ENCODED = "application/x-www-form-urlencoded";
 
    public static final String X_API_KEY = "X-Api-Key";
+   
+   public static final String CLIENT_ID = "client_id";
+   
+   public static final String CLIENT_SECRET = "client_secret";
+   
+   public static final String JWT_TOKEN = "jwt_token";
+   
+   public static final String AUTHORIZATION = "authorization";
+   
+   public static final String BEARER = "Bearer ";
+   
+   public static final String CACHE_CONTRL = "cache-control";
+   
+   public static final String NO_CACHE = "no-cache";
+   
+   public static final String CONTENT_TYPE = "content-type";
 
    public static final String JSON_ACCESS_TOKEN = "access_token";
    public static final String JK_PKEY = "PKey";

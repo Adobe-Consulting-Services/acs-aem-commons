@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
-import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.JSON_ACCESS_TOKEN;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.*;
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 
 import java.math.BigInteger;
@@ -109,13 +109,13 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
         try(CloseableHttpClient client = helper.getHttpClient()) {
             HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
-            post.addHeader("Cache-Control", "no-cache");
-            post.addHeader("Content-Type", "application/x-www-form-urlencoded");
+            post.addHeader(CACHE_CONTRL, NO_CACHE);
+            post.addHeader(CONTENT_TYPE, CONTENT_TYPE_URL_ENCODED);
 
             List<BasicNameValuePair> params = Lists.newArrayList();
-            params.add(new BasicNameValuePair("client_id", jwtServiceConfig.clientId()));
-            params.add(new BasicNameValuePair("client_secret", jwtServiceConfig.clientSecret()));
-            params.add(new BasicNameValuePair("jwt_token", getJwtToken()));
+            params.add(new BasicNameValuePair(CLIENT_ID, jwtServiceConfig.clientId()));
+            params.add(new BasicNameValuePair(CLIENT_SECRET, jwtServiceConfig.clientSecret()));
+            params.add(new BasicNameValuePair(JWT_TOKEN, getJwtToken()));
 
             post.setEntity(new UrlEncodedFormEntity(params));
 

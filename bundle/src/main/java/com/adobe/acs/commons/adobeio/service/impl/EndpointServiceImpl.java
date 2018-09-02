@@ -19,8 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
-import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.CONTENT_TYPE_APPLICATION_JSON;
-import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.RESULT_ERROR;
+import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
@@ -228,10 +227,10 @@ public class EndpointServiceImpl implements EndpointService {
       stopWatch.start();
 
       HttpGet get = new HttpGet(uri);
-      get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
-      get.setHeader("cache-control", "no-cache");
-      get.setHeader("x-api-key", integrationService.getApiKey());
-      get.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
+      get.setHeader(AUTHORIZATION, BEARER + integrationService.getAccessToken());
+      get.setHeader(CACHE_CONTRL, NO_CACHE);
+      get.setHeader(X_API_KEY, integrationService.getApiKey());
+      get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       addHeaders(get);
 
       try (CloseableHttpClient httpClient = helper.getHttpClient()) {
@@ -267,10 +266,10 @@ public class EndpointServiceImpl implements EndpointService {
       LOGGER.debug("STARTING STOPWATCH processRequestWithBody");
       stopWatch.start();
 
-      base.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
-      base.setHeader("cache-control", "no-cache");
-      base.setHeader("x-api-key", integrationService.getApiKey());
-      base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
+      base.setHeader(AUTHORIZATION, BEARER + integrationService.getAccessToken());
+      base.setHeader(CACHE_CONTRL, NO_CACHE);
+      base.setHeader(X_API_KEY, integrationService.getApiKey());
+      base.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       addHeaders(base);
 
       StringEntity input = new StringEntity(payload.toString());
