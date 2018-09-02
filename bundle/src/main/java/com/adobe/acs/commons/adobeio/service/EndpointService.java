@@ -51,11 +51,6 @@ public interface EndpointService {
      * @return The url of this endpoint
      */
     String getUrl();
-    
-    /**
-     * @return Specific headers used for this endpoint
-     */
-    Map<String, String> getSpecificServiceHeader();
 
 
     /**

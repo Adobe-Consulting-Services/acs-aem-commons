@@ -30,8 +30,11 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.io.IOUtils;
@@ -70,7 +73,7 @@ public class EndpointServiceImpl implements EndpointService {
    private String id;
    private String url;
    private String method;
-   private Map<String, String> specificServiceHeaders;
+   private List<Map.Entry<String, String>> specificServiceHeaders;
 
    @Reference
    private IntegrationService integrationService;
@@ -84,7 +87,12 @@ public class EndpointServiceImpl implements EndpointService {
       this.id = config.id();
       this.url = config.endpoint();
       this.method = config.method();
-      this.specificServiceHeaders = Collections.unmodifiableMap(ParameterUtil.toMap(config.specificServiceHeader(), ":"));
+      if (config.specificServiceHeader() == null) {
+         this.specificServiceHeaders = Collections.emptyList();
+      } else {
+         this.specificServiceHeaders = Arrays.asList(config.specificServiceHeader()).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
+             filter(e -> e != null).collect(Collectors.toList());
+      }
       LOGGER.debug("End ACTIVATE Endpoint {}", id);
    }
 
@@ -316,11 +324,6 @@ public class EndpointServiceImpl implements EndpointService {
    }
 
    private void addHeaders(HttpRequest request) {
-      this.specificServiceHeaders.forEach((k, v) -> request.addHeader(k, v));
-   }
-
-   @Override
-   public Map<String, String> getSpecificServiceHeader() {
-      return this.specificServiceHeaders;
+      this.specificServiceHeaders.forEach(e -> request.addHeader(e.getKey(), e.getValue()));
    }
 }

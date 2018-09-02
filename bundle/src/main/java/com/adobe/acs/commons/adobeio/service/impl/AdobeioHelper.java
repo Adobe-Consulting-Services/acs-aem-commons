@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,9 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.osgi.services.HttpClientBuilderFactory;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
-@Component(service = AdobeioHelper.class)
-public class AdobeioHelper {
+public interface AdobeioHelper {
 
-    @Reference
-    private HttpClientBuilderFactory clientBuilderFactory;
-
-    private static final int TIMEOUT = 10000;
-
-    public CloseableHttpClient getHttpClient() {
-        RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-            .setSocketTimeout(TIMEOUT)
-            .setConnectTimeout(TIMEOUT)
-            .setConnectionRequestTimeout(TIMEOUT)
-            .build();
-        return clientBuilderFactory.newBuilder().setDefaultRequestConfig(requestConfig).build();
-    }
+    CloseableHttpClient getHttpClient();
 }
