@@ -21,7 +21,6 @@ package com.adobe.acs.commons.adobeio.service.impl;
 
 import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.CONTENT_TYPE_APPLICATION_JSON;
 import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.RESULT_ERROR;
-import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.RESULT_NO_DATA;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +58,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -87,10 +86,10 @@ public class EndpointServiceImpl implements EndpointService {
       this.id = config.id();
       this.url = config.endpoint();
       this.method = config.method();
-      if (config.specificServiceHeader() == null) {
+      if (config.specificServiceHeaders() == null) {
          this.specificServiceHeaders = Collections.emptyList();
       } else {
-         this.specificServiceHeaders = Arrays.asList(config.specificServiceHeader()).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
+         this.specificServiceHeaders = Arrays.asList(config.specificServiceHeaders()).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
              filter(e -> e != null).collect(Collectors.toList());
       }
       LOGGER.debug("End ACTIVATE Endpoint {}", id);
@@ -111,8 +110,12 @@ public class EndpointServiceImpl implements EndpointService {
       return this.url;
    }
 
-
    @Override
+   public void setUrl(String url) {
+	   this.url = url;
+   }
+
+@Override
    public JsonObject performIO_Action() {
       return performio(url, Collections.emptyMap());
    }
@@ -126,26 +129,6 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public JsonObject performIO_Action(@NotNull JsonObject payload) {
       return handleAdobeIO_Action( payload);
-   }
-
-   @Override
-   public JsonObject postIO_Action(@NotNull String url, @NotNull JsonObject payload) {
-      // initialize jsonobject
-      JsonObject processResponse = new JsonObject();
-
-      if (isBlank(url) || (payload == null) || payload.isJsonNull()) {
-         processResponse.addProperty(RESULT_NO_DATA, "no payload available");
-         return processResponse;
-      }
-
-      try {
-         processResponse = process(url, Collections.emptyMap(), METHOD_POST, payload);
-      } catch (Exception e) {
-         processResponse.addProperty(RESULT_ERROR, "Problem processing");
-         LOGGER.error("Problem processing doPost", e);
-      }
-
-      return processResponse;
    }
 
    @Override

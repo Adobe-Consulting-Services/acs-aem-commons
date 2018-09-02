@@ -73,21 +73,18 @@ public interface EndpointService {
      */
     JsonObject performIO_Action(JsonObject payload);
 
-
-    /**
-     * Straight post-action to the provided url,
-     * using the payload as the body of the message.
-     * @param url Url of the endpoint
-     * @param payload Body of the POST-call
-     * @return JsonObject with the result of the call
-     */
-    JsonObject postIO_Action(String url, JsonObject payload);
-
     /**
      * This is a test for the connection to the endpoint.
      * The test will be performed using the URL and the GET-method.
      * @return TRUE if connection is successful
      */
     boolean isConnected();
+    
+    /**
+     * In case you want to override the default url from the configuration.
+     * 
+     * @param url the new url that needs to be used
+     */
+    void setUrl(String url);
     
 }
