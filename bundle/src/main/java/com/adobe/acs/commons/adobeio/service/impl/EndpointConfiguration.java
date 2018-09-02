@@ -23,7 +23,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 
-@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Endpoint Factory Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O Endpoint Factory Configuration",
         description = "Configuration of Adobe.io endpoints")
 public @interface EndpointConfiguration {
 
@@ -33,12 +33,12 @@ public @interface EndpointConfiguration {
     @AttributeDefinition(
        name = "Method",
        description = "Used method for the endpoint",
-      options = {
-            @Option(label = "DELETE", value = "DELETE"),
+       options = {
                 @Option(label = "GET", value = "GET"),
-                @Option(label = "PATCH", value = "PATCH"),
                 @Option(label = "POST", value = "POST"),
-                @Option(label = "PUT", value = "PUT"),  
+                @Option(label = "PUT", value = "PUT"),
+                @Option(label = "PATCH", value = "PATCH"),
+                @Option(label = "DELETE", value = "DELETE"),
         },
        required = true
     )

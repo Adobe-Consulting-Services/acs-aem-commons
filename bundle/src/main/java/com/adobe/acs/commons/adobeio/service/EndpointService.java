@@ -21,7 +21,6 @@ package com.adobe.acs.commons.adobeio.service;
 
 import java.util.Map;
 
-import com.adobe.acs.commons.adobeio.types.Filter;
 import com.google.gson.JsonObject;
 
 import aQute.bnd.annotation.ProviderType;
@@ -52,11 +51,6 @@ public interface EndpointService {
      * @return The url of this endpoint
      */
     String getUrl();
-    
-    /**
-     * @return Specific headers used for this endpoint
-     */
-    Map<String, String> getSpecificServiceHeader();
 
 
     /**
@@ -67,10 +61,10 @@ public interface EndpointService {
 
     /**
      * Performs the GET-action connected to the endpoint
-     * @param filter Filter that will be applied
+     * @param queryParameters query parameters to pass to the endpoint
      * @return JsonObject containing the result of the action
      */
-    JsonObject performIO_Action(Filter filter);
+    JsonObject performIO_Action(Map<String, String> queryParameters);
 
     /**
      * Performs the action connected to the endpoint

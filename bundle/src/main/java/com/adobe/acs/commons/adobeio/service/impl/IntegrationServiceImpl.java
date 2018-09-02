@@ -21,7 +21,6 @@ package com.adobe.acs.commons.adobeio.service.impl;
 
 import static com.adobe.acs.commons.adobeio.service.impl.AdobeioConstants.JSON_ACCESS_TOKEN;
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
-import static org.apache.http.impl.client.HttpClients.createDefault;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -39,14 +38,15 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +61,18 @@ import io.jsonwebtoken.Jwts;
 
 //scheduler is set to once per hour
 //you can use cronmaker.com for generating cron expressions
-@SuppressWarnings("PackageAccessibility")
 @Component(service = {IntegrationService.class, Runnable.class},
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = "scheduler.expression=0 0 0/1 1/1 * ? *")
-@Designate(ocd = IntegrationConfiguration.class, factory=false)
+@Designate(ocd = IntegrationConfiguration.class)
 public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
     private static final Base64.Decoder DECODER = Base64.getMimeDecoder();
+
+    @Reference
+    private AdobeioHelper helper;
+
     private String accessToken = null;
     protected IntegrationConfiguration jwtServiceConfig;
 
@@ -103,7 +107,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     private String fetchAccessToken() {
         String token = StringUtils.EMPTY;
 
-        try(CloseableHttpClient client = createDefault()) {
+        try(CloseableHttpClient client = helper.getHttpClient()) {
             HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
             post.addHeader("Cache-Control", "no-cache");
             post.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -114,9 +118,6 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
             params.add(new BasicNameValuePair("jwt_token", getJwtToken()));
 
             post.setEntity(new UrlEncodedFormEntity(params));
-            
-            //setting timeout
-            post.setConfig(requestConfigWithTimeout(10000));
 
             HttpResponse response = client.execute(post);
 
@@ -209,14 +210,6 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
         return cal.getTime();
-    }
-    
-    private RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
-        return RequestConfig.copy(RequestConfig.DEFAULT)
-                .setSocketTimeout(timeoutInMilliseconds)
-                .setConnectTimeout(timeoutInMilliseconds)
-                .setConnectionRequestTimeout(timeoutInMilliseconds)
-                .build();
     }
 
 }

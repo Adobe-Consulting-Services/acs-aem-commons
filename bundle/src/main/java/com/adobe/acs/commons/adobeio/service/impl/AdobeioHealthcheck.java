@@ -19,42 +19,77 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
+import com.adobe.acs.commons.adobeio.service.EndpointService;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-@SuppressWarnings("WeakerAccess")
+import java.util.Collection;
+
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
-                HealthCheck.TAGS + "=adobeio-jwt",
+                HealthCheck.TAGS + "=adobeio",
                 HealthCheck.MBEAN_NAME + "=ACS AEM Commons - Adobe I/O health check"})
 public class AdobeioHealthcheck implements HealthCheck {
 
     @Reference
-    private IntegrationService jwtService;
+    private IntegrationService integrationService;
+
+    @Reference
+    private volatile Collection<EndpointService> endpoints;
 
     @Override
     public Result execute() {
         final FormattingResultLog resultLog = new FormattingResultLog();
 
+        boolean integrationOk = true;
+
         resultLog.debug("Health check for Adobe I/O");
-        if ( StringUtils.isNotEmpty(jwtService.getApiKey())) {
-            resultLog.debug("Starting validation for x-api-key {}", jwtService.getApiKey());
+        if (StringUtils.isNotEmpty(integrationService.getApiKey())) {
+            resultLog.debug("Starting validation for x-api-key {}", integrationService.getApiKey());
         } else {
             resultLog.critical("No api key is specified in the OSGi-config");
+            integrationOk = false;
         }
         resultLog.debug("Obtaining the access token");
-        String accessToken = jwtService.getAccessToken();
+        String accessToken = integrationService.getAccessToken();
 
-        if ( StringUtils.isNotEmpty(accessToken)) {
+        if (StringUtils.isNotEmpty(accessToken)) {
             resultLog.info("Access token succesfully obtained {}", accessToken);
         } else {
             resultLog.critical("Could not obtain the access token");
+            integrationOk = false;
+        }
+
+        if (!integrationOk) {
+            resultLog.info("IntegrationService not healthy; skipping Endpoint checks.");
+        }
+
+        if (endpoints == null || endpoints.isEmpty()) {
+            resultLog.warn("No Endpoint Services found.");
+            return new Result(resultLog);
+        }
+        for (EndpointService endpoint : endpoints) {
+            resultLog.info("Checking Adobe I/O endpoint {}", endpoint.getId());
+            resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
+            JsonObject json = endpoint.performIO_Action();
+            if (json != null) {
+                resultLog.debug("JSON-response {}", json.toString());
+                if (StringUtils.contains(json.toString(), "error")) {
+                    resultLog.critical("Error returned from the API-call");
+                }
+            } else {
+                resultLog.info("Healthcheck completed");
+            }
         }
 
         resultLog.info("Healthcheck completed");

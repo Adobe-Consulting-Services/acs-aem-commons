@@ -23,7 +23,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O. Integration Configuration",
+@ObjectClassDefinition(name = "ACS AEM Commons - Adobe I/O Integration Configuration",
                      description = "Configuration of Adobe.IO access")
 public @interface IntegrationConfiguration {
 
@@ -48,7 +48,7 @@ public @interface IntegrationConfiguration {
    @AttributeDefinition(name = "TechAccountId", description = "Technical Account Id")
    String techAccountId();
         
-   @AttributeDefinition(name = "LoginClaim", description = "Login claims", defaultValue="https://ims-na1.adobelogin.com/s/ent_campaign_sdk")
+   @AttributeDefinition(name = "LoginClaim", description = "Login claims")
    String[] adobeLoginClaimKey();
    
    @AttributeDefinition(name = "ExpirationTime", description = "Expiration time of the access token in seconds",

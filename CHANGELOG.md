@@ -7,8 +7,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
 
+### Fixed
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
+- #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
 
 ## [3.17.4] - 2018-08-15
 
