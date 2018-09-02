@@ -331,7 +331,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Test
     public void testBadProxiedJavaScriptClientLibrary() throws Exception {
 
-        String badProxyPath = PROXY_PATH + "/bad";
+        final String badProxyPath = PROXY_PATH + "/bad";
 
         ClientLibrary clientLibrary = mock(ClientLibrary.class);
         when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
