@@ -115,8 +115,9 @@ public class EndpointServiceImpl implements EndpointService {
       if (specificServiceHeaders == null) {
          this.specificServiceHeaders = Collections.emptyList();
       } else {
-         this.specificServiceHeaders = Arrays.asList(specificServiceHeaders).stream().map(s -> ParameterUtil.toMapEntry(s, ":")).
-	              filter(e -> e != null).collect(Collectors.toList());
+         this.specificServiceHeaders = Arrays.asList(specificServiceHeaders).stream()
+        		 .map(s -> ParameterUtil.toMapEntry(s, ":"))
+             .filter(e -> e != null).collect(Collectors.toList());
       }
    }
 
