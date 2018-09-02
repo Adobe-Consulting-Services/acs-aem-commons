@@ -28,6 +28,8 @@ import static org.apache.sling.api.servlets.HttpConstants.METHOD_GET;
 import static org.apache.sling.api.servlets.HttpConstants.METHOD_POST;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -36,13 +38,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.osgi.service.component.annotations.Activate;
@@ -54,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
-import com.adobe.acs.commons.adobeio.types.Filter;
 import com.drew.lang.annotations.NotNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -104,12 +106,12 @@ public class EndpointServiceImpl implements EndpointService {
 
    @Override
    public JsonObject performIO_Action() {
-      return performio(url);
+      return performio(url, Collections.emptyMap());
    }
 
    @Override
-   public JsonObject performIO_Action(@NotNull Filter filter) {
-      return performio(url + "?" + filter.getFilter());
+   public JsonObject performIO_Action(@NotNull Map<String, String> queryParameters) {
+      return performio(url, queryParameters);
    }
 
 
@@ -129,7 +131,7 @@ public class EndpointServiceImpl implements EndpointService {
       }
 
       try {
-         processResponse = process(url, METHOD_POST, payload);
+         processResponse = process(url, Collections.emptyMap(), METHOD_POST, payload);
       } catch (Exception e) {
          processResponse.addProperty(RESULT_ERROR, "Problem processing");
          LOGGER.error("Problem processing doPost", e);
@@ -141,7 +143,7 @@ public class EndpointServiceImpl implements EndpointService {
    @Override
    public boolean isConnected() {
       try {
-         JsonObject response = processGet(url);
+         JsonObject response = processGet(new URIBuilder(url).build());
          return !response.has(RESULT_ERROR);
       } catch (Exception e) {
          LOGGER.error("Problem testing the connection for {}", id, e);
@@ -166,7 +168,7 @@ public class EndpointServiceImpl implements EndpointService {
       try {
          LOGGER.debug("ActionUrl = {} . method = {}", url, method);
          // process the Adobe I/O action
-         processResponse = process(url, method, payload);
+         processResponse = process(url, Collections.emptyMap(), method, payload);
       } catch (Exception e) {
          processResponse.addProperty(RESULT_ERROR, "Problem processing");
          LOGGER.error("Problem processing action {} in handleAdobeIO_Action", url);
@@ -180,6 +182,8 @@ public class EndpointServiceImpl implements EndpointService {
     * 
     * @param actionUrl
     *            The url to be executed
+    * @param queryParameters
+    *            The query parameters to pass
     * @param method
     *            The method to be executed
     * @param payload
@@ -188,46 +192,50 @@ public class EndpointServiceImpl implements EndpointService {
     * @throws Exception
     *             Thrown when process-action throws an exception
     */
-   private JsonObject process(@NotNull final String actionUrl, @NotNull final String method,
-         @NotNull final JsonObject payload) throws IOException {
+   private JsonObject process(@NotNull final String actionUrl, @NotNull final Map<String, String> queryParameters,
+                              @NotNull final String method,
+                              @NotNull final JsonObject payload) throws IOException, URISyntaxException {
       if (isBlank(actionUrl) || isBlank(method)) {
             LOGGER.error("Method or action is null");
          return new JsonObject();
       }
 
-      LOGGER.debug("Performing method = {}. actionUrl = {} . payload = {}", method, actionUrl, payload);
+      URIBuilder builder = new URIBuilder(actionUrl);
+      queryParameters.forEach((k, v) -> builder.addParameter(k, v));
+
+      URI uri = builder.build();
+
+      LOGGER.debug("Performing method = {}. queryParameters = {}. actionUrl = {}. payload = {}", method, queryParameters, uri, payload);
 
       if (StringUtils.equalsIgnoreCase(method, METHOD_POST)) {
-         return processPost(actionUrl, payload);
+         return processPost(uri, payload);
       } else if (StringUtils.equalsIgnoreCase(method, METHOD_GET)) {
-         return processGet(actionUrl);
+         return processGet(uri);
       } else if (StringUtils.equalsIgnoreCase(method, "PATCH")) {
-         return processPatch(actionUrl, payload);
+         return processPatch(uri, payload);
       } else {
          return new JsonObject();
       }
    }
 
-   private JsonObject processGet(@NotNull final String actionUrl) throws ClientProtocolException, IOException {
+   private JsonObject processGet(@NotNull final URI uri) throws IOException {
       StopWatch stopWatch = new StopWatch();
-      LOGGER.debug("STARTING STOPWATCH {}", actionUrl);
+      LOGGER.debug("STARTING STOPWATCH {}", uri);
       stopWatch.start();
 
-      HttpGet get = new HttpGet(actionUrl);
+      HttpGet get = new HttpGet(uri);
       get.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
       get.setHeader("cache-control", "no-cache");
       get.setHeader("x-api-key", integrationService.getApiKey());
       get.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
-      for (Map.Entry<String, String> headerEntry : this.specificServiceHeaders.entrySet()) {
-         get.setHeader(headerEntry.getKey(), headerEntry.getValue());
-      }
-      
+      addHeaders(get);
+
       try (CloseableHttpClient httpClient = helper.getHttpClient()) {
          CloseableHttpResponse response = httpClient.execute(get);
          final JsonObject result = responseAsJson(response);
 
          LOGGER.debug("Response-code {}", response.getStatusLine().getStatusCode());
-         LOGGER.debug("STOPPING STOPWATCH {}", actionUrl);
+         LOGGER.debug("STOPPING STOPWATCH {}", uri);
          stopWatch.stop();
          LOGGER.debug("Stopwatch time: {}", stopWatch);
          stopWatch.reset();
@@ -236,33 +244,30 @@ public class EndpointServiceImpl implements EndpointService {
       }
    }
 
-   private JsonObject processPost(@NotNull final String actionUrl, @NotNull final JsonObject payload)
-         throws ClientProtocolException, IOException {
-      HttpPost post = new HttpPost(actionUrl);
-      return (payload != null) && isNotBlank(payload.toString()) ? processBase(post, payload) : new JsonObject();
-   }
-
-   private JsonObject processPatch(@NotNull final String actionUrl, @NotNull final JsonObject payload)
+   private JsonObject processPost(@NotNull final URI uri, @NotNull final JsonObject payload)
          throws IOException {
-      HttpPatch patch = new HttpPatch(actionUrl);
-      return (payload != null) && isNotBlank(payload.toString()) ? processBase(patch, payload) : new JsonObject();
+      HttpPost post = new HttpPost(uri);
+      return (payload != null) && isNotBlank(payload.toString()) ? processRequestWithBody(post, payload) : new JsonObject();
    }
 
-   private JsonObject processBase(@NotNull final HttpEntityEnclosingRequestBase base,
-         @NotNull final JsonObject payload) throws ClientProtocolException, IOException {
+   private JsonObject processPatch(@NotNull final URI uri, @NotNull final JsonObject payload)
+         throws IOException {
+      HttpPatch patch = new HttpPatch(uri);
+      return (payload != null) && isNotBlank(payload.toString()) ? processRequestWithBody(patch, payload) : new JsonObject();
+   }
+
+   private JsonObject processRequestWithBody(@NotNull final HttpEntityEnclosingRequestBase base,
+                                             @NotNull final JsonObject payload) throws IOException {
 
       StopWatch stopWatch = new StopWatch();
-      LOGGER.debug("STARTING STOPWATCH processBase");
+      LOGGER.debug("STARTING STOPWATCH processRequestWithBody");
       stopWatch.start();
 
       base.setHeader("authorization", "Bearer " + integrationService.getAccessToken());
       base.setHeader("cache-control", "no-cache");
       base.setHeader("x-api-key", integrationService.getApiKey());
       base.setHeader("content-type", CONTENT_TYPE_APPLICATION_JSON);
-
-      for (Map.Entry<String, String> headerEntry : this.getSpecificServiceHeader()  .entrySet()) {
-         base.setHeader(headerEntry.getKey(), headerEntry.getValue());
-      }
+      addHeaders(base);
 
       StringEntity input = new StringEntity(payload.toString());
       input.setContentType(CONTENT_TYPE_APPLICATION_JSON);
@@ -277,9 +282,9 @@ public class EndpointServiceImpl implements EndpointService {
          CloseableHttpResponse response = httpClient.execute(base);
          final JsonObject result = responseAsJson(response);
 
-         LOGGER.debug("STOPPING STOPWATCH processBase");
+         LOGGER.debug("STOPPING STOPWATCH processRequestWithBody");
          stopWatch.stop();
-         LOGGER.debug("Stopwatch time processBase: {}", stopWatch);
+         LOGGER.debug("Stopwatch time processRequestWithBody: {}", stopWatch);
          stopWatch.reset();
          return result;
       }
@@ -301,13 +306,17 @@ public class EndpointServiceImpl implements EndpointService {
    }
 
 
-   private JsonObject performio(@NotNull String actionUrl) {
+   private JsonObject performio(@NotNull String actionUrl, @NotNull Map<String, String> queryParameters) {
       try {
-         return process(actionUrl, StringUtils.upperCase(method), null);
+         return process(actionUrl, queryParameters, StringUtils.upperCase(method), null);
       } catch (Exception e) {
          LOGGER.error("Problem processing action {} in performIO", actionUrl, e);
       }
       return new JsonObject();
+   }
+
+   private void addHeaders(HttpRequest request) {
+      this.specificServiceHeaders.forEach((k, v) -> request.addHeader(k, v));
    }
 
    @Override
