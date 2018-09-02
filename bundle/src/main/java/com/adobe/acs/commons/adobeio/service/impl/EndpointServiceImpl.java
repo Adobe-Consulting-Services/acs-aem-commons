@@ -73,6 +73,7 @@ public class EndpointServiceImpl implements EndpointService {
    private String url;
    private String method;
    private List<Map.Entry<String, String>> specificServiceHeaders;
+   private EndpointConfiguration config;
 
    @Reference
    private IntegrationService integrationService;
@@ -86,6 +87,7 @@ public class EndpointServiceImpl implements EndpointService {
       this.id = config.id();
       this.url = config.endpoint();
       this.method = config.method();
+      this.config = config;
       setServiceSpecificHeaders(config.specificServiceHeaders());
       LOGGER.debug("End ACTIVATE Endpoint {}", id);
    }
@@ -119,6 +121,11 @@ public class EndpointServiceImpl implements EndpointService {
                .map(s -> ParameterUtil.toMapEntry(s, ":"))
              .filter(e -> e != null).collect(Collectors.toList());
       }
+   }
+   
+   @Override
+   public String[] getConfigServiceSpecificHeaders() {
+      return config.specificServiceHeaders();
    }
 
    @Override

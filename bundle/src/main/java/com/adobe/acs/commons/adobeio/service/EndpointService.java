@@ -90,10 +90,17 @@ public interface EndpointService {
     /**
      * To override the headers specified via the configuration.
      * 
-     * This needs to be specified in the format <name:value>
+     * This needs to be specified in the format &lt;name:value&gt;
      * 
      * @param specificServiceHeaders array with headers
      */
     void setServiceSpecificHeaders(String[] specificServiceHeaders);
+    
+    /**
+     * Gets the headers that are set via the configuration.
+     * 
+     * @return
+     */
+    String[] getConfigServiceSpecificHeaders();
     
 }
