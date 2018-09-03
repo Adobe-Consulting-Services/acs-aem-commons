@@ -121,6 +121,7 @@
             });
 
             if (_.isEmpty($fieldSets)) {
+				cmf.IS_CONTENT_LOADED = true;
                 return;
             }
 
