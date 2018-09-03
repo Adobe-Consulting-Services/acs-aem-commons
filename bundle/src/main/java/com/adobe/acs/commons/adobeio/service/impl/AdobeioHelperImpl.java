@@ -31,14 +31,12 @@ public class AdobeioHelperImpl implements AdobeioHelper {
     @Reference
     private HttpClientBuilderFactory clientBuilderFactory;
 
-    private static final int TIMEOUT = 10000;
-
     @Override
-    public CloseableHttpClient getHttpClient() {
+    public CloseableHttpClient getHttpClient(int timeoutInMilliSeconds) {
         RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-            .setSocketTimeout(TIMEOUT)
-            .setConnectTimeout(TIMEOUT)
-            .setConnectionRequestTimeout(TIMEOUT)
+            .setSocketTimeout(timeoutInMilliSeconds)
+            .setConnectTimeout(timeoutInMilliSeconds)
+            .setConnectionRequestTimeout(timeoutInMilliSeconds)
             .build();
         return clientBuilderFactory.newBuilder().setDefaultRequestConfig(requestConfig).build();
     }

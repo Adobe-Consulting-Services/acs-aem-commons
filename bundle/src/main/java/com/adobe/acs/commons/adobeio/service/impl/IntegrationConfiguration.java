@@ -54,4 +54,8 @@ public @interface IntegrationConfiguration {
    @AttributeDefinition(name = "ExpirationTime", description = "Expiration time of the access token in seconds",
                       defaultValue="7200",type= AttributeType.INTEGER)
    int expirationTimeInSeconds();
+   
+   @AttributeDefinition(name = "Timeout", description = "Timeout in milliseconds, used in the various http-calls",
+           defaultValue="60000",type= AttributeType.INTEGER)
+   int timeoutInMilliSeocnds();
 }

@@ -23,5 +23,5 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 public interface AdobeioHelper {
 
-    CloseableHttpClient getHttpClient();
+    CloseableHttpClient getHttpClient(int timeoutInMilliSeconds);
 }

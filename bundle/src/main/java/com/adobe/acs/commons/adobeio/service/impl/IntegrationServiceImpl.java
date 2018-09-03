@@ -103,11 +103,16 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return jwtServiceConfig.clientId();
     }
     
-    // --------    PRIVATE METHODS    ----------
+    @Override
+	public int getTimeoutinMilliSeconds() {
+		return jwtServiceConfig.timeoutInMilliSeocnds();
+	}
+
+	// --------    PRIVATE METHODS    ----------
     private String fetchAccessToken() {
         String token = StringUtils.EMPTY;
 
-        try(CloseableHttpClient client = helper.getHttpClient()) {
+        try(CloseableHttpClient client = helper.getHttpClient(getTimeoutinMilliSeconds())) {
             HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
             post.addHeader(CACHE_CONTRL, NO_CACHE);
             post.addHeader(CONTENT_TYPE, CONTENT_TYPE_URL_ENCODED);

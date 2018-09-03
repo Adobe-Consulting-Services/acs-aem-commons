@@ -44,4 +44,11 @@ public interface IntegrationService {
     * @return the access token
     */
    String getAccessToken();
+   
+   /**
+    * Timeout in milliseconds that is used in the various http-calls
+    * 
+    * @return timeout in milliseconds
+    */
+   int getTimeoutinMilliSeconds();
 }

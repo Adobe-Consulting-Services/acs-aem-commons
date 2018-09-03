@@ -233,7 +233,7 @@ public class EndpointServiceImpl implements EndpointService {
       get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       addHeaders(get);
 
-      try (CloseableHttpClient httpClient = helper.getHttpClient()) {
+      try (CloseableHttpClient httpClient = helper.getHttpClient(integrationService.getTimeoutinMilliSeconds())) {
          CloseableHttpResponse response = httpClient.execute(get);
          final JsonObject result = responseAsJson(response);
 
@@ -281,7 +281,7 @@ public class EndpointServiceImpl implements EndpointService {
 
       LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
 
-      try (CloseableHttpClient httpClient = helper.getHttpClient()) {
+      try (CloseableHttpClient httpClient = helper.getHttpClient(integrationService.getTimeoutinMilliSeconds())) {
          CloseableHttpResponse response = httpClient.execute(base);
          final JsonObject result = responseAsJson(response);
 
