@@ -104,11 +104,11 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     }
     
     @Override
-	public int getTimeoutinMilliSeconds() {
-		return jwtServiceConfig.timeoutInMilliSeocnds();
-	}
+   public int getTimeoutinMilliSeconds() {
+      return jwtServiceConfig.timeoutInMilliSeocnds();
+   }
 
-	// --------    PRIVATE METHODS    ----------
+   // --------    PRIVATE METHODS    ----------
     private String fetchAccessToken() {
         String token = StringUtils.EMPTY;
 
