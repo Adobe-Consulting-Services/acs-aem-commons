@@ -74,9 +74,10 @@ public class EndpointServiceImplTest {
     public void setup() throws Exception {
         when(config.id()).thenReturn("test");
         when(config.endpoint()).thenReturn("https://test.com");
+        when(integrationService.getTimeoutinMilliSeconds()).thenReturn(60000);
         when(integrationService.getAccessToken()).thenReturn("ACCESS_TOKEN");
         when(integrationService.getApiKey()).thenReturn("API_KEY");
-        when(helper.getHttpClient()).thenReturn(httpClient);
+        when(helper.getHttpClient(60000)).thenReturn(httpClient);
         when(httpClient.execute(any())).thenReturn(response);
         when(response.getEntity()).thenReturn(new StringEntity("{'result':'ok'}"));
         when(response.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("http", 1, 1), 200, "OK"));
