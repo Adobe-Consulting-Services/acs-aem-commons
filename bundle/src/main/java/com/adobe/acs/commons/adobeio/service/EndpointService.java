@@ -99,7 +99,7 @@ public interface EndpointService {
     /**
      * Gets the headers that are set via the configuration.
      * 
-     * @return
+     * @return an array with the headers, in the format &lt;name:value&gt;
      */
     String[] getConfigServiceSpecificHeaders();
     
