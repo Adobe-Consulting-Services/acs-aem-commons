@@ -233,6 +233,7 @@ public class TestServlets {
                 return new ArrayList<Resource>().iterator();
             }
 
+            @SuppressWarnings("checkstyle:abbreviationaswordinname")
             public String getUserID() {
                 return "admin";
             }
