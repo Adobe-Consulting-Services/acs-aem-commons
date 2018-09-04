@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/Adobe-Consulting-Services/acs-aem-commons.png)](https://travis-ci.org/Adobe-Consulting-Services/acs-aem-commons)
 
-[![Code Climate](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons/badges/gpa.svg)](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons)
+[![Code Climate Issues](https://img.shields.io/codeclimate/issues/Adobe-Consulting-Services/acs-aem-commons.svg)](https://codeclimate.com/github/Adobe-Consulting-Services/acs-aem-commons)
 
 [![Coverage Status](https://coveralls.io/repos/github/Adobe-Consulting-Services/acs-aem-commons/badge.svg?branch=master)](https://coveralls.io/github/Adobe-Consulting-Services/acs-aem-commons?branch=master)
 
