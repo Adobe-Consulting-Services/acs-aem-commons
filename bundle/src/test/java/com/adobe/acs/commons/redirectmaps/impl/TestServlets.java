@@ -250,6 +250,9 @@ public class TestServlets {
         doReturn("0").when(mockSlingRequest).getParameter("idx");
         doReturn("/source").when(mockSlingRequest).getParameter("source");
         doReturn("/target").when(mockSlingRequest).getParameter("target");
+        doReturn("1").when(mockSlingRequest).getParameter("edit-id");
+        doReturn("/edit-source").when(mockSlingRequest).getParameter("edit-source");
+        doReturn("/edit-target").when(mockSlingRequest).getParameter("edit-target");
         doReturn(mockResolver).when(mockSlingRequest).getResourceResolver();
         doReturn(os).when(mockSlingResponse).getOutputStream();
 
@@ -281,8 +284,8 @@ public class TestServlets {
     @Test
     public void testAddEntryServlet() throws ServletException, IOException {
         log.info("testAddEntryServlet");
-        AddEntryServlet addEntryServlet = new AddEntryServlet();
-        addEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
+        AddEntryServlet servlet = new AddEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
 
         assertTrue(value.contains("/source /target"));
         log.info(value);
@@ -292,10 +295,22 @@ public class TestServlets {
     @Test
     public void testRemoveEntryServlet() throws ServletException, IOException {
         log.info("testRemoveEntryServlet");
-        RemoveEntryServlet addEntryServlet = new RemoveEntryServlet();
-        addEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
+        RemoveEntryServlet servlet = new RemoveEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
 
         assertFalse(value.contains("/source1 /target1"));
+        log.info(value);
+        log.info("Test successful!");
+    }
+    
+    @Test
+    public void testUpdateServlet() throws ServletException, IOException {
+        log.info("testRemoveEntryServlet");
+        UpdateEntryServlet servlet = new UpdateEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
+
+        assertFalse(value.contains("/source2 /target2"));
+        assertTrue(value.contains("/edit-source /edit-target"));
         log.info(value);
         log.info("Test successful!");
     }
