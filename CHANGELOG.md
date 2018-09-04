@@ -5,12 +5,19 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
-## [Unreleased]
+## Unreleased
 
+### Fixed
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+
+### Changed
+- #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
+- #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
 - #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes.
 
 ## [3.17.4] - 2018-08-15
 
+### Fixed
 - #1413 - Added ACL to make the redirect maps globally readable
 
 ## [3.17.2] - 2018-08-13
