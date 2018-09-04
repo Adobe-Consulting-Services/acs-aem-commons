@@ -7,9 +7,17 @@ env:
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m -Duser.language=fr -Duser.country=FR" POST_COVERAGE=false
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false
 script: mvn verify -B
+before_install:
+  - cp .travis.settings.xml $HOME/.m2/settings.xml
 after_success:
   - if [ "$POST_COVERAGE" == "true" ]; then mvn -Pcoverage clean prepare-package coveralls:report; fi
 sudo: false
+cache:
+  directories:
+  - $HOME/.m2
+before_cache:
+# don't cache snapshots
+  - find $HOME/.m2 -name *SNAPSHOT* -exec rm -r "{}" \;
 notifications:
   slack:
     secure: aC4TRo2EiPb0LUA5L1+7JhLzmSFw8Uiqzr3ycDpMc+PMQLM9pOKxZ1OckJZIQBcCnmgcnTMuNXrcuZAY0GIwJ65hu8uRxJGjLROb0KsVCvuJnvBdAjE+MlPIHbegyRA9YLupdRUdpuHAtYmy/Fdub33SHZ9ZXYpiOfYVFfaUpSk=
