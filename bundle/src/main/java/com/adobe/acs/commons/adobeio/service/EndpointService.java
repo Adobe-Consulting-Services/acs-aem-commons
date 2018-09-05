@@ -60,6 +60,21 @@ public interface EndpointService {
     JsonObject performIO_Action();
 
     /**
+     * Performs the action connected to the endpoint.
+     * With the parameters you can influence all the aspects from the api-call.
+     * 
+     * 
+     * @param url the url of the api call, the can include queryparameter
+     * @param method the method of the api call, like GET or POST
+     * @param headers headers that need to passed to the api, on top of the authentication headers
+     * @param payload an optional payload for the api-call
+     * 
+     * @return JsonObject containing the result of the action
+     */
+    JsonObject performIO_Action(String url, String method, String[] headers, JsonObject payload );
+
+    
+    /**
      * Performs the GET-action connected to the endpoint
      * @param queryParameters query parameters to pass to the endpoint
      * @return JsonObject containing the result of the action
@@ -79,22 +94,6 @@ public interface EndpointService {
      * @return TRUE if connection is successful
      */
     boolean isConnected();
-    
-    /**
-     * In case you want to override the default url from the configuration.
-     * 
-     * @param url the new url that needs to be used
-     */
-    void setUrl(String url);
-    
-    /**
-     * To override the headers specified via the configuration.
-     * 
-     * This needs to be specified in the format &lt;name:value&gt;
-     * 
-     * @param specificServiceHeaders array with headers
-     */
-    void setServiceSpecificHeaders(String[] specificServiceHeaders);
     
     /**
      * Gets the headers that are set via the configuration.
