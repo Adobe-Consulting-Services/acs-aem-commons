@@ -120,7 +120,7 @@ public class EndpointServiceImpl implements EndpointService {
    
    @Override
    public JsonObject performIO_Action(String url, String method, String[] headers, JsonObject payload) {
-	return process(url, null, method, headers, payload);
+   return process(url, Collections.emptyMap(), method, headers, payload);
    }
 
    @Override
@@ -187,7 +187,7 @@ public class EndpointServiceImpl implements EndpointService {
     *             Thrown when process-action throws an exception
     */
    private JsonObject process(@NotNull final String actionUrl, 
-		                      @NotNull final Map<String, String> queryParameters,
+                            @NotNull final Map<String, String> queryParameters,
                               @NotNull final String method,
                               final String[] headers,
                               @NotNull final JsonObject payload) {
@@ -199,13 +199,13 @@ public class EndpointServiceImpl implements EndpointService {
       URI uri = null;
 
       try {
-    	     URIBuilder builder = new URIBuilder(actionUrl);
-    	      queryParameters.forEach((k, v) -> builder.addParameter(k, v));
-    	      uri = builder.build();
-    	  
+            URIBuilder builder = new URIBuilder(actionUrl);
+             queryParameters.forEach((k, v) -> builder.addParameter(k, v));
+             uri = builder.build();
+         
       } catch(URISyntaxException uriexception) {
-    	     LOGGER.error(uriexception.getMessage());
-    	     return new JsonObject();
+            LOGGER.error(uriexception.getMessage());
+            return new JsonObject();
       }
 
       LOGGER.debug("Performing method = {}. queryParameters = {}. actionUrl = {}. payload = {}", method, queryParameters, uri, payload);
@@ -222,9 +222,9 @@ public class EndpointServiceImpl implements EndpointService {
            }
       }
       catch (IOException ioexception) {
- 	     LOGGER.error(ioexception.getMessage());
- 	     return new JsonObject();
-    	  
+         LOGGER.error(ioexception.getMessage());
+         return new JsonObject();
+         
       }
 
    }
@@ -240,7 +240,7 @@ public class EndpointServiceImpl implements EndpointService {
       get.setHeader(X_API_KEY, integrationService.getApiKey());
       get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       if ( headers == null || headers.length == 0) {
-    	    addHeaders(get, specificServiceHeaders);
+           addHeaders(get, specificServiceHeaders);
       } else {
         addHeaders(get, convertServiceSpecificHeaders(headers));
       }
@@ -284,7 +284,7 @@ public class EndpointServiceImpl implements EndpointService {
       base.setHeader(X_API_KEY, integrationService.getApiKey());
       base.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       if ( headers == null || headers.length == 0) {
-  	    addHeaders(base, specificServiceHeaders);
+         addHeaders(base, specificServiceHeaders);
       } else {
         addHeaders(base, convertServiceSpecificHeaders(headers));
       }
@@ -340,13 +340,13 @@ public class EndpointServiceImpl implements EndpointService {
    }
    
    protected List<Map.Entry<String, String>> convertServiceSpecificHeaders(String[] specificServiceHeaders) {
-	      if (specificServiceHeaders == null) {
-	         return Collections.emptyList();
-	      } else {
-	         return Arrays.asList(specificServiceHeaders).stream()
-	               .map(s -> ParameterUtil.toMapEntry(s, ":"))
-	             .filter(e -> e != null).collect(Collectors.toList());
-	      }
-	   }
+         if (specificServiceHeaders == null) {
+            return Collections.emptyList();
+         } else {
+            return Arrays.asList(specificServiceHeaders).stream()
+                  .map(s -> ParameterUtil.toMapEntry(s, ":"))
+                .filter(e -> e != null).collect(Collectors.toList());
+         }
+      }
 
 }
