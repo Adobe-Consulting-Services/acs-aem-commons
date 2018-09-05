@@ -64,7 +64,7 @@ public interface EndpointService {
      * With the parameters you can influence all the aspects from the api-call.
      * 
      * 
-     * @param url the url of the api call, the can include queryparameter
+     * @param url the url of the api call, the url can include queryparameter
      * @param method the method of the api call, like GET or POST
      * @param headers headers that need to passed to the api, on top of the authentication headers
      * @param payload an optional payload for the api-call
