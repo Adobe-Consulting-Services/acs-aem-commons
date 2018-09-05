@@ -42,6 +42,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,22 @@ public class EndpointServiceImplTest {
         assertThat(request, hasHeader("custom2", "header2"));
         assertEquals(7, request.getAllHeaders().length);
     }
+    
+    @Test
+    public void testConvertServiceSpecificHeadersWithNull() {
+    	   List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(null);
+    	
+    	   assertEquals(Collections.EMPTY_LIST, headers);
+    }
+    
+    @Test
+    public void testConvertServiceSpecificHeadersWitNothNull() {
+    	   String[] arr = {"name1:value","name2:value"};
+    	   List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(arr);
+
+    	   assertEquals(2, headers.size());
+    }
+   
 
     public static TypeSafeMatcher<HttpUriRequest> hasUri(final String uri) {
         return new TypeSafeMatcher<HttpUriRequest>() {
