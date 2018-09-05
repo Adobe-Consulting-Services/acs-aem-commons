@@ -19,35 +19,15 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.turbo.TurboFilter;
-import ch.qos.logback.core.spi.FilterReply;
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -74,19 +54,35 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.impl.GenericCacheMBean;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ACS AEM Commons - Versioned Clientlibs (CSS/JS) Rewriter
@@ -105,7 +101,7 @@ import com.google.common.cache.CacheBuilder;
         value = "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache", propertyPrivate = true)
 })
 @Service(value = {DynamicMBean.class, TransformerFactory.class, EventHandler.class})
-public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, GenericCacheMBean {
+public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
     private static final Logger log = LoggerFactory.getLogger(VersionedClientlibsTransformerFactory.class);
 
@@ -149,10 +145,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private ServiceRegistration filterReg;
 
     public VersionedClientlibsTransformerFactory() throws NotCompliantMBeanException {
-        super(GenericCacheMBean.class);
+        super(CacheMBean.class);
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected void activate(ComponentContext componentContext) {
         final BundleContext bundleContext = componentContext.getBundleContext();
         final Dictionary<?, ?> props = componentContext.getProperties();
@@ -161,7 +158,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         this.disableVersioning = PropertiesUtil.toBoolean(props.get(PROP_DISABLE_VERSIONING), DEFAULT_DISABLE_VERSIONING);
         this.enforceMd5 = PropertiesUtil.toBoolean(props.get(PROP_ENFORCE_MD5), DEFAULT_ENFORCE_MD5);
         if (enforceMd5) {
-            Dictionary<Object, Object> filterProps = new Hashtable<Object, Object>();
+            Dictionary<String, Object> filterProps = new Hashtable<String, Object>();
             filterProps.put("sling.filter.scope", "REQUEST");
             filterProps.put("service.ranking", Integer.valueOf(0));
 
@@ -184,11 +181,11 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private Attributes versionClientLibs(final String elementName, final Attributes attrs, final SlingHttpServletRequest request) {
-        if (SAXElementUtils.isCSS(elementName, attrs)) {
+        if (SaxElementUtils.isCss(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_CSS_PATH),
                     attrs.getValue("", ATTR_CSS_PATH), LibraryType.CSS, request);
 
-        } else if (SAXElementUtils.isJavaScript(elementName, attrs)) {
+        } else if (SaxElementUtils.isJavaScript(elementName, attrs)) {
             return this.rebuildAttributes(new AttributesImpl(attrs), attrs.getIndex("", ATTR_JS_PATH),
                     attrs.getValue("", ATTR_JS_PATH), LibraryType.JS, request);
 
@@ -282,13 +279,17 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
             @Override
             public String call() throws Exception {
-                return calculateMd5(htmlLibrary);
+                return calculateMd5(htmlLibrary, htmlLibraryManager.isMinifyEnabled());
             }
         });
     }
 
-    @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary) throws IOException {
-        return DigestUtils.md5Hex(htmlLibrary.getInputStream());
+    @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary, boolean isMinified) throws IOException {
+        // make sure that the minified version is being request in case minification is globally enabled
+        // as this will reset the dirty flag on the clientlib
+        try (InputStream input = htmlLibrary.getInputStream(isMinified)) {
+            return DigestUtils.md5Hex(input);
+        }
     }
 
     private class VersionableClientlibsTransformer extends AbstractTransformer {
@@ -332,20 +333,22 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected void addCacheData(Map<String, Object> data, String cacheObj) {
         data.put("Value", cacheObj);
     }
 
     @Override
-    protected String toString(String cacheObj) throws Exception {
+    protected String toString(String cacheObj) throws CacheMBeanException {
         return cacheObj;
     }
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected CompositeType getCacheEntryType() throws OpenDataException {
-        return new CompositeType("Cache Entry", "Cache Entry",
-                new String[] { "Cache Key", "Value" },
-                new String[] { "Cache Key", "Value" },
+        return new CompositeType(JMX_PN_CACHEENTRY, JMX_PN_CACHEENTRY,
+                new String[] { JMX_PN_CACHEKEY, "Value" },
+                new String[] { JMX_PN_CACHEKEY, "Value" },
                 new OpenType[] { SimpleType.STRING, SimpleType.STRING });
     }
 
@@ -375,6 +378,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     class BadMd5VersionedClientLibsFilter implements Filter {
 
         @Override
+        @SuppressWarnings("squid:S3776")
         public void doFilter(final ServletRequest request,
                              final ServletResponse response,
                              final FilterChain filterChain) throws IOException, ServletException {
@@ -400,7 +404,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     // this static value "Invalid cache key parameter." happens when the cache key can't be
                     // found in the cache
                     if ("Invalid cache key parameter.".equals(md5FromCache)) {
-                        md5FromCache = calculateMd5(uriInfo.htmlLibrary);
+                        md5FromCache = calculateMd5(uriInfo.htmlLibrary, htmlLibraryManager.isMinifyEnabled());
                     }
 
                     if (md5FromCache == null) {
@@ -414,7 +418,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                             filterChain.doFilter(request, response);
                         } else {
                             log.info("MD5 differs for '{}' in Versioned ClientLibs cache. Expected {}. Sending 404 for '{}'",
-                                    new Object[] { uriInfo.cleanedUri, md5FromCache, uri });
+                                    uriInfo.cleanedUri, md5FromCache, uri);
                             slingResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
                         }
                     }
@@ -427,23 +431,25 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
 
         @Override
-        public void init(final FilterConfig filterConfig) throws ServletException {}
+        public void init(final FilterConfig filterConfig) throws ServletException {
+            // no-op
+        }
 
         @Override
-        public void destroy() {}
+        public void destroy() {
+            // no-op
+        }
     }
 
     static class UriInfo {
         private final String cleanedUri;
         private final String md5;
-        private final LibraryType libraryType;
         private final HtmlLibrary htmlLibrary;
         private final String cacheKey;
 
         UriInfo(String cleanedUri, String md5, LibraryType libraryType, HtmlLibrary htmlLibrary) {
             this.cleanedUri = cleanedUri;
             this.md5 = md5;
-            this.libraryType = libraryType;
             this.htmlLibrary = htmlLibrary;
             if (libraryType != null && htmlLibrary != null) {
                 cacheKey = htmlLibrary.getLibraryPath() + libraryType.extension;

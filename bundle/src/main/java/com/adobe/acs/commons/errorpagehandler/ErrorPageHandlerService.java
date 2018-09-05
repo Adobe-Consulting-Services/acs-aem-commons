@@ -31,6 +31,8 @@ import aQute.bnd.annotation.ProviderType;
  * This service is used via the ACS-AEM-Commons error page handler implementation to create author-able error pages.
  */
 @ProviderType
+
+@SuppressWarnings("squid:S1214")
 public interface ErrorPageHandlerService {
     int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
@@ -117,5 +119,15 @@ public interface ErrorPageHandlerService {
      * @param response the response
      * @param path the path
      */
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     void includeUsingGET(SlingHttpServletRequest request, SlingHttpServletResponse response, String path);
+    
+    
+    /**
+     * Determines if Vanity-URL dispatch check is enabled. When enabled and current request URI is a valid vanity (after performing resource resolver mapping),
+     * request will be forwarded.
+     * 
+     * @return true if check is enabled else false
+     */
+    boolean isVanityDispatchCheckEnabled();
 }

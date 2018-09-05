@@ -79,7 +79,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_ACTIVATE() throws Exception {
+    public void testConfigureReplicationActionType_Activate() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.ACTIVATE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("ACTIVATE");
 
@@ -87,7 +87,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_DELETE() throws Exception {
+    public void testConfigureReplicationActionType_Delete() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DELETE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DELETE");
 
@@ -95,7 +95,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_DEACTIVATE() throws Exception {
+    public void testConfigureReplicationActionType_Deactivate() throws Exception {
         final ReplicationActionType expected = ReplicationActionType.DEACTIVATE;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("DEACTIVATE");
 
@@ -103,7 +103,7 @@ public class DispatcherFlushRulesImplTest {
     }
 
     @Test
-    public void testConfigureReplicationActionType_INHERIT() throws Exception {
+    public void testConfigureReplicationActionType_Inherit() throws Exception {
         final ReplicationActionType expected = null;
         final ReplicationActionType actual = dispatcherFlushRules.configureReplicationActionType("INHERIT");
 

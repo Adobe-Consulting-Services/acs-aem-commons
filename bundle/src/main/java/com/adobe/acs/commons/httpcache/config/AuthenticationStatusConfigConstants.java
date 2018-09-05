@@ -24,7 +24,6 @@ package com.adobe.acs.commons.httpcache.config;
  */
 public final class AuthenticationStatusConfigConstants {
     private AuthenticationStatusConfigConstants() {
-        throw new Error(AuthenticationStatusConfigConstants.class.getName() + " is not meant to be instantiated.");
     }
 
     /** Unauthenticated public requests */

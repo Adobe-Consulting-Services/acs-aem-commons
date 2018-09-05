@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.8.1-SNAPSHOT</version>
+        <version>3.17.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -54,7 +54,7 @@
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                     <properties>
-                        <acHandling>merge_preserve</acHandling>
+                        <acHandling>merge</acHandling>
                     </properties>
                     <embeddeds>
                         <embedded>
@@ -68,7 +68,14 @@
                             <target>/apps/acs-commons/install</target>
                         </embedded>
                     </embeddeds>
-                    <targetURL>http://${crx.host}:${crx.port}/crx/packmgr/service.jsp</targetURL>
+                    <dependencies>
+                        <dependency>
+                            <group>day/cq60/product</group>
+                            <name>cq-content</name>
+                            <version>[6.2.136,)</version>
+                        </dependency>
+                    </dependencies>
+                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
             
@@ -92,10 +99,10 @@
                     <excludes>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/content/base/ajax/loading-indicator-clientlibs/js/vendor/spin.min.js</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/extensions/contentfinder/audio.js</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/jquery.fonticonpicker/jquery.fonticonpicker.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/manage-controlled-processes/clientlibs/js/vendor</exclude>
                         <exclude>/src/main/content/jcr_root/apps/acs-commons/components/utilities/version-compare/clientlibs/js/vendor/jquery.jsPlumb-1.7.2-min.js</exclude>
                         <exclude>/src/main/content/jcr_root/etc/clientlibs/acs-commons/vendor</exclude>
-                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor/leaflet/js/leaflet.js</exclude>
+                        <exclude>/src/main/content/jcr_root/apps/acs-commons/authoring/vendor</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -158,11 +165,13 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle-twitter</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>
@@ -217,6 +226,7 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>

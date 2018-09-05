@@ -25,31 +25,22 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.awt.Color;
-import java.awt.Paint;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.day.image.Layer;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(LetterPillarBoxImageTransformerImpl.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LetterPillarBoxImageTransformerImplTest {
-    LetterPillarBoxImageTransformerImpl transformer;
 
     @Mock
     Layer layer;
@@ -61,8 +52,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
     @Before
     public void setUp() throws Exception {
-        map = new HashMap<String, Object>();
-        transformer = new LetterPillarBoxImageTransformerImpl();
+        map = new HashMap<>();
 
     }
 
@@ -86,28 +76,20 @@ public class LetterPillarBoxImageTransformerImplTest {
         map.put("height", height);
         map.put("color", color);
         map.put("alpha", alpha);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
-
-        final AtomicReference<Layer> resultLayer = new AtomicReference<Layer>();
-        PowerMockito.whenNew(Layer.class).withParameterTypes(int.class, int.class, Paint.class)
-                .withArguments(anyInt(), anyInt(), Matchers.eq(expected)).thenAnswer(new Answer<Layer>() {
-                    @Override
-                    public Layer answer(InvocationOnMock invocation) throws Throwable {
-                        resultLayer.set(mockLayer);
-                        return mockLayer;
-                    }
-                });
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, height);
 
         doNothing().when(mockLayer).blit(any(Layer.class), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
 
+        final Transformer transformer = new Transformer(mockLayer);
+
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertTrue("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, height);
@@ -126,11 +108,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, calcHeight);
@@ -139,7 +121,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertTrue("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, calcHeight);
@@ -158,11 +140,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         // Don't get confused, switching the dimensions forces Pillar boxing.
         when(layer.getWidth()).thenReturn(START_HEIGHT, START_HEIGHT, calcWidth);
@@ -172,7 +154,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(calcWidth, height);
@@ -188,11 +170,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, height);
@@ -201,7 +183,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, height);
@@ -217,11 +199,11 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("width", width);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, height);
@@ -230,7 +212,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, height);
@@ -245,11 +227,11 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, height);
@@ -258,7 +240,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, height);
@@ -274,11 +256,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH);
         when(layer.getHeight()).thenReturn(START_HEIGHT);
@@ -287,7 +269,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(START_WIDTH, START_HEIGHT);
@@ -306,11 +288,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, targetWidth);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, height);
@@ -319,7 +301,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertNotNull("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(targetWidth, height);
@@ -337,11 +319,11 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
-        final AtomicReference<Layer> resultLayer = setupMockLayer(mockLayer);
+        final Transformer transformer = new Transformer(mockLayer);
 
         when(layer.getWidth()).thenReturn(START_WIDTH, START_WIDTH, width);
         when(layer.getHeight()).thenReturn(START_HEIGHT, START_HEIGHT, targetheight);
@@ -350,7 +332,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        assertNotNull("Layer constructor was not intercepted.", resultLayer.get());
+        assertTrue("Layer constructor was not intercepted.", transformer.layerCreated);
         verify(layer, times(3)).getWidth();
         verify(layer, times(3)).getHeight();
         verify(layer, times(1)).resize(width, targetheight);
@@ -363,29 +345,32 @@ public class LetterPillarBoxImageTransformerImplTest {
     public void testTransform_emptyParams() throws Exception {
         ValueMap properties = new ValueMapDecorator(map);
 
-        transformer.transform(layer, properties);
+
+        new LetterPillarBoxImageTransformerImpl().transform(layer, properties);
 
         verifyZeroInteractions(layer);
     }
 
     @Test
     public void testTransform_nullParams() throws Exception {
-        transformer.transform(layer, null);
+        new LetterPillarBoxImageTransformerImpl().transform(layer, null);
 
         verifyZeroInteractions(layer);
     }
 
-    private AtomicReference<Layer> setupMockLayer(final Layer mockLayer) throws Exception {
-        final AtomicReference<Layer> resultLayer = new AtomicReference<Layer>();
-        PowerMockito.whenNew(Layer.class).withParameterTypes(int.class, int.class, Paint.class)
-                .withArguments(anyInt(), anyInt(), Matchers.isA(Paint.class)).thenAnswer(new Answer<Layer>() {
-                    @Override
-                    public Layer answer(InvocationOnMock invocation) throws Throwable {
-                        resultLayer.set(mockLayer);
-                        return mockLayer;
-                    }
-                });
-        return resultLayer;
+    private class Transformer extends LetterPillarBoxImageTransformerImpl {
+        private boolean layerCreated;
+        private Layer mockLayer;
+
+        private Transformer(Layer mockLayer) {
+            this.mockLayer = mockLayer;
+        }
+
+        @Override
+        Layer createLayer(Dimension size, Color color) {
+            layerCreated = true;
+            return mockLayer;
+        }
     }
 
 }

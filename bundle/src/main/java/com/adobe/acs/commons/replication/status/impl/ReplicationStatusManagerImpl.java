@@ -21,8 +21,13 @@
 package com.adobe.acs.commons.replication.status.impl;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -36,6 +41,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -47,10 +53,39 @@ import java.util.Calendar;
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
+    public static final String DEFAULT_REPLICATED_BY = "Unknown";
+
     private static final String REP_STATUS_ACTIVATE = "Activate";
     private static final String REP_STATUS_DEACTIVATE = "Deactivate";
     private static final int SAVE_THRESHOLD = 1024;
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Resource getReplicationStatusResource(String path, ResourceResolver resourceResolver) {
+        final Page page = resourceResolver.adaptTo(PageManager.class).getContainingPage(path);
+        final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
+
+        Resource resource;
+        String type;
+
+        if (page != null) {
+            type = "Page";
+            resource = page.getContentResource();
+        } else if (asset != null) {
+            type = "Asset";
+            Resource assetResource = resourceResolver.getResource(asset.getPath());
+            resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+        } else {
+            type = "Resource";
+            resource = resourceResolver.getResource(path);
+        }
+
+        log.trace(type + "'s resource that tracks replication status is " + resource.getPath());
+        return resource;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -74,6 +109,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("squid:S3776")
     public final void setReplicationStatus(final ResourceResolver resourceResolver,
                                            final String replicatedBy,
                                            final Calendar replicatedAt,
@@ -81,6 +117,22 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                                            final Resource... resources)
             throws RepositoryException, PersistenceException {
         final Session session = resourceResolver.adaptTo(Session.class);
+
+        // Issue #1265
+        Calendar replicatedAtClean = replicatedAt;
+        if (replicatedAtClean == null) {
+            replicatedAtClean = Calendar.getInstance();
+            log.warn("The provided [ replicatedAt ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED,
+                    new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(replicatedAtClean.getTime()));
+        }
+
+        String replicatedByClean = replicatedBy;
+        if (replicatedBy == null) {
+            replicatedByClean = DEFAULT_REPLICATED_BY;
+            log.warn("The provided [ replicatedBy ] parameter is null. Force setting the [ {} ] value to [ {} ]",
+                    ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
+        }
 
         int count = 0;
         for (final Resource resource : resources) {
@@ -112,12 +164,12 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                     this.addReplicationStatusMixin(node);
                 }
 
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAt);
-                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedBy);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, replicatedAtClean);
+                JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED_BY, replicatedByClean);
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
             }
 
-            log.info("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
+            log.debug("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
 
             if (count++ > SAVE_THRESHOLD) {
                 session.save();
@@ -146,8 +198,8 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
      * @throws RepositoryException
      */
     private void addReplicationStatusMixin(final Node node) throws RepositoryException {
-        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE) &&
-                node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
+        if (!this.hasMixin(node, ReplicationStatus.NODE_TYPE)
+                && node.canAddMixin(ReplicationStatus.NODE_TYPE)) {
             node.addMixin(ReplicationStatus.NODE_TYPE);
         }
     }

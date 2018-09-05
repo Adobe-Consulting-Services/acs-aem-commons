@@ -43,6 +43,34 @@
         SELECTOR_FORM_CREATE_PAGE: "form.cq-siteadmin-admin-createpage",
         SELECTOR_FORM_PROPERTIES_PAGE: "form#propertiesform",
 
+        nestedPluck: function(object, key) {
+            if (!_.isObject(object) || _.isEmpty(object) || _.isEmpty(key)) {
+                return [];
+            }
+
+            if (key.indexOf("/") === -1) {
+                return object[key];
+            }
+
+            var nestedKeys = _.reject(key.split("/"), function(token) {
+                return token.trim() === "";
+            }), nestedObjectOrValue = object;
+
+            _.each(nestedKeys, function(nKey) {
+                if(_.isUndefined(nestedObjectOrValue)){
+                    return;
+                }
+
+                if(_.isUndefined(nestedObjectOrValue[nKey])){
+                    nestedObjectOrValue = undefined;
+                    return;
+                }
+
+                nestedObjectOrValue = nestedObjectOrValue[nKey];
+            });
+
+            return nestedObjectOrValue;
+        },
 
         isSelectOne: function ($field) {
             return !_.isEmpty($field) && ($field.prop("type") === "select-one");
@@ -61,12 +89,36 @@
             }
         },
 
+        isSelectMultiple: function ($field) {
+            return !_.isEmpty($field) && ($field.prop("type") === "select-multiple");
+        },
+
+        setSelectMultiple: function ($field, value) {
+            var select = $field.closest(".coral-Select").data("select");
+            if (select){
+                select.setValue(value);
+            }
+        },
+		
+		    isCoralSelect: function ($field) {
+            return !_.isEmpty($field) && ($field.parent().prop('tagName') === "CORAL-SELECT");
+        },
+
+        setCoralSelect: function ($field, value) {
+            $field.parent().get(0).set("value",value);
+        },
+
+		    // To support coral 3 UI checkbox, add property granite:class=coral-Form-fieldwrapper to the field in dialog.
         isCheckbox: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "checkbox");
+            return !_.isEmpty($field) && ($field.prop("type") === "checkbox" || $field.hasClass("coral-Checkbox"));
         },
 
         setCheckBox: function ($field, value) {
-            $field.prop("checked", $field.attr("value") === value);
+            if($field.parent().hasClass("coral-Checkbox")){
+                $field.parent().prop("checked", $field.attr("value") === value);
+            }else {
+            	$field.prop("checked", $field.attr("value") === value);
+            }
         },
 
         isDateField: function ($field) {
@@ -76,8 +128,14 @@
         setDateField: function ($field, value) {
             var date = moment(new Date(value));
             var $parent = $field.parent();
-            $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
-            $field.val(date.format($parent.attr("data-stored-format")));
+            if (date.isValid()) {
+                $parent.find("input.coral-Textfield").val(date.format($parent.attr("data-displayed-format")));
+                $field.val(date.format($parent.attr("data-stored-format")));
+            }
+            else {
+                $parent.find("input.coral-Textfield").val(value);
+                $field.val(value);
+            }
         },
 
         isRichTextField: function ($field) {
@@ -91,6 +149,10 @@
 
         isAutocomplete: function($field) {
             return !_.isEmpty($field) && ($field.find("ul").hasClass("js-coral-Autocomplete-tagList") || $field.closest("ul").hasClass("js-coral-Autocomplete-tagList"));
+        },
+
+        isFoundationAutocomplete: function($field) {
+            return !_.isEmpty($field) && ($field.parents('foundation-autocomplete').length > 0);
         },
 
         setAutocomplete: function($field,value) {
@@ -107,6 +169,10 @@
                     $tagList._appendItem({"display": selectedItem.text(), "value": item});
                 });
             }
+        },
+
+        setFoundationAutocomplete: function($field,value) {
+            $field.parents('foundation-autocomplete').val(value);
         },
         
         isTagsField: function ($field) {
@@ -142,6 +208,8 @@
 
             if (this.isSelectOne($field)) {
                 this.setSelectOne($field, value);
+            } else if (this.isSelectMultiple($field)) {
+                this.setSelectMultiple($field, value);
             } else if (this.isCheckbox($field)) {
                 this.setCheckBox($field, value);
             } else if (this.isRichTextField($field)) {
@@ -152,6 +220,10 @@
                 this.setAutocomplete($field,value);
             } else if (this.isTagsField($field)) {
                 this.setTagsField($field,value);
+            } else if (this.isFoundationAutocomplete($field)) {
+                this.setFoundationAutocomplete($field,value);
+            } else if (this.isCoralSelect($field)) {
+                this.setCoralSelect($field, value);
             } else {
                 $field.val(value);
             }

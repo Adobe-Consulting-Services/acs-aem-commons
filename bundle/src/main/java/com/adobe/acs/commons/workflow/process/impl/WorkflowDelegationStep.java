@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.workflow.process.impl;
 
 import java.util.Map;
@@ -75,7 +94,7 @@ public class WorkflowDelegationStep implements WorkflowProcess {
     private static final String DEFAULT_WORKFLOW_MODEL = "defaultWorkflowModel";
 
     // When set to true, this Workflow will terminate after successful delegation. This is useful if there is a use-case when this step has WF steps behind it.
-    private String TERMINATE_ON_DELEGATION = "terminateWorkflowOnDelegation";
+    private static final String TERMINATE_ON_DELEGATION = "terminateWorkflowOnDelegation";
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metadata)
@@ -179,8 +198,8 @@ public class WorkflowDelegationStep implements WorkflowProcess {
             if (!workflowModelId.endsWith("/jcr:content/model")) {
                 ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession);
                 Resource resource = resourceResolver.getResource(workflowModelId + "/jcr:content/model");
-                if (resource != null &&
-                        StringUtils.equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class),"cq:WorkflowModel")) {
+                if (resource != null
+                        && StringUtils.equals(resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class),"cq:WorkflowModel")) {
                     workflowModelId = resource.getPath();
                 }
             }

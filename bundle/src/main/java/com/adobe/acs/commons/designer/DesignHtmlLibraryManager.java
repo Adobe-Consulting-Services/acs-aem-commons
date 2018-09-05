@@ -32,6 +32,7 @@ import java.io.Writer;
  * A service interface for looking up client libraries based on a Design.
  */
 @ProviderType
+@SuppressWarnings("squid:S1214")
 public interface DesignHtmlLibraryManager {
 
     /**

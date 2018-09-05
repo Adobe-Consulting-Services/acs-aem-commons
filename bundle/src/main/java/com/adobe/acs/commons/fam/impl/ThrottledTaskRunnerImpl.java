@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,27 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.concurrent.*;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularDataSupport;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -41,6 +31,28 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularDataSupport;
+import java.lang.management.ManagementFactory;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
 @Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
@@ -75,6 +87,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
         workerPool.submit(r);
     }
+    
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+        workerPool.submit(r);
+    }    
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -143,9 +160,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         if (!isRunning()) {
             initThreadPool();
             if (isPaused && resumeList != null) {
-                for (Runnable task : resumeList) {
-                    workerPool.execute(task);
-                }
+                resumeList.forEach(workerPool::execute);
                 resumeList.clear();
             }
             isPaused = false;
@@ -166,25 +181,45 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         return maxThreads;
     }
 
+    private final Semaphore pollingLock = new Semaphore(1);
+    private long lastCheck = -1;
+    private boolean wasRecentlyBusy = false;
+
+    @SuppressWarnings("squid:S3776")
+    private boolean isTooBusy() throws InterruptedException {
+        if (maxCpu <= 0 && maxHeap <= 0) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        long timeSinceLastCheck = now - lastCheck;
+        if (timeSinceLastCheck < 0 || timeSinceLastCheck > cooldownWaitTime) {
+            pollingLock.acquire();
+            now = System.currentTimeMillis();
+            timeSinceLastCheck = now - lastCheck;
+            if (timeSinceLastCheck < 0 || timeSinceLastCheck > cooldownWaitTime) {
+                try {
+                    double cpuLevel = maxCpu > 0 ? getCpuLevel() : -1;
+                    double heapUsage = maxHeap > 0 ? getMemoryUsage() : -1;
+
+                    wasRecentlyBusy = ((maxCpu > 0 && cpuLevel >= maxCpu)
+                            || (maxHeap > 0 && heapUsage >= maxHeap));
+                } catch (InstanceNotFoundException ex) {
+                    LOG.error("OS MBean Instance not found (should not ever happen)", ex);
+                } catch (ReflectionException ex) {
+                    LOG.error("OS MBean Instance reflection error (should not ever happen)", ex);
+                }
+                lastCheck = System.currentTimeMillis();
+            }
+            pollingLock.release();
+        }
+        return wasRecentlyBusy;
+    }
+
     @Override
     public void waitForLowCpuAndLowMemory() throws InterruptedException {
-        boolean tooHigh = true;
-        try {
-            while (tooHigh) {
-                double cpuLevel = getCpuLevel();
-                double heapUsage = getMemoryUsage();
-
-                if ((maxCpu <= 0 || cpuLevel <= maxCpu)
-                        && (maxHeap <= 0 || heapUsage <= maxHeap)) {
-                    tooHigh = false;
-                } else {
-                    Thread.sleep(cooldownWaitTime);
-                }
-            }
-        } catch (InstanceNotFoundException ex) {
-            LOG.error("OS MBean Instance not found (should not ever happen)", ex);
-        } catch (ReflectionException ex) {
-            LOG.error("OS MBean Instance reflection error (should not ever happen)", ex);
+        while (isTooBusy()) {
+            Thread.sleep(cooldownWaitTime);
         }
     }
 
@@ -210,7 +245,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             long max = (Long) cd.get("max");
             long used = (Long) cd.get("used");
             return (double) used / (double) max;
-        } catch (Exception e) {
+        } catch (AttributeNotFoundException | InstanceNotFoundException | MBeanException | ReflectionException e) {
             LOG.error("No Memory stats found for HeapMemoryUsage", e);
             return -1;
         }
@@ -231,10 +266,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         maxThreads = newSize;
         initThreadPool();
     }
-    
+
+    @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<Runnable>();
+            workQueue = new LinkedBlockingDeque<>();
         }
 
         // Terminate pool if the thread size has changed
@@ -253,19 +289,18 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     protected void activate(ComponentContext componentContext) {
         Dictionary<?, ?> properties = componentContext.getProperties();
+        int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
 
         maxCpu = PropertiesUtil.toDouble(properties.get("max.cpu"), 0.85);
         maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
-        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), 4);
+        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
         cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
         taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 60000);
 
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");
             osBeanName = ObjectName.getInstance("java.lang:type=OperatingSystem");
-        } catch (MalformedObjectNameException ex) {
-            LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
-        } catch (NullPointerException ex) {
+        } catch (MalformedObjectNameException | NullPointerException ex) {
             LOG.error("Error getting OS MBean (shouldn't ever happen)", ex);
         }
 

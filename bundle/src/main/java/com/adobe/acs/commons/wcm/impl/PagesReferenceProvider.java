@@ -48,7 +48,7 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM Commons - Pages Reference Provider
  * Reference provider that searches for  pages referenced inside any given page resource
  */
-@Component(policy = ConfigurationPolicy.REQUIRE)
+@Component(policy = ConfigurationPolicy.REQUIRE, metatype = true, label = "ACS AEM Commons - Pages Reference Provider", description = "ACS AEM Commons - Pages Reference Provider")
 @Service
 public final class PagesReferenceProvider implements ReferenceProvider {
 
@@ -87,7 +87,10 @@ public final class PagesReferenceProvider implements ReferenceProvider {
         search(resource, pages, pageManager);
 
         for (Page page: pages) {
-            references.add(getReference(page));
+            Resource contentResource = page.getContentResource();
+            if (contentResource != null && !contentResource.getPath().equals(resource.getPath())) {
+                references.add(getReference(page));
+            }
         }
 
         return references;
@@ -129,7 +132,7 @@ public final class PagesReferenceProvider implements ReferenceProvider {
     private Reference getReference(Page page) {
         return new Reference(TYPE_PAGE,
                 String.format("%s (Page)", page.getName()),
-                page.getContentResource(),
+                page.getContentResource().getParent(),
                 getLastModifiedTimeOfResource(page));
     }
 

@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.rewriter.impl;
 
-import ch.qos.logback.classic.turbo.TurboFilter;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -57,6 +56,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -101,36 +101,39 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Mock
     private ResourceResolver resourceResolver;
 
-    private final String PATH = "/etc/clientlibs/test";
-    private final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
-    private final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
-    private final byte[] BYTES;
-    private final java.io.InputStream INPUTSTREAM;
-    private final String INPUTSTREAM_MD5;
-    private final String PROXIED_PATH = "/apps/myco/test";
-    private final String PROXY_PATH = "/etc.clientlibs/myco/test";
+    private static final String PATH = "/etc/clientlibs/test";
+    private static final String FAKE_STREAM_CHECKSUM="fcadcfb01c1367e9e5b7f2e6d455ba8f"; // md5 of "I love strings"
+    private static final String PROXIED_FAKE_STREAM_CHECKSUM="669a712c318596cd7e7520e3e2000cfb"; // md5 of "I love strings when they are proxied"
+    private static final byte[] BYTES;
+    private static final java.io.InputStream INPUTSTREAM;
+    private static final String INPUTSTREAM_MD5;
+    private static final String PROXIED_PATH = "/apps/myco/test";
+    private static final String PROXY_PATH = "/etc.clientlibs/myco/test";
 
-
-    public VersionedClientlibsTransformerFactoryTest() throws Exception {
-        BYTES = "test".getBytes("UTF-8");
-        INPUTSTREAM = new ByteArrayInputStream(BYTES);
-        INPUTSTREAM_MD5 = DigestUtils.md5Hex(BYTES);
+    static {
+        try {
+            BYTES = "test".getBytes("UTF-8");
+            INPUTSTREAM = new ByteArrayInputStream(BYTES);
+            INPUTSTREAM_MD5 = DigestUtils.md5Hex(BYTES);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Before
     public void setUp() throws Exception {
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(componentContext.getProperties()).thenReturn(new Hashtable<Object, Object>());
+        when(componentContext.getProperties()).thenReturn(new Hashtable<String, Object>());
         factory = new VersionedClientlibsTransformerFactory();
         filter = factory.new BadMd5VersionedClientLibsFilter();
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
         factory.activate(componentContext);
 
         when(htmlLibrary.getLibraryPath()).thenReturn(PATH);
-        when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
+        when(htmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings".getBytes()));
 
         when(proxiedHtmlLibrary.getLibraryPath()).thenReturn(PROXIED_PATH);
-        when(proxiedHtmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
+        when(proxiedHtmlLibrary.getInputStream(false)).thenReturn(new java.io.ByteArrayInputStream("I love strings when they are proxied".getBytes()));
 
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
@@ -152,7 +155,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
     @Test
     public void testRegisterFilter() throws Exception {
-        Hashtable<Object, Object> props = new Hashtable<Object, Object>();
+        Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("enforce.md5", Boolean.TRUE);
         when(componentContext.getProperties()).thenReturn(props);
         factory.activate(componentContext);
@@ -178,7 +181,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibrary() throws Exception {
+    public void testCssClientLibrary() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -198,7 +201,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibraryWithMd5Enforce() throws Exception {
+    public void testCssClientLibraryWithMd5Enforce() throws Exception {
         PrivateAccessor.setField(factory, "enforceMd5", true);
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
@@ -219,7 +222,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibraryWithDot() throws Exception {
+    public void testCssClientLibraryWithDot() throws Exception {
         final String path = PATH + ".foo";
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(path))).thenReturn(htmlLibrary);
@@ -241,7 +244,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testMinifiedCSSClientLibrary() throws Exception {
+    public void testMinifiedCssClientLibrary() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -261,7 +264,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testMinifiedCSSClientLibraryWithEnforceMd5() throws Exception {
+    public void testMinifiedCssClientLibraryWithEnforceMd5() throws Exception {
         PrivateAccessor.setField(factory, "enforceMd5", true);
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
@@ -362,7 +365,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibraryWithInvalidExtension() throws Exception {
+    public void testCssClientLibraryWithInvalidExtension() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -382,7 +385,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
      @Test
-    public void testCSSClientLibraryWithRelAttributeValueDiffersFromStylesheet() throws Exception {
+    public void testCssClientLibraryWithRelAttributeValueDiffersFromStylesheet() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -460,7 +463,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibraryWithSameSchemePath() throws Exception {
+    public void testCssClientLibraryWithSameSchemePath() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -499,7 +502,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void testCSSClientLibraryWithSameDomainedPath() throws Exception {
+    public void testCssClientLibraryWithSameDomainedPath() throws Exception {
 
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(PATH))).thenReturn(htmlLibrary);
 
@@ -519,7 +522,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
-    public void doFilter_nonJSCSS() throws Exception {
+    public void doFilter_nonJsCss() throws Exception {
         when(slingRequest.getRequestURI()).thenReturn("/some_other/uri.html");
         filter.doFilter(slingRequest, slingResponse, filterChain);
         verifyNothingHappened();
@@ -530,7 +533,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASH" + INPUTSTREAM_MD5 + ".js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM);
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM);
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
@@ -544,7 +547,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.min.ACSHASHfoobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some")).thenReturn(library);
 
@@ -558,7 +561,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         when(slingRequest.getRequestURI()).thenReturn("/etc/clientlibs/some.path.min.ACSHASHfoobar.js");
 
         HtmlLibrary library = mock(HtmlLibrary.class);
-        when(library.getInputStream()).thenReturn(INPUTSTREAM );
+        when(library.getInputStream(false)).thenReturn(INPUTSTREAM );
         when(library.getLibraryPath()).thenReturn("/etc/clientlibs/some.path.js");
         when(htmlLibraryManager.getLibrary(LibraryType.JS, "/etc/clientlibs/some.path")).thenReturn(library);
 

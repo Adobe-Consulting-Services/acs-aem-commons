@@ -56,6 +56,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     private static final String SERVICE_NAME = "bulk-workflow";
     private static final Map<String, Object> AUTH_INFO;
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }

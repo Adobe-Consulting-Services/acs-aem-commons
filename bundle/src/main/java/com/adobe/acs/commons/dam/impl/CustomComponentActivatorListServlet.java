@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.dam.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -28,9 +30,6 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import javax.annotation.Nonnull;
@@ -58,30 +57,26 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
         })
     public static String PROP_COMPONENTS = "components";
 
-    private JSONObject json;
+    private JsonObject json;
 
     @Activate
-    protected void activate(Map<String, Object> config) throws JSONException {
+    protected void activate(Map<String, Object> config) {
         Map<String, String> components = ParameterUtil.toMap(PropertiesUtil.toStringArray(config.get(PROP_COMPONENTS), DEFAULT_COMPONENTS),"=");
-        JSONArray array = new JSONArray();
+        JsonArray array = new JsonArray();
         for (Map.Entry<String, String> entry : components.entrySet()) {
-            JSONObject obj = new JSONObject();
-            obj.put("propertyName", entry.getKey());
-            obj.put("componentPath", entry.getValue());
-            array.put(obj);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("propertyName", entry.getKey());
+            obj.addProperty("componentPath", entry.getValue());
+            array.add(obj);
         }
-        this.json = new JSONObject();
-        json.put("components", array);
+        this.json = new JsonObject();
+        json.add("components", array);
     }
 
     @Override
     protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        try {
-            json.write(response.getWriter());
-        } catch (JSONException e) {
-            throw new ServletException(e);
-        }
+        response.getWriter().print(json.toString());
     }
 }

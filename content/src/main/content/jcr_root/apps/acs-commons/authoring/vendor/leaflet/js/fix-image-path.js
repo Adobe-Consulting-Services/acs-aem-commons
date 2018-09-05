@@ -1,1 +1,1 @@
-L.Icon.Default.imagePath = L.Icon.Default.imagePath.replace("/vendor/images", "/vendor/leaflet/images");
+L.Icon.Default.imagePath = "/apps/acs-commons/authoring/vendor/leaflet/images/";

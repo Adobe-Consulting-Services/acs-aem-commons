@@ -149,6 +149,10 @@
                         }
                     }
 
+                    if(!_.isEmpty($field) && $field.siblings( "input.autocomplete-has-suggestion-btn")) {
+                        cmf.setWidgetValue($field.siblings( "input.autocomplete-has-suggestion-btn"), fValue);
+                    }
+
                     cmf.setWidgetValue($field, fValue);
                 });
             });
@@ -176,7 +180,7 @@
 
             function postProcess(data){
                 _.each(mNames, function($multifield, mName){
-                    cmf.buildMultiField(data[mName], $multifield, mName);
+                    cmf.buildMultiField(cmf.nestedPluck(data,mName), $multifield, mName);
                 });
 
                 $document.trigger("touchui-composite-multifield-nodestore-ready", mNames);
@@ -200,10 +204,13 @@
                 cmf = this;
 
             $multifields.each(function(counter, multifield){
-                $fields = $(multifield).children().children(cmf.CFFW);
+                // This looks for children inside children, there is a problem if we try to put in 
+                // tabs can be fixed
+                //$fields = $(multifield).children().children(cmf.CFFW);
+                $fields = $(multifield).find(cmf.CFFW);
 
                 $fields.each(function (j, field) {
-                    fillValue($form, $(multifield).data("name"), $(field).find("[name]"), (counter + 1));
+                    fillValue($form, $(multifield).data("name"), $(field).find("[name]").not("[name*='@']"), (counter + 1));
                 });
             });
 

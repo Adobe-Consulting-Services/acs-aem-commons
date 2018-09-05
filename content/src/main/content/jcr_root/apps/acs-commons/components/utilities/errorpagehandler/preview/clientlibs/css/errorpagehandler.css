@@ -99,7 +99,7 @@
     }
 
     #error-page-handler .message h1 {
-        border-bottom-width: 0px;
+        border-bottom-width: 0;
     }
 
     #error-page-handler .collapsed {

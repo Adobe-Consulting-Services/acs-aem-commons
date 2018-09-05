@@ -35,8 +35,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.query.*;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.jcr.query.QueryResult;
+import javax.jcr.query.Row;
+import javax.jcr.query.RowIterator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,52 +70,67 @@ public class QueryHelperImpl implements QueryHelper {
                                         final String language,
                                         final String statement,
                                         final String relPath) throws RepositoryException {
+        if (StringUtils.isEmpty(statement)) {
+            return Collections.emptyList();
+        }
 
-        final List<Resource> resources = new ArrayList<Resource>();
+        final String[] lines = StringUtils.split(statement, '\n');
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            final String[] lines = statement.split("[,;\\s\\n\\t]+");
-            final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
-
-            // ensure all results are returned
-            if (!params.containsKey("p.limit")) {
-                params.put("p.limit", "-1");
-            }
-
-            final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-            final List<Hit> hits = query.getResult().getHits();
-            for (final Hit hit : hits) {
-                resources.add(hit.getResource());
-            }
+            return getResourcesFromQueryBuilder(resourceResolver, lines);
         } else if (LIST.equalsIgnoreCase(language)) {
-            if (StringUtils.isNotBlank(statement)) {
-                final String[] lines = statement.split("[,;\\s\\n\\t]+");
-
-                for (String line : lines) {
-                    if (StringUtils.isNotBlank(line)) {
-                        final Resource resource = resourceResolver.getResource(line);
-                        final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
-
-                        if (relativeAwareResource != null) {
-                            resources.add(relativeAwareResource);
-                        }
-                    }
-                }
-            }
+            return getResourcesFromList(resourceResolver, lines, relPath);
         } else {
-            QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
-            NodeIterator nodeIter = queryManager.createQuery(statement, language).execute().getNodes();
+            return getResourcesFromQuery(resourceResolver, language, statement, relPath);
+        }
+    }
 
-            while (nodeIter.hasNext()) {
-                Resource resource = resourceResolver.getResource(nodeIter.nextNode().getPath());
-                if (resource != null) {
-                    final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+    private List<Resource> getResourcesFromQuery(ResourceResolver resourceResolver, String language, String statement, String relPath) throws RepositoryException {
+        final List<Resource> resources = new ArrayList<>();
+        QueryManager queryManager = resourceResolver.adaptTo(Session.class).getWorkspace().getQueryManager();
+        NodeIterator nodeIter = queryManager.createQuery(statement, language).execute().getNodes();
 
-                    if (relativeAwareResource != null) {
-                        resources.add(relativeAwareResource);
-                    }
+        while (nodeIter.hasNext()) {
+            Resource resource = resourceResolver.getResource(nodeIter.nextNode().getPath());
+            final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+            if (relativeAwareResource != null) {
+                resources.add(relativeAwareResource);
+            }
+        }
+
+        return resources;
+    }
+
+    private List<Resource> getResourcesFromList(ResourceResolver resourceResolver, String[] lines, String relPath) {
+        final List<Resource> resources = new ArrayList<>();
+        for (String line : lines) {
+            if (StringUtils.isNotBlank(line)) {
+                final Resource resource = resourceResolver.getResource(line);
+                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                if (relativeAwareResource != null) {
+                    resources.add(relativeAwareResource);
                 }
             }
+        }
+
+        return resources;
+    }
+
+    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines) throws RepositoryException {
+        final List<Resource> resources = new ArrayList<>();
+        final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
+
+        // ensure all results are returned
+        if (!params.containsKey("p.limit")) {
+            params.put("p.limit", "-1");
+        }
+
+        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        final List<Hit> hits = query.getResult().getHits();
+        for (final Hit hit : hits) {
+            resources.add(hit.getResource());
         }
 
         return resources;

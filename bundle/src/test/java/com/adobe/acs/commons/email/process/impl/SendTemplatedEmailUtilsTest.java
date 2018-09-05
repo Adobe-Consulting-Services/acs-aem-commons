@@ -32,33 +32,24 @@ import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.testing.jcr.MockValue;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.mock;
 
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.adobe.acs.commons.email.process.impl.SendTemplatedEmailUtils;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.wcm.api.Page;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ SendTemplatedEmailUtils.class, DamUtil.class, ResourceUtil.class })
+@RunWith(MockitoJUnitRunner.class)
 public class SendTemplatedEmailUtilsTest {
 
     private SimpleDateFormat sdf;
@@ -80,15 +71,6 @@ public class SendTemplatedEmailUtilsTest {
 
     private static final String PN_EMAIL = "profile/email";
 
-    @Before
-    public final void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        // Mock DamUtil class
-        PowerMockito.mockStatic(DamUtil.class);
-
-    }
-
     @Test
     public void testGetPayloadProperties_NullResource() throws Exception {
 
@@ -105,7 +87,7 @@ public class SendTemplatedEmailUtilsTest {
 
         Resource payloadRes = mock(Resource.class);
         Resource mdRes = mock(Resource.class);
-        when(DamUtil.isAsset(payloadRes)).thenReturn(true);
+        when(payloadRes.getResourceType()).thenReturn("dam:Asset");
 
         when(payloadRes.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER)).thenReturn(mdRes);
 
@@ -127,7 +109,6 @@ public class SendTemplatedEmailUtilsTest {
 
         Resource payloadRes = mock(Resource.class);
         Resource jcrRes = mock(Resource.class);
-        when(DamUtil.isAsset(payloadRes)).thenReturn(false);
 
         Page payloadPage = mock(Page.class);
         when(payloadRes.adaptTo(Page.class)).thenReturn(payloadPage);
@@ -181,8 +162,8 @@ public class SendTemplatedEmailUtilsTest {
     public void testGetEmailAddrs_Group() throws Exception {
 
         // mock group and users
-        String groupPath = "/home/users/g/group";
-        List<Authorizable> groupMembers = new ArrayList<Authorizable>();
+        final String groupPath = "/home/users/g/group";
+        final List<Authorizable> groupMembers = new ArrayList<Authorizable>();
 
         Authorizable user1 = mock(Authorizable.class);
         Authorizable user2 = mock(Authorizable.class);

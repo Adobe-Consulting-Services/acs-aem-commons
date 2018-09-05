@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!--
+Copyright 2017 Adobe.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html data-sly-use.process="com.adobe.acs.commons.mcp.model.ManagedProcess">
+    <head>
+        <title>${process.name}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html" 
+             data-sly-call="${clientlib.all @ categories='coralui3,coralui2,cq.authoring.dialog,granite.ui.coral.foundation'}"
+             />
+    </head>
+    <body>
+        <h3>Process: ${process.name}</h3>
+        <form class="coral-Form coral-Form--aligned">
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Description</label>
+                <span class="process-dialog-field">${process.description}</span>
+            </section>
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Started</label>
+                <span class="process-dialog-field">${process.startTimeFormatted} by ${process.requester}</span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${!process.isRunning}">
+                <label class="coral-Form-fieldlabel">Ended</label>
+                <span class="process-dialog-field">${process.stopTimeFormatted}</span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${process.isRunning}">
+                <label class="coral-Form-fieldlabel">Progress</label>
+                <span class="process-dialog-field">${process.progressPercent}</span>
+            </section>
+            <section class="coral-Form-fieldset">
+                <label class="coral-Form-fieldlabel">Status</label>
+                <span class="process-dialog-field">${process.status}</span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${resource['report/jcr:primaryType']}">
+                <label class="coral-Form-fieldlabel">Report</label>
+                <span class="process-dialog-field">
+                    <a is="coral-anchorbutton" icon="browse" href="${resource.path}/report.html" target="_new">View</a>
+                    <a is="coral-anchorbutton" icon="download" href="${resource.path}/report.xlsx">Download (Excel)</a>
+                </span>
+            </section>
+            <section class="coral-Form-fieldset" data-sly-test="${resource['failures/jcr:primaryType']}">
+                <label class="coral-Form-fieldlabel">Errors</label>
+                <span class="process-dialog-field">
+                    <a is="coral-anchorbutton" icon="browse" href="${resource.path}.errors.html" target="_new">View</a>
+                    <a is="coral-anchorbutton" icon="download" href="${resource.path}.errors.xlsx">Download (Excel)</a>
+                </span>
+            </section>
+        </form>
+    </body>
+</html>

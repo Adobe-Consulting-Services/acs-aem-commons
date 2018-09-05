@@ -46,15 +46,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Reference(target = "(factory.name=watson-speech-to-text)")
     private HttpClientFactory httpClientFactory;
 
-    @Activate
-    protected void activate(Map<String, Object> config) {
-    }
-
     @Override
     public String startTranscriptionJob(InputStream stream, String mimeType) {
-        Request request = httpClientFactory.post("/speech-to-text/api/v1/recognitions?continuous=true&timestamps=true").
-                addHeader("Content-Type", mimeType).
-                bodyStream(stream);
+        Request request = httpClientFactory.post("/speech-to-text/api/v1/recognitions?continuous=true&timestamps=true")
+                .addHeader("Content-Type", mimeType)
+                .bodyStream(stream);
 
         try {
             JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);

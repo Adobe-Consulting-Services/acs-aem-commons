@@ -64,7 +64,7 @@ public class ComponentDisabler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
     @Reference(policyOption = ReferencePolicyOption.GREEDY)
-    private ComponentDisablerDriver componentDisabler;
+    private ComponentDisablerDriver componentDisablerDriver;
 
     @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
             cardinality = Integer.MAX_VALUE)
@@ -85,7 +85,7 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            componentDisabler.disable(component);
+            componentDisablerDriver.disable(component);
         }
     }
 }

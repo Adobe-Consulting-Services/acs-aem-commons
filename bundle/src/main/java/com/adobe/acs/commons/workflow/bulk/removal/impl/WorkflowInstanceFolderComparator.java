@@ -22,13 +22,10 @@ package com.adobe.acs.commons.workflow.bulk.removal.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 
 public class WorkflowInstanceFolderComparator implements Comparator<Resource> {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceFolderComparator.class);
 
     private static final int MAX_SEGMENTS = 4; // YYYY-MM-DD_N
 

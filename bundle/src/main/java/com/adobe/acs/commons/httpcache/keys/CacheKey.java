@@ -19,17 +19,35 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import java.io.Serializable;
+
 /**
  * Generic CacheKey interface that allows multiple implementations of CacheKey's via CacheKeyFactories. All CacheKeys
- * are scoped to being build off the Request object. Implementations are expected to override <code> hashCode(),
+ * are scoped to being get off the Request object. Implementations are expected to override <code> hashCode(),
  * equals(Object), toString()</code> methods.
  */
-public interface CacheKey {
+public interface CacheKey extends Serializable
+{
     /**
      * Get URI.
      * @return the universal resource id. This can be a RequestURI or a Resource path based on the context of the key.
      */
     String getUri();
+
+    /**
+     * Gets the Hierarchy Resource Path (the resourcePath above jcr:content). This is used for invalidations.
+     *
+     * @return the hierarchy resource path
+     */
+    String getHierarchyResourcePath();
+
+    /**
+     * Determines if the @{param cacheKey} will invalidate this cache key entry.
+     *
+     * @param cacheKey
+     * @return true if is invalidated by, otherwise false
+     */
+    boolean isInvalidatedBy(CacheKey cacheKey);
 
     /**
      * The hashCode for the cache key.
@@ -49,4 +67,6 @@ public interface CacheKey {
      * @return true if the objects represent the same cache item, false otherwise.
      */
     boolean equals(Object o);
+
+
 }

@@ -108,6 +108,15 @@ public interface BulkWorkflowRunner {
     void complete(Workspace workspace) throws PersistenceException;
 
     /**
+     * Marks a payload as being completed.
+     * @param workspace the Workspace
+     * @param payload the completed Payload
+     * @throws Exception
+     */
+    @SuppressWarnings("squid:S00112")
+    void complete(Workspace workspace, Payload payload) throws Exception;
+
+    /**
      * Processes a payload under the Workspace.
      * @param workspace the Workspace
      * @param payload the Payload to process
@@ -115,19 +124,12 @@ public interface BulkWorkflowRunner {
     void run(Workspace workspace, Payload payload);
 
     /**
-     * Marks a payload as being completed.
-     * @param workspace the Workspace
-     * @param payload the completed Payload
-     * @throws Exception
-     */
-    void complete(Workspace workspace, Payload payload) throws Exception;
-
-    /**
      * Marks a payload being force terminated.
      * @param workspace the Workspace
      * @param payload the completed Payload
      * @throws Exception
      */
+    @SuppressWarnings("squid:S00112")
     void forceTerminate(Workspace workspace, Payload payload) throws Exception;
 }
 

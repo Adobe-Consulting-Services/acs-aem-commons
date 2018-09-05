@@ -22,17 +22,15 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.PayloadGroup;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -68,9 +66,6 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
-    private ThrottledTaskRunner throttledTaskRunner;
-
-    @Reference
     private JobManager jobManager;
 
     /**
@@ -78,7 +73,7 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
      */
     @Override
     public Runnable getRunnable(final Config config) {
-        return new AEMWorkflowRunnable(config, scheduler, resourceResolverFactory, workflowService, throttledTaskRunner);
+        return new AEMWorkflowRunnable(config, scheduler, resourceResolverFactory, workflowService);
     }
 
     @Override
@@ -91,6 +86,7 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
         return options;
     }
 
+    @SuppressWarnings("squid:S00112")
     @Override
     public void complete(Workspace workspace, Payload payload) throws Exception {
         super.complete(workspace, payload);
@@ -104,6 +100,7 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
         }
     }
 
+    @SuppressWarnings("squid:S00112")
     @Override
     public void forceTerminate(Workspace workspace, Payload payload) throws Exception {
         final WorkflowSession workflowSession =
@@ -163,7 +160,6 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
 
     protected class AEMWorkflowRunnable implements Runnable {
         private final ResourceResolverFactory resourceResolverFactory;
-        private final ThrottledTaskRunner throttledTaskRunner;
         private final WorkflowService workflowService;
         private final Scheduler scheduler;
         private String configPath ;
@@ -172,16 +168,16 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
         public AEMWorkflowRunnable(Config config,
                                    Scheduler scheduler,
                                    ResourceResolverFactory resourceResolverFactory,
-                                   WorkflowService workflowService,
-                                   ThrottledTaskRunner throttledTaskRunner) {
+                                   WorkflowService workflowService) {
             this.configPath = config.getPath();
             this.jobName = config.getWorkspace().getJobName();
             this.resourceResolverFactory = resourceResolverFactory;
             this.workflowService = workflowService;
-            this.throttledTaskRunner = throttledTaskRunner;
             this.scheduler = scheduler;
         }
 
+        @Override
+        @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
             log.debug("Running Bulk AEM Workflow job [ {} ]", jobName);
 
@@ -298,11 +294,19 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
                         log.info("Completed Bulk Workflow execution for [ {} ]", config.getPath());
                     }
 
-                    workspace.commit();
+                    if (workspace != null) {
+                        workspace.commit();
+                    }
                 }
             } catch (Exception e) {
-                log.error("Error processing periodic execution: {}", e);
+                String workspacePath = workspace != null ? workspace.getPath() : "unknown";
+                log.error("Error processing periodic execution for job [ {} ] for workspace [ {} ]", new String[]{ jobName, workspacePath }, e);
                 unscheduleJob(scheduler, jobName, configResource, workspace);
+                try {
+                    stop(workspace);
+                } catch (PersistenceException e1) {
+                    log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
+                }
             } finally {
                 if (adminResourceResolver != null) {
                     adminResourceResolver.close();

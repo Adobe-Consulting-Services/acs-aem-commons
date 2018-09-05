@@ -84,6 +84,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public void updateTwitterFeedComponents(ResourceResolver resourceResolver) {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
@@ -106,21 +107,21 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
                             List<Status> statuses = client.getUserTimeline(username);
 
                             if (statuses != null) {
-                                List<String> tweetsList = new ArrayList<String>(statuses.size());
-                                List<String> jsonList = new ArrayList<String>(statuses.size());
+                                List<String> tweetsList = new ArrayList<>(statuses.size());
+                                List<String> jsonList = new ArrayList<>(statuses.size());
 
                                 for (Status status : statuses) {
                                     tweetsList.add(processTweet(status));
                                     jsonList.add(DataObjectFactory.getRawJSON(status));
                                 }
 
-                                if (tweetsList.size() > 0) {
+                                if (!tweetsList.isEmpty()) {
                                     ModifiableValueMap map = twitterResource.adaptTo(ModifiableValueMap.class);
                                     map.put("tweets", tweetsList.toArray(new String[tweetsList.size()]));
                                     map.put("tweetsJson", jsonList.toArray(new String[jsonList.size()]));
                                     twitterResource.getResourceResolver().commit();
 
-                                    handleReplication(pageManager, twitterResource);
+                                    handleReplication(twitterResource);
                                 }
                             }
 
@@ -144,15 +145,15 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     }
 
     private List<Resource> findTwitterResources(ResourceResolver resourceResolver) {
-        List<Resource> twitterResources = new ArrayList<Resource>();
+        List<Resource> twitterResources = new ArrayList<>();
 
-        Map<String, String> predicateMap = new HashMap<String, String>();
+        Map<String, String> predicateMap = new HashMap<>();
         predicateMap.put("path", "/content");
         predicateMap.put("property", "sling:resourceType");
 
-        int i = 1;
+        int counter = 1;
         for (String path : twitterComponentPaths) {
-            predicateMap.put("property." + (i++) + "_value", path.toString());
+            predicateMap.put("property." + (counter++) + "_value", path);
 
         }
 
@@ -182,7 +183,7 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     }
 
-    private void handleReplication(PageManager pageManager, Resource twitterResource) throws ReplicationException {
+    private void handleReplication(Resource twitterResource) throws ReplicationException {
         if (isReplicationEnabled(twitterResource)) {
             Session session = twitterResource.getResourceResolver().adaptTo(Session.class);
             replicator.replicate(session, ReplicationActionType.ACTIVATE, twitterResource.getPath());

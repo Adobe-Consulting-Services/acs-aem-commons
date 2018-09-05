@@ -60,6 +60,7 @@ public class StartServlet extends SlingAllMethodsServlet {
     private BulkWorkflowEngine bulkWorkflowEngine;
 
     @Override
+    @SuppressWarnings("squid:S1192")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
@@ -80,6 +81,10 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("throttle", params.optInt("throttle", 10));
             properties.put("retryCount", params.optInt("retryCount", 0));
             properties.put("batchSize", params.optInt("batchSize", 10));
+            String userEventData = params.optString("userEventData", null);
+            if (userEventData != null && !userEventData.isEmpty()) {
+                properties.put("userEventData", userEventData);
+            }
 
             properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
             properties.put("autoThrottle", params.optBoolean("autoThrottle", true));

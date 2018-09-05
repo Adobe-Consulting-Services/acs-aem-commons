@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
@@ -42,8 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.WCMMode;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({WCMMode.class, AuthoringUIMode.class})
+@RunWith(MockitoJUnitRunner.class)
 public class ModeUtilTest {
 
     @Mock
@@ -61,14 +61,13 @@ public class ModeUtilTest {
     Set<String> modes = null;
 
     @Before
-    public void setUp() throws Exception {
-        modes = new HashSet<String>();
+    public void setUp() {
+        modes = new HashSet<>();
         when(slingSettings.getRunModes()).thenReturn(modes);
-        PowerMockito.mockStatic(WCMMode.class, AuthoringUIMode.class);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         modes = null;
         reset(slingSettings, context);
     }
@@ -136,146 +135,130 @@ public class ModeUtilTest {
     }
 
     @Test
-    public void testIsAnalytics() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.ANALYTICS);
+    public void testIsAnalytics() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.ANALYTICS);
         assertTrue(ModeUtil.isAnalytics(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotAnalytics() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsNotAnalytics() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isAnalytics(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsDesign() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.DESIGN);
+    public void testIsDesign() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.DESIGN);
         assertTrue(ModeUtil.isDesign(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotDesign() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsNotDesign() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isDesign(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsDisabled() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.DISABLED);
+    public void testIsDisabled() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.DISABLED);
         assertTrue(ModeUtil.isDisabled(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotDisabled() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsNotDisabled() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isDisabled(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsEdit() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsEdit() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertTrue(ModeUtil.isEdit(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotEdit() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.PREVIEW);
+    public void testIsNotEdit() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.PREVIEW);
         assertFalse(ModeUtil.isEdit(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsPreview() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.PREVIEW);
+    public void testIsPreview() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.PREVIEW);
         assertTrue(ModeUtil.isPreview(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotPreview() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsNotPreview() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isPreview(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsReadOnly() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.READ_ONLY);
+    public void testIsReadOnly() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.READ_ONLY);
         assertTrue(ModeUtil.isReadOnly(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotReadOnly() throws Exception {
-        when(WCMMode.fromRequest(request)).thenReturn(WCMMode.EDIT);
+    public void testIsNotReadOnly() {
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isReadOnly(request));
-        PowerMockito.verifyStatic();
-        WCMMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsClassic() throws Exception {
-        when(AuthoringUIMode.fromRequest(request)).thenReturn(AuthoringUIMode.CLASSIC);
+    public void testIsClassic() {
+        when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.CLASSIC);
         assertTrue(ModeUtil.isClassic(request));
-        PowerMockito.verifyStatic();
-        AuthoringUIMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotClassic() throws Exception {
-        when(AuthoringUIMode.fromRequest(request)).thenReturn(AuthoringUIMode.TOUCH);
+    public void testIsNotClassic() {
+        when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.TOUCH);
         assertFalse(ModeUtil.isClassic(request));
-        PowerMockito.verifyStatic();
-        AuthoringUIMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsTouch() throws Exception {
-        when(AuthoringUIMode.fromRequest(request)).thenReturn(AuthoringUIMode.TOUCH);
+    public void testIsTouch() {
+        when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.TOUCH);
         assertTrue(ModeUtil.isTouch(request));
-        PowerMockito.verifyStatic();
-        AuthoringUIMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
     @Test
-    public void testIsNotTouch() throws Exception {
-        when(AuthoringUIMode.fromRequest(request)).thenReturn(AuthoringUIMode.CLASSIC);
+    public void testIsNotTouch() {
+        when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.CLASSIC);
         assertFalse(ModeUtil.isTouch(request));
-        PowerMockito.verifyStatic();
-        AuthoringUIMode.fromRequest(request);
+        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 

@@ -19,9 +19,10 @@
  */
 package com.adobe.acs.commons.httpcache.keys;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
  * CacheKeyFactory is a OSGi Service interface that allows for consumers to generate their own CacheKey's based on their
@@ -38,6 +39,16 @@ public interface CacheKeyFactory {
      * @throws HttpCacheKeyCreationException
      */
     CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
+
+    /**
+     * Build a cache key.
+     *
+     * @param resourcePath
+     * @param cacheConfig
+     * @return
+     * @throws HttpCacheKeyCreationException
+     */
+    CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
 
     /**
      * Does the Cache Key matches the Htt[ Cache Config.

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Report Select Parameter Dynamically by Query"
+    sling:resourceType="cq/gui/components/authoring/dialog"
+    helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/reports">
+    <content
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="granite/ui/components/foundation/container">
+        <layout
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/layouts/fixedcolumns"/>
+        <items jcr:primaryType="nt:unstructured">
+            <column
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <fieldLabel
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                        fieldLabel="Label"
+                        name="./fieldLabel"
+                        required="{Boolean}true"/>
+                    <name
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                        fieldLabel="Name"
+                        name="./name"
+                        required="{Boolean}true"/>
+                    <resourceType
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/foundation/form/hidden"
+                        name="./resourceType"
+                        value="granite/ui/components/coral/foundation/form/select"/>
+                    <datasource
+                        jcr:primaryType="nt:unstructured"
+                        value="acs-commons/components/utilities/report-builder/data-sources/dynamic-select"
+                        sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                        fieldLabel="Datasource"
+                        name="./datasource/sling:resourceType"/>
+                    <dropdownquery
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/textarea"
+                            fieldLabel="Dropdown Query"
+                            name="./dropDownQuery"/>
+                    <drop-down-query-language
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                            fieldLabel="Dropdown Query Language"
+                            name="./dropDownQueryLanguage">
+                        <items jcr:primaryType="nt:unstructured">
+                            <jcr-sql2
+                                    jcr:primaryType="nt:unstructured"
+                                    text="JCR-SQL2"
+                                    value="JCR-SQL2"/>
+                            <xpath
+                                    jcr:primaryType="nt:unstructured"
+                                    text="XPath"
+                                    value="xpath"/>
+                            <query-builder
+                                    jcr:primaryType="nt:unstructured"
+                                    text="QueryBuilder"
+                                    value="querybuilder"/>
+                            <list
+                                    jcr:primaryType="nt:unstructured"
+                                    text="List"
+                                    value="list"/>
+                            <jcr-sql
+                                    jcr:primaryType="nt:unstructured"
+                                    text="JCR-SQL"
+                                    value="sql"/>
+                        </items>
+                    </drop-down-query-language>
+
+                    <drop-down-property-names
+                            jcr:primaryType="nt:unstructured"
+                            fieldLabel="Allowed Property Names"
+                            fieldDescription="Leave blank to allow ALL found properties."
+                            sling:resourceType="granite/ui/components/coral/foundation/form/multifield">
+                        <field
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                name="./allowedPropertyNames"/>
+                    </drop-down-property-names>
+                </items>
+            </column>
+        </items>
+    </content>
+</jcr:root>

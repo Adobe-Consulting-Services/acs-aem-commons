@@ -21,8 +21,9 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.jackrabbit.commons.iterator.NodeIteratorAdapter;
+import org.apache.jackrabbit.commons.iterator.PropertyIteratorAdapter;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.api.WorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.config.MetaInf;
@@ -36,22 +37,22 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.testing.sling.MockResource;
-import org.apache.sling.commons.testing.sling.MockResourceResolver;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,9 +67,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.eq;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(JcrUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PackageHelperImplTest {
     @Mock
     Packaging packaging;
@@ -128,13 +129,16 @@ public class PackageHelperImplTest {
     WorkspaceFilter packageTwoFilter;
 
     @Mock
-    PackageId packageOneID;
+    PackageId packageOneId;
 
     @Mock
-    PackageId packageTwoID;
+    PackageId packageTwoId;
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
+
+    @Rule
+    public SlingContext slingContext = new SlingContext();
 
     List<PathFilterSet> packageOneFilterSets;
     List<PathFilterSet> packageTwoFilterSets;
@@ -173,8 +177,8 @@ public class PackageHelperImplTest {
         when(packageOne.getDefinition()).thenReturn(packageOneDef);
         when(packageTwo.getDefinition()).thenReturn(packageTwoDef);
 
-        when(packageOneDef.getId()).thenReturn(packageOneID);
-        when(packageTwoDef.getId()).thenReturn(packageTwoID);
+        when(packageOneDef.getId()).thenReturn(packageOneId);
+        when(packageTwoDef.getId()).thenReturn(packageTwoId);
 
         when(packageOneDef.getNode()).thenReturn(packageOneDefNode);
         when(packageTwoDef.getNode()).thenReturn(packageTwoDefNode);
@@ -191,16 +195,16 @@ public class PackageHelperImplTest {
         when(packageOne.getNode()).thenReturn(packageOneNode);
         when(packageTwo.getNode()).thenReturn(packageTwoNode);
 
-        when(packageOneNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
-                packageOneVersion + ".zip");
-        when(packageTwoNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-" +
-                packageTwoVersion + ".zip");
+        when(packageOneNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-"
+                + packageOneVersion + ".zip");
+        when(packageTwoNode.getPath()).thenReturn("/etc/packages/" + packageGroup + "/" + packageName + "-"
+                + packageTwoVersion + ".zip");
 
-        when(packageOneID.getName()).thenReturn(packageName);
-        when(packageTwoID.getName()).thenReturn(packageName);
+        when(packageOneId.getName()).thenReturn(packageName);
+        when(packageTwoId.getName()).thenReturn(packageName);
 
-        when(packageOneID.getVersion()).thenReturn(Version.create(packageOneVersion));
-        when(packageTwoID.getVersion()).thenReturn(Version.create(packageTwoVersion));
+        when(packageOneId.getVersion()).thenReturn(Version.create(packageOneVersion));
+        when(packageTwoId.getVersion()).thenReturn(Version.create(packageTwoVersion));
     }
 
 
@@ -224,27 +228,30 @@ public class PackageHelperImplTest {
                 packageTwoMetaInf,
                 packageOneFilter,
                 packageTwoFilter,
-                packageOneID,
-                packageTwoID);
+                packageOneId,
+                packageTwoId);
     }
 
     @Test
     public void testAddThumbnail() throws Exception {
-        PowerMockito.mockStatic(JcrUtil.class);
-
         Resource thumbnailResource = mock(Resource.class);
         Node thumbnailNode = mock(Node.class);
+        NodeType ntFile = mock(NodeType.class);
 
         when(thumbnailResource.adaptTo(Node.class)).thenReturn(thumbnailNode);
         when(thumbnailNode.isNodeType("nt:file")).thenReturn(true);
+        when(thumbnailNode.getPrimaryNodeType()).thenReturn(ntFile);
+        when(ntFile.getName()).thenReturn("nt:file");
+        when(thumbnailNode.getMixinNodeTypes()).thenReturn(new NodeType[0]);
+        when(thumbnailNode.getProperties()).thenReturn(new PropertyIteratorAdapter(Collections.emptyIterator()));
+        when(thumbnailNode.getNodes()).thenReturn(new NodeIteratorAdapter(Collections.emptyIterator()));
 
         when(packageOneDefNode.getSession()).thenReturn(mock(Session.class));
 
         packageHelper.addThumbnail(packageOne, thumbnailResource);
 
         // Verification
-        PowerMockito.verifyStatic(times(1));
-        JcrUtil.copy(thumbnailNode, packageOneDefNode, "thumbnail.png");
+        verify(packageOneDefNode, times(1)).addNode(eq("thumbnail.png"), eq("nt:file"));
     }
 
     @Test
@@ -296,7 +303,7 @@ public class PackageHelperImplTest {
 
     @Test
     public void testCreatePackageFromPathFilterSets() throws Exception {
-        Map<String, String> properties = new HashMap<String, String>();
+        final Map<String, String> properties = new HashMap<String, String>();
 
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
         pathFilterSets.add(new PathFilterSet("/a/b/c"));
@@ -340,12 +347,11 @@ public class PackageHelperImplTest {
 
     @Test
     public void testGetPreviewJSON() throws Exception {
-        final MockResourceResolver resourceResolver = new MockResourceResolver();
         final Set<Resource> resources = new HashSet<Resource>();
 
-        resources.add(new MockResource(resourceResolver, "/a/b/c", ""));
-        resources.add(new MockResource(resourceResolver, "/d/e/f", ""));
-        resources.add(new MockResource(resourceResolver, "/g/h/i", ""));
+        resources.add(slingContext.create().resource("/a/b/c"));
+        resources.add(slingContext.create().resource("/d/e/f"));
+        resources.add(slingContext.create().resource("/g/h/i"));
 
 
         final String actual = packageHelper.getPreviewJSON(resources);

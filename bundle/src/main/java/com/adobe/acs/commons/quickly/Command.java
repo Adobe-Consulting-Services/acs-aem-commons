@@ -81,10 +81,16 @@ public class Command {
         return this.param;
     }
 
-    public String toString() { return this.raw; }
+    public String toString() {
+        return this.raw;
+    }
 
-    public String[] getParams() { return Arrays.copyOf(this.params, this.params.length); }
+    public String[] getParams() {
+        return Arrays.copyOf(this.params, this.params.length);
+    }
 
-    public String[] getPunctuation() { return Arrays.copyOf(this.punctuation, this.punctuation.length); }
+    public String[] getPunctuation() {
+        return Arrays.copyOf(this.punctuation, this.punctuation.length);
+    }
 
 }

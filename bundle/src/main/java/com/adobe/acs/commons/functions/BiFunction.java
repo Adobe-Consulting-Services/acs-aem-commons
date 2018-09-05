@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.functions;
 
@@ -27,19 +31,11 @@ import aQute.bnd.annotation.ConsumerType;
  * @param <R> the type of the result of the function
  *
  * @see Function
+ * @deprecated Use CheckedBiFunction instead
  */
 @ConsumerType
-public abstract class BiFunction<T, U, R> {
-
-    /**
-     * Applies this function to the given arguments.
-     *
-     * @param t the first function argument
-     * @param u the second function argument
-     * @return the function result
-     */
-    public abstract R apply(T t, U u) throws Exception;
-
+@Deprecated
+public abstract class BiFunction<T, U, R> implements CheckedBiFunction<T, U, R> {
     /**
      * Returns a composed function that first applies this function to
      * its input, and then applies the {@code after} function to the result.
@@ -54,15 +50,24 @@ public abstract class BiFunction<T, U, R> {
      * @throws NullPointerException if after is null
      */
     public <V> BiFunction<T, U, V> andThen(final Function<? super R, ? extends V> after) {
-        if (after == null) {
-            throw new NullPointerException();
+        return adapt(andThen((CheckedFunction) after));
+    }
+
+    public static <X, Y, Z> BiFunction<X, Y, Z> adapt(CheckedBiFunction<X, Y, Z> delegate) {
+        return new Adapter<>(delegate);
+    }
+
+    private static class Adapter<T, U, R> extends BiFunction<T, U, R> {
+
+        private final CheckedBiFunction<T, U, R> delegate;
+
+        public Adapter(CheckedBiFunction<T, U, R> delegate) {
+            this.delegate = delegate;
         }
-        final BiFunction<T, U, R> thiss = this;
-        return new BiFunction<T, U, V>() {
-            @Override
-            public V apply(T t, U u) throws Exception {
-                return after.apply(thiss.apply(t, u));
-            }
-        };
+
+        @Override
+        public R apply(T t, U u) throws Exception {
+            return delegate.apply(t, u);
+        }
     }
 }

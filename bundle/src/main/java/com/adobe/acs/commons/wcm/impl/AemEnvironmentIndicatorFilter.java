@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.acs.commons.util.BufferingResponse;
@@ -15,6 +34,7 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.xss.XSSAPI;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +75,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             + "height: 5px;"
             + "z-index: 100000000000000;";
 
+    private static final String TITLE_UPDATE_SCRIPT = "<script>(function() { var c = 0; t = '%s' + ' | ' + document.title, "
+            + "i = setInterval(function() { if (document.title === t && c++ > 10) { clearInterval(i); } else { document.title = t; } }, 1500); "
+            + "document.title = t; })();</script>\n";
 
     @Reference
     private XSSAPI xss;
@@ -105,8 +128,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
     @Property (label = "Excluded WCM modes",
-    		description = "Do not display the indicator when these WCM modes",
-    		cardinality = Integer.MAX_VALUE)
+            description = "Do not display the indicator when these WCM modes",
+            cardinality = Integer.MAX_VALUE)
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
@@ -118,10 +141,11 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-
+        // no-op
     }
 
     @Override
+    @SuppressWarnings("squid:S3776")
     public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
                                final FilterChain filterChain) throws IOException, ServletException {
 
@@ -145,10 +169,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         boolean doInclude = true;
         if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
-        	// Test for configured WCM modes, where the indicators are not displayed
-        	WCMMode wcmmode = extractFromRequest(request);
+            // Test for configured WCM modes, where the indicators are not displayed
+            WCMMode wcmmode = extractFromRequest(request);
 
-        	if (wcmmode != null) {
+            if (wcmmode != null) {
                 for (String m : excludedWCMModes) {
                     if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
                         doInclude = false;
@@ -178,9 +202,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 }
 
                 if (StringUtils.isNotBlank(titlePrefix)) {
-                    printWriter.write("<script>document.title = '"
-                            + titlePrefix
-                            + " | ' + document.title;</script>");
+                    printWriter.printf(TITLE_UPDATE_SCRIPT, titlePrefix);
                 }
 
                 printWriter.write(contents.substring(bodyIndex));
@@ -195,9 +217,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // no-op
     }
 
+    @SuppressWarnings("squid:S3923")
     private boolean accepts(final HttpServletRequest request) {
         if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
             // Only accept is properly configured
@@ -223,13 +246,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return true;
     }
 
-    private String createCSS(final String providedColor) {
+    private String createCss(final String providedColor) {
         return "#" + DIV_ID + " { "
                 + "background-color:" + providedColor + BASE_DEFAULT_STYLE
                 + " }";
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext ctx) {
         Dictionary<?, ?> config = ctx.getProperties();
 
@@ -242,7 +266,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         if (StringUtils.isNotBlank(cssOverride)) {
             css = cssOverride;
         } else if (StringUtils.isNotBlank(color)) {
-            css = createCSS(color);
+            css = createCss(color);
         }
 
         titlePrefix = xss.encodeForJSString(
@@ -250,7 +274,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         if (StringUtils.isNotBlank(css) || StringUtils.isNotBlank(titlePrefix)) {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
-            filterProps.put("pattern", ".*");
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/");
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
         }
 
@@ -271,7 +296,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     // extract the WCMMode from the request; we cannot use
     // WCMMode.fromRequest(), because this is not a SlingHttpServletRequest
-    private WCMMode extractFromRequest (HttpServletRequest request) {
+    private WCMMode extractFromRequest(HttpServletRequest request) {
 
         return (WCMMode) request.getAttribute(
                 WCMMode.REQUEST_ATTRIBUTE_NAME);

@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +15,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam;
 
+import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
+
 /**
  * In addition to MBean operations, a ThrottledTaskRunner lets the caller schedule work and provides a throttle method.
  * The logCompletion method should also allow a runnable action provide appropriate notification of success/failure
  */
+@ProviderType
 public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
 
     /**
@@ -28,15 +35,23 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * Only call this BEFORE starting a critical section.
      * @throws InterruptedException If the thread was interrupted
      */
-    public void waitForLowCpuAndLowMemory() throws InterruptedException;
+    void waitForLowCpuAndLowMemory() throws InterruptedException;
 
     /**
      * Schedule some kind of work to run in the future using the internal thread pool.
      * The work will be throttled according to the CPU/Memory settings
      * @param work 
      */
-    public void scheduleWork(Runnable work);
+    void scheduleWork(Runnable work);
 
+    /**
+     * Schedule some kind of work to run in the future using the internal thread pool.
+     * The work will be throttled according to the CPU/Memory settings.  This action can be canceled at any time.
+     * @param work 
+     * @param cancelHandler
+     */
+    void scheduleWork(Runnable work, CancelHandler cancelHandler);
+    
     /**
      * Record statistics
      * @param created Task creation time (Milliseconds since epoch) -- This is when the work is added to the queue
@@ -46,11 +61,11 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * @param successful If true, action concluded normally
      * @param error Exception caught, if any.
      */
-    public void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);    
+    void logCompletion(long created, long started, long executed, long finished, boolean successful, Throwable error);
     
     /**
      * Get number of maximum threads supported by this thread manager
      * @return Thread pool maximum size
      */
-    public int getMaxThreads();
+    int getMaxThreads();
 }

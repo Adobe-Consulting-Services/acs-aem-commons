@@ -1,9 +1,31 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.forms.helpers.impl;
 
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.xss.XSSAPI;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -25,6 +47,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.Cookie;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -38,7 +61,7 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     public static final String RESOURCE_PATH = "/test";
 
     @Rule
-    public SlingContext slingContext = new SlingContext();
+    public SlingContext slingContext = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
     @Mock
     private XSSAPI xss;
 
@@ -51,6 +74,9 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
 
     @Before
     public void setup() throws LoginException, PersistenceException {
+        // force resource resolver creation
+        slingContext.resourceResolver();
+
         slingContext.registerService(XSSAPI.class, xss);
         slingContext.registerService(FormsRouter.class, new FormsRouterImpl());
 

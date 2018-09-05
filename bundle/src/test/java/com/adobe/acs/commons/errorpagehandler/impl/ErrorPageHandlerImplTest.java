@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -29,20 +27,25 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ErrorPageHandlerImplTest {
 
     @Rule
     public final SlingContext context = new SlingContext();
-    
-	private MockSlingHttpServletRequest request;
-	private ResourceResolver resourceResolver;
+
+    private MockSlingHttpServletRequest request;
+    private ResourceResolver resourceResolver;
 
     @Before
     public void setup() {
-    	context.load().json(getClass().getResourceAsStream("ErrorPageHandlerImplTest.json"), "/content/project");
-    	resourceResolver = context.resourceResolver();
-    	request = context.request();
+        context.load().json(getClass().getResourceAsStream("ErrorPageHandlerImplTest.json"), "/content/project");
+        resourceResolver = context.resourceResolver();
+        request = context.request();
     }
     
     /**
@@ -60,7 +63,7 @@ public class ErrorPageHandlerImplTest {
      */
     @Test
     public void testFindErrorPage_withDirectConfig() {
-    	assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
+        assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
     }
     
     @Test
@@ -79,4 +82,15 @@ public class ErrorPageHandlerImplTest {
         assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page/jcr:content/test1/test2")));
     }
 
+    @Test
+    public void testFindErrorPage_nonExistingPageWithoutExtension() {
+        assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/non-existing-page")));
+    }
+
+    @Test
+    public void testFindErrorPage_JcrContent0() {
+        assertEquals("/content/project/test/error-pages.html",
+                new ErrorPageHandlerImpl().findErrorPage(request,
+                        new NonExistingResource(resourceResolver, "/content/project/jcr:content/non-existing")));
+    }
 }

@@ -67,12 +67,12 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     }
 
     @Override
-    public void invalidateAll() {
+    public void invalidate(HttpCacheConfig cacheConfig) {
         throw new NotImplementedException();
     }
 
     @Override
-    public void invalidate(HttpCacheConfig cacheConfig) {
+    public void invalidateAll() {
         throw new NotImplementedException();
     }
 

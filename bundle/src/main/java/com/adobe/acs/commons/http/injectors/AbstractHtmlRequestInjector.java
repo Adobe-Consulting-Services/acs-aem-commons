@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +108,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
 
     }
 
+    @SuppressWarnings("squid:S3923")
     protected boolean accepts(final ServletRequest servletRequest,
                             final ServletResponse servletResponse) {
 
@@ -142,14 +144,17 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
         return true;
     }
 
+    @SuppressWarnings("squid:S1149")
     protected final void registerAsFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
         filterProps.put("service.ranking", String.valueOf(ranking));
-        filterProps.put("pattern", StringUtils.defaultIfEmpty(pattern, ".*"));
+        filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, StringUtils.defaultIfEmpty(pattern, ".*"));
+        filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
     }
 
+    @SuppressWarnings("squid:S1149")
     protected final void registerAsSlingFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 

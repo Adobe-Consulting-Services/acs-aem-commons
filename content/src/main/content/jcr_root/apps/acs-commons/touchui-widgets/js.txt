@@ -5,3 +5,4 @@ touchui-limit-parsys.js
 touchui-configure-parsys-placeholder.js
 search-based-pathbrowser.js
 draggablelist.js
+dynamic-loader.js

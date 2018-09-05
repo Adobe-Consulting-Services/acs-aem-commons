@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Tools Bundle
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2014 Adobe
  * %%
@@ -53,7 +53,7 @@ public final class CustomPollingImporterListServlet extends SlingSafeMethodsServ
 
     @Activate
     protected void activate(ComponentContext ctx) throws InvalidSyntaxException {
-        BundleContext bundleContext = ctx.getBundleContext();
+        final BundleContext bundleContext = ctx.getBundleContext();
         StringBuilder builder = new StringBuilder();
         builder.append("(&(");
         builder.append(Constants.OBJECTCLASS).append("=").append(Importer.SERVICE_NAME).append(")");
@@ -71,7 +71,7 @@ public final class CustomPollingImporterListServlet extends SlingSafeMethodsServ
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException,
             IOException {
-        XSSAPI xssAPI = request.adaptTo(XSSAPI.class);
+        XSSAPI xssApi = request.adaptTo(XSSAPI.class);
         try {
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
@@ -87,7 +87,7 @@ public final class CustomPollingImporterListServlet extends SlingSafeMethodsServ
                             JSONObject obj = new JSONObject();
                             obj.put("qtip", "");
                             obj.put("text", displayName);
-                            obj.put("text_xss", xssAPI.encodeForJSString(displayName));
+                            obj.put("text_xss", xssApi.encodeForJSString(displayName));
                             obj.put("value", scheme);
                             list.put(obj);
                         }

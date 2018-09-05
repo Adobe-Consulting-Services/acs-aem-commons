@@ -1,0 +1,73 @@
+---
+version: "2"
+checks:
+  argument-count:
+    enabled: false
+  complex-logic:
+    enabled: false
+  file-lines:
+    enabled: false
+  method-complexity:
+    enabled: false
+  method-count:
+    enabled: false
+  method-lines:
+    enabled: false
+  nested-control-flow:
+    enabled: false
+  return-statements:
+    enabled: false
+  similar-code:
+    enabled: false
+  identical-code:
+    enabled: false
+plugins:
+  sonar-java:
+    enabled: true
+    channel: "beta"
+    exclude_patterns:
+      - "**/src/test/"
+    config:
+      sonar.java.source: 8
+  checkstyle:
+    enabled: true
+    config:
+      file: ".codeclimate/checkstyle.xml"
+    exclude_patterns:
+      - "**/src/test/java/com/amazonaws/"
+      - "**/src/test/java/ch/randelshofer/"
+#  csslint:
+#    enabled: true
+#  duplication:
+#    enabled: true
+#    config:
+#      languages:
+#      - javascript
+#  eslint:
+#    enabled: true
+#  fixme:
+#    enabled: true
+  pmd:
+    enabled: true
+    config:
+      file: ".codeclimate/pmd-ruleset.xml"
+exclude_patterns:
+- ".idea/"
+- "**/vendor/"
+- "**/extensions/contentfinder/"
+- "*/target/"
+
+
+# Common exclusions
+# squid:S3776 - Cognitive Complexity
+# squid:S1214 - constants in interface
+# squid:S1141 - nested try
+# squid:S1192 - literals
+# squid:S1149 - Hashtable
+# squid:S00112 - specific exceptions
+# squid:S2095 - close stream
+# squid:S1172 - unused method param
+# squid:S00115 - constant name
+# squid:S1144 - unused private method
+#
+# checkstyle:abbreviationaswordinname - abbreviation

@@ -22,10 +22,11 @@ package com.adobe.acs.commons.http.headers.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.jackrabbit.oak.commons.PropertiesUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +81,8 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
      */
     protected abstract void doActivate(ComponentContext context) throws Exception;
 
+    private static final Object MARKER = new Object();
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
 
@@ -100,8 +103,14 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         if (this.accepts(request)) {
             String header = getHeaderName();
             String val = getHeaderValue();
-            log.debug("Adding header {}: {}", header, val);
-            response.addHeader(header, val);
+            String attributeName = AbstractDispatcherCacheHeaderFilter.class.getName() + ".header." + header;
+            if (request.getAttribute(attributeName) == null) {
+                log.debug("Adding header {}: {}", header, val);
+                response.addHeader(header, val);
+                request.setAttribute(attributeName, MARKER);
+            } else {
+                log.debug("Header {} was already set. Skipping.", header);
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -122,9 +131,9 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         // - GET request
         // - No Params
         // - From Dispatcher
-        if (StringUtils.equalsIgnoreCase("get", request.getMethod()) && 
-            request.getParameterMap().isEmpty() && 
-            serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
+        if (StringUtils.equalsIgnoreCase("get", request.getMethod())
+                && request.getParameterMap().isEmpty()
+                && serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
 
             return true;
         }
@@ -132,6 +141,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
     }
 
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext context) throws Exception {
         Dictionary<?, ?> properties = context.getProperties();
 
@@ -146,7 +156,8 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
             log.debug("Adding filter ({}) to pattern: {}", this.toString(), pattern);
-            filterProps.put("pattern", pattern);
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
+            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             ServiceRegistration filterReg = context.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
             filterRegistrations.add(filterReg);
         }

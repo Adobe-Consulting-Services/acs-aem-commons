@@ -46,6 +46,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,8 +63,8 @@ import java.util.Map;
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
 @Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
-           description = "HttpCacheConfig custom extension for group based configuration and associated cache key " +
-                   "creation.",
+           description = "HttpCacheConfig custom extension for group based configuration and associated cache key "
+                   + "creation.",
            metatype = true,
            configurationFactory = true,
            policy = ConfigurationPolicy.REQUIRE
@@ -125,8 +130,13 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-
         return new GroupCacheKey(slingHttpServletRequest, cacheConfig);
+    }
+
+    @Override
+    public CacheKey build(final String resourcePath, final HttpCacheConfig cacheConfig)
+            throws HttpCacheKeyCreationException {
+        return new GroupCacheKey(resourcePath, cacheConfig);
     }
 
     @Override
@@ -143,7 +153,7 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     /**
      * The GroupCacheKey is a custom CacheKey bound to this particular factory.
      */
-    class GroupCacheKey extends AbstractCacheKey implements CacheKey {
+    class GroupCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
 
         /* This key is composed of uri, list of user groups and authentication requirement details */
         private List<String> cacheKeyUserGroups;
@@ -163,6 +173,10 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
         @Override
         public boolean equals(Object o) {
             if (!super.equals(o)) {
+                return false;
+            }
+
+            if (o == null) {
                 return false;
             }
 
@@ -189,6 +203,24 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
             formattedString.append(StringUtils.join(cacheKeyUserGroups, "|"));
             formattedString.append("] [AUTH_REQ:" + getAuthenticationRequirement() + "]");
             return formattedString.toString();
+        }
+
+        /** For Serialization **/
+        private void writeObject(ObjectOutputStream o) throws IOException
+        {
+            parentWriteObject(o);
+            final Object[] userGroupArray = cacheKeyUserGroups.toArray();
+            o.writeObject(StringUtils.join(userGroupArray, ","));
+        }
+
+        /** For De serialization **/
+        private void readObject(ObjectInputStream o)
+                throws IOException, ClassNotFoundException {
+
+            parentReadObject(o);
+            final String userGroupsStr = (String) o.readObject();
+            final String[] userGroupStrArray = userGroupsStr.split(",");
+            cacheKeyUserGroups = Arrays.asList(userGroupStrArray);
         }
     }
 

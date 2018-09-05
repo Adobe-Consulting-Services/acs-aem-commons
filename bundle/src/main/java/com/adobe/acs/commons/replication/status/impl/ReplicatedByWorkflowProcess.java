@@ -20,19 +20,12 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowData;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -47,10 +40,15 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.workflow.WorkflowPackageManager;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowData;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 
 /**
  * ACS AEM Commons - Workflow Process - Replicated By Workflow Initiator
@@ -74,6 +72,9 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
+    
+    @Reference
+    private ReplicationStatusManager replStatusManager;
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession,
@@ -101,32 +102,12 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
             final String replicatedBy = StringUtils.defaultIfEmpty(workItem.getWorkflow().getInitiator(),
                     "Unknown Workflow User");
 
-            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
             final List<String> paths = workflowPackageManager.getPaths(resourceResolver, payloadPath);
 
             for (final String path : paths) {
                 // For each item in the WF Package, or if not a WF Package, path = payloadPath
 
-                final Page page = pageManager.getContainingPage(path);
-                final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(path));
-
-                Resource resource;
-
-                if (page != null) {
-                    // Page
-                    resource = page.getContentResource();
-                    log.trace("Candidate Page for setting replicateBy is [ {} ]", resource.getPath());
-                } else if (asset != null) {
-                    // DAM Asset
-                    final Resource assetResource = resourceResolver.getResource(asset.getPath());
-                    resource = assetResource.getChild(JcrConstants.JCR_CONTENT);
-                    log.trace("Candidate Asset for setting replicateBy is [ {} ]", resource.getPath());
-                } else {
-                    // Some other resource
-                    resource = resourceResolver.getResource(path);
-                    log.trace("Candidate Resource for setting replicateBy is [ {} ]", resource.getPath());
-                }
+                Resource resource = replStatusManager.getReplicationStatusResource(path, resourceResolver);
 
                 final ModifiableValueMap mvm = resource.adaptTo(ModifiableValueMap.class);
 

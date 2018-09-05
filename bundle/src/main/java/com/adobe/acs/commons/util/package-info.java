@@ -20,7 +20,7 @@
 /**
  * Miscellaneous Utilities.
  */
-@Version("2.4.0")
-package com.adobe.acs.commons.util;
+@Version("3.15.0")
 
+package com.adobe.acs.commons.util;
 import aQute.bnd.annotation.Version;

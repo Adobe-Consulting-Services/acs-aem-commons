@@ -21,5 +21,6 @@
 
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
-    categories="acs-commons.jcr-compare.app"
+          jsProcessor="[default:none,min:gcc]"
+          categories="acs-commons.jcr-compare.app"
     dependencies="[coralui2,jquery,moment,acs-commons.json,acs-commons.coralui2.angularjs,acs-commons.angularjs,acs-commons.jsondiffpatch,acs-commons.angularjs.bindonce]"/>

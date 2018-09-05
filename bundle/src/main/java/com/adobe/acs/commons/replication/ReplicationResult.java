@@ -60,6 +60,7 @@ public class ReplicationResult {
         return String.format("ReplicationResult [path=%s, status=%s, version=%s]", path, status, version);
     }
 
+    @SuppressWarnings("squid:S00115")
     public enum Status {
         replicated, not_replicated, error
     }

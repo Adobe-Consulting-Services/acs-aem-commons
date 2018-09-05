@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:description="A report for finding all of the references to the provided page and any subpages."
+        jcr:title="References Report"
+        sling:resourceType="acs-commons/components/utilities/report-builder/report-page">
+        <config
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <queryconfig
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/configs/queryconfig"
+                pageSize="50"
+                query="SELECT * FROM [{{type}}] AS s WHERE CONTAINS(s.*, '{{path}}')"
+                queryLanguage="JCR-SQL2"
+                reportExecutor="com.adobe.acs.commons.reports.models.QueryReportExecutor"/>
+        </config>
+        <parameters
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <basic_1474003077
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/basic"
+                fieldLabel="Path"
+                name="path"
+                required="{Boolean}true"
+                resourceType="granite/ui/components/coral/foundation/form/textfield"/>
+           <select
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/parameters/select"
+                fieldLabel="Type"
+                name="type"
+                resourceType="granite/ui/components/coral/foundation/form/select">
+                <items jcr:primaryType="nt:unstructured">
+                    <item0
+                        jcr:primaryType="nt:unstructured"
+                        text="All"
+                        value="nt:base"/>
+                    <item1
+                        jcr:primaryType="nt:unstructured"
+                        text="Pages"
+                        value="cq:Page"/>
+                    <item2
+                        jcr:primaryType="nt:unstructured"
+                        text="Assets"
+                        value="dam:Asset"/>
+                </items>
+            </select>
+        </parameters>
+        <columns
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/foundation/components/parsys">
+            <path
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/path"
+                exporter="com.adobe.acs.commons.reports.models.PathReportCellCSVExporter"
+                heading="Path"
+                link="true"/>
+            <containing_page
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/containing-page"
+                exporter="com.adobe.acs.commons.reports.models.ContainingPageReportCellCSVExporter"
+                heading="Containing Page"/>
+            <editor
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
+                editor="/crx/de/index.jsp#"
+                heading="Edit"/>
+        </columns>
+    </jcr:content>
+</jcr:root>

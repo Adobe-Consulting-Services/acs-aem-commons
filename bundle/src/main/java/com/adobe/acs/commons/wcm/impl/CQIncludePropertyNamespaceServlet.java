@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  * ACS AEM Commons - CQInclude Property Namespace.
  */
 //@formatter:off
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
 @SlingServlet(
         label = "ACS AEM Commons - CQInclude Property Namespace",
         metatype = true,
@@ -254,8 +254,8 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
             if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
                     && (StringUtils.equals(jsonObject.optString(PN_XTYPE), "cqinclude"))) {
                 String path = jsonObject.optString(PN_PATH);
-                if (StringUtils.isNotBlank(path) &&
-                        path.matches(CQINCLUDE_NAMESPACE_URL_REGEX)) {
+                if (StringUtils.isNotBlank(path)
+                        && path.matches(CQINCLUDE_NAMESPACE_URL_REGEX)) {
                     return true;
 
                 }
@@ -282,15 +282,13 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
             return jsonObject;
         }
 
-        @SuppressWarnings("PMD.CollapsibleIfStatements")
+        @SuppressWarnings("squid:S3776")
         @Override
         protected void visit(JSONObject jsonObject) {
 
             if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
-                if (supportMultiLevel) {
-                    if (isCqincludeNamespaceWidget(jsonObject)) {
-                        jsonObject = makeMultiLevel(jsonObject);
-                    }
+                if (supportMultiLevel && isCqincludeNamespaceWidget(jsonObject)) {
+                    jsonObject = makeMultiLevel(jsonObject);
                 }
 
                 final Iterator<String> keys = jsonObject.keys();

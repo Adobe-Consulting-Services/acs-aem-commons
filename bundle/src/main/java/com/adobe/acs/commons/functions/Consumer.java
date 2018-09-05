@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.functions;
 
@@ -24,17 +28,11 @@ import aQute.bnd.annotation.ConsumerType;
  * to operate via side-effects.
  *
  * @param <T> the type of the input to the operation
+ * @deprecated Use CheckedConsumer instead
  */
 @ConsumerType
-public abstract class Consumer<T> {
-
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param t the input argument
-     */
-    abstract public void accept(T t) throws Exception;
-
+@Deprecated
+public abstract class Consumer<T> implements CheckedConsumer<T> {
     /**
      * Returns a composed {@code Consumer} that performs, in sequence, this
      * operation followed by the {@code after} operation. If performing either
@@ -48,16 +46,24 @@ public abstract class Consumer<T> {
      * @throws NullPointerException if {@code after} is null
      */
     public Consumer<T> andThen(final Consumer<? super T> after) {
-        if (after == null) {
-            throw new NullPointerException();
+        return adapt(andThen((CheckedConsumer) after));
+    }
+
+    public static <X> Consumer<X> adapt(CheckedConsumer<X> delegate) {
+        return new Adapter<>(delegate);
+    }
+
+    private static class Adapter<T> extends Consumer<T> {
+
+        private final CheckedConsumer<T> delegate;
+
+        public Adapter(CheckedConsumer<T> delegate) {
+            this.delegate = delegate;
         }
-        final Consumer<T> thiss = this;
-        return new Consumer<T>() {
-            @Override
-            public void accept(T t) throws Exception {
-                thiss.accept(t);
-                after.accept(t);
-            }
-        };
+
+        @Override
+        public void accept(T t) throws Exception {
+            delegate.accept(t);
+        }
     }
 }
