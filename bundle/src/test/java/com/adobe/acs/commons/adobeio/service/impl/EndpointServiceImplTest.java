@@ -170,17 +170,17 @@ public class EndpointServiceImplTest {
     
     @Test
     public void testConvertServiceSpecificHeadersWithNull() {
-    	   List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(null);
-    	
-    	   assertEquals(Collections.EMPTY_LIST, headers);
+          List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(null);
+       
+          assertEquals(Collections.EMPTY_LIST, headers);
     }
     
     @Test
     public void testConvertServiceSpecificHeadersWitNothNull() {
-    	   String[] arr = {"name1:value","name2:value"};
-    	   List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(arr);
+          String[] arr = {"name1:value","name2:value"};
+          List<Map.Entry<String, String>> headers = endpointService.convertServiceSpecificHeaders(arr);
 
-    	   assertEquals(2, headers.size());
+          assertEquals(2, headers.size());
     }
    
 
