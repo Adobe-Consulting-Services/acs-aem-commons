@@ -530,7 +530,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!StringUtils.equals(path, errorResource.getPath())) {
             // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
             // we know the errorResource and what the path resolves to is the same
-            resource = resourceResolver.resolve(request, path);
+            // #1415 - First try to get get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
+            resource = resourceResolver.getResource(path);
+
+            if (resource == null) {
+                // #1415 - If the resource is not available at the direct path, then try to resolve (handle sling:alias).
+                // First map the path, as the resolve could duplicate pathing.
+                resource = resourceResolver.resolve(request, resourceResolver.map(request, path));
+            }
         }
 
         // If the resource exists, then use it!

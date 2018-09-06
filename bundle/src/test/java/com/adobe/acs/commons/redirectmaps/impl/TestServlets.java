@@ -70,10 +70,13 @@ public class TestServlets {
     private Resource mockResource;
 
     @Mock
-    private Resource mockMapResource;
+    private Resource mockFileResource;
 
     @Mock
     private Resource mockMapContentResource;
+
+    @Mock
+    private ModifiableValueMap contentProperties;
 
     private String value = null;
 
@@ -81,13 +84,13 @@ public class TestServlets {
 
         @Override
         public <T> T get(String name, Class<T> type) {
-    
+
             return null;
         }
 
         @Override
         public <T> T get(String name, T defaultValue) {
-    
+
             return null;
         }
 
@@ -99,85 +102,92 @@ public class TestServlets {
 
         @Override
         public int size() {
-    
+
             return 0;
         }
 
         @Override
         public boolean isEmpty() {
-    
+
             return false;
         }
 
         @Override
         public boolean containsKey(Object key) {
-    
+
             return false;
         }
 
         @Override
         public boolean containsValue(Object value) {
-    
+
             return false;
         }
 
         @Override
         public Object put(String key, Object v) {
-            value = (String) v;
+            if (key.equals(JcrConstants.JCR_DATA)) {
+                if (v instanceof InputStream) {
+                    try {
+                        value = IOUtils.toString((InputStream) v);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    value = String.valueOf(v);
+                }
+            }
             return v;
         }
 
         @Override
         public Object remove(Object key) {
-    
+
             return null;
         }
 
         @Override
         public void putAll(Map<? extends String, ? extends Object> m) {
-    
 
         }
 
         @Override
         public void clear() {
-    
 
         }
 
         @Override
         public Set<String> keySet() {
-    
+
             return null;
         }
 
         @Override
         public Collection<Object> values() {
-    
+
             return null;
         }
 
         @Override
         public Set<Entry<String, Object>> entrySet() {
-    
+
             return null;
         }
 
     };
-    
+
     private ServletOutputStream os = new ServletOutputStream() {
 
         @Override
         public void write(int b) throws IOException {
-            
+
         }
-        
+
     };
-    
 
     @InjectMocks
     private RedirectMapModel model;
-    
+
     private List<RedirectConfigModel> redirectConfigs = new ArrayList<RedirectConfigModel>() {
         private static final long serialVersionUID = 1L;
 
@@ -211,59 +221,96 @@ public class TestServlets {
             });
         }
     };
-    
+
     @Before
     public void init() throws IOException, NoSuchFieldException {
         log.info("init");
 
         MockitoAnnotations.initMocks(this);
 
-        final MockResourceResolver mockResolver =     new MockResourceResolver() {
+        final MockResourceResolver mockResolver = new MockResourceResolver() {
             public Iterator<Resource> findResources(String query, String language) {
                 return new ArrayList<Resource>().iterator();
-
             }
+
+            @SuppressWarnings("checkstyle:abbreviationaswordinname")
+            public String getUserID() {
+                return "admin";
+            }
+
         };
+        mockResolver.addResource(mockResource);
+
+        doReturn(contentProperties).when(mockResource).adaptTo(ModifiableValueMap.class);
+        doReturn(null).when(contentProperties).put(org.mockito.Matchers.anyString(), org.mockito.Matchers.any());
 
         log.debug("Setting up the request...");
         doReturn(mockResource).when(mockSlingRequest).getResource();
+        doReturn(mockResolver).when(mockResource).getResourceResolver();
         doReturn("0").when(mockSlingRequest).getParameter("idx");
         doReturn("/source").when(mockSlingRequest).getParameter("source");
         doReturn("/target").when(mockSlingRequest).getParameter("target");
+        doReturn("1").when(mockSlingRequest).getParameter("edit-id");
+        doReturn("/edit-source").when(mockSlingRequest).getParameter("edit-source");
+        doReturn("/edit-target").when(mockSlingRequest).getParameter("edit-target");
         doReturn(mockResolver).when(mockSlingRequest).getResourceResolver();
         doReturn(os).when(mockSlingResponse).getOutputStream();
 
-        log.debug("Setting up the resources...");
-        doReturn(mockMapResource).when(mockResource).getChild(RedirectMapModel.MAP_FILE_NODE);
-        PrivateAccessor.setField(model, "redirects", redirectConfigs);
-        PrivateAccessor.setField(model, "redirectMap", mockMapResource);
-        PrivateAccessor.setField(model, "resourceResolver", mockResolver);
+        log.debug("Setting up the resource /etc");
+        doReturn("/etc").when(mockResource).getPath();
+        mockResolver.addResource(mockResource);
+
+        doReturn(mockFileResource).when(mockResource).getChild(RedirectMapModel.MAP_FILE_NODE);
         doReturn(model).when(mockResource).adaptTo(RedirectMapModel.class);
-        doReturn(IOUtils.toInputStream("/source1 /target1\n/source2 /target2")).when(mockMapResource)
+
+        log.debug("Seetting up the resource /etc/redirectMap.txt");
+        doReturn("/etc/redirectMap.txt").when(mockFileResource).getPath();
+        mockResolver.addResource(mockFileResource);
+        doReturn(IOUtils.toInputStream("/source1 /target1\n/source2 /target2")).when(mockFileResource)
                 .adaptTo(InputStream.class);
-        doReturn(mockMapContentResource).when(mockMapResource).getChild(JcrConstants.JCR_CONTENT);
+
+        log.debug("Setting up the resource /etc/redirectMap.txt/jcr:content");
+        doReturn(mockMapContentResource).when(mockFileResource).getChild(JcrConstants.JCR_CONTENT);
+        doReturn("/etc/redirectMap.txt/jcr:content").when(mockMapContentResource).getPath();
         doReturn(mvm).when(mockMapContentResource).adaptTo(ModifiableValueMap.class);
+        mockResolver.addResource(mockMapContentResource);
+
+        log.debug("Setting up the model...");
+        PrivateAccessor.setField(model, "redirects", redirectConfigs);
+        PrivateAccessor.setField(model, "redirectMap", mockFileResource);
+        PrivateAccessor.setField(model, "resourceResolver", mockResolver);
     }
 
     @Test
     public void testAddEntryServlet() throws ServletException, IOException {
         log.info("testAddEntryServlet");
-        AddEntryServlet addEntryServlet = new AddEntryServlet();
-        addEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
-        
+        AddEntryServlet servlet = new AddEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
+
         assertTrue(value.contains("/source /target"));
         log.info(value);
         log.info("Test successful!");
     }
-    
 
     @Test
     public void testRemoveEntryServlet() throws ServletException, IOException {
         log.info("testRemoveEntryServlet");
-        RemoveEntryServlet addEntryServlet = new RemoveEntryServlet();
-        addEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
-        
+        RemoveEntryServlet servlet = new RemoveEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
+
         assertFalse(value.contains("/source1 /target1"));
+        log.info(value);
+        log.info("Test successful!");
+    }
+    
+    @Test
+    public void testUpdateServlet() throws ServletException, IOException {
+        log.info("testRemoveEntryServlet");
+        UpdateEntryServlet servlet = new UpdateEntryServlet();
+        servlet.doPost(mockSlingRequest, mockSlingResponse);
+
+        assertFalse(value.contains("/source2 /target2"));
+        assertTrue(value.contains("/edit-source /edit-target"));
         log.info(value);
         log.info("Test successful!");
     }

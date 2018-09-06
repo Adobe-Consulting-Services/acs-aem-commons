@@ -5,13 +5,50 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
-## [Unreleased]
+## Unreleased
 
 ### Fixed
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1458 - Fixed issue where page date was not updated when modifying redirect map file
+
+### Changed
+- #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
+- #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
+- #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
+
+## [3.17.4] - 2018-08-15
+
+### Fixed
+- #1413 - Added ACL to make the redirect maps globally readable
+
+## [3.17.2] - 2018-08-13
+
+### Fixed
+- #1438 - Ensured Groups do not honor intermediate paths
+- #1424 - HTTP Cache - Handle case (Core CF Component) where the response.getHeaders() throws an exception.
+- #1423 - HTTP Cache - JCR Store - Update the /var/acs-commons/httpcache rep:policy to allow service user to create nodes.
+- #1414 - Fixed issue with TouchUI multifield where field collection was too shallow (did not account for deeply nested structures).
+- #1409 - Package Replication Status Updater throws exceptions when version is being created in parallel
+- #1407 - Package Replication Status Updater does not set correct replication status for policies below editable templates
 - #1417 - Fixed xss vulnerabilities in generic lists
 - #1386 - Fixed ajax calls like undefined.2.json when hovering over parsys
+- #1334 - Package Replication Status Updater does not treat initialContent below editable templates correctly
 - #1301 - Fixed issue in MCP process forms where CoralUI bindings happened twice per form breaking some functionality (like file uploads).
+- #1415 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1349 - Fixed issue with infinite loop in BrandPortalAgentFilter, when mpConfig property is not present.
+- #1441 - Fixed issue with the Report Runner loading custom Report Executors
+- #1429 - Fixed Composite Multifield support for pathfield
+- #1431 - Fixed Composite Multifield support for Coral3 Select
+- #1433 - Fixed issue with Coral 3 UI Checkbox
+- #1443 - Fixed issue with Coral 3 UI datepicker
+- #1451 - Add ns-scoped flags to function to fix repeated toolbar buttons in Edit mode (Shared Component Properties).
+- #1442 - Redirect Map Manager - Fixed error when adding redirects without file uploaded
+- #1426 - On Deploy Scripts - added filter.xml include for /etc/rep:policy
+
+### Changed
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
+- #1420 - MCP page component no longer extends "final" GraniteUI shell component
+- #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
 
 ## [3.17.0] - 2018-05-22
 
