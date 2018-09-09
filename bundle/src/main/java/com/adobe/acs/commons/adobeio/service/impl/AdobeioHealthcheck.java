@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
-import java.util.Collection;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import com.adobe.acs.commons.adobeio.service.EndpointService;
 import com.adobe.acs.commons.adobeio.service.IntegrationService;
@@ -41,8 +40,8 @@ public class AdobeioHealthcheck implements HealthCheck {
     @Reference
     private IntegrationService integrationService;
 
-    @Reference
-    private volatile Collection<EndpointService> endpoints;
+    @Reference (target="(id=sample)",cardinality=ReferenceCardinality.OPTIONAL)
+    private EndpointService endpoint;
 
     @Override
     public Result execute() {
@@ -71,24 +70,22 @@ public class AdobeioHealthcheck implements HealthCheck {
             resultLog.info("IntegrationService not healthy; skipping Endpoint checks.");
         }
 
-        if (endpoints == null || endpoints.isEmpty()) {
-            resultLog.warn("No Endpoint Services found.");
+        if (endpoint == null) {
+            resultLog.warn("No Endpoint Service with id=sample found.");
             return new Result(resultLog);
         }
-        for (EndpointService endpoint : endpoints) {
-            resultLog.info("Checking Adobe I/O endpoint {}", endpoint.getId());
-            resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
-            JsonObject json = endpoint.performIO_Action();
-            if (json != null) {
-                resultLog.debug("JSON-response {}", json.toString());
-                if (StringUtils.contains(json.toString(), "error")) {
-                    resultLog.critical("Error returned from the API-call");
-                }
+        resultLog.info("Checking Adobe I/O endpoint {}", endpoint.getId());
+        resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
+        JsonObject json = endpoint.performIO_Action();
+        if (json != null) {
+            resultLog.debug("JSON-response {}", json.toString());
+            if (StringUtils.contains(json.toString(), "error")) {
+                 resultLog.critical("Error returned from the API-call");
+            }
             } else {
                 resultLog.info("Healthcheck completed");
             }
-        }
-
+ 
         resultLog.info("Healthcheck completed");
 
         return new Result(resultLog);
