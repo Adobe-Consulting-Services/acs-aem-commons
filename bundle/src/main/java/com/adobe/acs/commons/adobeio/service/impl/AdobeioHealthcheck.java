@@ -41,7 +41,7 @@ public class AdobeioHealthcheck implements HealthCheck {
     @Reference
     private IntegrationService integrationService;
 
-    @Reference
+    @Reference 
     private volatile Collection<EndpointService> endpoints;
 
     @Override
@@ -76,22 +76,28 @@ public class AdobeioHealthcheck implements HealthCheck {
             return new Result(resultLog);
         }
         for (EndpointService endpoint : endpoints) {
-            resultLog.info("Checking Adobe I/O endpoint {}", endpoint.getId());
-            resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
-            JsonObject json = endpoint.performIO_Action();
-            if (json != null) {
-                resultLog.debug("JSON-response {}", json.toString());
-                if (StringUtils.contains(json.toString(), "error")) {
-                    resultLog.critical("Error returned from the API-call");
-                }
-            } else {
-                resultLog.info("Healthcheck completed");
-            }
+            execute(resultLog, endpoint);
         }
 
         resultLog.info("Healthcheck completed");
 
         return new Result(resultLog);
     }
+
+   private void execute(final FormattingResultLog resultLog, EndpointService endpoint) {
+      resultLog.info("Checking Adobe I/O endpoint {}", endpoint.getId());
+      if ("GET".equalsIgnoreCase(endpoint.getMethod())) {
+         resultLog.debug("Executing Adobe I/O call to {}", endpoint.getUrl());
+         JsonObject json = endpoint.performIO_Action();
+         if (json != null) {
+            resultLog.debug("JSON-response {}", json.toString());
+            if (StringUtils.contains(json.toString(), "error")) {
+                resultLog.critical("Error returned from the API-call");
+            }
+         }
+      } else {
+        resultLog.debug("Method != GET, but {}", endpoint.getMethod());
+      }
+   }
 
 }
