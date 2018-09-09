@@ -54,7 +54,8 @@ public interface EndpointService {
 
 
     /**
-     * Performs the GET-action connected to the endpoint
+     * Performs the action connected to the endpoint, and the associated details.
+     * 
      * @return JsonObject containing the result of the action
      */
     JsonObject performIO_Action();
