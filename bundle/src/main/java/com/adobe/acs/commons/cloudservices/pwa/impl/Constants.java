@@ -49,7 +49,7 @@ public class Constants {
     public static final String KEY_SCOPE = "scope";
     public static final String KEY_ICONS = "icons";
     public static final String KEY_ICON_SRC = "src";
-    public static final String KEY_ICON_SIZE = "size";
+    public static final String KEY_ICON_SIZE = "sizes";
     public static final String KEY_ICON_TYPE = "type";
     public static final String KEY_LANGUAGE = "lang";
  
