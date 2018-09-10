@@ -21,6 +21,7 @@ function isCacheable(request) {
     }
     config.no_cache.push('service-worker');
     config.no_cache.push('.pwa.');
+    config.no_cache.push('manifest');
     (config.no_cache || []).forEach(function(pattern) {
         if (cacheable && request.url.match(pattern)) {
             cacheable = false;
@@ -107,9 +108,30 @@ self.addEventListener('fetch', function(event) {
     if (!isCacheable(event.request)) {
         return;
     }
-// network then cache fallback
+
+    // cache then network fallback
     event.respondWith(
-        fetch(event.request)
+        caches.open(config.cache_name).then(function(cache) {
+            return cache.match(event.request).then(function (cachedResponse) {
+                return cachedResponse || fetch(event.request)
+                    .then(function(response) {
+                       cache.put(event.request, response.clone());
+                            return response;
+                }).catch(function() {
+                    return cache.match(getFallback(event.request))
+                        .then(function(cachedResponse) {
+                            return cachedResponse;
+                    });
+                });
+            });
+        })
+   
+    );
+
+    // network then cache fallback
+    /*
+
+         fetch(event.request)
         .then(function(response) {
             return caches.open(config.cache_name)
                 .then(function(cache) {
@@ -119,8 +141,7 @@ self.addEventListener('fetch', function(event) {
         }).catch(function(err) {
             return cachedResponse(event);
         })
-    );
-
+*/
 
 });
 

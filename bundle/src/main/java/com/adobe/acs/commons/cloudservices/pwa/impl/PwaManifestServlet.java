@@ -147,7 +147,7 @@ public class PwaManifestServlet extends SlingSafeMethodsServlet {
 
                         json.addProperty(KEY_ICON_SRC, path);
                         json.addProperty(KEY_ICON_SIZE, p.get(PN_ICON_SIZE, String.class));
-                        json.addProperty(KEY_ICON_TYPE, "png");
+                        json.addProperty(KEY_ICON_TYPE, mimeTypeService.getMimeType(path));
 
                         icons.add(json);
                     });

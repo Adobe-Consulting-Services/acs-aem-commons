@@ -128,7 +128,15 @@
                                                                             jcr:primaryType="nt:unstructured"
                                                                             sling:resourceType="acs-commons/cloudservices/pwa/data-sources/client-library-categories"/>
                                                                 </service-worker-js>
-
+                                                                <scope
+                                                                        granite:id="pwa-cloudconfiguration-version"
+                                                                        jcr:primaryType="nt:unstructured"
+                                                                        sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                                        fieldLabel="Service Worker Scope"
+                                                                        fieldDescription="A URL that defines a service worker\'s registration scope.relative to the base URL of the application. By default, the scope value for a service worker registration is set to the directory where the service worker script is located"
+                                                                        name="./scope"
+                                                                        value="/"
+                                                                        required="{Boolean}true"/>
                                                                 <version
                                                                         granite:id="pwa-cloudconfiguration-version"
                                                                         jcr:primaryType="nt:unstructured"
