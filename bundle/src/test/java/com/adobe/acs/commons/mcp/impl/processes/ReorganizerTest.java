@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
-import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
@@ -86,13 +85,7 @@ public class ReorganizerTest {
     }
     
     @Test(expected = RepositoryException.class)
-    public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
-        ResourceResolver rr = getEnhancedMockResolver();
-        Reorganizer tool = new ReorganizerFactory().createProcessDefinition();
-        ProcessInstanceImpl instance = spy(new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test"));
-        
-        doNothing().when(instance).persistStatus(anyObject());
-
+    public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException, PersistenceException {        
         assertEquals("Reorganizer: relocator test", instance.getName());
         instance.init(rr, Collections.EMPTY_MAP);
         tool.buildProcess(instance, rr);            
