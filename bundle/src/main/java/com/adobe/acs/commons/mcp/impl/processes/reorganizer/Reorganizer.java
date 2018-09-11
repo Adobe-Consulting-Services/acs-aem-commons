@@ -568,7 +568,7 @@ public class Reorganizer extends ProcessDefinition {
         return prvlgs;
     }
 
-    private void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
+    public void checkNodeAcls(ResourceResolver res, String path, Privilege[] prvlgs) throws RepositoryException {
         Actions.setCurrentItem(path);
         Session session = res.adaptTo(Session.class);
         boolean report = res.getResource(path).getResourceType().equals(NameConstants.NT_PAGE);
