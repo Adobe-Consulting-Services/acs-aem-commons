@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -89,9 +90,9 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final transient ThreadLocal<String> currentPath;
     private final List<Failure> failures;
     private final transient AtomicBoolean cleanupHandlerRegistered = new AtomicBoolean(false);
-    private final transient List<CheckedConsumer<ResourceResolver>> successHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final transient List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = Collections.synchronizedList(new ArrayList<>());
-    private final transient List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final transient List<CheckedConsumer<ResourceResolver>> successHandlers = new CopyOnWriteArrayList<>();
+    private final transient List<CheckedBiConsumer<List<Failure>, ResourceResolver>> errorHandlers = new CopyOnWriteArrayList<>();
+    private final transient List<Runnable> finishHandlers = new CopyOnWriteArrayList<>();
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
         this.name = name;

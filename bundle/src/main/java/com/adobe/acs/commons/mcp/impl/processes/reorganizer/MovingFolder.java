@@ -18,6 +18,7 @@ package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 import com.adobe.acs.commons.fam.actions.Actions;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
+import com.day.cq.replication.ReplicationActionType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jcr.Session;
@@ -73,5 +74,6 @@ public class MovingFolder extends MovingNode {
                 }
             }));
         }
+        replicatorQueue.replicate(session, ReplicationActionType.DEACTIVATE, getSourcePath());
     }
 }

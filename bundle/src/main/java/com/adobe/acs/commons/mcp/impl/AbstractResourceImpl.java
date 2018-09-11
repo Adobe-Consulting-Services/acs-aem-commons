@@ -76,6 +76,17 @@ public class AbstractResourceImpl extends AbstractResource {
             ((AbstractResourceImpl) res).setResourceResolver(rr);
         }
     }
+    
+    public void removeChild(Resource res) {
+        children.remove(res);
+        if (res instanceof AbstractResourceImpl) {
+            AbstractResourceImpl child = ((AbstractResourceImpl) res);
+            child.parent = null;
+            if (child.path.startsWith("/")) {
+                child.path = child.path.replaceFirst(path + "/", "");
+            }
+        }
+    }
 
     @Override
     public String getName() {

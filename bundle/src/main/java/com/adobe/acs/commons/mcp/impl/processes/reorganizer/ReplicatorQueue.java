@@ -36,8 +36,8 @@ import javax.jcr.Session;
  * Collect a list of replication events for later examination and/or replay.
  */
 public class ReplicatorQueue implements Replicator {
-    Map<String, ReplicationOptions> deactivateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
-    Map<String, ReplicationOptions> activateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
+    private Map<String, ReplicationOptions> deactivateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
+    private Map<String, ReplicationOptions> activateOperations = Collections.synchronizedMap(new LinkedHashMap<>());
 
     @Override
     public void replicate(Session session, ReplicationActionType actionType, String path) throws ReplicationException {
@@ -49,11 +49,11 @@ public class ReplicatorQueue implements Replicator {
         Map<String, ReplicationOptions> queue;
         switch (actionType) {
             case ACTIVATE:
-                queue = activateOperations;
+                queue = getActivateOperations();
                 break;
             case DEACTIVATE:
             case DELETE:
-                queue = deactivateOperations;
+                queue = getDeactivateOperations();
                 break;
             default:
                 queue = null;
@@ -77,4 +77,18 @@ public class ReplicatorQueue implements Replicator {
     public List<ReplicationContentFilter> createContentFilterChain(ReplicationAction action) {
         throw new UnsupportedOperationException("Not supported yet.");
     }    
+
+    /**
+     * @return the deactivateOperations
+     */
+    public Map<String, ReplicationOptions> getDeactivateOperations() {
+        return deactivateOperations;
+    }
+
+    /**
+     * @return the activateOperations
+     */
+    public Map<String, ReplicationOptions> getActivateOperations() {
+        return activateOperations;
+    }
 }

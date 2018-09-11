@@ -357,6 +357,10 @@ public class Reorganizer extends ProcessDefinition {
         return Optional.of(node);
     }
 
+    public void findReferences(ResourceResolver rr, MovingNode node) throws IllegalAccessException {
+        node.findReferences(rr, referenceSearchRoot, maxReferences);
+    }
+
     protected void identifyReferences(ActionManager manager) {
         AtomicInteger discoveredReferences = new AtomicInteger();
         manager.deferredWithResolver(rr -> {
@@ -366,7 +370,7 @@ public class Reorganizer extends ProcessDefinition {
                         if (childNode.isSupposedToBeReferenced()) {
                             manager.deferredWithResolver(rr3 -> {
                                 Actions.setCurrentItem("Looking for references to " + childNode.getSourcePath());
-                                childNode.findReferences(rr3, referenceSearchRoot, maxReferences);
+                                findReferences(rr3, childNode);
                                 discoveredReferences.addAndGet(childNode.getAllReferences().size());
                                 if (detailedReport) {
                                     note(childNode.getSourcePath(), Report.all_references, childNode.getAllReferences().size());
@@ -602,7 +606,7 @@ public class Reorganizer extends ProcessDefinition {
                 }
             });
         });
-        allPaths.addAll(replicatorQueue.deactivateOperations.keySet());
+        allPaths.addAll(replicatorQueue.getDeactivateOperations().keySet());
         return allPaths.stream();
     }
 
@@ -613,14 +617,14 @@ public class Reorganizer extends ProcessDefinition {
                 allPaths.addAll(node.getPublishedReferences());
             });
         });
-        allPaths.addAll(replicatorQueue.activateOperations.keySet());
+        allPaths.addAll(replicatorQueue.getActivateOperations().keySet());
         return allPaths.stream();
     }
 
     private Stream<String> getAllReplicationPaths() {
         return Stream.concat(
-                replicatorQueue.activateOperations.keySet().stream(),
-                replicatorQueue.deactivateOperations.keySet().stream()
+                replicatorQueue.getActivateOperations().keySet().stream(),
+                replicatorQueue.getDeactivateOperations().keySet().stream()
         ).distinct();
     }
 

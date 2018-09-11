@@ -45,4 +45,20 @@ public class ReorganizerFactory extends ProcessDefinitionFactory<Reorganizer> {
     public Reorganizer createProcessDefinitionInstance() {
         return new Reorganizer(pageManagerFactory, replicator);
     }
+    
+    /**
+     * Used to inject mock services
+     * @param factory mock factory
+     */
+    public void setPageManagerFactory(PageManagerFactory factory) {
+        pageManagerFactory = factory;
+    }
+    
+    /**
+     * Used to inject mock services
+     * @param factory mock replicator service
+     */
+    public void setReplicator(Replicator replicator) {
+        this.replicator = replicator;
+    }
 }
