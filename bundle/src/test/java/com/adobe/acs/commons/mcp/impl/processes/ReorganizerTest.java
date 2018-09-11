@@ -50,9 +50,12 @@ import com.adobe.acs.commons.mcp.impl.processes.reorganizer.ReplicatorQueue;
 import com.day.cq.dam.api.DamConstants;
 import java.util.List;
 import java.util.function.Function;
+import javax.jcr.Workspace;
+import javax.jcr.observation.ObservationManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,7 +67,25 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 public class ReorganizerTest {
-//    @Test(expected = RepositoryException.class)
+    ReorganizerFactory factory = new ReorganizerFactory();
+    Reorganizer tool;
+    ProcessInstanceImpl instance;
+    ReplicatorQueue queue;
+    ResourceResolver rr;
+    
+    @Before
+    public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
+        queue = spy(new ReplicatorQueue());        
+        factory.setReplicator(queue);
+        tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
+        instance = prepareProocessInstance(
+                new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
+        );
+        rr = getEnhancedMockResolver();
+        when(rr.hasChanges()).thenReturn(true);
+    }
+    
+    @Test(expected = RepositoryException.class)
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException, PersistenceException {
         ResourceResolver rr = getEnhancedMockResolver();
         Reorganizer tool = new ReorganizerFactory().createProcessDefinition();
@@ -78,14 +99,8 @@ public class ReorganizerTest {
         fail("That should have thrown an error");
     }
     
-//    @Test
+    @Test
     public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException, IllegalAccessException {
-        final ResourceResolver rr = getEnhancedMockResolver();
-        Reorganizer tool = prepareProcessDefinition(new ReorganizerFactory().createProcessDefinition(), null);
-        ProcessInstanceImpl instance = prepareProocessInstance(
-                new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
-        );
-        
         assertEquals("Reorganizer: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
@@ -99,17 +114,6 @@ public class ReorganizerTest {
     
     @Test
     public void noPublishTest() throws LoginException, DeserializeException, RepositoryException, PersistenceException, Exception {
-        final ResourceResolver rr = getEnhancedMockResolver();
-        
-        ReorganizerFactory factory = new ReorganizerFactory();
-        ReplicatorQueue queue = spy(new ReplicatorQueue());
-        
-        factory.setReplicator(queue);
-        Reorganizer tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
-        ProcessInstanceImpl instance = prepareProocessInstance(
-                new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
-        );
-
         assertEquals("Reorganizer: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
@@ -119,18 +123,11 @@ public class ReorganizerTest {
         instance.init(rr, values);
         instance.run(rr);
         assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/folderA"));
-        assertTrue(queue.getActivateOperations().isEmpty());   
+        assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/republishA"));
     }    
     
-//    @Test
+    @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException, IllegalAccessException {
-        final ResourceResolver rr = getEnhancedMockResolver();
-        Reorganizer tool = prepareProcessDefinition(new ReorganizerFactory().createProcessDefinition(), null);
-        ProcessInstanceImpl instance = prepareProocessInstance(
-                new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
-        );
-        
-
         assertEquals("Reorganizer: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
@@ -162,10 +159,8 @@ public class ReorganizerTest {
         put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
     }};
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
-        final ResourceResolver rr = getFreshMockResolver();
+        rr = getFreshMockResolver();
         
-        when(rr.hasChanges()).thenReturn(true);
-
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {
             String path = entry.getKey();
             String type = entry.getValue();
@@ -183,6 +178,11 @@ public class ReorganizerTest {
 
         Session ses = mock(Session.class);
         when(rr.adaptTo(Session.class)).thenReturn(ses);
+        Workspace wk = mock(Workspace.class);
+        ObservationManager om = mock(ObservationManager.class);
+        when(ses.getWorkspace()).thenReturn(wk);
+        when(wk.getObservationManager()).thenReturn(om);
+        
         AccessControlManager acm = mock(AccessControlManager.class);
         when(ses.getAccessControlManager()).thenReturn(acm);
         when(acm.privilegeFromName(any())).thenReturn(mock(Privilege.class));
