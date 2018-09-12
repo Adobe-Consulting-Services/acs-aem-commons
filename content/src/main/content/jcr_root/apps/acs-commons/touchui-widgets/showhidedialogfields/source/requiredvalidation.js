@@ -7,55 +7,57 @@
  * default AEM validator validates the field even if it is hidden.
  * 
  */
-$.validator
-    .register({
-      selector : '.field-required',
-      validate : function(el) {
-        var field, value;
+(function($, Granite) {
+  "use strict";
+  
+  $(window)
+      .adaptTo("foundation-registry")
+      .register(
+          "foundation.validation.validator",
+          {
+            selector : ".field-required",
+            validate : function(el) {
+              var field, value;
 
-        field = el.closest(".coral-Form-field");
-        value = el.val();
-        
-        // check if the field or or its parent is hidden
-        var hidden = $(field).hasClass('hide') || $(field).closest('.hide').hasClass('hide');
+              field = $(el).closest(".coral-Form-field");
+              value = $(el).val();
 
-        // if field or its parent not hidden, validate
-        if (!hidden && (value === null || value === '')) {
-          return Granite.I18n.get('The field is required');
-        }
-        return null;
-      },
-      show : function(el, message) {
-        var fieldErrorEl, field, error;
+              // check if the field or or its parent is hidden
+              var hidden = $(field).hasClass('hide') || $(field).closest('.hide').length;
 
-        fieldErrorEl = $("<span class='coral-Form-fielderror coral-Icon coral-Icon--alert" +
-         " coral-Icon--sizeS' data-init='quicktip' data-quicktip-type='error' />");
-        field = el.closest(".coral-Form-field");
+              // if field or its parent not hidden, validate
+              if (!hidden && (value === null || value === '')) {
+                return Granite.I18n.get('The field is required');
+              }
+              return null;
+            },
+            show : function(el, message, ctx) {
+              var fieldErrorEl, field, error;
 
-        field.attr("aria-invalid", "true").toggleClass("is-invalid", true);
+              fieldErrorEl = $("<span class='coral-Form-fielderror coral-Icon coral-Icon--alert coral-Icon--sizeS' data-init='quicktip' data-quicktip-type='error' />");
+              field = $(el).closest(".coral-Form-field");
 
-        field.nextAll(".coral-Form-fieldinfo").addClass(
-            "u-coral-screenReaderOnly");
+              field.attr("aria-invalid", "true").toggleClass("is-invalid", true);
 
-        error = field.nextAll(".coral-Form-fielderror");
+              field.nextAll(".coral-Form-fieldinfo").addClass("u-coral-screenReaderOnly");
 
-        if (error.length === 0) {
-          var arrow = field.closest("form").hasClass("coral-Form--vertical") ? "right"
-              : "top";
+              error = field.nextAll(".coral-Form-fielderror");
 
-          fieldErrorEl.attr("data-quicktip-arrow", arrow).attr(
-              "data-quicktip-content", message).insertAfter(field);
-        } else {
-          error.data("quicktipContent", message);
-        }
-      },
-      clear : function(el) {
-        var field = el.closest(".coral-Form-field");
+              if (error.length === 0) {
+                var arrow = field.closest("form").hasClass("coral-Form--vertical") ? "right" : "top";
 
-        field.removeAttr("aria-invalid").removeClass("is-invalid");
+                fieldErrorEl.attr("data-quicktip-arrow", arrow).attr("data-quicktip-content", message).insertAfter(field);
+              } else {
+                error.data("quicktipContent", message);
+              }
+            },
+            clear : function(el, ctx) {
+              var field = $(el).closest(".coral-Form-field");
 
-        field.nextAll(".coral-Form-fielderror").tooltip("hide").remove();
-        field.nextAll(".coral-Form-fieldinfo").removeClass(
-            "u-coral-screenReaderOnly");
-      }
-    });
+              field.removeAttr("aria-invalid").removeClass("is-invalid");
+
+              field.nextAll(".coral-Form-fielderror").tooltip("hide").remove();
+              field.nextAll(".coral-Form-fieldinfo").removeClass("u-coral-screenReaderOnly");
+            }
+          });
+})(Granite.$, Granite);
