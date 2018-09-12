@@ -15,7 +15,7 @@
       .register(
           "foundation.validation.validator",
           {
-            selector : ".field-required",
+            selector : ".acs-commons-field-required-allow-hidden",
             validate : function(el) {
               var field, value;
 
