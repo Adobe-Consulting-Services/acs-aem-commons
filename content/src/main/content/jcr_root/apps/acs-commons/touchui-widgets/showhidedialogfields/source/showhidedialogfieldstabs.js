@@ -106,22 +106,22 @@
    * Hides/unhides the element
    */
   function hideElement($elem, hide) {
-    var $field_wrapper = $elem.closest('.coral-Form-fieldwrapper');
-    var tab_panel = $elem.parent().parent("coral-panel[role='tabpanel']");
-    var tab_label_id = $(tab_panel).attr('aria-labelledby');
+    var $fieldWrapper = $elem.closest('.coral-Form-fieldwrapper');
+    var tabPanel = $elem.parent().parent("coral-panel[role='tabpanel']");
+    var tabLabelId = $(tabPanel).attr('aria-labelledby');
 
     if (hide) {
       // If target is a container, hides the container
       $elem.addClass('hide');
       // Hides the target field wrapper. Thus, hiding label, quicktip etc.
-      $field_wrapper.addClass('hide');
+      $fieldWrapper.addClass('hide');
       // hide the tab
-      $('#' + tab_label_id).addClass('hide');
+      $('#' + tabLabelId).addClass('hide');
     } else {
       // Unhide target container/field wrapper/tab
       $elem.removeClass('hide');
-      $field_wrapper.removeClass('hide');
-      $('#' + tab_label_id).removeClass('hide');
+      $fieldWrapper.removeClass('hide');
+      $('#' + tabLabelId).removeClass('hide');
     }
   }
 
