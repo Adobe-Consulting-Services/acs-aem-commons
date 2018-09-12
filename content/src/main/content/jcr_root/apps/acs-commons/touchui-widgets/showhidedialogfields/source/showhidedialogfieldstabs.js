@@ -17,7 +17,7 @@
  *   unhidden based on combination of dropdown and checkbox value.
  * - the dropdownshowhidetargetvalue and/or checkboxshowhidetargetvalue attribute can be added to dialog tab items to show and
  *   hide them.
- * - (optional) add css class field-required to provided required field validation, which turns off when the field is hidden
+ * - (optional) add css class acs-commons-field-required-allow-hidden to provided required field validation, which turns off when the field is hidden
  */
 (function(document, $) {
   "use strict";
