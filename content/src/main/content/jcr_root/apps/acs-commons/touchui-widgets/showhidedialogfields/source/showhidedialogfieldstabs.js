@@ -3,19 +3,19 @@
  * and dialog tabs based on the selection made in the dropdown/select or on checkbox check or their combination. 
  *
  * How to use:
- * - add the empty property cq-dialog-dropdown-checkbox-showhide to the dropdown/select or checkbox element
- * - add the data attribute cq-dialog-dropdown-checkbox-showhide-target to the dropdown/select or checkbox element, 
+ * - add the empty property acs-cq-dialog-dropdown-checkbox-showhide to the dropdown/select or checkbox element
+ * - add the data attribute acs-cq-dialog-dropdown-checkbox-showhide-target to the dropdown/select or checkbox element, 
  *   value should be the selector, usually a specific class name, to find all possible target elements that can be shown/hidden.
  * - add the target class to each target component that can be shown/hidden
  * - add the class hide to each target component to make them initially hidden
- * - add the attribute dropdownshowhidetargetvalue to the target component, the value should equal the value of the select
+ * - add the attribute acs-dropdownshowhidetargetvalue to the target component, the value should equal the value of the select
  *   option that will unhide this element. Multiple values can be provided separated with spaces.
- * - add the attribute checkboxshowhidetargetvalue to the target component, the value should equal to:
+ * - add the attribute acs-checkboxshowhidetargetvalue to the target component, the value should equal to:
  *   'true', if the field is to be displayed when Checkbox is selected.
  *   'false', if the field is to be displayed when Checkbox is unselected.
- * - add both dropdownshowhidetargetvalue and checkboxshowhidetargetvalue attribute to each target component, which should be
+ * - add both acs-dropdownshowhidetargetvalue and acs-checkboxshowhidetargetvalue attribute to each target component, which should be
  *   unhidden based on combination of dropdown and checkbox value.
- * - the dropdownshowhidetargetvalue and/or checkboxshowhidetargetvalue attribute can be added to dialog tab items to show and
+ * - the acs-dropdownshowhidetargetvalue and/or acs-checkboxshowhidetargetvalue attribute can be added to dialog tab items to show and
  *   hide them.
  * - (optional) add css class acs-commons-field-required-allow-hidden to provided required field validation, which turns off when the field is hidden
  */
@@ -26,7 +26,7 @@
   $(document).on("foundation-contentloaded", function() {
     // if there is already an initial value make sure the according target
     // element becomes visible
-    $("[data-cq-dialog-dropdown-checkbox-showhide]").each(function() {	
+    $("[data-acs-cq-dialog-dropdown-checkbox-showhide]").each(function() {	
       // handle Coral3 base drop-down/checkbox
       Coral.commons.ready($(this), function(element) {
         showHide(element);
@@ -35,15 +35,15 @@
 
   });
 
-  $(document).on("change", "[data-cq-dialog-dropdown-checkbox-showhide]", function() {
+  $(document).on("change", "[data-acs-cq-dialog-dropdown-checkbox-showhide]", function() {
     showHide($(this));
   });
 
   function showHide(el) {
     // get the selector to find the target elements. it is stored as
     // data-attribute
-    // cqDialogDropdownCheckboxShowhideTarget
-    var target = el.data('cqDialogDropdownCheckboxShowhideTarget');
+    // acsCqDialogDropdownCheckboxShowhideTarget
+    var target = el.data('acsCqDialogDropdownCheckboxShowhideTarget');
     var checkboxValue = '';
     var dropdownValue = '';
 
@@ -92,12 +92,12 @@
    * and checkbox value
    */
   function shouldBeVisible($elem, dropdownValue, checkboxValue) {
-    if ($elem.is('[data-dropdownshowhidetargetvalue]') && $elem.is('[data-checkboxshowhidetargetvalue]')) {
-      return $elem.attr('data-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0 && $elem.attr('data-checkboxshowhidetargetvalue') === checkboxValue;
-    } else if ($elem.is('[data-dropdownshowhidetargetvalue]')) {
-      return $elem.attr('data-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0;
-    } else if ($elem.is('[data-checkboxshowhidetargetvalue]')) {
-      return $elem.attr('data-checkboxshowhidetargetvalue') === checkboxValue;
+    if ($elem.is('[data-acs-dropdownshowhidetargetvalue]') && $elem.is('[data-acs-checkboxshowhidetargetvalue]')) {
+      return $elem.attr('data-acs-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0 && $elem.attr('data-acs-checkboxshowhidetargetvalue') === checkboxValue;
+    } else if ($elem.is('[data-acs-dropdownshowhidetargetvalue]')) {
+      return $elem.attr('data-acs-dropdownshowhidetargetvalue').indexOf(dropdownValue) >= 0;
+    } else if ($elem.is('[data-acs-checkboxshowhidetargetvalue]')) {
+      return $elem.attr('data-acs-checkboxshowhidetargetvalue') === checkboxValue;
     }
     return false;
   }
