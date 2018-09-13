@@ -1,7 +1,7 @@
 /**
  * Register required field validation.
  * 
- * The validator keys off of the ".field-required" selector. To use in Touch UI
+ * The validator keys off of the ".acs-commons-field-required-allow-hidden" selector. To use in Touch UI
  * dialogs, add the class "field-required" to a textfield. It is implemented to
  * get around the problem that a hidden required field cannot be submitted. The
  * default AEM validator validates the field even if it is hidden.
