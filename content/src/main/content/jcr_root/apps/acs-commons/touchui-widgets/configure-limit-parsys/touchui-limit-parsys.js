@@ -39,7 +39,7 @@
         //didn't find the function in util.js, we'll use _discover instead.
         return Granite.author.components._discover(design, path);
       }
-     };
+     }
     /**
      * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromPolicy
      */
