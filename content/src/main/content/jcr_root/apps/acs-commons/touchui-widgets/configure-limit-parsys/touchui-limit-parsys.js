@@ -27,19 +27,31 @@
     "use strict";
 
     var ACS_COMPONENTS_LIMIT = "acsComponentsLimit";
-
+    /** AEM 6.2 does not have the function resolveProperty in util.js and thus
+    * breaks authoring on a supported version. To deal with this we need to detect
+    * if the function is available and fallback to 6.2 functions if it is not.
+    */
+    function correctlyResolveProperty(design, path){
+      if ("resolveProperty" in Granite.author.util) {
+        //function was found, use it.
+        return Granite.author.util.resolveProperty(design, path);
+      }else{
+        //didn't find the function in util.js, we'll use _discover instead.
+        return Granite.author.components._discover(design, path);
+      }
+     };
     /**
      * mostly taken over from /libs/cq/gui/components/authoring/editors/clientlibs/core/js/storage/components.js _findAllowedComponentsFromPolicy
      */
     function _findPropertyFromPolicy(editable, design, propertyName) {
-        var cell = Granite.author.util.resolveProperty(design, editable.config.policyPath);
+        var cell = correctlyResolveProperty(design, editable.config.policyPath);
 
         if (!cell || !cell[propertyName]) {
             // Inherit property also from its parent (if not set in the local policy path)
             var parent = Granite.author.editables.getParent(editable);
 
             while (parent && !(cell && cell[propertyName])) {
-                cell = Granite.author.util.resolveProperty(design, parent.config.policyPath);
+                cell = correctlyResolveProperty(design, parent.config.policyPath);
                 parent = Granite.author.editables.getParent(parent);
             }
         }
@@ -63,7 +75,7 @@
 
                 if (cellSearchPaths) {
                     for (var i = 0; i < cellSearchPaths.length; i++) {
-                        var cell = Granite.author.util.resolveProperty(design, cellSearchPaths[i]);
+                        var cell = correctlyResolveProperty(design, cellSearchPaths[i]);
 
                         if (cell && cell[propertyName]) {
                             return cell[propertyName];
