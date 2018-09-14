@@ -118,11 +118,12 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         "rep:Group",
         "sling:OrderedFolder/nt:unstructured",
         ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+        "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
         "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
     };
 
     @Property(label = "Replication Status Node Type and Path Restrictions",
-            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'." ,
+            description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate nodetypes will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome." ,
             cardinality = Integer.MAX_VALUE,
             value = {
                     "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
@@ -131,6 +132,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                     "rep:Group",
                     "sling:OrderedFolder/nt:unstructured",
                     ReplicationStatus.NODE_TYPE, // replication status must be after cq:PageContent, because cq:PageContent is of mixin "cq:ReplicatonStatus" as well
+                    "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
                     "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
             })
     public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
