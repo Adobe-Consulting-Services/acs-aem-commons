@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## Unreleased
 
 ### Fixed
+- #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
 
