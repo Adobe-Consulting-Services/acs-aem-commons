@@ -176,7 +176,7 @@ public abstract class MovingNode {
      * @param consumer Consumer which accepts nodes
      */
     public void visit(Consumer<MovingNode> consumer) {
-        visit(consumer, null, null);
+        visit(consumer, consumer, null);
     }
 
     /**
