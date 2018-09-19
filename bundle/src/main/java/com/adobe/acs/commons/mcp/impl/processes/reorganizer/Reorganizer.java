@@ -43,6 +43,7 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -73,6 +74,8 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
  * Relocate Pages and/or Sites using a parallelized move process
  */
 public class Reorganizer extends ProcessDefinition {
+    private static final String DESTINATION_COL = "destination";
+    private static final String SOURCE_COL = "source";
 
     public Reorganizer(PageManagerFactory pageManagerFactory, Replicator replicator) {
         this.pageManagerFactory = pageManagerFactory;
@@ -92,7 +95,7 @@ public class Reorganizer extends ProcessDefinition {
             required = false)
     private RequestParameter sourceFile;
 
-    @FormField(name = "Source",
+    @FormField(name = SOURCE_COL,
             description = "Select page/site to be moved for single move",
             hint = "/content/my-site/en/my-page",
             component = NodeSelectComponent.class,
@@ -100,7 +103,7 @@ public class Reorganizer extends ProcessDefinition {
             options = {"base=/content"})
     private String sourceJcrPath;
 
-    @FormField(name = "Destination",
+    @FormField(name = DESTINATION_COL,
             description = "Destination location (must include new name for source node even if same)",
             hint = "Move: /content/new-place/my-page | Rename: /content/new-place/new-name",
             component = NodeSelectComponent.class,
@@ -211,15 +214,19 @@ public class Reorganizer extends ProcessDefinition {
         if (sourceFile != null && sourceFile.getSize() > 0) {
             Spreadsheet sheet;
             try {
-                sheet = new Spreadsheet(sourceFile, "Source", "Destination");
+                sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
             } catch (IOException ex) {
                 Logger.getLogger(Reorganizer.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RepositoryException("Unable to parse spreadsheet", ex);
             }
+            
+            if (!sheet.getHeaderRow().contains(SOURCE_COL) || !sheet.getHeaderRow().contains(DESTINATION_COL)) {
+                throw new RepositoryException(MessageFormat.format("Spreadsheet should have two columns, respectively named {0} and {1}", SOURCE_COL, DESTINATION_COL));                
+            }
+            
             sheet.getDataRowsAsCompositeVariants().forEach(row -> {
-                movePaths.put(
-                        row.get("Source").toString(),
-                        row.get("Destination").toString());
+                movePaths.put(row.get(SOURCE_COL).toString(),
+                        row.get(DESTINATION_COL).toString());
             });
         } else {
             if (sourceJcrPath == null) {
@@ -554,7 +561,7 @@ public class Reorganizer extends ProcessDefinition {
     @Override
     public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         GenericReport report = new GenericReport();
-        report.setRows(reportData, "Source", Report.class);
+        report.setRows(reportData, SOURCE_COL, Report.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
