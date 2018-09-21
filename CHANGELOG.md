@@ -6,6 +6,7 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
+- #1492 - Fix double encoding with Resource Resolver Mapping Rewriter.
 
 ### Fixed
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
