@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.17.5-SNAPSHOT</version>
+        <version>3.18.0</version>
     </parent>
 
     <!-- ====================================================================== -->
