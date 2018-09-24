@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
 - #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
 - #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
+- #1476 - Asset ingestion no longer mangles folder names, if they are already valid JCR node names
 
 ## [3.17.4] - 2018-08-15
 
