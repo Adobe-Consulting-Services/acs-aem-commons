@@ -34,7 +34,8 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 @RunWith(PowerMockRunner.class)
 public class TotalCacheSizeVisitorTest
 {
-    private static final long TEST_FILE_SIZE = 63 + System.lineSeparator().length() * 2;
+    private static final long TEST_FILE_SIZE_WIN = 63 + 4;
+    private static final long TEST_FILE_SIZE_POSIX = 63 + 2;
 
     @Test public void test() throws Exception
     {
@@ -47,7 +48,12 @@ public class TotalCacheSizeVisitorTest
         final TotalCacheSizeVisitor visitor = getMockedExpiredNodesVisitor();
         visitor.visit(rootNode);
 
-        assertEquals(TEST_FILE_SIZE * 30, visitor.getBytes());
+        long winSize = TEST_FILE_SIZE_WIN * 30;
+        long posixSize = TEST_FILE_SIZE_POSIX * 30;
+        long actualSize = visitor.getBytes();
+        if (actualSize != winSize && actualSize != posixSize) {
+            throw new Exception("File size was not the expected size, expected " + posixSize + " but was " + actualSize);
+        }
     }
 
     public TotalCacheSizeVisitor getMockedExpiredNodesVisitor()
