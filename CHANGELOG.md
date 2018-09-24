@@ -6,10 +6,21 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
-- #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
+
+## [3.18.0] - 2018-08-23
+
+### Added
+- #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
+
 ### Fixed
-- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1428 - URL Asset Import retain case sensitivity in column names
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1469 - Commons Imaging dependency from wcm.io should be excluded
+- #1476 - Asset ingestor modifies file names unnecessarily
+- #1480 - Adobe I/O healthcheck must only check 1 onepoint
+- #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
+- #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
 
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
