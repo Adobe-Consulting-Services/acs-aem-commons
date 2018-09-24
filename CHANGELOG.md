@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
 
-## [3.18.0] - 2018-08-23
+## [3.18.0] - 2018-09-24
 
 ### Added
 - #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
