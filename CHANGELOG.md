@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## Unreleased
 
 ### Fixed
+ - 1498 - Config is causing wrong behaviour in aem
+
+### Fixed
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
 
