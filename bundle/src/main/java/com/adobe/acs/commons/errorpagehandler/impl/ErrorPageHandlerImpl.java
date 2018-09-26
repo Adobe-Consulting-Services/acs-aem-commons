@@ -790,6 +790,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
                 new HashSet<String>());
 
+        //Reset the component context attribute to remove inclusion of response from top level components
+        request.removeAttribute("com.day.cq.wcm.componentcontext");
+
         // Clear the response
         response.reset();
         response.setContentType("text/html");

@@ -468,6 +468,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
             String name = getName();
             if (isFile() && name.contains(".")) {
                 return name;
+            } else if (JcrUtil.isValidName(name)) {
+                return name;
             } else {
                 return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
