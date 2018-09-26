@@ -5,12 +5,14 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
-## Unreleased
+## [3.18.2] - 2018-09-26
+
 ### Fixed
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 - #1486 - By default include policy mapping nodes for the replication status handler
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 - #1457 - Forward ported fixed from ACS Commons 2.x line for Parsys Placeholder feature
+- #1498 - Inadventantly included ServletResovler configs causing incorrect servlet resolution behaviour in AEM (default JSON servlet not working)
 
 ### Changed
 - #1462 - Updated ACS Commons multifield to support Colorfields
@@ -20,9 +22,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Added
 - #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
-
-### Fixed
- - 1498 - Config is causing wrong behaviour in aem
 
 ### Fixed
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
