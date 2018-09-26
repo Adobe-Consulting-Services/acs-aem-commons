@@ -40,6 +40,7 @@
 
 			if (path != null) {
 				slingResponse.setStatus(404);
+                errorPageHandlerService.resetRequestAndResponse(slingRequest, slingResponse, 404);
 				errorPageHandlerService.includeUsingGET(slingRequest, slingResponse, path);
 				return;
             }
