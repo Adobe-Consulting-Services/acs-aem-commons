@@ -318,4 +318,25 @@ public class S3AssetIngestorTest {
         assertEquals(Arrays.asList("testbucket:a/", "testbucket:a/folder1/", "testbucket:a/folder2/", "testbucket:a/folder2/folder3/"), currentItemCaptor.getAllValues());
     }
 
+    @Test // issue #1476
+    public void testCreateFoldersWithHyphens() throws Exception {
+        ingestor.init();
+        s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars/nested-folder-with-hyphens-after-16chars/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars/nested-folder-with-hyphens-after-16chars/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars-and-%/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars-and-%/nested-folder-with-hyphens-after-16chars/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+        s3Client.putObject(TEST_BUCKET, "folder-with-hyphens-after-16chars-and-%/nested-folder-with-hyphens-after-16chars/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+
+        ingestor.createFolders(actionManager);
+
+        assertFalse(context.resourceResolver().hasChanges());
+        assertEquals(4, ingestor.getCount(ingestor.createdFolders));
+        assertNotNull(context.resourceResolver().getResource("/content/dam/folder-with-hyphens-after-16chars"));
+        assertNotNull(context.resourceResolver().getResource("/content/dam/folder-with-hyphens-after-16chars/nested-folder-with-hyphens-after-16chars"));
+        assertNotNull(context.resourceResolver().getResource("/content/dam/folder-with-hyphensafter16charsand"));
+        assertNotNull(context.resourceResolver().getResource("/content/dam/folder-with-hyphensafter16charsand/nested-folder-with-hyphens-after-16chars"));
+    }
+
 }
