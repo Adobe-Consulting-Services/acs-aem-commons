@@ -135,7 +135,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final String[] paths = new String[] {PACKAGE_PATH};
 
         when(job.getProperty("paths")).thenReturn(paths);
-
+        when(job.getProperty("path")).thenReturn(PACKAGE_PATH);
         when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(resourceResolver);
         when(resourceResolver.getResource(PACKAGE_PATH)).thenReturn(packageResource);
         when(packageResource.adaptTo(Node.class)).thenReturn(packageNode);
