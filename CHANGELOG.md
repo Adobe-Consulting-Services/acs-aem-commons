@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 - #1486 - By default include policy mapping nodes for the replication status handler
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1462 - Fixed colorfield can not work well on multifield.
 
 ### Changed
 - #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
