@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## Unreleased
 ### Fixed
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
+- #1486 - By default include policy mapping nodes for the replication status handler
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 
 ### Changed
