@@ -6,6 +6,8 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
+### Fixed
+- #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 
 ## [3.18.0] - 2018-09-24
 
