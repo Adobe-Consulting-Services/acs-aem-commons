@@ -20,6 +20,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
 
 ### Fixed
+ - 1498 - Config is causing wrong behaviour in aem
+
+### Fixed
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
 - #1428 - URL Asset Import retain case sensitivity in column names
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
