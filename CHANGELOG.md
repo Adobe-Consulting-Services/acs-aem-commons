@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 
+### Chnaged
+- #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
+
 ## [3.18.0] - 2018-09-24
 
 ### Added
