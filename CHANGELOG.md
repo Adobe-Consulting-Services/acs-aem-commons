@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## Unreleased
 ### Fixed
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
+- #1486 - By default include policy mapping nodes for the replication status handler
+- #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+
+### Changed
+- #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
 
 ## [3.18.0] - 2018-09-24
 
@@ -15,6 +20,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
 
 ### Fixed
+ - 1498 - Config is causing wrong behaviour in aem
+
+### Fixed
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
 - #1428 - URL Asset Import retain case sensitivity in column names
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
@@ -23,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1480 - Adobe I/O healthcheck must only check 1 onepoint
 - #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
 - #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
+- #1495 - Error Page Handler doesn't reset the `com.day.cq.wcm.componentcontext` request attribute
 
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
