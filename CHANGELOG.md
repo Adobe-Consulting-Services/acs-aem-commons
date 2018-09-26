@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1480 - Adobe I/O healthcheck must only check 1 onepoint
 - #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
 - #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
+- #1495 - Error Page Handler doesn't reset the `com.day.cq.wcm.componentcontext` request attribute
 
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
