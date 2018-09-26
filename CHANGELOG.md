@@ -5,6 +5,8 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+- #1462 - Fixed colorfield can not work well on multifield.
+
 ## [3.17.4] - 2018-08-15
 
 - #1413 - Added ACL to make the redirect maps globally readable
