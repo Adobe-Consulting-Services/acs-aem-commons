@@ -19,34 +19,15 @@
  */
 package com.adobe.acs.commons.replication.status.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.jcr.Node;
-
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationEvent;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.apache.jackrabbit.vault.packaging.Packaging;
-import org.apache.jackrabbit.vault.packaging.VaultPackage;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.jackrabbit.vault.packaging.*;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
@@ -60,12 +41,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.replication.ReplicationAction;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationEvent;
+import javax.jcr.Node;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JcrPackageReplicationStatusEventHandlerTest {
@@ -262,11 +245,15 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/deeplynested/settings/wcm/templates/mytemplate/initial/somechild").matches());
         Assert.assertFalse(pathPattern.matcher("/conf/onemarketing/azde-default/settings/wcm/templates/azde-experience-fragment-tabs-accordion/initial/jcr:content").matches());
         Assert.assertTrue(pathPattern.matcher("/content/mypage/path").matches());
+
+
+        // "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
         Map.Entry<String, String> nodeTypeAndPathRestrictionForNtUnstructured = ParameterUtil.toMapEntry(JcrPackageReplicationStatusEventHandler.DEFAULT_REPLICATION_STATUS_NODE_TYPES[6], " ");
         pathPattern = Pattern.compile(nodeTypeAndPathRestrictionForNtUnstructured.getValue());
         // only policies for editable templates must match
         Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/templates/mytemplate/initial").matches());
         Assert.assertFalse(pathPattern.matcher("/content/some/otherpath").matches());
-        Assert.assertTrue(pathPattern.matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
+        Assert.assertFalse(pathPattern.matcher("/conf/mytemplates/settings/wcm/policies/somepolicy/deeplynested").matches());
+        Assert.assertTrue(pathPattern.matcher("/conf/we-retail/settings/wcm/templates/section-page/policies/jcr:content/deeply/nested").matches());
     }
 }
