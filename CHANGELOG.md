@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
 - #1486 - By default include policy mapping nodes for the replication status handler
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1457 - Forward ported fixed from ACS Commons 2.x line for Parsys Placeholder feature
 
 ### Changed
 - #1462 - Updated ACS Commons multifield to support Colorfields
