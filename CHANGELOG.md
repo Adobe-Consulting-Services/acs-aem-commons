@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
 
 ### Changed
+- #1462 - Updated ACS Commons multifield to support Colorfields
 - #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
 
 ## [3.18.0] - 2018-09-24
