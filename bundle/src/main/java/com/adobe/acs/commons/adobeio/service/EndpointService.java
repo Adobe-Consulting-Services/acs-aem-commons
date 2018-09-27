@@ -30,39 +30,46 @@ import aQute.bnd.annotation.ProviderType;
  * Using this service, the calling component can post to and retrieve from the endpoint.<br/>
  * All the plumbing around authentication will be taken care of.<br/>
  *
- * Example how to use in the calling component:
- *   @Reference(target = "(id=&lt;put your id here&gt;)")<br/>
- *   private EndpointService endpointService;
+ * Example how to use the service in your custom code:<br/>
+ * {@code @Reference(target="(id=yourEndpointId)")}<br/>
+ * {@code private EndpointService endpointService;}
+ * </code>
  */
 @ProviderType
 public interface EndpointService {
 
     /**
+     * The id of the endpoint that is defined via the configuration
+     * 
      * @return The ID of the endpoint
      */
     String getId();
 
     /**
+     * The method of the endpoint that is defined via the configuration
+     * 
      * @return The method of the endpoint
      */
     String getMethod();
 
     /**
+     * The url of the endpoint that is defined via the configuration
+     * 
      * @return The url of this endpoint
      */
     String getUrl();
 
 
     /**
-     * Performs the GET-action connected to the endpoint
+     * Performs the action connected to the endpoint.
+     * 
      * @return JsonObject containing the result of the action
      */
     JsonObject performIO_Action();
 
     /**
      * Performs the action connected to the endpoint.
-     * With the parameters you can influence all the aspects from the api-call.
-     * 
+     * With the parameters you can influence all the aspects of the api-call.
      * 
      * @param url the url of the api call, the url can include queryparameter
      * @param method the method of the api call, like GET or POST
@@ -75,14 +82,15 @@ public interface EndpointService {
 
     
     /**
-     * Performs the GET-action connected to the endpoint
+     * Performs the action connected to the endpoint, with the specified queryParameters.
+     * 
      * @param queryParameters query parameters to pass to the endpoint
      * @return JsonObject containing the result of the action
      */
     JsonObject performIO_Action(Map<String, String> queryParameters);
 
     /**
-     * Performs the action connected to the endpoint
+     * Performs the action connected to the endpoint with the specified payload.
      * @param payload JsonObject containing the data that is used in the action
      * @return JsonObject containing the result of the action
      */
