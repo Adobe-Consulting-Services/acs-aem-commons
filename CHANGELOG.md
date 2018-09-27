@@ -5,6 +5,11 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## Unreleased
+
+### Fixed
+- #1501 - Error downloading reports from MCP processes with 6.3.3.0
+
 ## [3.18.2] - 2018-09-26
 
 ### Fixed
