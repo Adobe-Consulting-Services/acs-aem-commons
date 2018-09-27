@@ -10,13 +10,43 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
  - 1497 -Javadoc improvement in EndpointService 
 
 ### Fixed
+- #1501 - Error downloading reports from MCP processes with 6.3.3.0
+
+## [3.18.2] - 2018-09-26
+
+### Fixed
+- #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
+- #1486 - By default include policy mapping nodes for the replication status handler
+- #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1457 - Forward ported fixed from ACS Commons 2.x line for Parsys Placeholder feature
+- #1498 - Inadventantly included ServletResovler configs causing incorrect servlet resolution behaviour in AEM (default JSON servlet not working)
+
+### Changed
+- #1462 - Updated ACS Commons multifield to support Colorfields
+- #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
+
+## [3.18.0] - 2018-09-24
+
+### Added
+- #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
+
+### Fixed
 - #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1428 - URL Asset Import retain case sensitivity in column names
 - #1458 - Fixed issue where page date was not updated when modifying redirect map file
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1469 - Commons Imaging dependency from wcm.io should be excluded
+- #1476 - Asset ingestor modifies file names unnecessarily
+- #1480 - Adobe I/O healthcheck must only check 1 onepoint
+- #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
+- #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
+- #1495 - Error Page Handler doesn't reset the `com.day.cq.wcm.componentcontext` request attribute
 
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
 - #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
 - #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
+- #1476 - Asset ingestion no longer mangles folder names, if they are already valid JCR node names
 
 ## [3.17.4] - 2018-08-15
 
@@ -100,15 +130,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
-- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration
 - #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
-- #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1237 - Reporting feature: Adding a report column for finding references to a resource
 - #1279 - New import tools for node metadata and file/url-based asset ingestion
 - #1307 - MCP now has error reporting and also XLSX export for errors.
-- #1238 - HTTP cache JCR storage 
+- #1238 - HTTP cache JCR storage
 - #1245 - On-Deploy Scripts Framework
 
 ### Fixed
@@ -186,7 +216,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
-- #1213 - Fixing Redirect Manager Action Load Issues 
+- #1213 - Fixing Redirect Manager Action Load Issues
 - #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
 - #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the AEM limitation to only correctly invalidate either the minified or unminified clientlib).
 - #1217 - Make compile-scope dependencies provided-scope and add enforcer rule to ensure no compile scope dependencies are added in the future.
@@ -231,7 +261,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1148 - Properly handle blank character encoding in SiteMapServlet
 - #1122 - Add clientlib category to touchui-widgets to load in Create Page wizard.
-- #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog 
+- #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog
 - #842 - Fix issue with Environment Indicator title being reset
 - #1143 - Remove current page from result from PagesReferenceProvider
 - #1156 - Remove unnecessary initialization of `window.Granite.author`
@@ -260,11 +290,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #916: AEM Assets Brand Portal workflow process and Agent filter
-- #958: Named Image Transform Servlet Sharpen transform 
+- #958: Named Image Transform Servlet Sharpen transform
 - #1005: Asset Folder Properties Support to allow custom fields/properties to be added to AEM Assets Folders in UI
 - #1039: Health Check Status E-mailer
 - #1041: QR Code to Publish in Page Editor
-- #1067: Vanity Path Web server re-writer mapping 
+- #1067: Vanity Path Web server re-writer mapping
 - Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 - Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work
@@ -278,14 +308,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
-- #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa' 
+- #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa'
 - #1008: E-mail subject mangled for non-latin chars
-- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat) 
-- #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened 
-- #1051: Emails sent via EmailService do not have connection/socket timeouts 
+- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat)
+- #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened
+- #1051: Emails sent via EmailService do not have connection/socket timeouts
 - #1064: Fixed NPE in ResourceServiceManager when no serviceReferences exist
 - Error page handler OSGi configuration missing web hint for 'not-found' behavior.
-- Touch UI Multi-field saved User-picker values were not populated in dialog 
+- Touch UI Multi-field saved User-picker values were not populated in dialog
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
 ### Security
@@ -295,7 +325,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated. com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
 
 <!---
- 
+
 ### Removed
 
 ---->

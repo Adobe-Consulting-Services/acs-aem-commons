@@ -530,7 +530,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!StringUtils.equals(path, errorResource.getPath())) {
             // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
             // we know the errorResource and what the path resolves to is the same
-            // #1415 - First try to get get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
+            // #1415 - First try to get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
             resource = resourceResolver.getResource(path);
 
             if (resource == null) {
@@ -560,6 +560,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         for (int i = parts.length - 1; i >= 0; i--) {
             String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
             String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
+
+            // #1415 - First try to get the resource at the direct path; this look-up is
+            // very fast (compared to rr.resolve and often what's required)
+            final Resource candidatePathResource = resourceResolver.getResource(candidatePath);
+            if (candidatePathResource != null) {
+                return candidatePathResource;
+            }
 
             final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
 
@@ -782,6 +789,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         // Fixes AEM 6.2 issue (https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/790)
         request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
                 new HashSet<String>());
+
+        //Reset the component context attribute to remove inclusion of response from top level components
+        request.removeAttribute("com.day.cq.wcm.componentcontext");
 
         // Clear the response
         response.reset();
