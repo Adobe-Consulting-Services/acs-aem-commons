@@ -21,7 +21,7 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.day.cq.commons.jcr.JcrUtil;
-import java.awt.*;
+import java.awt.Color;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.poi.ss.usermodel.Sheet;
