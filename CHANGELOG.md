@@ -6,6 +6,8 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
+### Fixed
+ - 1497 -Javadoc improvement in EndpointService 
 
 ### Fixed
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0
