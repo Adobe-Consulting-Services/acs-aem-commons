@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.functions;
 
 import aQute.bnd.annotation.ConsumerType;
+import java.util.function.Function;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
@@ -33,6 +34,10 @@ import aQute.bnd.annotation.ConsumerType;
 @SuppressWarnings("squid:S00112")
 public interface CheckedFunction<T, R> {
 
+    public static <T,R> CheckedFunction<T,R> from(Function<T,R> function) {
+        return t -> function.apply(t);
+    }
+    
     /**
      * Applies this function to the given argument.
      *

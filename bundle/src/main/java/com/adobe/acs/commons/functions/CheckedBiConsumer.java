@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.functions;
 
 import aQute.bnd.annotation.ConsumerType;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
@@ -37,6 +39,10 @@ import aQute.bnd.annotation.ConsumerType;
 @FunctionalInterface
 @SuppressWarnings("squid:S00112")
 public interface CheckedBiConsumer<T, U> {
+
+    public static <T,U> CheckedBiConsumer<T,U> from(BiConsumer<T,U> handler) {
+        return (T,U) -> handler.accept(T, U);
+    }
 
     /**
      * Performs this operation on the given arguments.
