@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.util.visitors;
 
+import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.function.BiConsumer;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
@@ -64,10 +64,10 @@ public class SimpleFilteringResourceVisitorTest {
     public void accept_breadthFirst() throws Exception {
         SimpleFilteringResourceVisitor visitor = new SimpleFilteringResourceVisitor();
         ArrayList<Resource> visitOrder = new ArrayList<>();
-        BiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
+        CheckedBiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
         
         visitor.setBreadthFirstMode();
-        visitor.setResourceVisitor(tracker);
+        visitor.setResourceVisitorChecked(tracker);
         visitor.accept(root);
         assertArrayEquals(breadthFirstList, visitOrder.toArray());
     }
@@ -76,10 +76,10 @@ public class SimpleFilteringResourceVisitorTest {
     public void accept_depthFirst() throws Exception {
         SimpleFilteringResourceVisitor visitor = new SimpleFilteringResourceVisitor();
         ArrayList<Resource> visitOrder = new ArrayList<>();
-        BiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
+        CheckedBiConsumer<Resource, Integer> tracker = (res, lvl) -> visitOrder.add(res);
         
         visitor.setDepthFirstMode();
-        visitor.setResourceVisitor(tracker);
+        visitor.setResourceVisitorChecked(tracker);
         visitor.accept(root);
         assertArrayEquals(depthFirstList, visitOrder.toArray());
     }
