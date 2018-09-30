@@ -214,7 +214,7 @@ public abstract class MovingNode {
         for (String part : parts) {
             String childPath = current.getSourcePath() + "/" + part;
             boolean found = false;
-            for (MovingNode child : getChildren()) {
+            for (MovingNode child : current.getChildren()) {
                 if (child.getSourcePath().equals(childPath)) {
                     current = child;
                     found = true;

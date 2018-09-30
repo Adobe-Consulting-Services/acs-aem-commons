@@ -74,6 +74,7 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
  * Relocate Pages and/or Sites using a parallelized move process
  */
 public class Reorganizer extends ProcessDefinition {
+
     private static final String DESTINATION_COL = "destination";
     private static final String SOURCE_COL = "source";
 
@@ -219,11 +220,11 @@ public class Reorganizer extends ProcessDefinition {
                 Logger.getLogger(Reorganizer.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RepositoryException("Unable to parse spreadsheet", ex);
             }
-            
+
             if (!sheet.getHeaderRow().contains(SOURCE_COL) || !sheet.getHeaderRow().contains(DESTINATION_COL)) {
-                throw new RepositoryException(MessageFormat.format("Spreadsheet should have two columns, respectively named {0} and {1}", SOURCE_COL, DESTINATION_COL));                
+                throw new RepositoryException(MessageFormat.format("Spreadsheet should have two columns, respectively named {0} and {1}", SOURCE_COL, DESTINATION_COL));
             }
-            
+
             sheet.getDataRowsAsCompositeVariants().forEach(row -> {
                 movePaths.put(row.get(SOURCE_COL).toString(),
                         row.get(DESTINATION_COL).toString());
@@ -255,6 +256,7 @@ public class Reorganizer extends ProcessDefinition {
                 if (!destinationPath.startsWith("/")) {
                     throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
                 } else {
+                    // TODO: Allow non-existing paths and also check destination path is expected type (folder/page, etc)
                     throw new RepositoryException("Unable to find destination " + destinationPath);
                 }
             }
@@ -295,7 +297,9 @@ public class Reorganizer extends ProcessDefinition {
             movePaths.forEach((source, dest) -> {
                 manager.deferredWithResolver(rr2 -> {
                     Resource res = rr2.getResource(source);
-                    buildMoveNode(res).ifPresent(root -> {
+                    Optional<MovingNode> rootNode = buildMoveNode(res);
+                    if (rootNode.isPresent()) {
+                        MovingNode root = rootNode.get();
                         root.setDestinationPath(dest);
                         moves.add(root);
                         note(source, Report.misc, "Root path");
@@ -308,33 +312,42 @@ public class Reorganizer extends ProcessDefinition {
                                 NameConstants.NT_PAGE
                         );
 
-                        visitor.setResourceVisitor((r, level) -> {
+                        visitor.setResourceVisitorChecked((r, level) -> {
                             if (!r.getPath().equals(res.getPath())) {
-                                buildMoveNode(r).ifPresent(childNode -> {
-                                    root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"))
-                                            .ifPresent(parent -> parent.addChild(childNode));
+                                Optional<MovingNode> node = buildMoveNode(r);
+                                if (node.isPresent()) {
+                                    MovingNode childNode = node.get();
+                                    // TODO: DEBUG THIS WITH 3 DEPTH LEVELS
+                                    String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
+                                    MovingNode parent = root.findByPath(parentPath)
+                                            .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
+                                    parent.addChild(childNode);
                                     if (detailedReport) {
                                         note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
                                     }
-                                });
-                                visitedSourceNodes.addAndGet(1);
+                                    visitedSourceNodes.addAndGet(1);
+                                }
                             }
                         });
 
-                        visitor.setLeafVisitor((r, level) -> {
-                            buildMoveNode(r).ifPresent(childNode -> {
-                                root.findByPath(StringUtils.substringBeforeLast(r.getPath(), "/"))
-                                        .ifPresent(parent -> parent.addChild(childNode));
+                        visitor.setLeafVisitorChecked((r, level) -> {
+                            Optional<MovingNode> node = buildMoveNode(r);
+                            if (node.isPresent()) {
+                                MovingNode childNode = node.get();
+                                String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
+                                MovingNode parent = root.findByPath(parentPath)
+                                        .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
+                                parent.addChild(childNode);
                                 if (detailedReport) {
                                     note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
                                 }
-                            });
+                            }
                             visitedSourceNodes.addAndGet(1);
                         });
 
                         visitor.accept(res);
                         note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
-                    });
+                    }
                 });
             });
         });
@@ -445,6 +458,7 @@ public class Reorganizer extends ProcessDefinition {
             moves.forEach(node -> {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
+                        // TODO: DEBUG THIS WITH 3 DEPTH LEVELS
                         if (!childNode.isCopiedBeforeMove()) {
                             manager.deferredWithResolver(rr3 -> {
                                 childNode.move(replicatorQueue, rr3);
@@ -537,6 +551,7 @@ public class Reorganizer extends ProcessDefinition {
     protected void removeSource(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             for (MovingNode node : moves) {
+                //TODO: DOUBLE-CHECK NOT TO DELETE ANYTHING?
                 rr.delete(rr.resolve(node.getSourcePath()));
             }
         });
