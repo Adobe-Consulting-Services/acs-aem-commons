@@ -89,6 +89,7 @@
     </filter>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
+    <filter root="/etc/tags/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/groups/rep:policy"/>

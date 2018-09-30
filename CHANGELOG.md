@@ -126,6 +126,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Fixed
 - #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
 
+### Added
+
+- #1294 - New Remote Assets feature
+
 ## [3.15.0] - 2018-04-13
 
 ### Changed
