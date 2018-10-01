@@ -25,6 +25,7 @@ import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.CheckboxComponent;
+import com.adobe.acs.commons.mcp.form.Description;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent.NodeSelectComponent;
@@ -87,16 +88,21 @@ public class Reorganizer extends ProcessDefinition {
     private final Replicator replicator;
 
     public enum PublishMethod {
-        NONE, SELF_MANAGED, QUEUE
+        @Description("No publishing will occur")
+        NONE, 
+        @Description("Publishing will be managed by MCP and the queue is left unaffected so regular publishing can still occur")
+        SELF_MANAGED, 
+        @Description("Publishing is handled by the product publish queue, not recommended very large jobs")
+        QUEUE
     }
 
-    @FormField(name = "File",
+    @FormField(name = "Multiple moves",
             description = "Excel spreadsheet for performing multiple moves",
             component = FileUploadComponent.class,
             required = false)
     private RequestParameter sourceFile;
 
-    @FormField(name = SOURCE_COL,
+    @FormField(name = "Source",
             description = "Select page/site to be moved for single move",
             hint = "/content/my-site/en/my-page",
             component = NodeSelectComponent.class,
@@ -104,9 +110,9 @@ public class Reorganizer extends ProcessDefinition {
             options = {"base=/content"})
     private String sourceJcrPath;
 
-    @FormField(name = DESTINATION_COL,
+    @FormField(name = "Destination",
             description = "Destination location (must include new name for source node even if same)",
-            hint = "Move: /content/new-place/my-page | Rename: /content/new-place/new-name",
+            hint = "Move: /content/new-place/my-page -OR- Rename: /content/new-place/new-name",
             component = NodeSelectComponent.class,
             required = false,
             options = {"base=/content"})
@@ -134,7 +140,7 @@ public class Reorganizer extends ProcessDefinition {
             description = "Self-managed handles publishing in-process where as Queue will add it to the system publish queue where progress is not tracked here.",
             required = false,
             component = RadioComponent.EnumerationSelector.class,
-            options = {"horizontal", "default=SELF_MANAGED"})
+            options = {"vertical", "default=SELF_MANAGED"})
     public PublishMethod publishMethod = PublishMethod.SELF_MANAGED;
 
     @FormField(name = "Create versions",
