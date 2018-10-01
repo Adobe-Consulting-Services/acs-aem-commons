@@ -35,7 +35,7 @@ public abstract class PathfieldComponent extends FieldComponent {
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
         getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
-        getOption("base").ifPresent(path->getComponentMetadata().put("rootPath", path));
+        getOption("base").ifPresent(path -> getComponentMetadata().put("rootPath", path));
         getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
     }
 
@@ -47,15 +47,15 @@ public abstract class PathfieldComponent extends FieldComponent {
             getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
         }
     }
-    
+
     public static class NodeSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
             super.init();
-            getComponentMetadata().put(OPTION_PREDICATE, "hierarchy");
+            getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
         }
-    }    
+    }
 
     public static class PageSelectComponent extends PathfieldComponent {
 
