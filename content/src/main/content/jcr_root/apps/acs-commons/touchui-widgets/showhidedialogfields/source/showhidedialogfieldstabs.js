@@ -19,11 +19,11 @@
  *   hide them.
  * - (optional) add css class acs-commons-field-required-allow-hidden to provided required field validation, which turns off when the field is hidden
  */
-(function(document, $) {
+(function($document, $) {
   "use strict";
 
   // when dialog gets injected
-  $(document).on("foundation-contentloaded", function() {
+  $document.on("foundation-contentloaded", function() {
     // if there is already an initial value make sure the according target
     // element becomes visible
     $("[data-acs-cq-dialog-dropdown-checkbox-showhide]").each(function() {	
@@ -35,7 +35,7 @@
 
   });
 
-  $(document).on("change", "[data-acs-cq-dialog-dropdown-checkbox-showhide]", function() {
+  $document.on("change", "[data-acs-cq-dialog-dropdown-checkbox-showhide]", function() {
     showHide($(this));
   });
 
@@ -125,4 +125,4 @@
     }
   }
 
-})(document, Granite.$);
+})($(document), Granite.$);
