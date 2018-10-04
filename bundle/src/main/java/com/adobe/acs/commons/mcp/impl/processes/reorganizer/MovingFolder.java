@@ -16,14 +16,18 @@
 package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 
 import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
 import com.day.cq.replication.ReplicationActionType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -31,6 +35,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Represents a folder being moved
  */
 public class MovingFolder extends MovingNode {
+    protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
 
     @Override
     public boolean isCopiedBeforeMove() {
@@ -56,7 +61,13 @@ public class MovingFolder extends MovingNode {
             Actions.setCurrentItem(getSourcePath() + "->" + getDestinationPath());
             String targetParentPath = StringUtils.substringBeforeLast(getDestinationPath(), "/");
             String targetName = StringUtils.substringAfterLast(getDestinationPath(), "/");
-            waitUntilResourceFound(rr, targetParentPath);
+            if (getParent() == null) {
+                if (!resourceExists(rr, getDestinationPath())) {
+                    createFolderNode(targetParentPath, rr);
+                }
+            } else {
+                waitUntilResourceFound(rr, targetParentPath);            
+            }
             Resource destParent = rr.getResource(targetParentPath);
             Logger.getLogger(MovingFolder.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
             rr.create(destParent, targetName, source.getValueMap());
@@ -75,5 +86,21 @@ public class MovingFolder extends MovingNode {
             }));
         }
         replicatorQueue.replicate(session, ReplicationActionType.DEACTIVATE, getSourcePath());
+    }
+
+    protected boolean createFolderNode(String folderPath, ResourceResolver r) throws RepositoryException, PersistenceException {
+        Session s = r.adaptTo(Session.class);
+        if (s.nodeExists(folderPath)) {
+            return false;
+        }
+        
+        String name = StringUtils.substringAfterLast(folderPath, "/");
+        String parentPath = StringUtils.substringBeforeLast(folderPath, "/");
+        createFolderNode(parentPath, r);
+        
+        s.getNode(parentPath).addNode(name, DEFAULT_FOLDER_TYPE);
+        r.commit();
+        r.refresh();
+        return true;
     }
 }

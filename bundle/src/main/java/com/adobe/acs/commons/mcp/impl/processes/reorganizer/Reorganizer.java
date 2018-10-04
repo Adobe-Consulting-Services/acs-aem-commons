@@ -261,13 +261,17 @@ public class Reorganizer extends ProcessDefinition {
             if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
                 if (!destinationPath.startsWith("/")) {
                     throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
-                } else {
-                    // TODO: Allow non-existing paths and also check destination path is expected type (folder/page, etc)
+                } else if (!destinationPath.startsWith(DAM_ROOT)) {
                     throw new RepositoryException("Unable to find destination " + destinationPath);
                 }
             }
+            
+            if (sourcePath.startsWith(DAM_ROOT) != destinationPath.startsWith(DAM_ROOT)) {
+                throw new RepositoryException("Source and destination are incompatible (if one is in the DAM, then so should the other be in the DAM)");
+            }
         }
     }
+    private static final String DAM_ROOT = "/content/dam";
 
     ManagedProcess instanceInfo;
 
