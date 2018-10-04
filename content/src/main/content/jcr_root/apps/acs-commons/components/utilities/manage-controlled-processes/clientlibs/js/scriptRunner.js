@@ -91,23 +91,18 @@ var ScriptRunner = {
             dataType: "html",
             success: function (response) {
                 var inputForm = window.top.jQuery("#processDefinitionInput"),
-                     parser = $(window).adaptTo("foundation-util-htmlparser");
+                    $html = jQuery(response);
 
-                parser.parse(response).then(function(fragment) {
-                    // Removed this processing as it results in double-application of CoralUI logic
-                    var $html = jQuery(response);
-
-                    $html.find("#processName").text(ScriptRunner.definitionName);
-                    $html.find("#process").val(ScriptRunner.definition);
-                    $html.find("coral-icon").each(function () {
-                        if (this.icon) {
-                            this.classList.add("coral-Icon--" + this.icon);
-                        }
-                    });
-
-                    inputForm.html($html).trigger("foundation-contentloaded");
-
+                $html.find("#processName").text(ScriptRunner.definitionName);
+                $html.find("#process").val(ScriptRunner.definition);
+                $html.find("coral-icon").each(function () {
+                    if (this.icon) {
+                        this.classList.add("coral-Icon--" + this.icon);
+                    }
                 });
+
+                inputForm.html($html).trigger("foundation-contentloaded");
+
             },
             data: {
                 processDefinition: definition
