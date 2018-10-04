@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## Unreleased
 ### Fixed
- - 1497 -Javadoc improvement in EndpointService 
+ - 1497 - Javadoc improvement in EndpointService
+ - 1506 - Fixed path browser input fields in MCP to work on AEM 6.4 
 
 ### Fixed
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0

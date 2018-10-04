@@ -91,19 +91,23 @@ var ScriptRunner = {
             dataType: "html",
             success: function (response) {
                 var inputForm = window.top.jQuery("#processDefinitionInput"),
-                    // Removed this processing as it results in double-application of CoralUI logic
-                    // html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinsitionInput", false, true),
-                    $html = jQuery(response);
+                     parser = $(window).adaptTo("foundation-util-htmlparser");
 
-                $html.find("#processName").text(ScriptRunner.definitionName);
-                $html.find("#process").val(ScriptRunner.definition);
-                $html.find("coral-icon").each(function () {
-                    if (this.icon) {
-                        this.classList.add("coral-Icon--" + this.icon);
-                    }
+                parser.parse(response).then(function(fragment) {
+                    // Removed this processing as it results in double-application of CoralUI logic
+                    var $html = jQuery(response);
+
+                    $html.find("#processName").text(ScriptRunner.definitionName);
+                    $html.find("#process").val(ScriptRunner.definition);
+                    $html.find("coral-icon").each(function () {
+                        if (this.icon) {
+                            this.classList.add("coral-Icon--" + this.icon);
+                        }
+                    });
+
+                    inputForm.html($html).trigger("foundation-contentloaded");
+
                 });
-                inputForm.html("").append($html);
-                $html.trigger("foundation-contentloaded");
             },
             data: {
                 processDefinition: definition
