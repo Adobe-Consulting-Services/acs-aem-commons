@@ -322,39 +322,8 @@ public class Reorganizer extends ProcessDefinition {
                                 NameConstants.NT_PAGE
                         );
 
-                        visitor.setResourceVisitorChecked((r, level) -> {
-                            if (!r.getPath().equals(res.getPath())) {
-                                Optional<MovingNode> node = buildMoveNode(r);
-                                if (node.isPresent()) {
-                                    MovingNode childNode = node.get();
-                                    String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
-                                    MovingNode parent = root.findByPath(parentPath)
-                                            .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
-                                    parent.addChild(childNode);
-                                    if (detailedReport) {
-                                        note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
-                                    }
-                                    visitedSourceNodes.addAndGet(1);
-                                }
-                            }
-                        });
-
-                        visitor.setLeafVisitorChecked((r, level) -> {
-                            Optional<MovingNode> node = buildMoveNode(r);
-                            if (node.isPresent()) {
-                                MovingNode childNode = node.get();
-                                if (level > 0) {
-                                    String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
-                                    MovingNode parent = root.findByPath(parentPath)
-                                            .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
-                                    parent.addChild(childNode);
-                                }
-                                if (detailedReport) {
-                                    note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
-                                }
-                            }
-                            visitedSourceNodes.addAndGet(1);
-                        });
+                        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r,level, root, visitedSourceNodes));
+                        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r,level, root, visitedSourceNodes));
 
                         visitor.accept(res);
                         note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
@@ -362,6 +331,23 @@ public class Reorganizer extends ProcessDefinition {
                 });
             });
         });
+    }
+
+    private void buildMoveTree(Resource r, int level, MovingNode root, AtomicInteger visitedSourceNodes) throws RepositoryException {
+        if (level > 0) {
+            Optional<MovingNode> node = buildMoveNode(r);
+            if (node.isPresent()) {
+                MovingNode childNode = node.get();
+                String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
+                MovingNode parent = root.findByPath(parentPath)
+                        .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
+                parent.addChild(childNode);
+                if (detailedReport) {
+                    note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
+                }
+                visitedSourceNodes.addAndGet(1);
+            }
+        }
     }
 
     private Optional<MovingNode> buildMoveNode(Resource res) {
