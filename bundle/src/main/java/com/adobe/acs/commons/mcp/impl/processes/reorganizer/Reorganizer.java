@@ -89,9 +89,9 @@ public class Reorganizer extends ProcessDefinition {
 
     public enum PublishMethod {
         @Description("No publishing will occur")
-        NONE, 
+        NONE,
         @Description("Publishing will be managed by MCP and the queue is left unaffected so regular publishing can still occur")
-        SELF_MANAGED, 
+        SELF_MANAGED,
         @Description("Publishing is handled by the product publish queue, not recommended very large jobs")
         QUEUE
     }
@@ -265,7 +265,7 @@ public class Reorganizer extends ProcessDefinition {
                     throw new RepositoryException("Unable to find destination " + destinationPath);
                 }
             }
-            
+
             if (sourcePath.startsWith(DAM_ROOT) != destinationPath.startsWith(DAM_ROOT)) {
                 throw new RepositoryException("Source and destination are incompatible (if one is in the DAM, then so should the other be in the DAM)");
             }
@@ -327,7 +327,6 @@ public class Reorganizer extends ProcessDefinition {
                                 Optional<MovingNode> node = buildMoveNode(r);
                                 if (node.isPresent()) {
                                     MovingNode childNode = node.get();
-                                    // TODO: DEBUG THIS WITH 3 DEPTH LEVELS
                                     String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
                                     MovingNode parent = root.findByPath(parentPath)
                                             .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
@@ -344,10 +343,12 @@ public class Reorganizer extends ProcessDefinition {
                             Optional<MovingNode> node = buildMoveNode(r);
                             if (node.isPresent()) {
                                 MovingNode childNode = node.get();
-                                String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
-                                MovingNode parent = root.findByPath(parentPath)
-                                        .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
-                                parent.addChild(childNode);
+                                if (level > 0) {
+                                    String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
+                                    MovingNode parent = root.findByPath(parentPath)
+                                            .orElseThrow(() -> new RepositoryException("Unable to find data structure for node " + parentPath));
+                                    parent.addChild(childNode);
+                                }
                                 if (detailedReport) {
                                     note(childNode.getSourcePath(), Report.target, childNode.getDestinationPath());
                                 }
