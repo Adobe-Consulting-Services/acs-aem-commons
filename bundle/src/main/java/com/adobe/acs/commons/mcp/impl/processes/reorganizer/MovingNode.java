@@ -226,4 +226,8 @@ public abstract class MovingNode {
         }
         return Optional.of(current);
     }
+    
+    public boolean hasChild(String path) {
+        return getChildren().stream().anyMatch(n -> n.getSourcePath().equals(path));
+    }
 }

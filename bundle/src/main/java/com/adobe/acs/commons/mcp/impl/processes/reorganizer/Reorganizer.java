@@ -461,6 +461,7 @@ public class Reorganizer extends ProcessDefinition {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
                         manager.deferredWithResolver(rr3 -> {
+                            Actions.setCurrentItem("Building structure for " + childNode.getSourcePath());
                             childNode.move(replicatorQueue, rr3);
                         });
                     }, null, MovingNode::isCopiedBeforeMove);
@@ -477,6 +478,7 @@ public class Reorganizer extends ProcessDefinition {
                         // TODO: DEBUG THIS WITH 3 DEPTH LEVELS
                         if (!childNode.isCopiedBeforeMove()) {
                             manager.deferredWithResolver(rr3 -> {
+                                Actions.setCurrentItem("Moving " + childNode.getSourcePath());
                                 childNode.move(replicatorQueue, rr3);
                             });
                         }
@@ -492,6 +494,7 @@ public class Reorganizer extends ProcessDefinition {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
                         manager.deferredWithResolver(rr3 -> {
+                            Actions.setCurrentItem("Replicating " + childNode.getDestinationPath());
                             performNecessaryReplication(rr3, childNode.getDestinationPath());
                         });
                     }, null, MovingNode::isCopiedBeforeMove);
@@ -505,6 +508,7 @@ public class Reorganizer extends ProcessDefinition {
             getAllActivationPaths().filter(this::isActivationPath)
                     .forEach(path -> {
                         step3.deferredWithResolver(rr2 -> {
+                            Actions.setCurrentItem("Replicating " + path);
                             performNecessaryReplication(rr2, path);
                         });
                     });
@@ -516,6 +520,7 @@ public class Reorganizer extends ProcessDefinition {
             getAllReplicationPaths().filter(this::isForeignPath)
                     .forEach(path -> {
                         step4.deferredWithResolver(rr2 -> {
+                            Actions.setCurrentItem("Replicating references " + path);
                             performNecessaryReplication(rr2, path);
                         });
                     });
@@ -527,6 +532,7 @@ public class Reorganizer extends ProcessDefinition {
             getAllReplicationPaths().filter(this::isDeactivationPath)
                     .forEach(path -> {
                         step5.deferredWithResolver(rr2 -> {
+                            Actions.setCurrentItem("Deactivating " + path);
                             performNecessaryReplication(rr2, path);
                         });
                     });

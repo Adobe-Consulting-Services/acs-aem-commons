@@ -15,7 +15,9 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 
+import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
 import javax.jcr.Session;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -43,6 +45,8 @@ public class MovingResource extends MovingNode {
 
     @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, Exception {
+        String destinationParent = StringUtils.substringBeforeLast(getDestinationPath(), "/");
+        waitUntilResourceFound(rr, destinationParent);
         Session session = rr.adaptTo(Session.class);
         session.move(getSourcePath(), getDestinationPath());
         session.save();

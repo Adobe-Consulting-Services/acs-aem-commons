@@ -32,13 +32,13 @@ import org.apache.sling.api.resource.ResourceResolver;
  * Represents a page being moved.
  */
 public class MovingPage extends MovingNode {
+
     PageManagerFactory pageManagerFactory;
-    
+
     public MovingPage(PageManagerFactory pageManagerFactory) {
         this.pageManagerFactory = pageManagerFactory;
     }
-    
-    
+
     @Override
     public boolean isCopiedBeforeMove() {
         return false;
@@ -52,7 +52,7 @@ public class MovingPage extends MovingNode {
     @Override
     public boolean isAbleToHaveChildren() {
         return true;
-    }    
+    }
 
     @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, Exception {
@@ -77,7 +77,7 @@ public class MovingPage extends MovingNode {
                         true,
                         listToStringArray(getAllReferences()),
                         listToStringArray(getPublishedReferences()));
-            } else {
+            } else if (!resourceExists(res, getDestinationPath())) {
                 Map<String, Object> props = new HashMap<>();
                 Resource parent = res.getResource(destinationParent);
                 res.create(parent, source.getName(), source.getValueMap());
@@ -88,7 +88,14 @@ public class MovingPage extends MovingNode {
             source = rr.getResource(getSourcePath());
             if (source != null && source.hasChildren()) {
                 for (Resource child : source.getChildren()) {
-                    res.move(child.getPath(), getDestinationPath());
+                    if (!hasChild(child.getPath())) {
+                        String childDestination = child.getPath().replaceAll(getSourcePath(), getDestinationPath());
+                        String childDestinationParent = StringUtils.substringBeforeLast(childDestination, "/");
+                        if (!resourceExists(res, childDestination)) {
+                            waitUntilResourceFound(res, childDestinationParent);
+                            res.move(child.getPath(), childDestination);
+                        }
+                    }
                 }
                 res.commit();
             }
