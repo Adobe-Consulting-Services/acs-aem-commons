@@ -237,6 +237,7 @@ public abstract class MovingNode {
     protected Map<String, Object> getClonedProperties(Resource source) {
         HashMap<String, Object> props = new HashMap<>(source.getValueMap());
         props.remove("jcr:versionHistory");
+        props.remove("jcr:uuid");
         return props;
     }
 
