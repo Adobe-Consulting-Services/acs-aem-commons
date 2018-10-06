@@ -238,6 +238,9 @@ public abstract class MovingNode {
         HashMap<String, Object> props = new HashMap<>(source.getValueMap());
         props.remove("jcr:versionHistory");
         props.remove("jcr:uuid");
+        props.remove("jcr:baseVersion");
+        props.remove("jcr:predecessors");
+        props.remove("jcr:isCheckedOut");
         return props;
     }
 
