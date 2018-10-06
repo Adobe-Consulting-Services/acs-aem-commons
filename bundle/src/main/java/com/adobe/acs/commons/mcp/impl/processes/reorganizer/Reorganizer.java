@@ -60,6 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
@@ -354,7 +355,7 @@ public class Reorganizer extends ProcessDefinition {
     }
 
     private Optional<MovingNode> buildMoveNode(Resource res) throws RepositoryException {
-        String type = res.getResourceType();
+        String type = res.adaptTo(Node.class).getPrimaryNodeType().getName();
         MovingNode node = null;
         switch (type) {
             case JcrConstants.NT_FOLDER:
@@ -372,8 +373,12 @@ public class Reorganizer extends ProcessDefinition {
                 if (res.getName().equals(JcrConstants.JCR_CONTENT)) {
                     return Optional.empty();
                 }
+            case "cq:CommentAttachment":
             case AccessControlConstants.NT_REP_ACL:
                 node = new MovingResource();
+                break;
+            case "cq:PageContent":
+                // Page content is moved with the page, so ignore it here
                 break;
             case TagConstants.NT_TAG:
             default:
