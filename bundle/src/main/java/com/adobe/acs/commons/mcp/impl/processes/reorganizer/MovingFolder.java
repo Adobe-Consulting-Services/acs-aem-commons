@@ -16,13 +16,11 @@
 package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
 import com.day.cq.replication.ReplicationActionType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
@@ -70,7 +68,7 @@ public class MovingFolder extends MovingNode {
             }
             Resource destParent = rr.getResource(targetParentPath);
             Logger.getLogger(MovingFolder.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
-            rr.create(destParent, targetName, source.getValueMap());
+            rr.create(destParent, targetName, getClonedProperties(source));
             rr.commit();
             rr.refresh();
         }

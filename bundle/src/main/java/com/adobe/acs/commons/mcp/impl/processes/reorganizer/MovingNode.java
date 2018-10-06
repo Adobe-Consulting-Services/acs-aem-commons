@@ -19,13 +19,16 @@ import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.*;
 import static com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor.toList;
 import com.day.cq.wcm.commons.ReferenceSearch;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -230,4 +233,11 @@ public abstract class MovingNode {
     public boolean hasChild(String path) {
         return getChildren().stream().anyMatch(n -> n.getSourcePath().equals(path));
     }
+   
+    protected Map<String, Object> getClonedProperties(Resource source) {
+        HashMap<String, Object> props = new HashMap<>(source.getValueMap());
+        props.remove("jcr:versionHistory");
+        return props;
+    }
+
 }

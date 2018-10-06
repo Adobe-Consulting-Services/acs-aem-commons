@@ -80,7 +80,7 @@ public class MovingPage extends MovingNode {
             } else if (!resourceExists(res, getDestinationPath())) {
                 Map<String, Object> props = new HashMap<>();
                 Resource parent = res.getResource(destinationParent);
-                res.create(parent, source.getName(), source.getValueMap());
+                res.create(parent, source.getName(), getClonedProperties(source));
             }
             res.commit();
             res.refresh();
