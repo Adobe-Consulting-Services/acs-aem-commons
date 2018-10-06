@@ -41,6 +41,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
+import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
 import java.io.IOException;
@@ -64,6 +65,7 @@ import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import org.apache.commons.lang.StringUtils;
+import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -335,8 +337,9 @@ public class Reorganizer extends ProcessDefinition {
 
     private void buildMoveTree(Resource r, int level, MovingNode root, AtomicInteger visitedSourceNodes) throws RepositoryException {
         if (level > 0) {
+            Actions.setCurrentItem(r.getPath());
             Optional<MovingNode> node = buildMoveNode(r);
-            if (node.isPresent()) {
+            if (node.isPresent()) {                
                 MovingNode childNode = node.get();
                 String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
                 MovingNode parent = root.findByPath(parentPath)
@@ -350,9 +353,9 @@ public class Reorganizer extends ProcessDefinition {
         }
     }
 
-    private Optional<MovingNode> buildMoveNode(Resource res) {
+    private Optional<MovingNode> buildMoveNode(Resource res) throws RepositoryException {
         String type = res.getResourceType();
-        MovingNode node;
+        MovingNode node = null;
         switch (type) {
             case JcrConstants.NT_FOLDER:
             case JcrResourceConstants.NT_SLING_FOLDER:
@@ -365,13 +368,24 @@ public class Reorganizer extends ProcessDefinition {
             case DamConstants.NT_DAM_ASSET:
                 node = new MovingAsset();
                 break;
+            case JcrConstants.NT_UNSTRUCTURED:
+                if (res.getName().equals(JcrConstants.JCR_CONTENT)) {
+                    return Optional.empty();
+                }
+            case AccessControlConstants.NT_REP_ACL:
+                node = new MovingResource();
+                break;
+            case TagConstants.NT_TAG:
             default:
-                return Optional.empty();
-            //throw new IllegalArgumentException("Not able to support type " + type);
+                throw new RepositoryException("Type " + type + " is not supported at this time!");
         }
 
-        node.setSourcePath(res.getPath());
-        return Optional.of(node);
+        if (node == null) {
+            return Optional.empty();
+        } else {
+            node.setSourcePath(res.getPath());
+            return Optional.of(node);
+        }
     }
 
     public void findReferences(ResourceResolver rr, MovingNode node) throws IllegalAccessException {
