@@ -325,8 +325,8 @@ public class Reorganizer extends ProcessDefinition {
                                 NameConstants.NT_PAGE
                         );
 
-                        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r,level, root, visitedSourceNodes));
-                        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r,level, root, visitedSourceNodes));
+                        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
+                        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
 
                         visitor.accept(res);
                         note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
@@ -340,7 +340,7 @@ public class Reorganizer extends ProcessDefinition {
         if (level > 0) {
             Actions.setCurrentItem(r.getPath());
             Optional<MovingNode> node = buildMoveNode(r);
-            if (node.isPresent()) {                
+            if (node.isPresent()) {
                 MovingNode childNode = node.get();
                 String parentPath = StringUtils.substringBeforeLast(r.getPath(), "/");
                 MovingNode parent = root.findByPath(parentPath)
@@ -455,6 +455,7 @@ public class Reorganizer extends ProcessDefinition {
         });
     }
 
+    // Try to create as much of the folder structures ahead of time (for assets, etc)
     protected void buildStructures(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
@@ -470,13 +471,13 @@ public class Reorganizer extends ProcessDefinition {
         });
     }
 
+    // Move assets and pages, and in some cases folders that were not already moved in the previous step
     protected void moveTree(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
             moves.forEach(node -> {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
-                        // TODO: DEBUG THIS WITH 3 DEPTH LEVELS
-                        if (!childNode.isCopiedBeforeMove()) {
+                        if (!childNode.isCopiedBeforeMove() || !resourceExists(rr2, childNode.getDestinationPath())) {
                             manager.deferredWithResolver(rr3 -> {
                                 Actions.setCurrentItem("Moving " + childNode.getSourcePath());
                                 childNode.move(replicatorQueue, rr3);
