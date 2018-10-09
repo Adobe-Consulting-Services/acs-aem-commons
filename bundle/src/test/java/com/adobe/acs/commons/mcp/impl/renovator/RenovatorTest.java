@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.renovator;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
@@ -25,17 +25,11 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.MovingNode;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.Renovator;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.RenovatorFactory;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.ReplicatorQueue;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.*;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +45,7 @@ import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -144,13 +139,29 @@ public class RenovatorTest {
         verify(rr, atLeastOnce()).commit();
     }
 
-    Map<String, String> testNodes = new HashMap<String, String>() {
+    @Test
+    public void testUpdateAssetReferences() throws RepositoryException, PersistenceException, LoginException, IllegalAccessException {
+        ModifiableValueMap test1 = rr.resolve("/test").adaptTo(ModifiableValueMap.class);
+        ModifiableValueMap test2 = rr.resolve("/test/child1").adaptTo(ModifiableValueMap.class);
+        MovingAsset asset = new MovingAsset();
+        asset.setSourcePath("/source");
+        asset.setDestinationPath("/target");
+        test1.put("attr1", "/source");
+        test2.put("attr2", "/source");
+        asset.updateReferences(queue, rr, "/test");
+        assertEquals("/target", test1.get("attr1"));
+        assertEquals("/target", test2.get("attr2"));
+    }
+
+    Map<String, String> testNodes = new TreeMap<String, String>() {
         {
             put("/content/folderA", JcrResourceConstants.NT_SLING_FOLDER);
             put("/content/folderB", JcrResourceConstants.NT_SLING_FOLDER);
             put("/content", JcrResourceConstants.NT_SLING_FOLDER);
             put("/content/folderA/asset1", DamConstants.NT_DAM_ASSET);
             put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
+            put("/test", "NT:UNSTRUCTURED");
+            put("/test/child1", "NT:UNSTRUCTURED");
         }
     };
 
@@ -161,6 +172,7 @@ public class RenovatorTest {
             String path = entry.getKey();
             String type = entry.getValue();
             AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "", new ResourceMetadata());
+            when(rr.resolve(path)).thenReturn(mockFolder);
             when(rr.getResource(path)).thenReturn(mockFolder);
         }
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {

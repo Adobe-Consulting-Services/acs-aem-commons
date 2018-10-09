@@ -121,7 +121,10 @@ public class AbstractResourceImpl extends AbstractResource {
         return !children.isEmpty();
     }
     
-    
+    @Override
+    public boolean isResourceType(String type) {
+        return getResourceType().equals(type);
+    }
 
     @Override
     public String getPath() {
