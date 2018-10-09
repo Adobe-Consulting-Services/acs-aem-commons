@@ -96,7 +96,6 @@ public class MovingPage extends MovingNode {
                     listToStringArray(getAllReferences()),
                     listToStringArray(getPublishedReferences()));
         } else if (!resourceExists(res, getDestinationPath())) {
-            Map<String, Object> props = new HashMap<>();
             Resource parent = res.getResource(destinationParent);
             res.create(parent, source.getName(), getClonedProperties(source));
         }
