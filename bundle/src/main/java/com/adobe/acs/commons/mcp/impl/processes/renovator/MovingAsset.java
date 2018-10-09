@@ -65,11 +65,11 @@ public class MovingAsset extends MovingNode {
         }
     }
     
-    public void updateReferences(ReplicatorQueue rep, ResourceResolver rr) {
+    void updateReferences(ReplicatorQueue rep, ResourceResolver rr) {
         getAllReferences().forEach(ref -> updateReferences(rep, rr, ref));
     }
 
-    public void updateReferences(ReplicatorQueue rep, ResourceResolver rr, String ref) {
+    void updateReferences(ReplicatorQueue rep, ResourceResolver rr, String ref) {
         Resource res = rr.getResource(ref);
         ModifiableValueMap map = res.adaptTo(ModifiableValueMap.class);
         AtomicBoolean changedProperty = new AtomicBoolean(false);

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.renovator;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
@@ -25,11 +25,14 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.*;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,9 +48,9 @@ import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -141,8 +144,8 @@ public class RenovatorTest {
 
     @Test
     public void testUpdateAssetReferences() throws RepositoryException, PersistenceException, LoginException, IllegalAccessException {
-        ModifiableValueMap test1 = rr.resolve("/test").adaptTo(ModifiableValueMap.class);
-        ModifiableValueMap test2 = rr.resolve("/test/child1").adaptTo(ModifiableValueMap.class);
+        final ModifiableValueMap test1 = rr.resolve("/test").adaptTo(ModifiableValueMap.class);
+        final ModifiableValueMap test2 = rr.resolve("/test/child1").adaptTo(ModifiableValueMap.class);
         MovingAsset asset = new MovingAsset();
         asset.setSourcePath("/source");
         asset.setDestinationPath("/target");
