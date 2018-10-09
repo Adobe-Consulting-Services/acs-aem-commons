@@ -3,14 +3,21 @@
 All notable changes to this project will be documented in this file. This format was adapated
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
+The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
+
+### Added
+- #1446 - Renovator combines and replaces previous relocator tools in MCP
 
 ### Fixed
 - #1497 - Javadoc improvement in EndpointService
 - #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0
+
+### Removed
+
+- #1446 - Removed Folder Relocator and Page Relocator tools
 
 ## [3.18.2] - 2018-09-26
 
