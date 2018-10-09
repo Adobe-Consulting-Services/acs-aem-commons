@@ -67,6 +67,7 @@ public abstract class RadioComponent extends FieldComponent {
         getComponentMetadata().put("vertical", hasOption("vertical"));
         getComponentMetadata().put("text", getFieldDefinition().name());
         getComponentMetadata().remove("fieldLabel");
+        getComponentMetadata().remove("fieldDescription");
     }
 
     @Override
