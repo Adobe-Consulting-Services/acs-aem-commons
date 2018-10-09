@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.data.Spreadsheet;
 import com.adobe.acs.commons.fam.ActionManager;
@@ -33,7 +33,7 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.*;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -77,12 +77,12 @@ import org.apache.sling.jcr.resource.JcrResourceConstants;
 /**
  * Relocate Pages and/or Sites using a parallelized move process
  */
-public class Reorganizer extends ProcessDefinition {
+public class Renovator extends ProcessDefinition {
 
     private static final String DESTINATION_COL = "destination";
     private static final String SOURCE_COL = "source";
 
-    public Reorganizer(PageManagerFactory pageManagerFactory, Replicator replicator) {
+    public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator) {
         this.pageManagerFactory = pageManagerFactory;
         this.replicator = replicator;
     }
@@ -226,7 +226,7 @@ public class Reorganizer extends ProcessDefinition {
             try {
                 sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
             } catch (IOException ex) {
-                Logger.getLogger(Reorganizer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RepositoryException("Unable to parse spreadsheet", ex);
             }
 

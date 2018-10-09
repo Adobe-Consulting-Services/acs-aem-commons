@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.day.cq.replication.Replicator;
@@ -28,7 +28,7 @@ import org.apache.felix.scr.annotations.Service;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class ReorganizerFactory extends ProcessDefinitionFactory<Reorganizer> {
+public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
 
     @Reference
     PageManagerFactory pageManagerFactory;
@@ -38,12 +38,12 @@ public class ReorganizerFactory extends ProcessDefinitionFactory<Reorganizer> {
 
     @Override
     public String getName() {
-        return "Reorganizer";
+        return "Renovator";
     }
 
     @Override
-    public Reorganizer createProcessDefinitionInstance() {
-        return new Reorganizer(pageManagerFactory, replicator);
+    public Renovator createProcessDefinitionInstance() {
+        return new Renovator(pageManagerFactory, replicator);
     }
     
     /**

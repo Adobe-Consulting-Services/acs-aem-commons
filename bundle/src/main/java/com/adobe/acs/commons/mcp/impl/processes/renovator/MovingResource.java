@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilResourceFound;
 import javax.jcr.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;

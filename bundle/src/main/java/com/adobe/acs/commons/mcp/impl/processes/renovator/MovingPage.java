@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.*;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
 import java.lang.reflect.Field;

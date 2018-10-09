@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.resourceExists;
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.waitUntilResourceFound;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.resourceExists;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilResourceFound;
 import com.day.cq.replication.ReplicationActionType;
 import java.util.logging.Level;
 import java.util.logging.Logger;

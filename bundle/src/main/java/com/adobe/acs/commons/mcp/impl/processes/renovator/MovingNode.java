@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.adobe.acs.commons.mcp.impl.processes.reorganizer;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import static com.adobe.acs.commons.mcp.impl.processes.reorganizer.Util.*;
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import static com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor.toList;
 import com.day.cq.wcm.commons.ReferenceSearch;
 import java.util.ArrayList;

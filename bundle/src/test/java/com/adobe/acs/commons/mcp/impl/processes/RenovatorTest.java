@@ -42,10 +42,10 @@ import org.junit.Test;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.impl.processes.reorganizer.MovingNode;
-import com.adobe.acs.commons.mcp.impl.processes.reorganizer.Reorganizer;
-import com.adobe.acs.commons.mcp.impl.processes.reorganizer.ReorganizerFactory;
-import com.adobe.acs.commons.mcp.impl.processes.reorganizer.ReplicatorQueue;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.MovingNode;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.Reorganizer;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.ReorganizerFactory;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.ReplicatorQueue;
 import com.day.cq.dam.api.DamConstants;
 import java.util.List;
 import java.util.function.Function;
@@ -65,7 +65,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Tests a few cases for folder relocator
  */
 @RunWith(PowerMockRunner.class)
-public class ReorganizerTest {
+public class RenovatorTest {
     ReorganizerFactory factory = new ReorganizerFactory();
     Reorganizer tool;
     ProcessInstanceImpl instance;
