@@ -21,45 +21,45 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
-import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
-import com.adobe.acs.commons.mcp.util.DeserializeException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.Privilege;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Test;
-
-import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.MovingNode;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.Renovator;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.RenovatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.ReplicatorQueue;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;
-import java.util.List;
-import java.util.function.Function;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.Workspace;
 import javax.jcr.observation.ObservationManager;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests a few cases for folder relocator
@@ -71,10 +71,10 @@ public class RenovatorTest {
     ProcessInstanceImpl instance;
     ReplicatorQueue queue;
     ResourceResolver rr;
-    
+
     @Before
     public void setup() throws RepositoryException, PersistenceException, IllegalAccessException, LoginException {
-        queue = spy(new ReplicatorQueue());        
+        queue = spy(new ReplicatorQueue());
         factory.setReplicator(queue);
         tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
         instance = prepareProcessInstance(
@@ -83,15 +83,15 @@ public class RenovatorTest {
         rr = getEnhancedMockResolver();
         when(rr.hasChanges()).thenReturn(true);
     }
-    
+
     @Test(expected = RepositoryException.class)
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
         assertEquals("Renovator: relocator test", instance.getName());
         instance.init(rr, Collections.EMPTY_MAP);
-        tool.buildProcess(instance, rr);            
+        tool.buildProcess(instance, rr);
         fail("That should have thrown an error");
     }
-    
+
     @Test
     public void barebonesRun() throws DeserializeException, RepositoryException, PersistenceException {
         assertEquals("Renovator: relocator test", instance.getName());
@@ -104,7 +104,7 @@ public class RenovatorTest {
         assertEquals(1.0, instance.updateProgress(), 0.00001);
         verify(rr, atLeast(3)).commit();
     }
-    
+
     @Test
     public void noPublishTest() throws Exception {
         assertEquals("Renovator: relocator test", instance.getName());
@@ -112,13 +112,13 @@ public class RenovatorTest {
         values.put("sourceJcrPath", "/content/folderA");
         values.put("destinationJcrPath", "/content/republishA");
         values.put("dryRun", "false");
-        
+
         instance.init(rr, values);
         instance.run(rr);
         assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/folderA"));
         assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/republishA"));
-    }    
-    
+    }
+
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
         assertEquals("Renovator: relocator test", instance.getName());
@@ -126,10 +126,10 @@ public class RenovatorTest {
         values.put("sourceJcrPath", "/content/folderA");
         values.put("destinationJcrPath", "/content/folderB");
         instance.init(rr, values);
-        
+
         CompletableFuture<Boolean> f = new CompletableFuture<>();
-        
-        instance.defineAction("Halt", rr, am->{
+
+        instance.defineAction("Halt", rr, am -> {
             instance.halt();
             try {
                 assertTrue(instance.updateProgress() < 1.0);
@@ -137,23 +137,26 @@ public class RenovatorTest {
                 f.complete(true);
             } catch (Throwable t) {
                 f.completeExceptionally(t);
-            }            
+            }
         });
         instance.run(rr);
         assertTrue(f.get());
         verify(rr, atLeastOnce()).commit();
     }
 
-    Map<String,String> testNodes = new HashMap<String, String>(){{
-        put("/content/folderA", JcrResourceConstants.NT_SLING_FOLDER);
-        put("/content/folderB", JcrResourceConstants.NT_SLING_FOLDER);
-        put("/content", JcrResourceConstants.NT_SLING_FOLDER);
-        put("/content/folderA/asset1", DamConstants.NT_DAM_ASSET);
-        put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
-    }};
+    Map<String, String> testNodes = new HashMap<String, String>() {
+        {
+            put("/content/folderA", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content/folderB", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content/folderA/asset1", DamConstants.NT_DAM_ASSET);
+            put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
+        }
+    };
+
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
         rr = getFreshMockResolver();
-        
+
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {
             String path = entry.getKey();
             String type = entry.getValue();
@@ -176,7 +179,7 @@ public class RenovatorTest {
         ObservationManager om = mock(ObservationManager.class);
         when(ses.getWorkspace()).thenReturn(wk);
         when(wk.getObservationManager()).thenReturn(om);
-        
+
         AccessControlManager acm = mock(AccessControlManager.class);
         when(ses.getAccessControlManager()).thenReturn(acm);
         when(acm.privilegeFromName(any())).thenReturn(mock(Privilege.class));
@@ -203,10 +206,10 @@ public class RenovatorTest {
             action.accept(getMockResolver());
             return null;
         }).when(instance).asServiceUser(anyObject());
-        
+
         return instance;
     }
-    
+
     private Renovator prepareProcessDefinition(Renovator source, Function<String, List<String>> refFunction) throws RepositoryException, PersistenceException, IllegalAccessException {
         Renovator definition = spy(source);
         doNothing().when(definition).storeReport(anyObject(), anyObject());

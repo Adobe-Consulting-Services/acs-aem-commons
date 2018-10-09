@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,24 +15,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
-import static com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor.toList;
 import com.day.cq.wcm.commons.ReferenceSearch;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.isActivated;
+import static com.adobe.acs.commons.util.visitors.SimpleFilteringResourceVisitor.toList;
 
 /**
  * Represents a node in the process of moving.
@@ -158,7 +159,7 @@ public abstract class MovingNode {
         return previousSibling;
     }
 
-    public abstract void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, Exception;
+    public abstract void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, MovingException;
 
     public void findReferences(ResourceResolver rr, String referenceSearchRoot, int maxReferences) throws IllegalAccessException {
         ReferenceSearch refSearch = new ReferenceSearch();
@@ -185,12 +186,12 @@ public abstract class MovingNode {
     /**
      * Depth-first visitor
      *
-     * @param consumer Consumer for traversed nodes
-     * @param leafConsumer Consumer for leaf nodes (first level after
-     * traversalFilter returns false), if no traversal function this is never
-     * called
+     * @param consumer        Consumer for traversed nodes
+     * @param leafConsumer    Consumer for leaf nodes (first level after
+     *                        traversalFilter returns false), if no traversal function this is never
+     *                        called
      * @param traversalFilter Function which determines if the tree should be
-     * evaluated any deeper, Null means always true
+     *                        evaluated any deeper, Null means always true
      */
     public void visit(Consumer<MovingNode> consumer, Consumer<MovingNode> leafConsumer, Function<MovingNode, Boolean> traversalFilter) {
         LinkedList<MovingNode> stack = new LinkedList<>();
@@ -229,11 +230,11 @@ public abstract class MovingNode {
         }
         return Optional.of(current);
     }
-    
+
     public boolean hasChild(String path) {
         return getChildren().stream().anyMatch(n -> n.getSourcePath().equals(path));
     }
-   
+
     protected Map<String, Object> getClonedProperties(Resource source) {
         HashMap<String, Object> props = new HashMap<>(source.getValueMap());
         props.remove("jcr:versionHistory");

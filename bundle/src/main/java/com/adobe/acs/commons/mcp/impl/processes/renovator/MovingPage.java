@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +15,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.fam.actions.Actions;
-import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.PageManagerFactory;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import com.day.cq.wcm.api.WCMException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 
 /**
  * Represents a page being moved.
@@ -55,7 +63,7 @@ public class MovingPage extends MovingNode {
     }
 
     @Override
-    public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, Exception {
+    public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, MovingException {
         // For starters, create a page manager with a modified replicator queue
         PageManager manager = pageManagerFactory.getPageManager(rr);
         Field replicatorField = FieldUtils.getDeclaredField(manager.getClass(), "replicator", true);
@@ -66,26 +74,40 @@ public class MovingPage extends MovingNode {
         String destinationParent = StringUtils.substringBeforeLast(getDestinationPath(), "/");
 
         // Attempt move operation
-        Actions.retry(10, 500, res -> {
-            waitUntilResourceFound(res, destinationParent);
-            Resource source = rr.getResource(getSourcePath());
-            if (resourceExists(res, contentPath)) {
-                manager.move(source,
-                        getDestinationPath(),
-                        getPreviousSibling(),
-                        true,
-                        true,
-                        listToStringArray(getAllReferences()),
-                        listToStringArray(getPublishedReferences()));
-            } else if (!resourceExists(res, getDestinationPath())) {
-                Map<String, Object> props = new HashMap<>();
-                Resource parent = res.getResource(destinationParent);
-                res.create(parent, source.getName(), getClonedProperties(source));
-            }
-            res.commit();
-            res.refresh();
+        try {
+            Actions.retry(10, 500, res -> {
+                waitUntilResourceFound(res, destinationParent);
+                moveOrClonePage(rr, manager, contentPath, destinationParent, res);
+                movePageChildren(rr, res);
+            }).accept(rr);
+        } catch (Exception e) {
+            throw new MovingException(getSourcePath(), e);
+        }
+    }
 
-            source = rr.getResource(getSourcePath());
+    private void moveOrClonePage(ResourceResolver rr, PageManager manager, String contentPath, String destinationParent, ResourceResolver res) throws WCMException, PersistenceException {
+        Resource source = rr.getResource(getSourcePath());
+        if (resourceExists(res, contentPath)) {
+            manager.move(source,
+                    getDestinationPath(),
+                    getPreviousSibling(),
+                    true,
+                    true,
+                    listToStringArray(getAllReferences()),
+                    listToStringArray(getPublishedReferences()));
+        } else if (!resourceExists(res, getDestinationPath())) {
+            Map<String, Object> props = new HashMap<>();
+            Resource parent = res.getResource(destinationParent);
+            res.create(parent, source.getName(), getClonedProperties(source));
+        }
+        res.commit();
+        res.refresh();
+    }
+
+    private void movePageChildren(ResourceResolver rr, ResourceResolver res) throws MovingException {
+        Resource source;
+        source = rr.getResource(getSourcePath());
+        try {
             if (source != null && source.hasChildren()) {
                 for (Resource child : source.getChildren()) {
                     if (!hasChild(child.getPath())) {
@@ -99,6 +121,8 @@ public class MovingPage extends MovingNode {
                 }
                 res.commit();
             }
-        }).accept(rr);
+        } catch (PersistenceException e) {
+            throw new MovingException(getSourcePath(), e);
+        }
     }
 }

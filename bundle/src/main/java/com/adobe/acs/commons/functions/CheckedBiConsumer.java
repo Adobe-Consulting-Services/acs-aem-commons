@@ -41,7 +41,7 @@ import java.util.function.BiConsumer;
 public interface CheckedBiConsumer<T, U> {
 
     public static <T,U> CheckedBiConsumer<T,U> from(BiConsumer<T,U> handler) {
-        return (T,U) -> handler.accept(T, U);
+        return (t, u) -> handler.accept(t, u);
     }
 
     /**

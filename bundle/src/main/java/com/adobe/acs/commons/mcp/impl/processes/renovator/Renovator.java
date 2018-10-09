@@ -33,6 +33,7 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 
@@ -46,6 +47,7 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -67,6 +69,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.request.RequestParameter;
@@ -177,31 +180,31 @@ public class Renovator extends ProcessDefinition {
     private boolean detailedReport = false;
 
     private final transient String[] requiredMovePrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE,
-        Privilege.JCR_REMOVE_CHILD_NODES,
-        Privilege.JCR_REMOVE_NODE,
-        Replicator.REPLICATE_PRIVILEGE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE,
+            Privilege.JCR_REMOVE_CHILD_NODES,
+            Privilege.JCR_REMOVE_NODE,
+            Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredMovePrivileges;
 
     private final transient String[] requiredPublishPrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE,
-        Replicator.REPLICATE_PRIVILEGE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE,
+            Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredPublishPrivileges;
 
     private final transient String[] requiredUpdatePrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE
     };
     Privilege[] requiredUpdatePrivileges;
 
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
-    final private Set<MovingNode> moves = Collections.synchronizedSet(new HashSet<>());
-    final private Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
+    private final Set<MovingNode> moves = Collections.synchronizedSet(new HashSet<>());
+    private final Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public void init() throws RepositoryException {
@@ -224,58 +227,71 @@ public class Renovator extends ProcessDefinition {
 
     private void validateInputs(ResourceResolver res) throws RepositoryException {
         if (sourceFile != null && sourceFile.getSize() > 0) {
-            Spreadsheet sheet;
-            try {
-                sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
-            } catch (IOException ex) {
-                Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException("Unable to parse spreadsheet", ex);
-            }
-
-            if (!sheet.getHeaderRow().contains(SOURCE_COL) || !sheet.getHeaderRow().contains(DESTINATION_COL)) {
-                throw new RepositoryException(MessageFormat.format("Spreadsheet should have two columns, respectively named {0} and {1}", SOURCE_COL, DESTINATION_COL));
-            }
-
-            sheet.getDataRowsAsCompositeVariants().forEach(row -> {
-                movePaths.put(row.get(SOURCE_COL).toString(),
-                        row.get(DESTINATION_COL).toString());
-            });
+            validateSpreadsheetInput();
         } else {
-            if (sourceJcrPath == null) {
-                throw new RepositoryException("Source path should not be null if no file provided");
-            }
-            if (destinationJcrPath == null) {
-                throw new RepositoryException("Destination path should not be null if no file provided");
-            }
-            movePaths.put(sourceJcrPath, destinationJcrPath);
+            validateSingleMoveInput();
         }
         for (Map.Entry<String, String> entry : movePaths.entrySet()) {
             String sourcePath = entry.getKey();
             String destinationPath = entry.getValue();
 
-            if (destinationPath.contains(sourcePath + "/")) {
-                throw new RepositoryException("Destination must be outside of source path");
-            }
-            if (!resourceExists(res, sourcePath)) {
-                if (!sourcePath.startsWith("/")) {
-                    throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + sourcePath);
-                } else {
-                    throw new RepositoryException("Unable to find source " + sourcePath);
-                }
-            }
-            if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
-                if (!destinationPath.startsWith("/")) {
-                    throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
-                } else if (!destinationPath.startsWith(DAM_ROOT)) {
-                    throw new RepositoryException("Unable to find destination " + destinationPath);
-                }
-            }
-
-            if (sourcePath.startsWith(DAM_ROOT) != destinationPath.startsWith(DAM_ROOT)) {
-                throw new RepositoryException("Source and destination are incompatible (if one is in the DAM, then so should the other be in the DAM)");
-            }
+            validateMovePreconditions(res, sourcePath, destinationPath);
         }
     }
+
+    private void validateMovePreconditions(ResourceResolver res, String sourcePath, String destinationPath) throws RepositoryException {
+        if (destinationPath.contains(sourcePath + "/")) {
+            throw new RepositoryException("Destination must be outside of source path");
+        }
+        if (!resourceExists(res, sourcePath)) {
+            if (!sourcePath.startsWith("/")) {
+                throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + sourcePath);
+            } else {
+                throw new RepositoryException("Unable to find source " + sourcePath);
+            }
+        }
+        if (!resourceExists(res, destinationPath.substring(0, destinationPath.lastIndexOf('/')))) {
+            if (!destinationPath.startsWith("/")) {
+                throw new RepositoryException("Paths are not valid unless they start with a forward slash, you provided: " + destinationPath);
+            } else if (!destinationPath.startsWith(DAM_ROOT)) {
+                throw new RepositoryException("Unable to find destination " + destinationPath);
+            }
+        }
+
+        if (sourcePath.startsWith(DAM_ROOT) != destinationPath.startsWith(DAM_ROOT)) {
+            throw new RepositoryException("Source and destination are incompatible (if one is in the DAM, then so should the other be in the DAM)");
+        }
+    }
+
+    private void validateSingleMoveInput() throws RepositoryException {
+        if (sourceJcrPath == null) {
+            throw new RepositoryException("Source path should not be null if no file provided");
+        }
+        if (destinationJcrPath == null) {
+            throw new RepositoryException("Destination path should not be null if no file provided");
+        }
+        movePaths.put(sourceJcrPath, destinationJcrPath);
+    }
+
+    private void validateSpreadsheetInput() throws RepositoryException {
+        Spreadsheet sheet;
+        try {
+            sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
+        } catch (IOException ex) {
+            Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RepositoryException("Unable to parse spreadsheet", ex);
+        }
+
+        if (!sheet.getHeaderRow().contains(SOURCE_COL) || !sheet.getHeaderRow().contains(DESTINATION_COL)) {
+            throw new RepositoryException(MessageFormat.format("Spreadsheet should have two columns, respectively named {0} and {1}", SOURCE_COL, DESTINATION_COL));
+        }
+
+        sheet.getDataRowsAsCompositeVariants().forEach(row -> {
+            movePaths.put(row.get(SOURCE_COL).toString(),
+                    row.get(DESTINATION_COL).toString());
+        });
+    }
+
     private static final String DAM_ROOT = "/content/dam";
 
     ManagedProcess instanceInfo;
@@ -374,8 +390,13 @@ public class Renovator extends ProcessDefinition {
             case JcrConstants.NT_UNSTRUCTURED:
                 if (res.getName().equals(JcrConstants.JCR_CONTENT)) {
                     return Optional.empty();
+                } else {
+                    node = new MovingResource();
                 }
+                break;
             case "cq:CommentAttachment":
+                node = new MovingResource();
+                break;
             case AccessControlConstants.NT_REP_ACL:
                 node = new MovingResource();
                 break;
@@ -431,30 +452,38 @@ public class Renovator extends ProcessDefinition {
                 manager.deferredWithResolver(rr2 -> {
                     node.visit(childNode -> {
                         manager.deferredWithResolver(rr3 -> {
-                            try {
-                                Actions.setCurrentItem("Checking ACLs on " + childNode.getSourcePath());
-                                checkNodeAcls(rr3, childNode.getSourcePath(), requiredMovePrivileges);
-                                for (String ref : childNode.getAllReferences()) {
-                                    Actions.setCurrentItem("Checking ACLs on " + ref + " which references " + childNode.getSourcePath());
-                                    if (publishMethod != PublishMethod.NONE
-                                            && childNode.getPublishedReferences().contains(ref)) {
-                                        checkNodeAcls(rr3, childNode.getSourcePath(), requiredPublishPrivileges);
-                                    } else {
-                                        checkNodeAcls(rr3, childNode.getSourcePath(), requiredUpdatePrivileges);
-                                    }
-                                }
-                                if (detailedReport) {
-                                    note(childNode.getSourcePath(), Report.acl_check, "Passed");
-                                }
-                            } catch (Exception e) {
-                                note(childNode.getSourcePath(), Report.acl_check, "Failed");
-                                throw e;
-                            }
+                            validateAcls(childNode, rr3);
                         });
                     });
                 });
             });
         });
+    }
+
+    private void validateAcls(MovingNode childNode, ResourceResolver rr3) throws RepositoryException {
+        try {
+            Actions.setCurrentItem("Checking ACLs on " + childNode.getSourcePath());
+            checkNodeAcls(rr3, childNode.getSourcePath(), requiredMovePrivileges);
+            for (String ref : childNode.getAllReferences()) {
+                Actions.setCurrentItem("Checking ACLs on " + ref + " which references " + childNode.getSourcePath());
+                validateAclsForReference(childNode, rr3, ref);
+            }
+            if (detailedReport) {
+                note(childNode.getSourcePath(), Report.acl_check, "Passed");
+            }
+        } catch (Exception e) {
+            note(childNode.getSourcePath(), Report.acl_check, "Failed");
+            throw e;
+        }
+    }
+
+    private void validateAclsForReference(MovingNode childNode, ResourceResolver rr, String ref) throws RepositoryException {
+        if (publishMethod != PublishMethod.NONE
+                && childNode.getPublishedReferences().contains(ref)) {
+            checkNodeAcls(rr, childNode.getSourcePath(), requiredPublishPrivileges);
+        } else {
+            checkNodeAcls(rr, childNode.getSourcePath(), requiredUpdatePrivileges);
+        }
     }
 
     // Try to create as much of the folder structures ahead of time (for assets, etc)
@@ -564,9 +593,7 @@ public class Renovator extends ProcessDefinition {
         for (Map.Entry<String, String> mapping : movePaths.entrySet()) {
             String sourcePath = mapping.getKey();
             String destinationPath = mapping.getValue();
-            if (path.startsWith(sourcePath)) {
-                return false;
-            } else if (path.startsWith(destinationPath)) {
+            if (path.startsWith(sourcePath) || path.startsWith(destinationPath)) {
                 return false;
             }
         }
@@ -627,10 +654,6 @@ public class Renovator extends ProcessDefinition {
         }
     }
 
-    private String convertSourceToDestination(String path, String source, String destination) {
-        return path.replaceAll(Pattern.quote(source), destination);
-    }
-
     private String reversePathLookup(String path) {
         for (Map.Entry<String, String> mapping : movePaths.entrySet()) {
             String sourcePath = mapping.getKey();
@@ -642,19 +665,6 @@ public class Renovator extends ProcessDefinition {
             }
         }
         return null;
-    }
-
-    private Stream<String> getAllDeactivationPaths() {
-        Set<String> allPaths = new TreeSet<>();
-        moves.forEach((n) -> {
-            n.visit(node -> {
-                if (node.isSourceActivated()) {
-                    allPaths.add(node.getSourcePath());
-                }
-            });
-        });
-        allPaths.addAll(replicatorQueue.getDeactivateOperations().keySet());
-        return allPaths.stream();
     }
 
     private Stream<String> getAllActivationPaths() {

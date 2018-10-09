@@ -1,9 +1,6 @@
 /*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2017 Adobe
- * %%
+ * Copyright 2018 Adobe.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * #L%
  */
-package com.adobe.acs.commons.mcp.form;
+package com.adobe.acs.commons.util.visitors;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public class TraversalException extends Exception {
+    public TraversalException(Throwable cause) {
+        super(cause);
+    }
 
-/**
- * Description annotation for enumeration constants
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Description {
-    String value();
+    public TraversalException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
