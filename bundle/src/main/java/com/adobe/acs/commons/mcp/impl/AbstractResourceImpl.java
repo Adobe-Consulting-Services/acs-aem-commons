@@ -31,6 +31,8 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+
 /**
  * This is a mock resource class used to pass values in to the granite UI components.
  */
@@ -50,6 +52,7 @@ public class AbstractResourceImpl extends AbstractResource {
         this.type = resourceType;
         this.superType = resourceSuperType;
         this.meta = metadata;
+        meta.put(JCR_PRIMARYTYPE, type);
     }
     
     @Override

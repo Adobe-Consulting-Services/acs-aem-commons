@@ -43,8 +43,8 @@ import org.junit.Test;
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.MovingNode;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.Reorganizer;
-import com.adobe.acs.commons.mcp.impl.processes.renovator.ReorganizerFactory;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.Renovator;
+import com.adobe.acs.commons.mcp.impl.processes.renovator.RenovatorFactory;
 import com.adobe.acs.commons.mcp.impl.processes.renovator.ReplicatorQueue;
 import com.day.cq.dam.api.DamConstants;
 import java.util.List;
@@ -66,8 +66,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 public class RenovatorTest {
-    ReorganizerFactory factory = new ReorganizerFactory();
-    Reorganizer tool;
+    RenovatorFactory factory = new RenovatorFactory();
+    Renovator tool;
     ProcessInstanceImpl instance;
     ReplicatorQueue queue;
     ResourceResolver rr;
@@ -77,7 +77,7 @@ public class RenovatorTest {
         queue = spy(new ReplicatorQueue());        
         factory.setReplicator(queue);
         tool = prepareProcessDefinition(factory.createProcessDefinition(), null);
-        instance = prepareProocessInstance(
+        instance = prepareProcessInstance(
                 new ProcessInstanceImpl(getControlledProcessManager(), tool, "relocator test")
         );
         rr = getEnhancedMockResolver();
@@ -85,16 +85,16 @@ public class RenovatorTest {
     }
     
     @Test(expected = RepositoryException.class)
-    public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException, PersistenceException {        
-        assertEquals("Reorganizer: relocator test", instance.getName());
+    public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
+        assertEquals("Renovator: relocator test", instance.getName());
         instance.init(rr, Collections.EMPTY_MAP);
         tool.buildProcess(instance, rr);            
         fail("That should have thrown an error");
     }
     
     @Test
-    public void barebonesRun() throws LoginException, DeserializeException, RepositoryException, PersistenceException, IllegalAccessException {
-        assertEquals("Reorganizer: relocator test", instance.getName());
+    public void barebonesRun() throws DeserializeException, RepositoryException, PersistenceException {
+        assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
         values.put("destinationJcrPath", "/content/folderB");
@@ -106,8 +106,8 @@ public class RenovatorTest {
     }
     
     @Test
-    public void noPublishTest() throws LoginException, DeserializeException, RepositoryException, PersistenceException, Exception {
-        assertEquals("Reorganizer: relocator test", instance.getName());
+    public void noPublishTest() throws Exception {
+        assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
         values.put("destinationJcrPath", "/content/republishA");
@@ -120,8 +120,8 @@ public class RenovatorTest {
     }    
     
     @Test
-    public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException, IllegalAccessException {
-        assertEquals("Reorganizer: relocator test", instance.getName());
+    public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
+        assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
         values.put("sourceJcrPath", "/content/folderA");
         values.put("destinationJcrPath", "/content/folderB");
@@ -170,6 +170,7 @@ public class RenovatorTest {
         }
 
         Session ses = mock(Session.class);
+        when(ses.nodeExists(any())).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
         when(rr.adaptTo(Session.class)).thenReturn(ses);
         Workspace wk = mock(Workspace.class);
         ObservationManager om = mock(ObservationManager.class);
@@ -185,7 +186,7 @@ public class RenovatorTest {
 
     private ControlledProcessManager getControlledProcessManager() throws LoginException {
         ActionManagerFactory amf = mock(ActionManagerFactoryImpl.class);
-        doAnswer((Answer) (InvocationOnMock invocationOnMock) -> getActionManager())
+        doAnswer((InvocationOnMock invocationOnMock) -> getActionManager())
                 .when(amf).createTaskManager(any(), any(), anyInt());
 
         ControlledProcessManager cpm = mock(ControlledProcessManager.class);
@@ -193,11 +194,11 @@ public class RenovatorTest {
         return cpm;
     }
 
-    private ProcessInstanceImpl prepareProocessInstance(ProcessInstanceImpl source) throws PersistenceException {
+    private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
         doNothing().when(instance).persistStatus(anyObject());
         doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
-        doAnswer((Answer) (InvocationOnMock invocationOnMock) -> {
+        doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());
             return null;
@@ -206,11 +207,11 @@ public class RenovatorTest {
         return instance;
     }
     
-    private Reorganizer prepareProcessDefinition(Reorganizer source, Function<String, List<String>> refFunction) throws RepositoryException, PersistenceException, IllegalAccessException {
-        Reorganizer definition = spy(source);
+    private Renovator prepareProcessDefinition(Renovator source, Function<String, List<String>> refFunction) throws RepositoryException, PersistenceException, IllegalAccessException {
+        Renovator definition = spy(source);
         doNothing().when(definition).storeReport(anyObject(), anyObject());
         doNothing().when(definition).checkNodeAcls(anyObject(), anyObject(), anyObject());
-        doAnswer((Answer) (InvocationOnMock invocationOnMock) -> {
+        doAnswer((InvocationOnMock invocationOnMock) -> {
             if (refFunction != null) {
                 MovingNode node = (MovingNode) invocationOnMock.getArguments()[1];
                 node.getAllReferences().addAll(refFunction.apply(node.getSourcePath()));

@@ -34,6 +34,8 @@ import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -355,7 +357,7 @@ public class Renovator extends ProcessDefinition {
     }
 
     private Optional<MovingNode> buildMoveNode(Resource res) throws RepositoryException {
-        String type = res.adaptTo(Node.class).getPrimaryNodeType().getName();
+        String type = res.getValueMap().get(JCR_PRIMARYTYPE, String.class);
         MovingNode node = null;
         switch (type) {
             case JcrConstants.NT_FOLDER:
