@@ -74,7 +74,7 @@ public class BrokenLinksTest {
         tool = getBrokenLinksReport();
     }
 
-//    @Test
+    @Test
     public void reportBrokenReferences() throws Exception {
         final ResourceResolver rr = getEnhancedMockResolver();
 
