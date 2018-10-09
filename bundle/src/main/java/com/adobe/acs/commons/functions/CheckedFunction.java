@@ -35,7 +35,7 @@ import java.util.function.Function;
 public interface CheckedFunction<T, R> {
 
     public static <T,R> CheckedFunction<T,R> from(Function<T,R> function) {
-        return t -> function.apply(t);
+        return function == null ? null : t -> function.apply(t);
     }
     
     /**
