@@ -97,6 +97,7 @@ public class Spreadsheet {
     }
 
     public Spreadsheet(RequestParameter file, String... required) throws IOException {
+        //this(true, file, required);
         this(true, file, required);
     }
 
@@ -229,7 +230,7 @@ public class Spreadsheet {
             if (str.contains("@")) {
                 str = StringUtils.substringBefore(str, "@");
             }
-            return String.valueOf(str).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
+            return String.valueOf(str).replaceAll("[^0-9a-zA-Z:\\-]+", "_");
         } else {
             return String.valueOf(str);
         }
