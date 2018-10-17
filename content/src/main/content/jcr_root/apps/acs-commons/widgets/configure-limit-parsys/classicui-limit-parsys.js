@@ -69,6 +69,9 @@
             for(var i = 0; i < parNames.length; i++){
                 var prop = parNames[i];
                 cellSearchPathInfo = cellSearchPathInfo[prop];
+                if (!cellSearchPathInfo) {
+                    return;
+                }
             }
             currentLimit = cellSearchPathInfo[ACS_COMPONENTS_LIMIT];
             if(currentLimit){
