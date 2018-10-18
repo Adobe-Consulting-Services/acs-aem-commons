@@ -16,25 +16,29 @@ if ('serviceWorker' in navigator) {
 }
 
 function registerSW(resp, configPath) {
+    checkIDB(resp.version).then(function() {
+                        loadSW(resp.scope, configPath, resp.version);
+                    });/*
     caches.has(resp.cache_name)
         .then(function(hasCacheName) {
             if (navigator.serviceWorker.controller === null) { // no SW exists; load one 
                 loadSW(resp.scope, configPath, resp.version);
             } else {
                 if (!hasCacheName && navigator.onLine) {
-                    updateServiceWorker().then(function() {
+                     updateServiceWorker().then(function() {
 
                         clearOldCache()
                             .then(function() {
                                 navigator.serviceWorker.controller = null;
                                 loadSW(resp.scope, configPath, resp.version);
                             });
-                    });
+                    }); 
+                    
 
                 }
             }
 
-        });
+        });*/
 }
 
 function clearOldCache() {
@@ -50,9 +54,8 @@ function clearOldCache() {
 }
 
 function loadSW(rootSW, configPath, version) {
-    var time = new Date().getTime();
     navigator.serviceWorker
-        .register(rootSW + '.pwa.service-worker.V' + version + '.js?config=' + configPath)
+        .register(rootSW + '.pwa.service-worker.V' + version + '.js')
         .then(function() {
             console.log('PWA Service Worker Registered');
         })
@@ -69,5 +72,58 @@ function updateServiceWorker(rootSW, configPath) {
             return registration.unregister();
 
         });
+
+}
+
+
+function checkIDB(versionNum) {
+    if (!('indexedDB' in window)) {
+        console.log('This browser doesn\'t support IndexedDB');
+        return;
+    }
+
+    var dbPromise = idb.open('pwa-aem-db', 1, function(db) {
+        console.log('database created ');
+        if (!db.objectStoreNames.contains('aem-pwa-store')) {
+            db.createObjectStore('aem-pwa-store', {
+                keyPath: 'pwaStore'
+            });
+        }
+    });
+
+    return dbPromise.then(function(db) {
+        var version = versionNum;
+        var tx = db.transaction('aem-pwa-store', 'readwrite');
+        var store = tx.objectStore('aem-pwa-store');
+        var item = {
+            pwaStore: 'pwa-version-store', 
+            version: version, 
+            configPath: configPath
+        };
+        return store.get('pwa-version-store').then(function(data) {
+            if (!data || data.version !== version) {
+                store.clear();
+                store.put(item);
+                updateCacheAndSW();
+				return tx.complete;
+            }
+        });
+
+
+    });
+
+
+
+
+}
+
+function updateCacheAndSW(){
+	caches.delete('STATIC_CACHE');
+    caches.delete('DYNAMIC_CACHE');
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+ 		for(let registration of registrations) {
+  			registration.unregister()
+		} 
+    });
 
 }

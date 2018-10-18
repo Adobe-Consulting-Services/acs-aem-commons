@@ -1,4 +1,5 @@
 /* Global state */
+ 
 var config = {
     cache_name: 'pwa__uninitialized-v0',
     version: 0
@@ -49,17 +50,35 @@ function getFallback(request) {
     return fallback;
 }
 
-function getServiceWorkerConfig() {
-    var configJson = new URL(location).searchParams.get('config');
-
-    return fetch(configJson).then(function(response) {
-        return response.json().then(function(json) {
-            config = json;
-            console.log("In SW ", config);
-            return json;
-
-        });
+function getServiceWorkerConfig() { 
+    return getStoreData()
+        .then(function(storeData){
+            console.log('storeData: ', storeData);
+            return fetch(storeData[0].configPath)
+                .then(function(response) {
+                    return response.json()
+                        .then(function(json) {
+                            config = json;
+                            console.log("In SW ", config);
+                            return json;
+                    });
+                });         
     });
+    
+    
+}
+
+function getStoreData(){
+    var dbPromise = idb.open('pwa-aem-db', 1, function(db){});
+    return dbPromise.then(function(db) {
+        console.log('db', db);
+        var tx = db.transaction('aem-pwa-store', 'readonly');
+        var store = tx.objectStore('aem-pwa-store');
+        console.log('store', store);
+        return store.getAll();
+    });
+
+    
 }
 
 /* Events */
@@ -74,12 +93,14 @@ function getServiceWorkerConfig() {
 self.addEventListener('install', function(e) {
     console.log('Registering SW');
     e.waitUntil(
-        init().then(function() {
-            caches.open(config.cache_name).then(function(cache) {
-                var urlsToCache = config.fallback.map(function(entry) {
-                    return entry.path;
-                }).concat(config.pre_cache);
-
+        init().then(function(configObject) {
+            console.log('configObject', configObject);
+            caches.open(configObject.cache_name)
+                .then(function(cache) {
+                var urlsToCache = configObject.fallback.map(function(entry) {
+                    return entry.path+'.html';
+                }).concat(configObject.pre_cache);
+                    
                 return cache.addAll(urlsToCache);
             });
         })
@@ -87,7 +108,7 @@ self.addEventListener('install', function(e) {
 });
 self.addEventListener("activate", function(event) {
 
-    console.log("Activated SW");
+    
               event.waitUntil(function() {
                         caches.keys().then(function(keyList) {
                             return Promise.all(keyList.map(function(key) {
@@ -98,9 +119,9 @@ self.addEventListener("activate", function(event) {
                             }));
 
                         });
+                        console.log("Activating SW");
                     });
-
-    return self.clients.claim();
+   return self.clients.claim();
 
 });
 
