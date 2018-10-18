@@ -1,14 +1,15 @@
 /* Global state */
  
-var config = {
-    cache_name: 'pwa__uninitialized-v0',
-    version: 0
-};
+var config = {};
 
 /* Helpers */
 
 function init() {
-    return getServiceWorkerConfig();
+    return clearCaches()
+    .then(function(){
+        return getServiceWorkerConfig();    
+    });
+    
 }
 
 function isCacheable(request) {
@@ -110,7 +111,14 @@ self.addEventListener("activate", function(event) {
 
     
               event.waitUntil(function() {
-                        caches.keys().then(function(keyList) {
+                        return clearCaches();
+                    });
+   return self.clients.claim();
+
+});
+
+function clearCaches(){
+    return caches.keys().then(function(keyList) {
                             return Promise.all(keyList.map(function(key) {
                                 if (key !== config.cache_name) {
                                     console.log(key);
@@ -119,17 +127,22 @@ self.addEventListener("activate", function(event) {
                             }));
 
                         });
-                        console.log("Activating SW");
-                    });
-   return self.clients.claim();
-
-});
+}
 
 self.addEventListener('fetch', function(event) {
     if (!isCacheable(event.request)) {
         return;
     }
-
+    if(!config.cache_name){
+        getServiceWorkerConfig()
+            .then(function(){
+            useSWCacheStrategy(event);
+        });
+    }else{
+        useSWCacheStrategy(event);
+    }
+});
+function useSWCacheStrategy(event){
     // cache then network fallback
     event.respondWith(
         caches.open(config.cache_name).then(function(cache) {
@@ -164,16 +177,16 @@ self.addEventListener('fetch', function(event) {
         })
 */
 
-});
+}
 
 function cachedResponse(event) {
 
     return caches.match(event.request).then(function(resp) {
         if (resp) {
-            console.log('Resolved respone', resp);
+            console.log('Resolved response', resp);
             return resp;
         } else {
-            console.log('chek for fallback for ', event.request);
+            console.log('check for fallback for ', event.request);
             return caches.match(getFallback(event.request));
         }
 
