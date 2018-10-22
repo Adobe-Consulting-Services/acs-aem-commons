@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Changed
+- #1523 - Added check to EnsureACEs to avoid duplicate path processing.
+
 ### Fixed
 - #1497 - Javadoc improvement in EndpointService
 - #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
