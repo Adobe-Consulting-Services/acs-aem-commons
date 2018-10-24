@@ -172,10 +172,14 @@
                 caches.open(configObject.cache_name)
                     .then(function (cache) {
                         var urlsToCache = configObject.fallback.map(function (entry) {
-                            return entry.path + '.html';
+                            return entry.path.indexOf('.html') > -1 ? entry.path :  entry.path + '.html';
                         }).concat(configObject.pre_cache);
-
-                        return cache.addAll(urlsToCache);
+                        
+                        var preCachedurls = urlsToCache.map(function(entry){
+                            return entry.indexOf(config.scope) > -1 && entry.indexOf('.html') > 0? entry : entry+'.html';
+                        }); 
+                        
+                        return cache.addAll(preCachedurls);
                     });
             })
         );
@@ -190,6 +194,16 @@
 
     self.addEventListener('fetch', function (event) {
         if (!isCacheable(event.request)) {
+            if(!navigator.onLine && event.request.headers.get('accept').includes('text/html') ){
+              /*  event.respondWith(async function(){
+                    const cachedResponse = await getFallback(event.request);
+                    return cachedResponse;
+                });*/
+                /* event.respondWith(new Promise(function(resolve, reject){
+                    resolve(getFallback(event.request));
+                }));*/
+                return;
+            }
             return;
         }
         if (!config.cache_name) {

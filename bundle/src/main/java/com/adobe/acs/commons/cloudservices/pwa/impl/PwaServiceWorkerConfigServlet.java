@@ -71,19 +71,22 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
         final Configuration configuration = modelFactory.createModel(request, Configuration.class);
         final ValueMap properties = configuration.getProperties();
         final JsonObject json = new JsonObject();
-        final int version = properties.get(PN_VERSION, 1);
-        final String swScope = properties.get(KEY_SW_Scope, "/");
+        if(properties !=null ){
+            final int version = properties.get(PN_VERSION, 1);
+            final String swScope = properties.get(KEY_SW_Scope, "/");
 
-        json.addProperty(KEY_CACHE_NAME,
-                "pwa__"
-                        + properties.get(PN_SHORT_NAME, configuration.getConfPage().getName())
-                        + "-v" + String.valueOf(version));
+            json.addProperty(KEY_CACHE_NAME,
+                    "pwa__"
+                            + properties.get(PN_SHORT_NAME, configuration.getConfPage().getName())
+                            + "-v" + String.valueOf(version));
 
-        json.addProperty(KEY_VERSION, version);
-        json.addProperty(KEY_SW_Scope, swScope);
-        json.add(KEY_FALLBACK, getFallback(request, configuration));
-        json.add(KEY_NO_CACHE, getNoCache(configuration));
-        json.add(KEY_PRE_CACHE, getPreCache(request, configuration));
+            json.addProperty(KEY_VERSION, version);
+            json.addProperty(KEY_SW_Scope, swScope);
+            json.add(KEY_FALLBACK, getFallback(request, configuration));
+            json.add(KEY_NO_CACHE, getNoCache(configuration));
+            json.add(KEY_PRE_CACHE, getPreCache(request, configuration));
+
+        }
 
         return json;
     }
