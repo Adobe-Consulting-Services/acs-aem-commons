@@ -1,4 +1,4 @@
-(function () {
+ 
 
     /* Global state */
     var config = {};
@@ -27,7 +27,7 @@
         config.no_cache.push('.pwa.');
         config.no_cache.push('manifest');
         (config.no_cache || []).forEach(function (pattern) {
-            if (cacheable && request.url.match(pattern)) {
+            if (cacheable && request.url.match(pattern.trim())) {
                 cacheable = false;
             }
         });
@@ -37,18 +37,27 @@
 
     /* Get the fallback url given the request pattern */
     function getFallback(request) {
-        var fallback = null;
+        
+        var fallback, fallbackAll= null;
         (config.fallback || []).forEach(function (entry) {
-            if (!fallback && request.url.match(entry.pattern)) {
+            if (!fallback && entry.pattern !== '*' && request.url.match(entry.pattern)) {
                 fallback = entry.path;
             }
+            if(entry.pattern === '*'){
+                fallbackAll = entry.path;
+            }
         });
+        
+        if(fallbackAll){
+            fallback = fallbackAll;
+        }
+        
 
         if (!fallback && config.fallback.length > 0) {
             fallback = config.fallback[0].path;
         }
 
-        return request.headers.get('accept').includes('text/html') ? fallback + '.html' : fallback;
+        return request.headers.get('accept').includes('text/html') ? fallback.indexOf('.html') > -1 ? fallback : fallback + '.html' : fallback;
     }
 
     /* The config object as authored in the server */
@@ -192,8 +201,6 @@
             useSWCacheStrategy(event);
         }
     });
-
-})();
-
+ 
 
 

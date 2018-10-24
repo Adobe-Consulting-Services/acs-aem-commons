@@ -65,6 +65,7 @@ public class Constants {
     /** Property Names **/
     public static final String PN_PATH = "path";
     public static final String PN_PATTERN = "pattern";
+    public static final String PN_URL = "url";
 
     /** JSON Keys **/
     public static final String KEY_CACHE_NAME = "cache_name";

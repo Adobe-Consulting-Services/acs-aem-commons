@@ -118,9 +118,9 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
         if (resource != null) {
             StreamSupport.stream(resource.getChildren().spliterator(), false)
                     .map(Resource::getValueMap)
-                    .filter(p -> p.get(PN_PATTERN, String.class) != null)
+                    .filter(p -> p.get(PN_URL, String.class) != null)
                     .forEach(p -> {
-                        jsons.add(new JsonPrimitive(p.get(PN_PATTERN, String.class)));
+                        jsons.add(new JsonPrimitive(p.get(PN_URL, String.class)));
                     });
 
         }
@@ -137,11 +137,11 @@ public class PwaServiceWorkerConfigServlet extends SlingSafeMethodsServlet {
         if (resource != null) {
             StreamSupport.stream(resource.getChildren().spliterator(), false)
                     .map(Resource::getValueMap)
-                    .filter(p -> p.get(PN_PATH, String.class) != null)
+                    .filter(p -> p.get(PN_URL, String.class) != null)
                     .forEach(p -> {
                         jsons.add(
                                 new JsonPrimitive(
-                                        request.getResourceResolver().map(request, p.get(PN_PATH, String.class))));
+                                        request.getResourceResolver().map(request, p.get(PN_URL, String.class))));
                     });
 
         }
