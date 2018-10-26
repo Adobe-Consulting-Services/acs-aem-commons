@@ -79,7 +79,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ObjectName osBeanName;
     private ObjectName memBeanName;
-    private ThreadPoolExecutor workerPool;
+    private PriorityThreadPoolExecutor workerPool;
     private BlockingQueue<Runnable> workQueue;
 
     public ThrottledTaskRunnerImpl() throws NotCompliantMBeanException {
@@ -299,7 +299,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             workerPool = null;
         }
         if (!isRunning()) {
-            workerPool = new ThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
+            workerPool = new PriorityThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
         }
     }
 

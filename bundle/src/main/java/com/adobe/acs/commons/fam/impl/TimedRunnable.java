@@ -19,15 +19,15 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.CancelHandler;
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.xmlbeans.impl.xb.substwsdl.TImport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.fam.CancelHandler;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 
 /**
  * Runnable task that has a time limit
@@ -118,7 +118,7 @@ public class TimedRunnable implements Runnable, Comparable {
     public int compareTo(Object o) {
         if(o instanceof TimedRunnable) {
             TimedRunnable other = (TimedRunnable) o;
-            int compareResult = this.priority - other.priority;
+            int compareResult = other.priority - this.priority;
 
             return compareResult;
         }
