@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
@@ -81,6 +82,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final AtomicLong started = new AtomicLong(0);
     private long finished;
     private int saveInterval;
+    private int priority;
 
     private final transient ResourceResolver baseResolver;
     private final transient List<ReusableResolver> resolvers = Collections.synchronizedList(new ArrayList<>());
@@ -94,12 +96,17 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final transient List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
+        this(name, taskRunner, resolver, saveInterval, ActionManagerFactory.DEFAULT_PRIORITY);
+    }
+
+    ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval, int priority) throws LoginException {
         this.name = name;
         this.taskRunner = taskRunner;
         this.saveInterval = saveInterval;
         baseResolver = resolver.clone(null);
         currentPath = new ThreadLocal<>();
         failures = new ArrayList<>();
+        this.priority =  priority;
     }
 
     @Override
@@ -156,7 +163,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         }
         taskRunner.scheduleWork(() -> {
             runActionAndLogErrors(action, closesResolver);
-        }, this);
+        }, this, priority);
     }
     
     @SuppressWarnings("squid:S1181")
@@ -341,7 +348,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                 }
                 runCompletionTasks();
                 closeAllResolvers();
-            });
+            }, priority);
         }
     }
 

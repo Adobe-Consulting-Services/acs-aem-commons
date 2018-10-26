@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
@@ -50,6 +51,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -86,12 +88,24 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     @Override
     public void scheduleWork(Runnable work) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerFactory.DEFAULT_PRIORITY);
+        workerPool.submit(r);
+    }
+
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerFactory.DEFAULT_PRIORITY);
+        workerPool.submit(r);
+    }
+
+
+    @Override
+    public void scheduleWork(Runnable work, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, priority);
         workerPool.submit(r);
     }
     
-    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, priority);
         workerPool.submit(r);
     }    
 
@@ -272,7 +286,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<>();
+            workQueue = new PriorityBlockingQueue<>();
         }
 
         // Terminate pool if the thread size has changed
