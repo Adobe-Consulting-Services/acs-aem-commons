@@ -41,7 +41,6 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * Schedule some kind of work to run in the future using the internal thread pool.
      * The work will be throttled according to the CPU/Memory settings
      * @param work
-     * @param priority the priority of the task
      */
     void scheduleWork(Runnable work);
 
@@ -50,7 +49,6 @@ public interface ThrottledTaskRunner extends ThrottledTaskRunnerMBean {
      * The work will be throttled according to the CPU/Memory settings.  This action can be canceled at any time.
      * @param work
      * @param cancelHandler
-     * @param priority the priority of the task
      */
     void scheduleWork(Runnable work, CancelHandler cancelHandler);
 
