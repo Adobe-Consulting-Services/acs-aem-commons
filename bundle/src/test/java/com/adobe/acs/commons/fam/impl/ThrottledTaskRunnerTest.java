@@ -1,17 +1,19 @@
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.management.NotCompliantMBeanException;
+
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.NotCompliantMBeanException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 
 public class ThrottledTaskRunnerTest {
 
@@ -30,9 +32,10 @@ public class ThrottledTaskRunnerTest {
             int finalI = i;
             ttr.scheduleWork(() -> {
                 try {
-                    Thread.sleep(1000);
+                    // sleep to slow these down so that higher priority tasks go first
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
                 log.info("normal priority: {}" + finalI);
                 executions.add(1L);
@@ -57,13 +60,10 @@ public class ThrottledTaskRunnerTest {
         //first 4 items are normal (4 threads execute)
         //next 10 are high
         //then the final 6 items
-        assertEquals("", 20, executions.size());
-        assertEquals("", 1L, executions.get(19).longValue());
-        assertEquals("", 1L, executions.get(18).longValue());
-        assertEquals("", 1L, executions.get(17).longValue());
-        assertEquals("", 1L, executions.get(16).longValue());
-        assertEquals("", 1L, executions.get(15).longValue());
-        assertEquals("", 1L, executions.get(14).longValue());
+        assertEquals("wrong number of items executed", 20, executions.size());
+        for (int i = 19; i > (19 - 6); i--) {
+            assertEquals("wrong priority for item: " + i, 1L, executions.get(i).longValue());
+        }
 
     }
 
