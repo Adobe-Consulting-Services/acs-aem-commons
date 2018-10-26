@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
@@ -50,10 +50,8 @@ import java.lang.management.ManagementFactory;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Component(metatype = true, immediate = true,
@@ -88,12 +86,12 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     @Override
     public void scheduleWork(Runnable work) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerFactory.DEFAULT_PRIORITY);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
         workerPool.submit(r);
     }
 
     public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerFactory.DEFAULT_PRIORITY);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
         workerPool.submit(r);
     }
 

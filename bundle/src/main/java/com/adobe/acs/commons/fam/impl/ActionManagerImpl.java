@@ -42,6 +42,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
 
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -49,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
@@ -98,7 +98,7 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     private final transient List<Runnable> finishHandlers = Collections.synchronizedList(new ArrayList<>());
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval) throws LoginException {
-        this(name, taskRunner, resolver, saveInterval, ActionManagerFactory.DEFAULT_PRIORITY);
+        this(name, taskRunner, resolver, saveInterval, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
     }
 
     ActionManagerImpl(String name, ThrottledTaskRunner taskRunner, ResourceResolver resolver, int saveInterval, int priority) throws LoginException {

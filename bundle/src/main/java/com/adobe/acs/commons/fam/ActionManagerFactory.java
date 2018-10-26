@@ -30,8 +30,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 @ProviderType
 public interface ActionManagerFactory extends ActionManagerMBean {
 
-    int DEFAULT_PRIORITY = 0;
-
     /**
      * Creates an ActionManager instead with the provided name and JCR context provided bu the resourceResolver.
      * @param name the name of the ActionManager. This method guarantee uniqueness of the action manager name.

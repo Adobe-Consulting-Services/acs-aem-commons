@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
@@ -58,7 +59,7 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
 
     @Override
     public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval) throws LoginException {
-        return this.createTaskManager(name, resourceResolver, saveInterval, DEFAULT_PRIORITY);
+        return this.createTaskManager(name, resourceResolver, saveInterval, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
     }
 
     @Override
