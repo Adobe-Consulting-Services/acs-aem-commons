@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Added
+- #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
+
 ### Changed
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.
 
