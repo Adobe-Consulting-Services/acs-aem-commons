@@ -63,10 +63,10 @@ public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements 
     }
 
     @Override
-    public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval, int priroty) throws LoginException {
+    public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval, int priority) throws LoginException {
         String fullName = String.format("%s (%s)", name, UUID.randomUUID().toString());
         
-        ActionManagerImpl manager = new ActionManagerImpl(fullName, taskRunner, resourceResolver, saveInterval, priroty);
+        ActionManagerImpl manager = new ActionManagerImpl(fullName, taskRunner, resourceResolver, saveInterval, priority);
         tasks.put(fullName, manager);
         return manager;
     }
