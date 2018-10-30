@@ -113,16 +113,8 @@ public class AbstractResourceImpl extends AbstractResource {
         Resource current = this;
         for (String name : StringUtils.split(relPath, "/")) {
             if (current instanceof AbstractResourceImpl) {
-                AbstractResourceImpl res = (AbstractResourceImpl) current;
-                boolean found = false;
-                for (Resource child : res.getChildren()) {
-                    if (child.getName().equals(name)) {
-                        found = true;
-                        current = child;
-                        break;
-                    }
-                }
-                if (!found) {
+                current = ((AbstractResourceImpl) current).getChildNamed(name);
+                if (current == null) {
                     return null;
                 }
             } else if (current.getChild(name) == null) {
@@ -132,6 +124,15 @@ public class AbstractResourceImpl extends AbstractResource {
             }
         }
         return current;
+    }
+    
+    public Resource getChildNamed(String name) {
+        for (Resource child : getChildren()) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
     }
     
     @Override
