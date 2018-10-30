@@ -16,17 +16,21 @@ import com.adobe.cq.dam.cfm.ContentFragmentException;
 import com.adobe.cq.dam.cfm.FragmentTemplate;
 import com.day.cq.commons.jcr.JcrConstants;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -287,8 +291,15 @@ public class ContentFragmentImport extends ProcessDefinition {
     private ContentFragment getOrCreateFragment(Resource parent, Resource template, String name, String title) throws ContentFragmentException {
         Resource fragmentResource = parent.getChild(name);
         if (fragmentResource == null) {
-            FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
-            return fragmentTemplate.createFragment(parent, name, title);
+            try {
+                FragmentTemplate fragmentTemplate = template.adaptTo(FragmentTemplate.class);
+// TODO: Replace this reflection hack with the proper method once ACS Commons doesn't support 6.2 anymore
+// return fragmentTemplate.createFragment(parent, name, title);
+                return (ContentFragment) MethodUtils.invokeMethod(fragmentTemplate, "createFragment", parent, name, title);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+                Logger.getLogger(ContentFragmentImport.class.getName()).log(Level.SEVERE, "Unable to call createFragment method -- Is this 6.3 or newer?", ex);
+                return null;
+            }
         } else {
             return fragmentResource.adaptTo(ContentFragment.class);
         }
