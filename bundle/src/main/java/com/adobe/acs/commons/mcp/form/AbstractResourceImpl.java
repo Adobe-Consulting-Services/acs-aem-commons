@@ -32,6 +32,7 @@ import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -60,6 +61,8 @@ public class AbstractResourceImpl extends AbstractResource {
     public <T> T adaptTo(Class<T> clazz) {
         if (clazz.equals(ModifiableValueMap.class)) {
             return (T) new ModifiableValueMapDecorator(this.getValueMap());
+        } else if (clazz == ValueMap.class || clazz == Map.class) {
+            return (T) getValueMap();
         } else {
             return null;
         }

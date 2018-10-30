@@ -30,7 +30,6 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 /**
  * Describes a component in a manner which supports auto-generated forms
  */
-// TODO: Provide a proper mechanism for setting path when creating components
 @ProviderType
 public abstract class FieldComponent {
     private String name;
