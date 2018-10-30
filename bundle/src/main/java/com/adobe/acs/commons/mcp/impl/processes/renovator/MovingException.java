@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,10 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("2.4.0")
-package com.adobe.acs.commons.fam;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
+
+public class MovingException extends Exception {
+    public MovingException(String nodePath, Throwable cause) {
+        super(String.format("Error when moving node %s: %s", nodePath, cause.getMessage()), cause);
+    }
+}

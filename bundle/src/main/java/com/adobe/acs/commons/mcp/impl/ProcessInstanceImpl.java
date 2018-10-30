@@ -239,7 +239,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         }
     }
 
-    private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
+    public void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
         if (failures.isEmpty()) {
             return;
         }
@@ -290,7 +290,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         infoBean.setStatus("Aborted");
     }
 
-    private void asServiceUser(CheckedConsumer<ResourceResolver> action) {
+    public void asServiceUser(CheckedConsumer<ResourceResolver> action) {
         ResourceResolver rr = null;
         try {
             rr = manager.getServiceResourceResolver();
@@ -307,7 +307,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         }
     }
 
-    private void persistStatus(ResourceResolver rr) throws PersistenceException {
+    public void persistStatus(ResourceResolver rr) throws PersistenceException {
         try {
             Map<String, Object> props = new HashMap<>();
             props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);

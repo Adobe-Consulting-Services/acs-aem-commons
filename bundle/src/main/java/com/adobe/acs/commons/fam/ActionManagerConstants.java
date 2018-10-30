@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2018 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
 
-import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+package com.adobe.acs.commons.fam;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
-public class FolderRelocatorFactory extends ProcessDefinitionFactory<FolderRelocator> {
+public class ActionManagerConstants {
 
-    @Override
-    public String getName() {
-        return "Folder Relocator";
+    private ActionManagerConstants() {
+        //no instances of constants class
     }
 
-    @Override
-    public FolderRelocator createProcessDefinitionInstance() {
-        return new FolderRelocator();
-    }
+    public static final int DEFAULT_ACTION_PRIORITY = 0;
+
 }

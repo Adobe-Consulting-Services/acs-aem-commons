@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,14 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("2.4.0")
-package com.adobe.acs.commons.fam;
+package com.adobe.acs.commons.util.visitors;
+
+public class TraversalException extends Exception {
+    public TraversalException(Throwable cause) {
+        super(cause);
+    }
+
+    public TraversalException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

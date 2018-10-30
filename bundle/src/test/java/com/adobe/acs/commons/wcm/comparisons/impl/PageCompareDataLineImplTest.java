@@ -95,7 +95,7 @@ public class PageCompareDataLineImplTest {
         PageCompareDataLineImpl underTest = new PageCompareDataLineImpl(property, "/base/path", 1);
 
         // then
-        assertThat(underTest.getUniqueName(), is("/relative/path"));
+        assertThat(underTest.getUniqueName(), is("relativepath"));
     }
 
     @Test

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.day.cq.replication.Replicator;
@@ -28,7 +28,7 @@ import org.apache.felix.scr.annotations.Service;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class PageRelocatorFactory extends ProcessDefinitionFactory<PageRelocator> {
+public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
 
     @Reference
     PageManagerFactory pageManagerFactory;
@@ -38,11 +38,27 @@ public class PageRelocatorFactory extends ProcessDefinitionFactory<PageRelocator
 
     @Override
     public String getName() {
-        return "Page Relocator";
+        return "Renovator";
     }
 
     @Override
-    public PageRelocator createProcessDefinitionInstance() {
-        return new PageRelocator(pageManagerFactory, replicator);
+    public Renovator createProcessDefinitionInstance() {
+        return new Renovator(pageManagerFactory, replicator);
+    }
+    
+    /**
+     * Used to inject mock services
+     * @param factory mock factory
+     */
+    public void setPageManagerFactory(PageManagerFactory factory) {
+        pageManagerFactory = factory;
+    }
+    
+    /**
+     * Used to inject mock services
+     * @param factory mock replicator service
+     */
+    public void setReplicator(Replicator replicator) {
+        this.replicator = replicator;
     }
 }
