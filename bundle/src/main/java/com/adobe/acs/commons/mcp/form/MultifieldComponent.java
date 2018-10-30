@@ -34,7 +34,6 @@ import org.apache.sling.api.resource.ResourceMetadata;
 public class MultifieldComponent extends FieldComponent {
 
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
-    String basePath;
     boolean isComposite = true;
 
     public MultifieldComponent() {
@@ -48,30 +47,31 @@ public class MultifieldComponent extends FieldComponent {
             extractFieldComponents(clazz);
         }
         if (sling != null && sling.getRequest() != null) {
-            basePath = sling.getRequest().getResource().getPath();
+            setPath(sling.getRequest().getResource().getPath());
         }
     }
 
     @Override
     public Resource buildComponentResource() {
         getComponentMetadata().put("composite", isComposite);
-        AbstractResourceImpl res = new AbstractResourceImpl(basePath, getResourceType(), getResourceSuperType(), getComponentMetadata());
+        AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
         if (sling != null) {
             res.setResourceResolver(sling.getRequest().getResourceResolver());
         }
         if (isComposite) {
-            AbstractResourceImpl field = new AbstractResourceImpl(basePath + "/field", "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());
+            AbstractResourceImpl field = new AbstractResourceImpl(getPath() + "/field", "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());
             // The container component is what sets the name, not the base component
             field.getResourceMetadata().put("name", getName());
             res.addChild(field);
-            AbstractResourceImpl items = new AbstractResourceImpl(basePath + "/field/items", "", "", new ResourceMetadata());
+            AbstractResourceImpl items = new AbstractResourceImpl(getPath() + "/field/items", "", "", new ResourceMetadata());
             field.addChild(items);
             for (FieldComponent component : fieldComponents.values()) {
+                component.setPath(getPath() + "/field/items/" + component.getName());
                 items.addChild(component.buildComponentResource());
             }
         } else {            
             for (FieldComponent component : fieldComponents.values()) {
-                component.setPath(basePath + "/" + component.getName());
+                component.setPath(getPath() + "/" + component.getName());
                 Resource comp = component.buildComponentResource();
                 comp.getResourceMetadata().put("name", getName());
                 res.addChild(comp);

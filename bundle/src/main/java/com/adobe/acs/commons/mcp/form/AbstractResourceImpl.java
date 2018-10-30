@@ -107,7 +107,31 @@ public class AbstractResourceImpl extends AbstractResource {
     
     @Override
     public Resource getChild(String relPath) {
-        return children.stream().filter(c->c.getName().equals(relPath)).findFirst().orElse(null);
+        if (relPath.startsWith("/")) {
+            relPath = relPath.replace(getPath(), "");
+        }
+        Resource current = this;
+        for (String name : StringUtils.split(relPath, "/")) {
+            if (current instanceof AbstractResourceImpl) {
+                AbstractResourceImpl res = (AbstractResourceImpl) current;
+                boolean found = false;
+                for (Resource child : res.getChildren()) {
+                    if (child.getName().equals(name)) {
+                        found = true;
+                        current = child;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return null;
+                }
+            } else if (current.getChild(name) == null) {
+                return null;
+            } else {
+                current = current.getChild(name);
+            }
+        }
+        return current;
     }
     
     @Override

@@ -97,7 +97,9 @@ public abstract class FieldComponent {
      */
     public Resource buildComponentResource() {
         AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
-        res.setResourceResolver(sling.getRequest().getResourceResolver());
+        if (sling != null && sling.getRequest() != null) {
+            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        }
         return res;
     }
 
