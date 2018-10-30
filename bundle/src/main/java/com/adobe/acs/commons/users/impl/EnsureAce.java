@@ -267,6 +267,7 @@ public class EnsureAce {
                 final Resource contentResource = aceResource.getParent().getParent();
 
                 if (!paths.contains(contentResource.getPath())) {
+                    paths.add(contentResource.getPath());
                     for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
                         if (policy instanceof JackrabbitAccessControlList) {
                             acls.add((JackrabbitAccessControlList) policy);
