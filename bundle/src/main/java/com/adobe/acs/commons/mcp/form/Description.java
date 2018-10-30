@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,18 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Miscellaneous Utilities.
- */
-@Version("2.1.0")
-package com.adobe.acs.commons.util.visitors;
+package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.Version;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Description annotation for enumeration constants
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Description {
+    String value();
+}

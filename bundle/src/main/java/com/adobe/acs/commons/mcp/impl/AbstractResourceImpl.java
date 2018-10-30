@@ -31,6 +31,8 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+
 /**
  * This is a mock resource class used to pass values in to the granite UI components.
  */
@@ -50,6 +52,7 @@ public class AbstractResourceImpl extends AbstractResource {
         this.type = resourceType;
         this.superType = resourceSuperType;
         this.meta = metadata;
+        meta.put(JCR_PRIMARYTYPE, type);
     }
     
     @Override
@@ -74,6 +77,17 @@ public class AbstractResourceImpl extends AbstractResource {
                 child.path = path + "/" + child.path;
             }
             ((AbstractResourceImpl) res).setResourceResolver(rr);
+        }
+    }
+    
+    public void removeChild(Resource res) {
+        children.remove(res);
+        if (res instanceof AbstractResourceImpl) {
+            AbstractResourceImpl child = ((AbstractResourceImpl) res);
+            child.parent = null;
+            if (child.path.startsWith("/")) {
+                child.path = child.path.replaceFirst(path + "/", "");
+            }
         }
     }
 
@@ -107,7 +121,10 @@ public class AbstractResourceImpl extends AbstractResource {
         return !children.isEmpty();
     }
     
-    
+    @Override
+    public boolean isResourceType(String type) {
+        return getResourceType().equals(type);
+    }
 
     @Override
     public String getPath() {

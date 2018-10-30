@@ -3,11 +3,12 @@
 All notable changes to this project will be documented in this file. This format was adapated
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
+The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
 ### Added
+- #1446 - Renovator combines and replaces previous relocator tools in MCP
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
 
 ### Changed
@@ -18,6 +19,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0
 - #1516 - Undefined exception on configure-limit-parsys.min.js
+
+### Removed
+
+- #1446 - Removed Folder Relocator and Page Relocator tools
 
 ## [3.18.2] - 2018-09-26
 
@@ -48,6 +53,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
 - #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
 - #1495 - Error Page Handler doesn't reset the `com.day.cq.wcm.componentcontext` request attribute
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1458 - Fixed issue where page date was not updated when modifying redirect map file
 
 ### Changed
 - #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.

@@ -17,23 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl.processes;
+package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-
-@Component
-@Service(ProcessDefinitionFactory.class)
-public class FolderRelocatorFactory extends ProcessDefinitionFactory<FolderRelocator> {
-
-    @Override
-    public String getName() {
-        return "Folder Relocator";
-    }
-
-    @Override
-    public FolderRelocator createProcessDefinitionInstance() {
-        return new FolderRelocator();
+public class MovingException extends Exception {
+    public MovingException(String nodePath, Throwable cause) {
+        super(String.format("Error when moving node %s: %s", nodePath, cause.getMessage()), cause);
     }
 }
