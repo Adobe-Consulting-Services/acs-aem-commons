@@ -97,6 +97,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component
 - #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
 
+### Added
+- #1410 - Added support to hide/show dialog fields and tabs based on values selected for dropdown and or checkbox.
+
 ## [3.17.0] - 2018-05-22
 
 ### Fixed
