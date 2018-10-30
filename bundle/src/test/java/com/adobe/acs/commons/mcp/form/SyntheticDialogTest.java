@@ -47,21 +47,36 @@ public class SyntheticDialogTest {
 
         assertNotNull(testPojo.getFieldComponents().get("multiField"));
         assertEquals("multiField", testPojo.getFieldComponents().get("multiField").getName());
+
+        assertNotNull(testPojo.getFieldComponents().get("simpleMultiField"));
+        assertEquals("simpleMultiField", testPojo.getFieldComponents().get("simpleMultiField").getName());
     }
 
     @Test
-    public void testMultifieldComponentGeneration() {
+    public void testCompositeMultifieldComponentGeneration() {
         MultifieldComponent component = (MultifieldComponent) testPojo.getFieldComponents().get("multiField");
         component.setPath("/test/path");
         assertNotNull(component.getFieldComponents().get("subField1"));
         assertNotNull(component.getFieldComponents().get("subField2"));
+        assertTrue(component.isComposite);
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
         assertNotNull("Multifield structure check 1", res.getChild("field"));
         assertNotNull("Multifield structure check 2", res.getChild("field/items"));
         assertNotNull("Should include subfield1 component", res.getChild("field/items/subField1"));
-        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));
+        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));        
+    }
+
+    @Test
+    public void testSimpleMultifieldComponentGeneration() {
+        MultifieldComponent component = (MultifieldComponent) testPojo.getFieldComponents().get("simpleMultiField");
+        component.setPath("/test/path");
+        assertFalse(component.isComposite);
+        AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
+        assertNotNull(res);
+        assertEquals("/test/path", res.getPath());
+        assertNotNull("Multifield node check", res.getChild("simpleMultiField"));
     }
 
     public class TestPojo extends GeneratedDialog {
@@ -69,8 +84,11 @@ public class SyntheticDialogTest {
         @FormField(component = TextfieldComponent.class, name = "Text Field")
         String textField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (composite)")
         List<TestSubtype> multiField;
+        
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)")
+        List<String> simpleMultiField;        
     }
 
     public class TestSubtype {
