@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,10 +33,62 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FormField {
+
     String name();
+
     String hint() default "";
+
     String description() default "";
+
     boolean required() default true;
+
     Class<? extends FieldComponent> component() default TextfieldComponent.class;
+
     String[] options() default {};
+
+    public static class Factory {
+        private Factory() {
+            // Factory cannot be instantiated
+        }
+
+        // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
+        public static FormField create(String name, String hint, String description, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
+            return new FormField() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public String hint() {
+                    return hint;
+                }
+
+                @Override
+                public String description() {
+                    return description;
+                }
+
+                @Override
+                public boolean required() {
+                    return required;
+                }
+
+                @Override
+                public Class<? extends FieldComponent> component() {
+                    return clazz;
+                }
+
+                @Override
+                public String[] options() {
+                    return options == null ? new String[0] : options;
+                }
+
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return null;
+                }
+            };
+        }
+    }
 }

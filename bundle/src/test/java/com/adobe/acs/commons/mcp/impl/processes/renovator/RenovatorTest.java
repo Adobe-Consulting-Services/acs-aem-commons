@@ -23,7 +23,7 @@ import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;

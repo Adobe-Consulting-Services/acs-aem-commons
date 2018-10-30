@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl;
+package com.adobe.acs.commons.mcp.form;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +32,7 @@ import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This is a mock resource class used to pass values in to the granite UI components.
@@ -54,7 +55,7 @@ public class AbstractResourceImpl extends AbstractResource {
         this.meta = metadata;
         meta.put(JCR_PRIMARYTYPE, type);
     }
-    
+        
     @Override
     public <T> T adaptTo(Class<T> clazz) {
         if (clazz.equals(ModifiableValueMap.class)) {
@@ -93,7 +94,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getName() {
-        return path.substring(path.lastIndexOf('/')+1);
+        return StringUtils.substringAfterLast(path, "/");
     }
 
     @Override
@@ -126,6 +127,10 @@ public class AbstractResourceImpl extends AbstractResource {
         return getResourceType().equals(type);
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
     @Override
     public String getPath() {
         return path;

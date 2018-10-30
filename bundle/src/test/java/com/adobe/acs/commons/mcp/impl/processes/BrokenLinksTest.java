@@ -23,7 +23,7 @@ import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.NonExistingResource;
