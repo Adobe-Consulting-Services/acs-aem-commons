@@ -42,14 +42,17 @@ public class SyntheticDialogTest {
 
     @Test
     public void testDialogInit() {
-        assertNotNull(testPojo.getFieldComponents().get("textField"));
-        assertEquals("textField", testPojo.getFieldComponents().get("textField").getName());
+        assertFieldExists("textField");
+        assertFieldExists("multiField");
+        assertFieldExists("simpleMultiField");
+        assertFieldExists("readOnly");
+        assertFieldExists("tags");
+        assertFieldExists("textArea");
+    }
 
-        assertNotNull(testPojo.getFieldComponents().get("multiField"));
-        assertEquals("multiField", testPojo.getFieldComponents().get("multiField").getName());
-
-        assertNotNull(testPojo.getFieldComponents().get("simpleMultiField"));
-        assertEquals("simpleMultiField", testPojo.getFieldComponents().get("simpleMultiField").getName());
+    public void assertFieldExists(String name) {
+        assertNotNull("Checking for field " + name, testPojo.getFieldComponents().get(name));
+        assertEquals("Validating field name " + name, name, testPojo.getFieldComponents().get(name).getName());
     }
 
     @Test
@@ -58,6 +61,9 @@ public class SyntheticDialogTest {
         component.setPath("/test/path");
         assertNotNull(component.getFieldComponents().get("subField1"));
         assertNotNull(component.getFieldComponents().get("subField2"));
+        assertNotNull(component.getFieldComponents().get("subField3"));
+        assertNotNull(component.getFieldComponents().get("subField4"));
+        assertNotNull(component.getFieldComponents().get("subField5"));
         assertTrue(component.isComposite);
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
@@ -65,7 +71,10 @@ public class SyntheticDialogTest {
         assertNotNull("Multifield structure check 1", res.getChild("field"));
         assertNotNull("Multifield structure check 2", res.getChild("field/items"));
         assertNotNull("Should include subfield1 component", res.getChild("field/items/subField1"));
-        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));        
+        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));
+        assertNotNull("Should include subfield3 component", res.getChild("field/items/subField3"));
+        assertNotNull("Should include subfield4 component", res.getChild("field/items/subField4"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField5"));
     }
 
     @Test
@@ -86,9 +95,18 @@ public class SyntheticDialogTest {
 
         @FormField(component = MultifieldComponent.class, name = "Multifield (composite)")
         List<TestSubtype> multiField;
-        
+
         @FormField(component = MultifieldComponent.class, name = "Multifield (simple)")
-        List<String> simpleMultiField;        
+        List<String> simpleMultiField;
+
+        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only")
+        String readOnly;
+
+        @FormField(component = TagPickerComponent.class, name = "tags")
+        List<String> tags;
+
+        @FormField(component = TextareaComponent.class, name = "Text Area")
+        String textArea;
     }
 
     public class TestSubtype {
@@ -98,5 +116,14 @@ public class SyntheticDialogTest {
 
         @FormField(component = TextfieldComponent.class, name = "Text Field")
         String subField2;
+
+        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only")
+        String subField3;
+
+        @FormField(component = TagPickerComponent.class, name = "tags")
+        List<String> subField4;
+
+        @FormField(component = TextareaComponent.class, name = "Text Area")
+        String subField5;
     }
 }
