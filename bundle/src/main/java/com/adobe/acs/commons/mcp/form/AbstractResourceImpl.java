@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.impl;
+package com.adobe.acs.commons.mcp.form;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +32,8 @@ import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This is a mock resource class used to pass values in to the granite UI components.
@@ -54,11 +56,13 @@ public class AbstractResourceImpl extends AbstractResource {
         this.meta = metadata;
         meta.put(JCR_PRIMARYTYPE, type);
     }
-    
+        
     @Override
     public <T> T adaptTo(Class<T> clazz) {
         if (clazz.equals(ModifiableValueMap.class)) {
             return (T) new ModifiableValueMapDecorator(this.getValueMap());
+        } else if (clazz == ValueMap.class || clazz == Map.class) {
+            return (T) getValueMap();
         } else {
             return null;
         }
@@ -93,7 +97,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getName() {
-        return path.substring(path.lastIndexOf('/')+1);
+        return StringUtils.substringAfterLast(path, "/");
     }
 
     @Override
@@ -103,7 +107,32 @@ public class AbstractResourceImpl extends AbstractResource {
     
     @Override
     public Resource getChild(String relPath) {
-        return children.stream().filter(c->c.getName().equals(relPath)).findFirst().orElse(null);
+        if (relPath.startsWith("/")) {
+            relPath = relPath.replace(getPath(), "");
+        }
+        Resource current = this;
+        for (String name : StringUtils.split(relPath, "/")) {
+            if (current instanceof AbstractResourceImpl) {
+                current = ((AbstractResourceImpl) current).getChildNamed(name);
+                if (current == null) {
+                    return null;
+                }
+            } else if (current.getChild(name) == null) {
+                return null;
+            } else {
+                current = current.getChild(name);
+            }
+        }
+        return current;
+    }
+    
+    public Resource getChildNamed(String name) {
+        for (Resource child : getChildren()) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
     }
     
     @Override
@@ -126,6 +155,10 @@ public class AbstractResourceImpl extends AbstractResource {
         return getResourceType().equals(type);
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
     @Override
     public String getPath() {
         return path;

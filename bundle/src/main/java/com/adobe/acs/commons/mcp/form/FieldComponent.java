@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -41,6 +40,7 @@ public abstract class FieldComponent {
     private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
+    private String path = "/fake/path";
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
@@ -60,6 +60,14 @@ public abstract class FieldComponent {
     
     public SlingScriptHelper getHelper() {
         return sling;
+    }
+    
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
+    public String getPath() {
+        return path;
     }
     
     public Field getField() {
@@ -88,8 +96,10 @@ public abstract class FieldComponent {
      * @return 
      */
     public Resource buildComponentResource() {
-        AbstractResourceImpl res = new AbstractResourceImpl("/fake/path", resourceType, resourceSuperType, componentMetadata);
-        res.setResourceResolver(sling.getRequest().getResourceResolver());
+        AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
+        if (sling != null && sling.getRequest() != null) {
+            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        }
         return res;
     }
 

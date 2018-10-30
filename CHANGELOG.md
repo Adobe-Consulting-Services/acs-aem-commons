@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #1446 - Renovator combines and replaces previous relocator tools in MCP
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
+- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
 
 ### Changed
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.

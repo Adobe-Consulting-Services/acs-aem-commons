@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
 
