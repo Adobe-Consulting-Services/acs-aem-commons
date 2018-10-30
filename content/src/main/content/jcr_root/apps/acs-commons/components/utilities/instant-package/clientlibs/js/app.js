@@ -60,10 +60,10 @@ angular.module('acs-commons-instant-package-app', ['acsCoral', 'ACS.Commons.noti
                 $http({
                     method: 'POST',
                     url: $scope.app.uri,
-                    data: './clientlib-authoring/categories=cq.wcm.sites',
+                    data: './clientlib-authoring/categories@TypeHint=String[]&./clientlib-authoring/categories=cq.wcm.sites&./clientlib-authoring/categories=dam.gui.admin.coral',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
-                    }
+                    } 
                 });
             } else {
                 $http({

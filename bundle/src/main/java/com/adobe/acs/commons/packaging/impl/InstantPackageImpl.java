@@ -17,11 +17,13 @@
  * limitations under the License.
  * #L%
  */
- 
+
 package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.DamConstants;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
@@ -46,7 +48,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 				} else if ("immediateChildren".equals(optionType)) {
 					packageResources = getImmediateChildren(paths, resourceResolver, pathList, allPaths);
 
-				} else { 
+				} else {
 					// all children
 					packageResources = getAllChildren(paths, resourceResolver, pathList, allPaths);
 				}
@@ -173,20 +174,73 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 	private ArrayList<Resource> getImmediateChildren(String paths, ResourceResolver resourceResolver, String[] pathList,
 			ArrayList<Resource> allPaths) {
 
+		Iterator<Resource> childAssetRes;
+		Iterator<Page> childPageRes;
 		// iterate over all paths and create list with immediate children
 		for (String path : pathList) {
+
 			Resource currentPath = resourceResolver.getResource(path);
-			allPaths.add(resourceResolver.getResource(currentPath.getPath() + JCR_CONTENT_APPEND));
-			Iterator<Page> res = currentPath.adaptTo(Page.class).listChildren();
-			
-			while (res.hasNext()) {		
-				String s = res.next().getPath() + JCR_CONTENT_APPEND;
-				Resource r = resourceResolver.getResource(s);
-				allPaths.add(r);
+			if (path.startsWith("/content/dam")) {
+				childAssetRes = currentPath.listChildren();
+				allPaths = getImmediateAssets(resourceResolver, currentPath, childAssetRes, allPaths);
+
+			} else {
+				childPageRes = currentPath.adaptTo(Page.class).listChildren();
+				allPaths = getImmediatePages(resourceResolver, currentPath, childPageRes, allPaths);
+
 			}
 
 		}
-		
+
+		return allPaths;
+	}
+
+	/**
+	 * Get the list of immediate child pages
+	 * 
+	 * @param resourceResolver
+	 * @param path
+	 * @param childPageRes
+	 * @param allPaths
+	 * @return
+	 */
+	private ArrayList<Resource> getImmediatePages(ResourceResolver resourceResolver, Resource pagePath,
+			Iterator<Page> childPageRes, ArrayList<Resource> allPaths) {
+
+		allPaths.add(resourceResolver.getResource(pagePath.getPath() + JCR_CONTENT_APPEND));
+		while (childPageRes.hasNext()) {
+			Resource res = resourceResolver.getResource(childPageRes.next().getPath() + JCR_CONTENT_APPEND);
+
+			// ignore folder and add pages only
+			if ("cq:PageContent".equals(res.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+				allPaths.add(res);
+			}
+		}
+
+		return allPaths;
+	}
+
+	/**
+	 * Get the list of immediate assets
+	 * 
+	 * @param resourceResolver
+	 * @param path
+	 * @param childRes
+	 * @param allPaths
+	 * @return
+	 */
+	private ArrayList<Resource> getImmediateAssets(ResourceResolver resourceResolver, Resource path,
+			Iterator<Resource> childRes, ArrayList<Resource> allPaths) {
+
+		while (childRes.hasNext()) {
+			Resource res = resourceResolver.getResource(childRes.next().getPath());
+
+			// ignore folder and add assets only
+			if (DamConstants.NT_DAM_ASSET.equals(res.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
+				allPaths.add(res);
+			}
+		}
+
 		return allPaths;
 	}
 
@@ -207,7 +261,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 			allPaths.add(resourceResolver.getResource(currentPath.getPath() + JCR_CONTENT_APPEND));
 
 		}
-		
+
 		return allPaths;
 	}
 
@@ -227,7 +281,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 			allPaths.add(resourceResolver.getResource(currentPath.getPath()));
 
 		}
-		
+
 		return allPaths;
 	}
 }
