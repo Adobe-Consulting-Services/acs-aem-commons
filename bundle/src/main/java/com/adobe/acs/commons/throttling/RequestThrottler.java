@@ -133,8 +133,9 @@ public class RequestThrottler implements Filter {
 	Clock clock;
 	
 	
-	@Activate @Modified
-	protected void activate (Config c) {
+	@Activate 
+	@Modified
+	protected void activate(Config c) {
 		this.config = c;
 		ThrottlingConfiguration tc = new ThrottlingConfiguration(c.max_requests_per_minute(),c.start_throttling_percentage());
 		loadEstimator = new CpuLoadEstimator(tc);
@@ -194,7 +195,7 @@ public class RequestThrottler implements Filter {
 	    
 	}
 	
-	protected void delay (long ms) {
+	protected void delay(long ms) {
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {

@@ -24,13 +24,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class CpuLoadEstimatorTest {
-    
+
     @Test
     public void testCalculations() {
-	assertEquals(5,CpuLoadEstimator.calculateRequests(5, 50, 5));
-	assertEquals(5,CpuLoadEstimator.calculateRequests(100, 100, 5));
-	
-	assertEquals(5,CpuLoadEstimator.calculateRequests(85, 70, 10)); // (100-85) / (100-70) * 10
+	assertEquals(5, CpuLoadEstimator.calculateRequests(5, 50, 5));
+	assertEquals(5, CpuLoadEstimator.calculateRequests(100, 100, 5));
+
+	assertEquals(5, CpuLoadEstimator.calculateRequests(85, 70, 10)); // (100-85) / (100-70) * 10
     }
 
 }

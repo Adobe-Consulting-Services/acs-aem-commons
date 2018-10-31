@@ -140,21 +140,19 @@ public class ThrottlingState {
 		int result = 0;
 		if (newSize != timestamps.length) {
 			
-			LOG.debug("Resizing throttling queue from {} to {}", newSize);
+			LOG.debug("Resizing throttling queue from {} to {}", timestamps.length,newSize);
 			Instant[] newQueue = new Instant[newSize];
 			
 			if (timestamps.length - newSize > 0) { // queue got smaller
 				
 				int newIndex = 0;
 				// step 1: first copy all entries with a smaller index than currentIndex
-				for (int i=currentIndex-1; i>= 0 && newIndex < newQueue.length; i--) {
+				for (int i=currentIndex-1; i>= 0 && newIndex < newQueue.length; i--, newIndex++) {
 					newQueue[newIndex] = timestamps[i];
-					newIndex++;
 				}
 				// step 2: and then copy from the highest index down to currentIndex
-				for (int i=timestamps.length-1;i > currentIndex && newIndex < newQueue.length;i--) {
+				for (int i=timestamps.length-1;i > currentIndex && newIndex < newQueue.length;i--, newIndex++) {
 					newQueue[newIndex] = timestamps[i];
-					newIndex++;
 				}
 				// step 3: reset currentIndex, as we start again from 0
 				currentIndex = 0;
