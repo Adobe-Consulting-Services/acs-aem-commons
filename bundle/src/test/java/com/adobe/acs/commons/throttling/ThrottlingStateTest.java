@@ -160,7 +160,7 @@ public class ThrottlingStateTest {
         for (int i = 5; i < CONSTANT_LOAD_SIZE; i++) {
             s.evaluateThrottling();
         }
-        assertEquals(0, s.currentIndex);
+        assertEquals(0, s.currentIndex.get());
 
         s.resize(8);
         assertEquals(s.timestamps.length, 8);
@@ -174,7 +174,7 @@ public class ThrottlingStateTest {
             assertEquals(startTime, s.timestamps[i]);
         }
         // and currentIndex should be 0
-        assertEquals(0, s.currentIndex);
+        assertEquals(0, s.currentIndex.get());
     }
 
     @Test
@@ -199,7 +199,7 @@ public class ThrottlingStateTest {
         assertEquals(ThrottlingDecision.State.NOTHROTTLE, s.evaluateThrottling().getState());
         assertEquals(ThrottlingDecision.State.NOTHROTTLE, s.evaluateThrottling().getState());
 
-        assertEquals(2, s.currentIndex);
+        assertEquals(2, s.currentIndex.get());
 
         s.loadEstimator = () -> 8; // reduce the number of slots to 8
 
@@ -220,7 +220,7 @@ public class ThrottlingStateTest {
         assertEquals(Instant.EPOCH, s.timestamps[7]);
 
         // and currentIndex should be 0
-        assertEquals(0, s.currentIndex);
+        assertEquals(0, s.currentIndex.get());
 
     }
 
@@ -238,7 +238,7 @@ public class ThrottlingStateTest {
         for (int i = 5; i < CONSTANT_LOAD_SIZE; i++) {
             s.evaluateThrottling();
         }
-        assertEquals(0, s.currentIndex);
+        assertEquals(0, s.currentIndex.get());
 
         s.resize(12);
         assertEquals(s.timestamps.length, 12);
@@ -256,7 +256,7 @@ public class ThrottlingStateTest {
         assertEquals(Instant.EPOCH, s.timestamps[11]);
 
         // and currentIndex should point to freshly added entries
-        assertEquals(10, s.currentIndex);
+        assertEquals(10, s.currentIndex.get());
     }
 
 }
