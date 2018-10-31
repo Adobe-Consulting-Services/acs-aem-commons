@@ -56,11 +56,15 @@ import java.util.Map;
 import java.util.Date;
 
 /**
- * ACS AEM Commons - Instant Packager Servlet Servlet end-point used to create
+ * ACS AEM Commons - Instant Package Utility for quickly creating package from Sites or Assets UI Console
  */
 @SuppressWarnings("serial")
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-		"acs-commons/components/utilities/instant-package" }, selectors = { "package" }, extensions = { "json" })
+@SlingServlet(
+        methods = { "POST" },
+        resourceTypes = { "acs-commons/components/utilities/instant-package" },
+        selectors = { "package" },
+        extensions = { "json" }
+)
 public class InstantPackageImpl extends SlingAllMethodsServlet {
 	private static final Logger log = LoggerFactory.getLogger(InstantPackageImpl.class);
 
@@ -95,27 +99,14 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 
 			try {
 
-				List<Resource> packageResources;
-				String[] pathList = paths.split(",");
-				ArrayList<Resource> allPaths = new ArrayList<>();
-
-				if ("selectedResource".equals(optionType)) {
-					packageResources = getSelectedPath(paths, resourceResolver, pathList, allPaths);
-
-				} else if ("immediateChildren".equals(optionType)) {
-					packageResources = getImmediateChildren(paths, resourceResolver, pathList, allPaths);
-
-				} else {
-					// all children
-					packageResources = getAllChildren(paths, resourceResolver, pathList, allPaths);
-				}
+				List<Resource> packageResources = preparePackageResources(paths, optionType, resourceResolver);				
 
 				final Map<String, String> packageDefinitionProperties = new HashMap<>();
 
 				// Package Description
 				packageDefinitionProperties.put(JcrPackageDefinition.PN_DESCRIPTION, DEFAULT_PACKAGE_DESCRIPTION);
 
-				if (packageResources == null || packageResources.isEmpty()) {
+				if (packageResources.isEmpty()) {
 					// Do not create empty packages; This will only clutter up
 					// CRX Package Manager
 					response.getWriter().print(
@@ -161,6 +152,24 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 		}
 
 	}
+	
+	private List<Resource> preparePackageResources(String paths, String optionType, ResourceResolver resourceResolver) {
+		String[] pathList = paths.split(",");
+		ArrayList<Resource> allPaths = new ArrayList<>();
+		List<Resource> packageResources;
+
+		if ("selectedResource".equals(optionType)) {
+			packageResources = getSelectedPath(paths, resourceResolver, pathList, allPaths);
+
+		} else if ("immediateChildren".equals(optionType)) {
+			packageResources = getImmediateChildren(paths, resourceResolver, pathList, allPaths);
+
+		} else {
+			// all children
+			packageResources = getAllChildren(resourceResolver, pathList, allPaths);
+		}
+		return packageResources;
+	}
 
 	/**
 	 * Get the list of immediate children for the current selected path in sites
@@ -182,11 +191,11 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 			Resource currentPath = resourceResolver.getResource(path);
 			if (path.startsWith("/content/dam")) {
 				childAssetRes = currentPath.listChildren();
-				allPaths = getImmediateAssets(resourceResolver, currentPath, childAssetRes, allPaths);
+				getImmediateAssets(resourceResolver, childAssetRes, allPaths);
 
 			} else {
 				childPageRes = currentPath.adaptTo(Page.class).listChildren();
-				allPaths = getImmediatePages(resourceResolver, currentPath, childPageRes, allPaths);
+				getImmediatePages(resourceResolver, currentPath, childPageRes, allPaths);
 
 			}
 
@@ -229,8 +238,8 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 	 * @param allPaths
 	 * @return
 	 */
-	private ArrayList<Resource> getImmediateAssets(ResourceResolver resourceResolver, Resource path,
-			Iterator<Resource> childRes, ArrayList<Resource> allPaths) {
+	private ArrayList<Resource> getImmediateAssets(ResourceResolver resourceResolver, Iterator<Resource> childRes,
+			ArrayList<Resource> allPaths) {
 
 		while (childRes.hasNext()) {
 			Resource res = resourceResolver.getResource(childRes.next().getPath());
@@ -273,7 +282,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 	 * @param resource
 	 *            resolver object
 	 */
-	private ArrayList<Resource> getAllChildren(String paths, ResourceResolver resourceResolver, String[] pathList,
+	private ArrayList<Resource> getAllChildren(ResourceResolver resourceResolver, String[] pathList,
 			ArrayList<Resource> allPaths) {
 		// all selected path with jcr:content to include all children
 		for (String path : pathList) {
