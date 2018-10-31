@@ -49,7 +49,6 @@ public class ThrottlingDecision {
 
     public static enum State {
         THROTTLE, 
-        NOTHROTTLE
-    };
+        NOTHROTTLE };
 
 }

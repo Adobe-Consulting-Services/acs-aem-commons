@@ -140,34 +140,11 @@ public class ThrottlingState {
             Instant[] newQueue = new Instant[newSize];
 
             if (timestamps.length - newSize > 0) { // queue got smaller
-
-                int newIndex = 0;
-                // step 1: first copy all entries with a smaller index than currentIndex
-                for (int i = currentIndex - 1; i >= 0 && newIndex < newQueue.length; i--, newIndex++) {
-                    newQueue[newIndex] = timestamps[i];
-                }
-                // step 2: and then copy from the highest index down to currentIndex
-                for (int i = timestamps.length - 1; i > currentIndex && newIndex < newQueue.length; i--, newIndex++) {
-                    newQueue[newIndex] = timestamps[i];
-                }
-                // step 3: reset currentIndex, as we start again from 0
-                currentIndex = 0;
-
-                result = 0; // no free slot
+                result = reduceSize(newQueue);
 
             } else { // queue got larger, just resize the timestamps array and ignore the purge till
                      // next cycle
-
-                // copy all data and fill the rest with default value
-                for (int i = 0; i < timestamps.length; i++) {
-                    newQueue[i] = timestamps[i];
-                }
-                for (int i = timestamps.length; i < newQueue.length; i++) {
-                    newQueue[i] = Instant.EPOCH;
-                }
-                // we just got some free slots, so let's put currentIndex there
-                currentIndex = timestamps.length;
-                result = newSize - timestamps.length; // we have some free slots now
+                result = increaseSize(newQueue);
             }
 
             timestamps = newQueue;
@@ -178,6 +155,39 @@ public class ThrottlingState {
 
         }
 
+        return result;
+    }
+
+    private int increaseSize(Instant[] newQueue) {
+        int result;
+        // copy all data and fill the rest with default value
+        for (int i = 0; i < timestamps.length; i++) {
+            newQueue[i] = timestamps[i];
+        }
+        for (int i = timestamps.length; i < newQueue.length; i++) {
+            newQueue[i] = Instant.EPOCH;
+        }
+        // we just got some free slots, so let's put currentIndex there
+        currentIndex = timestamps.length;
+        result = newQueue.length - timestamps.length; // we have some free slots now
+        return result;
+    }
+
+    private int reduceSize(Instant[] newQueue) {
+        int result;
+        int newIndex = 0;
+        // step 1: first copy all entries with a smaller index than currentIndex
+        for (int i = currentIndex - 1; i >= 0 && newIndex < newQueue.length; i--, newIndex++) {
+            newQueue[newIndex] = timestamps[i];
+        }
+        // step 2: and then copy from the highest index down to currentIndex
+        for (int i = timestamps.length - 1; i > currentIndex && newIndex < newQueue.length; i--, newIndex++) {
+            newQueue[newIndex] = timestamps[i];
+        }
+        // step 3: reset currentIndex, as we start again from 0
+        currentIndex = 0;
+
+        result = 0; // no free slot
         return result;
     }
 
