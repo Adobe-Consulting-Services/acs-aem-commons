@@ -44,150 +44,145 @@ import org.slf4j.LoggerFactory;
  */
 
 public class ThrottlingState {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(ThrottlingState.class);
-	
-	
-	/**
-	 * This array holds the timestamps when requests have reached the system; in case the timestamp has 
-	 * already expired, Instant.EPOCH is stored. Access to this array should be guarded by the lock.
-	 */
-	protected Instant[] timestamps;
 
-	/**
-	 * The clock to get the current timestamps from.
-	 */
-	private Clock clock;
+    private static final Logger LOG = LoggerFactory.getLogger(ThrottlingState.class);
 
-	protected LoadEstimator loadEstimator;
-	
+    /**
+     * This array holds the timestamps when requests have reached the system; in
+     * case the timestamp has already expired, Instant.EPOCH is stored. Access to
+     * this array should be guarded by the lock.
+     */
+    protected Instant[] timestamps;
 
-	
-	private static final long ONE_MINUTE = 1000 * 60;
-	
-	protected int currentIndex;
-	
-	
-	
-	protected ThrottlingState (Clock clock, LoadEstimator le) {
-		int queueLen = le.getMaxRequestPerMinute();
-		this.clock = clock;
-		this.loadEstimator = le;
-		timestamps = new Instant[queueLen];
-		for (int i=0;i<queueLen;i++) {
-			timestamps[i] = Instant.EPOCH;
-		}
-		currentIndex = 0;
-	}
-	
-	
-	
-	/**
-	 * @return
-	 */
-	protected synchronized ThrottlingDecision evaluateThrottling() {
+    /**
+     * The clock to get the current timestamps from.
+     */
+    private Clock clock;
 
-		
-		ThrottlingDecision result = null;
-		purgeExpiredEntries();
-		resize (loadEstimator.getMaxRequestPerMinute());
-		
-		if (isSlotEmpty(currentIndex))  {
-			// 1 minute already passed, reuse that slot
+    protected LoadEstimator loadEstimator;
 
-				timestamps[currentIndex] = clock.instant();
-				currentIndex = (currentIndex == this.timestamps.length -1) ? 0 : currentIndex+1;
-				result = new ThrottlingDecision(ThrottlingDecision.STATE.NOTHROTTLE);
+    private static final long ONE_MINUTE = 1000 * 60;
 
-		} else {
-			// time has not yet passed, we need some throttling
-			
-			long diff =  timestamps[currentIndex].toEpochMilli() + ONE_MINUTE - clock.instant().toEpochMilli();
-			result = new ThrottlingDecision(ThrottlingDecision.STATE.THROTTLE)
-					.withDelay(diff)
-					.withMessage("throttling required (at least " + diff + " ms)");
-			
-		}
-		return result;
-		
-	}
-	
-	/**
-	 * cleanup the timestamps array and replace all expired entries with Instant.EPOCH;
-	 * @return the number of emptied slots 
-	 */
-	private int purgeExpiredEntries() {
-		int result = 0;
+    protected int currentIndex;
 
-		// the array is expected to be small; therefor we can iterate through all
-		// entries without a huge performance impact (although it would be possible
-		// to reduce the number of array accesses by a more efficient and complex algorithm
-		for (int i = 0;i<timestamps.length;i++) {
-			long now = clock.instant().toEpochMilli();
-			if ( now - timestamps[i].toEpochMilli() > ONE_MINUTE) {
-				timestamps[i] = Instant.EPOCH;
-				result++;
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * resize the queue
-	 * @return the number of free entries in the array
-	 */
-	protected  int resize(int newSize) {
-		int result = 0;
-		if (newSize != timestamps.length) {
-			
-			LOG.debug("Resizing throttling queue from {} to {}", timestamps.length,newSize);
-			Instant[] newQueue = new Instant[newSize];
-			
-			if (timestamps.length - newSize > 0) { // queue got smaller
-				
-				int newIndex = 0;
-				// step 1: first copy all entries with a smaller index than currentIndex
-				for (int i=currentIndex-1; i>= 0 && newIndex < newQueue.length; i--, newIndex++) {
-					newQueue[newIndex] = timestamps[i];
-				}
-				// step 2: and then copy from the highest index down to currentIndex
-				for (int i=timestamps.length-1;i > currentIndex && newIndex < newQueue.length;i--, newIndex++) {
-					newQueue[newIndex] = timestamps[i];
-				}
-				// step 3: reset currentIndex, as we start again from 0
-				currentIndex = 0;
-				
-				result = 0; // no free slot
-				
-			} else { // queue got larger, just resize the timestamps array and ignore the purge till next cycle
-				
-				// copy all data and fill the rest with default value
-				for (int i=0; i< timestamps.length;i++) {
-					newQueue[i] = timestamps[i];
-				}
-				for (int i=timestamps.length;i<newQueue.length;i++) {
-					newQueue[i] = Instant.EPOCH;
-				}
-				// we just got some free slots, so let's put currentIndex there
-				currentIndex = timestamps.length;
-				result = newSize - timestamps.length; // we have some free slots now
-			}
+    protected ThrottlingState(Clock clock, LoadEstimator le) {
+        int queueLen = le.getMaxRequestPerMinute();
+        this.clock = clock;
+        this.loadEstimator = le;
+        timestamps = new Instant[queueLen];
+        for (int i = 0; i < queueLen; i++) {
+            timestamps[i] = Instant.EPOCH;
+        }
+        currentIndex = 0;
+    }
 
-			timestamps =  newQueue;
-			
-		} else {
-			// Do not resize
-			LOG.debug("No resizing required");
-			
-		}
-		
-		return result;
-	}
-	
-	
-	private boolean isSlotEmpty(int index) {
-		return (timestamps[index] == Instant.EPOCH);
-	}
-	
+    /**
+     * @return
+     */
+    protected synchronized ThrottlingDecision evaluateThrottling() {
+
+        ThrottlingDecision result = null;
+        purgeExpiredEntries();
+        resize(loadEstimator.getMaxRequestPerMinute());
+
+        if (isSlotEmpty(currentIndex)) {
+            // 1 minute already passed, reuse that slot
+
+            timestamps[currentIndex] = clock.instant();
+            currentIndex = (currentIndex == this.timestamps.length - 1) ? 0 : currentIndex + 1;
+            result = new ThrottlingDecision(ThrottlingDecision.STATE.NOTHROTTLE);
+
+        } else {
+            // time has not yet passed, we need some throttling
+
+            long diff = timestamps[currentIndex].toEpochMilli() + ONE_MINUTE - clock.instant().toEpochMilli();
+            result = new ThrottlingDecision(ThrottlingDecision.STATE.THROTTLE).withDelay(diff)
+                    .withMessage("throttling required (at least " + diff + " ms)");
+
+        }
+        return result;
+
+    }
+
+    /**
+     * cleanup the timestamps array and replace all expired entries with
+     * Instant.EPOCH;
+     * 
+     * @return the number of emptied slots
+     */
+    private int purgeExpiredEntries() {
+        int result = 0;
+
+        // the array is expected to be small; therefor we can iterate through all
+        // entries without a huge performance impact (although it would be possible
+        // to reduce the number of array accesses by a more efficient and complex
+        // algorithm
+        for (int i = 0; i < timestamps.length; i++) {
+            long now = clock.instant().toEpochMilli();
+            if (now - timestamps[i].toEpochMilli() > ONE_MINUTE) {
+                timestamps[i] = Instant.EPOCH;
+                result++;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * resize the queue
+     * 
+     * @return the number of free entries in the array
+     */
+    protected int resize(int newSize) {
+        int result = 0;
+        if (newSize != timestamps.length) {
+
+            LOG.debug("Resizing throttling queue from {} to {}", timestamps.length, newSize);
+            Instant[] newQueue = new Instant[newSize];
+
+            if (timestamps.length - newSize > 0) { // queue got smaller
+
+                int newIndex = 0;
+                // step 1: first copy all entries with a smaller index than currentIndex
+                for (int i = currentIndex - 1; i >= 0 && newIndex < newQueue.length; i--, newIndex++) {
+                    newQueue[newIndex] = timestamps[i];
+                }
+                // step 2: and then copy from the highest index down to currentIndex
+                for (int i = timestamps.length - 1; i > currentIndex && newIndex < newQueue.length; i--, newIndex++) {
+                    newQueue[newIndex] = timestamps[i];
+                }
+                // step 3: reset currentIndex, as we start again from 0
+                currentIndex = 0;
+
+                result = 0; // no free slot
+
+            } else { // queue got larger, just resize the timestamps array and ignore the purge till
+                     // next cycle
+
+                // copy all data and fill the rest with default value
+                for (int i = 0; i < timestamps.length; i++) {
+                    newQueue[i] = timestamps[i];
+                }
+                for (int i = timestamps.length; i < newQueue.length; i++) {
+                    newQueue[i] = Instant.EPOCH;
+                }
+                // we just got some free slots, so let's put currentIndex there
+                currentIndex = timestamps.length;
+                result = newSize - timestamps.length; // we have some free slots now
+            }
+
+            timestamps = newQueue;
+
+        } else {
+            // Do not resize
+            LOG.debug("No resizing required");
+
+        }
+
+        return result;
+    }
+
+    private boolean isSlotEmpty(int index) {
+        return (timestamps[index] == Instant.EPOCH);
+    }
 
 }

@@ -20,42 +20,36 @@
 package com.adobe.acs.commons.throttling;
 
 public class ThrottlingDecision {
-	
-	
-	private STATE state;
-	protected long delay;
-	String message;
-	
-	public ThrottlingDecision(STATE s) {
-		this.state = s;
-	}
-	
-	public ThrottlingDecision withDelay (long delay) {
-		this.delay = delay;
-		return this;
-	}
-	
-	public ThrottlingDecision withMessage (String msg) {
-		this.message = msg;
-		return this;
-	}
-	
-	
-	public STATE getState() {
-		return this.state;
-	}
-	
-	public long getDelay() {
-		return this.delay;
-	}
-	
-	
-	public enum STATE  {
-			THROTTLE,
-			NOTHROTTLE
-			
-	};
-	
-	
+
+    private STATE state;
+    protected long delay;
+    String message;
+
+    public ThrottlingDecision(STATE s) {
+        this.state = s;
+    }
+
+    public ThrottlingDecision withDelay(long delay) {
+        this.delay = delay;
+        return this;
+    }
+
+    public ThrottlingDecision withMessage(String msg) {
+        this.message = msg;
+        return this;
+    }
+
+    public STATE getState() {
+        return this.state;
+    }
+
+    public long getDelay() {
+        return this.delay;
+    }
+
+    public static enum STATE {
+        THROTTLE, 
+        NOTHROTTLE
+    };
 
 }

@@ -41,7 +41,7 @@ public class CpuLoadEstimator  implements LoadEstimator {
 	
 	ThrottlingConfiguration tc;
 	
-	public CpuLoadEstimator (ThrottlingConfiguration tc) {
+	public CpuLoadEstimator(ThrottlingConfiguration tc) {
 	    this.tc = tc;
 	    preseed();
 	}
@@ -50,16 +50,16 @@ public class CpuLoadEstimator  implements LoadEstimator {
 	protected void preseed ()  {
 	    mbs = ManagementFactory.getPlatformMBeanServer();
 	    try {
-		name = new ObjectName(OPERATING_SYSTEM_MBEAN);
+	        name = new ObjectName(OPERATING_SYSTEM_MBEAN);
 	    } catch (MalformedObjectNameException e) {
-		String message = String.format("invalid mbean name %s", OPERATING_SYSTEM_MBEAN);
-		LOG.error(message);
-		throw new IllegalStateException(message);
+	        String message = String.format("invalid mbean name %s", OPERATING_SYSTEM_MBEAN);
+	        LOG.error(message);
+	        throw new IllegalStateException(message);
 	    } 
 	    if (!mbs.isRegistered(name)) {
-		String message = String.format("Cannot determine CPU load via MBean %s, aborting (is it supported on your platform?)", name.toString());
-		LOG.error(message);
-		throw new IllegalStateException(message);
+	        String message = String.format("Cannot determine CPU load via MBean %s, aborting (is it supported on your platform?)", name.toString());
+	        LOG.error(message);
+	        throw new IllegalStateException(message);
 	    }
 	}
 	
@@ -68,29 +68,29 @@ public class CpuLoadEstimator  implements LoadEstimator {
 
 	    int cpuLoad;
 	    try {
-		cpuLoad = getCpuLoad();
-		return calculateRequests(cpuLoad, tc.startThrottlingPercentage, tc.maxRequests);
+	        cpuLoad = getCpuLoad();
+	        return calculateRequests(cpuLoad, tc.startThrottlingPercentage, tc.maxRequests);
 		
 	    } catch (JMException e) {
-		LOG.warn("Cannot query mbean %s, do not throttle at all!",name.toString(),e);
-		return tc.maxRequests;
+	        LOG.warn("Cannot query mbean %s, do not throttle at all!",name.toString(),e);
+	        return tc.maxRequests;
 	    }
 	    
 	}
 	
-	static int calculateRequests (int cpuLoad, int limit ,int maxRequests) {
+	static int calculateRequests(int cpuLoad, int limit ,int maxRequests) {
 
 	    // Validations
 	    if (cpuLoad < limit) {
-		return maxRequests;
+	        return maxRequests;
 	    }
 	    if (limit == 100) {
-		// do not throttle in this case
-		return maxRequests;
+	        // do not throttle in this case
+	        return maxRequests;
 	    }
 	    
 	    double fillLevel = (100.0-cpuLoad)/(100.0-limit);
-	    return (int) Math.round (fillLevel*maxRequests);
+	    return (int) Math.round(fillLevel*maxRequests);
 	    
 	}
 	
