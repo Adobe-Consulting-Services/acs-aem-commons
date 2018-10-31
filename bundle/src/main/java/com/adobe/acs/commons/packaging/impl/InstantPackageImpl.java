@@ -162,7 +162,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 			packageResources = getSelectedPath(paths, resourceResolver, pathList, allPaths);
 
 		} else if ("immediateChildren".equals(optionType)) {
-			packageResources = getImmediateChildren(paths, resourceResolver, pathList, allPaths);
+			packageResources = getImmediateChildren(resourceResolver, pathList, allPaths);
 
 		} else {
 			// all children
@@ -180,7 +180,7 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
 	 * @param resource
 	 *            resolver object
 	 */
-	private ArrayList<Resource> getImmediateChildren(String paths, ResourceResolver resourceResolver, String[] pathList,
+	private ArrayList<Resource> getImmediateChildren(ResourceResolver resourceResolver, String[] pathList,
 			ArrayList<Resource> allPaths) {
 
 		Iterator<Resource> childAssetRes;
