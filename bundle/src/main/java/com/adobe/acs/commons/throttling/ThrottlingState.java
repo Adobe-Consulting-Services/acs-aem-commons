@@ -90,13 +90,13 @@ public class ThrottlingState {
 
             timestamps[currentIndex] = clock.instant();
             currentIndex = (currentIndex == this.timestamps.length - 1) ? 0 : currentIndex + 1;
-            result = new ThrottlingDecision(ThrottlingDecision.STATE.NOTHROTTLE);
+            result = new ThrottlingDecision(ThrottlingDecision.State.NOTHROTTLE);
 
         } else {
             // time has not yet passed, we need some throttling
 
             long diff = timestamps[currentIndex].toEpochMilli() + ONE_MINUTE - clock.instant().toEpochMilli();
-            result = new ThrottlingDecision(ThrottlingDecision.STATE.THROTTLE).withDelay(diff)
+            result = new ThrottlingDecision(ThrottlingDecision.State.THROTTLE).withDelay(diff)
                     .withMessage("throttling required (at least " + diff + " ms)");
 
         }

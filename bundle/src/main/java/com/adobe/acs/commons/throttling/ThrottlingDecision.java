@@ -21,11 +21,11 @@ package com.adobe.acs.commons.throttling;
 
 public class ThrottlingDecision {
 
-    private STATE state;
+    private State state;
     protected long delay;
     String message;
 
-    public ThrottlingDecision(STATE s) {
+    public ThrottlingDecision(State s) {
         this.state = s;
     }
 
@@ -39,7 +39,7 @@ public class ThrottlingDecision {
         return this;
     }
 
-    public STATE getState() {
+    public State getState() {
         return this.state;
     }
 
@@ -47,7 +47,7 @@ public class ThrottlingDecision {
         return this.delay;
     }
 
-    public static enum STATE {
+    public static enum State {
         THROTTLE, 
         NOTHROTTLE
     };

@@ -20,15 +20,14 @@
 package com.adobe.acs.commons.throttling;
 
 public class ThrottlingConfiguration {
-    
-    
-    public ThrottlingConfiguration(int maxRequests,int startThrottlingPercentage) {
-	this.maxRequests = maxRequests;
-	this.startThrottlingPercentage = startThrottlingPercentage;
+
+    public ThrottlingConfiguration(int maxRequests, int startThrottlingPercentage) {
+        this.maxRequests = maxRequests;
+        this.startThrottlingPercentage = startThrottlingPercentage;
     }
-    
+
     public int maxRequests;
-    
+
     public int startThrottlingPercentage;
 
 }

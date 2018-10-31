@@ -64,17 +64,17 @@ public class ThrottlingStateTest {
         ThrottlingState s = new ThrottlingState(clock, getConstantLoad());
         for (int i = 0; i < CONSTANT_LOAD_SIZE; i++) {
             ThrottlingDecision decision = s.evaluateThrottling();
-            assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, decision.getState());
+            assertEquals(ThrottlingDecision.State.NOTHROTTLE, decision.getState());
         }
         ThrottlingDecision decision = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.THROTTLE, decision.getState());
+        assertEquals(ThrottlingDecision.State.THROTTLE, decision.getState());
         assertEquals(60 * 1000, decision.getDelay());
 
         // when the time iterates by 59 seconds throttling should still be active
         Instant delay1 = startTime.plusSeconds(59);
         Mockito.when(clock.instant()).thenReturn(delay1);
         ThrottlingDecision decision1 = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.THROTTLE, decision1.getState());
+        assertEquals(ThrottlingDecision.State.THROTTLE, decision1.getState());
         assertEquals(1 * 1000, decision1.getDelay());
 
         // when another 2 seconds pass, 10 new requests should run un-throttled
@@ -82,11 +82,11 @@ public class ThrottlingStateTest {
         Mockito.when(clock.instant()).thenReturn(delay2);
         for (int i = 0; i < CONSTANT_LOAD_SIZE; i++) {
             ThrottlingDecision decision2 = s.evaluateThrottling();
-            assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, decision2.getState());
+            assertEquals(ThrottlingDecision.State.NOTHROTTLE, decision2.getState());
         }
         // and the 11th should be throttled again
         ThrottlingDecision decision2 = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.THROTTLE, decision2.getState());
+        assertEquals(ThrottlingDecision.State.THROTTLE, decision2.getState());
     }
 
     @Test
@@ -101,15 +101,15 @@ public class ThrottlingStateTest {
         ThrottlingState s = new ThrottlingState(clock, ld);
 
         ThrottlingDecision decision = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, decision.getState());
+        assertEquals(ThrottlingDecision.State.NOTHROTTLE, decision.getState());
 
         decision = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.THROTTLE, decision.getState());
+        assertEquals(ThrottlingDecision.State.THROTTLE, decision.getState());
 
         Instant now = startTime.plusSeconds(61);
         Mockito.when(clock.instant()).thenReturn(now);
         decision = s.evaluateThrottling();
-        assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, decision.getState());
+        assertEquals(ThrottlingDecision.State.NOTHROTTLE, decision.getState());
 
     }
 
@@ -196,14 +196,14 @@ public class ThrottlingStateTest {
         // now all slots are full
         Instant time3 = time2.plusSeconds(60); // should cause the first entries to get purged
         Mockito.when(clock.instant()).thenReturn(time3);
-        assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, s.evaluateThrottling().getState());
-        assertEquals(ThrottlingDecision.STATE.NOTHROTTLE, s.evaluateThrottling().getState());
+        assertEquals(ThrottlingDecision.State.NOTHROTTLE, s.evaluateThrottling().getState());
+        assertEquals(ThrottlingDecision.State.NOTHROTTLE, s.evaluateThrottling().getState());
 
         assertEquals(2, s.currentIndex);
 
         s.loadEstimator = () -> 8; // reduce the number of slots to 8
 
-        assertEquals(ThrottlingDecision.STATE.THROTTLE, s.evaluateThrottling().getState());
+        assertEquals(ThrottlingDecision.State.THROTTLE, s.evaluateThrottling().getState());
 
         // resize has happened
         assertEquals(s.timestamps.length, 8);

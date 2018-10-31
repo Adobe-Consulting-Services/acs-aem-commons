@@ -41,98 +41,90 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class RequestThrottlerTest {
-    
+
     @Rule
     public SlingContext context = new SlingContext();
-    
+
     RequestThrottler rt;
     RequestThrottler.Config config;
-    
+
     @Before
     public void before() {
-	RequestThrottler r = new RequestThrottler();
-	rt = spy(r);
-	config = mock(RequestThrottler.Config.class);
-	context.create().resource("/content/foobar","a","b");
+        RequestThrottler r = new RequestThrottler();
+        rt = spy(r);
+        config = mock(RequestThrottler.Config.class);
+        context.create().resource("/content/foobar", "a", "b");
     }
-    
-    
+
     @Test
     public void pathFilterNoConfiguration() {
-	when(config.filtered_paths()).thenReturn(new String[] {});
-	rt.activate(config);
-	assertFalse(rt.needsFiltering("/bla"));
+        when(config.filtered_paths()).thenReturn(new String[] {});
+        rt.activate(config);
+        assertFalse(rt.needsFiltering("/bla"));
     }
-    
+
     @Test
     public void pathFilterExactMatch() {
-	when(config.filtered_paths()).thenReturn(new String[] {"/content"});
-	rt.activate(config);
-	assertTrue(rt.needsFiltering("/content"));
-	assertFalse(rt.needsFiltering("/content/something"));
-	assertFalse(rt.needsFiltering("/foo"));
+        when(config.filtered_paths()).thenReturn(new String[] { "/content" });
+        rt.activate(config);
+        assertTrue(rt.needsFiltering("/content"));
+        assertFalse(rt.needsFiltering("/content/something"));
+        assertFalse(rt.needsFiltering("/foo"));
     }
-    
+
     @Test
     public void pathFilterWildcardMatch() {
-	when(config.filtered_paths()).thenReturn(new String[] {"/content.*"});
-	rt.activate(config);
-	assertTrue(rt.needsFiltering("/content"));
-	assertTrue(rt.needsFiltering("/content/something"));
-	assertFalse(rt.needsFiltering("/foo"));
-	assertFalse(rt.needsFiltering("/foo/content"));
+        when(config.filtered_paths()).thenReturn(new String[] { "/content.*" });
+        rt.activate(config);
+        assertTrue(rt.needsFiltering("/content"));
+        assertTrue(rt.needsFiltering("/content/something"));
+        assertFalse(rt.needsFiltering("/foo"));
+        assertFalse(rt.needsFiltering("/foo/content"));
     }
-    
-    
+
     @Test
     public void noMatchingPath() throws Exception {
-	when(config.filtered_paths()).thenReturn(new String[] {"/content"});
-	when(config.max_requests_per_minute()).thenReturn(10);
-	rt.activate(config);
-	context.request().setResource(context.resourceResolver().getResource("/"));
-	FilterChain chain = mock(FilterChain.class);
-	doNothing().when(chain).doFilter(anyObject(), anyObject());
-	rt.doFilter(context.request(), context.response(), chain);
-	verify(chain).doFilter(context.request(), context.response());
-	verify(rt,never()).doFilterInternal(anyObject(),anyObject());
+        when(config.filtered_paths()).thenReturn(new String[] { "/content" });
+        when(config.max_requests_per_minute()).thenReturn(10);
+        rt.activate(config);
+        context.request().setResource(context.resourceResolver().getResource("/"));
+        FilterChain chain = mock(FilterChain.class);
+        doNothing().when(chain).doFilter(anyObject(), anyObject());
+        rt.doFilter(context.request(), context.response(), chain);
+        verify(chain).doFilter(context.request(), context.response());
+        verify(rt, never()).doFilterInternal(anyObject(), anyObject());
     }
-    
+
     @Test
     @Ignore("Will run into exceptions unless you use javax.servlet-api:3.1.0")
     public void doFilter_withMatchingPath() throws Exception {
-	context.request().setResource(context.resourceResolver().getResource("/content/foobar"));
-	
-	Instant now = Instant.now();
-	Clock c = mock(Clock.class);
-	when(c.instant()).thenReturn(now);
-	when(config.filtered_paths()).thenReturn(new String[] {"/content/.*"});
-	when(config.max_requests_per_minute()).thenReturn(10);
-	rt.activate(config);
-	rt.clock = c;
-	/*
-	 * The implementation of context.response() is current incomplete and throws
-	 * an UnsupportedOperationException when calling getRequestProgressTracker
-	 */
-	SlingHttpServletRequest request = spy(context.request()); 
-	RequestProgressTracker rpt = mock(RequestProgressTracker.class);
-	doReturn(rpt).when(request).getRequestProgressTracker();
-	
-	
-	
-	FilterChain chain = mock(FilterChain.class);
-	doNothing().when(chain).doFilter(anyObject(), anyObject());
-	
-	
-	
-	for (int i=0; i < 10;i++) {
-	    rt.doFilter(request, context.response(), chain);
-	    
-	}
-	verify(chain,times(10)).doFilter(request, context.response());
-	verify(rpt,times(10)).log(anyObject());
-	
-	
+        context.request().setResource(context.resourceResolver().getResource("/content/foobar"));
+
+        Instant now = Instant.now();
+        Clock c = mock(Clock.class);
+        when(c.instant()).thenReturn(now);
+        when(config.filtered_paths()).thenReturn(new String[] { "/content/.*" });
+        when(config.max_requests_per_minute()).thenReturn(10);
+        rt.activate(config);
+        rt.clock = c;
+        /*
+         * The implementation of context.response() is current incomplete and throws an
+         * UnsupportedOperationException when calling getRequestProgressTracker
+         */
+        SlingHttpServletRequest request = spy(context.request());
+        RequestProgressTracker rpt = mock(RequestProgressTracker.class);
+        doReturn(rpt).when(request).getRequestProgressTracker();
+
+        FilterChain chain = mock(FilterChain.class);
+        doNothing().when(chain).doFilter(anyObject(), anyObject());
+
+        for (int i = 0; i < 10; i++) {
+            rt.doFilter(request, context.response(), chain);
+
+        }
+        verify(chain, times(10)).doFilter(request, context.response());
+        verify(rpt, times(10)).log(anyObject());
+
     }
-    
 
 }

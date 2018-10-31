@@ -47,7 +47,7 @@ public class CpuLoadEstimator  implements LoadEstimator {
 	}
 
 	
-	protected void preseed ()  {
+	protected void preseed()  {
 	    mbs = ManagementFactory.getPlatformMBeanServer();
 	    try {
 	        name = new ObjectName(OPERATING_SYSTEM_MBEAN);

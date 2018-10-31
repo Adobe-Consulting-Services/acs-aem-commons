@@ -193,7 +193,7 @@ public class RequestThrottler implements Filter {
     protected void doFilterInternal(SlingHttpServletRequest req, SlingHttpServletResponse res) throws IOException {
 
         ThrottlingDecision decision = state.evaluateThrottling();
-        if (decision.getState().equals(ThrottlingDecision.STATE.THROTTLE)) {
+        if (decision.getState().equals(ThrottlingDecision.State.THROTTLE)) {
 
             if (this.config.reject_on_throttle()) {
                 String msg = "Request rejected because of throttling: " + decision.message;

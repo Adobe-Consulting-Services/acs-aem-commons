@@ -19,11 +19,11 @@
  */
 package com.adobe.acs.commons.throttling;
 
-@FunctionalInterface 
+@FunctionalInterface
 public interface LoadEstimator {
-    
+
     // this interface is mostly required to easier creating testing mocks ...
-    
+
     public int getMaxRequestPerMinute();
 
 }
