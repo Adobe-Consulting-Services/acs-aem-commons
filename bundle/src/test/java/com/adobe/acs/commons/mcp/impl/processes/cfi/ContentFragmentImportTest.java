@@ -26,7 +26,7 @@ import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.cq.dam.cfm.*;
+import com.adobe.cq.dam.cfm.ContentFragmentException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -36,8 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -46,9 +44,7 @@ import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import static com.adobe.acs.commons.mcp.impl.processes.cfi.ContentFragmentImport.*;
@@ -71,7 +67,7 @@ public class ContentFragmentImportTest {
     @Before
     public void setUp() throws RepositoryException, LoginException, PersistenceException, IllegalAccessException, ContentFragmentException {
         rr = getEnhancedMockResolver();
-        mockFragment =  new MockContentFragment();
+        mockFragment = new MockContentFragment();
         importer = prepareProcessDefinition(new ContentFragmentImport());
         importer.spreadsheet = new Spreadsheet(false, PATH, FOLDER_TITLE, NAME, TITLE, TEMPLATE);
         instance = prepareProcessInstance(new ProcessInstanceImpl(getControlledProcessManager(), importer, "Test content fragment import"));
@@ -88,12 +84,11 @@ public class ContentFragmentImportTest {
     public void importOne() {
         importer.dryRunMode = false;
         addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
-        mockFragment.elements.put("element1",null);
+        mockFragment.elements.put("element1", null);
         instance.run(rr);
         assertEquals("Should finish process", instance.getInfo().getProgress(), 1.0, 0.0001);
         assertEquals("Should set fragment element", "element1value", mockFragment.elements.get("element1"));
     }
-
 
     //------------------------------------------------------------------------------------------------------------------
     private void addImportRow(String path, String title, String... values) {
@@ -103,43 +98,14 @@ public class ContentFragmentImportTest {
         row.put(NAME, new CompositeVariant(StringUtils.substringAfter(path, "/")));
         row.put(TITLE, new CompositeVariant(title));
         row.put(TEMPLATE, new CompositeVariant("/test/template"));
-        for (int i=0; i < values.length-1; i += 2) {
-            row.put(values[i], new CompositeVariant(values[i+1]));
+        for (int i = 0; i < values.length - 1; i += 2) {
+            row.put(values[i], new CompositeVariant(values[i + 1]));
         }
         importer.spreadsheet.getDataRowsAsCompositeVariants().add(row);
     }
 
-//    Map<String, String> testNodes = new TreeMap<String, String>() {
-//        {
-//            put("/content/folderA", JcrResourceConstants.NT_SLING_FOLDER);
-//            put("/content/folderB", JcrResourceConstants.NT_SLING_FOLDER);
-//            put("/content", JcrResourceConstants.NT_SLING_FOLDER);
-//            put("/content/folderA/asset1", DamConstants.NT_DAM_ASSET);
-//            put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
-//            put("/test", "NT:UNSTRUCTURED");
-//            put("/test/child1", "NT:UNSTRUCTURED");
-//        }
-//    };
-
     private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
         rr = getFreshMockResolver();
-
-//        for (Map.Entry<String, String> entry : testNodes.entrySet()) {
-//            String path = entry.getKey();
-//            String type = entry.getValue();
-//            AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "", new ResourceMetadata());
-//            when(rr.resolve(path)).thenReturn(mockFolder);
-//            when(rr.getResource(path)).thenReturn(mockFolder);
-//        }
-//        for (Map.Entry<String, String> entry : testNodes.entrySet()) {
-//            String parentPath = StringUtils.substringBeforeLast(entry.getKey(), "/");
-//            if (rr.getResource(parentPath) != null) {
-//                AbstractResourceImpl parent = ((AbstractResourceImpl) rr.getResource(parentPath));
-//                AbstractResourceImpl node = (AbstractResourceImpl) rr.getResource(entry.getKey());
-//                parent.addChild(node);
-//            }
-//        }
-
         Session ses = mock(Session.class);
         Node node = mock(Node.class);
         when(ses.nodeExists(any())).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
@@ -188,201 +154,5 @@ public class ContentFragmentImportTest {
         doReturn(mockResource).when(definition).getFragmentTemplateResource(any(), any());
         doReturn(mockFragment).when(definition).getOrCreateFragment(anyObject(), anyObject(), anyObject(), anyObject());
         return definition;
-    }
-
-    public class MockContentElement implements ContentElement {
-        Map.Entry<String, String> entry;
-        public MockContentElement(Map.Entry<String, String> e) {
-            entry = e;
-        }
-
-        @Override
-        public Iterator<ContentVariation> getVariations() {
-            return null;
-        }
-
-        @Override
-        public ContentVariation getVariation(String s) {
-            return null;
-        }
-
-        @Override
-        public ContentVariation createVariation(VariationTemplate variationTemplate) throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public void removeVariation(ContentVariation contentVariation) throws ContentFragmentException {
-
-        }
-
-        @Override
-        public ContentVariation getResolvedVariation(String s) {
-            return null;
-        }
-
-        @Override
-        public String getName() {
-            return entry.getKey();
-        }
-
-        @Override
-        public String getTitle() {
-            return entry.getKey();
-        }
-
-        @Override
-        public String getContent() {
-            return entry.getValue();
-        }
-
-        @Override
-        public String getContentType() {
-            return "text/plain";
-        }
-
-        @Override
-        public void setContent(String s, String s1) throws ContentFragmentException {
-            entry.setValue(s);
-        }
-
-        @Override
-        public VersionDef createVersion(String s, String s1) throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public Iterator<VersionDef> listVersions() throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public VersionedContent getVersionedContent(VersionDef versionDef) throws ContentFragmentException {
-            return null;
-        }
-
-        @CheckForNull
-        @Override
-        public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
-            return null;
-        }
-    }
-
-    private class MockContentFragment implements ContentFragment {
-        String name;
-        String title;
-        String path;
-        HashMap<String, String> elements = new HashMap<>();
-        HashMap<String, Object> metadata = new HashMap<>();
-        @Override
-        public Iterator<ContentElement> getElements() {
-            return elements.entrySet().stream().map(MockContentElement::new).map(e->(ContentElement) e).collect(Collectors.toList()).iterator();
-        }
-
-        @Override
-        public boolean hasElement(String s) {
-            return elements.containsKey(s);
-        }
-
-        @Override
-        public ContentElement createElement(ElementTemplate elementTemplate) throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public ContentElement getElement(String s) {
-            for (Map.Entry<String, String> elems : elements.entrySet()) {
-                if (elems.getKey().equals(s)) {
-                    return new MockContentElement(elems);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String getTitle() {
-            return title;
-        }
-
-        @Override
-        public void setTitle(String s) throws ContentFragmentException {
-            title = s;
-        }
-
-        @Override
-        public String getDescription() {
-            return null;
-        }
-
-        @Override
-        public void setDescription(String s) throws ContentFragmentException {
-
-        }
-
-        @Override
-        public Map<String, Object> getMetaData() {
-            return metadata;
-        }
-
-        @Override
-        public void setMetaData(String s, Object o) throws ContentFragmentException {
-            metadata.put(s,o);
-        }
-
-        @Override
-        public Iterator<VariationDef> listAllVariations() {
-            return null;
-        }
-
-        @Override
-        public FragmentTemplate getTemplate() {
-            return null;
-        }
-
-        @Override
-        public VariationTemplate createVariation(String s, String s1, String s2) throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public Iterator<Resource> getAssociatedContent() {
-            return null;
-        }
-
-        @Override
-        public void addAssociatedContent(Resource resource) throws ContentFragmentException {
-
-        }
-
-        @Override
-        public void removeAssociatedContent(Resource resource) throws ContentFragmentException {
-
-        }
-
-        @Override
-        public VersionDef createVersion(String s, String s1) throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public Iterator<VersionDef> listVersions() throws ContentFragmentException {
-            return null;
-        }
-
-        @Override
-        public VersionedContent getVersionedContent(VersionDef versionDef) throws ContentFragmentException {
-            return null;
-        }
-
-        @CheckForNull
-        @Override
-        public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
-            return null;
-        }
     }
 }
