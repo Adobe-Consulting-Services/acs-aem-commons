@@ -44,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jcr.Node;
@@ -162,9 +163,13 @@ public class ContentFragmentImport extends ProcessDefinition {
     // Build folders
     protected void createFolders(ActionManager manager) throws IOException {
         manager.deferredWithResolver(r -> {
-            new HashSet<>(spreadsheet.getDataRowsAsCompositeVariants()).forEach(row -> {
+            Map<String, String> folders = new TreeMap<>();
+            spreadsheet.getDataRowsAsCompositeVariants().forEach(row -> {
                 String path = getString(row, PATH);
                 String folderTitle = getString(row, FOLDER_TITLE);
+                folders.put(path, folderTitle);
+            });
+            folders.forEach((path, folderTitle) -> {
                 manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
                     manager.setCurrentItem(path);
                     createFolderNode(path, folderTitle, rr);
@@ -192,7 +197,7 @@ public class ContentFragmentImport extends ProcessDefinition {
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(path) && titleProvided) {
             return updateFolderTitle(s, path, folderTitle, r);
-        } else {
+        } else if (!s.nodeExists(path)) {
             if (!s.nodeExists(parentPath)) {
                 createFolderNode(parentPath, null, r);
             }
@@ -204,6 +209,7 @@ public class ContentFragmentImport extends ProcessDefinition {
             r.refresh();
             return true;
         }
+        return false;
     }
 
     private boolean updateFolderTitle(Session s, String path, String folderTitle, ResourceResolver r) throws PersistenceException, RepositoryException {
