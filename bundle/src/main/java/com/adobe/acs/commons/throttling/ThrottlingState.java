@@ -133,11 +133,12 @@ public class ThrottlingState {
      * @return the number of free entries in the array
      */
     protected int resize(int newSize) {
-        int result = 0;
+        
         if (newSize != timestamps.length) {
 
             LOG.debug("Resizing throttling queue from {} to {}", timestamps.length, newSize);
             Instant[] newQueue = new Instant[newSize];
+            int result = 0;
 
             if (timestamps.length - newSize > 0) { // queue got smaller
                 result = reduceSize(newQueue);
@@ -148,6 +149,7 @@ public class ThrottlingState {
             }
 
             timestamps = newQueue;
+            return result;
 
         } else {
             // Do not resize
@@ -155,7 +157,7 @@ public class ThrottlingState {
 
         }
 
-        return result;
+        return 0;
     }
 
     private int increaseSize(Instant[] newQueue) {
