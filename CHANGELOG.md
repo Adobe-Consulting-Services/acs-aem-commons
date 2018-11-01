@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1531 - Content Fragment Importer tool added
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
 - #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
+- #1532 - Request Throttler tool added
 
 ### Changed
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.
@@ -22,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0
 - #1516 - Undefined exception on configure-limit-parsys.min.js
+- #1537 - Fixed leaking ResourceResolver in FastActionManagerRunnerImpl
 
 ### Removed
 
