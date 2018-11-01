@@ -159,10 +159,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final ReplicationActionType flushActionType =
                 replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             // Flush full content hierarchies
             for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {
@@ -201,10 +198,6 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
 
         } catch (LoginException e) {
             log.error("Error issuing  dispatcher flush rules do to repository login exception: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

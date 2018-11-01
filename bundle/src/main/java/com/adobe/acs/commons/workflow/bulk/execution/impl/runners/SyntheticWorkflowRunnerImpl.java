@@ -120,14 +120,12 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
         @Override
         @SuppressWarnings({"squid:S3776", "squid:S1141"})
         public void run() {
-            ResourceResolver serviceResourceResolver = null;
             Resource configResource;
             long start = System.currentTimeMillis();
             int total = 0;
             boolean stopped = false;
 
-            try {
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 final Config config = configResource.adaptTo(Config.class);
@@ -215,10 +213,6 @@ public class SyntheticWorkflowRunnerImpl extends AbstractWorkflowRunner implemen
                 }
             } catch (Exception e) {
                 log.error("Error processing Bulk Synthetic Workflow execution.", e);
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 

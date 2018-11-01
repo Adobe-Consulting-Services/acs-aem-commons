@@ -264,10 +264,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private boolean hasNotifications() {
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final Resource notificationsFolder = resourceResolver.getResource(PATH_NOTIFICATIONS);
             if (notificationsFolder != null) {
@@ -283,10 +280,6 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
             }
         } catch (LoginException e) {
             log.error("Could not get an service ResourceResolver", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return false;

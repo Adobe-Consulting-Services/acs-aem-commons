@@ -126,12 +126,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
     @Override
     @SuppressWarnings("squid:S1141")
     public void run() {
-        ResourceResolver resourceResolver = null;
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo)) {
 
-        try {
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo);
-
+            // we should rethink this nested try here ...
             try {
                 this.ensure(resourceResolver, ensureDefinitionsPath, oakIndexesPath);
             } catch (IOException e) {
@@ -143,10 +141,6 @@ public class EnsureOakIndexJobHandler implements Runnable {
             log.error("Could not get an admin resource resolver to ensure Oak Indexes", e);
         } catch (Exception e) {
             log.error("Unknown error occurred while ensuring indexes", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

@@ -159,10 +159,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        ResourceResolver resourceResolver = null;
 
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             final String path = (String) event.getProperty("TaskId");
             final Resource taskResource = resourceResolver.getResource(path);
 
@@ -186,11 +184,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             }
         } catch (LoginException e) {
             log.error("Could not get resource resolver", e);
-        } finally {
-            // Always close resource resolvers you open
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
@@ -203,10 +196,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
         @Override
         public void run() {
-            ResourceResolver resourceResolver = null;
-            try {
-                // Always use service users; never admin resource resolvers for "real" code
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
                 // Access data passed into the Job from the Event
                 Resource resource = resourceResolver.getResource(path);
@@ -229,11 +219,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                 }
             } catch (Exception e) {
                 log.error("Could not process Review Task Mover", e);
-            } finally {
-                // Always close resource resolvers you open
-                if (resourceResolver != null) {
-                    resourceResolver.close();
-                }
             }
         }
 

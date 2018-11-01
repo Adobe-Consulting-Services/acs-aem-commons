@@ -908,10 +908,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver serviceResourceResolver = null;
-            try {
-                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
                 final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
@@ -926,10 +924,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 

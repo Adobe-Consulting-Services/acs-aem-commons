@@ -483,9 +483,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     public <T> T withSession(final Function<Session, T> onSuccess, final Consumer<Exception> onError){
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             final Session session = resourceResolver.adaptTo(Session.class);
             return onSuccess.apply(session);
 
@@ -497,10 +495,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 }
             } catch (Exception subException) {
                 log.error("Error in handling the exception", subException);
-            }
-        } finally {
-            if(resourceResolver != null && resourceResolver.isLive()){
-                resourceResolver.close();
             }
         }
         return null;

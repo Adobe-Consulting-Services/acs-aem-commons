@@ -185,12 +185,10 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * options for editing shared/global configs.
      */
     private void updateSharedComponentsMap() {
-        ResourceResolver resourceResolver = null;
-        try {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)){
             log.debug("Calculating map of components with shared properties dialogs");
 
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
             resourceResolver.refresh();
             ComponentManager componentManager = resourceResolver.adaptTo(ComponentManager.class);
             Map<String, List<Boolean>> localComponentsWithSharedProperties = new HashMap<>();
@@ -213,10 +211,6 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
             log.error("Unable to log into service user to determine list of components with shared properties dialogs", e);
         } catch (RepositoryException e) {
             log.error("Unexpected error attempting to determine list of components with shared properties dialogs", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
