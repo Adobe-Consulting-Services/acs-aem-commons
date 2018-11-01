@@ -280,25 +280,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     }
 
     private String getHTML(final String path) {
-        ResourceResolver resourceResolver = null;
-
         // Handle blank HTML conditions first; Avoid looking in JCR for them.
         if (StringUtils.isBlank(path) || StringUtils.equals(BLANK_HTML, path)) {
             return "";
         }
 
-        try {
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             // Component error renditions are typically stored under /apps as part of the application; and thus
             // requires elevated ACLs to work on Publish instances.
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             return ResourceDataUtil.getNTFileAsString(path, resourceResolver);
         } catch (final Exception e) {
             log.error("Could not get the component error HTML at [ {} ], using blank.", path);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return "";

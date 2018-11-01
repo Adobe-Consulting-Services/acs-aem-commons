@@ -128,10 +128,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
     public void ensure(Operation operation, AbstractAuthorizable group) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             if (Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, (Group) group);
@@ -154,10 +151,6 @@ public final class EnsureGroup implements EnsureAuthorizable {
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Group [ %s ]",
                     operation.toString(), group.getPrincipalName()), e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

@@ -288,19 +288,13 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     }
 
     public void asServiceUser(CheckedConsumer<ResourceResolver> action) {
-        ResourceResolver rr = null;
-        try {
-            rr = manager.getServiceResourceResolver();
+        try (ResourceResolver rr = manager.getServiceResourceResolver()){
             action.accept(rr);
             if (rr.hasChanges()) {
                 rr.commit();
             }
         } catch (Exception ex) {
             LOG.error("Error while performing JCR operations", ex);
-        } finally {
-            if (rr != null) {
-                rr.close();
-            }
         }
     }
 

@@ -202,15 +202,13 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             final Map<String, Object> jobConfig = getInfoFromEvent(event);
             final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
-            ResourceResolver resourceResolver = null;
-            try {
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO))  {
+            
                 for (String path : paths) {
                     if (!this.containsJcrPackagePath(path)) {
                         continue;
                     }
-                    if (resourceResolver == null) {
-                        resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-                    }
+                    
                     final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
                     if (jcrPackage != null) {
                         // Close jcrPackages after they've been used to check if a Job should be invoked.
@@ -222,11 +220,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             } catch (LoginException e) {
                 log.error("Could not obtain a resource resolver.", e);
-            } finally {
-                if (resourceResolver != null) {
-                    resourceResolver.close();
-                }
-            }
+            } 
         }
     }
 
@@ -238,9 +232,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
         log.debug("Processing Replication Status Update for JCR Package: {}", path);
 
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
             if (jcrPackage == null) {
@@ -261,10 +253,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         } catch (RepositoryException e) {
             logJobError(job, "Could not update replication metadata", e);
             return JobResult.FAILED;
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return JobResult.OK;
