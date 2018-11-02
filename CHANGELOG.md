@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
 - #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
 - #1532 - Request Throttler tool added
+- #1529 - Instant Package Utility
 
 ### Changed
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.
