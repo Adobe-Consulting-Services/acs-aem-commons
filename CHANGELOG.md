@@ -7,23 +7,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+## [3.19.0] - 2018-11-03
+
 ### Added
+- #1410 - Show/Hide fields and tabs based on dropdown and/or checkbox selections
 - #1446 - Renovator combines and replaces previous relocator tools in MCP
-- #1531 - Content Fragment Importer tool added
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
-- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
-- #1532 - Request Throttler tool added
 - #1529 - Instant Package Utility
+- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
+- #1531 - Content Fragment Importer tool added
+- #1532 - Request Throttler tool added
 
 ### Changed
 - #1523 - Added check to EnsureACEs to avoid duplicate path processing.
 
 ### Fixed
-- #1351 - Fixed error when switching Include Children value in Audit Log Search
+- #1464 - ResourceResolverMapTransformer decodes URI-encoded values correctly now
+- #1495 - Error page handler resets component context attribute correctly now
 - #1497 - Javadoc improvement in EndpointService
-- #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
 - #1501 - Error downloading reports from MCP processes with 6.3.3.0
+- #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
+- #1513 - PageCompare popovers and legend fixed
 - #1516 - Undefined exception on configure-limit-parsys.min.js
+- #1523 - Resource check duplication fixed in Ensure ACE feature
+- #1524 - Audit log search UI fixes (also fixes #1351)
+- #1533 - Cleaned up leftovers from archetype template
 - #1537 - Fixed leaking ResourceResolver in FastActionManagerRunnerImpl
 
 ### Removed
