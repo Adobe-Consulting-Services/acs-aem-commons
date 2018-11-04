@@ -51,7 +51,7 @@ import java.util.Set;
 
 @SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet", methods = { "GET" }, resourceTypes = {
 "acs-commons/components/utilities/audit-log-search" }, selectors = {
-"auditlogsearch" }, extensions = { "json" }, metatype = true)
+"auditlogsearch" }, extensions = { "json" })
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 

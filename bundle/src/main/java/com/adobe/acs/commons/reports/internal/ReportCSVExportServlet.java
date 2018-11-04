@@ -51,7 +51,7 @@ import com.day.text.csv.Csv;
  */
 @SlingServlet(label = "ACS AEM Commons - Report CSV Export Servlet", methods = { "GET" }, resourceTypes = {
     "acs-commons/components/utilities/report-builder/report-page" }, selectors = {
-        "report" }, extensions = { "csv" }, metatype = true)
+        "report" }, extensions = { "csv" })
 public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private static final long serialVersionUID = 2794836639686938093L;

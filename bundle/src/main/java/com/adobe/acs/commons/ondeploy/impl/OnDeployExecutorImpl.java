@@ -77,7 +77,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Component(
         label = "ACS AEM Commons - On-Deploy Scripts Executor",
         description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
-        metatype = true, policy = ConfigurationPolicy.REQUIRE)
+        policy = ConfigurationPolicy.REQUIRE)
 @Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
         value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
 @Service(value = DynamicMBean.class)

@@ -46,6 +46,25 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <executions>
+				    <!-- Configure extra execution of 'manifest' in process-classes phase to make sure SCR metadata is generated before unit test runs -->
+				    <execution>
+				      <id>scr-metadata</id>
+				      <goals>
+				        <goal>manifest</goal>
+				      </goals>
+				      <configuration>
+				        <supportIncrementalBuild>true</supportIncrementalBuild>
+				      </configuration>
+				    </execution>
+				</executions>
+				<dependencies>
+					<dependency>
+					  <groupId>org.apache.felix</groupId>
+					  <artifactId>org.apache.felix.scr.bnd</artifactId>
+					  <version>1.9.0</version>
+					</dependency>
+				</dependencies>
                 <configuration>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
@@ -76,6 +95,15 @@
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
+
+
+						<!-- Enable processing of OSGI DS component annotations -->
+						<_dsannotations>*</_dsannotations>
+						<!-- Enable processing of OSGI metatype annotations -->
+						<_metatypeannotations>*</_metatypeannotations>
+						<!-- Support parsing of maven-scr-plugin annotations through the felix.scr.bnd
+								plugin -->
+						<_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory};</_plugin>
                     </instructions>
                 </configuration>
             </plugin>
@@ -352,6 +380,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <!--
         needed to override the embedded commons.osgi in org.apache.sling.models.impl
         -->
