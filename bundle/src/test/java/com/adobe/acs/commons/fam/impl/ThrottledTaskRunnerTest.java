@@ -57,7 +57,7 @@ public class ThrottledTaskRunnerTest {
                 } catch (InterruptedException e) {
                     log.error("", e);
                 }
-                log.info("normal priority: {}",  finalI);
+                log.info("very low priority: {}", finalI);
                 executions.add(1L);
             }, Integer.MIN_VALUE);
         }
@@ -66,9 +66,9 @@ public class ThrottledTaskRunnerTest {
         for(int i=0;i<10;i++) {
             int finalI = i;
             ttr.scheduleWork(() -> {
-                log.info("high priority: {}", finalI);
+                log.info("very high priority: {}", finalI);
                 executions.add(5L);
-            }, 10);
+            }, Integer.MAX_VALUE);
         }
 
         while(ttr.getActiveCount() > 0) {
