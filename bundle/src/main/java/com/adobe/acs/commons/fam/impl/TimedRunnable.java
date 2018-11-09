@@ -118,7 +118,7 @@ public class TimedRunnable implements Runnable, Comparable {
     public int compareTo(Object o) {
         if(o instanceof TimedRunnable) {
             TimedRunnable other = (TimedRunnable) o;
-            int compareResult = other.priority - this.priority;
+            int compareResult = Integer.compare(other.priority, this.priority);
 
             return compareResult;
         }
