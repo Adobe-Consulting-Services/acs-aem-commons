@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+
 ## [3.19.0] - 2018-11-03
 
 ### Added
