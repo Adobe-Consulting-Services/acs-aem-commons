@@ -104,9 +104,6 @@ public class EnsurePropertyIndex {
     private static final String TYPE_PROPERTY = "property";
 
     @Reference
-    private AemCapabilityHelper capabilityHelper;
-
-    @Reference
     private SlingRepository repository;
 
     private void createOrUpdateIndex(Node indexNode, IndexDefinition def) throws RepositoryException {
@@ -151,48 +148,44 @@ public class EnsurePropertyIndex {
     protected void activate(Map<String, Object> properties) throws RepositoryException {
         log.warn("EnsurePropertyIndex is deprecated. Please switch to EnsureOakIndex immediately.");
 
-        if (capabilityHelper.isOak()) {
-            final String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
+        final String name = PropertiesUtil.toString(properties.get(PROP_INDEX_NAME), null);
 
-            IndexDefinition def = new IndexDefinition();
-            def.propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
-            def.async = PropertiesUtil.toBoolean(properties.get(PROP_ASYNC), DEFAULT_ASYNC);
-            def.unique = PropertiesUtil.toBoolean(properties.get(PROP_UNIQUE), DEFAULT_UNIQUE);
-            def.declaringNodeTypes = PropertiesUtil.toStringArray(properties.get(PROP_NODE_TYPES), new String[0]);
+        IndexDefinition def = new IndexDefinition();
+        def.propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
+        def.async = PropertiesUtil.toBoolean(properties.get(PROP_ASYNC), DEFAULT_ASYNC);
+        def.unique = PropertiesUtil.toBoolean(properties.get(PROP_UNIQUE), DEFAULT_UNIQUE);
+        def.declaringNodeTypes = PropertiesUtil.toStringArray(properties.get(PROP_NODE_TYPES), new String[0]);
 
-            if (name == null || def.propertyName == null) {
-                log.warn("Incomplete configure; name or property name is null.");
-                return;
-            }
+        if (name == null || def.propertyName == null) {
+            log.warn("Incomplete configure; name or property name is null.");
+            return;
+        }
 
-            Session session = null;
-            try {
-                session = repository.loginService(EnsureOakIndexJobHandler.SERVICE_NAME, null);
+        Session session = null;
+        try {
+            session = repository.loginService(EnsureOakIndexJobHandler.SERVICE_NAME, null);
 
-                Node oakIndexContainer = session.getNode(PATH_OAK_INDEX);
-                if (oakIndexContainer.hasNode(name)) {
-                    Node indexNode = oakIndexContainer.getNode(name);
-                    if (needsUpdate(indexNode, def)) {
-                        log.info("updating index {}", name);
-                        updateIndex(indexNode, def);
-                    } else {
-                        log.debug("index {} does not need updating", name);
-                    }
+            Node oakIndexContainer = session.getNode(PATH_OAK_INDEX);
+            if (oakIndexContainer.hasNode(name)) {
+                Node indexNode = oakIndexContainer.getNode(name);
+                if (needsUpdate(indexNode, def)) {
+                    log.info("updating index {}", name);
+                    updateIndex(indexNode, def);
                 } else {
-                    log.info("creating index {}", name);
-                    createOrUpdateIndex(oakIndexContainer.addNode(name, NT_QID), def);
+                    log.debug("index {} does not need updating", name);
                 }
-                session.save();
-
-            } catch (RepositoryException e) {
-                log.error("Unable to create index", e);
-            } finally {
-                if (session != null) {
-                    session.logout();
-                }
+            } else {
+                log.info("creating index {}", name);
+                createOrUpdateIndex(oakIndexContainer.addNode(name, NT_QID), def);
             }
-        } else {
-            log.info("Cowardly refusing to create indexes on non-Oak instance.");
+            session.save();
+
+        } catch (RepositoryException e) {
+            log.error("Unable to create index", e);
+        } finally {
+            if (session != null) {
+                session.logout();
+            }
         }
     }
 }
