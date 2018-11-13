@@ -69,7 +69,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
             policy = ReferencePolicy.DYNAMIC)
-    private HttpCacheEngine httpCacheEngine;
+    private volatile HttpCacheEngine httpCacheEngine;
 
     @Reference
     private ResourceResolverFactory resolverFactory;
