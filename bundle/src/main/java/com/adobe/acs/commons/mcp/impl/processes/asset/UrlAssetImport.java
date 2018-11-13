@@ -146,7 +146,7 @@ public class UrlAssetImport extends AssetIngestor {
                             .build()
             );
             httpClient = clientBuilder.build();
-            clientProvider.setHttpClientSupplier(()->httpClient);
+            clientProvider.setHttpClientSupplier(this::getHttpClient);
             clientProvider.setUsername(username);
             clientProvider.setPassword(password);
         }
@@ -368,7 +368,7 @@ public class UrlAssetImport extends AssetIngestor {
         }
         String name = source.substring(source.lastIndexOf('/') + 1);
         Folder folder = extractFolder(assetData);
-        FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
+        FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
                 assetData.get(RENDITION_NAME) == null ? null : assetData.get(RENDITION_NAME).toString(),
