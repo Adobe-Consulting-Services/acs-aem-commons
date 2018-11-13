@@ -106,9 +106,25 @@ public class UrlAssetImport extends AssetIngestor {
             options = ("default=30000")
     )
     private int timeout = 30000;
+    
+    @FormField(
+            name = "Username",
+            description = "Username for connections that require login",
+            required = false
+    )
+    private String username = null;
+
+        @FormField(
+            name = "Password",
+            description = "Password for connections that require login",
+            required = false
+    )
+    private String password = null;
 
     transient Set<FileOrRendition> files;
     transient Map<String, Folder> folders = new TreeMap<>((a, b) -> b.compareTo(a));
+    
+    private ClientProvider clientProvider = new ClientProvider();
 
     Spreadsheet fileData;
 
@@ -130,6 +146,9 @@ public class UrlAssetImport extends AssetIngestor {
                             .build()
             );
             httpClient = clientBuilder.build();
+            clientProvider.setHttpClientSupplier(()->httpClient);
+            clientProvider.setUsername(username);
+            clientProvider.setPassword(password);
         }
     }
 
