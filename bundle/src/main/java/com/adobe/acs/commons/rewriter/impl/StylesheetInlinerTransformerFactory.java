@@ -53,15 +53,15 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
  * <body>, whereas those in <body> are included where they're found.
  */
 @Component(
-        metatype = true, 
-        label = "Stylesheet Inliner Transformer Factory", 
+        metatype = false,
+        label = "Stylesheet Inliner Transformer Factory",
         description = "Sling Rewriter Transformer Factory which inlines CSS references")
-@Properties({ 
-    @Property( name = "pipeline.type", value = "inline-css", propertyPrivate = true) } )
-@Service(value = { TransformerFactory.class })
+@Properties({
+    @Property(name = "pipeline.type", value = "inline-css", propertyPrivate = true)})
+@Service(value = {TransformerFactory.class})
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
-    private static final char[] NEWLINE = new char[] {'\n'};
+    private static final char[] NEWLINE = new char[]{'\n'};
     private static final String STYLE = "style";
     private static final String HEAD = "head";
 
@@ -69,7 +69,6 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
-
 
     public Transformer createTransformer() {
         return new CssInlinerTransformer();
@@ -128,22 +127,22 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
 
         private void inlineSheet(final String namespaceURI, String s) throws IOException, SAXException {
             InputStream inputStream = null;
-            
+
             String withoutExtension = s.substring(0, s.indexOf(LibraryType.CSS.extension));
             HtmlLibrary library = htmlLibraryManager.getLibrary(LibraryType.CSS, withoutExtension);
             if (library != null) {
                 inputStream = library.getInputStream();
             } else {
                 Resource resource = slingRequest.getResourceResolver().getResource(s);
-                
+
                 if (resource != null) {
                     inputStream = resource.adaptTo(InputStream.class);
                 }
             }
-            
+
             if (inputStream != null) {
                 char[] chars = IOUtils.toCharArray(inputStream);
-                
+
                 getContentHandler().startElement(namespaceURI, STYLE, null, new AttributesImpl());
                 getContentHandler().characters(NEWLINE, 0, 1);
                 getContentHandler().characters(chars, 0, chars.length);

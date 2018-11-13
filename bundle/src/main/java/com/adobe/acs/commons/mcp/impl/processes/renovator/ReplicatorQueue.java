@@ -27,6 +27,7 @@ import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.replication.Replicator;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,13 @@ public class ReplicatorQueue implements Replicator {
     }
 
     @Override
+    public void replicate(Session session, ReplicationActionType replicationActionType, String[] paths, ReplicationOptions replicationOptions) throws ReplicationException {
+        for (String path : paths) {
+            replicate(session, replicationActionType, path, replicationOptions);
+        }
+    }
+
+    @Override
     public void checkPermission(Session sn, ReplicationActionType rat, String string) throws ReplicationException {
         // no-op
     }
@@ -71,6 +79,11 @@ public class ReplicatorQueue implements Replicator {
     @Override
     public ReplicationStatus getReplicationStatus(Session sn, String string) {
         return null;
+    }
+
+    @Override
+    public Iterator<String> getActivatedPaths(Session session, String s) throws ReplicationException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

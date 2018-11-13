@@ -50,7 +50,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
+<!--                <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
                     <version>${scr.plugin.version}</version>
@@ -61,7 +61,7 @@
                             <version>${sl4fj.version}</version>
                         </dependency>
                     </dependencies>
-                </plugin>
+                </plugin>-->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -276,6 +276,12 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient-osgi</artifactId>
                 <version>4.5.2</version>
                 <scope>provided</scope>
@@ -334,7 +340,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.sling-mock</artifactId>
+                <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
                 <version>2.3.4</version>
                 <scope>test</scope>
             </dependency>
@@ -358,7 +364,7 @@
             </dependency>
             <dependency>
                 <groupId>io.wcm</groupId>
-                <artifactId>io.wcm.testing.aem-mock</artifactId>
+                <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
                 <version>2.3.2</version>
                 <scope>test</scope>
                 <exclusions>
@@ -482,7 +488,7 @@
                 </plugins>
                 <pluginManagement>
                     <plugins>
-                        <plugin>
+<!--                        <plugin>
                             <groupId>org.apache.felix</groupId>
                             <artifactId>maven-scr-plugin</artifactId>
                             <version>${scr.plugin.version}</version>
@@ -499,7 +505,7 @@
                                     <classifier>runtime</classifier>
                                 </dependency>
                             </dependencies>
-                        </plugin>
+                        </plugin>-->
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>animal-sniffer-maven-plugin</artifactId>
