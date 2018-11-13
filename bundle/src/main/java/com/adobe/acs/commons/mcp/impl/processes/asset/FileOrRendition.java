@@ -275,7 +275,7 @@ public class FileOrRendition implements HierarchialElement {
 
     private class SftpConnectionSource implements Source {
         private final FileOrRendition thizz;
-        private JSch jsch = new JSch();
+        private final JSch jsch = new JSch();
         private Session session;
         private InputStream currentStream;
         private Channel channel;
@@ -284,19 +284,20 @@ public class FileOrRendition implements HierarchialElement {
             this.thizz = thizz;
         }
         
-        private Session getSession() throws IOException {
+        private Session getSessionForHost(URI uri) throws IOException {
+            if (session != null && !session.getHost().equals(uri.getHost())) {
+                close();
+            }
             if (session == null || !session.isConnected()) {
                 try {
-                    URI uri = new URI(getUrl());
-                    int port = uri.getPort() > 0 ? uri.getPort() : 22;
-                    String host = uri.getHost();
-                    session = jsch.getSession(clientProvider.getUsername(), host, port);
+                    int port = uri.getPort() <= 0 ? 22 : uri.getPort();
+                    session = jsch.getSession(clientProvider.getUsername(), uri.getHost(), port);
                     Hashtable props = new Hashtable();
                     props.put("StrictHostKeyChecking", "no");
                     session.setConfig(props);
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
-                } catch (JSchException | URISyntaxException ex) {
+                } catch (JSchException ex) {
                     Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     throw new IOException("Unable to connect to server", ex);
                 }
@@ -315,7 +316,7 @@ public class FileOrRendition implements HierarchialElement {
                 URI uri = new URI(getUrl());
                 
                 if (channel == null || channel.isClosed()) {
-                    channel = getSession().openChannel( "sftp" );
+                    channel = getSessionForHost(uri).openChannel( "sftp" );
                     channel.connect();
                 }
                 
@@ -342,7 +343,7 @@ public class FileOrRendition implements HierarchialElement {
                 URI uri = new URI(getUrl());
                 
                 if (channel == null || channel.isClosed()) {
-                    channel = getSession().openChannel( "sftp" );
+                    channel = getSessionForHost(uri).openChannel( "sftp" );
                     channel.connect();
                 }
                 
