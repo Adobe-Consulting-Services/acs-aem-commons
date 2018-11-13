@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.HierarchialElement;
 import java.util.stream.Stream;
 
 /**
  * Represents a folder to be imported
  */
-public class Folder implements HierarchialElement {
-    HierarchialElement parent;
+public class Folder implements HierarchicalElement {
+    HierarchicalElement parent;
     String name;
     String basePath;
 
@@ -52,7 +51,7 @@ public class Folder implements HierarchialElement {
     }
 
     @Override
-    public HierarchialElement getParent() {
+    public HierarchicalElement getParent() {
         return parent;
     }
 
@@ -77,7 +76,7 @@ public class Folder implements HierarchialElement {
     }
 
     @Override
-    public Stream<HierarchialElement> getChildren() {
+    public Stream<HierarchicalElement> getChildren() {
         throw new UnsupportedOperationException("Folder does not support child navigation at the moment");
     }
 }

@@ -22,23 +22,26 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedSupplier;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
 import com.day.cq.commons.jcr.JcrUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.commons.mime.MimeTypeService;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Hashtable;
@@ -47,10 +50,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.mime.MimeTypeService;
 
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is
@@ -69,13 +68,13 @@ public class FileAssetIngestor extends AssetIngestor {
             required = true
     )
     String fileBasePath;
-    HierarchialElement baseFolder;
+    HierarchicalElement baseFolder;
 
     @Override
     public void init() throws RepositoryException {
         if (fileBasePath.toLowerCase().startsWith("sftp://")) {
             try {
-                baseFolder = new SftpHierarchialElement(fileBasePath);
+                baseFolder = new SftpHierarchicalElement(fileBasePath);
                 baseFolder.isFolder(); // Forces a login and check status of base folder
             } catch (JSchException | URISyntaxException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
@@ -86,7 +85,7 @@ public class FileAssetIngestor extends AssetIngestor {
             if (!base.exists()) {
                 throw new RepositoryException("Source folder does not exist!");
             }
-            baseFolder = new FileHierarchialElement(base);
+            baseFolder = new FileHierarchicalElement(base);
         }
         super.init();
 
@@ -153,10 +152,10 @@ public class FileAssetIngestor extends AssetIngestor {
     private class FileSource implements Source {
 
         final File file;
-        final HierarchialElement element;
+        final HierarchicalElement element;
         private InputStream lastOpenStream;
 
-        private FileSource(File f, FileHierarchialElement el) {
+        private FileSource(File f, FileHierarchicalElement el) {
             this.file = f;
             this.element = el;
         }
@@ -179,7 +178,7 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return element;
         }
 
@@ -192,11 +191,11 @@ public class FileAssetIngestor extends AssetIngestor {
         }
     }
 
-    class FileHierarchialElement implements HierarchialElement {
+    class FileHierarchicalElement implements HierarchicalElement {
 
         final File file;
 
-        FileHierarchialElement(File f) {
+        FileHierarchicalElement(File f) {
             this.file = f;
         }
 
@@ -216,12 +215,12 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getParent() {
+        public HierarchicalElement getParent() {
             File parent = file.getParentFile();
-            if (parent.getAbsolutePath().equals(fileBasePath)) {
+            if (parent == null || file.getAbsolutePath().equals(fileBasePath)) {
                 return null;
             }
-            return new FileHierarchialElement(file.getParentFile());
+            return new FileHierarchicalElement(file.getParentFile());
         }
 
         @Override
@@ -240,15 +239,15 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public Stream<HierarchialElement> getChildren() {
-            return Stream.of(file.listFiles()).map(FileHierarchialElement::new);
+        public Stream<HierarchicalElement> getChildren() {
+            return Stream.of(file.listFiles()).map(FileHierarchicalElement::new);
         }
     }
 
-    class SftpHierarchialElement implements HierarchialElement {
+    class SftpHierarchicalElement implements HierarchicalElement {
 
         boolean isFile;
-        HierarchialElement parent;
+        HierarchicalElement parent;
         String path;
         ChannelSftp channel;
         boolean retrieved = false;
@@ -257,12 +256,12 @@ public class FileAssetIngestor extends AssetIngestor {
         Source source;
         boolean keepChannelOpen = false;
 
-        public SftpHierarchialElement(String uri) throws URISyntaxException, JSchException {
+        SftpHierarchicalElement(String uri) throws URISyntaxException, JSchException {
             this.uri = new URI(uri);
             this.path = this.uri.getPath();
         }
 
-        private SftpHierarchialElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
+        private SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
             this(uri);
             this.channel = channel;
             this.keepChannelOpen = holdOpen;
@@ -322,10 +321,10 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getParent() {
+        public HierarchicalElement getParent() {
             if (parent == null && !jcrBasePath.endsWith(path)) {
                 try {
-                    parent = new SftpHierarchialElement(StringUtils.substringBeforeLast(path, "/"));
+                    parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(path, "/"));
                 } catch (URISyntaxException | JSchException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -334,21 +333,19 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public Stream<HierarchialElement> getChildren() {
+        public Stream<HierarchicalElement> getChildren() {
             try {
                 openChannel();
-                Vector children = channel.ls(getItemName());
-                return children.stream()
-                        .map(o -> {
-                            try {
-                                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) o;
-                                String childPath = getItemName() + "/" + entry.getFilename();
-                                return new SftpHierarchialElement(childPath, channel, true);
-                            } catch (URISyntaxException | JSchException ex) {
-                                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                                return null;
-                            }
-                        }).filter(Objects::nonNull);
+                Vector<ChannelSftp.LsEntry> children = channel.ls(getItemName());
+                return children.stream().map((ChannelSftp.LsEntry entry) -> {
+                    try {
+                        String childPath = getItemName() + "/" + entry.getFilename();
+                        return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
+                    } catch (URISyntaxException | JSchException ex) {
+                        Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                        return null;
+                    }
+                }).filter(Objects::nonNull);
             } catch (URISyntaxException | JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return Stream.empty();
@@ -394,9 +391,9 @@ public class FileAssetIngestor extends AssetIngestor {
         CheckedSupplier<ChannelSftp> channel;
         InputStream lastStream;
         ChannelSftp lastChannel;
-        HierarchialElement element;
+        HierarchicalElement element;
 
-        public SftpSource(long length, CheckedSupplier<ChannelSftp> channel, HierarchialElement elem) {
+        public SftpSource(long length, CheckedSupplier<ChannelSftp> channel, HierarchicalElement elem) {
             this.channel = channel;
             this.length = length;
             this.element = elem;
@@ -426,7 +423,7 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return element;
         }
 

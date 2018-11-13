@@ -143,6 +143,8 @@ public class FileAssetIngestorTest {
         File folder3 = mkdir(folder2, "folder3");
         addFile(folder3, "image.png", "/img/test.png");
 
+        assertNotNull(context.resourceResolver().getResource("/content/dam"));
+
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -151,9 +153,9 @@ public class FileAssetIngestorTest {
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));
 
-        verify(actionManager, times(4)).setCurrentItem(currentItemCaptor.capture());
+        verify(actionManager, atLeast(4)).setCurrentItem(currentItemCaptor.capture());
         assertThat(currentItemCaptor.getAllValues(),
-                containsInAnyOrder(tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()));
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()));
     }
 
 

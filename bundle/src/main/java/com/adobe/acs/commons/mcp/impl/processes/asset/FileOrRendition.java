@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.HierarchialElement;
-import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import com.adobe.acs.commons.data.CompositeVariant;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -49,7 +47,7 @@ import org.apache.http.client.methods.HttpGet;
 /**
  * Abstraction of a file which might be an asset or a rendition of another asset
  */
-public class FileOrRendition implements HierarchialElement {
+public class FileOrRendition implements HierarchicalElement {
 
     final String url;
     final String name;
@@ -105,7 +103,7 @@ public class FileOrRendition implements HierarchialElement {
     }
 
     @Override
-    public HierarchialElement getParent() {
+    public HierarchicalElement getParent() {
         return folder;
     }
 
@@ -152,7 +150,7 @@ public class FileOrRendition implements HierarchialElement {
     }
 
     @Override
-    public Stream<HierarchialElement> getChildren() {
+    public Stream<HierarchicalElement> getChildren() {
         throw new UnsupportedOperationException("FileOrRendition doesn't support child navigation");
     }
 
@@ -203,7 +201,7 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return thizz;
         }
 
@@ -262,7 +260,7 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return thizz;
         }
 
@@ -370,7 +368,7 @@ public class FileOrRendition implements HierarchialElement {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return thizz;
         }
 

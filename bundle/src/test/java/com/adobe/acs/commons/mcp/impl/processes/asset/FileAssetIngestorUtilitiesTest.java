@@ -59,14 +59,14 @@ public class FileAssetIngestorUtilitiesTest {
         File folder2 = new File(folder1, "folder2");
         folder2.mkdir();
 
-        HierarchialElement el = ingestor.new FileHierarchialElement(folder2);
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(folder2);
         assertEquals(folder2.getAbsolutePath(), el.getItemName());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
         assertEquals("/content/dam/folder1/folder2", el.getNodePath());
         assertEquals("folder2", el.getName());
 
-        HierarchialElement parent = el.getParent();
+        HierarchicalElement parent = el.getParent();
         assertEquals(folder1.getAbsolutePath(), parent.getItemName());
         assertNotNull(parent);
         assertTrue(parent.isFolder());
@@ -85,13 +85,13 @@ public class FileAssetIngestorUtilitiesTest {
         File image = new File(folder2, "image.png");
         FileUtils.writeByteArrayToFile(image, new byte[0]);
 
-        HierarchialElement el = ingestor.new FileHierarchialElement(image);
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(image);
         assertEquals(image.getAbsolutePath(), el.getItemName());
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
         assertEquals("image.png", el.getName());
 
-        HierarchialElement parent = el.getParent();
+        HierarchicalElement parent = el.getParent();
         assertEquals(folder2.getAbsolutePath(), parent.getItemName());
         assertNotNull(parent);
         assertTrue(parent.isFolder());
@@ -112,7 +112,7 @@ public class FileAssetIngestorUtilitiesTest {
     public void testHierarchialElementForFileInRoot() throws Exception {
         File image = new File(tempDirectory, "image.png");
         FileUtils.writeByteArrayToFile(image, new byte[0]);
-        HierarchialElement el = ingestor.new FileHierarchialElement(image);
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(image);
         assertEquals(image.getAbsolutePath(), el.getItemName());
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
@@ -125,7 +125,7 @@ public class FileAssetIngestorUtilitiesTest {
     public void testHierarchialElementForFolderInRoot() {
         File folder1 = new File(tempDirectory, "folder1");
         folder1.mkdir();
-        HierarchialElement el = ingestor.new FileHierarchialElement(folder1);
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(folder1);
         assertEquals(folder1.getAbsolutePath(), el.getItemName());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());

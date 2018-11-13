@@ -43,7 +43,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -293,7 +292,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     }
 
     @SuppressWarnings("squid:S3776")
-    protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
+    protected boolean createFolderNode(HierarchicalElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
             return false;
         }
@@ -311,36 +310,41 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                if (folderContentNode == null) {
-                    folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
-                }
-                folderContentNode.setProperty(JcrConstants.JCR_TITLE, name);
+                setFolderTitle(folderNode, name);
                 r.commit();
                 r.refresh();
                 return true;
             }
-        }
-        HierarchialElement parent = el.getParent();
-        String parentPath;
-        if (parent == null) {
-            parentPath = jcrBasePath;
         } else {
-            parentPath = parent.getNodePath();
+            HierarchicalElement parent = el.getParent();
+            String parentPath;
+            String nodeName;
+
+            if (parent != null) {
+                parentPath = parent.getNodePath();
+                nodeName = el.getNodeName();
+                if (!jcrBasePath.equals(parentPath)) {
+                    createFolderNode(parent, r);
+                }
+            } else {
+                parentPath = StringUtils.substringBeforeLast(el.getNodePath(),"/");
+                nodeName = StringUtils.substringAfterLast(el.getNodePath(),"/");
+            }
+            Node child = s.getNode(parentPath).addNode(nodeName, DEFAULT_FOLDER_TYPE);
+
+            System.out.println("Added folder node " + child.getPath());
+            setFolderTitle(child, name);
+
+            trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
+            incrementCount(createdFolders, 1L);
+            r.commit();
+            r.refresh();
+            return true;
         }
-        if (!jcrBasePath.equals(parentPath)) {
-            createFolderNode(parent, r);
-        }
-        Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
-        trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
-        setFolderTitle(child,folderPath,name);
-        incrementCount(createdFolders, 1L);
-        r.commit();
-        r.refresh();
-        return true;
     }
 
-    private void setFolderTitle(Node child,String folderPath,String title) throws RepositoryException{
-        if (!folderPath.equals(jcrBasePath)) {
+    private void setFolderTitle(Node child, String title) throws RepositoryException{
+        if (!child.getPath().equals(jcrBasePath)) {
             if(child.hasNode(JcrConstants.JCR_CONTENT)){
                 child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, title);
             }else{
@@ -358,7 +362,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return (ResourceResolver r) -> {
             createFolderNode(source.getElement().getParent(), r);
             actionManager.setCurrentItem(source.getElement().getItemName());
-            HierarchialElement el = source.getElement();
+            HierarchicalElement el = source.getElement();
             String path = source.getElement().getNodePath();
             if(null != el && el.isFile() && el.getName().contains(".") && !preserveFileName){
                 String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
@@ -392,12 +396,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
         return true;
     }
 
-    protected boolean canImportFolder(HierarchialElement element) {
+    protected boolean canImportFolder(HierarchicalElement element) {
         String name = element.getName();
         if (ignoreFolderList.contains(name.toLowerCase())) {
             return false;
         } else {
-            HierarchialElement parent = element.getParent();
+            HierarchicalElement parent = element.getParent();
             if (parent == null) {
                 return true;
             } else {
@@ -406,8 +410,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
-    protected boolean canImportContainingFolder(HierarchialElement element) {
-        HierarchialElement parent = element.getParent();
+    protected boolean canImportContainingFolder(HierarchicalElement element) {
+        HierarchicalElement parent = element.getParent();
         if (parent == null) {
             return true;
         } else {

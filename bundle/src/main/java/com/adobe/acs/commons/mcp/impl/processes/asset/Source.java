@@ -29,7 +29,7 @@ public interface Source {
 
     long getLength() throws IOException;
 
-    HierarchialElement getElement();
+    HierarchicalElement getElement();
 
     void close() throws IOException;
     

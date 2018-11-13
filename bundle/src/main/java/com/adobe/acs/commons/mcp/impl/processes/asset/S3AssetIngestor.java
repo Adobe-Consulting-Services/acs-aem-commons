@@ -124,8 +124,8 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     private void createFolders(ActionManager manager, ObjectListing listing) {
-        listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchialElement::new)
-                .filter(S3HierarchialElement::isFolder).filter(this::canImportFolder).forEach(el -> {
+        listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchicalElement::new)
+                .filter(S3HierarchicalElement::isFolder).filter(this::canImportFolder).forEach(el -> {
             manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
                 manager.setCurrentItem(el.getItemName());
                 createFolderNode(el, rr);
@@ -146,9 +146,9 @@ public class S3AssetIngestor extends AssetIngestor {
     }
 
     private void importAssets(ActionManager manager, ObjectListing listing) {
-        listing.getObjectSummaries().stream().map(S3HierarchialElement::new)
-                .filter(S3HierarchialElement::isFile).filter(this::canImportContainingFolder)
-                .map(S3HierarchialElement::getSource).forEach(ss -> {
+        listing.getObjectSummaries().stream().map(S3HierarchicalElement::new)
+                .filter(S3HierarchicalElement::isFile).filter(this::canImportContainingFolder)
+                .map(S3HierarchicalElement::getSource).forEach(ss -> {
             try {
                 if (canImportFile(ss)) {
                     manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
@@ -181,9 +181,9 @@ public class S3AssetIngestor extends AssetIngestor {
 
         final S3ObjectSummary s3ObjectSummary;
         private S3ObjectInputStream lastOpenStream;
-        final HierarchialElement element;
+        final HierarchicalElement element;
 
-        private S3Source(S3ObjectSummary s3ObjectSummary, S3HierarchialElement element) {
+        private S3Source(S3ObjectSummary s3ObjectSummary, S3HierarchicalElement element) {
             this.s3ObjectSummary = s3ObjectSummary;
             this.element = element;
         }
@@ -206,7 +206,7 @@ public class S3AssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return element;
         }
 
@@ -219,24 +219,24 @@ public class S3AssetIngestor extends AssetIngestor {
         }
     }
 
-    class S3HierarchialElement implements HierarchialElement {
+    class S3HierarchicalElement implements HierarchicalElement {
 
         final S3ObjectSummary original;
         final String negativePath;
         final String effectiveKey;
 
-        S3HierarchialElement(S3ObjectSummary original) {
+        S3HierarchicalElement(S3ObjectSummary original) {
             this(original, null);
         }
 
-        private S3HierarchialElement(S3ObjectSummary original, String negativePath) {
+        private S3HierarchicalElement(S3ObjectSummary original, String negativePath) {
             this.original = original;
             this.negativePath = negativePath != null ? negativePath : "";
             this.effectiveKey = original.getKey().substring(0, original.getKey().length() - this.negativePath.length());
         }
 
         @Override
-        public Stream<HierarchialElement> getChildren() {
+        public Stream<HierarchicalElement> getChildren() {
             throw new UnsupportedOperationException("S3 Elements do not support navigation children directly");
         }        
         
@@ -251,21 +251,21 @@ public class S3AssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getParent() {
+        public HierarchicalElement getParent() {
             if (isFolder()) {
                 String newNegativePath = getName() + "/" + this.negativePath;
                 String newEffectiveKey = original.getKey().substring(0, original.getKey().length() - newNegativePath.length());
                 if (newNegativePath.equals(original.getKey()) || newEffectiveKey.equals(s3BasePath)) {
                     return null;
                 }
-                return new S3HierarchialElement(original, newNegativePath);
+                return new S3HierarchicalElement(original, newNegativePath);
             } else {
                 String newNegativePath = getName();
                 String newEffectiveKey = original.getKey().substring(0, original.getKey().length() - newNegativePath.length());
                 if (newNegativePath.equals(original.getKey()) || newEffectiveKey.equals(s3BasePath)) {
                     return null;
                 }
-                return new S3HierarchialElement(original, newNegativePath);
+                return new S3HierarchicalElement(original, newNegativePath);
             }
         }
 
