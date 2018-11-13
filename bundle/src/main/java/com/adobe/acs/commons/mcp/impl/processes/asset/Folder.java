@@ -19,7 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.HierarchialElement;
+import com.adobe.acs.commons.mcp.impl.processes.asset.HierarchialElement;
+import java.util.stream.Stream;
 
 /**
  * Represents a folder to be imported
@@ -66,7 +67,7 @@ public class Folder implements HierarchialElement {
     }
 
     @Override
-    public AssetIngestor.Source getSource() {
+    public Source getSource() {
         throw new UnsupportedOperationException("This implementation of folder does not provide a source.");
     }
 
@@ -74,5 +75,9 @@ public class Folder implements HierarchialElement {
     public String getJcrBasePath() {
         return basePath;
     }
-    
+
+    @Override
+    public Stream<HierarchialElement> getChildren() {
+        throw new UnsupportedOperationException("Folder does not support child navigation at the moment");
+    }
 }

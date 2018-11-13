@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.HierarchialElement;
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.Source;
+import com.adobe.acs.commons.mcp.impl.processes.asset.HierarchialElement;
+import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import com.adobe.acs.commons.data.CompositeVariant;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
@@ -50,15 +51,15 @@ import org.apache.http.client.methods.HttpGet;
  */
 public class FileOrRendition implements HierarchialElement {
 
-    private final String url;
-    private final String name;
-    private final Folder folder;
+    final String url;
+    final String name;
+    final Folder folder;
     private Source fileSource;
     private final Map<String, FileOrRendition> additionalRenditions;
-    private String renditionName = null;
-    private String originalAssetName = null;
-    private Map<String, CompositeVariant> properties;
-    private ClientProvider clientProvider;
+    String renditionName = null;
+    String originalAssetName = null;
+    Map<String, CompositeVariant> properties;
+    ClientProvider clientProvider;
 
     public FileOrRendition(ClientProvider clientProvider, String name, String url, Folder folder, Map<String, CompositeVariant> data) {
         if (folder == null) {
@@ -137,11 +138,11 @@ public class FileOrRendition implements HierarchialElement {
     public String getJcrBasePath() {
         return folder.getJcrBasePath();
     }
-    
+
     public String getUrl() {
         return url;
     }
-    
+
     public Map<String, CompositeVariant> getProperties() {
         return Collections.unmodifiableMap(properties);
     }
@@ -150,9 +151,14 @@ public class FileOrRendition implements HierarchialElement {
         return properties.get(prop);
     }
 
+    @Override
+    public Stream<HierarchialElement> getChildren() {
+        throw new UnsupportedOperationException("FileOrRendition doesn't support child navigation");
+    }
+
     private class UrlConnectionSource implements Source {
 
-        private final FileOrRendition thizz;
+        final FileOrRendition thizz;
         private Long size = null;
         private URLConnection connection = null;
         private InputStream lastOpenStream = null;
@@ -212,7 +218,7 @@ public class FileOrRendition implements HierarchialElement {
 
     private class HttpConnectionSource implements Source {
 
-        private final FileOrRendition thizz;
+        final FileOrRendition thizz;
         private HttpGet lastRequest;
         private Long size = null;
         private HttpResponse connection = null;
@@ -274,7 +280,8 @@ public class FileOrRendition implements HierarchialElement {
     }
 
     private class SftpConnectionSource implements Source {
-        private final FileOrRendition thizz;
+
+        final FileOrRendition thizz;
         private final JSch jsch = new JSch();
         private Session session;
         private InputStream currentStream;
@@ -283,7 +290,7 @@ public class FileOrRendition implements HierarchialElement {
         public SftpConnectionSource(FileOrRendition thizz) {
             this.thizz = thizz;
         }
-        
+
         private Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();
@@ -304,7 +311,7 @@ public class FileOrRendition implements HierarchialElement {
             }
             return session;
         }
-        
+
         @Override
         public String getName() {
             return name;
@@ -314,17 +321,17 @@ public class FileOrRendition implements HierarchialElement {
         public InputStream getStream() throws IOException {
             try {
                 URI uri = new URI(getUrl());
-                
+
                 if (channel == null || channel.isClosed()) {
-                    channel = getSessionForHost(uri).openChannel( "sftp" );
+                    channel = getSessionForHost(uri).openChannel("sftp");
                     channel.connect();
                 }
-                
+
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
                 currentStream = sftpChannel.get(uri.getPath());
-                
+
                 return currentStream;
-                
+
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Bad URI format", ex);
@@ -333,7 +340,7 @@ public class FileOrRendition implements HierarchialElement {
                 throw new IOException("Error with connection", ex);
             } catch (SftpException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
-                throw new IOException("Error retrieving file", ex);                
+                throw new IOException("Error retrieving file", ex);
             }
         }
 
@@ -341,12 +348,12 @@ public class FileOrRendition implements HierarchialElement {
         public long getLength() throws IOException {
             try {
                 URI uri = new URI(getUrl());
-                
+
                 if (channel == null || channel.isClosed()) {
-                    channel = getSessionForHost(uri).openChannel( "sftp" );
+                    channel = getSessionForHost(uri).openChannel("sftp");
                     channel.connect();
                 }
-                
+
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
                 SftpATTRS stats = sftpChannel.lstat(uri.getPath());
                 return stats.getSize();
@@ -381,6 +388,6 @@ public class FileOrRendition implements HierarchialElement {
                 session = null;
             }
         }
-        
+
     }
 }

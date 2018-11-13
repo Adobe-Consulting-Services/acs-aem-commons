@@ -429,50 +429,5 @@ public abstract class AssetIngestor extends ProcessDefinition {
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
-    protected interface Source {
 
-        String getName();
-
-        InputStream getStream() throws IOException;
-
-        long getLength() throws IOException;
-
-        HierarchialElement getElement();
-
-        void close() throws IOException;
-
-    }
-
-    protected interface HierarchialElement {
-
-        boolean isFile();
-
-        boolean isFolder();
-
-        HierarchialElement getParent();
-
-        String getName();
-
-        String getItemName();
-
-        Source getSource();
-
-        String getJcrBasePath();
-
-        default String getNodePath() {
-            HierarchialElement parent = getParent();
-            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
-        }
-
-        default String getNodeName() {
-            String name = getName();
-            if (isFile() && name.contains(".")) {
-                return name;
-            } else if (JcrUtil.isValidName(name)) {
-                return name;
-            } else {
-                return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
-            }
-        }
-    }
 }

@@ -91,12 +91,14 @@ public class FileAssetIngestorTest {
 
         context.create().resource("/content/dam", JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         context.resourceResolver().commit();
+        tempDirectory = Files.createTempDir();
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
         ingestor.jcrBasePath = "/content/dam";
         ingestor.ignoreFileList = Collections.emptyList();
         ingestor.ignoreExtensionList = Collections.emptyList();
         ingestor.ignoreFolderList = Arrays.asList(".ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
+        ingestor.fileBasePath = tempDirectory.getAbsolutePath();
 
         doAnswer(new Answer() {
             @Override
@@ -106,8 +108,6 @@ public class FileAssetIngestorTest {
                 return null;
             }
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
-        tempDirectory = Files.createTempDir();
-        ingestor.fileBasePath = tempDirectory.getAbsolutePath();
     }
 
     @After

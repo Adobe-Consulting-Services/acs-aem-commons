@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.Source;
+import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;

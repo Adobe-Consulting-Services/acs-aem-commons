@@ -41,6 +41,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.stream.Stream;
 
 public class S3AssetIngestor extends AssetIngestor {
 
@@ -178,9 +179,9 @@ public class S3AssetIngestor extends AssetIngestor {
 
     private class S3Source implements Source {
 
-        private final S3ObjectSummary s3ObjectSummary;
+        final S3ObjectSummary s3ObjectSummary;
         private S3ObjectInputStream lastOpenStream;
-        private final HierarchialElement element;
+        final HierarchialElement element;
 
         private S3Source(S3ObjectSummary s3ObjectSummary, S3HierarchialElement element) {
             this.s3ObjectSummary = s3ObjectSummary;
@@ -220,8 +221,8 @@ public class S3AssetIngestor extends AssetIngestor {
 
     class S3HierarchialElement implements HierarchialElement {
 
-        private final S3ObjectSummary original;
-        private final String negativePath;
+        final S3ObjectSummary original;
+        final String negativePath;
         final String effectiveKey;
 
         S3HierarchialElement(S3ObjectSummary original) {
@@ -234,6 +235,11 @@ public class S3AssetIngestor extends AssetIngestor {
             this.effectiveKey = original.getKey().substring(0, original.getKey().length() - this.negativePath.length());
         }
 
+        @Override
+        public Stream<HierarchialElement> getChildren() {
+            throw new UnsupportedOperationException("S3 Elements do not support navigation children directly");
+        }        
+        
         @Override
         public boolean isFile() {
             return !isFolder();
