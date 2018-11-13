@@ -43,6 +43,51 @@ public class ThrottledTaskRunnerTest {
     private static final Logger log = LoggerFactory.getLogger(ThrottledTaskRunnerTest.class);
 
     @Test
+    public void testExecutionOrderOverflow() throws NotCompliantMBeanException, InterruptedException {
+        ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
+
+        List<Long> executions = new ArrayList<>();
+
+        for(int i=0;i<10;i++) {
+            int finalI = i;
+            ttr.scheduleWork(() -> {
+                try {
+                    // sleep to slow these down so that higher priority tasks go first
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    log.error("", e);
+                }
+                log.info("very low priority: {}", finalI);
+                executions.add(1L);
+            }, Integer.MIN_VALUE);
+        }
+
+
+        for(int i=0;i<10;i++) {
+            int finalI = i;
+            ttr.scheduleWork(() -> {
+                log.info("very high priority: {}", finalI);
+                executions.add(5L);
+            }, Integer.MAX_VALUE);
+        }
+
+        while(ttr.getActiveCount() > 0) {
+            Thread.sleep(1000);
+        }
+
+        //assert that the last 6 items in the list are all priority 1 (normal)
+        //it's hard to guarantee the exact order before that, but the general expectation is the order
+        //first 4 items are normal (4 threads execute)
+        //next 10 are high
+        //then the final 6 items
+        assertEquals("wrong number of items executed", 20, executions.size());
+        for (int i = 19; i > (19 - 6); i--) {
+            assertEquals("wrong priority for item: " + i, 1L, executions.get(i).longValue());
+        }
+
+    }
+
+    @Test
     public void testExecutionOrder() throws NotCompliantMBeanException, InterruptedException {
         ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
 
