@@ -116,14 +116,14 @@
     }
 
     function isWithinLimit(parsysEditable){
-        var children = getChildEditables(parsysEditable),
-            isWithin = true, currentLimit = "";
+        var isWithin = true, currentLimit = "";
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
         if (currentLimit === null) {
             return true;
         }
         var limit = parseInt(currentLimit);
+        var children = getChildEditables(parsysEditable);
         isWithin = children.length <= limit;
 
         if(!isWithin){
