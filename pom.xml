@@ -50,7 +50,8 @@
     <build>
         <pluginManagement>
             <plugins>
-<!--                <plugin>
+				<!-- TODO: Remove this plugin-->                
+				<plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
                     <version>${scr.plugin.version}</version>
@@ -61,7 +62,7 @@
                             <version>${sl4fj.version}</version>
                         </dependency>
                     </dependencies>
-                </plugin>-->
+                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -98,7 +99,7 @@
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>1.0.2</version>
+                    <version>0.0.24</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
