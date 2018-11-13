@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.redirectmaps.models.RedirectConfigModel;
 import com.adobe.acs.commons.redirectmaps.models.RedirectMapModel;
 import com.day.cq.commons.jcr.JcrConstants;
+import javax.servlet.WriteListener;
 
 import junitx.util.PrivateAccessor;
 
@@ -181,6 +182,16 @@ public class TestServlets {
         @Override
         public void write(int b) throws IOException {
 
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener wl) {
+            // Do nothing
         }
 
     };
