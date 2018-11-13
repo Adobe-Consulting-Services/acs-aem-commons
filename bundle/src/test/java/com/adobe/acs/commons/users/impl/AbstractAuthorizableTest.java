@@ -111,6 +111,34 @@ public class AbstractAuthorizableTest {
         }
     }
 
+    @Test
+    public void testServiceUser_AcesWithSpaces_1552() throws EnsureAuthorizableException {
+        String[] aces= new String[] {
+                "\ntype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/dam",
+                "\n  type=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content ",
+                "\n  \ttype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/projects \t",
+                "\n  \t\ttype=allow;privileges=jcr:all;path=/var/workflow \t \n",
+                "\n\n\n\n\ntype=allow;privileges=jcr:all;path=/etc/workflow\n    "
+        };
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
+        config.put(EnsureServiceUser.PROP_ACES, aces);
+
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
+
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
+        assertEquals(5, serviceUser.getAces().size());
+
+        for (Ace ace : serviceUser.getAces()) {
+            assertTrue(ace.isAllow());
+            assertFalse(ace.getContentPath().contains("\n"));
+            assertFalse(ace.getContentPath().contains("\t"));
+            assertFalse(ace.getContentPath().contains(" "));
+        }
+    }
+
     @Test(expected=EnsureAuthorizableException.class)
     public void testServiceUser_ProtectedSystemUser() throws EnsureAuthorizableException {
         Map<String, Object> config = new HashMap<String, Object>();
