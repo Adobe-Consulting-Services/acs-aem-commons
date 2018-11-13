@@ -403,7 +403,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+            <artifactId>org.apache.sling.testing.sling-mock</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -425,7 +425,7 @@
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
-            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
+            <artifactId>io.wcm.testing.aem-mock</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
