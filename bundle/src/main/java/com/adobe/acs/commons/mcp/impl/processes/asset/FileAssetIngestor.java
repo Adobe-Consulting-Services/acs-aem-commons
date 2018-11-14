@@ -200,6 +200,11 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
+        public boolean excludeBaseFolder() {
+            return true;
+        }
+
+            @Override
         public Source getSource() {
             return new FileSource(file, this);
         }
@@ -265,6 +270,11 @@ public class FileAssetIngestor extends AssetIngestor {
             this(uri);
             this.channel = channel;
             this.keepChannelOpen = holdOpen;
+        }
+
+        @Override
+        public boolean excludeBaseFolder() {
+            return true;
         }
 
         private ChannelSftp openChannel() throws URISyntaxException, JSchException {

@@ -73,7 +73,8 @@ public class FileAssetIngestorUtilitiesTest {
         assertFalse(parent.isFile());
         assertEquals("folder1", parent.getName());
 
-        assertNull(parent.getParent());
+        assertNotNull(parent.getParent());
+        assertNull(parent.getParent().getParent());
     }
 
     @Test
@@ -105,7 +106,8 @@ public class FileAssetIngestorUtilitiesTest {
         assertFalse(parent.isFile());
         assertEquals("folder1", parent.getName());
 
-        assertNull(parent.getParent());
+        assertNotNull(parent.getParent());
+        assertNull(parent.getParent().getParent());
     }
 
     @Test
@@ -118,7 +120,8 @@ public class FileAssetIngestorUtilitiesTest {
         assertTrue(el.isFile());
         assertEquals("image.png", el.getName());
 
-        assertNull(el.getParent());
+        assertNotNull(el.getParent());
+        assertNull(el.getParent().getParent());
     }
 
     @Test
@@ -131,7 +134,8 @@ public class FileAssetIngestorUtilitiesTest {
         assertFalse(el.isFile());
         assertEquals("folder1", el.getName());
 
-        assertNull(el.getParent());
+        assertNotNull(el.getParent());
+        assertNull(el.getParent().getParent());
     }
 
 }

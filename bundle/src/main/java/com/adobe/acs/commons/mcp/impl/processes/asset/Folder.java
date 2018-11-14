@@ -46,11 +46,6 @@ public class Folder implements HierarchicalElement {
     }
 
     @Override
-    public boolean isFolder() {
-        return true;
-    }
-
-    @Override
     public HierarchicalElement getParent() {
         return parent;
     }

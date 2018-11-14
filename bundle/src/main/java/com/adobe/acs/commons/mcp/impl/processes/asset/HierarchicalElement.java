@@ -18,6 +18,7 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.commons.jcr.JcrUtil;
+
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +28,10 @@ import java.util.stream.Stream;
  */
 public interface HierarchicalElement {
 
+    default boolean excludeBaseFolder() {
+        return false;
+    }
+
     boolean isFile();
 
     default boolean isFolder() {
@@ -34,7 +39,7 @@ public interface HierarchicalElement {
     }
 
     HierarchicalElement getParent();
-    
+
     Stream<HierarchicalElement> getChildren();
 
     String getName();
@@ -44,10 +49,14 @@ public interface HierarchicalElement {
     Source getSource();
 
     String getJcrBasePath();
-    
+
     default String getNodePath() {
         HierarchicalElement parent = getParent();
-        return parent == null ? getJcrBasePath() : parent.getNodePath() + "/" + getNodeName();
+        if (excludeBaseFolder()) {
+            return parent == null ? getJcrBasePath() : parent.getNodePath() + "/" + getNodeName();
+        } else {
+            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
+        }
     }
 
     default String getNodeName() {
@@ -60,17 +69,17 @@ public interface HierarchicalElement {
             return JcrUtil.createValidName(name, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING, "-");
         }
     }
-    
+
     default Stream<HierarchicalElement> getFileChildren() {
         return getChildren().filter(HierarchicalElement::isFile);
     }
-    
+
     default Stream<HierarchicalElement> getFolderChildren() {
         return getChildren().filter(HierarchicalElement::isFolder);
     }
 
     default void visitAllFolders(CheckedConsumer<HierarchicalElement> visitor,
-            CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFunction) throws Exception {
+                                 CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFunction) throws Exception {
         LinkedList<HierarchicalElement> nodes = new LinkedList<>();
         nodes.add(this);
         while (!nodes.isEmpty()) {
@@ -79,10 +88,10 @@ public interface HierarchicalElement {
             visitor.accept(node);
         }
     }
-    
+
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor,
-            CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFolderFunction,
-            CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFileFunction) throws Exception {
+                               CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFolderFunction,
+                               CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFileFunction) throws Exception {
         LinkedList<HierarchicalElement> nodes = new LinkedList<>();
         nodes.add(this);
         while (!nodes.isEmpty()) {
@@ -92,12 +101,12 @@ public interface HierarchicalElement {
                 visitor.accept(child);
             }
         }
-    }    
-    
+    }
+
     default void visitAllFolders(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
         visitAllFolders(visitor, HierarchicalElement::getFolderChildren);
     }
-    
+
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
         visitAllFiles(visitor, HierarchicalElement::getFolderChildren, HierarchicalElement::getFileChildren);
     }

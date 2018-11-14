@@ -126,11 +126,6 @@ public class FileAssetIngestorTest {
 
         assertFalse(context.resourceResolver().hasChanges());
         assertFalse(context.resourceResolver().getResource("/content/dam").hasChildren());
-
-        verify(actionManager).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(1, currentItemCaptor.getAllValues().size());
-        assertEquals(tempDirectory.getAbsolutePath(), currentItemCaptor.getValue());
-
     }
 
     @Test
