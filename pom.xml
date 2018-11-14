@@ -44,7 +44,7 @@
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
-        <scr.plugin.version>1.26.0</scr.plugin.version>
+        <scr.plugin.version>1.17.0</scr.plugin.version>
     </properties>
 
     <build>
