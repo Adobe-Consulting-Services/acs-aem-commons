@@ -29,6 +29,11 @@ public interface CheckedSupplier<T> {
     static <T> CheckedSupplier<T> fromSupplier(Supplier<T> supplier) {
         return supplier::get;
     }
-    
-    public T get() throws Exception;
+
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
+    T get() throws Exception;
 }

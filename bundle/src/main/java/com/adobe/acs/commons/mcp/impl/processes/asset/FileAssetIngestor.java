@@ -430,11 +430,11 @@ public class FileAssetIngestor extends AssetIngestor {
         public InputStream getStream() throws IOException {
             try {
                 lastChannel = channel.get();
-                lastStream = lastChannel.get(element.getNodePath());
+                lastStream = lastChannel.get(element.getItemName());
             } catch (Exception ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 close();
-                throw new IOException("Error in retrieving file", ex);
+                throw new IOException("Error in retrieving file " + element.getItemName(), ex);
             }
             return lastStream;
         }
