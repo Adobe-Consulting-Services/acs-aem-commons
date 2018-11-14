@@ -26,20 +26,23 @@ import java.util.stream.Stream;
  */
 public class Folder implements HierarchicalElement {
     HierarchicalElement parent;
+    // Note: in this implementation this is the url of the requested asset that generated this folder
+    String sourcePath;
     String name;
     String basePath;
 
-    public Folder(String name, Folder parent) {
+    public Folder(String name, Folder parent, String requestedPath) {
         this.name = name;
         this.parent = parent;
+        this.sourcePath = requestedPath;
     }
     
-    public Folder(String name, String basePath) {
+    public Folder(String name, String basePath, String requestedPath) {
         this.name = name;
         this.basePath = basePath;
+        this.sourcePath = requestedPath;
     }
-    
-    
+
     @Override
     public boolean isFile() {
         return false;
@@ -73,5 +76,10 @@ public class Folder implements HierarchicalElement {
     @Override
     public Stream<HierarchicalElement> getChildren() {
         throw new UnsupportedOperationException("Folder does not support child navigation at the moment");
+    }
+
+    @Override
+    public String getSourcePath() {
+        return sourcePath;
     }
 }

@@ -362,7 +362,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
             createFolderNode(source.getElement().getParent(), r);
-            actionManager.setCurrentItem(source.getElement().getItemName());
+            actionManager.setCurrentItem(source.getElement().getSourcePath());
             HierarchicalElement el = source.getElement();
             String path = source.getElement().getNodePath();
             if(null != el && el.isFile() && el.getName().contains(".") && !preserveFileName){

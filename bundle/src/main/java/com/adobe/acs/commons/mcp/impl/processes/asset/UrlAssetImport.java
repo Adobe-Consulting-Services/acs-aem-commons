@@ -220,7 +220,7 @@ public class UrlAssetImport extends AssetIngestor {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             folders.values().forEach(f
                     -> manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
-                        manager.setCurrentItem(f.getItemName());
+                        manager.setCurrentItem(f.getSourcePath());
                         createFolderNode(f, rr);
                     }))
             );
@@ -239,7 +239,7 @@ public class UrlAssetImport extends AssetIngestor {
                         manager.deferredWithResolver(Actions.retry(5, 100, importAsset(file.getSource(), manager)));
                     } else if (file.getSource().getLength() < 0) {
                         incrementCount(skippedFiles, 1);
-                        throw new IOException("Unable to download " + file.getUrl());
+                        throw new IOException("Unable to download " + file.getSourcePath());
                     } else {
                         incrementBytes(
                                 trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file of either file size or extension", 0L),
@@ -345,8 +345,8 @@ public class UrlAssetImport extends AssetIngestor {
                 String treePath = currentPath + "/" + parts[i];
                 if (!folders.containsKey(treePath)) {
                     Folder folder = parent == null
-                            ? new Folder(parts[i], jcrBasePath)
-                            : new Folder(parts[i], parent);
+                            ? new Folder(parts[i], jcrBasePath, assetData.get(SOURCE).toString())
+                            : new Folder(parts[i], parent, assetData.get(SOURCE).toString());
                     folders.put(treePath, folder);
                     parent = folder;
                 } else {

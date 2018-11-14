@@ -45,6 +45,8 @@ public interface HierarchicalElement {
     String getName();
 
     String getItemName();
+    
+    String getSourcePath();
 
     Source getSource();
 

@@ -137,7 +137,8 @@ public class FileOrRendition implements HierarchicalElement {
         return folder.getJcrBasePath();
     }
 
-    public String getUrl() {
+    @Override
+    public String getSourcePath() {
         return url;
     }
 
@@ -318,7 +319,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public InputStream getStream() throws IOException {
             try {
-                URI uri = new URI(getUrl());
+                URI uri = new URI(getSourcePath());
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -345,7 +346,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public long getLength() throws IOException {
             try {
-                URI uri = new URI(getUrl());
+                URI uri = new URI(getSourcePath());
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");

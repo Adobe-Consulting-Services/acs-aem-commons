@@ -42,7 +42,7 @@ public class FileOrRenditionTest {
     
     @Before
     public void setUp() {
-        testFolder = new Folder("test", "/");
+        testFolder = new Folder("test", "/", "");
         clientProvider = new ClientProvider();
         clientProvider.setHttpClientSupplier(()->null);
     }

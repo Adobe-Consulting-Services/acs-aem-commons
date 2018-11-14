@@ -105,7 +105,7 @@ public class FileAssetIngestor extends AssetIngestor {
             baseFolder.visitAllFolders(folder -> {
                 if (canImportFolder(folder)) {
                     manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
-                        manager.setCurrentItem(folder.getItemName());
+                        manager.setCurrentItem(folder.getSourcePath());
                         createFolderNode(folder, rr);
                     }));
                 }
@@ -198,10 +198,15 @@ public class FileAssetIngestor extends AssetIngestor {
         FileHierarchicalElement(File f) {
             this.file = f;
         }
+        
+        @Override 
+        public String getSourcePath() {
+            return file.getAbsolutePath();
+        }
 
         @Override
         public boolean excludeBaseFolder() {
-            return true;
+            return getParent() == null && isFolder();
         }
 
             @Override
@@ -211,7 +216,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public String getItemName() {
-            return file.getAbsolutePath();
+            return file.getName();
         }
 
         @Override
@@ -257,11 +262,13 @@ public class FileAssetIngestor extends AssetIngestor {
         ChannelSftp channel;
         boolean retrieved = false;
         URI uri;
+        String sourcePath;
         long size;
         Source source;
         boolean keepChannelOpen = false;
 
         SftpHierarchicalElement(String uri) throws URISyntaxException, JSchException {
+            this.sourcePath = uri;
             this.uri = new URI(uri);
             this.path = this.uri.getPath();
         }
@@ -273,8 +280,13 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
+        public String getSourcePath() {
+            return sourcePath;
+        }
+        
+        @Override
         public boolean excludeBaseFolder() {
-            return true;
+            return getParent() == null && isFolder();
         }
 
         private ChannelSftp openChannel() throws URISyntaxException, JSchException {
@@ -332,9 +344,9 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public HierarchicalElement getParent() {
-            if (parent == null && !jcrBasePath.endsWith(path)) {
+            if (parent == null && !fileBasePath.equals(getSourcePath())) {
                 try {
-                    parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(path, "/"));
+                    parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(getSourcePath(), "/"));
                 } catch (URISyntaxException | JSchException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -346,10 +358,10 @@ public class FileAssetIngestor extends AssetIngestor {
         public Stream<HierarchicalElement> getChildren() {
             try {
                 openChannel();
-                Vector<ChannelSftp.LsEntry> children = channel.ls(getItemName());
+                Vector<ChannelSftp.LsEntry> children = channel.ls(path);
                 return children.stream().map((ChannelSftp.LsEntry entry) -> {
                     try {
-                        String childPath = getItemName() + "/" + entry.getFilename();
+                        String childPath = getSourcePath() + "/" + entry.getFilename();
                         return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
                     } catch (URISyntaxException | JSchException ex) {
                         Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
@@ -368,12 +380,12 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public String getName() {
-            return StringUtils.substringAfterLast(uri.getPath(), "/");
+            return StringUtils.substringAfterLast(path, "/");
         }
 
         @Override
         public String getItemName() {
-            return uri.getPath();
+            return path;
         }
 
         @Override

@@ -303,5 +303,10 @@ public class S3AssetIngestor extends AssetIngestor {
         public String getJcrBasePath() {
             return jcrBasePath;
         }
+
+        @Override
+        public String getSourcePath() {
+            return getItemName();
+        }
     }
 }
