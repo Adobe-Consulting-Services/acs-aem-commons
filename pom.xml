@@ -50,8 +50,8 @@
     <build>
         <pluginManagement>
             <plugins>
-				<!-- TODO: Remove this plugin-->                
-				<plugin>
+                <!-- TODO: Remove this plugin-->                
+                <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
                     <version>${scr.plugin.version}</version>
@@ -66,13 +66,14 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>4.1.0</version>
+                    <!-- TODO: Determine why baseline doesn't work right from 4.0.0 onward -->
+                    <version>3.5.1</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
                             <id>baseline</id>
                             <goals>
-                                <goal>baseline</goal>
+                                <goal>baseline</goal>   
                             </goals>
                         </execution>
                     </executions>
@@ -489,7 +490,7 @@
                 </plugins>
                 <pluginManagement>
                     <plugins>
-<!--                        <plugin>
+                        <plugin>
                             <groupId>org.apache.felix</groupId>
                             <artifactId>maven-scr-plugin</artifactId>
                             <version>${scr.plugin.version}</version>
@@ -506,7 +507,7 @@
                                     <classifier>runtime</classifier>
                                 </dependency>
                             </dependencies>
-                        </plugin>-->
+                        </plugin>
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>animal-sniffer-maven-plugin</artifactId>

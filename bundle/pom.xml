@@ -28,7 +28,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.26.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-descriptor</id>
@@ -85,7 +84,7 @@
                 <artifactId>maven-sling-plugin</artifactId>
                 <configuration>
                     <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/apps/acs-commons/install</slingUrl>
-                    <usePut>true</usePut>
+                    <deploymentMethod>WebDAV</deploymentMethod>
                 </configuration>
             </plugin>
             <plugin>
