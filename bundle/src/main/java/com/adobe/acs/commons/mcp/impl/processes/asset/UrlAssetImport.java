@@ -106,9 +106,25 @@ public class UrlAssetImport extends AssetIngestor {
             options = ("default=30000")
     )
     private int timeout = 30000;
+    
+    @FormField(
+            name = "Username",
+            description = "Username for connections that require login",
+            required = false
+    )
+    private String username = null;
+
+        @FormField(
+            name = "Password",
+            description = "Password for connections that require login",
+            required = false
+    )
+    private String password = null;
 
     transient Set<FileOrRendition> files;
     transient Map<String, Folder> folders = new TreeMap<>((a, b) -> b.compareTo(a));
+    
+    private ClientProvider clientProvider = new ClientProvider();
 
     Spreadsheet fileData;
 
@@ -130,6 +146,9 @@ public class UrlAssetImport extends AssetIngestor {
                             .build()
             );
             httpClient = clientBuilder.build();
+            clientProvider.setHttpClientSupplier(this::getHttpClient);
+            clientProvider.setUsername(username);
+            clientProvider.setPassword(password);
         }
     }
 
@@ -201,7 +220,7 @@ public class UrlAssetImport extends AssetIngestor {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             folders.values().forEach(f
                     -> manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
-                        manager.setCurrentItem(f.getItemName());
+                        manager.setCurrentItem(f.getSourcePath());
                         createFolderNode(f, rr);
                     }))
             );
@@ -220,7 +239,7 @@ public class UrlAssetImport extends AssetIngestor {
                         manager.deferredWithResolver(Actions.retry(5, 100, importAsset(file.getSource(), manager)));
                     } else if (file.getSource().getLength() < 0) {
                         incrementCount(skippedFiles, 1);
-                        throw new IOException("Unable to download " + file.getUrl());
+                        throw new IOException("Unable to download " + file.getSourcePath());
                     } else {
                         incrementBytes(
                                 trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file of either file size or extension", 0L),
@@ -326,8 +345,8 @@ public class UrlAssetImport extends AssetIngestor {
                 String treePath = currentPath + "/" + parts[i];
                 if (!folders.containsKey(treePath)) {
                     Folder folder = parent == null
-                            ? new Folder(parts[i], jcrBasePath)
-                            : new Folder(parts[i], parent);
+                            ? new Folder(parts[i], jcrBasePath, assetData.get(SOURCE).toString())
+                            : new Folder(parts[i], parent, assetData.get(SOURCE).toString());
                     folders.put(treePath, folder);
                     parent = folder;
                 } else {
@@ -349,7 +368,7 @@ public class UrlAssetImport extends AssetIngestor {
         }
         String name = source.substring(source.lastIndexOf('/') + 1);
         Folder folder = extractFolder(assetData);
-        FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
+        FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
                 assetData.get(RENDITION_NAME) == null ? null : assetData.get(RENDITION_NAME).toString(),

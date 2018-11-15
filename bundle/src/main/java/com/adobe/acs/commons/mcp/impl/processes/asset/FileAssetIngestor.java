@@ -22,24 +22,38 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.actions.Actions;
+import com.adobe.acs.commons.functions.CheckedSupplier;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
 import com.day.cq.commons.jcr.JcrUtil;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Hashtable;
+import java.util.Objects;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
+
 /**
- * Asset Ingestor reads a directory structure recursively and imports it as-is into AEM.
+ * Asset Ingestor reads a directory structure recursively and imports it as-is
+ * into AEM.
  */
 public class FileAssetIngestor extends AssetIngestor {
 
@@ -49,20 +63,32 @@ public class FileAssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Source",
-            description = "Source folder for content ingestion",
-            hint = "/var/mycontent, /tmp, /mnt/all_the_things, ...",
+            description = "Source folder for content ingestion which can be a local folder or SFTP url with user/password",
+            hint = "/var/mycontent, /mnt/all_the_things, sftp://user:password@host[:port]/base/path...",
             required = true
-    )    
+    )
     String fileBasePath;
-    File baseFolder;
-    
+    HierarchicalElement baseFolder;
+
     @Override
     public void init() throws RepositoryException {
-        baseFolder = new File(fileBasePath);
-        if (!baseFolder.exists()) {
-            throw new RepositoryException("Source folder does not exist!");
+        if (fileBasePath.toLowerCase().startsWith("sftp://")) {
+            try {
+                baseFolder = new SftpHierarchicalElement(fileBasePath);
+                baseFolder.isFolder(); // Forces a login and check status of base folder
+            } catch (JSchException | URISyntaxException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                throw new RepositoryException("Unable to process URL!");
+            }
+        } else {
+            File base = new File(fileBasePath);
+            if (!base.exists()) {
+                throw new RepositoryException("Source folder does not exist!");
+            }
+            baseFolder = new FileHierarchicalElement(base);
         }
         super.init();
+
     }
 
     @Override
@@ -71,59 +97,69 @@ public class FileAssetIngestor extends AssetIngestor {
         instance.defineCriticalAction("Create Folders", rr, this::createFolders);
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
     }
-    
+
     void createFolders(ActionManager manager) throws IOException {
-        manager.deferredWithResolver(r->{
+        manager.deferredWithResolver(r -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(Path::toFile).filter(f -> !f.equals(baseFolder))
-                    .map(FileHierarchialElement::new).filter(FileHierarchialElement::isFolder).filter(this::canImportFolder).forEach(f->{
-                manager.deferredWithResolver(Actions.retry(10, 100, rr-> {
-                    manager.setCurrentItem(f.getItemName());
-                    createFolderNode(f, rr);
-                }));
+            baseFolder.visitAllFolders(folder -> {
+                if (canImportFolder(folder)) {
+                    manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+                        manager.setCurrentItem(folder.getSourcePath());
+                        createFolderNode(folder, rr);
+                    }));
+                }
             });
         });
     }
 
     void importAssets(ActionManager manager) throws IOException {
-        manager.deferredWithResolver(rr->{
+        manager.deferredWithResolver(rr -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, rr.adaptTo(Session.class), true);
             manager.setCurrentItem(fileBasePath);
-            Files.walk(baseFolder.toPath()).map(FileHierarchialElement::new).filter(FileHierarchialElement::isFile)
-                    .filter(this::canImportContainingFolder).map(FileHierarchialElement::getSource).forEach(fs->{
-                try {
-                    if (canImportFile(fs)) {
-                        manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fs, manager)));
-                    } else {
-                        incrementCount(skippedFiles, 1);
-                        trackDetailedActivity(fs.getName(), "Skip", "Skipping file", 0L);
-                    }
-                } catch (IOException ex) {
-                    Failure failure = new Failure();
-                    failure.setException(ex);
-                    failure.setNodePath(fs.getElement().getNodePath());
-                    manager.getFailureList().add(failure);
-                } finally {
-                    try {
-                        fs.close();
-                    } catch (IOException ex) {
-                        Failure failure = new Failure();
-                        failure.setException(ex);
-                        failure.setNodePath(fs.getElement().getNodePath());
-                        manager.getFailureList().add(failure);
+            baseFolder.visitAllFiles(file -> {
+                if (canImportContainingFolder(file)) {
+                    Source fileSource = file.getSource();
+                    if (canImportFile(fileSource)) {
+                        addFileImportTask(fileSource, manager);
                     }
                 }
-            });        
+            });
         });
     }
 
+    private void addFileImportTask(Source fileSource, ActionManager manager) {
+        try {
+            if (canImportFile(fileSource)) {
+                manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fileSource, manager)));
+            } else {
+                incrementCount(skippedFiles, 1);
+                trackDetailedActivity(fileSource.getName(), "Skip", "Skipping file", 0L);
+            }
+        } catch (IOException ex) {
+            Failure failure = new Failure();
+            failure.setException(ex);
+            failure.setNodePath(fileSource.getElement().getNodePath());
+            manager.getFailureList().add(failure);
+        } finally {
+            try {
+                fileSource.close();
+            } catch (IOException ex) {
+                Failure failure = new Failure();
+                failure.setException(ex);
+                failure.setNodePath(fileSource.getElement().getNodePath());
+                manager.getFailureList().add(failure);
+            }
+        }
+    }
+
     private class FileSource implements Source {
-        private final File file;
-        private final HierarchialElement element;
+
+        final File file;
+        final HierarchicalElement element;
         private InputStream lastOpenStream;
 
-        private FileSource(File f, FileHierarchialElement el) {
+        private FileSource(File f, FileHierarchicalElement el) {
             this.file = f;
             this.element = el;
         }
@@ -146,10 +182,10 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getElement() {
+        public HierarchicalElement getElement() {
             return element;
         }
-        
+
         @Override
         public void close() throws IOException {
             if (lastOpenStream != null) {
@@ -159,17 +195,22 @@ public class FileAssetIngestor extends AssetIngestor {
         }
     }
 
-    class FileHierarchialElement implements HierarchialElement {
+    class FileHierarchicalElement implements HierarchicalElement {
 
-        private final File file;
+        final File file;
 
-        FileHierarchialElement(File f) {
+        FileHierarchicalElement(File f) {
             this.file = f;
         }
 
-        @SuppressWarnings("squid:S1144")
-        private FileHierarchialElement(Path p) {
-            this(p.toFile());
+        @Override
+        public String getSourcePath() {
+            return file.getAbsolutePath();
+        }
+
+        @Override
+        public boolean excludeBaseFolder() {
+            return getParent() == null && isFolder();
         }
 
         @Override
@@ -179,7 +220,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public String getItemName() {
-            return file.getAbsolutePath();
+            return file.getName();
         }
 
         @Override
@@ -188,12 +229,12 @@ public class FileAssetIngestor extends AssetIngestor {
         }
 
         @Override
-        public HierarchialElement getParent() {
+        public HierarchicalElement getParent() {
             File parent = file.getParentFile();
-            if (parent.equals(baseFolder)) {
+            if (parent == null || file.getAbsolutePath().equals(fileBasePath)) {
                 return null;
             }
-            return new FileHierarchialElement(file.getParentFile());
+            return new FileHierarchicalElement(file.getParentFile());
         }
 
         @Override
@@ -210,6 +251,224 @@ public class FileAssetIngestor extends AssetIngestor {
         public String getJcrBasePath() {
             return jcrBasePath;
         }
+
+        @Override
+        public Stream<HierarchicalElement> getChildren() {
+            return Stream.of(file.listFiles()).map(FileHierarchicalElement::new);
+        }
     }
 
+    class SftpHierarchicalElement implements HierarchicalElement {
+
+        boolean isFile;
+        HierarchicalElement parent;
+        String path;
+        ChannelSftp channel;
+        boolean retrieved = false;
+        URI uri;
+        String sourcePath;
+        long size;
+        Source source;
+        boolean keepChannelOpen = false;
+
+        SftpHierarchicalElement(String uri) throws URISyntaxException, JSchException {
+            this.sourcePath = uri;
+            this.uri = new URI(uri);
+            this.path = this.uri.getPath();
+        }
+
+        private SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
+            this(uri);
+            this.channel = channel;
+            this.keepChannelOpen = holdOpen;
+        }
+
+        @Override
+        public String getSourcePath() {
+            return sourcePath;
+        }
+
+        @Override
+        public boolean excludeBaseFolder() {
+            return getParent() == null && isFolder();
+        }
+
+        @SuppressWarnings("squid:S1149")
+        private ChannelSftp openChannel() throws URISyntaxException, JSchException {
+            if (channel == null || !channel.isConnected()) {
+                JSch jsch = new JSch();
+                int port = uri.getPort() <= 0 ? 22 : uri.getPort();
+                String userInfo = uri.getUserInfo();
+                String username = StringUtils.substringBefore(userInfo, ":");
+                String password = StringUtils.substringAfter(userInfo, ":");
+
+                com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
+                Hashtable props = new Hashtable();
+                props.put("StrictHostKeyChecking", "no");
+                session.setConfig(props);
+                session.setPassword(password);
+                session.connect();
+                channel = (ChannelSftp) session.openChannel("sftp");
+                channel.connect();
+                // If this object opened the channel it should probably be the one closing it too
+                keepChannelOpen = false;
+            }
+            return channel;
+        }
+
+        private void closeChannel() {
+            if (channel != null) {
+                channel.disconnect();
+                channel.getSession().disconnect();
+            }
+            channel = null;
+        }
+
+        private void retrieveDetails() throws URISyntaxException, JSchException, SftpException {
+            if (!retrieved) {
+                openChannel();
+                SftpATTRS attributes = channel.lstat(path);
+                isFile = !attributes.isDir();
+                size = attributes.getSize();
+                if (!keepChannelOpen) {
+                    closeChannel();
+                }
+            }
+            retrieved = true;
+        }
+
+        @Override
+        public boolean isFile() {
+            try {
+                retrieveDetails();
+            } catch (URISyntaxException | JSchException | SftpException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return isFile;
+        }
+
+        @Override
+        public HierarchicalElement getParent() {
+            if (parent == null && !fileBasePath.equals(getSourcePath())) {
+                try {
+                    parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(getSourcePath(), "/"));
+                } catch (URISyntaxException | JSchException ex) {
+                    Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return parent;
+        }
+
+        @SuppressWarnings("squid:S1149")
+        @Override
+        public Stream<HierarchicalElement> getChildren() {
+            try {
+                openChannel();
+                Vector<ChannelSftp.LsEntry> children = channel.ls(path);
+                return children.stream().map(this::getChildFromEntry).filter(Objects::nonNull);
+            } catch (URISyntaxException | JSchException | SftpException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                return Stream.empty();
+            } finally {
+                if (!keepChannelOpen) {
+                    closeChannel();
+                }
+            }
+        }
+
+        private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
+            try {
+                String childPath = getSourcePath() + "/" + entry.getFilename();
+                return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
+            } catch (URISyntaxException | JSchException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
+        }
+
+        @Override
+        public String getName() {
+            return StringUtils.substringAfterLast(path, "/");
+        }
+
+        @Override
+        public String getItemName() {
+            return path;
+        }
+
+        @Override
+        public Source getSource() {
+            if (source == null) {
+                try {
+                    retrieveDetails();
+                    source = new SftpSource(size, this::openChannel, this);
+                } catch (URISyntaxException | JSchException | SftpException ex) {
+                    Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return source;
+        }
+
+        @Override
+        public String getJcrBasePath() {
+            return jcrBasePath;
+        }
+    }
+
+    public static class SftpSource implements Source {
+
+        Long length;
+        CheckedSupplier<ChannelSftp> channel;
+        InputStream lastStream;
+        ChannelSftp lastChannel;
+        HierarchicalElement element;
+
+        public SftpSource(long length, CheckedSupplier<ChannelSftp> channel, HierarchicalElement elem) {
+            this.channel = channel;
+            this.length = length;
+            this.element = elem;
+        }
+
+        @Override
+        public String getName() {
+            return element.getName();
+        }
+
+        @Override
+        public InputStream getStream() throws IOException {
+            try {
+                lastChannel = channel.get();
+                lastStream = lastChannel.get(element.getItemName());
+            } catch (Exception ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                close();
+                throw new IOException("Error in retrieving file " + element.getItemName(), ex);
+            }
+            return lastStream;
+        }
+
+        @Override
+        public long getLength() throws IOException {
+            return length;
+        }
+
+        @Override
+        public HierarchicalElement getElement() {
+            return element;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (lastStream != null) {
+                lastStream.close();
+                lastStream = null;
+            }
+
+            if (lastChannel != null) {
+                lastChannel.disconnect();
+                lastChannel.getSession().disconnect();
+                lastChannel = null;
+            }
+        }
+    }
 }

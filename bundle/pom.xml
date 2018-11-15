@@ -28,7 +28,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.26.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-descriptor</id>
@@ -50,7 +49,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
                             sun.misc.*;resolution:=optional,
@@ -85,7 +84,7 @@
                 <artifactId>maven-sling-plugin</artifactId>
                 <configuration>
                     <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/apps/acs-commons/install</slingUrl>
-                    <usePut>true</usePut>
+                    <deploymentMethod>WebDAV</deploymentMethod>
                 </configuration>
             </plugin>
             <plugin>
@@ -322,6 +321,12 @@
             <version>1.10.76</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.23</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -391,12 +396,12 @@
             <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
-		<dependency> 
-			<artifactId>jackrabbit-api</artifactId> 
-			<version>2.16.3</version> 
-			<groupId>org.apache.jackrabbit</groupId> 
-			<scope>test</scope> 
-		</dependency>
+        <dependency> 
+            <artifactId>jackrabbit-api</artifactId> 
+            <version>2.16.3</version> 
+            <groupId>org.apache.jackrabbit</groupId> 
+            <scope>test</scope> 
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-imaging</artifactId>
@@ -509,7 +514,7 @@
         </dependency>
 
 
-        <!--  Build Dependencies -->
+        <!--  Build Dependencies -->        
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>

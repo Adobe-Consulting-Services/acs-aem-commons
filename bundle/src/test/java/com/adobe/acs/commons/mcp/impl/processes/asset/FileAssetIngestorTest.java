@@ -25,6 +25,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
+import com.jcraft.jsch.JSchException;
 import org.apache.commons.io.FileUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
@@ -48,6 +49,7 @@ import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -91,12 +93,14 @@ public class FileAssetIngestorTest {
 
         context.create().resource("/content/dam", JcrConstants.JCR_PRIMARYTYPE, "sling:Folder");
         context.resourceResolver().commit();
+        tempDirectory = Files.createTempDir();
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
         ingestor.jcrBasePath = "/content/dam";
         ingestor.ignoreFileList = Collections.emptyList();
         ingestor.ignoreExtensionList = Collections.emptyList();
         ingestor.ignoreFolderList = Arrays.asList(".ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
+        ingestor.fileBasePath = tempDirectory.getAbsolutePath();
 
         doAnswer(new Answer() {
             @Override
@@ -106,8 +110,6 @@ public class FileAssetIngestorTest {
                 return null;
             }
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
-        tempDirectory = Files.createTempDir();
-        ingestor.fileBasePath = tempDirectory.getAbsolutePath();
     }
 
     @After
@@ -126,11 +128,6 @@ public class FileAssetIngestorTest {
 
         assertFalse(context.resourceResolver().hasChanges());
         assertFalse(context.resourceResolver().getResource("/content/dam").hasChildren());
-
-        verify(actionManager).setCurrentItem(currentItemCaptor.capture());
-        assertEquals(1, currentItemCaptor.getAllValues().size());
-        assertEquals(tempDirectory.getAbsolutePath(), currentItemCaptor.getValue());
-
     }
 
     @Test
@@ -143,6 +140,8 @@ public class FileAssetIngestorTest {
         File folder3 = mkdir(folder2, "folder3");
         addFile(folder3, "image.png", "/img/test.png");
 
+        assertNotNull(context.resourceResolver().getResource("/content/dam"));
+
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -151,9 +150,9 @@ public class FileAssetIngestorTest {
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2"));
         assertNotNull(context.resourceResolver().getResource("/content/dam/folder2/folder3"));
 
-        verify(actionManager, times(4)).setCurrentItem(currentItemCaptor.capture());
+        verify(actionManager, atLeast(4)).setCurrentItem(currentItemCaptor.capture());
         assertThat(currentItemCaptor.getAllValues(),
-                containsInAnyOrder(tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()));
+                containsInAnyOrder(tempDirectory.getAbsolutePath(), tempDirectory.getAbsolutePath(), folder1.getAbsolutePath(), folder2.getAbsolutePath(), folder3.getAbsolutePath()));
     }
 
 
@@ -264,6 +263,27 @@ public class FileAssetIngestorTest {
         File newDir = new File(dir, name);
         newDir.mkdir();
         return newDir;
+    }
+    
+    @Test
+    public void testSftpStructures() throws URISyntaxException, JSchException {
+        String baseUri = "sftp://user:password@host/test/path";
+        ingestor.fileBasePath = baseUri;
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(baseUri);
+        elem1.isFile = true;
+        assertNull(elem1.getParent());
+        assertEquals(baseUri, elem1.getSourcePath());
+        // File should be a child node
+        assertEquals("/content/dam/path", elem1.getNodePath());
+        assertEquals("path", elem1.getNodeName());
+
+        FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(baseUri);
+        elem1.isFile = false;
+        assertNull(elem2.getParent());
+        assertEquals(baseUri, elem2.getSourcePath());
+        // Folder should map to the root folder
+        assertEquals("/content/dam", elem2.getNodePath());
+        assertEquals("path", elem2.getNodeName());
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {
