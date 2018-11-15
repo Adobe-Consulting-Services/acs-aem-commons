@@ -58,7 +58,7 @@ public class DataImporter extends ProcessDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataImporter.class);
     private static final String PATH = "path";
-    private boolean enableHeaderNameConversion = false;
+    private boolean enableHeaderNameConversion = true;
 
     public enum MergeMode {
         CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
