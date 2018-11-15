@@ -50,7 +50,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
     private static final String CONFIG_SCOPE_PATHS = "scopePaths";
 
     @Override
-    public ProgressCheck newInstance(final JSONObject jsonObject) throws Exception {
+    public ProgressCheck newInstance(final JSONObject jsonObject) {
         final String libsPathPrefix = jsonObject.optString(CONFIG_LIBS_PATH_PREFIX, LIBS_PATH_PREFIX);
         final Violation.Severity severity = Violation.Severity.valueOf(jsonObject.optString(CONFIG_SEVERITY,
                 Violation.Severity.MAJOR.name()).toUpperCase());
@@ -139,6 +139,9 @@ public final class ContentClassifications implements ProgressCheckFactory {
             final Node leaf = getLibsLeaf(session, libsPath);
             if (leaf != null) {
                 final AreaType leafArea = AreaType.fromNode(leaf);
+                if (leafArea == AreaType.FINAL && libsPath.startsWith(leaf.getPath() + "/")) {
+                    return Optional.of(String.format("%s is implicitly marked %s", libsPath, AreaType.INTERNAL));
+                }
                 if (!allowedAreas.contains(leafArea)) {
                     return Optional.of(String.format("%s is marked %s", leaf.getPath(), leafArea));
                 }
