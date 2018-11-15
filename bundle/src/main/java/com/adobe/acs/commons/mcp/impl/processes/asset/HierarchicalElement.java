@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
@@ -80,6 +84,7 @@ public interface HierarchicalElement {
         return getChildren().filter(HierarchicalElement::isFolder);
     }
 
+    @SuppressWarnings("squid:S00112")
     default void visitAllFolders(CheckedConsumer<HierarchicalElement> visitor,
                                  CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFunction) throws Exception {
         LinkedList<HierarchicalElement> nodes = new LinkedList<>();
@@ -91,6 +96,12 @@ public interface HierarchicalElement {
         }
     }
 
+    @SuppressWarnings("squid:S00112")
+    default void visitAllFolders(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
+        visitAllFolders(visitor, HierarchicalElement::getFolderChildren);
+    }
+
+    @SuppressWarnings("squid:S00112")
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor,
                                CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFolderFunction,
                                CheckedFunction<HierarchicalElement, Stream<HierarchicalElement>> childFileFunction) throws Exception {
@@ -105,10 +116,7 @@ public interface HierarchicalElement {
         }
     }
 
-    default void visitAllFolders(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
-        visitAllFolders(visitor, HierarchicalElement::getFolderChildren);
-    }
-
+    @SuppressWarnings("squid:S00112")
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
         visitAllFiles(visitor, HierarchicalElement::getFolderChildren, HierarchicalElement::getFileChildren);
     }

@@ -303,7 +303,6 @@ public abstract class AssetIngestor extends ProcessDefinition {
         String name = el.getName();
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
-            System.out.println("Folder exists " + folderPath);
             Node folderNode = s.getNode(folderPath);
             Node folderContentNode = folderNode.hasNode(JcrConstants.JCR_CONTENT) ? folderNode.getNode(JcrConstants.JCR_CONTENT) : null;
             if (folderNode.getPath().equals(jcrBasePath) || (null != folderContentNode
@@ -333,7 +332,6 @@ public abstract class AssetIngestor extends ProcessDefinition {
             }
             Node child = s.getNode(parentPath).addNode(nodeName, DEFAULT_FOLDER_TYPE);
 
-            System.out.println("Added folder node " + child.getPath());
             setFolderTitle(child, name);
 
             trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);

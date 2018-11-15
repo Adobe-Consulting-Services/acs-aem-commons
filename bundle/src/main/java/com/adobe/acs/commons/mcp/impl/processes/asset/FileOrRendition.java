@@ -290,6 +290,7 @@ public class FileOrRendition implements HierarchicalElement {
             this.thizz = thizz;
         }
 
+        @SuppressWarnings("squid:S1149")
         private Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();

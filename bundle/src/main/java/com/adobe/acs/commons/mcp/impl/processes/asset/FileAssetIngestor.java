@@ -121,32 +121,36 @@ public class FileAssetIngestor extends AssetIngestor {
                 if (canImportContainingFolder(file)) {
                     Source fileSource = file.getSource();
                     if (canImportFile(fileSource)) {
-                        try {
-                            if (canImportFile(fileSource)) {
-                                manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fileSource, manager)));
-                            } else {
-                                incrementCount(skippedFiles, 1);
-                                trackDetailedActivity(fileSource.getName(), "Skip", "Skipping file", 0L);
-                            }
-                        } catch (IOException ex) {
-                            Failure failure = new Failure();
-                            failure.setException(ex);
-                            failure.setNodePath(fileSource.getElement().getNodePath());
-                            manager.getFailureList().add(failure);
-                        } finally {
-                            try {
-                                fileSource.close();
-                            } catch (IOException ex) {
-                                Failure failure = new Failure();
-                                failure.setException(ex);
-                                failure.setNodePath(fileSource.getElement().getNodePath());
-                                manager.getFailureList().add(failure);
-                            }
-                        }
+                        addFileImportTask(fileSource, manager);
                     }
                 }
             });
         });
+    }
+
+    private void addFileImportTask(Source fileSource, ActionManager manager) {
+        try {
+            if (canImportFile(fileSource)) {
+                manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fileSource, manager)));
+            } else {
+                incrementCount(skippedFiles, 1);
+                trackDetailedActivity(fileSource.getName(), "Skip", "Skipping file", 0L);
+            }
+        } catch (IOException ex) {
+            Failure failure = new Failure();
+            failure.setException(ex);
+            failure.setNodePath(fileSource.getElement().getNodePath());
+            manager.getFailureList().add(failure);
+        } finally {
+            try {
+                fileSource.close();
+            } catch (IOException ex) {
+                Failure failure = new Failure();
+                failure.setException(ex);
+                failure.setNodePath(fileSource.getElement().getNodePath());
+                manager.getFailureList().add(failure);
+            }
+        }
     }
 
     private class FileSource implements Source {
@@ -198,8 +202,8 @@ public class FileAssetIngestor extends AssetIngestor {
         FileHierarchicalElement(File f) {
             this.file = f;
         }
-        
-        @Override 
+
+        @Override
         public String getSourcePath() {
             return file.getAbsolutePath();
         }
@@ -209,7 +213,7 @@ public class FileAssetIngestor extends AssetIngestor {
             return getParent() == null && isFolder();
         }
 
-            @Override
+        @Override
         public Source getSource() {
             return new FileSource(file, this);
         }
@@ -283,12 +287,13 @@ public class FileAssetIngestor extends AssetIngestor {
         public String getSourcePath() {
             return sourcePath;
         }
-        
+
         @Override
         public boolean excludeBaseFolder() {
             return getParent() == null && isFolder();
         }
 
+        @SuppressWarnings("squid:S1149")
         private ChannelSftp openChannel() throws URISyntaxException, JSchException {
             if (channel == null || !channel.isConnected()) {
                 JSch jsch = new JSch();
@@ -354,20 +359,13 @@ public class FileAssetIngestor extends AssetIngestor {
             return parent;
         }
 
+        @SuppressWarnings("squid:S1149")
         @Override
         public Stream<HierarchicalElement> getChildren() {
             try {
                 openChannel();
                 Vector<ChannelSftp.LsEntry> children = channel.ls(path);
-                return children.stream().map((ChannelSftp.LsEntry entry) -> {
-                    try {
-                        String childPath = getSourcePath() + "/" + entry.getFilename();
-                        return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
-                    } catch (URISyntaxException | JSchException ex) {
-                        Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                        return null;
-                    }
-                }).filter(Objects::nonNull);
+                return children.stream().map(this::getChildFromEntry).filter(Objects::nonNull);
             } catch (URISyntaxException | JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return Stream.empty();
@@ -375,6 +373,16 @@ public class FileAssetIngestor extends AssetIngestor {
                 if (!keepChannelOpen) {
                     closeChannel();
                 }
+            }
+        }
+
+        private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
+            try {
+                String childPath = getSourcePath() + "/" + entry.getFilename();
+                return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
+            } catch (URISyntaxException | JSchException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
             }
         }
 
