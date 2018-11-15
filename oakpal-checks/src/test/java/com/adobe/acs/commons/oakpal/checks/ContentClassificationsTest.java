@@ -73,7 +73,7 @@ public class ContentClassificationsTest {
 
     private ProgressCheck checkForPath(final String path) {
         return new ContentClassifications().newInstance(
-                new JSONObject(String.format("{\"scopePaths\":[{\"type\":\"deny\",\"pattern\":\".*\"},{\"type\":\"allow\",\"pattern\":\"%s\"}]}", path)));
+                new JSONObject(String.format("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\"%s\"}]}", path)));
     }
 
     @Test

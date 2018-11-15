@@ -33,7 +33,10 @@ import org.json.JSONObject;
  * <dd>(default: {@link net.adamcin.oakpal.core.Violation.Severity#MAJOR}) specify the severity of violations reported
  * by this check.</dd>
  * <dt>{@code scopePaths} (type: {@link Rule[]})</dt>
- * <dd>(default: allow all) specify a list of pattern rules to allow or deny import paths from the scope of this check.</dd>
+ * <dd>(default: allow all) specify a list of pattern rules to allow or deny import paths from the scope of this check.
+ * When no pattern rules are specified, ALLOW ALL imported paths into scope for the check. When the first rule is type
+ * ALLOW, the default first rule becomes DENY ALL.
+ * </dd>
  * </dl>
  */
 public final class ContentClassifications implements ProgressCheckFactory {
@@ -85,7 +88,11 @@ public final class ContentClassifications implements ProgressCheckFactory {
                 return;
             }
 
-            Rule lastMatched = Rule.DEFAULT_ALLOW;
+            // default to ALLOW ALL
+            // if first rule is allow, change default to DENY ALL
+            Rule lastMatched = scopePaths.isEmpty() || scopePaths.get(0).isDeny()
+                    ? Rule.DEFAULT_ALLOW
+                    : Rule.DEFAULT_DENY;
             for (Rule rule : scopePaths) {
                 if (rule.matches(path)) {
                     lastMatched = rule;
