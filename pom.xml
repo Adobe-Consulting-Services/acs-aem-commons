@@ -66,8 +66,11 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <!-- TODO: Determine why baseline doesn't work right from 4.0.0 onward -->
-                    <version>3.5.1</version>
+                    <!-- There are issues when trying to use other maven bundle plugin versions:
+                        4.x : Baseline fails to work properly, ignores the package-version class version numbers
+                        3.5.1: Manifest XML files are generated but are completely empty
+                    -->
+                    <version>3.5.0</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
@@ -498,7 +501,7 @@
                                 <dependency>
                                     <groupId>org.slf4j</groupId>
                                     <artifactId>slf4j-simple</artifactId>
-                                    <version>1.6.4</version>
+                                    <version>1.7.6</version>
                                 </dependency>
                                 <dependency>
                                     <groupId>org.jacoco</groupId>
