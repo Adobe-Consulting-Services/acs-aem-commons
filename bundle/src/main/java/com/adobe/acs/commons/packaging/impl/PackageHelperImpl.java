@@ -21,6 +21,7 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.commons.jcr.JcrUtil;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
@@ -39,9 +40,6 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -396,15 +394,11 @@ public final class PackageHelperImpl implements PackageHelper {
      * {@inheritDoc}
      */
     public String getErrorJSON(final String msg) {
-        final JSONObject json = new JSONObject();
-        try {
-            json.put(KEY_STATUS, "error");
-            json.put(KEY_MSG, msg);
-            return json.toString();
-        } catch (JSONException e) {
-            log.error("Error creating JSON Error response message: {}", e);
-            return JSON_EXCEPTION_MSG;
-        }
+        Gson gson = new Gson();
+        final JsonObject json = new JsonObject();
+        json.addProperty(KEY_STATUS, "error");
+        json.addProperty(KEY_MSG, msg);
+        return gson.toJson(json);
     }
 
 }

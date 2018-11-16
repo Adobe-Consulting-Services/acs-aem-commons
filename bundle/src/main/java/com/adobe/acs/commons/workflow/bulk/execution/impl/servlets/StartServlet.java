@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
@@ -25,6 +24,8 @@ import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWo
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -34,8 +35,6 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +53,39 @@ import java.io.IOException;
         extensions = {"json"}
 )
 public class StartServlet extends SlingAllMethodsServlet {
+
     private static final Logger log = LoggerFactory.getLogger(StartServlet.class);
 
     @Reference
     private BulkWorkflowEngine bulkWorkflowEngine;
+
+    private String getPropertyString(JsonObject obj, String name) {
+        return getOptPropertyString(obj, name, null);
+    }
+
+    private String getOptPropertyString(JsonObject obj, String name, String opt) {
+        if (obj.has(name)) {
+            return obj.get(name).getAsString();
+        } else {
+            return opt;
+        }
+    }
+
+    private int getOptPropertyInt(JsonObject obj, String name, int opt) {
+        if (obj.has(name)) {
+            return obj.get(name).getAsInt();
+        } else {
+            return opt;
+        }
+    }
+    
+    private boolean getOptPropertyBoolean(JsonObject obj, String name, boolean opt) {
+        if (obj.has(name)) {
+            return obj.get(name).getAsBoolean();
+        } else {
+            return opt;
+        }
+    }    
 
     @Override
     @SuppressWarnings("squid:S1192")
@@ -68,27 +96,27 @@ public class StartServlet extends SlingAllMethodsServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            final JSONObject params = new JSONObject(request.getParameter("params"));
+            Gson gson = new Gson();
+            final JsonObject params = (JsonObject) gson.toJsonTree(request.getParameter("params"));
             final ModifiableValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
-            properties.put("runnerType", params.getString("runnerType"));
-            properties.put("queryType", params.getString("queryType"));
-            properties.put("queryStatement", params.getString("queryStatement"));
-            properties.put("relativePath", StringUtils.removeStart(params.optString("relativePath", ""), "/"));
-            properties.put("workflowModel", params.getString("workflowModelId"));
-            properties.put("interval", params.optInt("interval", 10));
-            properties.put("timeout", params.optInt("timeout", 30));
-            properties.put("throttle", params.optInt("throttle", 10));
-            properties.put("retryCount", params.optInt("retryCount", 0));
-            properties.put("batchSize", params.optInt("batchSize", 10));
-            String userEventData = params.optString("userEventData", null);
+            properties.put("runnerType", getPropertyString(params, "runnerType"));
+            properties.put("queryType", getPropertyString(params, "queryType"));
+            properties.put("queryStatement", getPropertyString(params, "queryStatement"));
+            properties.put("relativePath", StringUtils.removeStart(getOptPropertyString(params, "relativePath", ""), "/"));
+            properties.put("workflowModel", getPropertyString(params, "workflowModelId"));
+            properties.put("interval", getOptPropertyInt(params, "interval", 10));
+            properties.put("timeout", getOptPropertyInt(params, "timeout", 30));
+            properties.put("throttle", getOptPropertyInt(params, "throttle", 10));
+            properties.put("retryCount", getOptPropertyInt(params,"retryCount", 0));
+            properties.put("batchSize", getOptPropertyInt(params,"batchSize", 10));
+            String userEventData = getPropertyString(params, "userEventData");
             if (userEventData != null && !userEventData.isEmpty()) {
                 properties.put("userEventData", userEventData);
             }
 
-            properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
-            properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
-
+            properties.put("purgeWorkflow", getOptPropertyBoolean(params, "purgeWorkflow", false));
+            properties.put("autoThrottle", getOptPropertyBoolean(params, "autoThrottle", true));
 
             if (AEMWorkflowRunnerImpl.class.getName().equals(properties.get("runnerType", String.class))
                     && isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {
@@ -110,13 +138,6 @@ public class StartServlet extends SlingAllMethodsServlet {
 
             response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
 
-        } catch (JSONException e) {
-            log.error("Could not parse HTTP Request params: {}", e);
-
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not initialize Bulk Workflow due to invalid parameters."
-                            + " Please review the form and try again.",
-                    e.getMessage());
         } catch (RepositoryException e) {
             log.error("Could not initialize Bulk Workflow: {}", e);
 
