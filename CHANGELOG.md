@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 - #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+- Add oakpal-maven-plugin and oakpal-checks module, exporting the aem64 checklist for package acceptance tests.
 
 ### Fixed
 - #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
