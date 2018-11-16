@@ -31,8 +31,14 @@ import java.util.Map;
 /**
  * ACS AEM Commons - ContentFinder Result Hit Writer
  * QueryBuilder Hit Writer used for creating ContentFinder compatible results
+ * 
+ * TODO:
+ * - is this class actually used? Haven't found anyone referencing it. 
+ * - deprecating it for the moment, and leaving the scr annotations in place
+ * 
  */
 @Component(factory = "com.day.cq.search.result.ResultHitWriter/cf")
+@Deprecated
 public final class ContentFinderResultHitWriter implements ResultHitWriter {
 
     @Override
