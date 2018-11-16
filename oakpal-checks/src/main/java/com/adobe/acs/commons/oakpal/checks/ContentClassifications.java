@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.oakpal.checks;
 
 import java.util.Arrays;
@@ -105,6 +124,15 @@ public final class ContentClassifications implements ProgressCheckFactory {
             }
 
             // check sling:resourceType against libsPathPrefix.
+            checkResourceType(packageId, path, node);
+
+            // check sling:resourceSuperType against libsPathPrefix.
+            checkResourceSuperType(packageId, path, node);
+
+        }
+
+        void checkResourceType(final PackageId packageId, final String path, final Node node)
+                throws RepositoryException {
             if (node.hasProperty(P_SLING_RESOURCE_TYPE)) {
                 String rt = node.getProperty(P_SLING_RESOURCE_TYPE).getString();
                 if (rt.length() > 0) {
@@ -121,8 +149,10 @@ public final class ContentClassifications implements ProgressCheckFactory {
                                     packageId)));
                 }
             }
+        }
 
-            // check sling:resourceSuperType against libsPathPrefix.
+        void checkResourceSuperType(final PackageId packageId, final String path, final Node node)
+                throws RepositoryException {
             if (node.hasProperty(P_SLING_RESOURCE_SUPER_TYPE)) {
                 String rst = node.getProperty(P_SLING_RESOURCE_SUPER_TYPE).getString();
                 if (rst.length() > 0) {

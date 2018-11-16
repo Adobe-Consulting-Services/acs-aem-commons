@@ -19,24 +19,10 @@
     <name>ACS AEM Commons Oakpal Checks</name>
     <description>AEM Oakpal Checks for ACS AEM Commons Package.</description>
 
-    <properties>
-        <filevault.version>3.1.38</filevault.version>
-    </properties>
-
     <!-- ====================================================================== -->
     <!-- B U I L D D E F I N I T I O N -->
     <!-- ====================================================================== -->
     <build>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>false</filtering>
-            </testResource>
-            <testResource>
-                <directory>src/test/filtered-resources</directory>
-                <filtering>true</filtering>
-            </testResource>
-        </testResources>
 
         <plugins>
             <plugin>
@@ -49,34 +35,6 @@
                         <Oakpal-Checklist>OAKPAL-INF/checklist/aem64.json</Oakpal-Checklist>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-test-packages</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.jackrabbit.vault</groupId>
-                                    <artifactId>jackrabbit-filevault</artifactId>
-                                    <version>${filevault.version}</version>
-                                    <classifier>src</classifier>
-                                    <type>zip</type>
-                                    <overWrite>true</overWrite>
-                                    <destFileName>test-packages</destFileName>
-                                    <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
-                                    <includes>*/vault-core/src/test/resources/org/apache/jackrabbit/vault/packaging/integration/testpackages/*</includes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
