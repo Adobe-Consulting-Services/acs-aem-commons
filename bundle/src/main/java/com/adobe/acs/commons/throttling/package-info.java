@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2015 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,8 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.0.0")
-package com.adobe.acs.commons.fam;
+/**
+ * HTTP Request Throttling
+ */
+@aQute.bnd.annotation.Version("3.19.0")
+package com.adobe.acs.commons.throttling;

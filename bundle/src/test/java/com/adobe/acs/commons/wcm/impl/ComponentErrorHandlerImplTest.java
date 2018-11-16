@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.components.Component;
@@ -116,7 +117,7 @@ public class ComponentErrorHandlerImplTest {
 
         when(request.getAttribute(ComponentErrorHandler.SUPPRESS_ATTR)).thenReturn(false, true);
         when(componentContext.isRoot()).thenReturn(false);
-        when(componentHelper.isEditMode(request)).thenReturn(true);
+        when(ModeUtil.isEdit(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
@@ -178,7 +179,7 @@ public class ComponentErrorHandlerImplTest {
     @Test
     public void testEditError() throws Exception {
         when(componentContext.isRoot()).thenReturn(false);
-        when(componentHelper.isEditMode(request)).thenReturn(true);
+        when(ModeUtil.isEdit(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
@@ -194,7 +195,7 @@ public class ComponentErrorHandlerImplTest {
     public void testDisabledError_NotPreviouslyProcessedRequest() throws Exception {
         // This should not invoke ComponentErrorHandling
         when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(null);
-        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+        when(ModeUtil.isDisabled(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
@@ -208,7 +209,7 @@ public class ComponentErrorHandlerImplTest {
     public void testDisabledError_PreviouslyProcessedRequest() throws Exception {
         // This should not invoke ComponentErrorHandling
         when(request.getAttribute(ComponentErrorHandlerImpl.REQ_ATTR_PREVIOUSLY_PROCESSED)).thenReturn(true);
-        when(componentHelper.isDisabledMode(request)).thenReturn(true);
+        when(ModeUtil.isDisabled(request)).thenReturn(true);
 
         doThrow(new ServletException()).when(chain).doFilter(request, response);
 
