@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
+import aQute.bnd.annotation.ConsumerType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -34,7 +33,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.commons.json.io.JSONWriter;
@@ -46,6 +44,9 @@ import com.adobe.acs.commons.genericlists.GenericList;
 import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import org.apache.sling.spi.resource.provider.ResolveContext;
+import org.apache.sling.spi.resource.provider.ResourceContext;
+import org.apache.sling.spi.resource.provider.ResourceProvider;
 
 /**
  * Resource provider which makes Generic Lists available as JSON String resources
@@ -53,10 +54,10 @@ import com.day.cq.wcm.api.PageManager;
  */
 @Component(metatype = true, label = "ACS AEM Commons - Generic List JSON Resource Provider",
     description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
-@Service
-@Properties({ @Property(name = ResourceProvider.ROOTS, value = GenericListJsonResourceProvider.ROOT),
-        @Property(name = ResourceProvider.OWNS_ROOTS, boolValue = true) })
-public final class GenericListJsonResourceProvider implements ResourceProvider {
+//TODO: Confirm this works considering that spi Resource Provider is not an interface!
+@Service(ResourceProvider.class)
+@Properties({ @Property(name = ResourceProvider.PROPERTY_ROOT, value = GenericListJsonResourceProvider.ROOT) })
+public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static final Logger log = LoggerFactory.getLogger(GenericListJsonResourceProvider.class);
 
@@ -79,12 +80,8 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
     }
 
     @Override
-    public Resource getResource(ResourceResolver resourceResolver, HttpServletRequest request, String path) {
-        return getResource(resourceResolver, path);
-    }
-
-    @Override
-    public Resource getResource(ResourceResolver resourceResolver, String path) {
+    public Resource getResource(ResolveContext rc, String path, ResourceContext resourcecontext, Resource parent) {
+        ResourceResolver resourceResolver = rc.getResourceResolver();
         if (path == null) {
             return null;
         } else if (path.equals(ROOT)) {
@@ -116,7 +113,7 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
     }
 
     @Override
-    public Iterator<Resource> listChildren(Resource parent) {
+    public Iterator<Resource> listChildren(ResolveContext rc, Resource parent) {
         return null;
     }
 

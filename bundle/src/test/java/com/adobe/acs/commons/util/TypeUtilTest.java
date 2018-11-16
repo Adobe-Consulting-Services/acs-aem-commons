@@ -19,10 +19,9 @@
  */
 package com.adobe.acs.commons.util;
 
+import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -88,11 +87,11 @@ public class TypeUtilTest {
     }
 
     @Test
-    public void testToMap() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put("one", "uno");
-        json.put("two", 2);
-        json.put("three", new Long(3));
+    public void testToMap() {
+        final JsonObject json = new JsonObject();
+        json.addProperty("one", "uno");
+        json.addProperty("two", 2);
+        json.addProperty("three", new Long(3));
 
         final Map<String, Object> expResult = new HashMap<String, Object>();
         expResult.put("one", "uno");
@@ -105,23 +104,7 @@ public class TypeUtilTest {
     }
 
     @Test
-    public void testToMap_withType() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put("one", "uno");
-        json.put("two", 2);
-        json.put("three", "tres");
-
-        final Map<String, String> expResult = new HashMap<String, String>();
-        expResult.put("one", "uno");
-        expResult.put("three", "tres");
-
-        final Map<String, String> actual = TypeUtil.toMap(json, String.class);
-
-        assertEquals(expResult, actual);
-    }
-
-    @Test
-    public void testToValueMap() throws JSONException {
+    public void testToValueMap() {
         final Map<String, String> stringMap = new LinkedHashMap<String, String>();
         stringMap.put("one", "uno");
         stringMap.put("two", "dos");

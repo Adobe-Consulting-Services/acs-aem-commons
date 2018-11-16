@@ -31,7 +31,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +82,7 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
         return null;
     }
 
-    protected void doPackaging(SlingHttpServletRequest request, SlingHttpServletResponse response, boolean preview, ValueMap properties, List<PathFilterSet> packageResources) throws IOException, JSONException, RepositoryException {
+    protected void doPackaging(SlingHttpServletRequest request, SlingHttpServletResponse response, boolean preview, ValueMap properties, List<PathFilterSet> packageResources) throws IOException, RepositoryException {
         // Add the ACL Packager Configuration page
         if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
             final PathFilterSet tmp = this.getPackagerPageResource(request);

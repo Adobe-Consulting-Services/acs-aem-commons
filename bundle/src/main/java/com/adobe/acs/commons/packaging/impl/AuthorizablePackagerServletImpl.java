@@ -94,9 +94,6 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
         } catch (IOException ex) {
             log.error("IO error while creating Query Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (JSONException ex) {
-            log.error("JSON error while creating Query Package response", ex);
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         }
     }
 

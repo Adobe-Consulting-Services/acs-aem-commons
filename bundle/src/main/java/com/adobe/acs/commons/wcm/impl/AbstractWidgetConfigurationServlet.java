@@ -32,7 +32,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
 
 @SuppressWarnings("serial")
 public abstract class AbstractWidgetConfigurationServlet extends SlingSafeMethodsServlet {
