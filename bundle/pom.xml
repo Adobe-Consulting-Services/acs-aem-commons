@@ -123,6 +123,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
         </plugins>
@@ -518,6 +519,13 @@
 
         <!--  Build Dependencies -->        
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+            
+        <dependency>
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>
             <version>1.1</version>
@@ -534,5 +542,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
     </dependencies>
 </project>
