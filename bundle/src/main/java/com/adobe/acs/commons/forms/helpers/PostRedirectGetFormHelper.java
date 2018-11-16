@@ -23,10 +23,10 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+import com.google.gson.JsonParseException;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 
 import java.io.IOException;
 
@@ -51,7 +51,7 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException, JsonParseException;
 
     /**
      * Issues a 302 redirect with the form serialized into a JSON object that can be
@@ -65,7 +65,7 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException, JsonParseException;
 
     /**
      /**
@@ -80,7 +80,7 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws IOException, JsonParseException;
 
 
     /**
@@ -97,7 +97,7 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response) throws IOException, JsonParseException;
 
     /**
      * Same as:
@@ -113,7 +113,7 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response) throws IOException, JsonParseException;
 
     /**
      * Same as:
@@ -129,5 +129,5 @@ public interface PostRedirectGetFormHelper extends FormHelper {
      * @throws IOException
      * @throws JSONException
      */
-    void sendRedirect(Form form, Resource resource, String formSelector, SlingHttpServletResponse response) throws IOException, JSONException;
+    void sendRedirect(Form form, Resource resource, String formSelector, SlingHttpServletResponse response) throws IOException, JsonParseException;
 }

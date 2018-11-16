@@ -28,6 +28,9 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultBuilder;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -40,9 +43,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +90,8 @@ public class QuicklyEngineImpl implements QuicklyEngine {
     private Map<String, Operation> operations = new ConcurrentHashMap<String, Operation>();
 
     @Override
-    public final JSONObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
-                              final Command cmd) throws JSONException {
+    public final JsonObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
+                              final Command cmd) throws JsonParseException {
 
         for (final Operation operation : operations.values()) {
             if (operation.accepts(request, cmd)) {
@@ -105,11 +105,12 @@ public class QuicklyEngineImpl implements QuicklyEngine {
         return this.getJSONResults(cmd, request, defaultOperation.getResults(request, response, defaultCmd));
     }
 
-    private JSONObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) throws
-            JSONException {
-        final JSONObject json = new JSONObject();
+    private JsonObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) throws
+            JsonParseException {
+        final JsonObject json = new JsonObject();
 
-        json.put(KEY_RESULTS, new JSONArray());
+        JsonArray resultArray = new JsonArray();
+        json.add(KEY_RESULTS, resultArray);
 
         final ValueMap requestConfig = new ValueMapDecorator(new HashMap<String, Object>());
 
@@ -121,10 +122,10 @@ public class QuicklyEngineImpl implements QuicklyEngine {
                 authoringUIModeService.getAuthoringUIMode(request));
 
         for (final Result result : results) {
-            final JSONObject tmp = resultBuilder.toJSON(cmd, result, requestConfig);
+            final JsonObject tmp = resultBuilder.toJSON(cmd, result, requestConfig);
 
             if (tmp != null) {
-                json.accumulate(KEY_RESULTS, tmp);
+                resultArray.add(tmp);
             }
         }
 

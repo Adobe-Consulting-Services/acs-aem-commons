@@ -23,8 +23,11 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
 import com.adobe.acs.commons.forms.impl.FormImpl;
-import com.adobe.acs.commons.util.TypeUtil;
 import com.day.cq.wcm.api.Page;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -32,8 +35,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET Form Helper
@@ -77,39 +79,39 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
 
     @Override
     public final void sendRedirect(Form form, String path, SlingHttpServletResponse response) throws IOException,
-            JSONException {
+            JsonParseException {
         this.sendRedirect(form, path, null, response);
     }
 
     @Override
     public final void sendRedirect(Form form, Page page, SlingHttpServletResponse response) throws IOException,
-            JSONException {
+            JsonParseException {
         this.sendRedirect(form, page, null, response);
     }
 
     @Override
     public final void sendRedirect(Form form, Resource resource, SlingHttpServletResponse response) throws
-            IOException, JSONException {
+            IOException, JsonParseException {
         this.sendRedirect(form, resource, null, response);
     }
 
     @Override
     public void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JSONException {
+            throws IOException, JsonParseException {
         final String url = this.getRedirectPath(form, path, formSelector);
         response.sendRedirect(url);
     }
 
     @Override
     public void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JSONException {
+            throws IOException, JsonParseException {
         final String url = this.getRedirectPath(form, page, formSelector);
         response.sendRedirect(url);
     }
 
     @Override
     public void sendRedirect(Form form, Resource resource, String formSelector,
-                             SlingHttpServletResponse response) throws IOException, JSONException {
+                             SlingHttpServletResponse response) throws IOException, JsonParseException {
         final String url = this.getRedirectPath(form, resource, formSelector);
         response.sendRedirect(url);
     }
@@ -117,42 +119,42 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
     @Override
     public final void renderForm(final Form form, final Page page, final SlingHttpServletRequest request,
                                  final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, page, this.getFormSelector(request), response);
     }
 
     @Override
     public final void renderForm(final Form form, final Resource resource, final SlingHttpServletRequest request,
                                  final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, resource, this.getFormSelector(request), response);
     }
 
     @Override
     public final void renderForm(final Form form, final String path, final SlingHttpServletRequest request,
                                  final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, path, this.getFormSelector(request), response);
     }
 
     @Override
     public final void renderOtherForm(Form form, String path, String formSelector, SlingHttpServletRequest request,
                                       SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, path, formSelector, response);
     }
 
     @Override
     public final void renderOtherForm(Form form, Page page, String formSelector, SlingHttpServletRequest request,
                                       SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, page, formSelector, response);
     }
 
     @Override
     public final void renderOtherForm(Form form, Resource resource, String formSelector,
                                       SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         this.sendRedirect(form, resource, formSelector, response);
     }
 
@@ -183,6 +185,23 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
         }
     }
 
+    private Optional<JsonElement> getElement(JsonObject obj, String name) {
+        JsonElement elem = obj.get(name);
+        if (elem != null) {
+            return Optional.of(elem);
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    private String getOptionalProperty(JsonObject obj, String name) {
+        return getElement(obj, name).map(JsonElement::getAsString).orElse(null);
+    }
+
+    private JsonObject getOptionalObject(JsonObject obj, String name) {
+        return getElement(obj, name).map(JsonElement::getAsJsonObject).orElse(null);
+    }
+    
     /**
      * Derives the form from the request's Query Parameters as best it can
      * <p>
@@ -204,26 +223,27 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
         }
 
         try {
-            final JSONObject jsonData = new JSONObject(requestData);
+            Gson gson = new Gson();
+            final JsonObject jsonData = (JsonObject) gson.toJsonTree(requestData);
 
-            final String incomingFormName = jsonData.optString(KEY_FORM_NAME);
+            final String incomingFormName = getOptionalProperty(jsonData,KEY_FORM_NAME);
 
             // Double-check the form names; only inject matching forms
             if (StringUtils.equals(incomingFormName, formName)) {
-                final JSONObject incomingJsonForm = jsonData.optJSONObject(KEY_FORM);
+                final JsonObject incomingJsonForm = getOptionalObject(jsonData, KEY_FORM);
                 if (incomingJsonForm != null) {
-                    data = TypeUtil.toMap(incomingJsonForm, String.class);
+                    data = gson.fromJson(incomingJsonForm, Map.class);
                     log.debug("Form data: {}", data);
                 }
 
-                final JSONObject incomingJsonErrors = jsonData.optJSONObject(KEY_ERRORS);
+                final JsonObject incomingJsonErrors = getOptionalObject(jsonData, KEY_ERRORS);
 
                 if (incomingJsonErrors != null) {
-                    errors = TypeUtil.toMap(incomingJsonErrors, String.class);
+                    errors = gson.fromJson(incomingJsonErrors, Map.class);
                     log.debug("Form data: {}", errors);
                 }
             }
-        } catch (JSONException e) {
+        } catch (JsonParseException e) {
             log.warn("Cannot parse query parameters for request: {}", requestData);
             return new FormImpl(formName, request.getResource().getPath());
         }
@@ -256,13 +276,13 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param form
      * @param page
      * @return
-     * @throws org.apache.sling.commons.json.JSONException
+     * @throws org.apache.sling.commons.json.JsonParseException
      *
      * @throws java.io.UnsupportedEncodingException
      *
      */
     protected final String getRedirectPath(final Form form, final Page page, final String formSelector) throws
-            JSONException,
+            JsonParseException,
             UnsupportedEncodingException {
         return getRedirectPath(form, page.adaptTo(Resource.class), formSelector);
     }
@@ -273,13 +293,13 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param form
      * @param resource
      * @return
-     * @throws org.apache.sling.commons.json.JSONException
+     * @throws org.apache.sling.commons.json.JsonParseException
      *
      * @throws java.io.UnsupportedEncodingException
      *
      */
     protected final String getRedirectPath(final Form form, final Resource resource, final String formSelector) throws
-            JSONException,
+            JsonParseException,
             UnsupportedEncodingException {
         return getRedirectPath(form, resource.getPath() + FormHelper.EXTENSION, formSelector);
     }
@@ -290,11 +310,11 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * @param form
      * @param path
      * @return
-     * @throws org.apache.sling.commons.json.JSONException
+     * @throws org.apache.sling.commons.json.JsonParseException
      *
      */
     protected String getRedirectPath(final Form form, final String path, final String formSelector) throws
-            JSONException {
+            JsonParseException {
         String redirectPath = path;
         redirectPath += this.getSuffix();
         if (StringUtils.isNotBlank(formSelector)) {
@@ -311,10 +331,10 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
      * data
      *
      * @return
-     * @throws org.apache.sling.commons.json.JSONException
+     * @throws org.apache.sling.commons.json.JsonParseException
      *
      */
-    protected final String getQueryParameters(Form form) throws JSONException {
+    protected final String getQueryParameters(Form form) throws JsonParseException {
         String params = "";
         form = this.clean(form);
 
@@ -327,23 +347,25 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
         return params;
     }
 
-    protected final String getQueryParameterValue(Form form) throws JSONException {
+    protected final String getQueryParameterValue(Form form) throws JsonParseException {
         boolean hasData = false;
-        final JSONObject jsonData = new JSONObject();
+        final JsonObject jsonData = new JsonObject();
 
         form = this.clean(form);
 
-        jsonData.put(KEY_FORM_NAME, form.getName());
+        jsonData.addProperty(KEY_FORM_NAME, form.getName());
 
+        Gson gson = new Gson();
+        
         if (form.hasData()) {
-            final JSONObject jsonForm = new JSONObject(form.getData());
-            jsonData.put(KEY_FORM, jsonForm);
+            final JsonObject jsonForm = (JsonObject) gson.toJsonTree(form.getData());
+            jsonData.add(KEY_FORM, jsonForm);
             hasData = true;
         }
 
         if (form.hasErrors()) {
-            final JSONObject jsonError = new JSONObject(form.getErrors());
-            jsonData.put(KEY_ERRORS, jsonError);
+            final JsonObject jsonError = (JsonObject) gson.toJsonTree(form.getErrors());
+            jsonData.add(KEY_ERRORS, jsonError);
             hasData = true;
         }
 

@@ -25,6 +25,7 @@ import com.adobe.acs.commons.forms.helpers.ForwardAsGetFormHelper;
 import com.adobe.acs.commons.forms.helpers.impl.synthetics.SyntheticSlingHttpServletGetRequest;
 import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.day.cq.wcm.api.Page;
+import com.google.gson.JsonParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -33,7 +34,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +148,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderForm(final Form form, final Page page, final SlingHttpServletRequest request,
                             final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final String formSelector = this.getFormSelector(request);
 
         this.renderOtherForm(form, page, formSelector, request, response);
@@ -157,7 +157,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderForm(final Form form, final Resource resource, final SlingHttpServletRequest request,
                             final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final String formSelector = this.getFormSelector(request);
 
         this.renderOtherForm(form, resource, formSelector, request, response);
@@ -166,7 +166,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderForm(final Form form, final String path, final SlingHttpServletRequest request,
                             final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final String formSelector = this.getFormSelector(request);
 
         this.renderOtherForm(form, path, formSelector, request, response);
@@ -175,7 +175,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderOtherForm(final Form form, final String path, final String formSelector,
                                  final SlingHttpServletRequest request, final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
         if (StringUtils.isNotBlank(formSelector)) {
@@ -188,7 +188,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderOtherForm(final Form form, final Page page, final String formSelector,
                                  final SlingHttpServletRequest request, final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
         if (StringUtils.isNotBlank(formSelector)) {
@@ -201,7 +201,7 @@ public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implement
     @Override
     public final void renderOtherForm(final Form form, final Resource resource, final String formSelector,
                                 final SlingHttpServletRequest request, final SlingHttpServletResponse response)
-            throws IOException, ServletException, JSONException {
+            throws IOException, ServletException, JsonParseException {
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
 
         if (StringUtils.isNotBlank(formSelector)) {
