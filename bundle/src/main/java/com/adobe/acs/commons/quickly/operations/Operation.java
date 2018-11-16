@@ -23,7 +23,6 @@ package com.adobe.acs.commons.quickly.operations;
 import aQute.bnd.annotation.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
-import com.google.gson.JsonParseException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
@@ -55,7 +54,7 @@ public interface Operation {
      * @throws JSONException
      */
     Collection<Result> getResults(SlingHttpServletRequest request, SlingHttpServletResponse response,
-                                  Command cmd) throws JsonParseException;
+                                  Command cmd);
 
     /**
      * Returns the command operation this Operation is registered for.

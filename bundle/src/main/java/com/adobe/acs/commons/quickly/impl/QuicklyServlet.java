@@ -22,7 +22,6 @@ package com.adobe.acs.commons.quickly.impl;
 
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
-import com.google.gson.JsonParseException;
 
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -54,7 +53,7 @@ public class QuicklyServlet extends SlingSafeMethodsServlet {
 
         try {
             response.getWriter().append(quicklyEngine.execute(request, response, cmd).toString());
-        } catch (JsonParseException e) {
+        } catch (Exception e) {
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().print("{\"status:\": \"error\"}");
         }

@@ -24,7 +24,6 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
@@ -42,7 +41,7 @@ import org.apache.sling.api.resource.ValueMap;
 public class OpenResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
     public static final String TYPE = "OPEN";
 
-    public JsonObject toJSON(final Result result, final ValueMap config) throws JsonParseException {
+    public JsonObject toJSON(final Result result, final ValueMap config) {
         final AuthoringUIMode authoringUIMode = config.get(AuthoringUIMode.class.getName(), AuthoringUIMode.TOUCH);
 
         if(authoringUIMode != null && AuthoringUIMode.CLASSIC.equals(authoringUIMode)) {

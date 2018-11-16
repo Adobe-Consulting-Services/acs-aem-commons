@@ -25,7 +25,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 
 import aQute.bnd.annotation.ProviderType;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
@@ -42,5 +41,5 @@ public interface QuicklyEngine {
      */
     JsonObject execute(SlingHttpServletRequest slingRequest,
                        SlingHttpServletResponse slingResponse,
-                       Command cmd) throws JsonParseException;
+                       Command cmd);
 }

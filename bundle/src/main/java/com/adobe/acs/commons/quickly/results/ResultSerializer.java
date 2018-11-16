@@ -22,7 +22,6 @@ package com.adobe.acs.commons.quickly.results;
 
 import aQute.bnd.annotation.ProviderType;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import org.apache.sling.api.resource.ValueMap;
 
 @ProviderType
@@ -38,6 +37,6 @@ public interface ResultSerializer {
      * @return the JSON representation of the result
      * @throws JSONException
      */
-    JsonObject toJSON(Result result, ValueMap config) throws JsonParseException;
+    JsonObject toJSON(Result result, ValueMap config);
 
 }

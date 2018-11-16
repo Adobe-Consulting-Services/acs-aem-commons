@@ -30,7 +30,6 @@ import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -91,7 +90,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
 
     @Override
     public final JsonObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
-                              final Command cmd) throws JsonParseException {
+                              final Command cmd) {
 
         for (final Operation operation : operations.values()) {
             if (operation.accepts(request, cmd)) {
@@ -105,8 +104,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
         return this.getJSONResults(cmd, request, defaultOperation.getResults(request, response, defaultCmd));
     }
 
-    private JsonObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) throws
-            JsonParseException {
+    private JsonObject getJSONResults(Command cmd, SlingHttpServletRequest request, final Collection<Result> results) {
         final JsonObject json = new JsonObject();
 
         JsonArray resultArray = new JsonArray();

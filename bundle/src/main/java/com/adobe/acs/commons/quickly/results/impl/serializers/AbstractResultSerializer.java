@@ -24,12 +24,10 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.Action;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import org.apache.sling.api.resource.ValueMap;
 
 public abstract class AbstractResultSerializer {
 
-    public JsonObject toJSON(final Result result) throws JsonParseException {
+    public JsonObject toJSON(final Result result) {
         final JsonObject json = new JsonObject();
 
         json.addProperty("title", result.getTitle());
@@ -43,7 +41,7 @@ public abstract class AbstractResultSerializer {
         return json;
     }
 
-    public JsonObject toJSON(final Action action) throws JsonParseException {
+    public JsonObject toJSON(final Action action) {
 
         final JsonObject json = new JsonObject();
 

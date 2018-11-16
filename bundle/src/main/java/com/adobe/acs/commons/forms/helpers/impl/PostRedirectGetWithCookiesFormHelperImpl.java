@@ -24,7 +24,6 @@ import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesFormHelper;
 import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.Page;
-import com.google.gson.JsonParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -56,7 +55,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JsonParseException {
+            throws IOException {
         final String url = this.getRedirectPath(form, path, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -64,7 +63,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JsonParseException {
+            throws IOException {
         final String url = this.getRedirectPath(form, page, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -72,7 +71,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, Resource resource, String formSelector,
-            SlingHttpServletResponse response) throws IOException, JsonParseException {
+            SlingHttpServletResponse response) throws IOException {
         final String url = this.getRedirectPath(form, resource, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -106,8 +105,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     }
 
     @Override
-    protected final String getRedirectPath(final Form form, final String path, final String formSelector) throws
-            JsonParseException {
+    protected final String getRedirectPath(final Form form, final String path, final String formSelector) {
         String redirectPath = path;
         redirectPath += this.getSuffix();
         if (StringUtils.isNotBlank(formSelector)) {
@@ -144,7 +142,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      * @param form
      * @throws JSONException
      */
-    protected void addFlashCookie(SlingHttpServletResponse response, Form form) throws JsonParseException {
+    protected void addFlashCookie(SlingHttpServletResponse response, Form form) {
         final String name = this.getGetLookupKey(form.getName());
         final String value = getQueryParameterValue(form);
         final Cookie cookie = new Cookie(name, value);
