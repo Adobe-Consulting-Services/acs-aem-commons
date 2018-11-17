@@ -21,7 +21,6 @@ package com.adobe.acs.commons.wcm.datasources;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,13 +42,12 @@ public interface DataSourceBuilder {
 
 
     /**
-     * Print the DataSourceOptions out in a JSON format to the resonse.
+     * Print the DataSourceOptions out in a JSON format to the response.
      *
      * @param slingRequest the slingRequest
      * @param slingResponse the slingResponse
-     * @throws JSONException
      * @throws IOException
      */
     void writeDataSourceOptions(SlingHttpServletRequest slingRequest,
-                                SlingHttpServletResponse slingResponse) throws JSONException, IOException;
+                                SlingHttpServletResponse slingResponse) throws IOException;
 }

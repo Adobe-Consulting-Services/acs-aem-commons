@@ -19,10 +19,8 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
-import aQute.bnd.annotation.ConsumerType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -35,7 +33,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +41,10 @@ import com.adobe.acs.commons.genericlists.GenericList;
 import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import com.google.gson.Gson;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
 import org.apache.sling.spi.resource.provider.ResolveContext;
 import org.apache.sling.spi.resource.provider.ResourceContext;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
@@ -130,22 +131,13 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
         @Override
         public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
             if (type == InputStream.class) {
-                StringWriter buffer = new StringWriter();
                 try {
-                    JSONWriter writer = new JSONWriter(buffer);
-                    writer.object();
-                    writer.key("options");
-                    writer.array();
-                    for (Item item : list.getItems()) {
-                        writer.object();
-                        writer.key("text").value(item.getTitle());
-                        writer.key("value").value(item.getValue());
-                        writer.endObject();
-                    }
-                    writer.endArray();
-                    writer.endObject();
-                    return (AdapterType) new ByteArrayInputStream(buffer.toString().getBytes("UTF-8"));
-                } catch (Exception e) {
+                    Map<String, List<Item>> out = new HashMap<>();
+                    out.put("options", list.getItems());
+                    Gson gson = new Gson();
+                    String json = gson.toJson(out);
+                    return (AdapterType) new ByteArrayInputStream(json.getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
                     log.warn("Unable to generate JSON object.", e);
                     return null;
                 }
