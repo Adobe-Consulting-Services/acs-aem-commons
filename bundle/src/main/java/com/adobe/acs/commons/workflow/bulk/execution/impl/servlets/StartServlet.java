@@ -42,6 +42,8 @@ import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Start Servlet
  */
@@ -58,35 +60,7 @@ public class StartServlet extends SlingAllMethodsServlet {
 
     @Reference
     private BulkWorkflowEngine bulkWorkflowEngine;
-
-    private String getPropertyString(JsonObject obj, String name) {
-        return getOptPropertyString(obj, name, null);
-    }
-
-    private String getOptPropertyString(JsonObject obj, String name, String opt) {
-        if (obj.has(name)) {
-            return obj.get(name).getAsString();
-        } else {
-            return opt;
-        }
-    }
-
-    private int getOptPropertyInt(JsonObject obj, String name, int opt) {
-        if (obj.has(name)) {
-            return obj.get(name).getAsInt();
-        } else {
-            return opt;
-        }
-    }
     
-    private boolean getOptPropertyBoolean(JsonObject obj, String name, boolean opt) {
-        if (obj.has(name)) {
-            return obj.get(name).getAsBoolean();
-        } else {
-            return opt;
-        }
-    }    
-
     @Override
     @SuppressWarnings("squid:S1192")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -100,23 +74,23 @@ public class StartServlet extends SlingAllMethodsServlet {
             final JsonObject params = (JsonObject) gson.toJsonTree(request.getParameter("params"));
             final ModifiableValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
-            properties.put("runnerType", getPropertyString(params, "runnerType"));
-            properties.put("queryType", getPropertyString(params, "queryType"));
-            properties.put("queryStatement", getPropertyString(params, "queryStatement"));
-            properties.put("relativePath", StringUtils.removeStart(getOptPropertyString(params, "relativePath", ""), "/"));
-            properties.put("workflowModel", getPropertyString(params, "workflowModelId"));
-            properties.put("interval", getOptPropertyInt(params, "interval", 10));
-            properties.put("timeout", getOptPropertyInt(params, "timeout", 30));
-            properties.put("throttle", getOptPropertyInt(params, "throttle", 10));
-            properties.put("retryCount", getOptPropertyInt(params,"retryCount", 0));
-            properties.put("batchSize", getOptPropertyInt(params,"batchSize", 10));
-            String userEventData = getPropertyString(params, "userEventData");
+            properties.put("runnerType", getString(params, "runnerType"));
+            properties.put("queryType", getString(params, "queryType"));
+            properties.put("queryStatement", getString(params, "queryStatement"));
+            properties.put("relativePath", StringUtils.removeStart(getString(params, "relativePath", ""), "/"));
+            properties.put("workflowModel", getString(params, "workflowModelId"));
+            properties.put("interval", getInteger(params, "interval", 10));
+            properties.put("timeout", getInteger(params, "timeout", 30));
+            properties.put("throttle", getInteger(params, "throttle", 10));
+            properties.put("retryCount", getInteger(params,"retryCount", 0));
+            properties.put("batchSize", getInteger(params,"batchSize", 10));
+            String userEventData = getString(params, "userEventData");
             if (userEventData != null && !userEventData.isEmpty()) {
                 properties.put("userEventData", userEventData);
             }
 
-            properties.put("purgeWorkflow", getOptPropertyBoolean(params, "purgeWorkflow", false));
-            properties.put("autoThrottle", getOptPropertyBoolean(params, "autoThrottle", true));
+            properties.put("purgeWorkflow", getBoolean(params, "purgeWorkflow", false));
+            properties.put("autoThrottle", getBoolean(params, "autoThrottle", true));
 
             if (AEMWorkflowRunnerImpl.class.getName().equals(properties.get("runnerType", String.class))
                     && isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {

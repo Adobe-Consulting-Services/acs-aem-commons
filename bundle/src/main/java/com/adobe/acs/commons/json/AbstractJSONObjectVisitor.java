@@ -25,7 +25,12 @@ import com.google.gson.JsonObject;
 import java.util.Map.Entry;
 
 public abstract class AbstractJSONObjectVisitor {
-
+    private int currentDepth = 0;
+    
+    public int getCurrentDepth() {
+        return currentDepth;
+    }
+    
     /**
      * Visit the given JSON Object and all its descendants.
      *
@@ -34,7 +39,9 @@ public abstract class AbstractJSONObjectVisitor {
     public void accept(final JsonObject jsonObject) {
         if (jsonObject != null) {
             this.visit(jsonObject);
+            currentDepth++;
             this.traverseJSONObject(jsonObject);
+            currentDepth--;
         }
     }
 
@@ -45,7 +52,9 @@ public abstract class AbstractJSONObjectVisitor {
      */
     public void accept(final JsonArray jsonArray) {
         if (jsonArray != null) {
+            currentDepth++;
             this.traverseJSONArray(jsonArray);
+            currentDepth--;
         }
     }
 

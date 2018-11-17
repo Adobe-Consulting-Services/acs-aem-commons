@@ -52,6 +52,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+
 /**
  * ACS AEM Commons - CQInclude Property Namespace.
  */
@@ -240,20 +242,11 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
             return false;
         }
-
-
-        private String getProperty(JsonObject obj, String name) {
-            if (obj.has(name)) {
-                return obj.get(name).getAsString();
-            } else {
-                return "";
-            }
-        }
         
         protected boolean isCqincludeNamespaceWidget(JsonObject jsonObject) {
-            if (StringUtils.equals(getProperty(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
-                    && (StringUtils.equals(getProperty(jsonObject,PN_XTYPE), "cqinclude"))) {
-                String path = getProperty(jsonObject,PN_PATH);
+            if (StringUtils.equals(getString(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
+                    && (StringUtils.equals(getString(jsonObject,PN_XTYPE), "cqinclude"))) {
+                String path = getString(jsonObject,PN_PATH);
                 if (StringUtils.isNotBlank(path)
                         && path.matches(CQINCLUDE_NAMESPACE_URL_REGEX)) {
                     return true;
@@ -265,7 +258,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         }
 
         protected JsonObject makeMultiLevel(JsonObject jsonObject) {
-            String path = jsonObject.has(PN_PATH) ? jsonObject.get(PN_PATH).getAsString() : "";
+            String path = getString(jsonObject, PN_PATH);
             if (StringUtils.isNotBlank(path)) {
                 Pattern pattern = Pattern.compile(CQINCLUDE_NAMESPACE_URL_REGEX);
                 Matcher m = pattern.matcher(path);
@@ -282,7 +275,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         @Override
         protected void visit(JsonObject jsonObject) {
 
-            if (StringUtils.equals(getProperty(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
+            if (StringUtils.equals(getString(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
                 if (supportMultiLevel && isCqincludeNamespaceWidget(jsonObject)) {
                     jsonObject = makeMultiLevel(jsonObject);
                 }

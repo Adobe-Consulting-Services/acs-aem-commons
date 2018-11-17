@@ -348,7 +348,6 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      *
      * @param jsonObject the JSONObject to deserialize.
      * @return the list of SyntheticChildAsPropertyResources the jsonObject represents.
-     * @throws JSONException
      */
     protected final List<SyntheticChildAsPropertyResource> deserializeToSyntheticChildResources(JsonObject jsonObject) {
         final List<SyntheticChildAsPropertyResource> resources = new ArrayList<>();

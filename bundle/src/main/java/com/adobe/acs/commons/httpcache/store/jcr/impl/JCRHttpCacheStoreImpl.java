@@ -348,7 +348,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             CacheContent content = visitor.getCacheContentIfPresent();
 
             if (content != null) {
-                return IOUtils.toString(content.getInputDataStream());
+                return IOUtils.toString(content.getInputDataStream(), "UTF-8");
             } else {
                 return "not found";
             }

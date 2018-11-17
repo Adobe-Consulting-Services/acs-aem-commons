@@ -64,7 +64,7 @@ public class LongFormTextComponentImpl implements LongFormTextComponent {
         List<String> paragraphs = new ArrayList<String>();
 
         try {
-            final Document doc = htmlParser.parse(null, IOUtils.toInputStream(text), "UTF-8");
+            final Document doc = htmlParser.parse(null, IOUtils.toInputStream(text, "UTF-8"), "UTF-8");
             doc.getDocumentElement().normalize();
 
             TransformerFactory tf = TransformerFactory.newInstance();

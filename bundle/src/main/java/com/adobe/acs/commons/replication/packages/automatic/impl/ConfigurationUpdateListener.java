@@ -59,6 +59,8 @@ import com.day.cq.replication.Replicator;
 @Component(immediate = true)
 @Service(value = { EventHandler.class, AutomaticPackageReplicatorMBean.class })
 @Properties({
+            // TODO: Register a Resource Change Listener instead as per the deprecation notes
+            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
         @Property(name = EventConstants.EVENT_TOPIC, value = { SlingConstants.TOPIC_RESOURCE_ADDED,
                 SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_REMOVED }),
         @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),

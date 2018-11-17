@@ -46,8 +46,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
@@ -193,11 +193,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         map.put("p.limit", String.valueOf(limit));
         map.put("p.guessTotal", "true");
 
-        try {
-            log.debug("Lastmod QueryBuilder Map: {}", new JSONObject(map).toString(2));
-        } catch (JSONException e) {
-            // no-op
-        }
+        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2).toString());
 
         final Query query = queryBuilder.createQuery(PredicateGroup.create(map),
                 resourceResolver.adaptTo(Session.class));

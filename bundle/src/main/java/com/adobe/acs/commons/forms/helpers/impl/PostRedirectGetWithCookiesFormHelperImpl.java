@@ -37,6 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.logging.Level;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET-With-Cookies Form Helper
@@ -122,7 +126,12 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      */
     @Override
     protected final String encode(String unencoded) {
-        return StringUtils.isBlank(unencoded) ? "" : org.apache.sling.commons.json.http.Cookie.escape(unencoded);
+        try {
+            return StringUtils.isBlank(unencoded) ? "" : URLEncoder.encode(unencoded, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            java.util.logging.Logger.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return unencoded;
+        }
     }
 
     /**
@@ -133,7 +142,12 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      */
     @Override
     protected final String decode(String encoded) {
-        return StringUtils.isBlank(encoded) ? "" : org.apache.sling.commons.json.http.Cookie.unescape(encoded);
+        try {
+            return StringUtils.isBlank(encoded) ? "" : URLDecoder.decode(encoded, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            return encoded;
+        }
     }
 
     /**
