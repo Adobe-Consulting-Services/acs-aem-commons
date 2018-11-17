@@ -19,8 +19,12 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.util.AemCapabilityHelper;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -36,10 +40,7 @@ import org.apache.sling.commons.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 
 //@formatter:off
 @Component(
@@ -85,9 +86,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     public static final String PROP_IMMEDIATE = "immediate";
 
     @Reference
-    private AemCapabilityHelper capabilityHelper;
-
-    @Reference
     private ChecksumGenerator checksumGenerator;
 
     @Reference
@@ -105,11 +103,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     @Activate
     protected final void activate(Map<String, Object> config) throws RepositoryException {
-
-        if (!capabilityHelper.isOak()) {
-            log.info("Cowardly refusing to create indexes on non-Oak instance.");
-            return;
-        }
 
         ensureDefinitionsPath = PropertiesUtil.toString(config.get(PROP_ENSURE_DEFINITIONS_PATH),
                 DEFAULT_ENSURE_DEFINITIONS_PATH);

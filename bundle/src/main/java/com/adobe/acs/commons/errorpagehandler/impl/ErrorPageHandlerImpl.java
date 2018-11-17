@@ -530,7 +530,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         if (!StringUtils.equals(path, errorResource.getPath())) {
             // Only resolve the resource if the path of the errorResource is different from the cleaned up path; else
             // we know the errorResource and what the path resolves to is the same
-            resource = resourceResolver.resolve(request, path);
+            // #1415 - First try to get the resource at the direct path; this look-up is very fast (compared to rr.resolve and often what's required)
+            resource = resourceResolver.getResource(path);
+
+            if (resource == null) {
+                // #1415 - If the resource is not available at the direct path, then try to resolve (handle sling:alias).
+                // First map the path, as the resolve could duplicate pathing.
+                resource = resourceResolver.resolve(request, resourceResolver.map(request, path));
+            }
         }
 
         // If the resource exists, then use it!
@@ -553,6 +560,13 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         for (int i = parts.length - 1; i >= 0; i--) {
             String[] tmpArray = (String[]) ArrayUtils.subarray(parts, 0, i);
             String candidatePath = "/".concat(StringUtils.join(tmpArray, '/'));
+
+            // #1415 - First try to get the resource at the direct path; this look-up is
+            // very fast (compared to rr.resolve and often what's required)
+            final Resource candidatePathResource = resourceResolver.getResource(candidatePath);
+            if (candidatePathResource != null) {
+                return candidatePathResource;
+            }
 
             final Resource candidateResource = resourceResolver.resolve(request, candidatePath);
 
@@ -776,6 +790,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         request.setAttribute("com.adobe.granite.ui.clientlibs.HtmlLibraryManager.included",
                 new HashSet<String>());
 
+        //Reset the component context attribute to remove inclusion of response from top level components
+        request.removeAttribute("com.day.cq.wcm.componentcontext");
+
         // Clear the response
         response.reset();
         response.setContentType("text/html");
@@ -891,10 +908,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver serviceResourceResolver = null;
-            try {
-                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
                 final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
@@ -909,10 +924,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 

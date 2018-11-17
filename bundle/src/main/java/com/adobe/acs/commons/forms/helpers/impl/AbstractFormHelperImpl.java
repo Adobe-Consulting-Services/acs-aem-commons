@@ -120,17 +120,11 @@ public abstract class AbstractFormHelperImpl {
     public final String getAction(final String path, final String formSelector) {
         String actionPath = path;
 
-        ResourceResolver serviceResourceResolver = null;
-        try {
-            serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             actionPath = serviceResourceResolver.map(path);
         } catch (LoginException e) {
             log.error("Could not attain an admin ResourceResolver to map the Form's Action URI");
             // Use the unmapped ActionPath
-        } finally {
-            if (serviceResourceResolver != null && serviceResourceResolver.isLive()) {
-                serviceResourceResolver.close();
-            }
         }
 
         actionPath += FormHelper.EXTENSION + this.getSuffix();

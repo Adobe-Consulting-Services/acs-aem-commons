@@ -58,6 +58,7 @@ public class DataImporter extends ProcessDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataImporter.class);
     private static final String PATH = "path";
+    private boolean enableHeaderNameConversion = false;
 
     public enum MergeMode {
         CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
@@ -169,7 +170,7 @@ public class DataImporter extends ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
-            data = new Spreadsheet(importFile, PATH);
+            data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH);
             if (presortData) {
                 Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
             }

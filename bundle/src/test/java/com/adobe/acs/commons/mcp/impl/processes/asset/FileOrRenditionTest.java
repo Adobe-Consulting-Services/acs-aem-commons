@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.Source;
+import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -38,10 +38,13 @@ public class FileOrRenditionTest {
     }
     
     Folder testFolder;
+    ClientProvider clientProvider;
     
     @Before
     public void setUp() {
-        testFolder = new Folder("test", "/");
+        testFolder = new Folder("test", "/", "");
+        clientProvider = new ClientProvider();
+        clientProvider.setHttpClientSupplier(()->null);
     }
 
     /**
@@ -49,8 +52,8 @@ public class FileOrRenditionTest {
      */
     @Test
     public void testRenditionBehavior() {
-        FileOrRendition asset = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
-        FileOrRendition rendition = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition asset = new FileOrRendition(clientProvider, "name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition rendition = new FileOrRendition(clientProvider, "name", "url", testFolder, Collections.EMPTY_MAP);
         rendition.setAsRenditionOfImage("testRendition", "original asset");
         asset.addRendition(rendition);
         assertEquals("original asset", rendition.getOriginalAssetName());
@@ -65,7 +68,7 @@ public class FileOrRenditionTest {
      */
     @Test
     public void testAssetBehavior() {
-        FileOrRendition instance = new FileOrRendition(()->null, "name", "url", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition instance = new FileOrRendition(clientProvider, "name", "url", testFolder, Collections.EMPTY_MAP);
         assertNull("No rendition name present", instance.getOriginalAssetName());
         assertNotNull("Renditions data strucutre always present", instance.getRenditions());
         assertTrue("Is a file", instance.isFile());
@@ -80,7 +83,7 @@ public class FileOrRenditionTest {
     public void testFileSource() throws MalformedURLException, IOException {
         String basePath = new File(".").toURI().toURL().toString();
         
-        FileOrRendition instance = new FileOrRendition(()->null, "name", basePath+"/pom.xml", testFolder, Collections.EMPTY_MAP);
+        FileOrRendition instance = new FileOrRendition(clientProvider, "name", basePath+"/pom.xml", testFolder, Collections.EMPTY_MAP);
         Source fileSource = instance.getSource();
         assertEquals(instance, fileSource.getElement());
         assertEquals("name", fileSource.getName());

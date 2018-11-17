@@ -211,7 +211,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheConfigExtension")
-    private HttpCacheConfigExtension cacheConfigExtension;
+    private volatile HttpCacheConfigExtension cacheConfigExtension;
 
     // Making the cache key factory configurable.
     @Property(name = "cacheKeyFactory.target",
@@ -224,7 +224,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheKeyFactory")
-    private CacheKeyFactory cacheKeyFactory;
+    private volatile CacheKeyFactory cacheKeyFactory;
 
 
     @Property(label = "Config-specific HttpCacheHandlingRules",

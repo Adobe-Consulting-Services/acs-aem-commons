@@ -36,6 +36,9 @@ import aQute.bnd.annotation.ConsumerType;
 @FunctionalInterface
 @SuppressWarnings("squid:S00112")
 public interface CheckedBiFunction<T, U, R> {
+    static <T,U,R> CheckedBiFunction<T, U, R> from(java.util.function.BiFunction<T,U,R> function) {
+        return function == null ? null : (t, u) -> function.apply(t, u);
+    }
 
     /**
      * Applies this function to the given arguments.

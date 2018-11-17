@@ -28,7 +28,7 @@ import org.apache.felix.scr.annotations.Service;
         label = "ACS AEM Commons - Shared Component Properties",
         description = "Create an OSGi configuration to enable Shared Component Properties",
         policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+        metatype = false
 )
 @Service
 public class SharedComponentPropertiesImpl implements SharedComponentProperties {

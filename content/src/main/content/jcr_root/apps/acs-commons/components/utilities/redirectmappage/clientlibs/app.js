@@ -30,6 +30,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
         $scope.filteredEntries = [];
         $scope.invalidEntries = [];
         $scope.redirectMap = '';
+        $scope.currentEntry = null;
         
 
         $scope.addEntry = function(){
@@ -133,6 +134,20 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
                 window.open('/mnt/overlay/dam/gui/content/assets/metadataeditor.external.html?_charset_=utf-8&item='+path,'_blank');
             }
         };
+
+        $scope.editItem = function(id){
+            $scope.entries.forEach(function(el){
+                if(el.id == id){
+                    console.log('Editing entry: '+id);
+                    document.querySelector('input[name=edit-source]').value = el.source;
+                    document.querySelector('input[name=edit-target]').value = el.target;
+                    document.querySelector('input[name=edit-id]').value = id;
+                }
+            });
+            
+            var dialog = document.querySelector('#edit-entry');
+            dialog.show();
+        };
         
         $scope.postValues = function (e, id) {
             e.preventDefault();
@@ -146,8 +161,17 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             });
             return false;
         };
+        
+        $scope.removeAlert = function(id){
+            $scope.currentEntry = id;
 
-        $scope.removeLine = function(idx){
+            var dialog = document.querySelector('#remove-confirm');
+            dialog.show();
+        };
+
+        $scope.removeLine = function(){
+            
+            var idx = $scope.currentEntry;
             var start = new Date().getTime();
             NotificationsService.running(true);
             $scope.entries = [];
@@ -168,6 +192,32 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
             }).error(function (data, status, headers, config) {
                 NotificationsService.running(false);
                 NotificationsService.add('error', 'ERROR', 'Unable remove entry '+idx+'!');
+            });
+        };
+        
+        $scope.saveLine = function() {
+            var dialog = document.querySelector('#edit-entry');
+            var start = new Date().getTime();
+            NotificationsService.running(true);
+            $scope.entries = [];
+            $scope.invalidEntries = [];
+            $http({
+                method: 'POST',
+                url: $scope.app.uri+'.updateentry.json?'+$('#update-form').serialize()
+            }).success(function (data, status, headers, config) {
+                var time = new Date().getTime() - start;
+                data.time=time;
+                $scope.entries = data.entries || [];
+                $scope.invalidEntries = data.invalidEntries || [];
+                $scope.filterEntries();
+                NotificationsService.running(false);
+                NotificationsService.add('success', 'SUCCESS', 'Entry updated!');
+                $scope.loadRedirectMap();
+                dialog.hide();
+            }).error(function (data, status, headers, config) {
+                NotificationsService.running(false);
+                NotificationsService.add('error', 'ERROR', 'Unable to update entry!');
+                dialog.hide();
             });
         };
 

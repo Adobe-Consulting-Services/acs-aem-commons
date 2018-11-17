@@ -30,14 +30,14 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
-import static com.adobe.acs.commons.mcp.impl.processes.RefreshFolderTumbnails.ThumbnailScanLogic.*;
 import java.util.HashMap;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import org.mockito.stubbing.Answer;
 import org.mockito.invocation.InvocationOnMock;
+
+import static com.adobe.acs.commons.mcp.impl.processes.RefreshFolderTumbnails.ThumbnailScanLogic.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Assert that folders will be detected or skipped in different cases

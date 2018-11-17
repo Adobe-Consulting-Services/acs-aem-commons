@@ -35,6 +35,7 @@ import javax.jcr.RepositoryException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -72,6 +73,9 @@ public class ReportRunnerTest {
 
     @Mock
     private SlingHttpServletRequest invalidRequest;
+
+    @Mock
+    private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private MockReportExecutor exec = new MockReportExecutor();
 
@@ -117,12 +121,14 @@ public class ReportRunnerTest {
                     }
                 }));
 
+        when(dynamicClassLoaderManager.getDynamicClassLoader()).thenReturn(this.getClass().getClassLoader());
+
     }
 
     @Test
     public void testInvalid() throws RepositoryException {
         log.info("testInvalid");
-        ReportRunner reportRunner = new ReportRunner(invalidRequest);
+        ReportRunner reportRunner = new ReportRunner(invalidRequest, dynamicClassLoaderManager);
         reportRunner.init();
         assertEquals("No configurations found!", reportRunner.getFailureMessage());
         assertFalse(reportRunner.isSuccessful());
@@ -132,7 +138,7 @@ public class ReportRunnerTest {
     @Test
     public void testReportRunner() throws RepositoryException {
         log.info("testReportRunner");
-        ReportRunner reportRunner = new ReportRunner(validRequest);
+        ReportRunner reportRunner = new ReportRunner(validRequest, dynamicClassLoaderManager);
         reportRunner.init();
         assertTrue(reportRunner.isSuccessful());
         assertNull(reportRunner.getFailureMessage());

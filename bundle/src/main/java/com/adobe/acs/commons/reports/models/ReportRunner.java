@@ -27,7 +27,10 @@ import javax.jcr.RepositoryException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +52,26 @@ public class ReportRunner {
 
   private ReportExecutor reportExecutor;
 
+  @Self
   private SlingHttpServletRequest request;
 
   private boolean succeeded = true;
 
+  @OSGiService
+  private DynamicClassLoaderManager dynamicClassLoaderManager;
+
   public ReportRunner(SlingHttpServletRequest request) {
     this.request = request;
+  }
+
+  /**
+   * Used only for testing.
+   * @param request the request this model should adapt from.
+   * @param dynamicClassLoaderManager the dynamic class loader to resolve the parameter ReportRunner.
+   */
+  ReportRunner(SlingHttpServletRequest request, DynamicClassLoaderManager dynamicClassLoaderManager) {
+    this(request);
+    this.dynamicClassLoaderManager = dynamicClassLoaderManager;
   }
 
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
@@ -63,7 +80,7 @@ public class ReportRunner {
     if (StringUtils.isNotBlank(reportExecutorClass)) {
       log.debug("Loading class for: {}", reportExecutorClass);
       try {
-        Class<?> exClass = getClass().getClassLoader().loadClass(reportExecutorClass);
+        Class<?> exClass = Class.forName(reportExecutorClass, true, dynamicClassLoaderManager.getDynamicClassLoader());
         Object model = request.adaptTo(exClass);
         if (model instanceof ReportExecutor) {
           ReportExecutor ex = (ReportExecutor) model;

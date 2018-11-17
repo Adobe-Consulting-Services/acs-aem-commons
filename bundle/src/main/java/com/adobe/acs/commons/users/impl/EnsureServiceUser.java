@@ -112,11 +112,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     public void ensure(Operation operation, AbstractAuthorizable serviceUser) throws EnsureAuthorizableException {
         final long start = System.currentTimeMillis();
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             if (Operation.ADD.equals(operation)) {
                 ensureExistance(resourceResolver, (ServiceUser) serviceUser);
             } else if (Operation.REMOVE.equals(operation)) {
@@ -140,10 +136,6 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
                     operation.toString(), serviceUser.getPrincipalName()), e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

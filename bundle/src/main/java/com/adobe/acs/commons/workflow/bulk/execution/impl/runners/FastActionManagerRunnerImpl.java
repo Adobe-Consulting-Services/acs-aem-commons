@@ -190,11 +190,9 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
         @Override
         @SuppressWarnings({"squid:S3776", "squid:S1141", "squid:S1854"})
         public void run() {
-            ResourceResolver resourceResolver;
             Resource configResource;
 
-            try {
-                resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
                 configResource = resourceResolver.getResource(configPath);
 

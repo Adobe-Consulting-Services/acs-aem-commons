@@ -132,8 +132,8 @@ public class BrokenLinksReport extends ProcessDefinition implements Serializable
     public void buildReport(ActionManager manager) {
         TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
         visitor.setBreadthFirstMode();
-        visitor.setTraversalFilter(null);
-        visitor.setResourceVisitor((resource, depth) -> {
+        visitor.setTraversalFilterChecked(null);
+        visitor.setResourceVisitorChecked((resource, depth) -> {
             manager.deferredWithResolver(rr -> {
                 Map<String, List<String>> brokenRefs = collectBrokenReferences(resource, regex, excludeList, deepCheckList);
                 for(Map.Entry<String, List<String>> ref : brokenRefs.entrySet()){

@@ -74,9 +74,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
         PrintWriter pw = resp.getWriter();
 
-        ResourceResolver resolver = null;
-        try {
-            resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             pw.println("<p class='statline ui-state-highlight'>Inbox Notification Configurations</p>");
             pw.println("<ul>");
@@ -115,10 +113,6 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
         } catch (Exception e) {
             throw new ServletException(e);
-        } finally {
-            if (resolver != null && resolver.isLive()) {
-                resolver.close();
-            }
         }
     }
     
@@ -126,10 +120,8 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getParameter("path");
         if (path != null) {
-            ResourceResolver resolver = null;
-            try {
+            try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(AUTH_INFO)){
                 int counter = 0;
-                resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
                 Session session = resolver.adaptTo(Session.class);
                 Node node = session.getNode(path);
                 NodeIterator it = node.getNodes();
@@ -142,10 +134,6 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
                 resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>%n", counter);
             } catch (Exception e) {
                 throw new ServletException(e);
-            } finally {
-                if (resolver != null && resolver.isLive()) {
-                    resolver.close();
-                }
             }
         }
         resp.sendRedirect((String) req.getAttribute("felix.webconsole.pluginRoot"));

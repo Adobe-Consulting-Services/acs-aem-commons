@@ -64,6 +64,9 @@ import org.slf4j.LoggerFactory;
  */
 public class UrlAssetImport extends AssetIngestor {
 
+    private static final String ACTION_SKIPPED = "Skipped";
+    private static final String ACTION_UNMATCHED = "Unmatched";
+    private static final String ACTION_IMPORT = "Import";
     public static String SOURCE = "source";
     public static String TARGET_FOLDER = "target";
     public static String ORIGINAL_FILE_NAME = "original";
@@ -103,14 +106,30 @@ public class UrlAssetImport extends AssetIngestor {
             options = ("default=30000")
     )
     private int timeout = 30000;
+    
+    @FormField(
+            name = "Username",
+            description = "Username for connections that require login",
+            required = false
+    )
+    private String username = null;
+
+        @FormField(
+            name = "Password",
+            description = "Password for connections that require login",
+            required = false
+    )
+    private String password = null;
 
     transient Set<FileOrRendition> files;
     transient Map<String, Folder> folders = new TreeMap<>((a, b) -> b.compareTo(a));
+    
+    private ClientProvider clientProvider = new ClientProvider();
 
     Spreadsheet fileData;
 
     EnumMap<ReportColumns, Object> importedRenditions
-            = trackDetailedActivity("All Renditions", "Import", "Count of all rendition imports", 0L);
+            = trackDetailedActivity("All Renditions", ACTION_IMPORT, "Count of all rendition imports", 0L);
 
     @Override
     public void init() throws RepositoryException {
@@ -127,6 +146,9 @@ public class UrlAssetImport extends AssetIngestor {
                             .build()
             );
             httpClient = clientBuilder.build();
+            clientProvider.setHttpClientSupplier(this::getHttpClient);
+            clientProvider.setUsername(username);
+            clientProvider.setPassword(password);
         }
     }
 
@@ -135,29 +157,29 @@ public class UrlAssetImport extends AssetIngestor {
         try {
             fileData = new Spreadsheet(importFile);
             files = extractFilesAndFolders(fileData.getDataRowsAsCompositeVariants());
-            instance.getInfo().setDescription("Import " + fileData.getFileName() + " (" + fileData.getRowCount() + " rows)");
+            instance.getInfo().setDescription(String.format("Import %s (%s rows)",  fileData.getFileName(), fileData.getRowCount()));
         } catch (IOException ex) {
             LOG.error("Unable to process import", ex);
-            instance.getInfo().setDescription("Import " + fileData.getFileName() + " (failed)");
+            instance.getInfo().setDescription(String.format("Import %s (failed)", fileData.getFileName()));
             throw new RepositoryException("Unable to parse input file", ex);
         }
         trackUnmatchedRenditions();
         trackIgnoredFiles();
         instance.defineCriticalAction("Create Folders", rr, this::createFolders);
-        instance.defineAction("Import " + files.size() + " Assets", rr, this::importAssets);
+        instance.defineAction(String.format("Import %s Assets", files.size()), rr, this::importAssets);
         int countOfRenditions = files.stream().map(FileOrRendition::getRenditions).mapToInt(Map::size).sum();
         if (countOfRenditions > 0) {
-            instance.defineAction("Import " + countOfRenditions + " Renditions", rr, this::importRenditions);
+            instance.defineAction(String.format("Import %s Renditions", countOfRenditions), rr, this::importRenditions);
         }
         instance.defineAction("Update Metadata", rr, this::updateMetadata);
     }
 
     private void trackIgnoredFiles() {
         files.stream().filter(f -> !canImportContainingFolder(f)).forEach(file -> {
-            trackDetailedActivity(file.getNodePath(), "Skipped", "Skipped file because its folder is also skipped", 0L);
+            trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file because its folder is also skipped", 0L);
             incrementCount(skippedFiles, 1 + file.getRenditions().size());
             file.getRenditions().forEach((renditionName, rendition)
-                    -> trackDetailedActivity(rendition.getNodePath(), "Skipped", "Skipped rendition " + renditionName + " because its parent file is skipped", 0L));
+                    -> trackDetailedActivity(rendition.getNodePath(), ACTION_SKIPPED, "Skipped rendition " + renditionName + " because its parent file is skipped", 0L));
             file.getRenditions().clear();
         });
     }
@@ -165,7 +187,7 @@ public class UrlAssetImport extends AssetIngestor {
     private void trackUnmatchedRenditions() {
         unmatchedRenditions.forEach(row -> {
             long rowNumber = this.fileData.getRowNum(row);
-            trackDetailedActivity(row.get(SOURCE).toString(), "Unmatched", "Unable to track original asset for rendition, row " + rowNumber, 0L);
+            trackDetailedActivity(row.get(SOURCE).toString(), ACTION_UNMATCHED, "Unable to track original asset for rendition, row " + rowNumber, 0L);
             incrementCount(skippedFiles, 1);
         });
     }
@@ -198,7 +220,7 @@ public class UrlAssetImport extends AssetIngestor {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             folders.values().forEach(f
                     -> manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
-                        manager.setCurrentItem(f.getItemName());
+                        manager.setCurrentItem(f.getSourcePath());
                         createFolderNode(f, rr);
                     }))
             );
@@ -217,10 +239,10 @@ public class UrlAssetImport extends AssetIngestor {
                         manager.deferredWithResolver(Actions.retry(5, 100, importAsset(file.getSource(), manager)));
                     } else if (file.getSource().getLength() < 0) {
                         incrementCount(skippedFiles, 1);
-                        throw new IOException("Unable to download " + file.getUrl());
+                        throw new IOException("Unable to download " + file.getSourcePath());
                     } else {
                         incrementBytes(
-                                trackDetailedActivity(file.getNodePath(), "Skipped", "Skipped file of either file size or extension", 0L),
+                                trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file of either file size or extension", 0L),
                                 file.getSource().getLength()
                         );
                         incrementCount(skippedFiles, 1);
@@ -235,6 +257,38 @@ public class UrlAssetImport extends AssetIngestor {
     protected void importRenditions(ActionManager manager) throws IOException {
         manager.setCurrentItem(jcrBasePath);
         files.stream().filter(this::canImportContainingFolder).forEach(file -> importRenditions(file, manager));
+    }
+
+    private void importRenditions(FileOrRendition file, ActionManager manager) {
+        file.getRenditions().forEach((rendition, renditionFile) -> {
+            manager.deferredWithResolver(Actions.retry(5, 500, rr -> {
+                try {
+                    long lineNumber = fileData.getRowNum(renditionFile.getProperties());
+                    manager.setCurrentItem(String.format("Rendition %s (line %s)", renditionFile.getItemName(), lineNumber));
+
+                    String renditionName = rendition;
+                    String type = mimetypeService.getMimeType(renditionFile.getName());
+                    String extension = renditionFile.getName().substring(renditionFile.getName().lastIndexOf('.') + 1).toLowerCase();
+                    if (renditionName.lastIndexOf('.') <= 0) {
+                        renditionName += "." + extension;
+                    }
+                    if (!dryRunMode) {
+                        commitAndRefresh(rr);
+                        Resource assetResource = rr.getResource(file.getNodePath());
+                        if (assetResource == null) {
+                            throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath());
+                        }
+                        Asset asset = assetResource.adaptTo(Asset.class);
+                        asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
+                    }
+                    incrementCount(importedRenditions, 1L);
+                    incrementBytes(importedData, renditionFile.getSource().getLength());
+                    trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
+                } finally {
+                    renditionFile.getSource().close();
+                }
+            }));
+        });
     }
 
     protected void updateMetadata(ActionManager manager) throws IOException {
@@ -280,38 +334,6 @@ public class UrlAssetImport extends AssetIngestor {
         }
     }
 
-    private void importRenditions(FileOrRendition file, ActionManager manager) {
-        file.getRenditions().forEach((rendition, renditionFile) -> {
-            manager.deferredWithResolver(Actions.retry(5, 500, rr -> {
-                try {
-                    long lineNumber = fileData.getRowNum(renditionFile.getProperties());
-                    manager.setCurrentItem(String.format("Rendition %s (line %s)", renditionFile.getItemName(), lineNumber));
-
-                    String renditionName = rendition;
-                    String type = mimetypeService.getMimeType(renditionFile.getName());
-                    String extension = renditionFile.getName().substring(renditionFile.getName().lastIndexOf('.') + 1).toLowerCase();
-                    if (renditionName.lastIndexOf('.') <= 0) {
-                        renditionName += "." + extension;
-                    }
-                    if (!dryRunMode) {
-                        commitAndRefresh(rr);
-                        Resource assetResource = rr.getResource(file.getNodePath());
-                        if (assetResource == null) {
-                            throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath());
-                        }
-                        Asset asset = assetResource.adaptTo(Asset.class);
-                        asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
-                    }
-                    incrementCount(importedRenditions, 1L);
-                    incrementBytes(importedData, renditionFile.getSource().getLength());
-                    trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
-                } finally {
-                    renditionFile.getSource().close();
-                }
-            }));
-        });
-    }
-
     private Folder extractFolder(Map<String, CompositeVariant> assetData) {
         String folderPath = getTargetFolder(assetData);
         if (!folders.containsKey(folderPath)) {
@@ -323,8 +345,8 @@ public class UrlAssetImport extends AssetIngestor {
                 String treePath = currentPath + "/" + parts[i];
                 if (!folders.containsKey(treePath)) {
                     Folder folder = parent == null
-                            ? new Folder(parts[i], jcrBasePath)
-                            : new Folder(parts[i], parent);
+                            ? new Folder(parts[i], jcrBasePath, assetData.get(SOURCE).toString())
+                            : new Folder(parts[i], parent, assetData.get(SOURCE).toString());
                     folders.put(treePath, folder);
                     parent = folder;
                 } else {
@@ -346,7 +368,7 @@ public class UrlAssetImport extends AssetIngestor {
         }
         String name = source.substring(source.lastIndexOf('/') + 1);
         Folder folder = extractFolder(assetData);
-        FileOrRendition file = new FileOrRendition(this::getHttpClient, name, source, folder, assetData);
+        FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
 
         file.setAsRenditionOfImage(
                 assetData.get(RENDITION_NAME) == null ? null : assetData.get(RENDITION_NAME).toString(),

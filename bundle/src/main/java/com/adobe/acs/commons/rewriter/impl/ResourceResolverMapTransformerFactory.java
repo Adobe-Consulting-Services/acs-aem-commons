@@ -21,6 +21,8 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -35,6 +37,8 @@ import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -64,6 +68,8 @@ import java.util.Map;
 })
 @Service
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(ResourceResolverMapTransformerFactory.class);
 
     private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src"};
     private Map<String, String[]> attributes;
@@ -95,7 +101,13 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
                 final String attrValue = newAttrs.getValue(i);
                 if (StringUtils.startsWith(attrValue, "/") && !StringUtils.startsWith(attrValue, "//")) {
                     // Only map absolute paths (starting w /), avoid relative-scheme URLs starting w //
-                    newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, attrValue));
+                    try {
+                        final String attrValueDecoded = new URLCodec().decode(attrValue);
+                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, attrValueDecoded));
+                    } catch (DecoderException e) {
+                        log.error("Could not decode the attribute value", e);
+                        newAttrs.setValue(i, slingRequest.getResourceResolver().map(slingRequest, attrValue));
+                    }
                 }
             }
         }
