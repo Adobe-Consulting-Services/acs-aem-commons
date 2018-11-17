@@ -53,13 +53,10 @@ import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
 import com.day.cq.dam.video.VideoProfile;
 
-
-
 @Component(name = "ACS AEM Commons - Watson Transcription Workflow Process", service=WorkflowExternalProcess.class,properties= {
                    "process.name=Generate Audio Transcript with IBM Watson"
            },configurationPolicy=ConfigurationPolicy.REQUIRE)
 @Designate(ocd=TranscriptionProcess.Config.class)
-
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);
