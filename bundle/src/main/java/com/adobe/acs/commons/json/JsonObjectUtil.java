@@ -20,12 +20,19 @@
 package com.adobe.acs.commons.json;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.jcr.Node;
+import org.apache.sling.api.resource.Resource;
 
 /**
  * Provide convenience methods to help use GSON JsonObjects similar to the
@@ -37,17 +44,27 @@ public class JsonObjectUtil {
         // private constructor for a utility class
     }
 
+    public static JsonObject toJsonObject(String json) {
+        JsonParser parse = new JsonParser();
+        return parse.parse(json).getAsJsonObject();
+    }
+
+    public static JsonObject toJsonObject(Resource resource) {
+        return toJsonObject(resource.adaptTo(Node.class));
+    }
+
     public static JsonObject toJsonObject(Object source) {
         if (source instanceof String) {
-            JsonParser parse = new JsonParser();
-            return parse.parse((String) source).getAsJsonObject();
+            return toJsonObject((String) source);
+        } else if (source instanceof Resource) {
+            return toJsonObject((Resource) source);
         } else {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Node.class, new JcrJsonAdapter()).create();
             return gson.toJsonTree(source).getAsJsonObject();
         }
     }
     
-    public static JsonObject toJsonObject(Object source, int depth) {        
+    public static <T> JsonObject toJsonObject(T source, int depth) {
         JsonObject obj = toJsonObject(source);
         pruneToDepth(obj, depth);
         return obj;
@@ -58,14 +75,15 @@ public class JsonObjectUtil {
             @Override
             protected void visit(JsonObject jsonObject) {
                 if (getCurrentDepth() >= depth) {
-                    jsonObject.entrySet().forEach(e -> jsonObject.remove(e.getKey()));
+                    Set<String> allKeys = jsonObject.entrySet().stream().map(Entry::getKey).collect(Collectors.toSet());
+                    allKeys.forEach(jsonObject::remove);
                 }
             }
         };
         prune.accept(obj);        
     }
     
-    public static String getAsJsonString(Object source, int depth) {
+    public static <T> String getAsJsonString(T source, int depth) {
         Gson gson = new Gson();
         JsonObject object = toJsonObject(source, depth);
         return gson.toJson(object);

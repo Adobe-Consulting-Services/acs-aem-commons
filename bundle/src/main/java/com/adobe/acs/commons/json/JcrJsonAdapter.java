@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.json;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

@@ -19,13 +19,11 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.util.JcrJsonAdapter;
+import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 
-import javax.jcr.Node;
 import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -48,11 +46,6 @@ public abstract class AbstractWidgetConfigurationServlet extends SlingSafeMethod
         return componentPath.matches(pattern);
     }
 
-    protected JsonObject toJSONObject(Resource resource) throws ServletException {
-        Gson gson = new GsonBuilder().registerTypeAdapter(Node.class, new JcrJsonAdapter()).create();
-        return (JsonObject) gson.toJsonTree(resource.adaptTo(Node.class));
-    }
-
     protected void writeEmptyWidget(String propertyName, SlingHttpServletResponse response) throws IOException {
         Gson gson = new Gson();
         JsonObject rte = createEmptyWidget(propertyName);
@@ -72,7 +65,7 @@ public abstract class AbstractWidgetConfigurationServlet extends SlingSafeMethod
      */
     protected final JsonObject underlay(JsonObject config, Resource resource)
             throws ServletException {
-        JsonObject baseStructure = toJSONObject(resource);
+        JsonObject baseStructure = JsonObjectUtil.toJSONObject(resource);
         if (baseStructure != null) {
             config.entrySet().forEach(e -> baseStructure.add(e.getKey(), e.getValue()));
             return baseStructure;
