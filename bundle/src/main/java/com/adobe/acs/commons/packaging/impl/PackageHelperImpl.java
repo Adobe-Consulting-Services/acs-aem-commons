@@ -65,8 +65,6 @@ public final class PackageHelperImpl implements PackageHelper {
 
     private static final String NN_THUMBNAIL = "thumbnail.png";
 
-//    private static final String JSON_EXCEPTION_MSG
-//            = "{\"status\": \"error\", \"msg\": \"Error creating JSON response.\"}";
     private static final String KEY_STATUS = "status";
     private static final String KEY_MSG = "msg";
     private static final String KEY_PATH = "path";
