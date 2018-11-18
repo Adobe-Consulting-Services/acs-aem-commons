@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.http;
 
+import com.adobe.acs.commons.json.JsonObjectUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -43,7 +44,6 @@ public class JsonObjectResponseHandler implements ResponseHandler<JsonElement> {
         if (json == null) {
             return null;
         }
-        Gson gson = new Gson();
-        return gson.toJsonTree(json);
+        return JsonObjectUtil.toJsonObject(json);
     }
 }

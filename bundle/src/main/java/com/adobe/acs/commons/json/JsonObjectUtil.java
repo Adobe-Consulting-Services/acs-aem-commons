@@ -18,6 +18,8 @@ package com.adobe.acs.commons.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -32,8 +34,13 @@ public class JsonObjectUtil {
     }
 
     public static JsonObject toJsonObject(Object source) {
-        Gson gson = new Gson();
-        return gson.toJsonTree(source).getAsJsonObject();        
+        if (source instanceof String) {
+            JsonParser parse = new JsonParser();
+            return parse.parse((String) source).getAsJsonObject();
+        } else {
+            Gson gson = new Gson();
+            return gson.toJsonTree(source).getAsJsonObject();
+        }
     }
     
     public static JsonObject toJsonObject(Object source, int depth) {        

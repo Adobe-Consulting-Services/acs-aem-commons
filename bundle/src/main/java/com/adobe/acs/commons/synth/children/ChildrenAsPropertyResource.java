@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.synth.children;
 
+import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -301,8 +302,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
 
         List<SyntheticChildAsPropertyResource> resources;
 
-        Gson gson = new Gson();       
-        resources = deserializeToSyntheticChildResources(gson.toJsonTree(propertyData).getAsJsonObject());
+        resources = deserializeToSyntheticChildResources(JsonObjectUtil.toJsonObject(propertyData));
 
         if (this.comparator != null) {
             Collections.sort(resources, this.comparator);

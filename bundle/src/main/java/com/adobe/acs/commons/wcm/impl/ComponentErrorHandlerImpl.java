@@ -208,7 +208,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         if (editModeEnabled
                 && (modeHelper.isEdit(request)
                 || modeHelper.isDesign(request)
-                || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
+                || ModeUtil.isAnalytics(slingRequest))) {
             // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
         } else if (previewModeEnabled

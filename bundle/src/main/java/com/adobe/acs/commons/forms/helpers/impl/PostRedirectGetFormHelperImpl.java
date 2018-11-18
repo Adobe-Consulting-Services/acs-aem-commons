@@ -23,6 +23,7 @@ import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
 import com.adobe.acs.commons.forms.impl.FormImpl;
+import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.day.cq.wcm.api.Page;
 
 import com.google.gson.Gson;
@@ -207,7 +208,7 @@ public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implem
 
         try {
             Gson gson = new Gson();
-            final JsonObject jsonData = (JsonObject) gson.toJsonTree(requestData);
+            final JsonObject jsonData = JsonObjectUtil.toJsonObject(requestData);
 
             final String incomingFormName = getString(jsonData, KEY_FORM_NAME);
 

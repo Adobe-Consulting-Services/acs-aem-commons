@@ -93,10 +93,11 @@ public class TypeUtilTest {
         json.addProperty("two", 2);
         json.addProperty("three", new Long(3));
 
+        // TODO: Find a way to coerce GSON to not treat all numbers as Double, but that's what it does, unavoidably.
         final Map<String, Object> expResult = new HashMap<String, Object>();
         expResult.put("one", "uno");
-        expResult.put("two", 2);
-        expResult.put("three", new Long(3));
+        expResult.put("two", 2.0);
+        expResult.put("three", 3.0);
 
         final Map<String, Object> actual = TypeUtil.toMap(json);
 
