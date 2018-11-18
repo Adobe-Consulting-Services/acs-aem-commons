@@ -68,7 +68,7 @@ import java.util.concurrent.ConcurrentMap;
            metatype = true)
 @Properties({
         @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                    value = HttpCacheStore.VALUE_CAFFEINE_MEM_CACHE_STORE_TYPE,
+                    value = CaffeineMemHttpCacheStoreImpl.CACHE_STORE_TYPE,
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
                     value = "com.adobe.acs.httpcache:type=Caffeine In Memory HTTP Cache Store",
@@ -82,6 +82,9 @@ import java.util.concurrent.ConcurrentMap;
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
 
+    /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    public static final String CACHE_STORE_TYPE = "CAFFEINE";
+
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
 
@@ -90,7 +93,7 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
               longValue = CaffeineMemHttpCacheStoreImpl.DEFAULT_TTL)
     private static final String PROP_TTL = "httpcache.cachestore.cafffeine.ttl";
     private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
-    private static final int NANOSECOND_MODIFIER = 1000000;
+    protected static final int NANOSECOND_MODIFIER = 1000000;
     private long ttl;
 
     @Property(label = "Maximum size of this store in MB",
@@ -104,14 +107,21 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     /** Cache - Uses Caffeine cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
+    private Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
+
+    public CaffeineMemHttpCacheStoreImpl() throws NotCompliantMBeanException {
+        super(MemCacheMBean.class);
+    }
+
     @Activate
     protected void activate(Map<String, Object> configs) {
         // Read config and populate values.
         ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
+        expiryPolicy = new CacheExpiryPolicy(ttl);
         maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
 
         // Initializing the cache.
-        // If cache is present, invalidate all and reinitailize the cache.
+        // If cache is present, invalidate all and reinitialize the cache.
         // Recording cache usage stats enabled.
         if (null != cache) {
             cache.invalidateAll();
@@ -121,7 +131,7 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         cache = Caffeine.newBuilder()
             .maximumWeight(maxSizeInMb * MEGABYTE)
             .weigher(new MemCacheEntryWeigher())
-            .expireAfter(getExpiryPolicy())
+            .expireAfter(expiryPolicy)
             .removalListener(new MemCacheEntryRemovalListener())
             .recordStats()
             .build();
@@ -129,40 +139,6 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         log.info("EHCacheMemHttpCacheStoreImpl activated / modified.");
     }
 
-    private Expiry<CacheKey, MemCachePersistenceObject> getExpiryPolicy() {
-        return new Expiry<CacheKey, MemCachePersistenceObject>() {
-            @Override
-            public long expireAfterCreate(
-                    CacheKey key, MemCachePersistenceObject value, long currentTime) {
-                long customExpiryTime = key.getExpiryForCreation();
-                if(customExpiryTime > 0){
-                    return (System.currentTimeMillis() * NANOSECOND_MODIFIER) + (customExpiryTime * NANOSECOND_MODIFIER);
-                }else{
-                    if(ttl > 0){
-                        return (System.currentTimeMillis() * NANOSECOND_MODIFIER) + (ttl * NANOSECOND_MODIFIER);
-                    }else{
-                        return Long.MAX_VALUE;
-                    }
-                }
-            }
-            @Override
-            public long expireAfterUpdate(
-                    CacheKey key, MemCachePersistenceObject value, long currentTime, long currentDuration) {
-                if(key.getExpiryForUpdate() > 0){
-                    return (System.currentTimeMillis() * NANOSECOND_MODIFIER) + (key.getExpiryForUpdate() * NANOSECOND_MODIFIER);
-                }
-                return currentDuration;
-            }
-            @Override
-            public long expireAfterRead(
-                    CacheKey key, MemCachePersistenceObject value, long currentTime, long currentDuration) {
-                if(key.getExpiryForAccess() > 0){
-                    return (System.currentTimeMillis() * NANOSECOND_MODIFIER) + (key.getExpiryForAccess() * NANOSECOND_MODIFIER);
-                }
-                return currentDuration;
-            }
-        };
-    }
 
     @Deactivate
     protected void deactivate(Map<String, Object> configs) {
@@ -310,9 +286,7 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
 
     //-------------------------<Mbean specific implementation>
 
-    public CaffeineMemHttpCacheStoreImpl() throws NotCompliantMBeanException {
-        super(MemCacheMBean.class);
-    }
+
 
 
 }

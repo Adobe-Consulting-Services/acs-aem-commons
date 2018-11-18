@@ -138,7 +138,7 @@ public interface HttpCacheConfig {
      * 1 or above is the expiry for entries produced by this config .
      * @return
      */
-    long getCustomExpiryOnCreate();
+    long getExpiryOnCreate();
 
     /**
      * Gets the expiry time for the cache entry access / read.

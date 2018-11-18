@@ -51,8 +51,8 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = request.getRequestURI();
         this.resourcePath = unmangle(request.getResource().getPath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
-        this.customExpiryTime = cacheConfig.getCustomExpiryOnCreate();
-        this.expiryForAccessTime = cacheConfig.getCustomExpiryOnCreate();
+        this.customExpiryTime = cacheConfig.getExpiryOnCreate();
+        this.expiryForAccessTime = cacheConfig.getExpiryOnCreate();
         this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
         this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
@@ -62,7 +62,7 @@ public abstract class AbstractCacheKey implements Serializable{
         this.uri = uri;
         this.resourcePath = unmangle(new PathInfo(uri).getResourcePath());
         this.hierarchyResourcePath = makeHierarchyResourcePath(this.resourcePath);
-        this.customExpiryTime = cacheConfig.getCustomExpiryOnCreate();
+        this.customExpiryTime = cacheConfig.getExpiryOnCreate();
         this.expiryForUpdateTime = cacheConfig.getExpiryForUpdate();
         this.expiryForAccessTime = cacheConfig.getExpiryForAccess();
     }
