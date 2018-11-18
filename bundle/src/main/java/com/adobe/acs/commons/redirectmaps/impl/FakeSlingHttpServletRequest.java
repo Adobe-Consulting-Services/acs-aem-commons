@@ -308,6 +308,9 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
         return false;
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated    
     public boolean isRequestedSessionIdFromUrl() {
@@ -414,6 +417,9 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
         return null;
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated
     public String getRealPath(String path) {

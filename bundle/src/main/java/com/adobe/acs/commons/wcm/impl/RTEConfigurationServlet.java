@@ -111,7 +111,6 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
     private void writeConfigResource(Resource resource, String rteName,
             SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException {
-        Gson gson = new Gson();
         JsonObject widget = createEmptyWidget(rteName);
 
         // these two size properties seem to be necessary to get the size correct
@@ -123,16 +122,14 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
         for (Map.Entry<String, RequestParameter[]> entry : map.entrySet()) {
             String key = entry.getKey();
             RequestParameter[] params = entry.getValue();
-            if (params != null) {
-                if (params.length > 1 || EXTERNAL_STYLESHEETS_PROPERTY.equals(key)) {
-                    JsonArray arr = new JsonArray();
-                    for (int i = 0; i < params.length; i++) {
-                        arr.add(new JsonPrimitive(params[i].getString()));
-                    }
-                    widget.add(key, arr);
-                } else if (params.length == 1) {
-                    widget.addProperty(key, params[0].getString());
+            if (params != null && (params.length > 1 || EXTERNAL_STYLESHEETS_PROPERTY.equals(key))) {
+                JsonArray arr = new JsonArray();
+                for (int i = 0; i < params.length; i++) {
+                    arr.add(new JsonPrimitive(params[i].getString()));
                 }
+                widget.add(key, arr);
+            } else if (params != null && params.length == 1) {
+                widget.addProperty(key, params[0].getString());
             }
         }
 
@@ -157,6 +154,7 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
         parent.addProperty("border", false);
         parent.addProperty("padding", 0);
         parent.add("items", widget);
+        Gson gson = new Gson();
         gson.toJson(parent, response.getWriter());
     }
 

@@ -1,6 +1,9 @@
 /*
- * Copyright 2018 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.util;
 
@@ -46,50 +50,10 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                     if (p.isMultiple()) {
                         writer.beginArray();
                         for (Value v : p.getValues()) {
-                            switch (v.getType()) {
-                                case PropertyType.BINARY:
-                                    writer.value("(binary value)");
-                                    break;
-                                case PropertyType.BOOLEAN:
-                                    writer.value(v.getBoolean());
-                                    break;
-                                case PropertyType.DATE:
-                                case PropertyType.LONG:
-                                    writer.value(v.getLong());
-                                    break;
-                                case PropertyType.DECIMAL:
-                                case PropertyType.DOUBLE:
-                                    writer.value(v.getDecimal().toPlainString());
-                                    break;
-                                default:
-//                        case PropertyType.PATH:
-//                        case PropertyType.STRING:
-//                        case PropertyType.URI:
-                                    writer.value(v.getString());
-                            }
+                            writeValue(writer, v);
                         }
                     } else {
-                        switch (p.getType()) {
-                            case PropertyType.BINARY:
-                                writer.value("(binary value)");
-                                break;
-                            case PropertyType.BOOLEAN:
-                                writer.value(p.getBoolean());
-                                break;
-                            case PropertyType.DATE:
-                            case PropertyType.LONG:
-                                writer.value(p.getLong());
-                                break;
-                            case PropertyType.DECIMAL:
-                            case PropertyType.DOUBLE:
-                                writer.value(p.getDecimal().toPlainString());
-                                break;
-                            default:
-//                        case PropertyType.PATH:
-//                        case PropertyType.STRING:
-//                        case PropertyType.URI:
-                                writer.value(p.getString());
-                        }
+                        writeValue(writer, p.getValue());
                     }
                 }
                 for (NodeIterator ni = t.getNodes(); ni.hasNext();) {
@@ -102,6 +66,30 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                 Logger.getLogger(JcrJsonAdapter.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException(ex);
             }
+        }
+    }
+
+    private void writeValue(JsonWriter writer, Value v) throws IOException, RepositoryException {
+        switch (v.getType()) {
+            case PropertyType.BINARY:
+                writer.value("(binary value)");
+                break;
+            case PropertyType.BOOLEAN:
+                writer.value(v.getBoolean());
+                break;
+            case PropertyType.DATE:
+            case PropertyType.LONG:
+                writer.value(v.getLong());
+                break;
+            case PropertyType.DECIMAL:
+            case PropertyType.DOUBLE:
+                writer.value(v.getDecimal().toPlainString());
+                break;
+            default:
+//                        case PropertyType.PATH:
+//                        case PropertyType.STRING:
+//                        case PropertyType.URI:
+                writer.value(v.getString());
         }
     }
 

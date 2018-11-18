@@ -86,6 +86,9 @@ public class ReplicatorQueue implements Replicator {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated
     public List<ReplicationContentFilter> createContentFilterChain(ReplicationAction action) {

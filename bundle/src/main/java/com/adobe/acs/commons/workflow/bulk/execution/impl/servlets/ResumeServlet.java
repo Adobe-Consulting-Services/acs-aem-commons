@@ -47,8 +47,6 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 )
 public class ResumeServlet extends SlingAllMethodsServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(ResumeServlet.class);
-
     @Reference
     private BulkWorkflowEngine bulkWorkflowEngine;
 

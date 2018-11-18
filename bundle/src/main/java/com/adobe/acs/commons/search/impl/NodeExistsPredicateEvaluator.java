@@ -80,6 +80,9 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
                 && predicate.getParameters().get(OR) != null));
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated
     public final boolean isFiltering(final Predicate predicate, final EvaluationContext context) {

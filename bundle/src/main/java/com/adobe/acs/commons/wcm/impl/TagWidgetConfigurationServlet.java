@@ -142,7 +142,6 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
     private void writeConfigResource(Resource resource, String propertyName,
             SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException,
             ServletException {
-        Gson gson = new Gson();
         JsonObject widget = createEmptyWidget(propertyName);
 
         RequestParameterMap map = request.getRequestParameterMap();
@@ -170,6 +169,7 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
         parent.addProperty("padding", 0);
         parent.addProperty("style", "padding: 0px");
         parent.add("items", widget);
+        Gson gson = new Gson();
         gson.toJson(parent, response.getWriter());
     }
 

@@ -44,6 +44,7 @@ public abstract class RunnableOnMaster implements TopologyEventListener, Runnabl
     public void handleTopologyEvent(TopologyEvent te) {
         this.isLeader = te.getNewView().getLocalInstance().isLeader();
     }
+
     /**
      * {@inheritDoc}
      */
