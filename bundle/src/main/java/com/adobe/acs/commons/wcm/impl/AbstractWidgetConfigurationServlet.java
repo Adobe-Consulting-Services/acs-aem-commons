@@ -65,7 +65,7 @@ public abstract class AbstractWidgetConfigurationServlet extends SlingSafeMethod
      */
     protected final JsonObject underlay(JsonObject config, Resource resource)
             throws ServletException {
-        JsonObject baseStructure = JsonObjectUtil.toJSONObject(resource);
+        JsonObject baseStructure = JsonObjectUtil.toJsonObject(resource);
         if (baseStructure != null) {
             config.entrySet().forEach(e -> baseStructure.add(e.getKey(), e.getValue()));
             return baseStructure;
