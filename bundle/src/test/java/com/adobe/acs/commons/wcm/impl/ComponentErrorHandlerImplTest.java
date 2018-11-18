@@ -23,6 +23,7 @@ package com.adobe.acs.commons.wcm.impl;
 import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.wcm.api.WCMMode;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentContext;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -179,9 +180,9 @@ public class ComponentErrorHandlerImplTest {
     @Test
     public void testEditError() throws Exception {
         when(componentContext.isRoot()).thenReturn(false);
-        when(ModeUtil.isEdit(request)).thenReturn(true);
+        when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
 
-        doThrow(new ServletException()).when(chain).doFilter(request, response);
+        doThrow(new ServletException("Should not delegate to chained filters")).when(chain).doFilter(request, response);
 
         handler.doFilter(request, response, chain);
 

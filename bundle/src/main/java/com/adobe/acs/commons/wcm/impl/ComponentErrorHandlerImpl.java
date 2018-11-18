@@ -193,7 +193,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                FilterChain chain) throws IOException, ServletException {
 
-        // We are in a Sling Filter, so these request/response objects are guarenteed to be of type Sling...
+        // We are in a Sling Filter, so these request/response objects are guaranteed to be of type Sling...
         final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
         final SlingHttpServletResponse response = (SlingHttpServletResponse) servletResponse;
 

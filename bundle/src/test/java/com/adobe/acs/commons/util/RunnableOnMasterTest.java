@@ -37,7 +37,7 @@ public class RunnableOnMasterTest {
         InstanceDescription instanceDescription = mock(InstanceDescription.class);
         when(te.getNewView()).thenReturn(view);
         when(view.getLocalInstance()).thenReturn(instanceDescription);
-        when(instanceDescription.isLeader()).thenReturn(true);
+        when(instanceDescription.isLeader()).thenReturn(isLeader);
         return te;
     }
     
