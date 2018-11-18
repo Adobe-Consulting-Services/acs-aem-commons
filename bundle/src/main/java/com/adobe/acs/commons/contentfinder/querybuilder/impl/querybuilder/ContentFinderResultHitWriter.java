@@ -32,6 +32,8 @@ import java.util.Map;
  * ACS AEM Commons - ContentFinder Result Hit Writer
  * QueryBuilder Hit Writer used for creating ContentFinder compatible results
  * 
+ * @Deprecated this class is not part of the API and internally not used
+ * 
  * TODO:
  * - is this class actually used? Haven't found anyone referencing it. 
  * - deprecating it for the moment, and leaving the scr annotations in place

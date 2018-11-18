@@ -52,7 +52,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
     private static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
     private static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
 
-    final static String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
+    static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
 
        
     @ObjectClassDefinition(name="ACS AEM Commons - Custom Component Activator List Servlet")
