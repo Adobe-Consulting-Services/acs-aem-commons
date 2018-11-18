@@ -20,24 +20,21 @@
 package com.adobe.acs.commons.json;
 
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-import javax.jcr.Node;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.IOException;
-
-import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.testing.mock.jcr.MockJcr;
+import org.junit.Before;
+import org.junit.Test;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 import static org.junit.Assert.*;
 
 /**
- *
- * @author Brendan Robert
+ * Test the JcrJsonAdapter utility functions
  */
 public class JcrJsonAdapterTest {
     
@@ -45,6 +42,7 @@ public class JcrJsonAdapterTest {
     }
     
     Session session;
+
     @Before
     public void setUp() {
         session = MockJcr.newSession();
@@ -56,8 +54,6 @@ public class JcrJsonAdapterTest {
      */
     @Test
     public void testWrite() throws RepositoryException {
-        System.out.println("write");
-        
         Node root = JcrUtils.getOrCreateByPath("/test/level1", JcrConstants.NT_UNSTRUCTURED, session);
         root.setProperty("level",1);
         Node l2 = JcrUtils.getOrCreateByPath("/test/level1/l2", JcrConstants.NT_UNSTRUCTURED, session);
@@ -81,13 +77,8 @@ public class JcrJsonAdapterTest {
      */
     @Test(expected = UnsupportedOperationException.class)
     public void testRead() throws IOException {
-        JsonReader reader = null;
         JcrJsonAdapter instance = new JcrJsonAdapter();
-        Node expResult = null;
-        Node result = instance.read(reader);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        instance.read(null);
     }
     
 }

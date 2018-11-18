@@ -43,6 +43,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.sling.xss.XSSAPI;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
+
 /**
  * Servlets which allows for dynamic selection of RTE configuration. To use in a
  * component, specify the xtype of
@@ -137,7 +139,7 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
             widget.remove("hideLabel");
         }
 
-        JsonObject config = toJSONObject(resource);
+        JsonObject config = toJsonObject(resource);
 
         if (config == null) {
             config = new JsonObject();
