@@ -68,7 +68,7 @@
                             !android.util.*,
                             *
                         </Import-Package>
-                        <Embed-Dependency>guava,jjwt;inline=true</Embed-Dependency>
+                        <Embed-Dependency>guava,jjwt,jsch,jzlib;inline=true</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -325,13 +325,19 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.23</version>
+            <version>0.1.54</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
         </dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jzlib</artifactId>
+            <version>1.1.3</version>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
