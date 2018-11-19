@@ -15,7 +15,7 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>ACS AEM Commons Oakpal Checks</name>
     <description>AEM Oakpal Checks for ACS AEM Commons Package.</description>
 
@@ -23,18 +23,22 @@
     <!-- B U I L D D E F I N I T I O N -->
     <!-- ====================================================================== -->
     <build>
-
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-oakpal-checks</Bundle-SymbolicName>
-                        <Oakpal-Checklist>OAKPAL-INF/checklist/aem64.json</Oakpal-Checklist>
-                    </instructions>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

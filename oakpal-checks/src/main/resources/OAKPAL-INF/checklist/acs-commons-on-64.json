@@ -1,9 +1,40 @@
 {
-  "name": "aem64",
+  "name": "acs-commons-on-64",
   "checks": [
     {
+      "name": "noUnsafeACHandling",
+      "impl": "net.adamcin.oakpal.core.checks.AcHandling",
+      "config": {
+        "levelSet": "no_unsafe"
+      }
+    },
+    {
       "name": "content-classifications",
-      "impl": "com.adobe.acs.commons.oakpal.checks.ContentClassifications"
+      "impl": "com.adobe.acs.commons.oakpal.checks.ContentClassifications",
+      "config": {
+        "scopePaths": [
+          {
+            "comment": "Known extension of final supertype.",
+            "type": "exclude",
+            "pattern": "/apps/acs-commons/components/workflow/.*"
+          },
+          {
+            "comment": "Known usages of internal resource types.",
+            "type": "exclude",
+            "pattern": "/etc/dam/video(/.*)?"
+          },
+          {
+            "comment": "Known extension of final supertype.",
+            "type": "exclude",
+            "pattern": "/apps/acs-commons/components/authoring/graphiciconselect"
+          },
+          {
+            "comment": "Known extension of final supertype.",
+            "type": "exclude",
+            "pattern": "/apps/acs-commons/touchui-widgets/contextualpathbrowser"
+          }
+        ]
+      }
     }
   ],
   "cndNames": [

@@ -98,7 +98,7 @@ public class ContentClassificationsTest {
     @Test
     public void testCheckAllValid() throws Exception {
         ProgressCheck checkValid = new ContentClassifications().newInstance(
-                new JSONObject("{\"scopePaths\":[{\"type\":\"deny\",\"pattern\":\".*/invalid.*\"}]}"));
+                new JSONObject("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\".*/valid.*\"},{\"type\":\"allow\",\"pattern\":\"/apps/acs/(abstract|public).*\"}]}"));
         CheckReport reportValid = scanWithCheck(checkValid, pack);
         assertEquals("No violations when deny invalid paths.", 0, reportValid.getViolations().size());
     }
@@ -110,6 +110,16 @@ public class ContentClassificationsTest {
         assertTrue(String.format("Violation contains 'marked %s' (actual: %s): %s.", marked,
                 report.getViolations().iterator().next().getDescription(), description),
                 report.getViolations().iterator().next().getDescription().contains(String.format("marked %s", marked)));
+    }
+
+    @Test
+    public void testCheckInvalidOverlayFinal() throws Exception {
+        checkInvalidPath("/apps/acs/final", "FINAL", "overlay final");
+    }
+
+    @Test
+    public void testCheckInvalidOverlayInternal() throws Exception {
+        checkInvalidPath("/apps/acs/internal", "INTERNAL", "overlay final");
     }
 
     @Test

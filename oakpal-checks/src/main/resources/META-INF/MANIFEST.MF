@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
+Oakpal-Checklist: OAKPAL-INF/checklist/acs-commons-on-64.json

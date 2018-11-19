@@ -87,29 +87,14 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>oakpal-scan-aem64</id>
+                        <id>oakpal-scan-on-64</id>
                         <goals>
                             <goal>scan</goal>
                         </goals>
                         <configuration>
                             <checklists>
-                                <checklist>basic</checklist>
-                                <checklist>aem64</checklist>
+                                <checklist>acs-commons-on-64</checklist>
                             </checklists>
-                            <checks>
-                                <check>
-                                    <name>acHandling</name>
-                                    <config>
-                                        <levelSet>no_unsafe</levelSet>
-                                    </config>
-                                </check>
-                                <check>
-                                    <name>content-classifications</name>
-                                    <config>
-                                        <severity>MINOR</severity>
-                                    </config>
-                                </check>
-                            </checks>
                         </configuration>
                     </execution>
                     <execution>

@@ -19,11 +19,15 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -42,7 +46,8 @@ import org.json.JSONObject;
  * Enforce rules for "Content Classifications" in
  * <a href="https://helpx.adobe.com/experience-manager/6-4/sites/deploying/using/sustainable-upgrades.html#ContentClassifications">Sustainable Upgrades</a>.
  * <p>
- * This check assumes that all the reference nodes under /libs have been provided by forced roots or pre-install packages.
+ * This check assumes that all the reference nodes under {@code libsPathPrefix} have been provided by forced roots or
+ * pre-install packages.
  * <p>
  * {@code config} options:
  * <dl>
@@ -56,6 +61,9 @@ import org.json.JSONObject;
  * When no pattern rules are specified, ALLOW ALL imported paths into scope for the check. When the first rule is type
  * ALLOW, the default first rule becomes DENY ALL.
  * </dd>
+ * <dt>{@code searchPaths}</dt>
+ * <dd>(default: {@code ["/apps","/libs"]}) list of search path prefixes for checking overlays. If null or absent, the
+ * default applies.</dd>
  * </dl>
  */
 public final class ContentClassifications implements ProgressCheckFactory {
@@ -70,6 +78,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
     private static final String CONFIG_LIBS_PATH_PREFIX = "libsPathPrefix";
     private static final String CONFIG_SEVERITY = "severity";
     private static final String CONFIG_SCOPE_PATHS = "scopePaths";
+    private static final String CONFIG_SEARCH_PATHS = "searchPaths";
 
     @Override
     public ProgressCheck newInstance(final JSONObject jsonObject) {
@@ -77,19 +86,26 @@ public final class ContentClassifications implements ProgressCheckFactory {
         final Violation.Severity severity = Violation.Severity.valueOf(jsonObject.optString(CONFIG_SEVERITY,
                 Violation.Severity.MAJOR.name()).toUpperCase());
         final List<Rule> scopePaths = Rule.fromJSON(jsonObject.optJSONArray(CONFIG_SCOPE_PATHS));
+        final List<String> searchPaths = ofNullable(jsonObject.optJSONArray(CONFIG_SEARCH_PATHS))
+                .map(array -> StreamSupport.stream(array.spliterator(), false)
+                        .map(String::valueOf).collect(Collectors.toList()))
+                .orElse(Arrays.asList("/apps", "/libs"));
 
-        return new Check(libsPathPrefix, severity, scopePaths);
+        return new Check(libsPathPrefix, severity, scopePaths, searchPaths);
     }
 
     class Check extends SimpleProgressCheck {
         final String libsPathPrefix;
         final Violation.Severity severity;
         final List<Rule> scopePaths;
+        final List<String> searchPaths;
 
-        public Check(final String libsPathPrefix, final Violation.Severity severity, final List<Rule> scopePaths) {
+        public Check(final String libsPathPrefix, final Violation.Severity severity,
+                     final List<Rule> scopePaths, final List<String> searchPaths) {
             this.libsPathPrefix = libsPathPrefix;
             this.severity = severity;
             this.scopePaths = scopePaths;
+            this.searchPaths = searchPaths;
         }
 
         @Override
@@ -103,15 +119,13 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
             // short circuit if we happen to be installing /libs content. we won't check for
             // those violations here.
-            if (path.startsWith(libsPathPrefix)) {
+            if (path.startsWith(libsPathPrefix + "/")) {
                 return;
             }
 
             // default to ALLOW ALL
             // if first rule is allow, change default to DENY ALL
-            Rule lastMatched = scopePaths.isEmpty() || scopePaths.get(0).isDeny()
-                    ? Rule.DEFAULT_ALLOW
-                    : Rule.DEFAULT_DENY;
+            Rule lastMatched = Rule.fuzzyDefaultAllow(scopePaths);
             for (Rule rule : scopePaths) {
                 if (rule.matches(path)) {
                     lastMatched = rule;
@@ -123,11 +137,31 @@ public final class ContentClassifications implements ProgressCheckFactory {
                 return;
             }
 
+            // check path against libsPathPrefix for overlay
+            checkOverlay(packageId, path, node);
+
             // check sling:resourceType against libsPathPrefix.
             checkResourceType(packageId, path, node);
 
             // check sling:resourceSuperType against libsPathPrefix.
             checkResourceSuperType(packageId, path, node);
+
+        }
+
+        void checkOverlay(final PackageId packageId, final String path, final Node node)
+                throws RepositoryException {
+            Optional<String> optPrefix = searchPaths.stream().filter(pre -> path.startsWith(pre + "/")).findFirst();
+            if (!optPrefix.isPresent()) {
+                return;
+            }
+
+            final String searchPrefix = optPrefix.get();
+            final String relPath = path.substring(searchPrefix.length(), path.length());
+            final String libsRt = libsPathPrefix + relPath;
+
+            assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
+                    .ifPresent(message -> reportViolation(new SimpleViolation(severity,
+                            String.format("%s [restricted overlay]: %s", path, message), packageId)));
 
         }
 
@@ -145,7 +179,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
                     assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_TYPE)
                             .ifPresent(message -> reportViolation(new SimpleViolation(severity,
-                                    String.format("%s [protected resource type]: %s", path, message),
+                                    String.format("%s [restricted resource type]: %s", path, message),
                                     packageId)));
                 }
             }
@@ -165,7 +199,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
                     assertClassifications(node.getSession(), libsRst, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
                             .ifPresent(message -> reportViolation(new SimpleViolation(severity,
-                                    String.format("%s [protected super type]: %s", path, message),
+                                    String.format("%s [restricted super type]: %s", path, message),
                                     packageId)));
                 }
             }
@@ -195,7 +229,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
                 Node parent = getLibsLeaf(session, parentPath);
                 if (parent != null) {
                     final String name = Text.getName(absPath, true);
-                    if (parent.hasNode(name)) {
+                    if (parent.getPath().equals(parentPath) && parent.hasNode(name)) {
                         return parent.getNode(name);
                     } else {
                         return parent;
