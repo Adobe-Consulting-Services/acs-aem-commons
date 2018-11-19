@@ -12,10 +12,12 @@
       "name": "enforce-no-libs",
       "impl": "net.adamcin.oakpal.core.checks.Paths",
       "config": {
-        "rules": [{
-          "type": "deny",
-          "pattern": "/libs(/.*)?"
-        }]
+        "rules": [
+          {
+            "type": "deny",
+            "pattern": "/libs(/.*)?"
+          }
+        ]
       }
     },
     {
@@ -58,20 +60,6 @@
     "OAKPAL-INF/nodetypes/content_classifications.cnd"
   ],
   "forcedRoots": [
-    {
-      "path": "/home/users",
-      "primaryType": "rep:AuthorizableFolder",
-      "mixinTypes": [
-        "rep:AccessControllable"
-      ]
-    },
-    {
-      "path": "/home/users/system",
-      "primaryType": "rep:AuthorizableFolder",
-      "mixinTypes": [
-        "rep:AccessControllable"
-      ]
-    },
     {
       "path": "/libs/screens/player",
       "mixinTypes": [
