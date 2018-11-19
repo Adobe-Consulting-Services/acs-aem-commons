@@ -62,7 +62,7 @@ public class TwitterAdapterFactoryRegisterer {
         try {
             TwitterAdapterFactory adapterFactory = new TwitterAdapterFactory(httpProxyHost, httpProxyPort, useSsl);
 
-
+            @SuppressWarnings("squid:S1149")
             Dictionary<String, Object> serviceProps = new Hashtable<>();
             serviceProps.put(AdapterFactory.ADAPTABLE_CLASSES, new String[] { "com.day.cq.wcm.api.Page", "com.day.cq.wcm.webservicesupport.Configuration" });
             serviceProps.put(AdapterFactory.ADAPTER_CLASSES, new String[] { "twitter4j.Twitter", "com.adobe.acs.commons.twitter.TwitterClient" });
