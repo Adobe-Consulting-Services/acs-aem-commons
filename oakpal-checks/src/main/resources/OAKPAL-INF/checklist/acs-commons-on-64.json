@@ -2,10 +2,17 @@
   "name": "acs-commons-on-64",
   "checks": [
     {
-      "name": "noUnsafeACHandling",
+      "name": "acHandling-merge-or-better",
       "impl": "net.adamcin.oakpal.core.checks.AcHandling",
       "config": {
         "levelSet": "no_unsafe"
+      }
+    },
+    {
+      "name": "enforce-no-deletes",
+      "impl": "net.adamcin.oakpal.core.checks.Paths",
+      "config": {
+        "denyAllDeletes": true
       }
     },
     {

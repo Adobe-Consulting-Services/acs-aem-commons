@@ -27,18 +27,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
                 <configuration>
                     <archive>
-                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                        <manifestEntries>
+                            <Oakpal-ModuleName>com.adobe.acs.acs-aem-commons-oakpal-checks</Oakpal-ModuleName>
+                            <Oakpal-Checklist>OAKPAL-INF/checklist/acs-commons-on-64.json</Oakpal-Checklist>
+                        </manifestEntries>
                     </archive>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
