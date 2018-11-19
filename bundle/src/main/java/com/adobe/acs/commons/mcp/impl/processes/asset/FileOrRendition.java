@@ -35,7 +35,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -290,7 +289,6 @@ public class FileOrRendition implements HierarchicalElement {
             this.thizz = thizz;
         }
 
-        @SuppressWarnings("squid:S1149")
         private Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();
@@ -299,9 +297,7 @@ public class FileOrRendition implements HierarchicalElement {
                 try {
                     int port = uri.getPort() <= 0 ? 22 : uri.getPort();
                     session = jsch.getSession(clientProvider.getUsername(), uri.getHost(), port);
-                    Hashtable props = new Hashtable();
-                    props.put("StrictHostKeyChecking", "no");
-                    session.setConfig(props);
+                    session.setConfig("StrictHostKeyChecking", "no");
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
                 } catch (JSchException ex) {
