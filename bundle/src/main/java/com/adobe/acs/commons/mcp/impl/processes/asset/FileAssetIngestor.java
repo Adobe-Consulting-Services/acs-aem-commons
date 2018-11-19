@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -366,7 +365,10 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 openChannel();
                 Vector<ChannelSftp.LsEntry> children = channel.ls(path);
-                return children.stream().map(this::getChildFromEntry).filter(Objects::nonNull);
+                return children.stream()
+                        .filter(this::isNotDotFolder)
+                        .map(this::getChildFromEntry)
+                        .filter(Objects::nonNull);
             } catch (URISyntaxException | JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return Stream.empty();
@@ -375,6 +377,10 @@ public class FileAssetIngestor extends AssetIngestor {
                     closeChannel();
                 }
             }
+        }
+
+        private boolean isNotDotFolder(ChannelSftp.LsEntry entry) {
+            return !(".".equals(entry.getFilename()) || "..".equals(entry.getFilename()));
         }
 
         private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
