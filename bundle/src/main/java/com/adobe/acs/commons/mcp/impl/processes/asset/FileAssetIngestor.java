@@ -293,7 +293,6 @@ public class FileAssetIngestor extends AssetIngestor {
             return getParent() == null && isFolder();
         }
 
-        @SuppressWarnings("squid:S1149")
         private ChannelSftp openChannel() throws URISyntaxException, JSchException {
             if (channel == null || !channel.isConnected()) {
                 JSch jsch = new JSch();
@@ -303,9 +302,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 String password = StringUtils.substringAfter(userInfo, ":");
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
-                Hashtable props = new Hashtable();
-                props.put("StrictHostKeyChecking", "no");
-                session.setConfig(props);
+                session.setConfig("StrictHostKeyChecking", "no");
                 session.setPassword(password);
                 session.connect();
                 channel = (ChannelSftp) session.openChannel("sftp");
@@ -319,7 +316,11 @@ public class FileAssetIngestor extends AssetIngestor {
         private void closeChannel() {
             if (channel != null) {
                 channel.disconnect();
-                channel.getSession().disconnect();
+                try {
+                    channel.getSession().disconnect();
+                } catch (JSchException ex) {
+                    // Ignore possible exception thrown by getSession()
+                }
             }
             channel = null;
         }
@@ -466,7 +467,11 @@ public class FileAssetIngestor extends AssetIngestor {
 
             if (lastChannel != null) {
                 lastChannel.disconnect();
-                lastChannel.getSession().disconnect();
+                try {
+                    lastChannel.getSession().disconnect();
+                } catch (JSchException ex) {
+                    // Ignore possible exception thrown by getSession()
+                }
                 lastChannel = null;
             }
         }
