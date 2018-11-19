@@ -62,11 +62,6 @@
                             <artifactId>acs-aem-commons-bundle</artifactId>
                             <target>/apps/acs-commons/install</target>
                         </embedded>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                        </embedded>
                     </embeddeds>
                     <dependencies>
                         <dependency>
@@ -164,12 +159,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

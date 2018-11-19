@@ -563,7 +563,6 @@
 
     <modules>
         <module>bundle</module>
-        <module>bundle-twitter</module>
         <module>content</module>
     </modules>
 </project>

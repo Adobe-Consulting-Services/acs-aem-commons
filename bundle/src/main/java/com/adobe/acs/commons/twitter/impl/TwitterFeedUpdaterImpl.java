@@ -60,7 +60,7 @@ import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(immediate = true, label = "ACS AEM Commons - Twitter Feed Update Service",
+@Component(label = "ACS AEM Commons - Twitter Feed Update Service",
     metatype = true, description = "Service to update Twitter Feed components.")
 @Service
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
