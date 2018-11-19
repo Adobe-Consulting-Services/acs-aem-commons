@@ -42,7 +42,7 @@ public class ContentClassificationsTest {
     public static final String NS_URI_GRANITE = "http://www.adobe.com/jcr/granite/1.0";
 
     public static final URL CND = ContentClassifications.class
-            .getResource("/OAKPAL-INF/nodetypes/aem64sp2.cnd");
+            .getResource("/OAKPAL-INF/nodetypes/content_classifications.cnd");
     public static final InitStage INIT;
 
     static {
