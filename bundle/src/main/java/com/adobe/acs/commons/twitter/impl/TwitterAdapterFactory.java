@@ -19,19 +19,12 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import java.util.Map;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,38 +40,33 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 
-@Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
-    description = "Adapter Factory to generate TwitterClient objects.")
-@Service
-@Properties({
-        @Property(name = AdapterFactory.ADAPTABLE_CLASSES, value = { "com.day.cq.wcm.api.Page",
-                "com.day.cq.wcm.webservicesupport.Configuration" }, propertyPrivate = true),
-        @Property(name = AdapterFactory.ADAPTER_CLASSES, value = { "twitter4j.Twitter",
-                "com.adobe.acs.commons.twitter.TwitterClient" }, propertyPrivate = true) })
-public class TwitterAdapterFactory implements AdapterFactory {
+class TwitterAdapterFactory implements AdapterFactory {
+
+    TwitterAdapterFactory(String httpProxyHost, int httpProxyPort, boolean useSsl) {
+        this.httpProxyHost = httpProxyHost;
+        this.httpProxyPort = httpProxyPort;
+        this.useSsl = useSsl;
+        this.factory = new TwitterFactory(buildConfiguration());
+    }
+
+    @VisibleForTesting
+    TwitterAdapterFactory() {
+        this(null, 0, true);
+    }
 
     private static final String CLOUD_SERVICE_NAME = "twitterconnect";
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
-    private static final boolean DEFAULT_USE_SSL = true;
+    private final TwitterFactory factory;
 
-    @Property(label = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
-    private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
+    private final String httpProxyHost;
 
-    @Property(label = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", intValue = 0)
-    private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
+    private final int httpProxyPort;
 
-    @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
-    private static final String PROP_USE_SSL = "use.ssl";
+    private final boolean useSsl;
 
-    private TwitterFactory factory;
 
-    private String httpProxyHost;
-
-    private int httpProxyPort;
-
-    private boolean useSsl;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -159,14 +147,6 @@ public class TwitterAdapterFactory implements AdapterFactory {
                 new String[0]);
         return configurationManager.getConfiguration(
                 CLOUD_SERVICE_NAME, services);
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> properties) {
-        this.httpProxyHost = PropertiesUtil.toString(properties.get(PROP_HTTP_PROXY_HOST), null);
-        this.httpProxyPort = PropertiesUtil.toInteger(properties.get(PROP_HTTP_PROXY_PORT), 0);
-        this.useSsl = PropertiesUtil.toBoolean(properties.get(PROP_USE_SSL), DEFAULT_USE_SSL);
-        this.factory = new TwitterFactory(buildConfiguration());
     }
 
 }

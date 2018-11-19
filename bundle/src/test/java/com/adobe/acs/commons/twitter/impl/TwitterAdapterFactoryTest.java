@@ -25,11 +25,17 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
 import junitx.util.PrivateAccessor;
+import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.framework.BundleContext;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -42,16 +48,23 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TwitterAdapterFactoryTest {
 
     public static final String VALID_OAUTH_CLIENT_ID = "abcd";
     public static final String VALID_OAUTH_SECRET = "efgh";
     private ValueMap validOauthValueMap;
 
+    @Mock
+    private BundleContext bundleContext;
+
+    private TwitterAdapterFactory registeredFactory;
+
     @Test
     public void activateWithoutProxy() throws Exception {
-        TwitterAdapterFactory adapterFactory = new TwitterAdapterFactory();
-        adapterFactory.activate(Collections.emptyMap());
+        TwitterAdapterFactoryRegisterer registerer = new TwitterAdapterFactoryRegisterer();
+        registerer.activate(bundleContext, Collections.emptyMap());
+        TwitterAdapterFactory adapterFactory = registeredFactory;
         TwitterFactory factory = (TwitterFactory) PrivateAccessor.getField(adapterFactory, "factory");
         Twitter twitter = factory.getInstance();
         Configuration configuration = (Configuration) PrivateAccessor.getField(twitter, "conf");
@@ -61,8 +74,9 @@ public class TwitterAdapterFactoryTest {
 
     @Test
     public void activateWithProxyPortWithoutHost() throws Exception {
-        TwitterAdapterFactory adapterFactory = new TwitterAdapterFactory();
-        adapterFactory.activate(Collections.singletonMap("http.proxy.port", 8080));;
+        TwitterAdapterFactoryRegisterer registerer = new TwitterAdapterFactoryRegisterer();
+        registerer.activate(bundleContext, Collections.singletonMap("http.proxy.port", 8080));
+        TwitterAdapterFactory adapterFactory = registeredFactory;
         TwitterFactory factory = (TwitterFactory) PrivateAccessor.getField(adapterFactory, "factory");
         Twitter twitter = factory.getInstance();
         Configuration configuration = (Configuration) PrivateAccessor.getField(twitter, "conf");
@@ -72,8 +86,9 @@ public class TwitterAdapterFactoryTest {
 
     @Test
     public void activateWithProxyHostWithoutPort() throws Exception {
-        TwitterAdapterFactory adapterFactory = new TwitterAdapterFactory();
-        adapterFactory.activate(Collections.singletonMap("http.proxy.host", "myproxy"));;
+        TwitterAdapterFactoryRegisterer registerer = new TwitterAdapterFactoryRegisterer();
+        registerer.activate(bundleContext, Collections.singletonMap("http.proxy.host", "myproxy"));
+        TwitterAdapterFactory adapterFactory = registeredFactory;
         TwitterFactory factory = (TwitterFactory) PrivateAccessor.getField(adapterFactory, "factory");
         Twitter twitter = factory.getInstance();
         Configuration configuration = (Configuration) PrivateAccessor.getField(twitter, "conf");
@@ -83,11 +98,12 @@ public class TwitterAdapterFactoryTest {
 
     @Test
     public void activateWithProxy() throws Exception {
-        TwitterAdapterFactory adapterFactory = new TwitterAdapterFactory();
-        Map<String, Object> config = new HashMap<String, Object>();
+        TwitterAdapterFactoryRegisterer registerer = new TwitterAdapterFactoryRegisterer();
+        Map<String, Object> config = new HashMap<>();
         config.put("http.proxy.host", "myproxy");
         config.put("http.proxy.port", 8080);
-        adapterFactory.activate(config);;
+        registerer.activate(bundleContext, config);
+        TwitterAdapterFactory adapterFactory = registeredFactory;
         TwitterFactory factory = (TwitterFactory) PrivateAccessor.getField(adapterFactory, "factory");
         Twitter twitter = factory.getInstance();
         Configuration configuration = (Configuration) PrivateAccessor.getField(twitter, "conf");
@@ -194,6 +210,14 @@ public class TwitterAdapterFactoryTest {
         validOAuthConfig.put("oauth.client.id", VALID_OAUTH_CLIENT_ID);
         validOAuthConfig.put("oauth.client.secret", VALID_OAUTH_SECRET);
         this.validOauthValueMap = new ValueMapDecorator(validOAuthConfig);
+
+        when(bundleContext.registerService(eq(AdapterFactory.class), any(AdapterFactory.class), any())).thenAnswer(i -> {
+            if (registeredFactory != null) {
+                throw new IllegalArgumentException("TwitterAdapterFactory already registered");
+            }
+            registeredFactory = i.getArgumentAt(1, TwitterAdapterFactory.class);
+            return null;
+        });
     }
 
     private com.day.cq.wcm.webservicesupport.Configuration setupConfiguration(ValueMap configData) {

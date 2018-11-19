@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +17,27 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("2.0.0")
 package com.adobe.acs.commons.functions;
+
+import aQute.bnd.annotation.ConsumerType;
+import java.util.function.Supplier;
+
+/**
+ * Supplier function which allows throwing exceptions
+ * @param <T> Type being supplied
+ */
+@ConsumerType
+@FunctionalInterface
+@SuppressWarnings("squid:S00112")
+public interface CheckedSupplier<T> {
+    static <T> CheckedSupplier<T> fromSupplier(Supplier<T> supplier) {
+        return supplier::get;
+    }
+
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
+    T get() throws Exception;
+}
