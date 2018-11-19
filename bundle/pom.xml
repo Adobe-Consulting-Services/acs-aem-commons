@@ -63,6 +63,7 @@
                             org.apache.poi.ss.usermodel;version="[2.0,6)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
+                            twitter4j*;version="[3.0.5,4)";resolution:=optional,
                             !org.bouncycastle.jce.*, 
                             !android.util.*,
                             *
@@ -326,6 +327,10 @@
             <artifactId>jsch</artifactId>
             <version>0.1.23</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
