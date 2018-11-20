@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -277,7 +276,7 @@ public class FileAssetIngestor extends AssetIngestor {
             this.path = this.uri.getPath();
         }
 
-        private SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
+        SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
             this(uri);
             this.channel = channel;
             this.keepChannelOpen = holdOpen;
@@ -329,12 +328,16 @@ public class FileAssetIngestor extends AssetIngestor {
             if (!retrieved) {
                 openChannel();
                 SftpATTRS attributes = channel.lstat(path);
-                isFile = !attributes.isDir();
-                size = attributes.getSize();
+                processAttrs(attributes);
                 if (!keepChannelOpen) {
                     closeChannel();
                 }
             }
+        }
+
+        private void processAttrs(SftpATTRS attrs) {
+            isFile = !attrs.isDir();
+            size = attrs.getSize();
             retrieved = true;
         }
 
@@ -366,7 +369,10 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 openChannel();
                 Vector<ChannelSftp.LsEntry> children = channel.ls(path);
-                return children.stream().map(this::getChildFromEntry).filter(Objects::nonNull);
+                return children.stream()
+                        .filter(this::isNotDotFolder)
+                        .map(this::getChildFromEntry)
+                        .filter(Objects::nonNull);
             } catch (URISyntaxException | JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return Stream.empty();
@@ -377,10 +383,16 @@ public class FileAssetIngestor extends AssetIngestor {
             }
         }
 
+        private boolean isNotDotFolder(ChannelSftp.LsEntry entry) {
+            return !(".".equals(entry.getFilename()) || "..".equals(entry.getFilename()));
+        }
+
         private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
             try {
                 String childPath = getSourcePath() + "/" + entry.getFilename();
-                return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
+                SftpHierarchicalElement child = new SftpHierarchicalElement(childPath, channel, true);
+                child.processAttrs(entry.getAttrs());
+                return child;
             } catch (URISyntaxException | JSchException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return null;
