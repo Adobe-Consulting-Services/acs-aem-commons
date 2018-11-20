@@ -51,12 +51,12 @@ public class OktaLogoutHandlerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void activateWithoutHostThrowsIllegalArgumentException() {
-        underTest.activate(Collections.emptyMap());
+        context.registerInjectActivateService(underTest, Collections.emptyMap());
     }
 
     @Test
     public void testDropCredentials() throws Exception {
-        underTest.activate(Collections.singletonMap("okta.host.name", "www.okta.com"));
+        context.registerInjectActivateService(underTest, Collections.singletonMap("okta.host.name", "www.okta.com"));
         underTest.dropCredentials(context.request(), context.response());
 
         assertRedirect("https://www.okta.com/login/signout", context.response());
@@ -67,8 +67,8 @@ public class OktaLogoutHandlerTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("okta.host.name", "www.okta.com");
         properties.put("from.uri", "www.myco.com");
-
-        underTest.activate(properties);
+        context.registerInjectActivateService(underTest, properties);
+        
         underTest.dropCredentials(context.request(), context.response());
 
         assertRedirect("https://www.okta.com/login/signout?fromURI=www.myco.com", context.response());

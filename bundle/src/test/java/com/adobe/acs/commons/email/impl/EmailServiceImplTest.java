@@ -27,6 +27,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -85,6 +86,9 @@ public class EmailServiceImplTest {
 
     @Rule
     private ExpectedException thrown = ExpectedException.none();
+    
+    @Rule
+    public SlingContext context = new SlingContext();
 
     private String emailTemplatePath;
 
@@ -259,7 +263,8 @@ public class EmailServiceImplTest {
 
     @Test
     public void testDefaultTimeouts() {
-        emailService.activate(Collections.emptyMap());
+        //emailService.activate(Collections.emptyMap());
+        context.registerInjectActivateService(new EmailServiceImpl(),Collections.emptyMap());
         SimpleEmail email = sendTestEmail();
         assertEquals(30000, email.getSocketConnectionTimeout());
         assertEquals(30000, email.getSocketTimeout());
@@ -270,7 +275,8 @@ public class EmailServiceImplTest {
         Map<String, Object> params = new HashMap<>();
         params.put("so.timeout", 100);
         params.put("conn.timeout", 500);
-        emailService.activate(params);
+        //emailService.activate(params);
+        context.registerInjectActivateService(emailService, params);
         SimpleEmail email = sendTestEmail();
         assertEquals(500, email.getSocketConnectionTimeout());
         assertEquals(100, email.getSocketTimeout());
