@@ -115,7 +115,7 @@
         return children;
     }
 
-    function isWithinLimit(parsysEditable){
+    function isWithinLimit(parsysEditable, pasteAction) {
         var isWithin = true, currentLimit = "";
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
@@ -124,7 +124,10 @@
         }
         var limit = parseInt(currentLimit);
         var children = getChildEditables(parsysEditable);
-        isWithin = children.length <= limit;
+        //in case is a paste action calculates the final number or paragraphs by adding how many are on the clipboard
+        //and subtracting always 1 because Granite.author.edit.findEditables() returns also the * component
+        var finalNumberOfParagraphs = pasteAction ? children.length - 1 + Granite.author.clipboard.length : children.length;
+        isWithin = finalNumberOfParagraphs <= limit;
 
         if(!isWithin){
             showErrorAlert("Limit of paragraphs within this paragraph system exceeded, allowed only up to " + currentLimit + " paragraphs.");
@@ -133,7 +136,7 @@
         return isWithin;
     }
 
-    function extendComponentDrop(){
+    function extendComponentDrop() {
         var dropController = Granite.author.ui.dropController,
             compDragDrop;
 
@@ -145,7 +148,7 @@
                 //handle drop action
                 compDragDrop.handleDrop = function(dropFn){
                     return function (event) {
-                        if(!isWithinLimit(event.currentDropTarget.targetEditable.getParent())){
+                        if(!isWithinLimit(event.currentDropTarget.targetEditable.getParent(), false)){
                             return;
                         }
                         return dropFn.call(this, event);
@@ -160,7 +163,7 @@
                 return function (editableBefore) {
                     // only prevent copy but not move operations (if previous operation was cut)
                     if(!Granite.author.clipboard.shouldCut()) {
-                        if(!isWithinLimit(editableBefore.getParent())){
+                        if(!isWithinLimit(editableBefore.getParent(), true)){
                             return;
                         }
                     }
@@ -173,7 +176,7 @@
             // overwrite both execute and handler (for doubleclick and "+" icon click functionality)
             insertAction.execute = insertAction.handler = function(insertHandlerFn){
                 return function(editableBefore, param, target){
-                    if(!isWithinLimit(editableBefore.getParent())){
+                    if(!isWithinLimit(editableBefore.getParent(), false)){
                         return;
                     }
                     return insertHandlerFn.call(this, editableBefore, param, target);
