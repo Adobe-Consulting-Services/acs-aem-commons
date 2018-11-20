@@ -531,6 +531,7 @@
 			<groupId>org.apache.sling</groupId>
 			<artifactId>org.apache.sling.servlets.annotations</artifactId>
 			<version>1.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 
