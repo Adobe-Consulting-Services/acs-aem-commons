@@ -58,6 +58,7 @@
                             com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 Ingestor -->
                             com.github.jknack.handlebars;resolution:=optional, <!-- only required for Report Builder -->
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
+                            com.day.cq.replication;version="[6.4,7)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
                             org.apache.poi.ss.usermodel;version="[2.0,6)",  <!-- using a wider version range for forward compatibility -->
