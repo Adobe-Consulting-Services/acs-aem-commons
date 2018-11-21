@@ -52,10 +52,11 @@
 	                	<goals>
 	                		<goal>manifest</goal>
 	                	</goals>
-	                	<phase>generate-classes</phase>
+	                	<phase>process-classes</phase>
                 	</execution>
                 </executions>
                 <configuration>
+                	<exportScr>true</exportScr>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
