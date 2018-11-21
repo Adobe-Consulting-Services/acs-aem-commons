@@ -49,7 +49,7 @@ public class OktaLogoutHandlerTest {
         assertFalse(underTest.requestCredentials(context.request(), context.response()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = Exception.class)
     public void activateWithoutHostThrowsIllegalArgumentException() {
         context.registerInjectActivateService(underTest, Collections.emptyMap());
     }
