@@ -90,8 +90,16 @@
                         </Sling-Model-Packages>
                         <_dsannotations>*</_dsannotations>
                         <_metatypeannotations>*</_metatypeannotations>
+                        <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
+                <dependencies>
+                    <dependency>
+			            <groupId>org.apache.felix</groupId>
+			            <artifactId>org.apache.felix.scr.bnd</artifactId>
+			            <version>1.9.0</version>
+			        </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
