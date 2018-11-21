@@ -57,13 +57,14 @@
                             org.apache.sling.models.spi.injectorspecific.*;resolution:=optional, <!-- that package was added with Sling Models API 1.1 -->
                             com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 Ingestor -->
                             com.github.jknack.handlebars;resolution:=optional, <!-- only required for Report Builder -->
-                            com.day.cq.replication;version="[6.3,8)";resolution:=optional, <!-- using a wider version range for forward compatibility -->
                             com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
+                            com.day.cq.replication;version="[6.4,7)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
                             com.adobe.cq.sightly;version="[2.5,4)",
                             org.apache.poi.ss.usermodel;version="[2.0,6)",  <!-- using a wider version range for forward compatibility -->
                             org.apache.poi.ss.util;version="[2.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
+                            twitter4j*;version="[3.0.5,4)";resolution:=optional,
                             !org.bouncycastle.jce.*, 
                             !android.util.*,
                             *
@@ -336,7 +337,11 @@
             <version>1.1.3</version>
             <optional>true</optional>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
