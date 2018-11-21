@@ -32,6 +32,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,12 +50,14 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-@SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet",
-        methods = {"GET"},
-        resourceTypes = {"acs-commons/components/utilities/audit-log-search"},
-        selectors = {"auditlogsearch"},
-        extensions = {"json"}, metatype = false)
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
+@Component(service=Servlet.class, name="ACS AEM Commons - Audit Log Search Servlet",property= {
+		SLING_SERVLET_METHODS+"=GET",
+		SLING_SERVLET_EXTENSIONS+"=json",
+		SLING_SERVLET_SELECTORS+"=auditlogsearch",
+		SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/audit-log-search"
+		
+})
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 
