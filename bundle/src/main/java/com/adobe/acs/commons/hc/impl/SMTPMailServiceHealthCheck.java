@@ -115,7 +115,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                 try {
                     List<InternetAddress> emailAddresses = new ArrayList<InternetAddress>();
                     emailAddresses.add(new InternetAddress(this.toEmail));
-                    MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE), CharEncoding.UTF_8);
+                    MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE, "UTF-8"), CharEncoding.UTF_8);
                     SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(Collections.emptyMap()), SimpleEmail.class);
 
                     email.setSubject("AEM E-mail Service Health Check");

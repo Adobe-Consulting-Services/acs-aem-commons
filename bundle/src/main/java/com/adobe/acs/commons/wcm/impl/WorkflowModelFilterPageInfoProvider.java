@@ -27,9 +27,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +41,7 @@ import com.day.cq.wcm.api.PageInfoProvider;
  */
 @Component
 @Service
+@SuppressWarnings( "deprecation" )
 public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 
     private static final String KEY_MODELS = "models";
@@ -57,15 +55,16 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
     private static final Logger log = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
 
     @Override
-    public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
-            throws JSONException {
+    @SuppressWarnings( "deprecation" )
+    public void updatePageInfo(SlingHttpServletRequest request, org.apache.sling.commons.json.JSONObject info, Resource resource)
+            throws org.apache.sling.commons.json.JSONException {
         if (info.has(KEY_WORKFLOWS)) {
-            final JSONObject workflows = info.getJSONObject(KEY_WORKFLOWS);
+            final org.apache.sling.commons.json.JSONObject workflows = info.getJSONObject(KEY_WORKFLOWS);
             final String resourcePath = resource.getPath();
             final ResourceResolver resourceResolver = resource.getResourceResolver();
             for (final Iterator<String> types = workflows.keys(); types.hasNext();) {
                 final String type = types.next();
-                final JSONObject typeObject = workflows.getJSONObject(type);
+                final org.apache.sling.commons.json.JSONObject typeObject = workflows.getJSONObject(type);
                 filter(typeObject, resourcePath, resourceResolver);
             }
         } else {
@@ -74,11 +73,12 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
     }
 
     @SuppressWarnings("squid:S3776")
-    private void filter(JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver) throws JSONException {
-        final JSONArray models = typeObject.getJSONArray(KEY_MODELS);
-        final JSONArray newModels = new JSONArray();
+    private void filter(org.apache.sling.commons.json.JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver) 
+            throws org.apache.sling.commons.json.JSONException {
+        final org.apache.sling.commons.json.JSONArray models = typeObject.getJSONArray(KEY_MODELS);
+        final org.apache.sling.commons.json.JSONArray newModels = new org.apache.sling.commons.json.JSONArray();
         for (int i = 0; i < models.length(); i++) {
-            final JSONObject modelObject = models.getJSONObject(i);
+            final org.apache.sling.commons.json.JSONObject modelObject = models.getJSONObject(i);
             final String path = modelObject.getString(KEY_MODEL_PATH);
             final Resource modelResource = resourceResolver.getResource(path);
             if (modelResource != null) {

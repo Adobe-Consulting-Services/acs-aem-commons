@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.search.impl;
 
 import com.day.cq.search.Predicate;
@@ -34,21 +33,26 @@ import javax.jcr.query.Row;
 import java.util.Map;
 
 /**
- * This AEM QueryBuilder predicate checks if a JCR node exists, or doesn't exist, off the provided relative path.
+ * This AEM QueryBuilder predicate checks if a JCR node exists, or doesn't
+ * exist, off the provided relative path.
  *
  * There are 3 configurations:
  *
- * nodeExists.or = true | false (defaults to false)
- * -- When nodeExists.or = false (the default), all .exists and .notexists conditions for this predicate are AND'd together to determine if the result node is included.
+ * nodeExists.or = true | false (defaults to false) -- When nodeExists.or =
+ * false (the default), all .exists and .notexists conditions for this predicate
+ * are AND'd together to determine if the result node is included.
  *
- * nodeExists.#_exists = relative path (relative from the result node) to another node. This relative path mush exist for this expression to return true
- * -- Multiple exists conditions can be present and need to be prefixed via the usual `#_exists` syntax.
+ * nodeExists.#_exists = relative path (relative from the result node) to
+ * another node. This relative path mush exist for this expression to return
+ * true -- Multiple exists conditions can be present and need to be prefixed via
+ * the usual `#_exists` syntax.
  *
- * nodeExists.#_notexists = relative path (relative from the result node) to another node. This relative path mush NOT exist for this expression to return true
- * -- Multiple exists conditions can be present and need to be prefixed via the usual `#_notexists` syntax.
+ * nodeExists.#_notexists = relative path (relative from the result node) to
+ * another node. This relative path mush NOT exist for this expression to return
+ * true -- Multiple exists conditions can be present and need to be prefixed via
+ * the usual `#_notexists` syntax.
  *
- * nodeExists.or=true
- * nodeExists.exists=jcr:content/renditions/original
+ * nodeExists.or=true nodeExists.exists=jcr:content/renditions/original
  * nodeExists.2_exists=jcr:content/renditions/cq5dam.thumbnail.48.48.png
  * nodeExists.1_notexists=jcr:content/renditions/cq5dam.web.1280.1280.png
  * nodeExists.2_notexists=jcr:content/renditions/cq5dam.web.600.400.png
@@ -57,6 +61,7 @@ import java.util.Map;
         factory = "com.day.cq.search.eval.PredicateEvaluator/nodeExists"
 )
 public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator implements PredicateEvaluator {
+
     private static final Logger log = LoggerFactory.getLogger(NodeExistsPredicateEvaluator.class);
 
     public static final String OR = "or";
@@ -70,15 +75,16 @@ public class NodeExistsPredicateEvaluator extends AbstractPredicateEvaluator imp
 
     @Override
     public final boolean canFilter(final Predicate predicate, final EvaluationContext context) {
-        if (predicate.getParameters().isEmpty()
-                || (predicate.getParameters().size() == 1 && predicate.getParameters().get(OR) != null)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(predicate.getParameters().isEmpty()
+                || (predicate.getParameters().size() == 1
+                && predicate.getParameters().get(OR) != null));
     }
 
+    /**
+     * @deprecated
+     */
     @Override
+    @Deprecated
     public final boolean isFiltering(final Predicate predicate, final EvaluationContext context) {
         // .canFilter(..) has replaced isFiltering(..)
         return this.canFilter(predicate, context);

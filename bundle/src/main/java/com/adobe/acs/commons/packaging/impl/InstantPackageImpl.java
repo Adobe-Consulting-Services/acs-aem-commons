@@ -40,7 +40,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,9 +140,6 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
                 response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
             } catch (IOException ex) {
                 log.error("IO error while creating Instant Package", ex);
-                response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-            } catch (JSONException ex) {
-                log.error("JSON error while creating Instant Package response", ex);
                 response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
             }
         }

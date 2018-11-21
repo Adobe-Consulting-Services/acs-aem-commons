@@ -141,7 +141,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
             }
 
             if (inputStream != null) {
-                char[] chars = IOUtils.toCharArray(inputStream);
+                char[] chars = IOUtils.toCharArray(inputStream, "UTF-8");
 
                 getContentHandler().startElement(namespaceURI, STYLE, null, new AttributesImpl());
                 getContentHandler().characters(NEWLINE, 0, 1);

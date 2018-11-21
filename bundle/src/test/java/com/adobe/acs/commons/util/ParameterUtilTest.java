@@ -29,36 +29,6 @@ import static org.junit.Assert.assertEquals;
 
 public class ParameterUtilTest {
 
-    /**
-     * Test of toSimpleEntry method, of class OsgiPropertyUtil.
-     */
-    @Test
-    public void testToSimpleEntry() {
-        String value = "key:value";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = new SimpleEntry<String, String>("key", "value");
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithOnlyKey1() {
-        String value = "key:";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithOnlyKey2() {
-        String value = "key";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
     @Test
     public void testToMapEntryWithOptionalValueWithOnlyKey() {
         String value = "key";
@@ -67,34 +37,6 @@ public class ParameterUtilTest {
         Map.Entry<String, String> result = ParameterUtil.toMapEntryWithOptionalValue(value, separator);
         assertEquals(expResult, result);
     }
-
-    @Test
-    public void testToSimpleEntryWithOnlyValue() {
-        String value = ":value";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithMultipleSeparators() {
-        String value = "key:val:ue";
-        String separator = ":";
-        SimpleEntry<String, String> expResult = new SimpleEntry<String, String>("key", "val:ue");
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
-    @Test
-    public void testToSimpleEntryWithMismatchSeparators() {
-        String value = "key:value";
-        String separator = "-";
-        SimpleEntry<String, String> expResult = null;
-        SimpleEntry<String, String> result = ParameterUtil.toSimpleEntry(value, separator);
-        assertEquals(expResult, result);
-    }
-
 
     /**
      * Test of toMap method, of class OsgiPropertyUtil.

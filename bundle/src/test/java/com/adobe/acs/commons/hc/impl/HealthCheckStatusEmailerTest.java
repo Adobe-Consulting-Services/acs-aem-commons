@@ -22,6 +22,7 @@ package com.adobe.acs.commons.hc.impl;
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
@@ -36,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -176,13 +178,18 @@ public class HealthCheckStatusEmailerTest {
     }
 
     @Test
-    public void throttledExecution() {
+    public void throttledExecution() throws IllegalAccessException {
         results.add(failureExecutionResult);
 
         config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
         // Set a long delay to ensure we hit it on the 2nd .run() call..
         config.put(HealthCheckStatusEmailer.PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE, 100000);
         healthCheckStatusEmailer.activate(config);
+
+        Calendar minuteAgo = Calendar.getInstance();
+        // Make sure enough time has "ellapsed" so that the call to send email does something
+        minuteAgo.add(Calendar.MINUTE, -1);
+        FieldUtils.writeField(healthCheckStatusEmailer, "nextEmailTime",  minuteAgo, true);
 
         // Send the first time
         healthCheckStatusEmailer.run();
