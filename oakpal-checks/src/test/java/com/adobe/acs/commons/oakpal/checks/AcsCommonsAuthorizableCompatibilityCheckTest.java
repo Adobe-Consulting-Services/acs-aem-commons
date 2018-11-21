@@ -36,7 +36,7 @@ public class AcsCommonsAuthorizableCompatibilityCheckTest extends CheckTestBase 
 
     @Before
     public void setUp() throws Exception {
-        pack = TestPackageUtil.prepareTestPackageFromFolder("content-class-pack.zip",
+        pack = TestPackageUtil.prepareTestPackageFromFolder("home-users-pack.zip",
                 new File("src/test/resources/home-users-filevault"));
     }
 
