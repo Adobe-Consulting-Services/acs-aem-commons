@@ -24,13 +24,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.InitStage;
-import net.adamcin.oakpal.core.OakMachine;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.testing.TestPackageUtil;
 import org.json.JSONObject;
