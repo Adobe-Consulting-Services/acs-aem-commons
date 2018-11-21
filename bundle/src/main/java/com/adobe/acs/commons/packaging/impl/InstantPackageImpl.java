@@ -26,8 +26,6 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.vault.fs.api.ProgressTrackerListener;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
 import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
@@ -41,11 +39,20 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.Servlet;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +67,13 @@ import java.util.Date;
  * Sites or Assets UI Console
  */
 @SuppressWarnings("serial")
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/instant-package" }, selectors = { "package" }, extensions = { "json" })
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_METHODS+"=POST",
+SLING_SERVLET_SELECTORS+"=package",
+SLING_SERVLET_EXTENSIONS+"=json",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/instant-package"
+})
 public class InstantPackageImpl extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InstantPackageImpl.class);
 
