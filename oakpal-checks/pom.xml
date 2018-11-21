@@ -32,7 +32,7 @@
                     <archive>
                         <manifestEntries>
                             <Oakpal-ModuleName>com.adobe.acs.acs-aem-commons-oakpal-checks</Oakpal-ModuleName>
-                            <Oakpal-Checklist>OAKPAL-INF/checklist/acs-commons-on-64.json</Oakpal-Checklist>
+                            <Oakpal-Checklist>OAKPAL-INF/checklist/acs-internal.json</Oakpal-Checklist>
                         </manifestEntries>
                     </archive>
                 </configuration>

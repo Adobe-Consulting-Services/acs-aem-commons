@@ -88,18 +88,18 @@
                 <configuration>
                     <deferBuildFailure>true</deferBuildFailure>
                     <checklists>
-                        <checklist>acs-commons-on-64</checklist>
+                        <checklist>acs-internal</checklist>
                     </checklists>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>oakpal-scan-on-64</id>
+                        <id>oakpal-scan</id>
                         <goals>
                             <goal>scan</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>oakpal-scan-min-on-64</id>
+                        <id>oakpal-scan-min</id>
                         <goals>
                             <goal>scan-many</goal>
                         </goals>

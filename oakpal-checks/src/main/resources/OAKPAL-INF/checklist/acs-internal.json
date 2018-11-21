@@ -1,5 +1,5 @@
 {
-  "name": "acs-commons-on-64",
+  "name": "acs-internal",
   "checks": [
     {
       "name": "acHandling-merge-or-better",

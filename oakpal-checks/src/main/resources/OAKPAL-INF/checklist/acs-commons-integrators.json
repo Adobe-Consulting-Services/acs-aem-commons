@@ -1,0 +1,9 @@
+{
+  "name": "acs-commons-integrators",
+  "checks": [
+    {
+      "name": "authorizable-compatibility-check",
+      "impl": "com.adobe.acs.commons.oakpal.checks.AcsCommonsAuthorizableCompatibilityCheck"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ContentClassificationsTest {
+public class ContentClassificationsTest extends CheckTestBase {
     public static final String NS_URI_SLING = "http://sling.apache.org/jcr/sling/1.0";
     public static final String NS_URI_GRANITE = "http://www.adobe.com/jcr/granite/1.0";
 
@@ -78,16 +78,7 @@ public class ContentClassificationsTest {
     public void setUp() throws Exception {
         pack = TestPackageUtil.prepareTestPackageFromFolder("content-class-pack.zip",
                 new File("src/test/resources/content-classifications-filevault"));
-    }
-
-    public CheckReport scanWithCheck(final ProgressCheck check, final File... files) throws Exception {
-        List<File> artifacts = Arrays.asList(files);
-        Optional<CheckReport> reports = new OakMachine.Builder().withInitStage(INIT).withProgressChecks(check)
-                .build().scanPackages(artifacts).stream()
-                .filter(report -> check.getCheckName().equals(report.getCheckName()))
-                .findFirst();
-        assertTrue(String.format("report for %s is present", check.getCheckName()), reports.isPresent());
-        return reports.get();
+        initStages.add(INIT);
     }
 
     private ProgressCheck checkForPath(final String path) {
