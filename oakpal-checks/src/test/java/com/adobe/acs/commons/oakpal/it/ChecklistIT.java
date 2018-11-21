@@ -38,9 +38,9 @@ import org.junit.Test;
  * is generated at package time.
  */
 public class ChecklistIT {
-    public final static String OAKPAL_MODULE_NAME = "com.adobe.acs.acs-aem-commons-oakpal-checks";
-    public final static String OAKPAL_CHECKLIST_INTERNAL = "acs-internal";
-    public final static String OAKPAL_CHECKLIST_PUBLIC = "acs-commons-integrators";
+    public static final String OAKPAL_MODULE_NAME = "com.adobe.acs.acs-aem-commons-oakpal-checks";
+    public static final String OAKPAL_CHECKLIST_INTERNAL = "acs-internal";
+    public static final String OAKPAL_CHECKLIST_PUBLIC = "acs-commons-integrators";
 
     @Test
     public void testLoadChecklists() throws Exception {
