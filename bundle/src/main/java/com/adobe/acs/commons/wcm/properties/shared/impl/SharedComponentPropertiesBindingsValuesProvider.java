@@ -24,12 +24,11 @@ import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.commons.WCMUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +51,7 @@ import java.util.Map;
  * to instance-level values, then shared values, and finally global
  * values when properties exist at multiple levels with the same name.
  */
-@org.apache.felix.scr.annotations.Component
-@Service
+@org.osgi.service.component.annotations.Component(service=BindingsValuesProvider.class)
 public class SharedComponentPropertiesBindingsValuesProvider implements BindingsValuesProvider {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesBindingsValuesProvider.class);
 
