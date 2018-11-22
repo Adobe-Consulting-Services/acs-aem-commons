@@ -19,14 +19,17 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
+
 import java.io.IOException;
 import java.util.Iterator;
 
 import javax.jcr.query.Query;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -34,6 +37,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +50,8 @@ import com.day.cq.wcm.api.NameConstants;
  */
 
 @SuppressWarnings("serial")
-@SlingServlet(
-        metatype = false,
-        paths = { "/bin/wcm/duplicateVanityCheck" },
-        methods = { "GET" }
-)
+@Component(service = Servlet.class, property = { SLING_SERVLET_PATHS + "=/bin/wcm/duplicateVanityCheck",
+		SLING_SERVLET_METHODS + "=GET" })
 public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(VanityDuplicateCheckServlet.class);

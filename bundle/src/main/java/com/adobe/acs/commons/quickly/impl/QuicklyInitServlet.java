@@ -21,15 +21,22 @@ package com.adobe.acs.commons.quickly.impl;
 
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
 
 import java.io.IOException;
 
@@ -38,7 +45,9 @@ import java.io.IOException;
  *
  */
 @SuppressWarnings("serial")
-@SlingServlet(paths = "/bin/quickly.init.json")
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_PATHS+"=/bin/quickly.init.json"})
 public class QuicklyInitServlet extends SlingSafeMethodsServlet {
     @Reference
     private QuicklyEngine quicklyEngine;
