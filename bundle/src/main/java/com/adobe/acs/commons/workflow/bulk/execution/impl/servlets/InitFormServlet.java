@@ -57,9 +57,9 @@ import com.google.gson.JsonObject;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
-		SLING_SERVLET_SELECTORS + "=init-form",
-		SLING_SERVLET_EXTENSIONS + "=json" })
+      SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+      SLING_SERVLET_SELECTORS + "=init-form",
+      SLING_SERVLET_EXTENSIONS + "=json" })
 public class InitFormServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitFormServlet.class);
     private static final String KEY_RUNNER_TYPES = "runnerTypes";

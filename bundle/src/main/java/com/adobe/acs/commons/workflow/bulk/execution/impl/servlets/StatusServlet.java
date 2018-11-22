@@ -62,10 +62,10 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
-		SLING_SERVLET_SELECTORS + "=status",
-		SLING_SERVLET_METHODS + "=GET",
-		SLING_SERVLET_EXTENSIONS + "=json" })
+      SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+      SLING_SERVLET_SELECTORS + "=status",
+      SLING_SERVLET_METHODS + "=GET",
+      SLING_SERVLET_EXTENSIONS + "=json" })
 public class StatusServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(StatusServlet.class);
 

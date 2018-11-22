@@ -43,51 +43,51 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component(service = Servlet.class, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "ACS AEM Commons - Custom DAM Component List Servlet", property = {
-		SLING_SERVLET_PATHS + "=" + "/bin/acs-commons/dam/custom-components.json" })
+      SLING_SERVLET_PATHS + "=" + "/bin/acs-commons/dam/custom-components.json" })
 @Designate(ocd = CustomComponentActivatorListServlet.Config.class)
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 
-	static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
-	static final String FONTS = "xmpTPg:Fonts=/apps/acs-commons/dam/content/admin/fonts";
-	static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
-	static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
-	static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
+   static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
+   static final String FONTS = "xmpTPg:Fonts=/apps/acs-commons/dam/content/admin/fonts";
+   static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
+   static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
+   static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
 
-	@ObjectClassDefinition(description = "ACS AEM Commons - Custom DAM Component List Servlet")
-	public @interface Config {
+   @ObjectClassDefinition(description = "ACS AEM Commons - Custom DAM Component List Servlet")
+   public @interface Config {
 
-		@AttributeDefinition(description = "Map in the form <propertyName>=<replacement path>", defaultValue = {
-				HISTORY, FONTS, COLORANTS, LOCATION })
-		String[] components();
-	}
+      @AttributeDefinition(description = "Map in the form <propertyName>=<replacement path>", defaultValue = {
+            HISTORY, FONTS, COLORANTS, LOCATION })
+      String[] components();
+   }
 
-	private JsonObject json;
+   private JsonObject json;
 
-	@Activate
-	protected void activate(CustomComponentActivatorListServlet.Config config) {
-		Map<String, String> components = null;
-		if (config.components().length == 0) {
-			components = ParameterUtil.toMap(DEFAULT_COMPONENTS, "=");
-		} else {
-			components = ParameterUtil.toMap(config.components(), "=");
-		}
+   @Activate
+   protected void activate(CustomComponentActivatorListServlet.Config config) {
+      Map<String, String> components = null;
+      if (config.components().length == 0) {
+         components = ParameterUtil.toMap(DEFAULT_COMPONENTS, "=");
+      } else {
+         components = ParameterUtil.toMap(config.components(), "=");
+      }
 
-		JsonArray array = new JsonArray();
-		for (Map.Entry<String, String> entry : components.entrySet()) {
-			JsonObject obj = new JsonObject();
-			obj.addProperty("propertyName", entry.getKey());
-			obj.addProperty("componentPath", entry.getValue());
-			array.add(obj);
-		}
-		this.json = new JsonObject();
-		json.add("components", array);
-	}
+      JsonArray array = new JsonArray();
+      for (Map.Entry<String, String> entry : components.entrySet()) {
+         JsonObject obj = new JsonObject();
+         obj.addProperty("propertyName", entry.getKey());
+         obj.addProperty("componentPath", entry.getValue());
+         array.add(obj);
+      }
+      this.json = new JsonObject();
+      json.add("components", array);
+   }
 
-	@Override
-	protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
-			throws ServletException, IOException {
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(json.toString());
-	}
+   @Override
+   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+         throws ServletException, IOException {
+      response.setContentType("application/json");
+      response.setCharacterEncoding("UTF-8");
+      response.getWriter().print(json.toString());
+   }
 }
