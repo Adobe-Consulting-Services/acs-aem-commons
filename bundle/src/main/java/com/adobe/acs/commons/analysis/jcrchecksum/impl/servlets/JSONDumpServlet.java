@@ -48,8 +48,8 @@ import com.google.gson.stream.JsonWriter;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class,property= {"sling.servlet.paths="+JSONDumpServlet.SERVLET_PATH,
-		"sling.auth.requirements=" + "-" + JSONDumpServlet.SERVLET_PATH
-		})
+      "sling.auth.requirements=" + "-" + JSONDumpServlet.SERVLET_PATH
+      })
 public class JSONDumpServlet extends BaseChecksumServlet {
     private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
 
