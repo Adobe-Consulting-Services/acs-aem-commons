@@ -35,37 +35,37 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 @RunWith(MockitoJUnitRunner.class)
 public class CustomComponentActivatorListServletTest {
 
-	private static final String DEFAULT_RESULT = "{\"components\":[{\"propertyName\":\"xmpMM:History\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/history\"},"
-			+ "{\"propertyName\":\"xmpTPg:Fonts\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/fonts\"},"
-			+ "{\"propertyName\":\"xmpTPg:Colorants\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/color-swatches\"},"
-			+ "{\"propertyName\":\"location\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/asset-location-map\"}]}";
+   private static final String DEFAULT_RESULT = "{\"components\":[{\"propertyName\":\"xmpMM:History\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/history\"},"
+         + "{\"propertyName\":\"xmpTPg:Fonts\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/fonts\"},"
+         + "{\"propertyName\":\"xmpTPg:Colorants\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/color-swatches\"},"
+         + "{\"propertyName\":\"location\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/asset-location-map\"}]}";
 
-	@Mock
-	private CustomComponentActivatorListServlet.Config config;
+   @Mock
+   private CustomComponentActivatorListServlet.Config config;
 
-	@Test
-	public void testDefault() throws Exception {
-		CustomComponentActivatorListServlet servlet = new CustomComponentActivatorListServlet();
-		when(config.components()).thenReturn(new String[0]);
-		servlet.activate(config);
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(null, null, null, null, null);
-		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
-		servlet.doGet(request, response);
-		String result = response.getOutput().toString();
-		JSONAssert.assertEquals(DEFAULT_RESULT, result, JSONCompareMode.NON_EXTENSIBLE);
-	}
+   @Test
+   public void testDefault() throws Exception {
+      CustomComponentActivatorListServlet servlet = new CustomComponentActivatorListServlet();
+      when(config.components()).thenReturn(new String[0]);
+      servlet.activate(config);
+      MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(null, null, null, null, null);
+      MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+      servlet.doGet(request, response);
+      String result = response.getOutput().toString();
+      JSONAssert.assertEquals(DEFAULT_RESULT, result, JSONCompareMode.NON_EXTENSIBLE);
+   }
 
-	@Test
-	public void testCustom() throws Exception {
-		CustomComponentActivatorListServlet servlet = new CustomComponentActivatorListServlet();
-		when(config.components()).thenReturn(new String[] { "test=my/test/component" });
-		servlet.activate(config);
-		MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(null, null, null, null, null);
-		MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
-		servlet.doGet(request, response);
-		String result = response.getOutput().toString();
-		JSONAssert.assertEquals(
-				"{\"components\":[{\"propertyName\":\"test\",\"componentPath\":\"my/test/component\"}]}", result,
-				JSONCompareMode.NON_EXTENSIBLE);
-	}
+   @Test
+   public void testCustom() throws Exception {
+      CustomComponentActivatorListServlet servlet = new CustomComponentActivatorListServlet();
+      when(config.components()).thenReturn(new String[] { "test=my/test/component" });
+      servlet.activate(config);
+      MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(null, null, null, null, null);
+      MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+      servlet.doGet(request, response);
+      String result = response.getOutput().toString();
+      JSONAssert.assertEquals(
+            "{\"components\":[{\"propertyName\":\"test\",\"componentPath\":\"my/test/component\"}]}", result,
+            JSONCompareMode.NON_EXTENSIBLE);
+   }
 }

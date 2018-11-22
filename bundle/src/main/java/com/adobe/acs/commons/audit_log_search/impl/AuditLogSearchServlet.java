@@ -19,13 +19,28 @@
  */
 package com.adobe.acs.commons.audit_log_search.impl;
 
-import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -36,27 +51,15 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import static org.apache.sling.api.servlets.ServletResolverConstants.*;
+import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 @Component(service=Servlet.class, name="ACS AEM Commons - Audit Log Search Servlet",property= {
-		SLING_SERVLET_METHODS+"=GET",
-		SLING_SERVLET_EXTENSIONS+"=json",
-		SLING_SERVLET_SELECTORS+"=auditlogsearch",
-		SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/audit-log-search"
-		
+      SLING_SERVLET_METHODS+"=GET",
+      SLING_SERVLET_EXTENSIONS+"=json",
+      SLING_SERVLET_SELECTORS+"=auditlogsearch",
+      SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/audit-log-search"
 })
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {

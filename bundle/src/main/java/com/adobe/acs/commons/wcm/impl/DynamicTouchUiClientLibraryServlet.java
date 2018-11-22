@@ -35,35 +35,35 @@ import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 @Component(service = Servlet.class, 
         name = "ACS AEM Commons - Dynamic Touch UI Client Library Loader", 
         property = {
-		SLING_SERVLET_PATHS + "=/bin/acs-commons/dynamic-touchui-clientlibs.json" })
+      SLING_SERVLET_PATHS + "=/bin/acs-commons/dynamic-touchui-clientlibs.json" })
 public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
-	private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
-	private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
+   private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
+   private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
 
-	private static final String[] DEFAULT_CATEGORIES = new String[] { CATEGORY_LIMIT, CATEGORY_PLACEHOLDER };
+   private static final String[] DEFAULT_CATEGORIES = new String[] { CATEGORY_LIMIT, CATEGORY_PLACEHOLDER };
 
-	@ObjectClassDefinition(description = "Allows for dynamic loading of optional Touch UI Client Libraries")
-	public @interface Config {
+   @ObjectClassDefinition(description = "Allows for dynamic loading of optional Touch UI Client Libraries")
+   public @interface Config {
 
-		@AttributeDefinition(description = "Exclude all client library categories")
-		boolean exclude_all();
+      @AttributeDefinition(description = "Exclude all client library categories")
+      boolean exclude_all();
 
-		@AttributeDefinition(description = "Client Library Categories", defaultValue = { CATEGORY_LIMIT,
-				CATEGORY_PLACEHOLDER })
-		String[] categories();
+      @AttributeDefinition(description = "Client Library Categories", defaultValue = { CATEGORY_LIMIT,
+            CATEGORY_PLACEHOLDER })
+      String[] categories();
 
-	}
+   }
 
-	@Reference
-	private HtmlLibraryManager htmlLibraryManager;
+   @Reference
+   private HtmlLibraryManager htmlLibraryManager;
 
-	@Activate
-	protected void activate(DynamicTouchUiClientLibraryServlet.Config config) {
-		String[] categories = config.categories();
-		if (ArrayUtils.isEmpty(categories)) {
-			categories = DEFAULT_CATEGORIES;
-		}
-		super.activate(categories, config.exclude_all(), htmlLibraryManager);
-	}
+   @Activate
+   protected void activate(DynamicTouchUiClientLibraryServlet.Config config) {
+      String[] categories = config.categories();
+      if (ArrayUtils.isEmpty(categories)) {
+         categories = DEFAULT_CATEGORIES;
+      }
+      super.activate(categories, config.exclude_all(), htmlLibraryManager);
+   }
 }
