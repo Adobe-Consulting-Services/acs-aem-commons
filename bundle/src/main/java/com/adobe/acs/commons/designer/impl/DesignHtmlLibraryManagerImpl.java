@@ -25,27 +25,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
 import com.adobe.acs.commons.designer.PageRegion;
-import com.day.cq.wcm.api.designer.Design;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.day.cq.wcm.api.designer.Design;
 
 /**
  * ACS Commons - Design HTML Library Manager
  * Helper service used to expose configured Design-specific client libraries in JSPs.
  *
  */
-@Component
-@Service
+@Component(service=DesignHtmlLibraryManager.class)
 public final class DesignHtmlLibraryManagerImpl implements DesignHtmlLibraryManager {
     private static final Logger log = LoggerFactory.getLogger(DesignHtmlLibraryManagerImpl.class);
 

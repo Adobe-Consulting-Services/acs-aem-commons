@@ -19,43 +19,33 @@
  */
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.core.contentfinder.ViewHandler;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.Session;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * ACS AEM Commons - GQL to Querybuilder View Handler
  * Leverage Querybuilder to run ContentFinder queries
  */
 @SuppressWarnings("serial")
-@Component
-@Properties({
-        @Property(
-                label = "Servlet Paths",
-                name = "sling.servlet.paths",
-                value = "/bin/wcm/contentfinder/qb/view"
-        )
-})
-@Service
+@Component(service=Servlet.class,property= {"sling.servlet.paths=/bin/wcm/contentfinder/qb/view"})
 public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 

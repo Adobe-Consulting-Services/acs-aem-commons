@@ -21,29 +21,25 @@ package com.adobe.acs.commons.dam.impl;
 
 import java.awt.Color;
 
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.dam.AbstractRenditionModifyingProcess;
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Rendition;
+import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import com.day.cq.workflow.metadata.MetaDataMap;
 import com.day.image.Layer;
 
 /**
  * Workflow process which mattes an image against a solid background to the specified size.
  */
-@Component(metatype = false)
-@Service
-@Property(name = "process.label", value = "Matte Rendition")
+@Component(service=WorkflowProcess.class,property= { "process.label=Matte Rendition"})
 @SuppressWarnings({"squid:S00115", "checkstyle:localvariablename"})
 public final class MatteRenditionProcess extends AbstractRenditionModifyingProcess implements WorkflowProcess {
 
