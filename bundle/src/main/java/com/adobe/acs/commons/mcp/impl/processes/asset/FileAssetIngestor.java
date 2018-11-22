@@ -74,7 +74,7 @@ public class FileAssetIngestor extends AssetIngestor {
             description = "Username for SFTP connection",
             required = false
     )
-    private String username = null;
+    String username = null;
 
     @FormField(
             name = "Password",
@@ -82,7 +82,7 @@ public class FileAssetIngestor extends AssetIngestor {
             required = false,
             component = PasswordComponent.class
     )
-    private String password = null;
+    String password = null;
 
     @FormField(
             name = "Connection timeout",
@@ -90,7 +90,7 @@ public class FileAssetIngestor extends AssetIngestor {
             required = false,
             options = ("default=30000")
     )
-    private int timeout = 30000;
+    int timeout = 30000;
 
     HierarchicalElement baseFolder;
 
