@@ -20,14 +20,18 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+
+import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -36,23 +40,26 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.servlet.ServletException;
-import java.io.IOException;
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Start Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {"POST"},
-        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
-        selectors = {"start"},
-        extensions = {"json"}
-)
+@Component(service = Servlet.class, property = {
+		SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+		SLING_SERVLET_SELECTORS + "=start",
+		SLING_SERVLET_METHODS + "=POST",
+		SLING_SERVLET_EXTENSIONS + "=json" })
 public class StartServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(StartServlet.class);
 
