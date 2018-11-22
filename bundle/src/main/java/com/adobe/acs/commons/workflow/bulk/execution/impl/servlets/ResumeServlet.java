@@ -48,10 +48,10 @@ import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
-		SLING_SERVLET_SELECTORS + "=resume",
-		SLING_SERVLET_METHODS + "=POST",
-		SLING_SERVLET_EXTENSIONS + "=json" })
+      SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+      SLING_SERVLET_SELECTORS + "=resume",
+      SLING_SERVLET_METHODS + "=POST",
+      SLING_SERVLET_EXTENSIONS + "=json" })
 public class ResumeServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ResumeServlet.class);
 

@@ -52,10 +52,10 @@ import com.day.cq.workflow.model.WorkflowModel;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
-		SLING_SERVLET_SELECTORS + "=init",
-		SLING_SERVLET_METHODS + "=GET",
-		SLING_SERVLET_EXTENSIONS + "=json" })
+      SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
+      SLING_SERVLET_SELECTORS + "=init",
+      SLING_SERVLET_METHODS + "=GET",
+      SLING_SERVLET_EXTENSIONS + "=json" })
 public class InitServlet extends SlingSafeMethodsServlet {
 
     private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
