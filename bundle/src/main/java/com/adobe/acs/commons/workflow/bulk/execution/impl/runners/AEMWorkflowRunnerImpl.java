@@ -20,7 +20,26 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.scheduler.ScheduleOptions;
+import org.apache.sling.commons.scheduler.Scheduler;
+import org.apache.sling.event.jobs.JobManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
@@ -31,28 +50,8 @@ import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.Workflow;
 import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.scheduler.ScheduleOptions;
-import org.apache.sling.commons.scheduler.Scheduler;
-import org.apache.sling.event.jobs.JobManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-@Component
-@Service
+@Component(service=BulkWorkflowRunner.class)
 public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AEMWorkflowRunnerImpl.class);
 
