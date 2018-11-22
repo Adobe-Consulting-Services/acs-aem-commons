@@ -63,7 +63,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Source",
-            description = "Source folder for content ingestion which can be a local folder or SFTP url with user/password",
+            description = "Source folder for content ingestion which can be a local folder or SFTP url",
             hint = "/var/mycontent, /mnt/all_the_things, sftp://host[:port]/base/path...",
             required = true
     )
@@ -71,18 +71,26 @@ public class FileAssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Username",
-            description = "Username for connections that require login",
+            description = "Username for SFTP connection",
             required = false
     )
     private String username = null;
 
     @FormField(
             name = "Password",
-            description = "Password for connections that require login",
+            description = "Password for SFTP connection",
             required = false,
             component = PasswordComponent.class
     )
     private String password = null;
+
+    @FormField(
+            name = "Connection timeout",
+            description = "HTTP Connection timeout (in milliseconds) for SFTP connection",
+            required = false,
+            options = ("default=30000")
+    )
+    private int timeout = 30000;
 
     HierarchicalElement baseFolder;
 
@@ -316,6 +324,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
                 session.setConfig("StrictHostKeyChecking", "no");
+                session.setTimeout(timeout);
                 session.setPassword(password);
                 session.connect();
                 channel = (ChannelSftp) session.openChannel("sftp");
