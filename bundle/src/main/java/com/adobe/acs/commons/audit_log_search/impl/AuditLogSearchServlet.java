@@ -55,6 +55,7 @@ import com.adobe.acs.commons.audit_log_search.AuditLogSearchRequest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 @Component(service=Servlet.class, name="ACS AEM Commons - Audit Log Search Servlet",property= {
       SLING_SERVLET_METHODS+"=GET",
       SLING_SERVLET_EXTENSIONS+"=json",
