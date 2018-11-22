@@ -115,7 +115,7 @@
         return children;
     }
 
-    function isWithinLimit(parsysEditable) {
+    function isWithinLimit(parsysEditable){
         var isWithin = true, currentLimit = "";
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
