@@ -25,6 +25,7 @@ import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedSupplier;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -63,10 +64,26 @@ public class FileAssetIngestor extends AssetIngestor {
     @FormField(
             name = "Source",
             description = "Source folder for content ingestion which can be a local folder or SFTP url with user/password",
-            hint = "/var/mycontent, /mnt/all_the_things, sftp://user:password@host[:port]/base/path...",
+            hint = "/var/mycontent, /mnt/all_the_things, sftp://host[:port]/base/path...",
             required = true
     )
     String fileBasePath;
+
+    @FormField(
+            name = "Username",
+            description = "Username for connections that require login",
+            required = false
+    )
+    private String username = null;
+
+    @FormField(
+            name = "Password",
+            description = "Password for connections that require login",
+            required = false,
+            component = PasswordComponent.class
+    )
+    private String password = null;
+
     HierarchicalElement baseFolder;
 
     @Override
@@ -296,9 +313,6 @@ public class FileAssetIngestor extends AssetIngestor {
             if (channel == null || !channel.isConnected()) {
                 JSch jsch = new JSch();
                 int port = uri.getPort() <= 0 ? 22 : uri.getPort();
-                String userInfo = uri.getUserInfo();
-                String username = StringUtils.substringBefore(userInfo, ":");
-                String password = StringUtils.substringAfter(userInfo, ":");
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
                 session.setConfig("StrictHostKeyChecking", "no");
