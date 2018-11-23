@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
+- #1578 - Asset import needs additional configuration inputs
 
 ## [3.19.0] - 2018-11-03
 
