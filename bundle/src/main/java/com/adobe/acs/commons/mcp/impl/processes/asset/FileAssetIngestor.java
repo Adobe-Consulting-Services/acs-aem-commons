@@ -71,7 +71,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Connection timeout",
-            description = "HTTP Connection timeout (in milliseconds) for SFTP connection",
+            description = "Connection timeout (in milliseconds) for SFTP connection",
             required = false,
             options = ("default=30000")
     )
