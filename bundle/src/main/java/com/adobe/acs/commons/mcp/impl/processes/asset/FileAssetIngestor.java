@@ -70,6 +70,14 @@ public class FileAssetIngestor extends AssetIngestor {
     String fileBasePath;
 
     @FormField(
+            name = "Connection timeout",
+            description = "HTTP Connection timeout (in milliseconds) for SFTP connection",
+            required = false,
+            options = ("default=30000")
+    )
+    int timeout = 30000;
+
+    @FormField(
             name = "Username",
             description = "Username for SFTP connection",
             required = false
@@ -83,14 +91,6 @@ public class FileAssetIngestor extends AssetIngestor {
             component = PasswordComponent.class
     )
     String password = null;
-
-    @FormField(
-            name = "Connection timeout",
-            description = "HTTP Connection timeout (in milliseconds) for SFTP connection",
-            required = false,
-            options = ("default=30000")
-    )
-    int timeout = 30000;
 
     HierarchicalElement baseFolder;
 
