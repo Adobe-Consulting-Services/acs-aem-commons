@@ -20,6 +20,30 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -30,45 +54,20 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.resource.api.JcrResourceConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-@Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - DAM Metadata Property Reset",
-        description = "Replaces DAM Asset metadata properties with other values from the metadata node"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "DAM Metadata Property Reset",
-                description = "Replaces DAM Asset metadata properties with other values from the metadata node"
-        )
-})
-@Service
+@Component(service=WorkflowProcess.class)
+@Designate(ocd=DamMetadataPropertyResetProcess.Config.class)
 public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
 
+    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - DAM Metadata Property Reset",
+            description = "Replaces DAM Asset metadata properties with other values from the metadata node")
+    public @interface Config {
+       @AttributeDefinition(defaultValue = {
+             "DAM Metadata Property Reset" }, name = "Workflow Label", description = "Replaces DAM Asset metadata properties with other values from the metadata node")
+       String process_label();
+    }
+    
     @Reference
     private WorkflowPackageManager workflowPackageManager;
 
