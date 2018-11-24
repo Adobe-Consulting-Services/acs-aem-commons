@@ -88,7 +88,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Property(label = "TTL",
               description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
               longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
-    private static final String PROP_TTL = "httpcache.cachestore.memcache.ttl";
+    private static final String PROP_TTL = HttpCacheStore.PN_TTL;
     private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     private long ttl;
 
@@ -96,7 +96,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
               description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
                       + "from the cache",
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
+    private static final String PROP_MAX_SIZE_IN_MB = HttpCacheStore.PN_MAXSIZE;
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
     private long maxSizeInMb;
 

@@ -1,10 +1,9 @@
 package com.adobe.acs.commons.httpcache.store;
 
-import com.adobe.acs.commons.functions.BiFunctionWithException;
+import com.adobe.acs.commons.functions.SupplierWithException;
 import com.adobe.acs.commons.util.CacheMBean;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -27,32 +26,17 @@ public abstract class AbstractHttpCacheStoreRegistrationServiceImpl <T extends H
     private ServiceRegistration<HttpCacheStore> ehCacheHttpCacheStoreRegistration;
     private ServiceRegistration<DynamicMBean> ehCacheMBeanRegistration;
 
-    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
-    @Property(label = "TTL",
-            description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-            longValue = DEFAULT_TTL)
-    private static final String PROP_TTL = "httpcache.cachestore.ehcache.ttl";
-    private long ttl;
-
-    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
-    @Property(label = "Maximum size of this store in MB",
-            description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                    + "from the cache",
-            longValue = DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.ehcache.maxsize";
-    private long maxSizeInMb;
-
     private T httpCacheStore;
     private ServiceRegistration<T> storeRegistration;
     private ServiceRegistration<DynamicMBean> storeMBeanRegistration;
 
     protected abstract String getJMXName();
-    protected abstract BiFunctionWithException<Long,Long,T> getStoreCreateFunction();
+    protected abstract SupplierWithException<T> getStoreCreateSupplier();
 
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         try {
-            this.httpCacheStore =  getStoreCreateFunction().apply(ttl, maxSizeInMb);
+            this.httpCacheStore =  getStoreCreateSupplier().get();
 
             Dictionary<String, Object> serviceProps = new Hashtable<>(properties);
             serviceProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, httpCacheStore.getStoreType());

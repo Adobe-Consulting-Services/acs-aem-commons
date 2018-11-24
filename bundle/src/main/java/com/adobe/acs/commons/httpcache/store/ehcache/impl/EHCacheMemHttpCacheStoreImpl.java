@@ -90,9 +90,9 @@ public class EHCacheMemHttpCacheStoreImpl extends AbstractEHCacheMBean<CacheKey,
         this.dynamicClassLoaderManager = dclm;
         this.statisticsService = statisticsService;
 
+        expiryPolicy = new EHCacheExpiryPolicy(ttl);
         cacheManager = buildCacheManager(statisticsService);
         cache = cacheManager.getCache(EH_CACHE_NAME, CacheKey.class, MemCachePersistenceObject.class);
-        expiryPolicy = new EHCacheExpiryPolicy(ttl);
 
         log.info("EHCacheMemHttpCacheStoreImpl activated / modified.");
     }

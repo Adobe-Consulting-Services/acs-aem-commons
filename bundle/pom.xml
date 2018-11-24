@@ -65,8 +65,9 @@
                             org.apache.poi.ss.util;version="[2.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
-                            caffeine*;version="[2.6.2,3)";resolution:=optional,
-                            ehcache*;version="[3.5.2,4)";resolution:=optional,
+                            com.github.benmanes.caffeine*;resolution:=optional,
+                            org.ehcache*;resolution:=optional,
+                            org.terracotta*;resolution:=optional,
                             !org.bouncycastle.jce.*,
                             !android.util.*,
                             *

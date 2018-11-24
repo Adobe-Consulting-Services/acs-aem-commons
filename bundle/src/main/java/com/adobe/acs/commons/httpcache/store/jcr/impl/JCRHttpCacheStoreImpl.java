@@ -124,7 +124,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
         @Property(
                 label = "Expire time in milliseconds",
                 description = "The amount of milliseconds after which nodes will be removed by the scheduled cleanup service. ",
-                name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINMS,
+                name = HttpCacheStore.PN_TTL,
                 longValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRE_TIME_IN_MS
         )
 })
@@ -134,7 +134,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public static final String  PN_ROOTPATH            = "httpcache.config.jcr.rootpath";
     public static final String  PN_BUCKETDEPTH         = "httpcache.config.jcr.bucketdepth";
     public static final String  PN_SAVEDELTA           = "httpcache.config.jcr.savedelta";
-    public static final String PN_EXPIRETIMEINMS = "httpcache.config.jcr.expiretimeinms";
 
     //defaults
     public static final String  DEFAULT_ROOTPATH            = "/var/acs-commons/httpcache";
@@ -179,7 +178,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
         bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
         deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
-        defaultExpireTimeInMS = PropertiesUtil.toLong(properties.get(PN_EXPIRETIMEINMS), DEFAULT_EXPIRE_TIME_IN_MS);
+        defaultExpireTimeInMS = PropertiesUtil.toLong(properties.get(PN_TTL), DEFAULT_EXPIRE_TIME_IN_MS);
     }
 
     @Override
