@@ -25,19 +25,18 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
+import org.osgi.service.component.annotations.Component;
 
 import com.adobe.cq.dialogconversion.AbstractDialogRewriteRule;
 import com.adobe.cq.dialogconversion.DialogRewriteException;
+import com.adobe.cq.dialogconversion.DialogRewriteRule;
 import com.adobe.cq.dialogconversion.DialogRewriteUtils;
 
 /**
  * DialogRewriteRule which handles rewriting of the 'graphiciconselection' xtype.
  */
-@Component
-@Service
+@Component(service=DialogRewriteRule.class)
 public final class GraphicIconSelectionDialogRewriteRule extends AbstractDialogRewriteRule {
 
     private static final String PN_OPTIONS = "options";

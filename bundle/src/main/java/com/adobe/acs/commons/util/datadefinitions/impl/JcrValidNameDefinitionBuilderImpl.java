@@ -19,25 +19,16 @@
  */
 package com.adobe.acs.commons.util.datadefinitions.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.osgi.service.component.annotations.Component;
+
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
-
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
-@Component
-@Properties({
-        @Property(
-                name = ResourceDefinitionBuilder.PROP_NAME,
-                value = JcrValidNameDefinitionBuilderImpl.NAME,
-                propertyPrivate = true
-        )
+@Component(service=ResourceDefinitionBuilder.class,property= {
+		ResourceDefinitionBuilder.PROP_NAME + "=" + JcrValidNameDefinitionBuilderImpl.NAME
 })
-@Service
 public class JcrValidNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_TO_NODE_NAME";
 
