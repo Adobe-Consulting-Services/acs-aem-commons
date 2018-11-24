@@ -30,6 +30,7 @@ import com.adobe.acs.commons.httpcache.store.caffeine.AbstractCaffeineCacheMBean
 import com.adobe.acs.commons.httpcache.store.mem.MemCacheMBean;
 import com.adobe.acs.commons.httpcache.store.mem.MemCachePersistenceObject;
 import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
+import com.adobe.acs.commons.util.AbstractCacheMBean;
 import com.adobe.acs.commons.util.exception.CacheMBeanException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -63,22 +64,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * In-memory cache store implementation. Uses Google Guava Cache.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Caffeine cache store.",
-           description = "Cache data store implementation for in-memory storage.",
-           metatype = true)
-@Properties({
-        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                    value = CaffeineMemHttpCacheStoreImpl.CACHE_STORE_TYPE,
-                    propertyPrivate = true),
-        @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=Caffeine In Memory HTTP Cache Store",
-                    propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "TTL: {httpcache.cachestore.ttl}, "
-                            + "Max size in MB: {httpcache.cachestore.maxsize}",
-                    propertyPrivate = true)
-})
-@Service(value = {DynamicMBean.class, HttpCacheStore.class})
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
 
@@ -88,37 +73,21 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
 
-    @Property(label = "TTL",
-              description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-              longValue = CaffeineMemHttpCacheStoreImpl.DEFAULT_TTL)
-    private static final String PROP_TTL = "httpcache.cachestore.cafffeine.ttl";
-    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     protected static final int NANOSECOND_MODIFIER = 1000000;
-    private long ttl;
-
-    @Property(label = "Maximum size of this store in MB",
-              description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                      + "from the cache",
-              longValue = CaffeineMemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
-    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
-    private long maxSizeInMb;
 
     /** Cache - Uses Caffeine cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     private Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
+    private final long ttl;
+    private final long maxSizeInMb;
 
-    public CaffeineMemHttpCacheStoreImpl() throws NotCompliantMBeanException {
+    public CaffeineMemHttpCacheStoreImpl(long ttl, long maxSizeInMb) throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
-    }
-
-    @Activate
-    protected void activate(Map<String, Object> configs) {
         // Read config and populate values.
-        ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
         expiryPolicy = new CacheExpiryPolicy(ttl);
-        maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+        this.ttl = ttl;
+        this.maxSizeInMb = maxSizeInMb;
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitialize the cache.
@@ -128,22 +97,17 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
             log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
 
-        cache = Caffeine.newBuilder()
-            .maximumWeight(maxSizeInMb * MEGABYTE)
-            .weigher(new MemCacheEntryWeigher())
-            .expireAfter(expiryPolicy)
-            .removalListener(new MemCacheEntryRemovalListener())
-            .recordStats()
-            .build();
-
-        log.info("EHCacheMemHttpCacheStoreImpl activated / modified.");
+        cache = buildCache();
     }
 
-
-    @Deactivate
-    protected void deactivate(Map<String, Object> configs) {
-        cache.invalidateAll();
-        log.info("EHCacheMemHttpCacheStoreImpl deactivated.");
+    private Cache<CacheKey, MemCachePersistenceObject> buildCache() {
+        return Caffeine.newBuilder()
+                .maximumWeight(maxSizeInMb * MEGABYTE)
+                .weigher(new MemCacheEntryWeigher())
+                .expireAfter(expiryPolicy)
+                .removalListener(new MemCacheEntryRemovalListener())
+                .recordStats()
+                .build();
     }
 
     @Override
@@ -160,12 +124,12 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     protected void addCacheData(Map<String, Object> data, MemCachePersistenceObject cacheObj) {
         int hitCount = cacheObj.getHitCount();
         long size = cacheObj.getBytes().length;
-        data.put(JMX_PN_STATUS, cacheObj.getStatus());
-        data.put(JMX_PN_SIZE, FileUtils.byteCountToDisplaySize(size));
-        data.put(JMX_PN_CONTENTTYPE, cacheObj.getContentType());
-        data.put(JMX_PN_CHARENCODING, cacheObj.getCharEncoding());
-        data.put(JMX_PN_HITS, hitCount);
-        data.put(JMX_PN_TOTALSIZESERVED, FileUtils.byteCountToDisplaySize(hitCount * size));
+        data.put(AbstractCacheMBean.JMX_PN_STATUS, cacheObj.getStatus());
+        data.put(AbstractCacheMBean.JMX_PN_SIZE, FileUtils.byteCountToDisplaySize(size));
+        data.put(AbstractCacheMBean.JMX_PN_CONTENTTYPE, cacheObj.getContentType());
+        data.put(AbstractCacheMBean.JMX_PN_CHARENCODING, cacheObj.getCharEncoding());
+        data.put(AbstractCacheMBean.JMX_PN_HITS, hitCount);
+        data.put(AbstractCacheMBean.JMX_PN_TOTALSIZESERVED, FileUtils.byteCountToDisplaySize(hitCount * size));
     }
 
     @Override
@@ -181,9 +145,9 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
 
     @Override
     protected CompositeType getCacheEntryType() throws OpenDataException {
-        return new CompositeType(JMX_PN_CACHEENTRY, JMX_PN_CACHEENTRY,
-                new String[] { JMX_PN_CACHEKEY, JMX_PN_STATUS, JMX_PN_SIZE, JMX_PN_CONTENTTYPE, JMX_PN_CHARENCODING, JMX_PN_HITS, JMX_PN_TOTALSIZESERVED },
-                new String[] { JMX_PN_CACHEKEY, JMX_PN_STATUS, JMX_PN_SIZE, JMX_PN_CONTENTTYPE, JMX_PN_CHARENCODING, JMX_PN_HITS, JMX_PN_TOTALSIZESERVED },
+        return new CompositeType(AbstractCacheMBean.JMX_PN_CACHEENTRY, AbstractCacheMBean.JMX_PN_CACHEENTRY,
+                new String[] { AbstractCacheMBean.JMX_PN_CACHEKEY, AbstractCacheMBean.JMX_PN_STATUS, AbstractCacheMBean.JMX_PN_SIZE, AbstractCacheMBean.JMX_PN_CONTENTTYPE, AbstractCacheMBean.JMX_PN_CHARENCODING, AbstractCacheMBean.JMX_PN_HITS, AbstractCacheMBean.JMX_PN_TOTALSIZESERVED },
+                new String[] { AbstractCacheMBean.JMX_PN_CACHEKEY, AbstractCacheMBean.JMX_PN_STATUS, AbstractCacheMBean.JMX_PN_SIZE, AbstractCacheMBean.JMX_PN_CONTENTTYPE, AbstractCacheMBean.JMX_PN_CHARENCODING, AbstractCacheMBean.JMX_PN_HITS, AbstractCacheMBean.JMX_PN_TOTALSIZESERVED },
                 new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
     }
 

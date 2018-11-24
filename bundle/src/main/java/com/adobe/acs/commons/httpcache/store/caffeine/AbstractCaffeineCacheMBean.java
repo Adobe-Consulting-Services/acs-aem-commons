@@ -23,10 +23,6 @@ import java.util.Map;
  */
 public abstract class AbstractCaffeineCacheMBean <K, V> extends AbstractCacheMBean<K,V> implements CacheMBean {
 
-    public <T> AbstractCaffeineCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
-        super(implementation, mbeanInterface);
-    }
-
     protected AbstractCaffeineCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
     }
