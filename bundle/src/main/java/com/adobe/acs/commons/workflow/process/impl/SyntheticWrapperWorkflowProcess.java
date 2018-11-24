@@ -51,14 +51,14 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Component(service=WorkflowProcess.class)
 @Designate(ocd=SyntheticWrapperWorkflowProcess.Config.class)
 public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
-	
+   
     @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Synthetic Workflow Wrapper Process",
             description = "Executes an AEM Workflow model as a Synthetic Workflow using FAM")
     public @interface Config {
        @AttributeDefinition(defaultValue = {
              "Synthetic Workflow Wrapper" }, name = "Workflow Label", description = "Executes an AEM Workflow model as a Synthetic Workflow (serial execution)")
        String process_label();
-    }	
+    }   
     private static final Logger log = LoggerFactory.getLogger(SyntheticWrapperWorkflowProcess.class);
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_SAVE_INTERVAL = "saveInterval";

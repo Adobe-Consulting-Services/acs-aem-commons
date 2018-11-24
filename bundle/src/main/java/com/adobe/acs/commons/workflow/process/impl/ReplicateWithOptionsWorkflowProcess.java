@@ -59,7 +59,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Component(service=WorkflowProcess.class)
 @Designate(ocd=ReplicateWithOptionsWorkflowProcess.Config.class)
 public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
-	
+   
     @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Replicate with Options",
             description = "Replicates the content based on the process arg replication configuration using FAM,")
     public @interface Config {
@@ -67,7 +67,7 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
              "Replicate with Options" }, name = "Workflow Label", description = "Replicates the content based on the process arg replication configuration (serial execution)")
        String process_label();
     }
-	
+   
     private static final Logger log = LoggerFactory.getLogger(ReplicateWithOptionsWorkflowProcess.class);
 
     private static final String ARG_TRAVERSE_TREE = "traverseTree";

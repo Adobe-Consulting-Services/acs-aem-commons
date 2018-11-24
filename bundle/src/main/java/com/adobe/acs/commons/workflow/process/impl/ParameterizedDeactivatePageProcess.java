@@ -38,7 +38,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Component(service=WorkflowProcess.class)
 @Designate(ocd=ParameterizedDeactivatePageProcess.Config.class)
 public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
-	
+   
     @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Parameterized Deactivate Resource",
             description = "Triggers a deactivation replication event, but only to specifically configured agents.")
     public @interface Config {
@@ -46,7 +46,6 @@ public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
              "Parameterized Deactivate Resource Process" }, name = "Workflow Label", description = "Triggers a deactivation replication event, but only to specifically configured agents.")
        String process_label();
     }
-
 
     private static final String AGENT_ARG = "replicationAgent";
 
