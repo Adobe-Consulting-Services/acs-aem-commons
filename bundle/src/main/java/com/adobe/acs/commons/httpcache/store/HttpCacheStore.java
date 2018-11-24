@@ -29,7 +29,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
  * Multiple implementation of this cache store can be present at any time and they can work in conjunction.
  */
 @SuppressWarnings("squid:S1214")
-public interface HttpCacheStore {
+public interface HttpCacheStore extends AutoCloseable {
     /** Represents the key to find out the type of cache data store. Type could be MEM, DISK, JCR, etc. */
     String KEY_CACHE_STORE_TYPE = "httpcache.cachestore.type";
     /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
@@ -38,6 +38,10 @@ public interface HttpCacheStore {
     String VALUE_DISK_CACHE_STORE_TYPE = "DISK";
     /** Value representing JCR type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_JCR_CACHE_STORE_TYPE = "JCR";
+    /** Value representing EHCache type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE = "EHCACHE";
+    /** Value representing EHCache type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_CAFFEINE_MEMORY_STORE_TYPE = "CAFFEINE";
 
     /**
      * Put an item into the cache.
@@ -96,4 +100,15 @@ public interface HttpCacheStore {
      * @return
      */
     TempSink createTempSink();
+
+    /**
+     * Returns the store type of this store.
+     * @return
+     */
+    String getStoreType();
+
+    @Override
+    default void close() {
+        //not implemented  by default.
+    }
 }

@@ -155,36 +155,21 @@ public class EntryNodeWriterMocks
 
     private void mockJCRUtil() throws RepositoryException
     {
+
         when(
                 JcrUtils.getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false))
                 .thenAnswer(
-                        new Answer<Node>(){
-                            @Override public Node answer(InvocationOnMock invocationOnMock) throws Throwable {
-                                return contentNode;
-                            }
-                        }
-        );
+                        (Answer<Node>) invocationOnMock -> contentNode
+                );
 
         when(
                 JcrUtils.getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false))
-                .thenAnswer(new Answer<Node>()
-                {
-                    @Override public Node answer(InvocationOnMock invocationOnMock) throws Throwable
-                    {
-                        return jcrContentNode;
-                    }
-                }
-        );
+                .thenAnswer((Answer<Node>) invocationOnMock -> jcrContentNode
+                );
 
         when(
                 JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false))
-                .thenAnswer(new Answer<Node>()
-                            {
-                                @Override public Node answer(InvocationOnMock invocationOnMock) throws Throwable
-                                {
-                                    return headersNode;
-                                }
-                            }
+                .thenAnswer((Answer<Node>) invocationOnMock -> headersNode
                 );
 
     }

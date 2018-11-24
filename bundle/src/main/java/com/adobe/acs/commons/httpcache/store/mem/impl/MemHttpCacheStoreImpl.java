@@ -242,6 +242,16 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         return new MemTempSinkImpl();
     }
 
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
+    }
+
+    @Override
+    public void close() {
+        cache.invalidateAll();
+    }
+
     //-------------------------<Mbean specific implementation>
 
     public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {

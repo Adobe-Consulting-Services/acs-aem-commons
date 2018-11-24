@@ -21,6 +21,8 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.mock;
 
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
+import com.adobe.acs.commons.functions.ConsumerWithException;
+import com.adobe.acs.commons.functions.FunctionWithException;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
@@ -28,7 +30,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -44,6 +46,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 public class JCRHttpCacheStoreMocks {
@@ -111,17 +114,17 @@ public class JCRHttpCacheStoreMocks {
         Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
         Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
         Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
-        Whitebox.setInternalState(store, "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
+        Whitebox.setInternalState(store, "defaultExpireTimeInMS", JCRHttpCacheStoreImpl.DEFAULT_EXPIRE_TIME_IN_MS);
 
         doCallRealMethod().when(store).put(cacheKey, cacheContent);
         doCallRealMethod().when(store).contains(cacheKey);
         doCallRealMethod().when(store).invalidate(cacheKey);
         doCallRealMethod().when(store).clearCache();
         doCallRealMethod().when(store).getCacheEntry(any(String.class));
-        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class));
-        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class), any(CheckedConsumer.class));
-        doCallRealMethod().when(store).withSession(any(CheckedFunction.class));
-        doCallRealMethod().when(store).withSession(any(CheckedFunction.class), any(CheckedConsumer.class));
+        doCallRealMethod().when(store).withSession(any(ConsumerWithException.class));
+        doCallRealMethod().when(store).withSession(any(ConsumerWithException.class), any(ConsumerWithException.class));
+        doCallRealMethod().when(store).withSession(any(FunctionWithException.class));
+        doCallRealMethod().when(store).withSession(any(FunctionWithException.class), any(ConsumerWithException.class));
     }
 
     private CacheKeyMock generateCacheKey(Arguments arguments) {
@@ -135,13 +138,13 @@ public class JCRHttpCacheStoreMocks {
 
     private void mockEntryNodeWriter() throws Exception {
         whenNew(EntryNodeWriter.class)
-                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, Integer.class)
-                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(Integer.class))
+                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class)
+                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class))
                 .thenReturn(entryNodeWriter);
     }
 
     private void mockBucketNodeHandler() throws Exception {
-        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class)))
+        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
                 .thenReturn(entryNode);
         whenNew(BucketNodeHandler.class)
                 .withParameterTypes(Node.class, DynamicClassLoaderManager.class)

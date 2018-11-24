@@ -40,17 +40,9 @@ import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.github.benmanes.caffeine.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -66,9 +58,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
-
-    /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
-    public static final String CACHE_STORE_TYPE = "CAFFEINE";
 
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
@@ -98,6 +87,11 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         }
 
         cache = buildCache();
+    }
+
+    @Override
+    public void close(){
+        cache.invalidateAll();
     }
 
     private Cache<CacheKey, MemCachePersistenceObject> buildCache() {
@@ -246,6 +240,11 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     @Override
     public TempSink createTempSink() {
         return new MemTempSinkImpl();
+    }
+
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE;
     }
 
     //-------------------------<Mbean specific implementation>
