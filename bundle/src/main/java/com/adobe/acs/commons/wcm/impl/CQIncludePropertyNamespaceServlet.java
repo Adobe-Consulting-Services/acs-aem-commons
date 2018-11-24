@@ -25,6 +25,9 @@ import com.adobe.acs.commons.util.BufferingResponse;
 import com.adobe.acs.commons.util.InfoWriter;
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.day.cq.commons.jcr.JcrConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
@@ -34,8 +37,6 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.request.RequestUtil;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +46,13 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
 
 /**
  * ACS AEM Commons - CQInclude Property Namespace.
@@ -141,7 +144,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
         if (!this.accepts(request)) {
             response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(new JSONObject().toString());
+            response.getWriter().write("{}");
         }
 
         /* Servlet accepts this request */
@@ -156,21 +159,12 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         final BufferingResponse bufferingResponse = new BufferingResponse(response);
         request.getRequestDispatcher(request.getResource(), options).forward(request, bufferingResponse);
 
+        Gson gson = new Gson();
+         final JsonObject json = gson.toJsonTree(bufferingResponse.getContents()).getAsJsonObject();
+         final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
 
-        try {
-            final JSONObject json = new JSONObject(bufferingResponse.getContents());
-            final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
-
-            propertyNamespaceUpdater.accept(json);
-            response.getWriter().write(json.toString());
-
-        } catch (JSONException e) {
-            log.error("Error composing the cqinclude JSON representation of the widget overlay for [ {} ]",
-                    request.getRequestURI(), e);
-
-            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().toString());
-        }
+         propertyNamespaceUpdater.accept(json);
+         response.getWriter().write(json.toString());
     }
 
     protected boolean accepts(SlingHttpServletRequest request) {
@@ -248,12 +242,11 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
             return false;
         }
-
-
-        protected boolean isCqincludeNamespaceWidget(JSONObject jsonObject) {
-            if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
-                    && (StringUtils.equals(jsonObject.optString(PN_XTYPE), "cqinclude"))) {
-                String path = jsonObject.optString(PN_PATH);
+        
+        protected boolean isCqincludeNamespaceWidget(JsonObject jsonObject) {
+            if (StringUtils.equals(getString(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)
+                    && (StringUtils.equals(getString(jsonObject,PN_XTYPE), "cqinclude"))) {
+                String path = getString(jsonObject,PN_PATH);
                 if (StringUtils.isNotBlank(path)
                         && path.matches(CQINCLUDE_NAMESPACE_URL_REGEX)) {
                     return true;
@@ -264,18 +257,14 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
             return false;
         }
 
-        protected JSONObject makeMultiLevel(JSONObject jsonObject) {
-            String path = jsonObject.optString(PN_PATH);
+        protected JsonObject makeMultiLevel(JsonObject jsonObject) {
+            String path = getString(jsonObject, PN_PATH);
             if (StringUtils.isNotBlank(path)) {
                 Pattern pattern = Pattern.compile(CQINCLUDE_NAMESPACE_URL_REGEX);
                 Matcher m = pattern.matcher(path);
                 if (m.matches()) {
                     path = m.group(1) + this.namespace + ESCAPED_SLASH + m.group(2) + m.group(3);
-                    try {
-                        jsonObject.put(PN_PATH, path);
-                    } catch (JSONException e) {
-                        log.error("Could not update cqinclude namespace with path [ {} ]", path);
-                    }
+                    jsonObject.addProperty(PN_PATH, path);
                 }
             }
 
@@ -284,25 +273,20 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
 
         @SuppressWarnings("squid:S3776")
         @Override
-        protected void visit(JSONObject jsonObject) {
+        protected void visit(JsonObject jsonObject) {
 
-            if (StringUtils.equals(jsonObject.optString(JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
+            if (StringUtils.equals(getString(jsonObject,JcrConstants.JCR_PRIMARYTYPE), NT_CQ_WIDGET)) {
                 if (supportMultiLevel && isCqincludeNamespaceWidget(jsonObject)) {
                     jsonObject = makeMultiLevel(jsonObject);
                 }
 
-                final Iterator<String> keys = jsonObject.keys();
-
-                while (keys.hasNext()) {
-                    final String propertyName = keys.next();
-
-                    if (!this.accept(propertyName, jsonObject.optString(propertyName))) {
-                        log.debug("Property [ {} ~> {} ] is not a namespace-able property name/value", propertyName,
-                                jsonObject.optString(propertyName));
+                for (Entry<String, JsonElement> elem : jsonObject.entrySet()) {
+                    final String propertyName = elem.getKey();                    
+                    String value = elem.getValue().getAsString();
+                    if (!this.accept(propertyName, value)) {
+                        log.debug("Property [ {} ~> {} ] is not a namespace-able property name/value", propertyName, value);
                         continue;
                     }
-
-                    String value = jsonObject.optString(propertyName);
 
                     if (value != null) {
                         String prefix = "";
@@ -312,11 +296,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
                         }
 
                         if (StringUtils.isNotBlank(value)) {
-                            try {
-                                jsonObject.put(propertyName, prefix + namespace + "/" + value);
-                            } catch (final JSONException e) {
-                                log.error("Error updating the Name property of the JSON object", e);
-                            }
+                            jsonObject.addProperty(propertyName, prefix + namespace + "/" + value);
                         }
                     }
                 }

@@ -29,10 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.functions.Consumer;
-import com.adobe.acs.commons.functions.Function;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.mock.JCRHttpCacheStoreMocks;
 
 @RunWith(PowerMockRunner.class)

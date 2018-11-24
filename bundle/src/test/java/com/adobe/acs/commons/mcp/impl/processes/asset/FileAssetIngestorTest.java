@@ -19,13 +19,15 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
@@ -52,6 +54,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Vector;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -285,11 +289,36 @@ public class FileAssetIngestorTest {
         assertEquals("/content/dam", elem2.getNodePath());
         assertEquals("path", elem2.getNodeName());
     }
+    
+    @Test
+    public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException {
+        String baseUri = "sftp://user:password@host/test/path";
+        ingestor.fileBasePath = baseUri;
+        ChannelSftp channel = mock(ChannelSftp.class);
+        when(channel.isConnected()).thenReturn(true);
+        when(channel.getSession()).thenReturn(mock(Session.class));
+        
+        Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
+                .addDirectory(".")
+                .addDirectory("..")
+                .addFile("file1.png", 1234L)
+                .addFile("file2.png", 4567L)
+                .asVector();
+        when(channel.ls(anyObject())).thenReturn(entries);
+        
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(baseUri, channel, false);
+        int count = 0;
+        for (HierarchicalElement e : elem1.getChildren().collect(Collectors.toList())) {
+            count++;
+            assertTrue("Expected file name", e.getName().equals("file1.png") || e.getName().equals("file2.png"));
+            assertTrue("Expected isFile for " + e.getName(), e.isFile());
+        }
+        assertEquals("Expected only two files", 2, count);
+    }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {
         File newFile = new File(dir, name);
         FileUtils.copyInputStreamToFile(getClass().getResourceAsStream(resourcePath), newFile);
         return newFile;
     }
-
 }

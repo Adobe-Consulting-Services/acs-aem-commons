@@ -50,7 +50,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- TODO: Remove this plugin-->
+                <!-- TODO: Remove this plugin-->                
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
@@ -77,7 +77,7 @@
                         <execution>
                             <id>baseline</id>
                             <goals>
-                                <goal>baseline</goal>
+                                <goal>baseline</goal>   
                             </goals>
                         </execution>
                     </executions>
@@ -274,12 +274,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>2.6.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.adobe.aem</groupId>
                 <artifactId>uber-jar</artifactId>
                 <version>6.3.0</version>
@@ -406,7 +400,7 @@
                 <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
-
+            
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
@@ -569,8 +563,6 @@
 
     <modules>
         <module>bundle</module>
-        <module>bundle-twitter</module>
-        <module>bundle-caffeine</module>
         <module>content</module>
     </modules>
 </project>

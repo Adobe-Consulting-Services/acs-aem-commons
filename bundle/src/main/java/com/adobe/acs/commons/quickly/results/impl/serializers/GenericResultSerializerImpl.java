@@ -22,12 +22,11 @@ package com.adobe.acs.commons.quickly.results.impl.serializers;
 
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
+import com.google.gson.JsonObject;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class GenericResultSerializerImpl extends AbstractResultSerializer implem
 
     public static final String TYPE = "GENERIC";
 
-    public JSONObject toJSON(final Result result, final ValueMap config) throws JSONException {
+    public JsonObject toJSON(final Result result, final ValueMap config) {
         log.trace("Entering Generic Result Serializer for {}", result.getPath());
         return super.toJSON(result);
     }

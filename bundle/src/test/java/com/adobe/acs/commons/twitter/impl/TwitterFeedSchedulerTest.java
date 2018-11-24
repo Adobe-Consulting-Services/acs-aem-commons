@@ -32,7 +32,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.twitter.impl.TwitterFeedScheduler;
+import org.apache.sling.discovery.InstanceDescription;
+import org.apache.sling.discovery.TopologyEvent;
+import org.apache.sling.discovery.TopologyView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterFeedSchedulerTest {
@@ -66,17 +68,27 @@ public class TwitterFeedSchedulerTest {
 
     }
 
+    public TopologyEvent createLeaderChangeEvent(boolean isLeader) {
+        TopologyEvent te = mock(TopologyEvent.class);
+        TopologyView view = mock(TopologyView.class);
+        InstanceDescription instanceDescription = mock(InstanceDescription.class);
+        when(te.getNewView()).thenReturn(view);
+        when(view.getLocalInstance()).thenReturn(instanceDescription);
+        when(instanceDescription.isLeader()).thenReturn(isLeader);
+        return te;
+    }
+    
     @Test
     public void testDefaultInstanceBehaviour() throws NoSuchFieldException {
-        boolean isMaster = (Boolean) PrivateAccessor.getField(scheduler,
-                "isMaster");
-        assertFalse(isMaster);
+        boolean isLeader = (Boolean) PrivateAccessor.getField(scheduler,
+                "isLeader");
+        assertFalse(isLeader);
     }
 
     @Test
     public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenCallsService()
             throws Exception {
-        scheduler.bindRepository("", "", true);
+        scheduler.handleTopologyEvent(createLeaderChangeEvent(true));
         scheduler.run();
         verify(twitterFeedService).updateTwitterFeedComponents(resourceResolver);
 
@@ -85,7 +97,7 @@ public class TwitterFeedSchedulerTest {
     @Test
     public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenFinallyResourceResolverGetsClosed()
             throws Exception {
-        scheduler.bindRepository("", "", true);
+        scheduler.handleTopologyEvent(createLeaderChangeEvent(true));
         scheduler.run();
         verify(resourceResolver).close();
 

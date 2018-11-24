@@ -74,7 +74,7 @@ public class RedirectEntriesUtils {
             Resource fileResource = resource.getChild(RedirectMapModel.MAP_FILE_NODE);
             if (fileResource != null && fileResource.adaptTo(InputStream.class) != null) {
                 is = fileResource.adaptTo(InputStream.class);
-                lines = IOUtils.readLines(is);
+                lines = IOUtils.readLines(is, "UTF-8");
             }
             log.debug("Loaded {} lines", lines.size());
         } finally {

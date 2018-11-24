@@ -329,7 +329,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         try {
             stream = value.getBinary().getStream();
-            return DigestUtils.shaHex(stream);
+            return DigestUtils.sha1Hex(stream);
         } finally {
             if (stream != null) {
                 stream.close();
@@ -344,7 +344,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @throws RepositoryException
      */
     protected static String getStringChecksum(final Value value) throws RepositoryException {
-        return DigestUtils.shaHex(value.getString());
+        return DigestUtils.sha1Hex(value.getString());
     }
 
     /**
@@ -379,6 +379,6 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
             data.append(entry.getKey() + "=" + entry.getValue());
         }
 
-        return DigestUtils.shaHex(data.toString());
+        return DigestUtils.sha1Hex(data.toString());
     }
 }

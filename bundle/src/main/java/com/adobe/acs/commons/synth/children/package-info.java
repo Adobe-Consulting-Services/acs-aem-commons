@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@Version("1.0.0")
+@Version("2.0.0")
 
 package com.adobe.acs.commons.synth.children;
 

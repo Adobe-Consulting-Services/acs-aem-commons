@@ -64,8 +64,8 @@ public class EvolutionAnalyserImpl implements EvolutionAnalyser {
         propertyIgnores = PropertiesUtil.toStringArray(config.get(PROPERTY_IGNORES), new String[] { "" });
         resourceIgnores = PropertiesUtil.toStringArray(config.get(RESOURCE_IGNORES), new String[] { "" });
         evolutionConfig = new EvolutionConfig(propertyIgnores, resourceIgnores);
-        log.debug("Ignored properties: {}", propertyIgnores);
-        log.debug("Ignored resources: {}", resourceIgnores);
+        log.debug("Ignored properties: {}", (Object[]) propertyIgnores);
+        log.debug("Ignored resources: {}", (Object[]) resourceIgnores);
     }
 
 }

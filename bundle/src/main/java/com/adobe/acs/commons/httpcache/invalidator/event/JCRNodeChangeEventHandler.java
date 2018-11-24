@@ -53,6 +53,8 @@ import java.util.Map;
            policy = ConfigurationPolicy.REQUIRE)
 @Properties({
         @Property(label = "Event Topics",
+            // TODO: Register a Resource Change Listener instead as per the deprecation notes
+            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
                    value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,
                            SlingConstants.TOPIC_RESOURCE_REMOVED},
                    description = "This handler responds to resource modification event.",

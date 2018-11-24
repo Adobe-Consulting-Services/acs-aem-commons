@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.Map;
 
@@ -126,7 +127,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 IOUtils.closeQuietly(stream);
                 try {
                     Files.delete(transcodedAudio.toPath());
-                } catch (Exception e) {
+                } catch (IOException e) {
                     log.error("Transcoded audio file @ " + transcodedAudio.getAbsolutePath() + " coud not be deleted", e);
                 }
             } catch (IOException e) {
@@ -160,7 +161,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 try {
                     asset.addRendition("transcription.txt", new ByteArrayInputStream(result.getContent().getBytes("UTF-8")), "text/plain");
                     log.info("Transcription for {} created.", asset.getPath());
-                } catch (Exception e) {
+                } catch (UnsupportedEncodingException e) {
                     log.error("Unable to save new rendition", e);
                 }
                 return true;

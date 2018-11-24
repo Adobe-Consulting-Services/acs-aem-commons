@@ -62,16 +62,6 @@
                             <artifactId>acs-aem-commons-bundle</artifactId>
                             <target>/apps/acs-commons/install</target>
                         </embedded>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle-httpcache-caffeine</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                        </embedded>
                     </embeddeds>
                     <dependencies>
                         <dependency>
@@ -83,7 +73,7 @@
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
-
+            
             <plugin>
                 <groupId>com.cj.jshintmojo</groupId>
                 <artifactId>jshint-maven-plugin</artifactId>
@@ -169,18 +159,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-bundle-twitter</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-bundle-httpcache-caffeine</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
