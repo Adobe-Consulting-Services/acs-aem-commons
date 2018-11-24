@@ -25,18 +25,16 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -44,18 +42,10 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component
-@Properties({
-        @Property(
-                name="sling.servlet.paths",
-                value= ChecksumGeneratorServlet.SERVLET_PATH
-        ),
-        @Property(
-                name="sling.auth.requirements",
-                value= "-" + ChecksumGeneratorServlet.SERVLET_PATH
-        )
-})
-@Service
+@Component(service=Servlet.class, property= {
+		"sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
+		"sling.auth.requirements=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
+		})
 public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
