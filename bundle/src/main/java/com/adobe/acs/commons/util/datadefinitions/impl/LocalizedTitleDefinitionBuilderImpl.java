@@ -31,7 +31,7 @@ import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 
 @Component(service=ResourceDefinitionBuilder.class,property= {
-		ResourceDefinitionBuilder.PROP_NAME + "=" + LocalizedTitleDefinitionBuilderImpl.NAME
+      ResourceDefinitionBuilder.PROP_NAME + "=" + LocalizedTitleDefinitionBuilderImpl.NAME
 })
 public class LocalizedTitleDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "LOCALIZED_TITLE";
