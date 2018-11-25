@@ -19,9 +19,23 @@
  */
 package com.adobe.acs.commons.email.impl;
 
-import com.day.cq.commons.mail.MailTemplate;
-import com.day.cq.mailer.MessageGateway;
-import com.day.cq.mailer.MessageGatewayService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.activation.DataSource;
+import javax.jcr.Session;
+import javax.mail.internet.MimeMultipart;
+
 import org.apache.commons.mail.ByteArrayDataSource;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
@@ -43,20 +57,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import javax.activation.DataSource;
-import javax.jcr.Session;
-import javax.mail.internet.MimeMultipart;
-import java.io.File;
-import java.io.FileInputStream;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import com.day.cq.commons.mail.MailTemplate;
+import com.day.cq.mailer.MessageGateway;
+import com.day.cq.mailer.MessageGatewayService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(MailTemplate.class)
@@ -76,6 +79,9 @@ public class EmailServiceImplTest {
 
     @Mock
     private MessageGateway<HtmlEmail> messageGatewayHtmlEmail;
+    
+    @Mock
+    private EmailServiceImpl.Config config;
 
     @Mock
     private Session session;
@@ -259,7 +265,7 @@ public class EmailServiceImplTest {
 
     @Test
     public void testDefaultTimeouts() {
-        emailService.activate(Collections.emptyMap());
+        emailService.activate(config);
         SimpleEmail email = sendTestEmail();
         assertEquals(30000, email.getSocketConnectionTimeout());
         assertEquals(30000, email.getSocketTimeout());
@@ -267,10 +273,9 @@ public class EmailServiceImplTest {
 
     @Test
     public void testCustomTimeouts() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("so.timeout", 100);
-        params.put("conn.timeout", 500);
-        emailService.activate(params);
+        when(config.so_timeout()).thenReturn(100);
+        when(config.conn_timeout()).thenReturn(500);
+        emailService.activate(config);
         SimpleEmail email = sendTestEmail();
         assertEquals(500, email.getSocketConnectionTimeout());
         assertEquals(100, email.getSocketTimeout());

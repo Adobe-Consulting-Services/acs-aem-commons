@@ -19,38 +19,41 @@
 */
 package com.adobe.acs.commons.email.impl;
 
-import com.adobe.acs.commons.email.EmailService;
-import com.adobe.acs.commons.email.EmailServiceConstants;
-import com.day.cq.commons.mail.MailTemplate;
-import com.day.cq.mailer.MessageGateway;
-import com.day.cq.mailer.MessageGatewayService;
-import org.apache.commons.lang.text.StrLookup;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.commons.mail.SimpleEmail;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import javax.activation.DataSource;
 import javax.jcr.Session;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.lang.text.StrLookup;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.SimpleEmail;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.email.EmailService;
+import com.adobe.acs.commons.email.EmailServiceConstants;
+import com.day.cq.commons.mail.MailTemplate;
+import com.day.cq.mailer.MessageGateway;
+import com.day.cq.mailer.MessageGatewayService;
 
 /**
  * ACS AEM Commons - E-mail Service
@@ -68,9 +71,18 @@ import java.util.Map;
  *      ...
  *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
-@Component(metatype = true, label = "ACS AEM Commons - Email Service", description = "ACS AEM Commons - Email Service")
-@Service
+@Component(service=EmailService.class)
+@Designate(ocd=EmailServiceImpl.Config.class)
 public final class EmailServiceImpl implements EmailService {
+   
+   @ObjectClassDefinition(name = "ACS AEM Commons - Email Service", description = "ACS AEM Commons - Email Service")
+   public @interface Config {
+      @AttributeDefinition(name = "Socket Timeout", description = "Socket timeout in milliseconds",type=AttributeType.INTEGER,defaultValue= {""+DEFAULT_SOCKET_TIMEOUT})
+      int so_timeout();
+      
+      @AttributeDefinition(name = "Connect Timeout", description = "Connect timeout in milliseconds",type=AttributeType.INTEGER,defaultValue= {""+DEFAULT_CONNECT_TIMEOUT})
+      int conn_timeout();
+   }
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String MSG_INVALID_RECIPIENTS = "Invalid Recipients";
@@ -85,21 +97,21 @@ public final class EmailServiceImpl implements EmailService {
 
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 
-    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
-    private static final String PROP_SO_TIMEOUT = "so.timeout";
-
-    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
-    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
-
     private static String SERVICE_NAME = "email-service";
 
     private int connectTimeout;
     private int soTimeout;
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
-        soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
+    protected void activate(EmailServiceImpl.Config config) {
+        connectTimeout = config.conn_timeout();
+        soTimeout = config.so_timeout();
+        if (connectTimeout == 0) {
+              connectTimeout = DEFAULT_CONNECT_TIMEOUT;
+        }
+        if (soTimeout == 0) {
+             soTimeout = DEFAULT_SOCKET_TIMEOUT;
+        }
     }
 
     @Override

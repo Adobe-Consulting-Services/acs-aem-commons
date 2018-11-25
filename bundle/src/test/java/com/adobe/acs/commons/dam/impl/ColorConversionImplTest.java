@@ -20,21 +20,29 @@
 package com.adobe.acs.commons.dam.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
-import com.adobe.acs.commons.dam.ColorConversion;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Collections;
+import com.adobe.acs.commons.dam.ColorConversion;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ColorConversionImplTest {
 
     private ColorConversionImpl impl;
+    
+    @Mock
+    ColorConversionImpl.Config config;
 
     @Before
     public void setup() throws Exception {
         impl = new ColorConversionImpl();
-        impl.activate(Collections.<String, Object>emptyMap());
+        when(config.cmyk_icc_profile()).thenReturn("");
+        impl.activate(config);
     }
 
     @Test
