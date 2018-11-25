@@ -43,9 +43,9 @@ import java.util.Set;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property= {
-		"sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
-		"sling.auth.requirements=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
-		})
+      "sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
+      "sling.auth.requirements=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
+      })
 public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
