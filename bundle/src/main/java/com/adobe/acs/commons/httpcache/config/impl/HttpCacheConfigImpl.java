@@ -140,13 +140,27 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     // Cache store
     // @formatter:off
     @Property(label = "Cache store",
-              description = "Cache store for caching the response for this request URI. Example - MEM. This should "
-                      + "be one of the cache stores active in this installation. Mandatory parameter.",
-              value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE
-    )
+            description = "Cache store for caching the response for this request URI. Example - MEM. This should "
+                    + "be one of the cache stores active in this installation. Mandatory parameter.",
+            propertyPrivate = false,
+            options = {
+                    @PropertyOption(name = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+                            value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
+                    @PropertyOption(name = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,
+                            value = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE),
+                    @PropertyOption(name = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE,
+                            value = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE),
+                    // Only MEM and JCR implementations are available now.
+                    //@PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
+                    //                value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
+
+                    @PropertyOption(name = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+                            value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE)
+            },
+            value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE)
     // @formatter:on
     private static final String PROP_CACHE_STORE = "httpcache.config.cachestore";
-    private static final String DEFAULT_CACHE_STORE = "MEM"; // Defaults to memory cache store
+    private static final String DEFAULT_CACHE_STORE = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE; // Defaults to memory cache store
     private String cacheStore;
 
 
