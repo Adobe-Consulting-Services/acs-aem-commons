@@ -23,9 +23,6 @@ public abstract class AbstractHttpCacheStoreRegistrationServiceImpl <T extends H
 
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpCacheStoreRegistrationServiceImpl.class);
 
-    private ServiceRegistration<HttpCacheStore> ehCacheHttpCacheStoreRegistration;
-    private ServiceRegistration<DynamicMBean> ehCacheMBeanRegistration;
-
     private T httpCacheStore;
     private ServiceRegistration<T> storeRegistration;
 
