@@ -142,7 +142,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Property(label = "Cache store",
               description = "Cache store for caching the response for this request URI. Example - MEM. This should "
                       + "be one of the cache stores active in this installation. Mandatory parameter.",
-              propertyPrivate = true,
               value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE
     )
     // @formatter:on

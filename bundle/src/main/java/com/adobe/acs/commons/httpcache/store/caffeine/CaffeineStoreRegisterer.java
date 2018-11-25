@@ -1,10 +1,14 @@
 package com.adobe.acs.commons.httpcache.store.caffeine;
 
+import com.adobe.acs.commons.functions.FunctionWithException;
 import com.adobe.acs.commons.functions.SupplierWithException;
 import com.adobe.acs.commons.httpcache.store.AbstractHttpCacheStoreRegistrationServiceImpl;
+import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
+
+import java.util.Map;
 
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_MAXSIZE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_TTL;
@@ -31,12 +35,16 @@ public class CaffeineStoreRegisterer extends AbstractHttpCacheStoreRegistrationS
 
     @Override
     protected String getJMXName() {
-        return "EHCache In Memory HTTP Cache Store";
+        return "Caffeine in mem HTTP Cache Store";
     }
 
     @Override
-    protected SupplierWithException<CaffeineMemHttpCacheStoreImpl> getStoreCreateSupplier() {
-        return () -> new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
+    protected FunctionWithException<Map<String,Object>, CaffeineMemHttpCacheStoreImpl> getStoreCreateFunction() {
+        return (properties) -> {
+            long ttl = (long) properties.get(HttpCacheStore.PN_TTL);
+            long maxSizeInMb = (long) properties.get(HttpCacheStore.PN_MAXSIZE);
+            return new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
+        };
     }
 
 }

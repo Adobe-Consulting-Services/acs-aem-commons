@@ -72,13 +72,11 @@ public class EHCacheMemHttpCacheStoreImpl extends AbstractEHCacheMBean<CacheKey,
     private final long ttl;
     private final long maxSizeInMb;
 
-    private Cache<CacheKey, MemCachePersistenceObject> cache;
-    private CacheManager cacheManager;
+    private final Cache<CacheKey, MemCachePersistenceObject> cache;
+    private final CacheManager cacheManager;
 
-    @Reference
+
     private StatisticsService statisticsService;
-
-    @Reference
     private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private ExpiryPolicy<CacheKey, MemCachePersistenceObject> expiryPolicy;

@@ -65,9 +65,9 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     protected static final int NANOSECOND_MODIFIER = 1000000;
 
     /** Cache - Uses Caffeine cache */
-    private Cache<CacheKey, MemCachePersistenceObject> cache;
+    private final Cache<CacheKey, MemCachePersistenceObject> cache;
 
-    private Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
+    private final Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
     private final long ttl;
     private final long maxSizeInMb;
 
@@ -81,11 +81,6 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         // Initializing the cache.
         // If cache is present, invalidate all and reinitialize the cache.
         // Recording cache usage stats enabled.
-        if (null != cache) {
-            cache.invalidateAll();
-            log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
-        }
-
         cache = buildCache();
     }
 

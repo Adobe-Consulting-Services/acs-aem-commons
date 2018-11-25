@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.httpcache.store.ehcache;
 
-import com.adobe.acs.commons.functions.SupplierWithException;
+import com.adobe.acs.commons.functions.FunctionWithException;
 import com.adobe.acs.commons.httpcache.store.AbstractHttpCacheStoreRegistrationServiceImpl;
 import com.adobe.acs.commons.httpcache.store.ehcache.impl.EHCacheMemHttpCacheStoreImpl;
 import org.apache.felix.scr.annotations.Component;
@@ -8,6 +8,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.ehcache.core.spi.service.StatisticsService;
+
+import java.util.Map;
 
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_MAXSIZE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_TTL;
@@ -41,11 +43,18 @@ public class EHCacheStoreRegisterer extends AbstractHttpCacheStoreRegistrationSe
 
     @Override
     protected String getJMXName() {
-        return "EHCache HttpCache Store";
+        return "EHCache in mem HttpCache Store";
     }
 
     @Override
-    protected SupplierWithException<EHCacheMemHttpCacheStoreImpl> getStoreCreateSupplier() {
-        return () -> new EHCacheMemHttpCacheStoreImpl(dclm, statisticsService, ttl, maxSizeInMb);
+    protected FunctionWithException<Map<String, Object>, EHCacheMemHttpCacheStoreImpl> getStoreCreateFunction() {
+        return (properties) -> {
+            long ttl = (long) properties.get(PN_TTL);
+            long maxSizeInMb = (long) properties.get(PN_MAXSIZE);
+            return new EHCacheMemHttpCacheStoreImpl(dclm, statisticsService, ttl, maxSizeInMb);
+        };
     }
+
 }
+
+

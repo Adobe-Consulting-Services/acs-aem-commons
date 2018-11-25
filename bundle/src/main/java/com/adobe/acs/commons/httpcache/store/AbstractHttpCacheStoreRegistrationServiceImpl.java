@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.httpcache.store;
 
-import com.adobe.acs.commons.functions.SupplierWithException;
+import com.adobe.acs.commons.functions.FunctionWithException;
 import com.adobe.acs.commons.util.CacheMBean;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -28,15 +28,14 @@ public abstract class AbstractHttpCacheStoreRegistrationServiceImpl <T extends H
 
     private T httpCacheStore;
     private ServiceRegistration<T> storeRegistration;
-    private ServiceRegistration<DynamicMBean> storeMBeanRegistration;
 
     protected abstract String getJMXName();
-    protected abstract SupplierWithException<T> getStoreCreateSupplier();
+    protected abstract FunctionWithException<Map<String,Object>,T> getStoreCreateFunction();
 
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         try {
-            this.httpCacheStore =  getStoreCreateSupplier().get();
+            this.httpCacheStore =  getStoreCreateFunction().apply(properties);
 
             Dictionary<String, Object> serviceProps = new Hashtable<>(properties);
             serviceProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, httpCacheStore.getStoreType());
@@ -44,8 +43,7 @@ public abstract class AbstractHttpCacheStoreRegistrationServiceImpl <T extends H
             serviceProps.put("webconsole.configurationFactory.nameHint", "TTL: {httpcache.cachestore.ttl}, "
                     + "Max size in MB: {httpcache.cachestore.maxsize}");
 
-            this.ehCacheHttpCacheStoreRegistration = bundleContext.registerService(HttpCacheStore.class, httpCacheStore, serviceProps);
-            this.ehCacheMBeanRegistration =          bundleContext.registerService(DynamicMBean.class, httpCacheStore, serviceProps);
+            storeRegistration = (ServiceRegistration<T>) bundleContext.registerService(new String[]{HttpCacheStore.class.getName(), DynamicMBean.class.getName()}, httpCacheStore, serviceProps);
 
             log.info("{} activated.", getJMXName());
         } catch (NoClassDefFoundError e) {
@@ -65,10 +63,6 @@ public abstract class AbstractHttpCacheStoreRegistrationServiceImpl <T extends H
         if (this.storeRegistration != null) {
             this.storeRegistration.unregister();
             this.storeRegistration = null;
-        }
-        if (this.storeMBeanRegistration != null) {
-            this.storeMBeanRegistration.unregister();
-            this.storeMBeanRegistration = null;
         }
     }
 }
