@@ -150,6 +150,8 @@ public class SpreadsheetTest {
     public void testVariantTypes() throws IOException {
         Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
         Map<String, CompositeVariant> values = instance.getDataRowsAsCompositeVariants().get(4);
+        assertNotNull("Should have a row of data", values);
+        assertNotNull("Should have a column int-val", values.get("int-val"));
         assertEquals((Integer) 12345, values.get("int-val").toPropertyValue());
         assertArrayEquals(new String[]{"one", "two", "three"}, (Object[]) values.get("string-list1").toPropertyValue());
         assertArrayEquals(new String[]{"four", "five", "six"}, (Object[]) values.get("string-list2").toPropertyValue());
