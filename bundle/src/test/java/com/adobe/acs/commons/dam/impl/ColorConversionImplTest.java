@@ -22,7 +22,11 @@ package com.adobe.acs.commons.dam.impl;
 import static org.junit.Assert.assertEquals;
 
 import com.adobe.acs.commons.dam.ColorConversion;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -30,11 +34,15 @@ import java.util.Collections;
 public class ColorConversionImplTest {
 
     private ColorConversionImpl impl;
+    
+    @Rule
+    public AemContext context = new AemContext();
+    
 
     @Before
     public void setup() throws Exception {
         impl = new ColorConversionImpl();
-        impl.activate(Collections.<String, Object>emptyMap());
+        context.registerInjectActivateService(impl, Collections.<String, Object>emptyMap());
     }
 
     @Test
