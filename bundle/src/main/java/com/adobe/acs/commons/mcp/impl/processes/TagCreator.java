@@ -49,7 +49,12 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates cq:Tags based on a well defined Excel document.
@@ -343,8 +348,8 @@ public class TagCreator extends ProcessDefinition implements Serializable {
     }
 
     protected static final class TagRootResolver {
-        private final String CONTENT_LOCATION = "/content/cq:tags";
-        private final String ETC_LOCATION = "/etc/tags";
+        private static final String CONTENT_LOCATION = "/content/cq:tags";
+        private static final String ETC_LOCATION = "/etc/tags";
 
         private final String tagsLocationPath;
 
