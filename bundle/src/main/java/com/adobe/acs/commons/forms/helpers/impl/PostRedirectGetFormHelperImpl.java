@@ -19,40 +19,37 @@
  */
 package com.adobe.acs.commons.forms.helpers.impl;
 
-import com.adobe.acs.commons.forms.Form;
-import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
-import com.adobe.acs.commons.forms.impl.FormImpl;
-import com.adobe.acs.commons.util.TypeUtil;
-import com.day.cq.wcm.api.Page;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
+import com.adobe.acs.commons.forms.Form;
+import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
+import com.adobe.acs.commons.forms.impl.FormImpl;
+import com.adobe.acs.commons.util.TypeUtil;
+import com.day.cq.wcm.api.Page;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET Form Helper
  *
  */
-@Component(inherit = true)
-@Property(label = "Service Ranking",
-        name = Constants.SERVICE_RANKING,
-        intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
-@Service(value = { FormHelper.class, PostRedirectGetFormHelper.class })
+@Component(service={ FormHelper.class, PostRedirectGetFormHelper.class}, property= {
+      Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_GET})
 public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implements PostRedirectGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
