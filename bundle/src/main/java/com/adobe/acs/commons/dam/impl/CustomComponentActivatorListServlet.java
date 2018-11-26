@@ -19,27 +19,32 @@
  */
 package com.adobe.acs.commons.dam.impl;
 
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.servlet.ServletException;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.servlets.annotations.SlingServletPaths;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Map;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-@SlingServlet(paths = "/bin/acs-commons/dam/custom-components.json", generateComponent = false)
-@Component(metatype = true, policy = ConfigurationPolicy.REQUIRE, label = "ACS AEM Commons - Custom DAM Component List Servlet",
-    description = "Servlet to list custom component paths to automatically replace in metadata editor.")
+@SuppressWarnings("serial")
+@SlingServletPaths("/bin/acs-commons/dam/custom-components.json")
+@Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Designate(ocd=CustomComponentActivatorListServlet.Config.class)
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 
     private static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
@@ -47,21 +52,21 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
     private static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
     private static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
 
-    private static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
+    static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
 
-    @Property(label = "Components", description = "Map in the form <propertyName>=<replacement path>", value = {
-            HISTORY,
-            FONTS,
-            COLORANTS,
-            LOCATION
-        })
-    public static String PROP_COMPONENTS = "components";
+       
+    @ObjectClassDefinition(name="ACS AEM Commons - Custom Component Activator List Servlet")
+    public @interface Config {
+        @AttributeDefinition(defaultValue= {HISTORY, FONTS, COLORANTS, LOCATION },name="Components",
+                description="Map in the form <propertyName>=<replacement path>")
+        String[] components() default { HISTORY, FONTS, COLORANTS, LOCATION };
+    }
 
     private JsonObject json;
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        Map<String, String> components = ParameterUtil.toMap(PropertiesUtil.toStringArray(config.get(PROP_COMPONENTS), DEFAULT_COMPONENTS),"=");
+    protected void activate(Config conf) {
+        Map<String, String> components = ParameterUtil.toMap(PropertiesUtil.toStringArray(conf.components(), DEFAULT_COMPONENTS),"=");
         JsonArray array = new JsonArray();
         for (Map.Entry<String, String> entry : components.entrySet()) {
             JsonObject obj = new JsonObject();

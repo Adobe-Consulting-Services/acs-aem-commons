@@ -21,5 +21,7 @@
 /**
  * Bulk Execution Model API
  */
-@aQute.bnd.annotation.Version("4.0.0")
+@Version("4.0.0")
 package com.adobe.acs.commons.workflow.bulk.execution.model;
+
+import org.osgi.annotation.versioning.Version;
