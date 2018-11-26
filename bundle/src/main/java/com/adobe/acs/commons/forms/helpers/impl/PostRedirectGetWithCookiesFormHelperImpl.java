@@ -19,12 +19,10 @@
  */
 package com.adobe.acs.commons.forms.helpers.impl;
 
-import com.adobe.acs.commons.forms.Form;
-import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
-import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesFormHelper;
-import com.adobe.acs.commons.util.CookieUtil;
-import com.day.cq.wcm.api.Page;
+import java.io.IOException;
+
+import javax.servlet.http.Cookie;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -35,15 +33,18 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.Cookie;
-import java.io.IOException;
+import com.adobe.acs.commons.forms.Form;
+import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.helpers.PostRedirectGetWithCookiesFormHelper;
+import com.adobe.acs.commons.util.CookieUtil;
+import com.day.cq.wcm.api.Page;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET-With-Cookies Form Helper
  *
  */
 @Component(service={ FormHelper.class, PostRedirectGetWithCookiesFormHelper.class}, property= {
-		Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_WITH_COOKIES_GET})
+      Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_WITH_COOKIES_GET})
 public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFormHelperImpl implements PostRedirectGetWithCookiesFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class);
 

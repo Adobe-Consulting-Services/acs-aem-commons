@@ -43,7 +43,7 @@ import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 @Component(service=ActionManagerFactory.class, property= {
-		"jmx.objectname=com.adobe.acs.commons:type=Action Manager"
+      "jmx.objectname=com.adobe.acs.commons:type=Action Manager"
 })
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
