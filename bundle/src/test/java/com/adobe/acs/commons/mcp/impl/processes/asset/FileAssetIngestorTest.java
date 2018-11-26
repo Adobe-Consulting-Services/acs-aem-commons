@@ -65,6 +65,9 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 @RunWith(MockitoJUnitRunner.class)
 public class FileAssetIngestorTest {
     private static final int FILE_SIZE = 57797;
+    private static final String SFTP_HOST_TEST_PATH = "sftp://host/test/path";
+    private static final String SFTP_USER_TEST_NAME = "user";
+    private static final String SFTP_USER_TEST_PASSWORD = "password";
 
     @Rule
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -271,29 +274,27 @@ public class FileAssetIngestorTest {
     
     @Test
     public void testSftpStructures() throws URISyntaxException, JSchException {
-        String baseUri = "sftp://user:password@host/test/path";
-        ingestor.fileBasePath = baseUri;
-        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(baseUri);
+        configureSftpFields();
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH);
         elem1.isFile = true;
         assertNull(elem1.getParent());
-        assertEquals(baseUri, elem1.getSourcePath());
+        assertEquals(SFTP_HOST_TEST_PATH, elem1.getSourcePath());
         // File should be a child node
         assertEquals("/content/dam/path", elem1.getNodePath());
         assertEquals("path", elem1.getNodeName());
 
-        FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(baseUri);
+        FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH);
         elem1.isFile = false;
         assertNull(elem2.getParent());
-        assertEquals(baseUri, elem2.getSourcePath());
+        assertEquals(SFTP_HOST_TEST_PATH, elem2.getSourcePath());
         // Folder should map to the root folder
         assertEquals("/content/dam", elem2.getNodePath());
         assertEquals("path", elem2.getNodeName());
     }
-    
+
     @Test
     public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException {
-        String baseUri = "sftp://user:password@host/test/path";
-        ingestor.fileBasePath = baseUri;
+        configureSftpFields();
         ChannelSftp channel = mock(ChannelSftp.class);
         when(channel.isConnected()).thenReturn(true);
         when(channel.getSession()).thenReturn(mock(Session.class));
@@ -306,7 +307,7 @@ public class FileAssetIngestorTest {
                 .asVector();
         when(channel.ls(anyObject())).thenReturn(entries);
         
-        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(baseUri, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         int count = 0;
         for (HierarchicalElement e : elem1.getChildren().collect(Collectors.toList())) {
             count++;
@@ -320,5 +321,11 @@ public class FileAssetIngestorTest {
         File newFile = new File(dir, name);
         FileUtils.copyInputStreamToFile(getClass().getResourceAsStream(resourcePath), newFile);
         return newFile;
+    }
+
+    private void configureSftpFields() {
+        ingestor.fileBasePath = SFTP_HOST_TEST_PATH;
+        ingestor.username = SFTP_USER_TEST_NAME;
+        ingestor.password = SFTP_USER_TEST_PASSWORD;
     }
 }
