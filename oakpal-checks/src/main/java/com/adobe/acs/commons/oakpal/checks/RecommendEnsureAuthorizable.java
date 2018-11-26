@@ -106,18 +106,15 @@ public class RecommendEnsureAuthorizable implements ProgressCheckFactory {
                     }
                 }
 
-                // if id is excluded, short circuit
-                if (lastMatched.isDeny()) {
+                // if id is excluded, or is user and not system user, short circuit
+                if (lastMatched.isDeny() || (!authz.isGroup() && !((User) authz).isSystemUser())) {
                     return;
                 }
 
-                if (authz.isGroup() || ((User) authz).isSystemUser()) {
-                    // report for groups and system users
-                    reportViolation(new SimpleViolation(severity,
-                            String.format("%s: imported explicit %s. %s",
-                                    path, authz.isGroup() ? "group" : "system user", recommendation), packageId));
-                }
-
+                // report for groups and system users
+                reportViolation(new SimpleViolation(severity,
+                        String.format("%s: imported explicit %s. %s",
+                                path, authz.isGroup() ? "group" : "system user", recommendation), packageId));
             }
         }
     }
