@@ -19,100 +19,105 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
-import com.day.cq.dam.handler.ffmpeg.FfmpegNotFoundException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Component(metatype = true, label = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
-@Service
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
+import com.day.cq.dam.handler.ffmpeg.FfmpegNotFoundException;
+
+@Component(service = AudioHelper.class)
+@Designate(ocd=AudioHelperImpl.Config.class)
 public class AudioHelperImpl implements AudioHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(AudioHelperImpl.class);
+   private static final Logger log = LoggerFactory.getLogger(AudioHelperImpl.class);
 
-    /**
-     * FFmpeg working directory. If relative, relative to sling.home.
-     */
-    @Property(value = "./logs/ffmpeg")
-    public static final String PROP_WORKING_DIR = "ffmpeg.workingdir";
+   @ObjectClassDefinition(name = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
+   public @interface Config {
+      static String DEFAULT_DIR = "./logs/ffmpeg";
 
-    @Reference(policy = ReferencePolicy.STATIC)
-    private ExecutableLocator locator;
+      @AttributeDefinition(defaultValue = { DEFAULT_DIR })
+      String ffmpeg_workingdir();
+   }
 
-    private File workingDir;
+   @Reference(policy = ReferencePolicy.STATIC)
+   private ExecutableLocator locator;
 
-    protected final void activate(ComponentContext ctx) {
-        String slingHome = ctx.getBundleContext().getProperty("sling.home");
-        workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, (String) ctx.getProperties().get(PROP_WORKING_DIR));
-        if (!workingDir.exists() && !workingDir.mkdirs()) {
-            throw new IllegalStateException("Could not create " + workingDir.getPath());
-        }
-    }
+   private File workingDir;
 
-    @Override
-    @SuppressWarnings("squid:S2095")
-    public <A, R> R process(Asset asset, ResourceResolver resourceResolver, A args, AudioProcessor<A, R> audioProcessor)
-            throws AudioException {
-        File tmpDir = null;
-        File tmpWorkingDir = null;
+   @Activate
+   protected final void activate(ComponentContext ctx, AudioHelperImpl.Config config) {
+      String slingHome = ctx.getBundleContext().getProperty("sling.home");
+      workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, config.ffmpeg_workingdir());
+      if (!workingDir.exists() && !workingDir.mkdirs()) {
+         throw new IllegalStateException("Could not create " + workingDir.getPath());
+      }
+   }
 
-        try {
-            // creating temp directory
-            tmpDir = FFMpegAudioUtils.createTempDir(null);
+   @Override
+   @SuppressWarnings("squid:S2095")
+   public <A, R> R process(Asset asset, ResourceResolver resourceResolver, A args, AudioProcessor<A, R> audioProcessor)
+         throws AudioException {
+      File tmpDir = null;
+      File tmpWorkingDir = null;
 
-            // creating temp working directory for ffmpeg
-            tmpWorkingDir = FFMpegAudioUtils.createTempDir(workingDir);
-        } catch (IOException e) {
-            throw new AudioException(e);
-        }
+      try {
+         // creating temp directory
+         tmpDir = FFMpegAudioUtils.createTempDir(null);
 
-        // streaming file to temp directory
-        final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
+         // creating temp working directory for ffmpeg
+         tmpWorkingDir = FFMpegAudioUtils.createTempDir(workingDir);
+      } catch (IOException e) {
+         throw new AudioException(e);
+      }
 
-        try (FileOutputStream fos = new FileOutputStream(tmpFile);
-             InputStream is = asset.getOriginal().getStream();) {
+      // streaming file to temp directory
+      final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
 
-            IOUtils.copy(is, fos);
+      try (FileOutputStream fos = new FileOutputStream(tmpFile); InputStream is = asset.getOriginal().getStream();) {
 
-            return audioProcessor.processAudio(asset, resourceResolver, tmpFile, locator, tmpWorkingDir, args);
+         IOUtils.copy(is, fos);
 
-        } catch (IOException e) {
-            throw new AudioException(e);
-        } catch (FfmpegNotFoundException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        } finally {
-            try {
-                // cleaning up temp directory
-                if (tmpDir != null) {
-                    FileUtils.deleteDirectory(tmpDir);
-                }
-            } catch (IOException e) {
-                log.warn("Could not delete temp directory: {}", tmpDir.getPath());
+         return audioProcessor.processAudio(asset, resourceResolver, tmpFile, locator, tmpWorkingDir, args);
+
+      } catch (IOException e) {
+         throw new AudioException(e);
+      } catch (FfmpegNotFoundException e) {
+         log.error(e.getMessage(), e);
+         return null;
+      } finally {
+         try {
+            // cleaning up temp directory
+            if (tmpDir != null) {
+               FileUtils.deleteDirectory(tmpDir);
             }
-            try {
-                // cleaning up ffmpeg's temp working directory
-                if (tmpWorkingDir != null) {
-                    FileUtils.deleteDirectory(tmpWorkingDir);
-                }
-            } catch (IOException e) {
-                log.warn("Could not delete ffmpeg's temporary working directory: {}", tmpWorkingDir.getPath());
+         } catch (IOException e) {
+            log.warn("Could not delete temp directory: {}", tmpDir.getPath());
+         }
+         try {
+            // cleaning up ffmpeg's temp working directory
+            if (tmpWorkingDir != null) {
+               FileUtils.deleteDirectory(tmpWorkingDir);
             }
-        }
-    }
+         } catch (IOException e) {
+            log.warn("Could not delete ffmpeg's temporary working directory: {}", tmpWorkingDir.getPath());
+         }
+      }
+   }
 }
