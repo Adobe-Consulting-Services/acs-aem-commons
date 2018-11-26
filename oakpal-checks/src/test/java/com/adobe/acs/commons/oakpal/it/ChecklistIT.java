@@ -62,7 +62,9 @@ public class ChecklistIT {
                 .collect(Collectors.toList()));
 
         expectNames.addAll(Stream.of(
-                "authorizable-compatibility-check"
+                "authorizable-compatibility-check",
+                "recommend-ensure-authorizable",
+                "recommend-ensure-oak-index"
         ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_PUBLIC + "/" + name)
                 .collect(Collectors.toList()));
 
