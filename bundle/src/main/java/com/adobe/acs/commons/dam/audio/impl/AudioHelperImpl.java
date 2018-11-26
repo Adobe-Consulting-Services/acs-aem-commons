@@ -90,7 +90,8 @@ public class AudioHelperImpl implements AudioHelper {
       // streaming file to temp directory
       final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
 
-      try (FileOutputStream fos = new FileOutputStream(tmpFile); InputStream is = asset.getOriginal().getStream();) {
+      try (FileOutputStream fos = new FileOutputStream(tmpFile); 
+            InputStream is = asset.getOriginal().getStream();) {
 
          IOUtils.copy(is, fos);
 
