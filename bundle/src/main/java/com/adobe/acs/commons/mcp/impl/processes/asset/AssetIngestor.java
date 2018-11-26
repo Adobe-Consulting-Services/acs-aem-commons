@@ -294,6 +294,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     }
 
     final Set<String> alreadyCreatedFolders = Collections.synchronizedSet(new TreeSet<>());
+    
     @SuppressWarnings("squid:S3776")
     protected boolean createFolderNode(HierarchicalElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
