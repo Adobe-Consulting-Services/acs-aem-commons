@@ -51,6 +51,8 @@ public class SpreadsheetTest {
     static XSSFWorkbook testWorkbook;
     static String[] header = new String[]{"path", "title", "someOtherCol", "int-val@integer", "string-list1@string[]", "string-list2@string[;]",
         "double-val@double", "array", "array", "array", "date-val@date"};
+    static String[] headerNames = new String[]{"path", "title", "someOtherCol", "int-val", "string-list1", "string-list2",
+        "double-val", "array", "array", "array", "date-val"};
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
     static Date testDate = new Date();
     static Spreadsheet dataTypesSheet;
@@ -106,7 +108,7 @@ public class SpreadsheetTest {
     @Test
     public void testGetHeaderRow() throws IOException {
         Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()));
-        List<String> expResult = Arrays.asList(header);
+        List<String> expResult = Arrays.asList(headerNames);
         List<String> result = instance.getHeaderRow();
         assertTrue("Header row should match", result.containsAll(expResult));
     }
