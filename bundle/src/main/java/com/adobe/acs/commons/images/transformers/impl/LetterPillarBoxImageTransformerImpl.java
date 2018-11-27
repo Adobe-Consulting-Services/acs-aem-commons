@@ -22,10 +22,8 @@ package com.adobe.acs.commons.images.transformers.impl;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.Map;
 
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -46,7 +44,7 @@ import com.day.image.Layer;
  */
 //@formatter:off
 @Component(service=ImageTransformer.class, property = {
-      ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE})
+    ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE})
 @Designate(ocd=LetterPillarBoxImageTransformerImpl.Config.class)
 //@formatter:on
 public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {

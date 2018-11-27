@@ -40,7 +40,7 @@ import com.day.image.Layer;
  */
 
 @Component(service=ImageTransformer.class, property = {
-	      ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE})
+    ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE})
 @Designate(ocd=ResizeImageTransformerImpl.Config.class)
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);

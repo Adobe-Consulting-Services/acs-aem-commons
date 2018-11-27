@@ -41,7 +41,7 @@ import java.util.HashMap;
  *
  */
 @Component(service=ImageTransformer.class, property = {
-	      ImageTransformer.PROP_TYPE + "=" + ScaleImageTransformerImpl.TYPE})
+         ImageTransformer.PROP_TYPE + "=" + ScaleImageTransformerImpl.TYPE})
 public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ScaleImageTransformerImpl.class);
 

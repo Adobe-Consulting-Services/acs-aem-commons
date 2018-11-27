@@ -40,7 +40,7 @@ import com.day.image.Layer;
  */
 //@formatter:off
 @Component(service=ImageTransformer.class, property = {
-	      ImageTransformer.PROP_TYPE + "=" + MultiplyBlendImageTransformerImpl.TYPE})
+         ImageTransformer.PROP_TYPE + "=" + MultiplyBlendImageTransformerImpl.TYPE})
 //@formatter:on
 public class MultiplyBlendImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(MultiplyBlendImageTransformerImpl.class);
