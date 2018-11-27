@@ -23,13 +23,10 @@ package com.adobe.acs.commons.images.transformers.impl;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.day.image.Layer;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,14 +40,8 @@ import java.util.HashMap;
  * "round" being the default
  *
  */
-@Component
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = ScaleImageTransformerImpl.TYPE
-        )
-})
-@Service
+@Component(service=ImageTransformer.class, property = {
+	      ImageTransformer.PROP_TYPE + "=" + ScaleImageTransformerImpl.TYPE})
 public class ScaleImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ScaleImageTransformerImpl.class);
 
