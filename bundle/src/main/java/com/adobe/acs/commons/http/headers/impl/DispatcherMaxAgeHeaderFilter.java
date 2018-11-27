@@ -68,6 +68,7 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     
     @Override
    protected void doActivate(ComponentContext context) throws Exception {
+    	// now using direct activate()
    }
 
    @Activate
