@@ -20,21 +20,19 @@
 package com.adobe.acs.commons.auth.saml.impl;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.auth.core.spi.AuthenticationHandler;
 import org.apache.sling.auth.core.spi.AuthenticationInfo;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * When using the SAML 2.0 Template from Okta, traditional Single Log Out (SLO) support
@@ -42,32 +40,39 @@ import org.osgi.framework.Constants;
  * 
  * Details are here: https://community.okta.com/community/okta/blog/2014/01/31/logout-and-redirect-to-an-url
  */
-@Component(label = "ACS AEM Commons - Okta Logout Handler",
-        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout",
-        metatype = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "ACS AEM Commons Okta Logout Handler", propertyPrivate = true),
-    @Property(name = Constants.SERVICE_RANKING, intValue = 5003, propertyPrivate = false),
-    @Property(name = AuthenticationHandler.PATH_PROPERTY, value = "/", propertyPrivate = false)
+@Component(service=AuthenticationHandler.class,
+configurationPolicy=ConfigurationPolicy.REQUIRE,
+        property= {
+      Constants.SERVICE_DESCRIPTION + "=" + "ACS AEM Commons Okta Logout Handler",
 })
+@Designate(ocd=OktaLogoutHandler.Config.class)
 public class OktaLogoutHandler implements AuthenticationHandler {
+   
+   @ObjectClassDefinition(name = "ACS AEM Commons - Okta Logout Handler",
+        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout")
+   public @interface Config {
+       @AttributeDefinition(defaultValue = ""+5003)
+        int service_ranking();
+       
+       @AttributeDefinition(defaultValue = "/")
+       String path();
+       
+       @AttributeDefinition
+       String okta_host_name();
 
-    @Property
-    private static final String PROP_OKTA_HOST_NAME = "okta.host.name";
-
-    @Property
-    private static final String PROP_FROM_URI = "from.uri";
+       @AttributeDefinition
+       String from_uri();
+    }
 
     private String redirectLocation;
 
     @Activate
-    protected void activate(Map<String, Object> props) {
-        String oktaHostName = PropertiesUtil.toString(props.get(PROP_OKTA_HOST_NAME), null);
+    protected void activate(OktaLogoutHandler.Config config) {
+        String oktaHostName = config.okta_host_name();
         if (oktaHostName == null) {
             throw new IllegalArgumentException("Okta Host Name must be provided");
         }
-        String fromUri = PropertiesUtil.toString(props.get(PROP_FROM_URI), null);
+        String fromUri = config.from_uri();
         StringBuilder builder = new StringBuilder("https://");
         builder.append(oktaHostName);
         builder.append("/login/signout");
