@@ -19,10 +19,9 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Collections;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -52,6 +51,9 @@ public class GenericListJsonResourceProviderTest {
 
     @Mock
     private Page invalidPage;
+    
+    @Mock
+    private GenericListJsonResourceProvider.Config config;
 
     @Mock
     private GenericList list;
@@ -68,7 +70,7 @@ public class GenericListJsonResourceProviderTest {
 
     @Before
     public void setup() {
-        provider.activate(Collections.<String, String>emptyMap());
+        provider.activate(config);
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(pageManager.getPage(goodPagePath)).thenReturn(validPage);
         when(pageManager.getPage(badPagePath)).thenReturn(invalidPage);
