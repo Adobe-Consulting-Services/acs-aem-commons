@@ -23,14 +23,12 @@ import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.amazonaws.services.s3.AmazonS3Client;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+@Component(service=ProcessDefinitionFactory.class)
 public class S3AssetIngestorFactory extends AuthorizedGroupProcessDefinitionFactory<ProcessDefinition> {
 
     @Reference
