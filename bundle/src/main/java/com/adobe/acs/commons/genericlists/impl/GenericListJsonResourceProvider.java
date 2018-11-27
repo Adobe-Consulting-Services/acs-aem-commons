@@ -51,8 +51,8 @@ import com.day.cq.wcm.api.PageManager;
  * for use with the Touch UI Metadata Asset Editor.
  */
 @Component(service=ResourceProvider.class, property= {
-		ResourceProvider.ROOTS + "=" + GenericListJsonResourceProvider.ROOT,
-		ResourceProvider.OWNS_ROOTS + "=true"
+      ResourceProvider.ROOTS + "=" + GenericListJsonResourceProvider.ROOT,
+      ResourceProvider.OWNS_ROOTS + "=true"
 })
 @Designate(ocd=GenericListJsonResourceProvider.Config.class)
 public final class GenericListJsonResourceProvider implements ResourceProvider {
@@ -68,7 +68,7 @@ public final class GenericListJsonResourceProvider implements ResourceProvider {
     private static final int EXTENSION_LENGTH = EXTENSION.length();
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Generic List JSON Resource Provider",
-    	    description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
+           description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
     public @interface Config {
        @AttributeDefinition(name = "Generic List Root", description = "Root path under which generic lists can be found", defaultValue = DEFAULT_LIST_ROOT)
        String list_root();

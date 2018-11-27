@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.forms.FormsRouter;
 import com.adobe.acs.commons.util.PathInfoUtil;
-@Component(service=FormsRouter.class, configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Component(service=FormsRouter.class, 
+   configurationPolicy=ConfigurationPolicy.REQUIRE)
 public class FormsRouterImpl implements FormsRouter {
     private static final Logger log = LoggerFactory.getLogger(FormsRouterImpl.class);
 

@@ -30,8 +30,8 @@ import com.day.cq.wcm.api.Page;
 
 
 @Component(service=AdapterFactory.class, property= {
-		AdapterFactory.ADAPTABLE_CLASSES + "=com.day.cq.wcm.api.Page",
-		AdapterFactory.ADAPTER_CLASSES + "=com.adobe.acs.commons.genericlists.GenericList"
+      AdapterFactory.ADAPTABLE_CLASSES + "=com.day.cq.wcm.api.Page",
+      AdapterFactory.ADAPTER_CLASSES + "=com.adobe.acs.commons.genericlists.GenericList"
 })
 public class GenericListAdapterFactory implements AdapterFactory {
 
