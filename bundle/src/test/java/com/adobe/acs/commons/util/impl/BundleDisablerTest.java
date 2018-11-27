@@ -19,31 +19,38 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.junit.Before;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.BundleException;
-import org.osgi.service.component.ComponentContext;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.service.component.ComponentContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleDisablerTest {
 
     @Mock
     private ComponentContext componentContext;
+    
+    @Mock
+    private BundleDisabler.Config config;
 
     @Mock
     private BundleContext bundleContext;
@@ -58,7 +65,8 @@ public class BundleDisablerTest {
 
     @Test
     public void testNullProperties() {
-        disabler.activate(componentContext, Collections.<String, Object>emptyMap());
+    	    when(config.bundles()).thenReturn(null);
+        disabler.activate(componentContext, config);
         verifyNoMoreInteractions(bundleContext);
     }
 
@@ -77,7 +85,8 @@ public class BundleDisablerTest {
 
     @Test
     public void shouldNotDisableOwnBundle() {
-        disabler.activate(componentContext, bundleProperties("my.own.bundle"));
+	    when(config.bundles()).thenReturn(new String[] {"my.own.bundle"});
+        disabler.activate(componentContext, config);
     }
 
     @Test
@@ -86,8 +95,9 @@ public class BundleDisablerTest {
         bundles.add(targetBundle);
 
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
-
-        disabler.activate(componentContext, bundleProperties("to.stop.bundle"));
+        
+	    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
+        disabler.activate(componentContext, config);
 
         try {
             verify(targetBundle).stop();
@@ -103,8 +113,9 @@ public class BundleDisablerTest {
 
         when(targetBundle.getState()).thenReturn(Bundle.UNINSTALLED);
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
-
-        disabler.activate(componentContext, bundleProperties("to.stop.bundle"));
+        
+	    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
+        disabler.activate(componentContext, config);
 
         try {
             verify(targetBundle, never()).stop();
