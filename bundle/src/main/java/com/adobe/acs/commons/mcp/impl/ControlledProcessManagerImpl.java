@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * Implementation of ControlProcessManager service
  */
 @Component(service=ControlledProcessManager.class, property= {
-		"jmx.objectname" + "=" + "com.adobe.acs.commons:type=Manage Controlled Processes"
+   "jmx.objectname" + "=" + "com.adobe.acs.commons:type=Manage Controlled Processes"
 })
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerImpl.class);
