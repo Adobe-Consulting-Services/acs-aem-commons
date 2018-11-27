@@ -226,13 +226,10 @@ public class Spreadsheet {
 
     public String convertHeaderName(String str) {
         String name;
-        String suffix;
         if (str.contains("@")) {
             name = StringUtils.substringBefore(str, "@");
-            suffix = "@" + StringUtils.substringAfter(str, "@");
         } else {
             name = str;
-            suffix = "";
         }
         if (enableHeaderNameConversion) {
             name = String.valueOf(name).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
