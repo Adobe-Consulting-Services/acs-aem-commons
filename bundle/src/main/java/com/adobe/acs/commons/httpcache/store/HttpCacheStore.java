@@ -39,8 +39,6 @@ public interface HttpCacheStore extends AutoCloseable {
     /** Value representing JCR type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_JCR_CACHE_STORE_TYPE = "JCR";
     /** Value representing EHCache type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
-    String VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE = "EHCACHE";
-    /** Value representing EHCache type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_CAFFEINE_MEMORY_STORE_TYPE = "CAFFEINE";
 
     String PN_TTL = "httpcache.cachestore.ttl";

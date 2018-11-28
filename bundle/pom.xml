@@ -66,8 +66,7 @@
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
                             com.github.benmanes.caffeine*;resolution:=optional,
-                            org.ehcache*;resolution:=optional,
-                            org.terracotta*;resolution:=optional,
+                            com.github.benmanes.caffeine*;resolution:=optional,
                             !org.bouncycastle.jce.*,
                             !android.util.*,
                             *
@@ -348,10 +347,6 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>

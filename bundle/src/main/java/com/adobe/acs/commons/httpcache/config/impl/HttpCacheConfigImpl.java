@@ -148,8 +148,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                             value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE),
                     @PropertyOption(name = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,
                             value = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE),
-                    @PropertyOption(name = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE,
-                            value = HttpCacheStore.VALUE_EHCACHE_MEMORY_CACHE_STORE_TYPE),
                     // Only MEM and JCR implementations are available now.
                     //@PropertyOption(name = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
                     //                value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE),
