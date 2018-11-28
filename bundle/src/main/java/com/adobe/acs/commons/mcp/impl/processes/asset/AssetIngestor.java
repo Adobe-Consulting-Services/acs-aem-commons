@@ -48,6 +48,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
@@ -291,6 +293,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    final Set<String> alreadyCreatedFolders = Collections.synchronizedSet(new TreeSet<>());
+    
     @SuppressWarnings("squid:S3776")
     protected boolean createFolderNode(HierarchicalElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
@@ -300,6 +304,13 @@ public abstract class AssetIngestor extends ProcessDefinition {
             return true;
         }
         String folderPath = el.getNodePath();
+        synchronized (alreadyCreatedFolders) {
+            if (alreadyCreatedFolders.contains(folderPath)) {
+                return false;
+            } else {
+                alreadyCreatedFolders.add(folderPath);
+            }
+        }
         String name = el.getName();
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
