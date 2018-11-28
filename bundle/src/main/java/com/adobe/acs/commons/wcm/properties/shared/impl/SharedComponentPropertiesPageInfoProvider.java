@@ -35,9 +35,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.slf4j.Logger;
@@ -98,14 +95,15 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * can determine whether or not to enable shared/global properties for a component on a site.
      */
     @Override
-    public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
-            throws JSONException {
+    @SuppressWarnings( "deprecation" )
+    public void updatePageInfo(SlingHttpServletRequest request, org.apache.sling.commons.json.JSONObject info, Resource resource)
+            throws org.apache.sling.commons.json.JSONException {
         if (scheduledSharedComponentsMapUpdate > 0 && System.currentTimeMillis() > scheduledSharedComponentsMapUpdate) {
             scheduledSharedComponentsMapUpdate = -1L;
             updateSharedComponentsMap();
         }
 
-        JSONObject props = new JSONObject();
+        org.apache.sling.commons.json.JSONObject props = new org.apache.sling.commons.json.JSONObject();
         props.put("enabled", false);
 
         Page page = pageRootProvider.getRootPage(resource);
@@ -120,7 +118,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
                 if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
                     props.put("enabled", true);
                     props.put("root", page.getPath());
-                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) JSONArray::new));
+                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) org.apache.sling.commons.json.JSONArray::new));
                 } else {
                     log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
                 }

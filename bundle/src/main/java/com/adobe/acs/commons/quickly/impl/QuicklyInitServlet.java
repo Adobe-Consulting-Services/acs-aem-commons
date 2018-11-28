@@ -19,15 +19,13 @@
  */
 package com.adobe.acs.commons.quickly.impl;
 
-import com.adobe.acs.commons.quickly.QuicklyEngine;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
 import javax.servlet.ServletException;
 
@@ -40,24 +38,18 @@ import java.io.IOException;
 @SuppressWarnings("serial")
 @SlingServlet(paths = "/bin/quickly.init.json")
 public class QuicklyInitServlet extends SlingSafeMethodsServlet {
-    @Reference
-    private QuicklyEngine quicklyEngine;
-
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
         response.setHeader("Content-Type", " application/json; charset=UTF-8");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        try {
-            json.put("user", request.getResourceResolver().getUserID());
-            json.put("throttle", 200);
-            response.getWriter().write(json.toString());
-        } catch (JSONException e) {
-            response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().print("{\"status:\": \"error\"}");
-        }
+        json.addProperty("user", request.getResourceResolver().getUserID());
+        json.addProperty("throttle", 200);
+        
+        Gson gson = new Gson();
+        gson.toJson(json, response.getWriter());
     }
 }

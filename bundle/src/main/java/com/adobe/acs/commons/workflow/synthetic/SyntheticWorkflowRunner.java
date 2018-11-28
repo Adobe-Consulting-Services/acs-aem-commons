@@ -25,7 +25,6 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.util.List;
 import java.util.Map;
 
 @ProviderType
@@ -37,73 +36,6 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
         PROCESS_LABEL,
         PROCESS_NAME
     }
-
-
-    /**
-     * Process a payload path using using the provided Workflow Processes.
-     *
-     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF ops
-     * @param payloadPath                      the path to execute the workflow against
-     * @param workflowSteps                    defines the list of WF Steps to process, each representing a WF Process
-     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
-     * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
-     * @throws com.day.cq.workflow.WorkflowException
-     * @deprecated use alternate method
-     */
-    @Deprecated
-    void execute(ResourceResolver resourceResolver,
-                 String payloadPath,
-                 List<SyntheticWorkflowStep> workflowSteps,
-                 boolean autoSaveAfterEachWorkflowProcess,
-                 boolean autoSaveAtEnd) throws WorkflowException;
-
-    /**
-     * Process a payload path using using the provided Workflow Processes.
-     *
-     * This is deprecated as it only allows a single workflow step of a particular process type to be executed.
-     *
-     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF ops
-     * @param payloadPath                      the path to execute the workflow against
-     * @param workflowProcessIdType            defines is the WF ProcessIds are process.labels or process class names
-     * @param workflowProcessIds               the process.labels or process names of the WF to execute in order against the payloadPath
-     *                                         resource
-     * @param processArgs                      the WF args metadata maps; each workflowProcessLabel can have one map
-     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
-     * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
-     * @throws com.day.cq.workflow.WorkflowException
-     * @deprecated use alternate method
-     */
-    @Deprecated
-    void execute(ResourceResolver resourceResolver,
-                 String payloadPath,
-                 WorkflowProcessIdType workflowProcessIdType,
-                 String[] workflowProcessIds,
-                 Map<String, Map<String, Object>> processArgs,
-                 boolean autoSaveAfterEachWorkflowProcess,
-                 boolean autoSaveAtEnd) throws WorkflowException;
-
-    /**
-     * Process a payload path using using the provided Workflow Processes.
-     *
-     * This is deprecated as it only allows a single workflow step of a particular process type to be executed.
-     *
-     * @param resourceResolver                 the resourceResolver object that provides access to the JCR for WF operations
-     * @param payloadPath                      the path to execute the workflow against
-     * @param workflowProcessLabels            the process.labels of the workflow to execute in order against the payloadPath
-     *                                         resource
-     * @param processArgs                      the WF args metadata maps; each workflowProcessLabel can have one map
-     * @param autoSaveAfterEachWorkflowProcess persist changes to JCR after each Workflow Process completes
-     * @param autoSaveAtEnd                    persist changes to JCR after all Workflow Process complete
-     * @throws com.day.cq.workflow.WorkflowException
-     * @deprecated use alternate method
-     */
-    @Deprecated
-    void execute(ResourceResolver resourceResolver,
-                 String payloadPath,
-                 String[] workflowProcessLabels,
-                 Map<String, Map<String, Object>> processArgs,
-                 boolean autoSaveAfterEachWorkflowProcess,
-                 boolean autoSaveAtEnd) throws WorkflowException;
 
     /**
      * Process a payload path using using the provided Workflow Processes.
@@ -167,7 +99,3 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
      */
     SyntheticWorkflowStep getSyntheticWorkflowStep(String id, WorkflowProcessIdType type, Map<String, Object> metadataMap);
 }
-
-
-
-

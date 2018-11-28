@@ -27,12 +27,9 @@ import com.day.cq.wcm.core.contentfinder.ViewQuery;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +44,10 @@ import java.util.Set;
  * Leverage Querybuilder to run ContentFinder queries
  */
 @SuppressWarnings("serial")
-@Component
-@Properties({
-        @Property(
-                label = "Servlet Paths",
-                name = "sling.servlet.paths",
-                value = "/bin/wcm/contentfinder/qb/view"
-        )
+@Component(properties= {
+        "sling.servlet.paths=/bin/wcm/contentfinder/qb/view"
 })
-@Service
+
 public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 

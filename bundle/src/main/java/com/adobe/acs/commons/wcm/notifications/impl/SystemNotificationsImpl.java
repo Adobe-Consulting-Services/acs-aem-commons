@@ -171,7 +171,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     public String getNotificationId(final Page notificationPage) {
         final String path = notificationPage.getPath();
         final String lastModified = String.valueOf(notificationPage.getLastModified().getTimeInMillis());
-        return "uid-" + DigestUtils.shaHex(path + lastModified);
+        return "uid-" + DigestUtils.sha1Hex(path + lastModified);
     }
 
     @Override
@@ -296,6 +296,8 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
             // Listen on Add and Remove under /etc/acs-commons/notifications
 
+            // TODO: Register a Resource Change Listener instead as per the deprecation notes
+            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
             filterProps.put(EventConstants.EVENT_TOPIC,
                     new String[]{
                             SlingConstants.TOPIC_RESOURCE_ADDED,

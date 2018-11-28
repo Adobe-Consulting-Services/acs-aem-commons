@@ -47,7 +47,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 
@@ -117,13 +116,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
             doPackaging(request, response, preview, properties, packageResources);
 
 
-        } catch (RepositoryException ex) {
-            log.error(ex.getMessage());
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (JSONException ex) {
+        } catch (RepositoryException | IOException ex) {
             log.error(ex.getMessage());
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         }

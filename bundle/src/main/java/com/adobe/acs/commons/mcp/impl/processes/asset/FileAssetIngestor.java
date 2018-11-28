@@ -25,6 +25,7 @@ import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedSupplier;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -63,11 +63,35 @@ public class FileAssetIngestor extends AssetIngestor {
 
     @FormField(
             name = "Source",
-            description = "Source folder for content ingestion which can be a local folder or SFTP url with user/password",
-            hint = "/var/mycontent, /mnt/all_the_things, sftp://user:password@host[:port]/base/path...",
+            description = "Source folder for content ingestion which can be a local folder or SFTP url",
+            hint = "/var/mycontent, /mnt/all_the_things, sftp://host[:port]/base/path...",
             required = true
     )
     String fileBasePath;
+
+    @FormField(
+            name = "Connection timeout",
+            description = "Connection timeout (in milliseconds) for SFTP connection",
+            required = false,
+            options = ("default=30000")
+    )
+    int timeout = 30000;
+
+    @FormField(
+            name = "Username",
+            description = "Username for SFTP connection",
+            required = false
+    )
+    String username = null;
+
+    @FormField(
+            name = "Password",
+            description = "Password for SFTP connection",
+            required = false,
+            component = PasswordComponent.class
+    )
+    String password = null;
+
     HierarchicalElement baseFolder;
 
     @Override
@@ -76,7 +100,7 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 baseFolder = new SftpHierarchicalElement(fileBasePath);
                 baseFolder.isFolder(); // Forces a login and check status of base folder
-            } catch (JSchException | URISyntaxException ex) {
+            } catch (URISyntaxException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RepositoryException("Unable to process URL!");
             }
@@ -271,13 +295,13 @@ public class FileAssetIngestor extends AssetIngestor {
         Source source;
         boolean keepChannelOpen = false;
 
-        SftpHierarchicalElement(String uri) throws URISyntaxException, JSchException {
+        SftpHierarchicalElement(String uri) throws URISyntaxException {
             this.sourcePath = uri;
             this.uri = new URI(uri);
             this.path = this.uri.getPath();
         }
 
-        private SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, JSchException {
+        SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException {
             this(uri);
             this.channel = channel;
             this.keepChannelOpen = holdOpen;
@@ -293,16 +317,14 @@ public class FileAssetIngestor extends AssetIngestor {
             return getParent() == null && isFolder();
         }
 
-        private ChannelSftp openChannel() throws URISyntaxException, JSchException {
+        private ChannelSftp openChannel() throws JSchException {
             if (channel == null || !channel.isConnected()) {
                 JSch jsch = new JSch();
                 int port = uri.getPort() <= 0 ? 22 : uri.getPort();
-                String userInfo = uri.getUserInfo();
-                String username = StringUtils.substringBefore(userInfo, ":");
-                String password = StringUtils.substringAfter(userInfo, ":");
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
                 session.setConfig("StrictHostKeyChecking", "no");
+                session.setTimeout(timeout);
                 session.setPassword(password);
                 session.connect();
                 channel = (ChannelSftp) session.openChannel("sftp");
@@ -325,16 +347,20 @@ public class FileAssetIngestor extends AssetIngestor {
             channel = null;
         }
 
-        private void retrieveDetails() throws URISyntaxException, JSchException, SftpException {
+        private void retrieveDetails() throws JSchException, SftpException {
             if (!retrieved) {
                 openChannel();
                 SftpATTRS attributes = channel.lstat(path);
-                isFile = !attributes.isDir();
-                size = attributes.getSize();
+                processAttrs(attributes);
                 if (!keepChannelOpen) {
                     closeChannel();
                 }
             }
+        }
+
+        private void processAttrs(SftpATTRS attrs) {
+            isFile = !attrs.isDir();
+            size = attrs.getSize();
             retrieved = true;
         }
 
@@ -342,7 +368,7 @@ public class FileAssetIngestor extends AssetIngestor {
         public boolean isFile() {
             try {
                 retrieveDetails();
-            } catch (URISyntaxException | JSchException | SftpException ex) {
+            } catch (JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
             }
             return isFile;
@@ -353,7 +379,7 @@ public class FileAssetIngestor extends AssetIngestor {
             if (parent == null && !fileBasePath.equals(getSourcePath())) {
                 try {
                     parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(getSourcePath(), "/"));
-                } catch (URISyntaxException | JSchException ex) {
+                } catch (URISyntaxException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -366,8 +392,11 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 openChannel();
                 Vector<ChannelSftp.LsEntry> children = channel.ls(path);
-                return children.stream().map(this::getChildFromEntry).filter(Objects::nonNull);
-            } catch (URISyntaxException | JSchException | SftpException ex) {
+                return children.stream()
+                        .filter(this::isNotDotFolder)
+                        .map(this::getChildFromEntry)
+                        .filter(Objects::nonNull);
+            } catch (JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return Stream.empty();
             } finally {
@@ -377,11 +406,17 @@ public class FileAssetIngestor extends AssetIngestor {
             }
         }
 
+        private boolean isNotDotFolder(ChannelSftp.LsEntry entry) {
+            return !(".".equals(entry.getFilename()) || "..".equals(entry.getFilename()));
+        }
+
         private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
             try {
                 String childPath = getSourcePath() + "/" + entry.getFilename();
-                return (HierarchicalElement) new SftpHierarchicalElement(childPath, channel, true);
-            } catch (URISyntaxException | JSchException ex) {
+                SftpHierarchicalElement child = new SftpHierarchicalElement(childPath, channel, true);
+                child.processAttrs(entry.getAttrs());
+                return child;
+            } catch (URISyntaxException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return null;
             }
@@ -403,7 +438,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 try {
                     retrieveDetails();
                     source = new SftpSource(size, this::openChannel, this);
-                } catch (URISyntaxException | JSchException | SftpException ex) {
+                } catch (JSchException | SftpException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }

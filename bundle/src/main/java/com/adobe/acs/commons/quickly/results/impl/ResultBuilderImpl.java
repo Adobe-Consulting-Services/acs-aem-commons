@@ -37,9 +37,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class ResultBuilderImpl implements ResultBuilder {
     private ResultSerializer defaultResultSerialize;
 
     @Override
-    public JSONObject toJSON(final Command cmd, Result result, final ValueMap config) throws JSONException {
+    public JsonObject toJSON(final Command cmd, Result result, final ValueMap config) {
 
         if (!this.acceptsAuthoringUIMode(result,
                 config.get(AuthoringUIMode.class.getName(), AuthoringUIMode.TOUCH))) {

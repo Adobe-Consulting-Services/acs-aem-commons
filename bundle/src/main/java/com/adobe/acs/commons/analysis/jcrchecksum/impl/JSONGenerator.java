@@ -212,7 +212,7 @@ public final class JSONGenerator {
                         try {
                             java.io.InputStream stream =
                                     v.getBinary().getStream();
-                            String ckSum = DigestUtils.shaHex(stream);
+                            String ckSum = DigestUtils.sha1Hex(stream);
                             stream.close();
                             sortedValueMap.put(ckSum, v);
                         } catch (IOException e) {
@@ -299,7 +299,7 @@ public final class JSONGenerator {
         } else if (value.getType() == PropertyType.BINARY) {
             try {
                 java.io.InputStream stream = value.getBinary().getStream();
-                String ckSum = DigestUtils.shaHex(stream);
+                String ckSum = DigestUtils.sha1Hex(stream);
                 stream.close();
                 out.value(ckSum);
             } catch (IOException e) {
