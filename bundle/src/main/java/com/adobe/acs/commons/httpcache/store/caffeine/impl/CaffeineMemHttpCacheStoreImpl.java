@@ -30,7 +30,7 @@ import com.adobe.acs.commons.httpcache.store.mem.impl.MemCacheMBean;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemCachePersistenceObject;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.adobe.acs.commons.util.impl.AbstractCacheMBean;
-import com.adobe.acs.commons.util.exception.CacheMBeanException;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;

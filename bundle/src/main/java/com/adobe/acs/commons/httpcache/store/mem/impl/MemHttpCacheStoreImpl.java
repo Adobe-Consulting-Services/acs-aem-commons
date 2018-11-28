@@ -27,7 +27,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
-import com.adobe.acs.commons.util.exception.CacheMBeanException;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;

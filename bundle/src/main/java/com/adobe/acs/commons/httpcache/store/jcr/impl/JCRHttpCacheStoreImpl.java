@@ -38,7 +38,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateByCacheC
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
-import com.adobe.acs.commons.util.exception.CacheMBeanException;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
 import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 import org.apache.commons.io.FileUtils;

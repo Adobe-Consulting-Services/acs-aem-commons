@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util.exception;
+package com.adobe.acs.commons.util.impl.exception;
 
 public class CacheMBeanException extends Exception{
     public CacheMBeanException() {
