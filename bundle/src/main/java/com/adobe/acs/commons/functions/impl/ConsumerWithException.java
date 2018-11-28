@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.functions;
+package com.adobe.acs.commons.functions.impl;
 
 import java.util.Objects;
 

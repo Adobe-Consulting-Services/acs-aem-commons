@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
-import com.adobe.acs.commons.functions.ConsumerWithException;
-import com.adobe.acs.commons.functions.FunctionWithException;
+import com.adobe.acs.commons.functions.impl.ConsumerWithException;
+import com.adobe.acs.commons.functions.impl.FunctionWithException;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
