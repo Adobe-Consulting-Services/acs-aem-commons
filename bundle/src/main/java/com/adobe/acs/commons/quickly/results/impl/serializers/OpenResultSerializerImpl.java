@@ -23,22 +23,17 @@ package com.adobe.acs.commons.quickly.results.impl.serializers;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
 import com.day.cq.wcm.api.AuthoringUIMode;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * ACS AEM Commons - Quickly - Open Result Serializer
  */
-@Component
-@Property(
-        name = ResultSerializer.PROP_TYPE,
-        value = OpenResultSerializerImpl.TYPE
-)
-@Service(value = ResultSerializer.class)
+@Component(service = ResultSerializer.class, property= {
+		ResultSerializer.PROP_TYPE + "=" + OpenResultSerializerImpl.TYPE
+})
 public class OpenResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
     public static final String TYPE = "OPEN";
 
