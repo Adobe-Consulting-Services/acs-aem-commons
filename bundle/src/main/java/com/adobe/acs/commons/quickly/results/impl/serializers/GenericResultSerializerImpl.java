@@ -20,25 +20,21 @@
 
 package com.adobe.acs.commons.quickly.results.impl.serializers;
 
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultSerializer;
 import com.google.gson.JsonObject;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ValueMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * ACS AEM Commons - Quickly - Generic Result Serializer
  */
-@Component
-@Property(
-        name = ResultSerializer.PROP_TYPE,
-        value = GenericResultSerializerImpl.TYPE
-)
-@Service(value = ResultSerializer.class)
+@Component(service = ResultSerializer.class, property= {
+		ResultSerializer.PROP_TYPE + "=" + GenericResultSerializerImpl.TYPE
+})
 public class GenericResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
     private static final Logger log = LoggerFactory.getLogger(GenericResultSerializerImpl.class);
 

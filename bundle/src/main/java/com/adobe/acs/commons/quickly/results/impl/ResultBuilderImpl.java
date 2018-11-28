@@ -30,15 +30,17 @@ import com.adobe.acs.commons.quickly.results.impl.serializers.GenericResultSeria
 import com.day.cq.wcm.api.AuthoringUIMode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+
 import com.google.gson.JsonObject;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +52,15 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * ACS AEM Commons - Quickly - Result Builder
  */
-@Component
-@Reference(
-        name = "resultSerializers",
-        referenceInterface = ResultSerializer.class,
-        policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
-)
-@Service
+@Component(service=ResultBuilder.class, reference= {
+		@Reference(
+		        name = "resultSerializers",
+		        service = ResultSerializer.class,
+		        policy = ReferencePolicy.DYNAMIC,
+		        cardinality = ReferenceCardinality.MULTIPLE
+		)
+})
+
 public class ResultBuilderImpl implements ResultBuilder {
     private static final Logger log = LoggerFactory.getLogger(ResultBuilderImpl.class);
 
@@ -155,7 +158,7 @@ public class ResultBuilderImpl implements ResultBuilder {
     }
 
     @Deactivate
-    protected final void deactivate(Map<String, String> map) {
+    protected final void deactivate() {
         resultSerializers = new ConcurrentHashMap<String, ResultSerializer>();
     }
 
