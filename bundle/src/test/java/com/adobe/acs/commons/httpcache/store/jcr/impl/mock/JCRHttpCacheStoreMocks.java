@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.mock;
 
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.functions.ConsumerWithException;
 import com.adobe.acs.commons.functions.FunctionWithException;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
@@ -30,7 +28,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
-import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;

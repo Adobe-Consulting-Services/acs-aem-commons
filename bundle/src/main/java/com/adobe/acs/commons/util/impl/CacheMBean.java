@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.util.impl;
 
 import javax.management.DynamicMBean;
 import javax.management.openmbean.OpenDataException;

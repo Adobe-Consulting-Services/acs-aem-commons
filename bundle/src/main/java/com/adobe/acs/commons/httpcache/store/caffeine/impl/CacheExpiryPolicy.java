@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.httpcache.store.caffeine.impl;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.mem.MemCachePersistenceObject;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemCachePersistenceObject;
 import com.github.benmanes.caffeine.cache.Expiry;
 
 import static com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl.NANOSECOND_MODIFIER;

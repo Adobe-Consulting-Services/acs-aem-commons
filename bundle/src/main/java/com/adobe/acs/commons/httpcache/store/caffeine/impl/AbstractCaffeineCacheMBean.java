@@ -1,26 +1,9 @@
-/*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2015 Adobe
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.httpcache.store.caffeine.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheStats;
+import com.adobe.acs.commons.util.impl.AbstractCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -34,13 +17,13 @@ import javax.management.openmbean.TabularType;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K,V> implements CacheMBean {
+/**
+ * AbstractCaffeineCacheMBean
+ * Contains common logic for Caffeine MBean purposes, for exposing stores.
+ */
+public abstract class AbstractCaffeineCacheMBean <K, V> extends AbstractCacheMBean<K,V> implements CacheMBean {
 
-    public <T> AbstractGuavaCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
-        super(implementation, mbeanInterface);
-    }
-
-    protected AbstractGuavaCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
+    protected AbstractCaffeineCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
     }
 
@@ -100,11 +83,11 @@ public abstract class AbstractGuavaCacheMBean<K, V> extends AbstractCacheMBean<K
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Load Exception Count");
-        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.loadExceptionCount()));
+        row.put(JMX_PN_VALUE, String.valueOf(cacheStats.loadFailureCount()));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Load Exception Rate");
-        row.put(JMX_PN_VALUE, String.format("%.0f%%", cacheStats.loadExceptionRate() * 100));
+        row.put(JMX_PN_VALUE, String.format("%.0f%%", cacheStats.loadFailureRate() * 100));
         tabularData.put(new CompositeDataSupport(cacheEntryType, row));
 
         row.put(JMX_PN_STAT, "Load Success Count");

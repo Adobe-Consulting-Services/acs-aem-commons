@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.store.mem;
+package com.adobe.acs.commons.httpcache.store.mem.impl;
 
-import com.adobe.acs.commons.util.CacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.granite.jmx.annotation.Description;
 
 /**

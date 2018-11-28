@@ -37,7 +37,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.ValueFactory;
 
-import com.adobe.acs.commons.httpcache.store.mem.MemTempSinkImpl;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.value.BinaryImpl;
 import org.mockito.invocation.InvocationOnMock;
