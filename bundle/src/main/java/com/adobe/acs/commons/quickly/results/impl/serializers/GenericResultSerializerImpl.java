@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * ACS AEM Commons - Quickly - Generic Result Serializer
  */
 @Component(service = ResultSerializer.class, property= {
-		ResultSerializer.PROP_TYPE + "=" + GenericResultSerializerImpl.TYPE
+      ResultSerializer.PROP_TYPE + "=" + GenericResultSerializerImpl.TYPE
 })
 public class GenericResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
     private static final Logger log = LoggerFactory.getLogger(GenericResultSerializerImpl.class);

@@ -74,7 +74,7 @@ import com.day.cq.commons.jcr.JcrConstants;
  * time after failing the first time.
  */
 @Component(service = DynamicMBean.class, configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-		"jmx.objectname" + "=" + "com.adobe.acs.commons:type=On-Deploy Scripts"
+      "jmx.objectname" + "=" + "com.adobe.acs.commons:type=On-Deploy Scripts"
 })
 public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutor {
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";

@@ -51,14 +51,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * ACS AEM Commons - Quickly - Result Builder
  */
 @Component(service=ResultBuilder.class, reference= {
-		@Reference(
-		        name = "resultSerializers",
-		        service = ResultSerializer.class,
-		        policy = ReferencePolicy.DYNAMIC,
-		        cardinality = ReferenceCardinality.MULTIPLE
-		)
+      @Reference(
+              name = "resultSerializers",
+              service = ResultSerializer.class,
+              policy = ReferencePolicy.DYNAMIC,
+              cardinality = ReferenceCardinality.MULTIPLE
+      )
 })
-
 public class ResultBuilderImpl implements ResultBuilder {
     private static final Logger log = LoggerFactory.getLogger(ResultBuilderImpl.class);
 

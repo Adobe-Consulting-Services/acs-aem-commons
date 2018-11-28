@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
  * ACS AEM Commons - Quickly - Open Result Serializer
  */
 @Component(service = ResultSerializer.class, property= {
-		ResultSerializer.PROP_TYPE + "=" + OpenResultSerializerImpl.TYPE
+      ResultSerializer.PROP_TYPE + "=" + OpenResultSerializerImpl.TYPE
 })
 public class OpenResultSerializerImpl extends AbstractResultSerializer implements ResultSerializer {
     public static final String TYPE = "OPEN";
