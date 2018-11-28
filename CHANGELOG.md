@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
 
 ### Fixed
+- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
 - #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
 
 ### Changed
