@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1564 - Added SFTP support for asset ingest utilities
 
 ### Fixed
+- #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils
 - #1583 - Asset Ingestor may try to create asset folders when they already exist
 - #1578 - Added user/password handling as well as timeout specification in SFTP import

@@ -71,7 +71,7 @@ public class MultifieldComponent extends FieldComponent {
             }
         } else {            
             for (FieldComponent component : fieldComponents.values()) {
-                component.setPath(getPath() + "/" + component.getName());
+                component.setPath(getPath() + "/field");
                 Resource comp = component.buildComponentResource();
                 comp.getResourceMetadata().put("name", getName());
                 res.addChild(comp);
