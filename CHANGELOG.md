@@ -6,12 +6,17 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
-- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+### Added
+- #1564 - Added SFTP support for asset ingest utilities
 
 ### Fixed
-- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
-- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
 - #1583 - Asset Ingestor may try to create asset folders when they already exist
+- #1578 - Added user/password handling as well as timeout specification in SFTP import
+- #1576 - SFTP import folder handling bugs
+- #1572 - Update JSCH version used for SFTP support
+- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
+- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
