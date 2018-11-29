@@ -33,6 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -277,7 +278,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    private class SftpConnectionSource implements Source {
+    class SftpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private final JSch jsch = new JSch();
@@ -316,7 +317,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public InputStream getStream() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -324,7 +325,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                currentStream = sftpChannel.get(uri.getPath());
+                currentStream = sftpChannel.get(URLDecoder.decode(uri.getPath(), "utf-8"));
 
                 return currentStream;
 
@@ -343,7 +344,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public long getLength() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -351,7 +352,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                SftpATTRS stats = sftpChannel.lstat(uri.getPath());
+                SftpATTRS stats = sftpChannel.lstat(URLDecoder.decode(uri.getPath(), "utf-8"));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);

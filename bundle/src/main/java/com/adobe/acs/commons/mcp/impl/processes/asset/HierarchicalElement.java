@@ -23,6 +23,8 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.commons.jcr.JcrUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,5 +121,10 @@ public interface HierarchicalElement {
     @SuppressWarnings("squid:S00112")
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
         visitAllFiles(visitor, HierarchicalElement::getFolderChildren, HierarchicalElement::getFileChildren);
+    }
+
+
+    default String encodeUriParts(final String uri) throws UnsupportedEncodingException {
+        return URLEncoder.encode(uri, "utf-8").replaceAll("%2F", "/").replaceFirst("%3A", ":");
     }
 }

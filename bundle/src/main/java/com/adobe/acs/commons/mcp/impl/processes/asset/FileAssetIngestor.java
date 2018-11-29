@@ -43,8 +43,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -100,7 +102,7 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 baseFolder = new SftpHierarchicalElement(fileBasePath);
                 baseFolder.isFolder(); // Forces a login and check status of base folder
-            } catch (URISyntaxException ex) {
+            } catch (URISyntaxException | UnsupportedEncodingException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 throw new RepositoryException("Unable to process URL!");
             }
@@ -295,13 +297,13 @@ public class FileAssetIngestor extends AssetIngestor {
         Source source;
         boolean keepChannelOpen = false;
 
-        SftpHierarchicalElement(String uri) throws URISyntaxException {
+        SftpHierarchicalElement(String uri) throws URISyntaxException, UnsupportedEncodingException {
             this.sourcePath = uri;
-            this.uri = new URI(uri);
-            this.path = this.uri.getPath();
+            this.uri = new URI(encodeUriParts(uri));
+            this.path = URLDecoder.decode(this.uri.getPath(), "utf-8");
         }
 
-        SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException {
+        SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, UnsupportedEncodingException {
             this(uri);
             this.channel = channel;
             this.keepChannelOpen = holdOpen;
@@ -379,7 +381,7 @@ public class FileAssetIngestor extends AssetIngestor {
             if (parent == null && !fileBasePath.equals(getSourcePath())) {
                 try {
                     parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(getSourcePath(), "/"));
-                } catch (URISyntaxException ex) {
+                } catch (URISyntaxException | UnsupportedEncodingException  ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -416,7 +418,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 SftpHierarchicalElement child = new SftpHierarchicalElement(childPath, channel, true);
                 child.processAttrs(entry.getAttrs());
                 return child;
-            } catch (URISyntaxException ex) {
+            } catch (URISyntaxException | UnsupportedEncodingException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 return null;
             }

@@ -51,6 +51,7 @@ import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -273,7 +274,7 @@ public class FileAssetIngestorTest {
     }
     
     @Test
-    public void testSftpStructures() throws URISyntaxException, JSchException {
+    public void testSftpStructures() throws URISyntaxException, JSchException, UnsupportedEncodingException {
         configureSftpFields();
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH);
         elem1.isFile = true;
@@ -293,7 +294,7 @@ public class FileAssetIngestorTest {
     }
 
     @Test
-    public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException {
+    public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException, UnsupportedEncodingException {
         configureSftpFields();
         ChannelSftp channel = mock(ChannelSftp.class);
         when(channel.isConnected()).thenReturn(true);
@@ -315,6 +316,16 @@ public class FileAssetIngestorTest {
             assertTrue("Expected isFile for " + e.getName(), e.isFile());
         }
         assertEquals("Expected only two files", 2, count);
+    }
+
+    @Test
+    public void testSftpUrlSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException {
+        String url = "sftp://somehost/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(url);
+
+        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem1.path);
+        assertEquals(elem1.encodeUriParts(url), elem1.uri.toString());
+        assertEquals("somehost", elem1.uri.getHost());
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {

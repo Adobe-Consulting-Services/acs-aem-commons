@@ -23,11 +23,18 @@ import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Collections;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -91,5 +98,31 @@ public class FileOrRenditionTest {
         assertTrue("Able to read file", fileSource.getStream().available() > 0);
         fileSource.close();
     }
+
+    @Test
+    public void testSftpSourceSupportsSpecialCharsInUrl() {
+        String url = "sftp://somehost/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+
+        FileOrRendition instance = new FileOrRendition(clientProvider, "name", url, testFolder, Collections.EMPTY_MAP);
+        FileOrRendition.SftpConnectionSource sftpSource = instance. new SftpConnectionSource(instance);
+
+        try {
+            sftpSource.getStream();
+        } catch (IOException e) {
+            if (e.getCause() instanceof URISyntaxException) {
+                fail("URISyntaxException occurred");
+            }
+        }
+
+        try {
+            sftpSource.getLength();
+        } catch (IOException e) {
+            if (e.getCause() instanceof URISyntaxException) {
+                fail("URISyntaxException occurred");
+            }
+        }
+    }
+
+
     
 }
