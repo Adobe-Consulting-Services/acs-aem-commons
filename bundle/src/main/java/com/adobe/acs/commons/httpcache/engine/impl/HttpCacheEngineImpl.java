@@ -41,6 +41,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
@@ -385,7 +386,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
 
         prepareCachedResponse(response, cacheContent);
-        return executeCacheContentDeliver(request, response, cacheContent);
+        return executeCacheContentDeliver(request, response, cacheConfig, cacheContent);
     }
 
 
@@ -616,10 +617,10 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         response.setCharacterEncoding(cacheContent.getCharEncoding());
     }
 
-    private boolean executeCacheContentDeliver(SlingHttpServletRequest request, SlingHttpServletResponse response, CacheContent cacheContent) throws HttpCacheDataStreamException {
+    private boolean executeCacheContentDeliver(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent) throws HttpCacheDataStreamException {
         // Copy the cached data into the servlet output stream.
         try {
-            serveCacheContentIntoResponse(response, cacheContent);
+            serveCacheContentIntoResponse(response, cacheConfig,cacheContent);
 
             if (log.isDebugEnabled()) {
                 log.debug("Response delivered from cache for the url [ {} ]", request.getRequestURI());
@@ -630,12 +631,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         }
     }
 
-    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
+    private void serveCacheContentIntoResponse(SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent)
             throws IOException {
-        try {
-            IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
-        } catch(IllegalStateException ex) {
-            // in this case, either the writer has already been obtained or the response doesn't support getOutputStream()
+
+        if(cacheConfig.getResponseWriteMethod().equals(HttpCacheConfig.ResponseWriteMethod.OUTPUTSTREAM)){
+            try {
+                IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
+            } catch(IllegalStateException ex) {
+                // in this case, either the writer has already been obtained or the response doesn't support getOutputStream()
+                IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
+            }
+        }else{
+            // config specified to use the print writer specifically.
             IOUtils.copy(cacheContent.getInputDataStream(), response.getWriter(), response.getCharacterEncoding());
         }
     }

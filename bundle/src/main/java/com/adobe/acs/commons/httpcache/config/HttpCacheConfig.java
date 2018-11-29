@@ -37,9 +37,14 @@ import java.util.regex.Pattern;
 @ProviderType
 public interface HttpCacheConfig {
 
-    public enum FilterScope {
+    enum FilterScope {
         REQUEST,
         INCLUDE
+    }
+
+    enum ResponseWriteMethod {
+        OUTPUTSTREAM,
+        PRINTWRITER
     }
 
     /**
@@ -143,4 +148,12 @@ public interface HttpCacheConfig {
      * @return the filter scope this HttpCacheConfig should involve itself in.
      */
     FilterScope getFilterScope();
+
+    /**
+     * @return the type of how the cache should be written to the response.
+     * This is useful if you require cache to be writing using a specific way.
+     */
+    default ResponseWriteMethod getResponseWriteMethod() {
+        return ResponseWriteMethod.OUTPUTSTREAM;
+    }
 }

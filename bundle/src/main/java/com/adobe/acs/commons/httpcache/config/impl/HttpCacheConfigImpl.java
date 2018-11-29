@@ -80,6 +80,9 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String FILTER_SCOPE_REQUEST = "REQUEST";
     private static final String FILTER_SCOPE_INCLUDE = "INCLUDE";
 
+    private static final String RESPONSE_WRITE_OUTPUTSTREAM = "OUTPUTSTREAM";
+    private static final String RESPONSE_WRITE_PRINTWRITER = "PRINTWRITER";
+
     // Order
     public static final int DEFAULT_ORDER = 1000;
     private int order = DEFAULT_ORDER;
@@ -209,6 +212,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
     private List<String> cacheHandlingRulesPid;
 
+
+    private static final String DEFAULT_RESPONSE_WRITE_METHOD = RESPONSE_WRITE_OUTPUTSTREAM; // Defaults to REQUEST scope
+    @Property(label = "Response writing method",
+            description = "Specify on how the cache content should be written to the request",
+            options = {
+                    @PropertyOption(name = RESPONSE_WRITE_OUTPUTSTREAM,
+                            value = RESPONSE_WRITE_OUTPUTSTREAM),
+                    @PropertyOption(name = RESPONSE_WRITE_PRINTWRITER,
+                            value = RESPONSE_WRITE_PRINTWRITER)
+            },
+            value = DEFAULT_RESPONSE_WRITE_METHOD)
+    // @formatter:on
+    private static final String PROP_RESPONSE_WRITE_METHOD = "httpcache.config.response-write-method";
+    private HttpCacheConfig.ResponseWriteMethod responseWriteMethod;
+
     @Activate
     protected void activate(Map<String, Object> configs) {
 
@@ -237,6 +255,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(PROP_FILTER_SCOPE), DEFAULT_FILTER_SCOPE).toUpperCase());
+
+        responseWriteMethod = ResponseWriteMethod.valueOf(PropertiesUtil.toString(configs.get(PROP_RESPONSE_WRITE_METHOD), DEFAULT_RESPONSE_WRITE_METHOD).toUpperCase());
 
         // PIDs of cache handling rules.
         cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -398,5 +418,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public FilterScope getFilterScope() {
         return this.filterScope;
+    }
+
+    @Override
+    public ResponseWriteMethod getResponseWriteMethod() {
+        return responseWriteMethod;
     }
 }
