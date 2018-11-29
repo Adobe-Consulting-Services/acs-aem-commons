@@ -85,7 +85,7 @@ public class SyntheticDialogTest {
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
-        assertNotNull("Multifield node check", res.getChild("simpleMultiField"));
+        assertNotNull("Multifield node check", res.getChild("field"));
     }
 
     public class TestPojo extends GeneratedDialog {
