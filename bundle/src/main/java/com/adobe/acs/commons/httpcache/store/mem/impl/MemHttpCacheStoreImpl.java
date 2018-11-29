@@ -89,6 +89,11 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     private long ttl;
 
+    @Property(propertyPrivate = true,
+            longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
+    private static final String PROP_TTL_LEGACY = "httpcache.cachestore.memcache.ttl";
+    private long ttlLegacy;
+
     @Property(label = "Maximum size of this store in MB",
               description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
                       + "from the cache",
@@ -107,10 +112,13 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
     @Activate
     protected void activate(Map<String, Object> configs) {
-        // Read config and populate values.
-        ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
-
         //legacy support for configurations that still use the old key, to be backwards compatible.
+        if(ttlLegacy != DEFAULT_TTL && maxSizeInMb == DEFAULT_TTL){
+            ttl = PropertiesUtil.toLong(configs.get(PROP_TTL_LEGACY), DEFAULT_TTL);
+        }else{
+            ttl = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_TTL);
+        }
+
         if(maxSizeInMbLegacy != DEFAULT_MAX_SIZE_IN_MB && maxSizeInMb == DEFAULT_MAX_SIZE_IN_MB){
             maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB_LEGACY), DEFAULT_MAX_SIZE_IN_MB);
         }else{
