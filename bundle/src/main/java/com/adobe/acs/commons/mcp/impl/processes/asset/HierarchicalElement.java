@@ -34,6 +34,8 @@ import java.util.stream.Stream;
  */
 public interface HierarchicalElement {
 
+    String SFT_URL_ENCODING = "utf-8";
+
     default boolean excludeBaseFolder() {
         return false;
     }
@@ -125,6 +127,6 @@ public interface HierarchicalElement {
 
 
     default String encodeUriParts(final String uri) throws UnsupportedEncodingException {
-        return URLEncoder.encode(uri, "utf-8").replaceAll("%2F", "/").replaceFirst("%3A", ":");
+        return URLEncoder.encode(uri, SFT_URL_ENCODING).replaceAll("%2F", "/").replaceFirst("%3A", ":");
     }
 }

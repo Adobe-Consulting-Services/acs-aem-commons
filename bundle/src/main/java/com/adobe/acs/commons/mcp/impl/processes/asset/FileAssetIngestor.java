@@ -300,7 +300,7 @@ public class FileAssetIngestor extends AssetIngestor {
         SftpHierarchicalElement(String uri) throws URISyntaxException, UnsupportedEncodingException {
             this.sourcePath = uri;
             this.uri = new URI(encodeUriParts(uri));
-            this.path = URLDecoder.decode(this.uri.getPath(), "utf-8");
+            this.path = URLDecoder.decode(this.uri.getPath(), SFT_URL_ENCODING);
         }
 
         SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, UnsupportedEncodingException {
