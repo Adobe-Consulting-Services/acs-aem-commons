@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.Source;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -29,11 +29,16 @@ import java.util.Collections;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
@@ -100,22 +105,26 @@ public class FileOrRenditionTest {
     }
 
     @Test
-    public void testSftpSourceSupportsSpecialCharsInUrl() {
+    public void testSftpSourceGetLength() throws JSchException, IOException, SftpException {
         String url = "sftp://somehost/this/is/path with/$pecial/characters#@/some image& chars.jpg";
 
         FileOrRendition instance = new FileOrRendition(clientProvider, "name", url, testFolder, Collections.EMPTY_MAP);
         FileOrRendition.SftpConnectionSource sftpSource = instance. new SftpConnectionSource(instance);
+        sftpSource = spy(sftpSource);
+
+        Session session = mock(Session.class);
+        doReturn(session).when(sftpSource).getSessionForHost(any());
+
+        ChannelSftp channelSftp = mock(ChannelSftp.class);
+        when(session.openChannel(any())).thenReturn(channelSftp);
+
+        SftpATTRS stats = mock(SftpATTRS.class);
+        doReturn(stats).when(channelSftp).lstat(any());
+        long expectedSize = 1024L;
+        doReturn(expectedSize).when(stats).getSize();
 
         try {
-            sftpSource.getStream();
-        } catch (IOException e) {
-            if (e.getCause() instanceof URISyntaxException) {
-                fail("URISyntaxException occurred");
-            }
-        }
-
-        try {
-            sftpSource.getLength();
+            assertEquals(expectedSize, sftpSource.getLength());
         } catch (IOException e) {
             if (e.getCause() instanceof URISyntaxException) {
                 fail("URISyntaxException occurred");
@@ -123,6 +132,29 @@ public class FileOrRenditionTest {
         }
     }
 
+    @Test
+    public void testSftpSourceGetStream() throws JSchException, IOException, SftpException {
+        String url = "sftp://somehost/this/is/path with/$pecial/characters#@/some image& chars.jpg";
 
-    
+        FileOrRendition instance = new FileOrRendition(clientProvider, "name", url, testFolder, Collections.EMPTY_MAP);
+        FileOrRendition.SftpConnectionSource sftpSource = instance. new SftpConnectionSource(instance);
+        sftpSource = spy(sftpSource);
+
+        Session session = mock(Session.class);
+        doReturn(session).when(sftpSource).getSessionForHost(any());
+
+        ChannelSftp channelSftp = mock(ChannelSftp.class);
+        when(session.openChannel(any())).thenReturn(channelSftp);
+
+        InputStream expectedStream = mock(InputStream.class);
+        doReturn(expectedStream).when(channelSftp).get(any());
+
+        try {
+            assertEquals(expectedStream, sftpSource.getStream());
+        } catch (IOException e) {
+            if (e.getCause() instanceof URISyntaxException) {
+                fail("URISyntaxException occurred");
+            }
+        }
+    }
 }

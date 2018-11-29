@@ -292,7 +292,7 @@ public class FileOrRendition implements HierarchicalElement {
             this.thizz = thizz;
         }
 
-        private Session getSessionForHost(URI uri) throws IOException {
+        Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();
             }
