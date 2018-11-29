@@ -29,12 +29,12 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor.SFTP_URL_ENCODING;
+
 /**
  * Represents an element in the asset tree, which is either an asset/file or a folder
  */
 public interface HierarchicalElement {
-
-    String SFT_URL_ENCODING = "utf-8";
 
     default boolean excludeBaseFolder() {
         return false;
@@ -127,6 +127,6 @@ public interface HierarchicalElement {
 
 
     default String encodeUriParts(final String uri) throws UnsupportedEncodingException {
-        return URLEncoder.encode(uri, SFT_URL_ENCODING).replaceAll("%2F", "/").replaceFirst("%3A", ":");
+        return URLEncoder.encode(uri, SFTP_URL_ENCODING).replaceAll("%2F", "/").replaceFirst("%3A", ":");
     }
 }

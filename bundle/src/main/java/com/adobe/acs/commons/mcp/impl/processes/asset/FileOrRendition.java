@@ -44,6 +44,8 @@ import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
+import static com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor.SFTP_URL_ENCODING;
+
 /**
  * Abstraction of a file which might be an asset or a rendition of another asset
  */
@@ -325,7 +327,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                currentStream = sftpChannel.get(URLDecoder.decode(uri.getPath(), SFT_URL_ENCODING));
+                currentStream = sftpChannel.get(URLDecoder.decode(uri.getPath(), SFTP_URL_ENCODING));
 
                 return currentStream;
 
@@ -352,7 +354,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                SftpATTRS stats = sftpChannel.lstat(URLDecoder.decode(uri.getPath(), SFT_URL_ENCODING));
+                SftpATTRS stats = sftpChannel.lstat(URLDecoder.decode(uri.getPath(), SFTP_URL_ENCODING));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);

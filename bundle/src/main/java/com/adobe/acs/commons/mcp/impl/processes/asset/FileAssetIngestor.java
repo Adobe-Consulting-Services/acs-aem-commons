@@ -59,6 +59,8 @@ import java.util.stream.Stream;
  */
 public class FileAssetIngestor extends AssetIngestor {
 
+    static String SFTP_URL_ENCODING = "utf-8";
+
     public FileAssetIngestor(MimeTypeService mimeTypeService) {
         super(mimeTypeService);
     }
@@ -300,7 +302,7 @@ public class FileAssetIngestor extends AssetIngestor {
         SftpHierarchicalElement(String uri) throws URISyntaxException, UnsupportedEncodingException {
             this.sourcePath = uri;
             this.uri = new URI(encodeUriParts(uri));
-            this.path = URLDecoder.decode(this.uri.getPath(), SFT_URL_ENCODING);
+            this.path = URLDecoder.decode(this.uri.getPath(), SFTP_URL_ENCODING);
         }
 
         SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, UnsupportedEncodingException {
