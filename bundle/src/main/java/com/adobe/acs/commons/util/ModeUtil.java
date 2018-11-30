@@ -22,10 +22,11 @@ package com.adobe.acs.commons.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.felix.scr.annotations.Component;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.annotations.Component;
 
 import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.AuthoringUIMode;

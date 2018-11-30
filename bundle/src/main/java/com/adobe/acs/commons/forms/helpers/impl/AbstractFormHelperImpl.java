@@ -27,9 +27,6 @@ import org.apache.sling.xss.XSSAPI;
 import com.day.cq.wcm.api.Page;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -38,6 +35,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +50,11 @@ import java.util.Map;
  * Abstract Form Helper. This provides common behaviors for handling POST-behaviors of the
  *  ACS AEM Commons Forms implementation.
  */
-@Component(componentAbstract = true)
-@Property(name = Constants.SERVICE_RANKING, intValue = FormHelper.SERVICE_RANKING_BASE)
+//@Component(componentAbstract = true,scope=)
+//TODO: how to deal with componentAbstract?
+@Component(property= {
+		Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_BASE
+})
 public abstract class AbstractFormHelperImpl {
     private static final Logger log = LoggerFactory.getLogger(AbstractFormHelperImpl.class);
 

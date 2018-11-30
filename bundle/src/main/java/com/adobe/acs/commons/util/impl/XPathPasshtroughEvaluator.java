@@ -19,7 +19,8 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import org.apache.felix.scr.annotations.Component;
+
+import org.osgi.service.component.annotations.Component;
 
 import com.day.cq.search.Predicate;
 import com.day.cq.search.eval.AbstractPredicateEvaluator;

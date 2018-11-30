@@ -29,10 +29,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
