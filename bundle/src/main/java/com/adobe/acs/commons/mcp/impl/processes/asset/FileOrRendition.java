@@ -327,7 +327,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                currentStream = sftpChannel.get(decodeUriParts(uri.getPath()));
+                currentStream = sftpChannel.get(decodeUriParts(uri.getRawPath()));
 
                 return currentStream;
 
@@ -354,7 +354,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getPath()));
+                SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
