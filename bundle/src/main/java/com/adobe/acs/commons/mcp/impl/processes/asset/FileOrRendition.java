@@ -43,6 +43,9 @@ import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.encodeUriParts;
+
 /**
  * Abstraction of a file which might be an asset or a rendition of another asset
  */
@@ -277,7 +280,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    private class SftpConnectionSource implements Source {
+    class SftpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private final JSch jsch = new JSch();
@@ -289,7 +292,7 @@ public class FileOrRendition implements HierarchicalElement {
             this.thizz = thizz;
         }
 
-        private Session getSessionForHost(URI uri) throws IOException {
+        Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();
             }
@@ -316,7 +319,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public InputStream getStream() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -324,7 +327,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                currentStream = sftpChannel.get(uri.getPath());
+                currentStream = sftpChannel.get(decodeUriParts(uri.getRawPath()));
 
                 return currentStream;
 
@@ -343,7 +346,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public long getLength() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -351,7 +354,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                SftpATTRS stats = sftpChannel.lstat(uri.getPath());
+                SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
