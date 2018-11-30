@@ -53,7 +53,7 @@ import java.util.Map;
 //@Component(componentAbstract = true,scope=)
 //TODO: how to deal with componentAbstract?
 @Component(property= {
-		Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_BASE
+      Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_BASE
 })
 public abstract class AbstractFormHelperImpl {
     private static final Logger log = LoggerFactory.getLogger(AbstractFormHelperImpl.class);
