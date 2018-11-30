@@ -127,7 +127,8 @@ public interface HierarchicalElement {
 
 
     class UriHelper {
-        static String SFTP_URL_ENCODING = "utf-8";
+        private static String SFTP_URL_ENCODING = "utf-8";
+        private static int FIRST_SUB_PATH_INDEX = 3;
 
         private UriHelper(){}
 
@@ -135,7 +136,7 @@ public interface HierarchicalElement {
             String[] uriParts = uri.split("/");
 
             //path parts started from index 3
-            for (int i = 3; i < uriParts.length; i++) {
+            for (int i = FIRST_SUB_PATH_INDEX; i < uriParts.length; i++) {
                 uriParts[i] = URLEncoder.encode(uriParts[i], SFTP_URL_ENCODING);
             }
 
