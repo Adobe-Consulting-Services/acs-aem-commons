@@ -129,6 +129,8 @@ public interface HierarchicalElement {
     class UriHelper {
         static String SFTP_URL_ENCODING = "utf-8";
 
+        private UriHelper(){};
+
         static String encodeUriParts(final String uri) throws UnsupportedEncodingException {
             String[] uriParts = uri.split("/");
 
