@@ -19,6 +19,11 @@
  */
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.ReplicationActionType;
@@ -27,10 +32,6 @@ import com.day.cq.replication.ReplicationResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.LoginException;
@@ -41,23 +42,31 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl.AUTH_INFO;
 
 @SuppressWarnings("serial")
-@SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
-        selectors = "flush", methods = "POST")
-
+@Component(service = Servlet.class,
+property = 
+{ SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
+  SLING_SERVLET_METHODS + "=POST", 
+  SLING_SERVLET_SELECTORS + "=flush" })
+@Designate(ocd=DispatcherFlusherServlet.Config.class)
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
@@ -70,13 +79,16 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
-
-    @Property(label = "Flush with Admin Resource Resolver",
+    
+    @ObjectClassDefinition()
+    public @interface Config {
+       @AttributeDefinition(name = "Flush with Admin Resource Resolver",
             description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
                     + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
                     + "users JCR permissions. [ Default: true ]",
-            boolValue = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER)
-    public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
+                    defaultValue="true")
+          boolean flush_with_admin_resource_resolver();
+    }
 
     @Override
     @SuppressWarnings("squid:S3776")
@@ -178,9 +190,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     }
 
     @Activate
-    protected final void activate(final Map<String, String> config) {
-        this.flushWithAdminResourceResolver = PropertiesUtil.toBoolean(
-                config.get(PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER),
-                DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER);
+    protected final void activate(DispatcherFlusherServlet.Config config) {
+        this.flushWithAdminResourceResolver = config.flush_with_admin_resource_resolver();
     }
 }
