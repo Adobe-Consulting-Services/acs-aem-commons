@@ -24,12 +24,13 @@ import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,19 +55,29 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component(metatype = true, immediate = true,
-           label = "ACS AEM Commons - Throttled Task Runner Service",
-           description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
-@Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
-@Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
-    @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
-    @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", value = "0.75"),
-    @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", value = "0.85"),
-    @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100"),
-    @Property(name = "task.timeout", label = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", value = "3600000"),})
+@Component(service = {ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class}, 
+       immediate = true,
+       property = {
+    		   "jmx.objectname" + "=" + "com.adobe.acs.commons.fam:type=Throttled Task Runner"
+       })
+@Designate(ocd=ThrottledTaskRunnerImpl.Config.class)
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
+    	@ObjectClassDefinition(name = "ACS AEM Commons - Throttled Task Runner Service",
+    	           description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
+	public @interface Config {
+	    @AttributeDefinition(name = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",defaultValue = "4")
+        int max_threads();
+	    @AttributeDefinition(name = "Max cpu %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.75")
+        int max_cpu();
+	    @AttributeDefinition(name = "Max heap %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.85")
+        int max_heap();
+	    @AttributeDefinition(name = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", defaultValue = "100")
+        int cooldown_wait_time();
+	    @AttributeDefinition(name = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", defaultValue = "3600000")
+		int task_timeout();
+	}
+	
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
     private int taskTimeout;
     private int cooldownWaitTime;
@@ -301,15 +312,15 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         }
     }
 
-    protected void activate(ComponentContext componentContext) {
-        Dictionary<?, ?> properties = componentContext.getProperties();
+    @Activate
+    protected void activate(ThrottledTaskRunnerImpl.Config config) {
         int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
 
-        maxCpu = PropertiesUtil.toDouble(properties.get("max.cpu"), 0.75);
-        maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
-        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
-        cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
-        taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 3600000);
+        maxCpu = config.max_cpu();
+        maxHeap = config.max_heap();
+        maxThreads = config.max_threads();
+        cooldownWaitTime = config.cooldown_wait_time();
+        taskTimeout = config.task_timeout();
 
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");

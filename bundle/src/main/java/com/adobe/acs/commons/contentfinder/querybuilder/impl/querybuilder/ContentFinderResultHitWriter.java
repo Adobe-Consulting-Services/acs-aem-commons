@@ -23,9 +23,9 @@ import com.adobe.acs.commons.contentfinder.querybuilder.impl.ContentFinderHitBui
 import com.day.cq.search.Query;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.writer.ResultHitWriter;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.io.JSONWriter;
+import org.osgi.service.component.annotations.Component;
 
 import javax.jcr.RepositoryException;
 import java.util.Map;
