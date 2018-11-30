@@ -22,14 +22,14 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.commons.jcr.JcrUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.adobe.acs.commons.mcp.impl.processes.asset.FileAssetIngestor.SFTP_URL_ENCODING;
 
 /**
  * Represents an element in the asset tree, which is either an asset/file or a folder
@@ -126,7 +126,22 @@ public interface HierarchicalElement {
     }
 
 
-    default String encodeUriParts(final String uri) throws UnsupportedEncodingException {
-        return URLEncoder.encode(uri, SFTP_URL_ENCODING).replaceAll("%2F", "/").replaceFirst("%3A", ":");
+    class UriHelper {
+        static String SFTP_URL_ENCODING = "utf-8";
+
+        static String encodeUriParts(final String uri) throws UnsupportedEncodingException {
+            String[] uriParts = uri.split("/");
+
+            //path parts started from index 3
+            for (int i = 3; i < uriParts.length; i++) {
+                uriParts[i] = URLEncoder.encode(uriParts[i], SFTP_URL_ENCODING);
+            }
+
+            return StringUtils.join(uriParts, "/");
+        }
+
+        static String decodeUriParts(final String uri) throws UnsupportedEncodingException {
+            return URLDecoder.decode(uri, SFTP_URL_ENCODING);
+        }
     }
 }

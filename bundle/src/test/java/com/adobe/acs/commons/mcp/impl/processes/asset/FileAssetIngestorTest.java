@@ -320,12 +320,20 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testSftpUrlSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException {
-        String url = "sftp://somehost/this/is/path with/$pecial/characters#@/some image& chars.jpg";
-        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(url);
+        String urlWithPort = "sftp://somehost:20/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(urlWithPort);
 
         assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem1.path);
-        assertEquals(elem1.encodeUriParts(url), elem1.uri.toString());
+        assertEquals("sftp://somehost:20/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem1.uri.toString());
         assertEquals("somehost", elem1.uri.getHost());
+        assertEquals(20, elem1.uri.getPort());
+
+        String urlWithoutPort = "sftp://somehost2/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(urlWithoutPort);
+
+        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem2.path);
+        assertEquals("sftp://somehost2/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem2.uri.toString());
+        assertEquals("somehost2", elem2.uri.getHost());
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {

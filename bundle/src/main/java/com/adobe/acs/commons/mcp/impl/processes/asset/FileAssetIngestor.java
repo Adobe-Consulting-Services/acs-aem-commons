@@ -46,20 +46,20 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.encodeUriParts;
+
 /**
  * Asset Ingestor reads a directory structure recursively and imports it as-is
  * into AEM.
  */
 public class FileAssetIngestor extends AssetIngestor {
-
-    static String SFTP_URL_ENCODING = "utf-8";
 
     public FileAssetIngestor(MimeTypeService mimeTypeService) {
         super(mimeTypeService);
@@ -302,7 +302,7 @@ public class FileAssetIngestor extends AssetIngestor {
         SftpHierarchicalElement(String uri) throws URISyntaxException, UnsupportedEncodingException {
             this.sourcePath = uri;
             this.uri = new URI(encodeUriParts(uri));
-            this.path = URLDecoder.decode(this.uri.getPath(), SFTP_URL_ENCODING);
+            this.path = decodeUriParts(this.uri.getPath());
         }
 
         SftpHierarchicalElement(String uri, ChannelSftp channel, boolean holdOpen) throws URISyntaxException, UnsupportedEncodingException {
