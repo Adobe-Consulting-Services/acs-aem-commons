@@ -99,31 +99,36 @@ public class FileAssetIngestor extends AssetIngestor {
     HierarchicalElement baseFolder;
 
     @Override
-    public void init() throws RepositoryException {
-        if (fileBasePath.toLowerCase().startsWith("sftp://")) {
-            try {
-                baseFolder = new SftpHierarchicalElement(fileBasePath);
-                baseFolder.isFolder(); // Forces a login and check status of base folder
-            } catch (URISyntaxException | UnsupportedEncodingException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException("Unable to process URL!");
-            }
-        } else {
-            File base = new File(fileBasePath);
-            if (!base.exists()) {
-                throw new RepositoryException("Source folder does not exist!");
-            }
-            baseFolder = new FileHierarchicalElement(base);
-        }
-        super.init();
-
-    }
-
-    @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
+        baseFolder = getBaseFolder(fileBasePath);
         instance.getInfo().setDescription(fileBasePath + "->" + jcrBasePath);
         instance.defineCriticalAction("Create Folders", rr, this::createFolders);
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
+    }
+
+    HierarchicalElement getBaseFolder(final String url) throws RepositoryException {
+        HierarchicalElement baseHierarchicalElement;
+        if (url.toLowerCase().startsWith("sftp://")) {
+            try {
+                baseHierarchicalElement = new SftpHierarchicalElement(url);
+                // Forces a login
+                ((SftpHierarchicalElement) baseHierarchicalElement).retrieveDetails();
+            } catch (URISyntaxException | UnsupportedEncodingException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                throw new RepositoryException("Unable to process URL!");
+            } catch (JSchException | SftpException ex) {
+                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                throw new RepositoryException(ex.getMessage());
+            }
+        } else {
+            File base = new File(url);
+            if (!base.exists()) {
+                throw new RepositoryException("Source folder does not exist!");
+            }
+            baseHierarchicalElement = new FileHierarchicalElement(base);
+        }
+
+        return baseHierarchicalElement;
     }
 
     void createFolders(ActionManager manager) throws IOException {
