@@ -45,6 +45,7 @@
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
+        <oakpal.version>1.1.9</oakpal.version>
     </properties>
 
     <build>
@@ -176,6 +177,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.0.0-M2</version>
+                </plugin>
+                <plugin>
+                    <groupId>net.adamcin.oakpal</groupId>
+                    <artifactId>oakpal-maven-plugin</artifactId>
+                    <version>${oakpal.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -398,6 +404,18 @@
                 <version>1.3</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-core</artifactId>
+                <version>${oakpal.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-testing</artifactId>
+                <version>${oakpal.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!-- Http Cache Dependency -->
             <dependency>
@@ -569,6 +587,7 @@
 
     <modules>
         <module>bundle</module>
+        <module>oakpal-checks</module>
         <module>content</module>
     </modules>
 </project>
