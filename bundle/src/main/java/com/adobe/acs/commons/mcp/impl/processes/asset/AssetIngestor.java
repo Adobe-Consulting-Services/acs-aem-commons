@@ -261,9 +261,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 }
                 Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
 
-                if (asset == null) {
-                    throw new RepositoryException("Could not create asset, see more in logs.");
-                } else {
+                if (asset != null) {
                     saveMigrationInfo(source, asset);
                 }
 
