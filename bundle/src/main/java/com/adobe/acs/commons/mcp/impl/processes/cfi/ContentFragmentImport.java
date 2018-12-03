@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -167,13 +166,13 @@ public class ContentFragmentImport extends ProcessDefinition {
             spreadsheet.getDataRowsAsCompositeVariants().forEach(row -> {
                 String path = getString(row, PATH);
                 String folderTitle = getString(row, FOLDER_TITLE);
-                folders.put(path, folderTitle);
-            });
-            folders.forEach((path, folderTitle) -> {
-                manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
-                    manager.setCurrentItem(path);
-                    createFolderNode(path, folderTitle, rr);
-                }));
+                if (!folders.containsKey(path)) {
+                    folders.put(path, folderTitle);
+                    manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+                        manager.setCurrentItem(path);
+                        createFolderNode(path, folderTitle, rr);
+                    }));
+                }
             });
         });
     }
