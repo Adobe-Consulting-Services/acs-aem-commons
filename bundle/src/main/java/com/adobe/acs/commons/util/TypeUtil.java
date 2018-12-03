@@ -20,13 +20,14 @@
 package com.adobe.acs.commons.util;
 
 import aQute.bnd.annotation.ProviderType;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 @ProviderType
@@ -78,40 +80,14 @@ public final class TypeUtil {
     }
 
     /**
-     * Converts a JSONObject to a simple Map. This will only work properly for
-     * JSONObjects of depth 1.
-     * <p/>
-     * Resulting map will be type'd <String, T> where T is the type of the second parameter (klass)
-     *
-     * @param json
-     * @param klass
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Map<String, T> toMap(JSONObject json, Class<T> klass) throws JSONException {
-        final HashMap<String, T> map = new HashMap<String, T>();
-        final List<?> keys = IteratorUtils.toList(json.keys());
-
-        for (final Object key : keys) {
-            final String strKey = key.toString();
-            final Object obj = json.get(strKey);
-            if (klass.isInstance(obj)) {
-                // Only add objects of this type
-                map.put(strKey, (T) obj);
-            }
-        }
-
-        return map;
-    }
-
-    /**
      * Convenience wrapper for toMap(jsonObj, Object.class).
      *
      * @param json
      * @return
      */
-    public static Map<String, Object> toMap(JSONObject json) throws JSONException {
-        return toMap(json, Object.class);
+    public static Map<String, Object> toMap(JsonObject json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, Map.class);
     }
 
     /**

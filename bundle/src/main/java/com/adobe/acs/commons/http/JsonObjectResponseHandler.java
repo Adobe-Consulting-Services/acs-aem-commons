@@ -19,41 +19,31 @@
  */
 package com.adobe.acs.commons.http;
 
+import com.adobe.acs.commons.json.JsonObjectUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
 import java.io.IOException;
 
-import static com.day.cq.wcm.foundation.List.log;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 /**
- * Converts response to a JSON Object.
+ * Converts response to a JSON Object which could be a JsonObject or JsonArray
  */
-public class JsonObjectResponseHandler implements ResponseHandler<JSONObject> {
+public class JsonObjectResponseHandler implements ResponseHandler<JsonElement> {
 
     private BasicResponseHandler handler = new BasicResponseHandler();
 
     @Override
-    public JSONObject handleResponse(HttpResponse httpResponse) throws
+    public JsonElement handleResponse(HttpResponse httpResponse) throws
             ClientProtocolException, IOException {
         String json = handler.handleResponse(httpResponse);
         if (json == null) {
             return null;
         }
-        try {
-            return new JSONObject(json);
-        } catch (JSONException e) {
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("error", e.getMessage());
-            } catch (JSONException e1) {
-                log.error("Could not form a JSON error response", e);
-            }
-            return jsonObject;
-        }
+        return JsonObjectUtil.toJsonObject(json);
     }
 }

@@ -129,7 +129,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
             if (response.getStatusLine().getStatusCode() != 200) {
                 LOGGER.info("response code {} ", response.getStatusLine().getStatusCode());
             }
-            String result = IOUtils.toString(response.getEntity().getContent());
+            String result = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 
             LOGGER.info("JSON Response : {}", result);
             JsonParser parser = new JsonParser();

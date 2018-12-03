@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ModeUtil;
 import com.adobe.acs.commons.util.ResourceDataUtil;
 import com.adobe.acs.commons.wcm.ComponentErrorHandler;
 import com.adobe.acs.commons.wcm.ComponentHelper;
@@ -102,6 +103,10 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Reference
     private ComponentHelper componentHelper;
+    
+    @Reference
+    private ModeUtil modeHelper;
+   
 
     /* Edit Mode */
 
@@ -188,7 +193,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                FilterChain chain) throws IOException, ServletException {
 
-        // We are in a Sling Filter, so these request/response objects are guarenteed to be of type Sling...
+        // We are in a Sling Filter, so these request/response objects are guaranteed to be of type Sling...
         final SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
         final SlingHttpServletResponse response = (SlingHttpServletResponse) servletResponse;
 
@@ -201,18 +206,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
         if (editModeEnabled
-                && (componentHelper.isEditMode(slingRequest)
-                || componentHelper.isDesignMode(slingRequest)
-                || WCMMode.ANALYTICS.equals(WCMMode.fromRequest(slingRequest)))) {
+                && (modeHelper.isEdit(request)
+                || modeHelper.isDesign(request)
+                || ModeUtil.isAnalytics(slingRequest))) {
             // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
         } else if (previewModeEnabled
-                && (componentHelper.isPreviewMode(slingRequest)
-                || componentHelper.isReadOnlyMode(slingRequest))) {
+                && (modeHelper.isPreview(request)
+                || modeHelper.isReadOnly(request))) {
             // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
         } else if (publishModeEnabled
-                && componentHelper.isDisabledMode(slingRequest)
+                && modeHelper.isDisabled(request)
                 && !this.isFirstInChain(slingRequest)) {
             // Publish Modes; Requires special handling in Published Modes - do not process first filter chain
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);

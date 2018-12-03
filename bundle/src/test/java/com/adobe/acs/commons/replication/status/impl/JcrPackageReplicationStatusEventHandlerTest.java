@@ -44,6 +44,9 @@ import org.osgi.service.event.Event;
 import javax.jcr.Node;
 import java.util.*;
 import java.util.regex.Pattern;
+import org.apache.sling.discovery.InstanceDescription;
+import org.apache.sling.discovery.TopologyEvent;
+import org.apache.sling.discovery.TopologyView;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyMap;
@@ -186,8 +189,13 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, eventParams);
 
         final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-
-        eventHandler.bindRepository(null, null, true);
+        TopologyEvent te = mock(TopologyEvent.class);
+        TopologyView view = mock(TopologyView.class);
+        InstanceDescription instanceDescription = mock(InstanceDescription.class);
+        when(te.getNewView()).thenReturn(view);
+        when(view.getLocalInstance()).thenReturn(instanceDescription);
+        when(instanceDescription.isLeader()).thenReturn(true);
+        eventHandler.handleTopologyEvent(te);
         eventHandler.handleEvent(event);
 
         verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());

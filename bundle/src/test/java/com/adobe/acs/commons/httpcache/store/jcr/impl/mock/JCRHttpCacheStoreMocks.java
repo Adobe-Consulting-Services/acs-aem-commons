@@ -19,30 +19,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.mock;
 
-import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.doCallRealMethod;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.reflect.Whitebox;
-import org.slf4j.Logger;
-
-import com.adobe.acs.commons.functions.Consumer;
-import com.adobe.acs.commons.functions.Function;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
@@ -51,9 +29,25 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.mockito.invocation.InvocationOnMock;
+import org.powermock.reflect.Whitebox;
+import org.slf4j.Logger;
 
-public class JCRHttpCacheStoreMocks
-{
+import javax.jcr.Node;
+import javax.jcr.Session;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.mockito.Matchers.any;
+import static org.powermock.api.mockito.PowerMockito.*;
+
+public class JCRHttpCacheStoreMocks {
+
     private final Arguments arguments;
     private final JCRHttpCacheStoreImpl store = mock(JCRHttpCacheStoreImpl.class);
     private final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
@@ -75,9 +69,10 @@ public class JCRHttpCacheStoreMocks
 
     private final AtomicBoolean resourceResolverOpen = new AtomicBoolean(true);
 
-    public static class Arguments{
+    public static class Arguments {
+
         InputStream contents;
-        Map<String,List<String>> headers;
+        Map<String, List<String>> headers;
 
         String cacheKeyUri = "https://adobe-consulting-services.github.io/acs-aem-commons/";
         String cacheKeyString = "some/random/string";
@@ -89,7 +84,7 @@ public class JCRHttpCacheStoreMocks
         int cacheContentStatus = 200;
     }
 
-    public JCRHttpCacheStoreMocks(final Arguments arguments) throws Exception{
+    public JCRHttpCacheStoreMocks(final Arguments arguments) throws Exception {
         this.arguments = arguments;
         generateCacheContent();
         mockRepository();
@@ -103,37 +98,33 @@ public class JCRHttpCacheStoreMocks
         mockLogger();
     }
 
-    private void mockNodeNames()
-    {
+    private void mockNodeNames() {
         when(rootNode.toString()).thenReturn("rootnode");
         when(bucketNode.toString()).thenReturn("bucketnode");
     }
 
-    private void mockLogger()
-    {
+    private void mockLogger() {
         Whitebox.setInternalState(JCRHttpCacheStoreImpl.class, "log", log);
     }
 
-    private void mockStore() throws Exception
-    {
-        Whitebox.setInternalState(store,  "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
-        Whitebox.setInternalState(store,  "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
-        Whitebox.setInternalState(store,  "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
-        Whitebox.setInternalState(store,  "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
+    private void mockStore() throws Exception {
+        Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
+        Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
+        Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
+        Whitebox.setInternalState(store, "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
 
         doCallRealMethod().when(store).put(cacheKey, cacheContent);
         doCallRealMethod().when(store).contains(cacheKey);
         doCallRealMethod().when(store).invalidate(cacheKey);
         doCallRealMethod().when(store).clearCache();
         doCallRealMethod().when(store).getCacheEntry(any(String.class));
-        doCallRealMethod().when(store).withSession(any(Consumer.class));
-        doCallRealMethod().when(store).withSession(any(Consumer.class), any(Consumer.class));
-        doCallRealMethod().when(store).withSession(any(Function.class));
-        doCallRealMethod().when(store).withSession(any(Function.class), any(Consumer.class));
+        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class));
+        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class), any(CheckedConsumer.class));
+        doCallRealMethod().when(store).withSession(any(CheckedFunction.class));
+        doCallRealMethod().when(store).withSession(any(CheckedFunction.class), any(CheckedConsumer.class));
     }
 
-    private CacheKeyMock generateCacheKey(Arguments arguments)
-    {
+    private CacheKeyMock generateCacheKey(Arguments arguments) {
         return new CacheKeyMock(
                 arguments.cacheKeyUri,
                 arguments.cacheKeyHierarchyResourcePath,
@@ -142,15 +133,14 @@ public class JCRHttpCacheStoreMocks
         );
     }
 
-    private void mockEntryNodeWriter() throws Exception
-    {
+    private void mockEntryNodeWriter() throws Exception {
         whenNew(EntryNodeWriter.class)
                 .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, Integer.class)
                 .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(Integer.class))
                 .thenReturn(entryNodeWriter);
     }
 
-    private void mockBucketNodeHandler() throws Exception{
+    private void mockBucketNodeHandler() throws Exception {
         when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class)))
                 .thenReturn(entryNode);
         whenNew(BucketNodeHandler.class)
@@ -160,7 +150,7 @@ public class JCRHttpCacheStoreMocks
 
     }
 
-    private void mockBucketNodeFactory() throws Exception{
+    private void mockBucketNodeFactory() throws Exception {
         when(factory.getBucketNode()).thenReturn(bucketNode);
         whenNew(BucketNodeFactory.class)
                 .withParameterTypes(Session.class, String.class, CacheKey.class, Integer.class)
@@ -168,7 +158,7 @@ public class JCRHttpCacheStoreMocks
                 .thenReturn(factory);
     }
 
-    private void generateCacheContent(){
+    private void generateCacheContent() {
         when(cacheContent.getCharEncoding()).thenReturn(arguments.cacheContentCharEncoding);
         when(cacheContent.getContentType()).thenReturn(arguments.cacheContentType);
         when(cacheContent.getInputDataStream()).thenReturn(arguments.contents);
@@ -177,24 +167,12 @@ public class JCRHttpCacheStoreMocks
         when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
     }
 
+    private JCRHttpCacheStoreImpl mockRepository() throws Exception {
+        when(resourceResolver.isLive()).thenAnswer((InvocationOnMock invocationOnMock) -> resourceResolverOpen.get());
 
-    private JCRHttpCacheStoreImpl mockRepository() throws Exception
-    {
-        when(resourceResolver.isLive()).thenAnswer(new Answer<Boolean>()
-        {
-            @Override public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable
-            {
-                return resourceResolverOpen.get();
-            }
-        });
-
-        when(resourceResolver, "close").then(new Answer<Void>()
-        {
-            @Override public Void answer(InvocationOnMock invocationOnMock) throws Throwable
-            {
-                resourceResolverOpen.set(false);
-                return null;
-            }
+        when(resourceResolver, "close").then((InvocationOnMock invocationOnMock) -> {
+            resourceResolverOpen.set(false);
+            return null;
         });
 
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
@@ -209,38 +187,31 @@ public class JCRHttpCacheStoreMocks
         return store;
     }
 
-    public JCRHttpCacheStoreImpl getStore()
-    {
+    public JCRHttpCacheStoreImpl getStore() {
         return store;
     }
 
-    public Session getSession()
-    {
+    public Session getSession() {
         return session;
     }
 
-    public ResourceResolver getResourceResolver()
-    {
+    public ResourceResolver getResourceResolver() {
         return resourceResolver;
     }
 
-    public CacheKey getCacheKey()
-    {
+    public CacheKey getCacheKey() {
         return cacheKey;
     }
 
-    public CacheContent getCacheContent()
-    {
+    public CacheContent getCacheContent() {
         return cacheContent;
     }
 
-    public static Logger getLog()
-    {
+    public static Logger getLog() {
         return log;
     }
 
-    public EntryNodeWriter getEntryNodeWriter()
-    {
+    public EntryNodeWriter getEntryNodeWriter() {
         return entryNodeWriter;
     }
 }

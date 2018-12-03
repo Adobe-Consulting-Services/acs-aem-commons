@@ -38,6 +38,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ACE OSGi Config Format
@@ -83,7 +84,7 @@ public final class Ace {
         String[] segments = StringUtils.split(raw, PARAM_DELIMITER);
 
         for (String segment : segments) {
-            AbstractMap.SimpleEntry<String, String> entry = ParameterUtil.toSimpleEntry(segment, KEY_VALUE_SEPARATOR);
+            Map.Entry<String, String> entry = ParameterUtil.toMapEntry(segment, KEY_VALUE_SEPARATOR);
 
             if (entry == null) {
                 continue;

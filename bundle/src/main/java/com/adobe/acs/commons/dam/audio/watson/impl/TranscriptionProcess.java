@@ -19,6 +19,27 @@
  */
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.dam.audio.impl.AudioException;
 import com.adobe.acs.commons.dam.audio.impl.AudioHelper;
 import com.adobe.granite.workflow.WorkflowException;
@@ -31,30 +52,11 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
 import com.day.cq.dam.video.VideoProfile;
-import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.Map;
-
-@Component(metatype = true, label = "ACS AEM Commons - Watson Transcription Workflow Process",
-           description = "ACS AEM Commons - Watson Transcription Workflow Process")
-@Service(WorkflowExternalProcess.class)
-@Property(name = "process.name", value = "Generate Audio Transcript with IBM Watson", propertyPrivate = true)
+@Component(name = "ACS AEM Commons - Watson Transcription Workflow Process", service=WorkflowExternalProcess.class,properties= {
+                   "process.name=Generate Audio Transcript with IBM Watson"
+           },configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Designate(ocd=TranscriptionProcess.Config.class)
 public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelper.AudioProcessor<MetaDataMap, Serializable> {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionProcess.class);
@@ -64,18 +66,22 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
 
     @Reference
     private AudioHelper audioHelper;
-
+    
+    @ObjectClassDefinition(name="ACS AEM Commons - Watson Transcription Workflow Process")
+    public @interface Config {
+        @AttributeDefinition(name="Transocde Profile",
+                description="Profile name for audio transcoding. Must be a format acceptable to Watson",defaultValue=DEFAULT_PROFILE)
+        String profile() default DEFAULT_PROFILE;
+    }
+    
     private static final String DEFAULT_PROFILE = "flacmono";
 
-    @Property(label = "Trancode Profile", description = "Profile name for audio transcoding. Must be a format acceptable to Watson",
-              value = DEFAULT_PROFILE)
-    private static final String PROP_PROFILE = "profile";
 
     private String profileName;
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        this.profileName = PropertiesUtil.toString(config.get(PROP_PROFILE), DEFAULT_PROFILE);
+    protected void activate(Config conf) {
+        this.profileName = conf.profile();
     }
 
     @Override
@@ -126,7 +132,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 IOUtils.closeQuietly(stream);
                 try {
                     Files.delete(transcodedAudio.toPath());
-                } catch (Exception e) {
+                } catch (IOException e) {
                     log.error("Transcoded audio file @ " + transcodedAudio.getAbsolutePath() + " coud not be deleted", e);
                 }
             } catch (IOException e) {
@@ -160,7 +166,7 @@ public class TranscriptionProcess implements WorkflowExternalProcess, AudioHelpe
                 try {
                     asset.addRendition("transcription.txt", new ByteArrayInputStream(result.getContent().getBytes("UTF-8")), "text/plain");
                     log.info("Transcription for {} created.", asset.getPath());
-                } catch (Exception e) {
+                } catch (UnsupportedEncodingException e) {
                     log.error("Unable to save new rendition", e);
                 }
                 return true;

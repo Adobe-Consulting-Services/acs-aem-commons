@@ -46,7 +46,17 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <executions>
+                	<execution>
+	                	<id>generate-scr-metadata-for-unittests</id>
+	                	<goals>
+	                		<goal>manifest</goal>
+	                	</goals>
+	                	<phase>process-classes</phase>
+                	</execution>
+                </executions>
                 <configuration>
+                	<exportScr>true</exportScr>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
@@ -78,8 +88,18 @@
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
+                        <_dsannotations>*</_dsannotations>
+                        <_metatypeannotations>*</_metatypeannotations>
+                        <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
+                <dependencies>
+                    <dependency>
+			            <groupId>org.apache.felix</groupId>
+			            <artifactId>org.apache.felix.scr.bnd</artifactId>
+			            <version>1.9.0</version>
+			        </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -124,6 +144,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
         </plugins>
@@ -149,6 +170,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>biz.aQute</groupId>
@@ -427,6 +449,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.sling-mock.junit4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.sling-mock</artifactId>
         </dependency>
         <dependency>
@@ -450,7 +476,7 @@
         </dependency>
         <dependency>
             <groupId>io.wcm</groupId>
-            <artifactId>io.wcm.testing.aem-mock</artifactId>
+            <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -525,9 +551,22 @@
             <version>2.8.4</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.servlets.annotations</artifactId>
+			<version>1.0.0</version>
+			<scope>provided</scope>
+		</dependency>
 
 
         <!--  Build Dependencies -->        
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+            
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>
@@ -545,5 +584,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
     </dependencies>
 </project>

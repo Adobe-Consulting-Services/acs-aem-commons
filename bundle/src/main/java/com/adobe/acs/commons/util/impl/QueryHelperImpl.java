@@ -151,6 +151,7 @@ public class QueryHelperImpl implements QueryHelper {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
         final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
         return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
