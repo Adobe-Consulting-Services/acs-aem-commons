@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
 - #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
 - #1593 - Sftp Asset Injector throws URISyntaxException if item contains special characters
+- #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
