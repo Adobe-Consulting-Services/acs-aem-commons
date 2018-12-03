@@ -47,16 +47,16 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <executions>
-                	<execution>
-	                	<id>generate-scr-metadata-for-unittests</id>
-	                	<goals>
-	                		<goal>manifest</goal>
-	                	</goals>
-	                	<phase>process-classes</phase>
-                	</execution>
+                    <execution>
+                        <id>generate-scr-metadata-for-unittests</id>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
                 </executions>
                 <configuration>
-                	<exportScr>true</exportScr>
+                    <exportScr>true</exportScr>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
@@ -95,10 +95,10 @@
                 </configuration>
                 <dependencies>
                     <dependency>
-			            <groupId>org.apache.felix</groupId>
-			            <artifactId>org.apache.felix.scr.bnd</artifactId>
-			            <version>1.9.0</version>
-			        </dependency>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.apache.felix.scr.bnd</artifactId>
+                        <version>1.9.0</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <plugin>
@@ -146,6 +146,10 @@
                     <target>1.8</target>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -552,11 +556,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.servlets.annotations</artifactId>
-			<version>1.0.0</version>
-			<scope>provided</scope>
-		</dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.servlets.annotations</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 
 
         <!--  Build Dependencies -->        
