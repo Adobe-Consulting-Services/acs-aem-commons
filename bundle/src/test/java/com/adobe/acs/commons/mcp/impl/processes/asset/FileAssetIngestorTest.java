@@ -131,7 +131,7 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testCreateFoldersWithEmptyDirectory() throws Exception {
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         ingestor.createFolders(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -140,7 +140,7 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testCreateFolders() throws Exception {
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         addFile(tempDirectory, "image.png", "/img/test.png");
         File folder1 = mkdir(tempDirectory, "folder1");
         addFile(folder1, "image.png", "/img/test.png");
@@ -166,7 +166,7 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testImportAssetsWithEmptyDirectory() throws Exception {
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         ingestor.importAssets(actionManager);
 
         assertFalse(context.resourceResolver().hasChanges());
@@ -180,7 +180,7 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testImportAssetsWithDirectoryContainingJustFolders() throws Exception {
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         mkdir(tempDirectory, "folder1");
         mkdir(mkdir(tempDirectory, "folder2"), "folder3");
 
@@ -197,7 +197,7 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testImportAssets() throws Exception {
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
         final File folder1 = mkdir(tempDirectory, "folder1");
         final File folder1Image = addFile(folder1, "image.png", "/img/test.png");
@@ -224,7 +224,7 @@ public class FileAssetIngestorTest {
     @Test
     public void testImportAssetsToNewRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
 
         ingestor.importAssets(actionManager);
@@ -247,7 +247,7 @@ public class FileAssetIngestorTest {
     @Test
     public void testImportAssetsToExistingRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
-        ingestor.init();
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
         final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
 
