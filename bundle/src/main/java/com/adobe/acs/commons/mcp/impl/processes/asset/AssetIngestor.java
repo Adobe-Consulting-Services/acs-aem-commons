@@ -31,12 +31,14 @@ import com.adobe.acs.commons.mcp.model.FieldFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 import javax.jcr.Node;
@@ -59,11 +61,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
             "asset-ingest",
             "dam-administrators"
     };
+    public static final String PN_MIGRATED_FROM = "migratedFrom";
 
     protected final transient MimeTypeService mimetypeService;
 
     @SuppressWarnings("squid:S00115")
-    public static enum AssetAction {
+    public enum AssetAction {
         skip, version, replace
     }
 
@@ -96,7 +99,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @FormField(
             name = "Preserve Filename",
-            description = "If checked, file name is preserved as asset name.  If unchecked, asset name is converted to a JCR-friendly name.",
+            description = "If checked, file name is preserved as asset name.  If unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens",
             component = CheckboxComponent.class,
             options = "checked"
     )
@@ -173,7 +176,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
             = trackActivity(ALL_ASSETS, "Data imported", "Count of bytes imported", 0L);
 
     @SuppressWarnings("squid:S00115")
-    public static enum ReportColumns {
+    public enum ReportColumns {
         item, action, description, count, @FieldFormat(ValueFormat.storageSize) bytes
     }
 
@@ -256,7 +259,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     r.refresh();
                     //once version is committed we are safe to create, which only replaces the original version
                 }
-                assetManager.createAsset(assetPath, source.getStream(), type, false);
+                Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
+
+                if (asset != null) {
+                    saveMigrationInfo(source, asset);
+                }
+
                 r.commit();
                 r.refresh();
             }
@@ -269,6 +277,26 @@ public abstract class AssetIngestor extends ProcessDefinition {
             incrementCount(importedAssets, 1L);
         } finally {
             source.close();
+        }
+    }
+
+    void saveMigrationInfo(final Source source, final Asset asset) {
+        Resource assetResource = asset.adaptTo(Resource.class);
+
+        if (assetResource != null) {
+            assetResource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+        }
+
+        if (assetResource != null) {
+            ValueMap assetProperties = assetResource.adaptTo(ModifiableValueMap.class);
+
+            if (assetProperties != null) {
+                if (!StringUtils.equals(asset.getName(), source.getName())) {
+                    assetProperties.put(JcrConstants.JCR_TITLE, source.getName());
+                }
+
+                assetProperties.put(PN_MIGRATED_FROM, source.getElement().getItemName());
+            }
         }
     }
 
@@ -378,8 +406,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
                 String extension = StringUtils.substringAfterLast(el.getName(), ".");
                 path = (el.getParent() == null ? el.getJcrBasePath() : el.getParent().getNodePath()) + "/"
-                        + JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-")
-                        + "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
+                        + NameUtil.createValidDamName(baseName,NameUtil.CASE_SENSITIVE_HYPHEN_LABEL_CHAR_MAPPING,"-")
+                        + "." + NameUtil.createValidDamName(extension,NameUtil.CASE_SENSITIVE_HYPHEN_LABEL_CHAR_MAPPING,"-");
             }
             handleExistingAsset(source, path, r);
         };
