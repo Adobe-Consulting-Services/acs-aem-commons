@@ -48,7 +48,11 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import static com.adobe.acs.commons.mcp.impl.processes.cfi.ContentFragmentImport.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -63,6 +67,8 @@ public class ContentFragmentImportTest {
     ContentFragmentImport importer;
     ProcessInstanceImpl instance;
     MockContentFragment mockFragment;
+    String currentNodePath = "";
+    ArrayList<String> createdNodePaths = new ArrayList<>();
 
     @Before
     public void setUp() throws RepositoryException, LoginException, PersistenceException, IllegalAccessException, ContentFragmentException {
@@ -71,6 +77,8 @@ public class ContentFragmentImportTest {
         importer = prepareProcessDefinition(new ContentFragmentImport());
         importer.spreadsheet = new Spreadsheet(false, PATH, FOLDER_TITLE, NAME, TITLE, TEMPLATE);
         instance = prepareProcessInstance(new ProcessInstanceImpl(getControlledProcessManager(), importer, "Test content fragment import"));
+        currentNodePath = "";
+        createdNodePaths.clear();
     }
 
     @Test
@@ -90,6 +98,18 @@ public class ContentFragmentImportTest {
         assertEquals("Should set fragment element", "element1value", mockFragment.elements.get("element1"));
     }
 
+    @Test
+    public void assertFolderCreation() {
+        importer.dryRunMode = false;
+        addImportRow("/test/path/fragment1", "Fragment 1", "element1", "element1value");
+        mockFragment.elements.put("element1", null);
+        instance.run(rr);
+        assertTrue("Should have created test folder", createdNodePaths.contains("/test/path"));
+        assertTrue("Should have created test metadata", createdNodePaths.contains("/test/path/jcr:content"));
+        assertTrue("Should have created fragment1 folder", createdNodePaths.contains("/test/path/fragment1"));
+        assertTrue("Should have created fragment1 metadata", createdNodePaths.contains("/test/path/fragment1/jcr:content"));
+    }
+    
     //------------------------------------------------------------------------------------------------------------------
     private void addImportRow(String path, String title, String... values) {
         Map<String, CompositeVariant> row = new HashMap<>();
@@ -108,9 +128,18 @@ public class ContentFragmentImportTest {
         rr = getFreshMockResolver();
         Session ses = mock(Session.class);
         Node node = mock(Node.class);
-        when(ses.nodeExists(any())).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
-        when(ses.getNode(any())).thenReturn(node);
-        when(node.addNode(any(), any())).thenReturn(node);
+        when(ses.nodeExists("/test")).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
+        when(ses.getNode(any())).then(invocation -> {
+            currentNodePath = invocation.getArgumentAt(0, String.class);
+            return node;
+        });
+        when(node.addNode(any(), any())).then(invocation -> {
+            String nodeName = invocation.getArgumentAt(0, String.class);
+            String nodePath = currentNodePath + "/" + nodeName;
+            createdNodePaths.add(nodePath);
+            currentNodePath = nodePath;
+            return node;
+        });
         when(rr.adaptTo(Session.class)).thenReturn(ses);
 
         Workspace wk = mock(Workspace.class);
