@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
+- #1600 - Extended the httpcache - config now supports explicitly using the printwriter instead of outputstream when writing the cache
 
 ## [3.19.0] - 2018-11-03
 
