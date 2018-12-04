@@ -157,7 +157,7 @@ public class FileOrRendition implements HierarchicalElement {
         throw new UnsupportedOperationException("FileOrRendition doesn't support child navigation");
     }
 
-    private class UrlConnectionSource implements Source {
+    public class UrlConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private Long size = null;
@@ -217,7 +217,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    private class HttpConnectionSource implements Source {
+    public class HttpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private HttpGet lastRequest;
@@ -280,7 +280,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    class SftpConnectionSource implements Source {
+    public class SftpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private final JSch jsch = new JSch();
