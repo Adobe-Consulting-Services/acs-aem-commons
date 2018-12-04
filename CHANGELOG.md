@@ -6,14 +6,31 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
-- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+
+### Added
+- Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
+- #1564 - Added SFTP support for asset ingest utilities
 
 ### Fixed
+- #1590 - Multifield component doesn't render non-composite at all (NPE error)
+- #1588 - Updated error handler JSP to use ModeUtils
+- #1583 - Asset Ingestor may try to create asset folders when they already exist
+- #1578 - Added user/password handling as well as timeout specification in SFTP import
+- #1576 - SFTP import folder handling bugs
+- #1572 - Update JSCH version used for SFTP support
+- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
+- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
 - #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
+- #1563 - Limiting the parsys does not work when pasting multiple paragraphs
+- #1593 - Sftp Asset Injector throws URISyntaxException if item contains special characters
+- #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
+- #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1600 - Extended the httpcache - config now supports explicitly using the printwriter instead of outputstream when writing the cache
+- #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
+- #1578 - Asset import needs additional configuration inputs
 
 ## [3.19.0] - 2018-11-03
 

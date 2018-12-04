@@ -24,12 +24,11 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.html.HtmlParser;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -52,7 +51,6 @@ import java.util.List;
  * Provides support for the ACS AEM Commons Long-form Text Component.
  */
 @Component
-@Service
 public class LongFormTextComponentImpl implements LongFormTextComponent {
     private static final Logger log = LoggerFactory.getLogger(LongFormTextComponentImpl.class);
 

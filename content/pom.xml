@@ -32,6 +32,14 @@
                 <targetPath>../vault-work/META-INF/vault/definition</targetPath>
             </resource>
             <resource>
+                <directory>src/main/content/META-INF/vault</directory>
+                <includes>
+                    <include>nodetypes.cnd</include>
+                    <include>privileges.xml</include>
+                </includes>
+                <targetPath>../vault-work/META-INF/vault</targetPath>
+            </resource>
+            <resource>
                 <directory>src/main/resources/META-INF</directory>
                 <targetPath>../vault-work/META-INF</targetPath>
             </resource>
@@ -72,6 +80,54 @@
                     </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-maven-plugin</artifactId>
+                <configuration>
+                    <deferBuildFailure>true</deferBuildFailure>
+                    <checklists>
+                        <checklist>acs-internal</checklist>
+                    </checklists>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>oakpal-scan</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-min</id>
+                        <goals>
+                            <goal>scan-many</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <scanArtifacts>
+                                <artifact>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>min</classifier>
+                                    <type>zip</type>
+                                </artifact>
+                            </scanArtifacts>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFiles>
+                                <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            </summaryFiles>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             
             <plugin>
@@ -161,6 +217,12 @@
             <artifactId>acs-aem-commons-bundle</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>

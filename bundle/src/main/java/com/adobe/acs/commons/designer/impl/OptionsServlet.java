@@ -26,11 +26,12 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletPaths;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
@@ -42,8 +43,8 @@ import com.google.gson.stream.JsonWriter;
  *
  */
 @SuppressWarnings("serial")
-@SlingServlet(paths = "/apps/acs-commons/components/utilities/designer/clientlibsmanager/options",
-extensions = "json")
+@Component()
+@SlingServletPaths("/apps/acs-commons/components/utilities/designer/clientlibsmanager/options.json")
 public class OptionsServlet extends SlingSafeMethodsServlet {
 
     @Reference
