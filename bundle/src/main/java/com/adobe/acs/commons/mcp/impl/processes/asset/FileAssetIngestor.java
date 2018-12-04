@@ -253,7 +253,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
         @Override
         public String getItemName() {
-            return file.getName();
+            return file.getPath();
         }
 
         @Override
