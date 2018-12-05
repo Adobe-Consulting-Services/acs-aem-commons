@@ -47,6 +47,8 @@ public class CacheContent {
     /** Temp sink attached to this cache content */
     private TempSink tempSink;
 
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
+
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.
@@ -57,9 +59,9 @@ public class CacheContent {
      * @param dataInputStream
      */
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
-            dataInputStream) {
+            dataInputStream,HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {
 
-        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream);
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, writeMethod);
     }
 
     /**
@@ -73,8 +75,9 @@ public class CacheContent {
      * @param dataInputStream
      */
     public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
-            dataInputStream) {
+            dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {
 
+        this.writeMethod = writeMethod;
         this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
@@ -116,6 +119,7 @@ public class CacheContent {
 
         // Get hold of the response content available in sink.
         this.dataInputStream = responseWrapper.getTempSink().createInputStream();
+        this.writeMethod = responseWrapper.getWriteMethod();
 
         return this;
     }
@@ -171,4 +175,7 @@ public class CacheContent {
         return this.tempSink;
     }
 
+    public HttpCacheServletResponseWrapper.ResponseWriteMethod getWriteMethod() {
+        return writeMethod;
+    }
 }
