@@ -19,10 +19,6 @@
     <name>ACS AEM Commons Bundle</name>
     <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
-    <properties>
-        <scr.fail.on.error>true</scr.fail.on.error>
-    </properties>
-
     <!-- ====================================================================== -->
     <!-- B U I L D D E F I N I T I O N -->
     <!-- ====================================================================== -->
@@ -151,10 +147,6 @@
                     <target>1.8</target>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -530,6 +522,19 @@
             <artifactId>handlebars</artifactId>
             <version>4.0.6</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <version>0.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.report</artifactId>
+            <version>0.8.2</version>
+            <scope>test</scope>
         </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
