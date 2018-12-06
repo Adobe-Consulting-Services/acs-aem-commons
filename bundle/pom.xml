@@ -57,7 +57,6 @@
                 </executions>
                 <configuration>
                     <exportScr>true</exportScr>
-                    <failOnError>${scr.fail.on.error}</failOnError>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
