@@ -116,7 +116,7 @@ public class FileOrRendition implements HierarchicalElement {
 
     @Override
     public String getItemName() {
-        return getName();
+        return folder.getSourcePath();
     }
 
     @Override

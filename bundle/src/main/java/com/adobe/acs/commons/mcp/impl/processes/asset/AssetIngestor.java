@@ -308,7 +308,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     createAsset(source, assetPath, r, false);
                 } else {
                     incrementCount(skippedFiles, 1L);
-                    trackDetailedActivity(assetPath, "Skip", "Skipped existing asset", 0L);
+
+                    trackDetailedActivity(source.getElement().getSourcePath() + " -> " + assetPath,
+                                          "Skip", "Skipped existing asset", 0L);
                 }
                 break;
             case replace:
