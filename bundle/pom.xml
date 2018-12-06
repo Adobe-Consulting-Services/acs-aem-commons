@@ -523,19 +523,6 @@
             <version>4.0.6</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <classifier>runtime</classifier>
-            <version>0.8.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.report</artifactId>
-            <version>0.8.2</version>
-            <scope>test</scope>
-        </dependency>
         <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
