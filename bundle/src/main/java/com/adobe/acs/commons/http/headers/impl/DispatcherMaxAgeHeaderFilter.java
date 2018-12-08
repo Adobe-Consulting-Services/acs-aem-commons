@@ -66,9 +66,11 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
         return HEADER_PREFIX + maxage;
     }
     
-    @Override
+
+   @Override
    protected void doActivate(ComponentContext context) throws Exception {
    }
+
 
    @Activate
     protected void activate(DispatcherMaxAgeHeaderFilter.Config config) throws Exception {

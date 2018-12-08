@@ -119,7 +119,7 @@ public class AbstractExpiresHeaderFilterTest {
         expected.set(Calendar.SECOND, 0);
         expected.set(Calendar.MILLISECOND, 0);
 
-        filter.doActivate(componentContext);
+        //filter.doActivate(componentContext);
         String header = filter.getHeaderValue();
         Date date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z").parse(header);
         Calendar actual = Calendar.getInstance();
@@ -187,7 +187,7 @@ public class AbstractExpiresHeaderFilterTest {
 
         when(componentContext.getProperties()).thenReturn(properties);
 
-        filter.doActivate(componentContext);
+        //filter.doActivate(componentContext);
         assertNotNull(filter.getHeaderValue());
         verify(componentContext).getProperties();
         verifyNoMoreInteractions(componentContext);

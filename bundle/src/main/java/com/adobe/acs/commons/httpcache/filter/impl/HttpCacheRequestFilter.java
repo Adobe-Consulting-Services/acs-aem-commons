@@ -21,10 +21,11 @@ package com.adobe.acs.commons.httpcache.filter.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,20 +42,18 @@ import java.io.IOException;
  * to introduce caching layer. Works with {@link com.adobe.acs.commons.httpcache .engine.HttpCacheEngine} to deal with
  * caching aspects.
  */
-@SlingFilter(
-        generateComponent = true,
-        generateService = true,
-        order = 4999, // Magic number places it immediately after the Granite inner cache
-        scope = { SlingFilterScope.REQUEST })
+@Component(service=Filter.class,
+property= {"sling.filter.scope=REQUEST",
+		Constants.SERVICE_RANKING +":Integer=4999"})
 public class HttpCacheRequestFilter extends AbstractHttpCacheFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheRequestFilter.class);
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private HttpCacheEngine cacheEngine;
 
     // Only instantiate this Filter if there is at least 1 REQUEST-based cache config
     @Reference(
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            cardinality = ReferenceCardinality.MANDATORY,
             target = "(httpcache.config.filter-scope=REQUEST)"
     )
     private HttpCacheConfig requestScopeCacheConfigs;
