@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,9 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HealthCheckStatusEmailerTest {
+   
+   @Mock
+   HealthCheckStatusEmailer.Config config;
 
     @Mock
     HealthCheckExecutor healthCheckExecutor;
@@ -77,14 +79,11 @@ public class HealthCheckStatusEmailerTest {
     @InjectMocks
     HealthCheckStatusEmailer healthCheckStatusEmailer = new HealthCheckStatusEmailer();
 
-
-    Map<String, Object> config;
     List<HealthCheckExecutionResult> results;
 
     @Before
     public void setUp() throws Exception {
-        config = new HashMap<String, Object>();
-        config.put(HealthCheckStatusEmailer.PROP_RECIPIENTS_EMAIL_ADDRESSES, "test@example.com");
+        when(config.recipients_emailaddresses()).thenReturn(new String[] {"test@example.com"});
 
         // Success
         HealthCheckMetadata successMetadata = mock(HealthCheckMetadata.class);
@@ -116,8 +115,9 @@ public class HealthCheckStatusEmailerTest {
     @Test
     public void run_WithoutFailuresDontSendEmail() throws Exception {
         results.add(successExecutionResult);
+        
+        when(config.email_sendonlyonfailure()).thenReturn(true);
 
-        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
@@ -128,7 +128,7 @@ public class HealthCheckStatusEmailerTest {
     public void run_WithoutFailuresSendEmail() throws Exception {
         results.add(successExecutionResult);
 
-        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, false);
+        when(config.email_sendonlyonfailure()).thenReturn(false);
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
@@ -140,7 +140,7 @@ public class HealthCheckStatusEmailerTest {
     public void run_WithFailuresSendEmail() throws Exception {
         results.add(failureExecutionResult);
 
-        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
+        when(config.email_sendonlyonfailure()).thenReturn(true);
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
@@ -152,7 +152,7 @@ public class HealthCheckStatusEmailerTest {
     public void run_WithFailuresSendEmail_2() throws Exception {
         results.add(failureExecutionResult);
 
-        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, false);
+        when(config.email_sendonlyonfailure()).thenReturn(false);
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
@@ -179,9 +179,10 @@ public class HealthCheckStatusEmailerTest {
     public void throttledExecution() {
         results.add(failureExecutionResult);
 
-        config.put(HealthCheckStatusEmailer.PROP_SEND_EMAIL_ONLY_ON_FAILURE, true);
+        when(config.email_sendonlyonfailure()).thenReturn(true);
+
         // Set a long delay to ensure we hit it on the 2nd .run() call..
-        config.put(HealthCheckStatusEmailer.PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE, 100000);
+        when(config.hc_timeout_override()).thenReturn(100000);
         healthCheckStatusEmailer.activate(config);
 
         // Send the first time

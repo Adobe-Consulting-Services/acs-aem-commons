@@ -32,17 +32,15 @@ import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Various deferred actions to be used with the ActionManager
  * @deprecated Use the Checked function definitions and the fam.actions classes now.  This class is only provided for compatibility.
  */
-@Component
-@Service(DeferredActions.class)
+@Component(service=DeferredActions.class)
 @ProviderType
 @Deprecated
 public final class DeferredActions {
