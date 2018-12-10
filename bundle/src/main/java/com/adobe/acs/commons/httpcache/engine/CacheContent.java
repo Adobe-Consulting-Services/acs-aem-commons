@@ -49,10 +49,6 @@ public class CacheContent {
 
     private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
 
-    public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
-            dataInputStream){
-        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
-    }
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.
@@ -61,6 +57,21 @@ public class CacheContent {
      * @param contentType
      * @param headers
      * @param dataInputStream
+     */
+    public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream){
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
+    }
+
+    /**
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     * @param writeMethod
      */
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream,HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {
@@ -88,6 +99,7 @@ public class CacheContent {
         this.headers = headers;
         this.dataInputStream = dataInputStream;
     }
+
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.
@@ -97,6 +109,7 @@ public class CacheContent {
      * @param contentType
      * @param headers
      * @param dataInputStream
+     * @param writeMethod
      */
     public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {

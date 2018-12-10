@@ -41,16 +41,18 @@ import java.util.Collections;
  * Wrapper for <code>SlingHttpServletResponse</code>. Wrapped to get hold of the copy of servlet response stream.
  */
 public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWrapper {
+
+    public enum ResponseWriteMethod {
+        OUTPUTSTREAM,
+        PRINTWRITER
+    }
+
     private static final Logger log = LoggerFactory.getLogger(HttpServletResponseWrapper.class);
 
     private PrintWriter printWriter;
     private ServletOutputStream servletOutputStream;
     private final TempSink tempSink;
 
-    public enum ResponseWriteMethod {
-        OUTPUTSTREAM,
-        PRINTWRITER
-    }
     private ResponseWriteMethod writeMethod;
 
     public HttpCacheServletResponseWrapper(SlingHttpServletResponse wrappedResponse, TempSink tempSink) throws
