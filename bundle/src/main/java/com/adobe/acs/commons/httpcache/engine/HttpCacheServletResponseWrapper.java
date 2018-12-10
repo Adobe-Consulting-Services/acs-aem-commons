@@ -59,9 +59,10 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
         this.tempSink = tempSink;
     }
 
+
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        if (this.writeMethod.equals(ResponseWriteMethod.PRINTWRITER)) {
+        if (ResponseWriteMethod.PRINTWRITER.equals(this.writeMethod)) {
             throw new IllegalStateException("Cannot invoke getOutputStream() once getWriter() has been called.");
         } else if (this.servletOutputStream == null) {
             try {
@@ -80,7 +81,7 @@ public class HttpCacheServletResponseWrapper extends SlingHttpServletResponseWra
     @Override
     @SuppressWarnings("squid:S2095")
     public PrintWriter getWriter() throws IOException {
-        if (this.writeMethod.equals(ResponseWriteMethod.OUTPUTSTREAM)) {
+        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
             throw new IllegalStateException("Cannot invoke getWriter() once getOutputStream() has been called.");
         } else if (this.printWriter == null) {
             try {

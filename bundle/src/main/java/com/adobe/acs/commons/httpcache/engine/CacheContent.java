@@ -49,6 +49,10 @@ public class CacheContent {
 
     private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
 
+    public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream){
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
+    }
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.
@@ -64,6 +68,26 @@ public class CacheContent {
         this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, writeMethod);
     }
 
+
+    /**
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param status
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     */
+    public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream) {
+        this.writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER;
+        this.status = status;
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.dataInputStream = dataInputStream;
+    }
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.

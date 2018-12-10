@@ -632,7 +632,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     private void serveCacheContentIntoResponse(SlingHttpServletResponse response, CacheContent cacheContent)
             throws IOException {
-        if(cacheContent.getWriteMethod().equals(HttpCacheServletResponseWrapper.ResponseWriteMethod.OUTPUTSTREAM)){
+        if(HttpCacheServletResponseWrapper.ResponseWriteMethod.OUTPUTSTREAM.equals(cacheContent.getWriteMethod())){
             try {
                 IOUtils.copy(cacheContent.getInputDataStream(), response.getOutputStream());
             } catch(IllegalStateException ex) {
