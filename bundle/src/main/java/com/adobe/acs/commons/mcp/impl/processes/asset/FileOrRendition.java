@@ -29,6 +29,7 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -116,7 +117,14 @@ public class FileOrRendition implements HierarchicalElement {
 
     @Override
     public String getItemName() {
-        return folder.getSourcePath();
+        try {
+            URI uri = new URI(encodeUriParts(url));
+            String filePath = decodeUriParts(uri.getRawPath());
+            return decodeUriParts(filePath);
+        } catch (URISyntaxException | UnsupportedEncodingException ex) {
+            Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return url;
     }
 
     @Override

@@ -368,7 +368,12 @@ public class UrlAssetImport extends AssetIngestor {
         if (source.startsWith("/")) {
             source = defaultPrefix + source;
         }
+
         String name = source.substring(source.lastIndexOf('/') + 1);
+        if (!preserveFileName) {
+            name = NameUtil.createValidDamName(name);
+        }
+
         Folder folder = extractFolder(assetData);
         FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
 
