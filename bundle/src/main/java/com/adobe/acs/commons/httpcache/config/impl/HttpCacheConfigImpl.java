@@ -237,7 +237,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         order = PropertiesUtil.toInteger(configs.get(PROP_ORDER), DEFAULT_ORDER);
 
         filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(PROP_FILTER_SCOPE), DEFAULT_FILTER_SCOPE).toUpperCase());
-
         // PIDs of cache handling rules.
         cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
                 .get(PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
