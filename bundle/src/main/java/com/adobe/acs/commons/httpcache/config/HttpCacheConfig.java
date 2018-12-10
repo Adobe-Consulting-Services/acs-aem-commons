@@ -143,4 +143,5 @@ public interface HttpCacheConfig {
      * @return the filter scope this HttpCacheConfig should involve itself in.
      */
     FilterScope getFilterScope();
+
 }
