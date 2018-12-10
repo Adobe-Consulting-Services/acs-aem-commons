@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
 - #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 - #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content node. If asset is skipped the message in the format "source -> destination" is written into report
+- #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.

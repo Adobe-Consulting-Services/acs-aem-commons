@@ -40,4 +40,8 @@ final class NameUtil {
 
         return name.toString();
     }
+
+    static String createValidDamName(String title) {
+        return createValidDamName(title, CASE_SENSITIVE_HYPHEN_LABEL_CHAR_MAPPING, "-");
+    }
 }
