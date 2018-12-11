@@ -160,7 +160,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     private String              cacheRootPath;
     private int                 bucketTreeDepth;
     private int                 deltaSaveThreshold;
-    private long                 defaultExpireTimeInMS;
+    private long                defaultExpireTimeInMs;
 
     @Reference private ResourceResolverFactory   resourceResolverFactory;
     @Reference private DynamicClassLoaderManager dclm;
@@ -178,7 +178,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
         bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
         deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
-        defaultExpireTimeInMS = PropertiesUtil.toLong(properties.get(PN_TTL), DEFAULT_EXPIRE_TIME_IN_MS);
+        defaultExpireTimeInMs = PropertiesUtil.toLong(properties.get(PN_TTL), DEFAULT_EXPIRE_TIME_IN_MS);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                     final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
                     final Node bucketNode = factory.getBucketNode();
 
-                    final long expireTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : defaultExpireTimeInMS;
+                    final long expireTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : defaultExpireTimeInMs;
                     final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key,expireTime);
 
                     new EntryNodeWriter(session, entryNode, key, content).write();
@@ -342,7 +342,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override public long getTtl()
     {
-        return defaultExpireTimeInMS;
+        return defaultExpireTimeInMs;
     }
 
     @Override public void clearCache()

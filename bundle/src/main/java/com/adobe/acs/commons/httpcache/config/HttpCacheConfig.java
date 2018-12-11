@@ -153,7 +153,7 @@ public interface HttpCacheConfig {
      * @return
      */
     default long getExpiryOnCreate() {
-        return -1l;
+        return -1L;
     }
 
     /**
@@ -164,7 +164,7 @@ public interface HttpCacheConfig {
      * @return the expiry time
      */
     default long getExpiryForAccess() {
-        return -1l;
+        return -1lL;
     }
 
     /**
@@ -175,6 +175,6 @@ public interface HttpCacheConfig {
      * @return the expiry time
      */
     default long getExpiryForUpdate() {
-        return -1l;
+        return -1L;
     }
 }

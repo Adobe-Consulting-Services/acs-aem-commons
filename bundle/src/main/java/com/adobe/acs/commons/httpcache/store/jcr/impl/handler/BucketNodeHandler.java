@@ -44,7 +44,7 @@ public class BucketNodeHandler
         this.dynamicClassLoaderManager = dynamicClassLoaderManager;
     }
 
-    public Node createOrRetrieveEntryNode(CacheKey key, long engineDefaultExpiryInMS)
+    public Node createOrRetrieveEntryNode(CacheKey key, long engineDefaultExpiryInMs)
             throws RepositoryException, IOException, ClassNotFoundException
     {
         final Node existingEntryNode = getEntryIfExists(key);
@@ -57,7 +57,7 @@ public class BucketNodeHandler
             return existingEntryNode;
         }else {
             Node created =  getOrCreateUniqueByPath(bucketNode, JCRHttpCacheStoreConstants.PATH_ENTRY, JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED);
-            created.setProperty(PN_EXPIRES_ON, System.currentTimeMillis() + engineDefaultExpiryInMS);
+            created.setProperty(PN_EXPIRES_ON, System.currentTimeMillis() + engineDefaultExpiryInMs);
             return created;
         }
     }

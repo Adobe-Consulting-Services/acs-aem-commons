@@ -178,21 +178,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String PROP_FILTER_SCOPE = "httpcache.config.filter-scope";
     private FilterScope filterScope;
 
-    private static final long DEFAULT_EXPIRY_ON_CREATE = 0l;
+    private static final long DEFAULT_EXPIRY_ON_CREATE = 0L;
     @Property(label = "Expiry on create",
             description = "If specified higher then 0, it will overrule the default expiry time with config specific value. Not supported for MEM cache, but supported for all others.",
             longValue = DEFAULT_EXPIRY_ON_CREATE)
     private static final String PROP_EXPIRY_ON_CREATE = "httpcache.config.expiry-on-create";
     private long expiryOnCreate;
 
-    private static final long DEFAULT_EXPIRY_ON_ACCESS = 0l;
+    private static final long DEFAULT_EXPIRY_ON_ACCESS = 0L;
     @Property(label = "Expiry on access",
             description = "If specified higher then 0, will refresh the expiry time with given value if accessed. Not supported for MEM cache, but supported for all others.",
             longValue = DEFAULT_EXPIRY_ON_ACCESS)
     private static final String PROP_EXPIRY_ON_ACCESS = "httpcache.config.expiry-on-access";
     private long expiryOnAccess;
 
-    private static final long DEFAULT_EXPIRY_ON_UPDATE = 0l;
+    private static final long DEFAULT_EXPIRY_ON_UPDATE = 0L;
     @Property(label = "Expiry on update",
             description = "If specified higher then 0, will refresh the expiry time when the entry is updated. Not supported for MEM cache, but supported for all others.",
             longValue = DEFAULT_EXPIRY_ON_UPDATE)
