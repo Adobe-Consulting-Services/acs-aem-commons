@@ -29,7 +29,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
  * Multiple implementation of this cache store can be present at any time and they can work in conjunction.
  */
 @SuppressWarnings("squid:S1214")
-public interface HttpCacheStore extends AutoCloseable {
+public interface HttpCacheStore {
     /** Represents the key to find out the type of cache data store. Type could be MEM, DISK, JCR, etc. */
     String KEY_CACHE_STORE_TYPE = "httpcache.cachestore.type";
     /** Value representing in-memory type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
@@ -107,7 +107,9 @@ public interface HttpCacheStore extends AutoCloseable {
      */
     String getStoreType();
 
-    @Override
+    /**
+     * Close the store and free up resources.
+     */
     default void close() {
         //not implemented  by default.
     }
