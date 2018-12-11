@@ -9,5 +9,6 @@ public interface SupplierWithException<T> {
      *
      * @return a result
      */
+    @SuppressWarnings("squid:S00112")
     T get() throws Exception;
 }

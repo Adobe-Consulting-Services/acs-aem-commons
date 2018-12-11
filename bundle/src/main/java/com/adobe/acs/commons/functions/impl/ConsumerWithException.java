@@ -11,6 +11,7 @@ public interface ConsumerWithException<T> {
      *
      * @param t the input argument
      */
+    @SuppressWarnings("squid:S00112")
     void accept(T t) throws Exception;
 
     /**

@@ -21,6 +21,7 @@ public interface FunctionWithException<T, R> {
      * @param t the function argument
      * @return the function result
      */
+    @SuppressWarnings("squid:S00112")
     R apply(T t) throws Exception;
 
     /**
