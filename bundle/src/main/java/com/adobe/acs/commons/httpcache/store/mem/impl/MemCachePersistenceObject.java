@@ -58,6 +58,7 @@ public class MemCachePersistenceObject implements Serializable {
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
      */
     public MemCachePersistenceObject() {
+        //empty constructor
     }
 
     /**
