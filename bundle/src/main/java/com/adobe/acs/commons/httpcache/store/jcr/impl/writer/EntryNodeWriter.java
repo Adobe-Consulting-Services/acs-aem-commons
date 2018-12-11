@@ -79,6 +79,7 @@ public class EntryNodeWriter
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_STATUS, cacheContent.getStatus());
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CHAR_ENCODING, cacheContent.getCharEncoding());
         entryNode.setProperty(JCRHttpCacheStoreConstants.PN_CONTENT_TYPE, cacheContent.getContentType());
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_WRITEMETHOD, cacheContent.getWriteMethod().name());
     }
 
     /**

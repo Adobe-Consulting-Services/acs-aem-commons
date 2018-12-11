@@ -37,6 +37,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.testing.jcr.RepositoryProvider;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +66,8 @@ public class FileImporterTest {
     public void setup() throws Exception {
         provider = RepositoryProvider.instance();
         importer.activate(Collections.<String, Object> emptyMap());
-        testFile = new File("src/test/resources/emailTemplate.txt");
+        testFile = new File(getClass().getResource("emailTemplate.txt").getFile());
+        Assert.assertTrue(testFile.exists());
         when(mimeTypeService.getMimeType("emailTemplate.txt")).thenReturn("text/plain");
 
         session = provider.getRepository().loginAdministrative(null);

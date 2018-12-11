@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.email.impl;
 
+import com.adobe.acs.commons.email.EmailService;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
@@ -27,6 +28,8 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,51 +69,38 @@ public class EmailServiceImplTest {
     private MessageGatewayService messageGatewayService;
 
     @Mock
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Mock
-    private ResourceResolver resourceResolver;
-
-    @Mock
     private MessageGateway<SimpleEmail> messageGatewaySimpleEmail;
 
     @Mock
     private MessageGateway<HtmlEmail> messageGatewayHtmlEmail;
 
-    @Mock
-    private Session session;
-
-    @InjectMocks
-    private EmailServiceImpl emailService = new EmailServiceImpl();
+    private EmailService emailService = new EmailServiceImpl();
 
     @Rule
     private ExpectedException thrown = ExpectedException.none();
+    
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
-    private String emailTemplatePath;
+    private static final String emailTemplatePath = "/emailTemplate.txt";
+    private static final String EMAIL_TEMPLATE = "emailTemplate.txt";
 
-    private String emailTemplateAttachmentPath;
+    private static final String emailTemplateAttachmentPath = "/emailTemplateAttachment.html";
+    private static final String EMAIL_TEMPLATE_ATTACHMENT = "emailTemplateAttachment.html";
 
     @Before
     public final void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
 
+        context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE),emailTemplatePath);
+        context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE_ATTACHMENT), emailTemplateAttachmentPath);
+
         when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGatewaySimpleEmail);
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
-        when(resourceResolverFactory.getServiceResourceResolver(Matchers.anyMap())).thenReturn(resourceResolver);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-
-        emailTemplatePath = new File(this.getClass().getResource("/emailTemplate.txt").toURI()).getPath();
-
-        emailTemplateAttachmentPath = new File(this.getClass().getResource("/emailTemplateAttachment.html").toURI()).getPath();
-
-        // Mock the Mail Template
-        PowerMockito.mockStatic(MailTemplate.class);
-        when(MailTemplate.create(emailTemplatePath, session)).thenReturn(
-            new MailTemplate(new FileInputStream(emailTemplatePath), "UTF-8"));
-
-        when(MailTemplate.create(emailTemplateAttachmentPath, session)).thenReturn(
-                new MailTemplate(new FileInputStream(emailTemplateAttachmentPath), "UTF-8"));
+        
+        context.registerService(MessageGatewayService.class, messageGatewayService);
+        context.registerInjectActivateService(emailService);
 
     }
 
@@ -235,13 +225,11 @@ public class EmailServiceImplTest {
         emailService.sendEmail(templatePath, params, recipients);
     }
 
-    @Test
+    @Test(expected=IllegalArgumentException.class)
     public final void testBlankTemplatePath() throws Exception {
         final String templatePath = null;
         final Map<String, String> params = new HashMap<String, String>();
         final String recipient =  "upasanac@acs.com";
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Mail template path [ null ] could not resolve to a valid template");
 
         emailService.sendEmail(templatePath, params, recipient);
      }
@@ -259,7 +247,8 @@ public class EmailServiceImplTest {
 
     @Test
     public void testDefaultTimeouts() {
-        emailService.activate(Collections.emptyMap());
+        //emailService.activate(Collections.emptyMap());
+        context.registerInjectActivateService(emailService,Collections.emptyMap());
         SimpleEmail email = sendTestEmail();
         assertEquals(30000, email.getSocketConnectionTimeout());
         assertEquals(30000, email.getSocketTimeout());
@@ -270,7 +259,8 @@ public class EmailServiceImplTest {
         Map<String, Object> params = new HashMap<>();
         params.put("so.timeout", 100);
         params.put("conn.timeout", 500);
-        emailService.activate(params);
+        //emailService.activate(params);
+        context.registerInjectActivateService(emailService, params);
         SimpleEmail email = sendTestEmail();
         assertEquals(500, email.getSocketConnectionTimeout());
         assertEquals(100, email.getSocketTimeout());

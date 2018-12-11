@@ -21,6 +21,7 @@
 %><%@page session="false"
         import="org.apache.sling.api.SlingHttpServletResponse,
                 com.adobe.acs.commons.wcm.ComponentHelper,
+                com.adobe.acs.commons.util.ModeUtil,
                 com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService"%><%
 
     final ErrorPageHandlerService errorPageHandlerService = sling.getService(ErrorPageHandlerService.class);
@@ -30,9 +31,9 @@
         final int status = errorPageHandlerService.getStatusCode(slingRequest);
 
         if (status >= SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
-                !componentHelper.isDisabledMode(slingRequest)) {
+                !ModeUtil.isDisabled(slingRequest)) {
             // If error is some sort of internal error (500+) and on Author (since WCMMode.DISABLED ~> Publish)
-            if (componentHelper.isPreviewMode(slingRequest)) {
+            if (ModeUtil.isPreview(slingRequest)) {
                 %><cq:include script="/apps/acs-commons/components/utilities/errorpagehandler/preview/errormessage.jsp" /><%
                 return;
             } else {

@@ -189,8 +189,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
         cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getStatus(), content.getCharEncoding(),
-                content.getContentType(), content.getHeaders(), content.getInputDataStream()));
-
+                content.getContentType(), content.getHeaders(), content.getInputDataStream(), content.getWriteMethod()));
     }
 
     @Override
@@ -212,7 +211,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         value.incrementHitCount();
 
         return new CacheContent(value.getStatus(), value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
-                ByteArrayInputStream(value.getBytes()));
+                ByteArrayInputStream(value.getBytes()), value.getWriteMethod());
     }
 
     @Override

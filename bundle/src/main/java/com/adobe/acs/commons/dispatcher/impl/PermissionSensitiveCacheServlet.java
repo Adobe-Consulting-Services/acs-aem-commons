@@ -20,36 +20,31 @@
 package com.adobe.acs.commons.dispatcher.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        label = "ACS AEM Commons - Permission Sensitive Cache Servlet",
-        description = "Servlet that checks if the current sessions has access to a cached object",
-        metatype = true, immediate = true
-)
-@Properties({
-        @Property(
-                name = "sling.servlet.paths",
-                cardinality = Integer.MAX_VALUE,
-                label = "Sling Servlet Paths",
-                description = "Paths that this servlet will resolve to"
-        )
-})
-@Service
+@Component(immediate = true, configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Designate(ocd=PermissionSensitiveCacheServlet.Config.class)
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
+    
+    @ObjectClassDefinition
+    public @interface Config {
+        @AttributeDefinition(name="Sling Servlet Paths",description="Paths that this servlet will resolve to")
+        String[] sling_servlet_paths();
+    }
 
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {

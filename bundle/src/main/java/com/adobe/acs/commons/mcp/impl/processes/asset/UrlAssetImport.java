@@ -27,6 +27,7 @@ import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.data.Spreadsheet;
 import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import java.io.IOException;
@@ -117,7 +118,8 @@ public class UrlAssetImport extends AssetIngestor {
         @FormField(
             name = "Password",
             description = "Password for connections that require login",
-            required = false
+            required = false,
+            component = PasswordComponent.class
     )
     private String password = null;
 
@@ -366,7 +368,12 @@ public class UrlAssetImport extends AssetIngestor {
         if (source.startsWith("/")) {
             source = defaultPrefix + source;
         }
+
         String name = source.substring(source.lastIndexOf('/') + 1);
+        if (!preserveFileName) {
+            name = NameUtil.createValidDamName(name);
+        }
+
         Folder folder = extractFolder(assetData);
         FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
 

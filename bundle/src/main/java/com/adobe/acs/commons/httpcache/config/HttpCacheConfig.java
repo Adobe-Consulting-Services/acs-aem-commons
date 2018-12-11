@@ -132,40 +132,6 @@ public interface HttpCacheConfig {
     int getOrder();
 
     /**
-     * Returns a custom expiry for this config in miliseconds.
-     * -1 means the entry will never expire itself.
-     * 0 means the expiry is not set, and the default expiry will be used.
-     * 1 or above is the expiry for entries produced by this config .
-     *
-     * @return
-     */
-    default long getExpiryOnCreate() {
-        return -1l;
-    }
-
-    /**
-     * Gets the expiry time for the cache entry access / read.
-     * If set, it will refresh the expiry time when an entry is read with given value.
-     * Value is in miliseconds.
-     *
-     * @return the expiry time
-     */
-    default long getExpiryForAccess() {
-        return -1l;
-    }
-
-    /**
-     * Gets the expiry time for the cache entry updated.
-     * If set, it will refresh the expiry time when an entry is updated with given value.
-     * Value is in miliseconds.
-     *
-     * @return the expiry time
-     */
-    default long getExpiryForUpdate() {
-        return -1l;
-    }
-
-    /**
      * Check if the cache config accepts the service pid of the cache handling rule.
      *
      * @param servicePid Service pid of HttpCacheHandlingRule.
@@ -177,4 +143,5 @@ public interface HttpCacheConfig {
      * @return the filter scope this HttpCacheConfig should involve itself in.
      */
     FilterScope getFilterScope();
+
 }
