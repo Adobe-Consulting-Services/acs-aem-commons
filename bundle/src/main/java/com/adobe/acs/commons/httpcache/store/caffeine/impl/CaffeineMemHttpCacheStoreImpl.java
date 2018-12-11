@@ -149,11 +149,9 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
      * Removal listener for cache entry items.
      */
     private static class MemCacheEntryRemovalListener implements RemovalListener<CacheKey, MemCachePersistenceObject> {
-        private static final Logger log = LoggerFactory.getLogger(MemCacheEntryRemovalListener.class);
-
         @Override
         public void onRemoval(CacheKey cacheKey, MemCachePersistenceObject memCachePersistenceObject, RemovalCause removalCause) {
-
+            //do nothing as of now
         }
     }
 
