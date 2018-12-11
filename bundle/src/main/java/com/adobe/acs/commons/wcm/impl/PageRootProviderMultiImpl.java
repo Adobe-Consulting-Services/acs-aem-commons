@@ -23,16 +23,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,19 +38,18 @@ import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(metatype=false)
-@Service(PageRootProvider.class)
 /**
  * Service to fetch the site root page (i.e. home page) for a given resource.
  * Supports multiple (independent) configurations.
  *
  * @see PageRootProviderConfig
  */
+@Component(service=PageRootProvider.class)
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
-    @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    @Reference(name = "config", service = PageRootProviderConfig.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     private RankedServices<PageRootProviderConfig> configList = new RankedServices<>(Order.ASCENDING);
 
     @Override

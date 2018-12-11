@@ -21,12 +21,13 @@ package com.adobe.acs.commons.wcm.impl;
 
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,23 +38,23 @@ import org.slf4j.LoggerFactory;
  * @deprecated use PageRootProviderConfig instead
  */
 @Component(
-        label = "ACS AEM Commons - Page Root Provider (deprecated)",
-        description = "Deprecated configuration for Page Root Provider. Please use PageRootProviderConfig instead.",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
-        inherit = false
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service=PageRootProviderConfig.class
 )
-@Service(PageRootProviderConfig.class)
+@Designate(ocd=PageRootProviderImpl.Config.class)
 @Deprecated
 public class PageRootProviderImpl extends PageRootProviderConfig {
-
-    @Property(
-            label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
-            cardinality = Integer.MAX_VALUE,
-            value = { DEFAULT_PAGE_ROOT_PATH })
-    private static final String PAGE_ROOT_PATH = PageRootProviderConfig.PAGE_ROOT_PATH;
-
+	
+	@ObjectClassDefinition()
+	public @interface Config {
+	    @AttributeDefinition(
+	            name = "Root page path pattern",
+	            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+	            cardinality = Integer.MAX_VALUE,
+	            defaultValue = { DEFAULT_PAGE_ROOT_PATH })
+	   String[] page_root_path();
+		
+	}
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderImpl.class);
 
     @Activate
