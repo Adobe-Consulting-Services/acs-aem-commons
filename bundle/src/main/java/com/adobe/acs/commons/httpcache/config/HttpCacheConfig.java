@@ -164,7 +164,7 @@ public interface HttpCacheConfig {
      * @return the expiry time
      */
     default long getExpiryForAccess() {
-        return -1lL;
+        return -1L;
     }
 
     /**
