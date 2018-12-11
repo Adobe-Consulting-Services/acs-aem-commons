@@ -25,24 +25,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
-        label = "ACS AEM Commons - Page Root Provider Configuration",
-        description = "Configuration instance for Page Root Provider, a service to fetch the site root page for a given resource.",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
-        configurationFactory = true
-)
-@Service(PageRootProviderConfig.class)
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        factory = "PageRootProviderConfig",
+        service=PageRootProviderConfig.class)
+@Designate(ocd=PageRootProviderConfig.Config.class)
 /**
  * Configuration instance for Page Root Provider.
  * Use service.ranking to guarantee priority between conflicting configurations.
@@ -53,12 +51,20 @@ public class PageRootProviderConfig {
 
     /* Default root. */
     static final String DEFAULT_PAGE_ROOT_PATH = "/content";
+    
+    @ObjectClassDefinition( name = "ACS AEM Commons - Page Root Provider Configuration",
+            description = "Configuration instance for Page Root Provider, a service to fetch the site root page for a given resource.")
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Root page path pattern",
+                description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+                cardinality = Integer.MAX_VALUE,
+                defaultValue = { DEFAULT_PAGE_ROOT_PATH })
+        /* Page root property. */
+        String[] page_root_path();
+ 
+    }
 
-    @Property(
-            label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
-            cardinality = Integer.MAX_VALUE,
-            value = { DEFAULT_PAGE_ROOT_PATH })
     /* Page root property. */
     static final String PAGE_ROOT_PATH = "page.root.path";
 

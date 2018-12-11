@@ -32,11 +32,11 @@ import java.io.IOException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
