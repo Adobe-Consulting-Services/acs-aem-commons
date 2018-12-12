@@ -28,60 +28,70 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.oak.spi.security.principal.PrincipalImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(label = "ACS AEM Commons - Ensure Group",
-           configurationFactory = true,
-           metatype = true,
+@Component(
+service= { EnsureGroup.class, EnsureAuthorizable.class },
            immediate = true,
-           policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-                    @Property(name = "webconsole.configurationFactory.nameHint",
-                              value = "Ensure Group: {operation} {principalName}")
-})
-@Service(value = { EnsureGroup.class, EnsureAuthorizable.class })
+           configurationPolicy = ConfigurationPolicy.REQUIRE,property= {
+        		   "webconsole.configurationFactory.nameHint" + "=" + "Ensure Group: {operation} {principalName}"
+           })
+@Designate(ocd=EnsureGroup.Config.class, factory=true)
 public final class EnsureGroup implements EnsureAuthorizable {
+	
+	@ObjectClassDefinition(name = "ACS AEM Commons - Ensure Group")
+	public @interface Config {
+	    @AttributeDefinition(name = "Ensure immediately", defaultValue = "true",
+	            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
+	    String ensure_immediately();
+		
+	    @AttributeDefinition(
+	    		name = "Operation",
+	            description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
+	            options = { @Option(value = "add", label = "Ensure existence (add)"),
+	                    @Option(value = "remove", label = "Ensure extinction (remove)") })
+	    String operation();
 
-    @Property(label = "Ensure immediately", boolValue = true,
-            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+	    @AttributeDefinition(name = "Principal Name", description = "The grouo's principal name")
+	    String principalName();
+
+	    @AttributeDefinition(name = "ACEs",
+	            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+	            cardinality = Integer.MAX_VALUE)
+	    String[] aces();
+
+	    @AttributeDefinition(
+	    		name = "Member Of",
+	            description = "Defines groups this group must be a member of.  Group will be removed from any groups not listed.",
+	            cardinality = Integer.MAX_VALUE)
+	    String[] memberof();
+
+	}
+
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure.immediately";
 
     public static final String DEFAULT_OPERATION = "add";
-    @Property(
-            label = "Operation",
-            description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
-            options = { @PropertyOption(name = "add", value = "Ensure existence (add)"),
-                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)") })
     public static final String PROP_OPERATION = "operation";
 
-    @Property(label = "Principal Name", description = "The grouo's principal name")
     public static final String PROP_PRINCIPAL_NAME = "principalName";
 
-    @Property(label = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
-            cardinality = Integer.MAX_VALUE)
     public static final String PROP_ACES = "aces";
 
-    @Property(
-            label = "Member Of",
-            description = "Defines groups this group must be a member of.  Group will be removed from any groups not listed.",
-            cardinality = Integer.MAX_VALUE)
-    public static final String PROP_MEMBER_OF = "member-of";
+    public static final String PROP_MEMBER_OF = "memberof";
 
     private static final Logger log = LoggerFactory.getLogger(EnsureGroup.class);
     private static final String SERVICE_NAME = "ensure-service-user";

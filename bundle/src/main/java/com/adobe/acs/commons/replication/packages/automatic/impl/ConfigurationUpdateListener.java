@@ -27,11 +27,6 @@ import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -40,6 +35,8 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -56,15 +53,13 @@ import com.day.cq.replication.Replicator;
  * Listens to changes under /etc/acs-commons/automatic-package-replication and
  * manages the Automatic Package Replicator jobs based on the updates.
  */
-@Component(immediate = true)
-@Service(value = { EventHandler.class, AutomaticPackageReplicatorMBean.class })
-@Properties({
-            // TODO: Register a Resource Change Listener instead as per the deprecation notes
-            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
-        @Property(name = EventConstants.EVENT_TOPIC, value = { SlingConstants.TOPIC_RESOURCE_ADDED,
-                SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_REMOVED }),
-        @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),
-        @Property(name = EventConstants.EVENT_FILTER, value = "(path=/etc/acs-commons/automatic-package-replication/*/jcr:content)") })
+
+@Component(immediate = true, service = { EventHandler.class, AutomaticPackageReplicatorMBean.class }, property= {
+		EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_ADDED + "," +
+                SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_REMOVED  + "]",
+                "jmx.objectname" + "=" + "com.adobe.acs.commons:type=Automatic Package Replicator",
+                EventConstants.EVENT_FILTER + "=" + "(path=/etc/acs-commons/automatic-package-replication/*/jcr:content)"
+})
 public class ConfigurationUpdateListener extends ResourceServiceManager
         implements EventHandler, AutomaticPackageReplicatorMBean {
 
