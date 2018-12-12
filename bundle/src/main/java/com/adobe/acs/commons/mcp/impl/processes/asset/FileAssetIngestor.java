@@ -68,18 +68,9 @@ public class FileAssetIngestor extends AssetIngestor {
     @FormField(
             name = "Source",
             description = "Source folder for content ingestion which can be a local folder or SFTP url",
-            hint = "/var/mycontent, /mnt/all_the_things, sftp://host[:port]/base/path...",
-            required = true
+            hint = "/var/mycontent, /mnt/all_the_things, sftp://host[:port]/base/path..."
     )
     String fileBasePath;
-
-    @FormField(
-            name = "Connection timeout",
-            description = "Connection timeout (in milliseconds) for SFTP connection",
-            required = false,
-            options = ("default=30000")
-    )
-    int timeout = 30000;
 
     @FormField(
             name = "Username",
@@ -137,7 +128,7 @@ public class FileAssetIngestor extends AssetIngestor {
             manager.setCurrentItem(fileBasePath);
             baseFolder.visitAllFolders(folder -> {
                 if (canImportFolder(folder)) {
-                    manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+                    manager.deferredWithResolver(Actions.retry(retries, retryPause, rr -> {
                         manager.setCurrentItem(folder.getSourcePath());
                         createFolderNode(folder, rr);
                     }));
@@ -164,7 +155,7 @@ public class FileAssetIngestor extends AssetIngestor {
     private void addFileImportTask(Source fileSource, ActionManager manager) {
         try {
             if (canImportFile(fileSource)) {
-                manager.deferredWithResolver(Actions.retry(5, 25, importAsset(fileSource, manager)));
+                manager.deferredWithResolver(Actions.retry(retries, retryPause, importAsset(fileSource, manager)));
             } else {
                 incrementCount(skippedFiles, 1);
                 trackDetailedActivity(fileSource.getName(), "Skip", "Skipping file", 0L);
@@ -333,7 +324,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
                 session.setConfig("StrictHostKeyChecking", "no");
-                session.setTimeout(timeout);
+                session.setTimeout(retryPause);
                 session.setPassword(password);
                 session.connect();
                 channel = (ChannelSftp) session.openChannel("sftp");
