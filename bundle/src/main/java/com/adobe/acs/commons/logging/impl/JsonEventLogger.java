@@ -19,14 +19,7 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
+
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
@@ -34,9 +27,16 @@ import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.metatype.annotations.*;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +51,11 @@ import java.util.Map;
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.
  */
-@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
-    label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
-@SuppressWarnings("PMD.MoreThanOneLogger")
-@Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
+@Component( configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+      "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
 })
+@SuppressWarnings("PMD.MoreThanOneLogger")
+@Designate(ocd=JsonEventLogger.Config.class, factory=true)
 public class JsonEventLogger implements EventHandler {
 
     /**
@@ -88,24 +85,33 @@ public class JsonEventLogger implements EventHandler {
             return null;
         }
     }
+    @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
+    public @interface Config {
+        @AttributeDefinition(name = "Event Topics",
+                description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
+        String[] event_topics();
 
-    @Property(label = "Event Topics", unbounded = PropertyUnbounded.ARRAY,
-            description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
+        @AttributeDefinition(name = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
+        String event_filter();
+
+        @AttributeDefinition(name = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
+        String event_logger_category();
+
+        @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
+                @Option(value = "TRACE", label = "Trace"),
+                @Option(value = "DEBUG", label = "Debug"),
+                @Option(value = "INFO", label = "Information"),
+                @Option(value = "WARN", label = "Warnings"),
+                @Option(value = "ERROR", label = "Error")})
+        String event_logger_level();
+    }
+
     private static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
 
-    @Property(label = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
     private static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
 
-    @Property(label = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
     private static final String OSGI_CATEGORY = "event.logger.category";
 
-    @Property(label = "Logger Level", value = DEFAULT_LEVEL, options = {
-            @PropertyOption(name = "TRACE", value = "Trace"),
-            @PropertyOption(name = "DEBUG", value = "Debug"),
-            @PropertyOption(name = "INFO", value = "Information"),
-            @PropertyOption(name = "WARN", value = "Warnings"),
-            @PropertyOption(name = "ERROR", value = "Error")
-    }, description = "Select the logging level the messages should be sent with.")
     private static final String OSGI_LEVEL = "event.logger.level";
 
     private String[] topics;
