@@ -20,15 +20,15 @@
 package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.api.SlingRepository;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +45,11 @@ import java.util.Map;
  * @deprecated use EnsureOakIndex instead
  */
 @Deprecated
-@Component(configurationFactory = true,
-        metatype = true,
-        label = "ACS AEM Commons - Ensure Oak Property Index",
-        description = "Component Factory to create Oak property indexes.",
-        policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Index: {index.name}, Property: {property.name}, on nodes [{node.types}]")
-})
+@Component(
+        configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
+        		 "webconsole.configurationFactory.nameHint" + "=" + "Index: {index.name}, Property: {property.name}, on nodes [{node.types}]"
+        })
+@Designate(ocd=EnsurePropertyIndex.Config.class, factory=true)
 public class EnsurePropertyIndex {
 
     private static class IndexDefinition {
@@ -85,20 +80,36 @@ public class EnsurePropertyIndex {
     private static final String PN_TYPE = "type";
 
     private static final String PN_UNIQUE = "unique";
+    
+    @ObjectClassDefinition(name  = "ACS AEM Commons - Ensure Oak Property Index",
+        description = "Component Factory to create Oak property indexes.")
+    public @interface Config {
+        @AttributeDefinition(name = "Async?", description = "Is this index async?", defaultValue = ""+DEFAULT_ASYNC)
+        boolean index_async();
 
-    @Property(label = "Async?", description = "Is this index async?", boolValue = DEFAULT_ASYNC)
+        @AttributeDefinition(name = "Index Name", description = "Will be used as the index node name.")
+        String index_name();
+
+        @AttributeDefinition(name = "Declaring Node Types", description = "Declaring Node Types")
+        String[] node_types();
+        
+        @AttributeDefinition(name = "Property Name", description = "Property name to index.")
+        String property_name();
+
+        @AttributeDefinition(name = "Unique", description = "Is in this index unique?", defaultValue = ""+DEFAULT_UNIQUE)
+        boolean unique();
+
+    	
+    }
+
     private static final String PROP_ASYNC = "index.async";
 
-    @Property(label = "Index Name", description = "Will be used as the index node name.")
     private static final String PROP_INDEX_NAME = "index.name";
 
-    @Property(label = "Declaring Node Types", description = "Declaring Node Types", unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_NODE_TYPES = "node.types";
     
-    @Property(label = "Property Name", description = "Property name to index.")
     private static final String PROP_PROPERTY_NAME = "property.name";
 
-    @Property(label = "Unique", description = "Is in this index unique?", boolValue = DEFAULT_UNIQUE)
     private static final String PROP_UNIQUE = "unique";
 
     private static final String TYPE_PROPERTY = "property";
