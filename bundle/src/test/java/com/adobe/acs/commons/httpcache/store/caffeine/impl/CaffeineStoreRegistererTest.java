@@ -59,16 +59,16 @@ public class CaffeineStoreRegistererTest {
     ArgumentCaptor<Dictionary<String, ?>> argumentCaptor;
     private Map<String, Object> properties = new HashMap<>();
 
-    private long value_ttl = 30L;
-    private long value_maxsize = 20L;
+    private long valueTtl = 30L;
+    private long valueMaxSize = 20L;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         systemUnderTest = new CaffeineStoreRegisterer();
 
-        properties.put(CaffeineStoreRegisterer.PROP_TTL, value_ttl);
-        properties.put(CaffeineStoreRegisterer.PROP_MAX_SIZE_IN_MB, value_maxsize);
+        properties.put(CaffeineStoreRegisterer.PROP_TTL, valueTtl);
+        properties.put(CaffeineStoreRegisterer.PROP_MAX_SIZE_IN_MB, valueMaxSize);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class CaffeineStoreRegistererTest {
     @Test
     public void test_class_not_found() throws Exception {
 
-        PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withArguments(value_ttl, value_maxsize).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
+        PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withArguments(valueTtl, valueMaxSize).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
         systemUnderTest.activate(bundleContext, properties);
         verify(bundleContext, never()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
     }
