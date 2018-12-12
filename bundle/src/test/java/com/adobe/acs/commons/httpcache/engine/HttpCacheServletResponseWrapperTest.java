@@ -47,6 +47,7 @@ public class HttpCacheServletResponseWrapperTest {
     public void init(){
         response.setCharacterEncoding("utf-8");
     }
+
     @Test
     public void getHeaderNames_NullHeaderNames() throws IOException {
         TempSink tempSink = new MemTempSinkImpl();

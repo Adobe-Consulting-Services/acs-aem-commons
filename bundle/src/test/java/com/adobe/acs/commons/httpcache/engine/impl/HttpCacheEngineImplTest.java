@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -25,7 +44,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.management.NotCompliantMBeanException;
@@ -41,7 +59,6 @@ import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -54,10 +71,16 @@ public class HttpCacheEngineImplTest {
     HttpCacheEngineImpl systemUnderTest;
 
     @Mock
-    HttpCacheConfig memCacheConfig, jcrCacheConfig;
+    HttpCacheConfig memCacheConfig;
 
     @Mock
-    HttpCacheStore memCacheStore, jcrCacheStore;
+    HttpCacheConfig jcrCacheConfig;
+
+    @Mock
+    HttpCacheStore memCacheStore;
+
+    @Mock
+    HttpCacheStore jcrCacheStore;
 
     @Captor
     ArgumentCaptor<CacheContent> cacheContentCaptor;
@@ -122,7 +145,7 @@ public class HttpCacheEngineImplTest {
     @Test
     public void test_deliver_cache_content() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, HttpCacheKeyCreationException, HttpCachePersistenceException, HttpCacheDataStreamException, IOException {
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
-        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
         when(jcrCacheConfig.accepts(request)).thenReturn(true);
         HttpCacheConfig foundConfig = systemUnderTest.getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
@@ -137,6 +160,8 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
         when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
         boolean delivered = systemUnderTest.deliverCacheContent(request,response, jcrCacheConfig );
 
         assertTrue(delivered);
@@ -147,7 +172,6 @@ public class HttpCacheEngineImplTest {
     @Test
     public void test_deliver_cache_content_outputstream() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, HttpCacheKeyCreationException, HttpCachePersistenceException, HttpCacheDataStreamException, IOException {
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
-        StringResponseWrapper response = new StringResponseWrapper(new MockSlingHttpServletResponse());
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
         when(jcrCacheConfig.accepts(request)).thenReturn(true);
         HttpCacheConfig foundConfig = systemUnderTest.getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
@@ -163,6 +187,9 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
         when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
+        StringResponseWrapper response = new StringResponseWrapper(new MockSlingHttpServletResponse());
+
+
         boolean delivered = systemUnderTest.deliverCacheContent(request,response, jcrCacheConfig );
 
         assertTrue(delivered);

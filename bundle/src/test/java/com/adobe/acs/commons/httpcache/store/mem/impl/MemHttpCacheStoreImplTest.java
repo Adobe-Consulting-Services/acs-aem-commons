@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -6,7 +25,6 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineStoreRegisterer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +35,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +42,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,15 +53,15 @@ public class MemHttpCacheStoreImplTest {
 
     MemHttpCacheStoreImpl systemUnderTest ;
     private Map<String, Object> properties = new HashMap<>();
-    private long value_ttl = 30L;
-    private long value_maxsize = 20L;
+    private long valueTtl = 30L;
+    private long valueMaxSize = 20L;
 
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
 
-        properties.put(MemHttpCacheStoreImpl.PROP_TTL, value_ttl);
-        properties.put(MemHttpCacheStoreImpl.PROP_MAX_SIZE_IN_MB, value_maxsize);
+        properties.put(MemHttpCacheStoreImpl.PROP_TTL, valueTtl);
+        properties.put(MemHttpCacheStoreImpl.PROP_MAX_SIZE_IN_MB, valueMaxSize);
         systemUnderTest.activate(properties);
     }
 
