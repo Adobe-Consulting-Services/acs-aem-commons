@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
-
+- #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 ### Fixed
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
