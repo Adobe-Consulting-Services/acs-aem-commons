@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.httpcache.store.caffeine.impl;
+package com.adobe.acs.commons.httpcache.store.mem.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
@@ -6,16 +6,18 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemCachePersistenceObject;
+import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineStoreRegisterer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,22 +25,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaffeineMemHttpCacheStoreImplTest {
+public class MemHttpCacheStoreImplTest {
 
-    CaffeineMemHttpCacheStoreImpl systemUnderTest;
-    private long ttl = 5000;
-    private long maxSizeInMb = 100;
+    MemHttpCacheStoreImpl systemUnderTest ;
+    private Map<String, Object> properties = new HashMap<>();
+    private long value_ttl = 30L;
+    private long value_maxsize = 20L;
 
     @Before
-    public void setUp() throws Exception {
-        systemUnderTest = new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
+    public void init() throws NotCompliantMBeanException {
+        systemUnderTest = new MemHttpCacheStoreImpl();
+
+        properties.put(MemHttpCacheStoreImpl.PROP_TTL, value_ttl);
+        properties.put(MemHttpCacheStoreImpl.PROP_MAX_SIZE_IN_MB, value_maxsize);
+        systemUnderTest.activate(properties);
     }
 
     @Test
@@ -48,6 +53,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
         InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
         when(content.getInputDataStream()).thenReturn(inputStream);
         systemUnderTest.put(key,content);
+
         assertTrue("contains entry we just put in",systemUnderTest.contains(key));
 
         assertEquals(1, systemUnderTest.size());
@@ -58,6 +64,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
         assertEquals(expectedContentString, retrievedContentString);
     }
+
 
     @Test
     public void test_remove() throws HttpCacheDataStreamException {
@@ -126,5 +133,4 @@ public class CaffeineMemHttpCacheStoreImplTest {
         TabularData data = systemUnderTest.getCacheStats();
         assertEquals(12, data.size());
     }
-
 }

@@ -200,7 +200,13 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
 
     @Override
     public void invalidate(CacheKey invalidationKey) {
-        cache.invalidate(invalidationKey);
+        final ConcurrentMap<CacheKey, MemCachePersistenceObject> cacheAsMap = cache.asMap();
+
+        for (CacheKey key : cacheAsMap.keySet()) {
+            if (key.isInvalidatedBy(invalidationKey)) {
+                cache.invalidate(key);
+            }
+        }
     }
 
     @Override

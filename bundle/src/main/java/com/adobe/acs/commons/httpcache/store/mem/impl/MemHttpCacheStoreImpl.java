@@ -80,31 +80,31 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
-    private static final long MEGABYTE = 1024L * 1024L;
+    static final long MEGABYTE = 1024L * 1024L;
 
     @Property(label = "TTL",
               description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
               longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
-    private static final String PROP_TTL = HttpCacheStore.PN_TTL;
-    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+    static final String PROP_TTL = HttpCacheStore.PN_TTL;
+    static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     private long ttl;
 
     @Property(propertyPrivate = true,
             longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
-    private static final String PROP_TTL_LEGACY = "httpcache.cachestore.memcache.ttl";
+    static final String PROP_TTL_LEGACY = "httpcache.cachestore.memcache.ttl";
     private long ttlLegacy;
 
     @Property(label = "Maximum size of this store in MB",
               description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
                       + "from the cache",
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = HttpCacheStore.PN_MAXSIZE;
-    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+    static final String PROP_MAX_SIZE_IN_MB = HttpCacheStore.PN_MAXSIZE;
+    static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
     private long maxSizeInMb;
 
     @Property(propertyPrivate = true,
             longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB_LEGACY = "httpcache.cachestore.memcache.maxsize";
+    static final String PROP_MAX_SIZE_IN_MB_LEGACY = "httpcache.cachestore.memcache.maxsize";
     private long maxSizeInMbLegacy;
 
     /** Cache - Uses Google Guava's cache */
