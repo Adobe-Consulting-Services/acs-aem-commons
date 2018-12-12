@@ -151,7 +151,9 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
         private List<String> agents = new ArrayList<String>();
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            String[] lines = Arrays.stream(StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator())).
+                    map(StringUtils::trim).
+                    toArray(String[]::new);
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
