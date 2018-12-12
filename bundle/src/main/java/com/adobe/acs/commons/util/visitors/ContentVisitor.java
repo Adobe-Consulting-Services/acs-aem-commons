@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.util.visitors;
 
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -36,7 +37,7 @@ public class ContentVisitor<T extends ResourceRunnable> extends AbstractResource
     private static final Logger log = LoggerFactory.getLogger(ContentVisitor.class);
 
     private static final String[] DEFAULT_CONTAINER_TYPES = {JcrResourceConstants.NT_SLING_FOLDER, JcrResourceConstants.NT_SLING_ORDERED_FOLDER, JcrConstants.NT_FOLDER};
-    private static final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET};
+    private static final String[] DEFAULT_CONTENT_TYPES = {NameConstants.NT_PAGE, DamConstants.NT_DAM_ASSET, TagConstants.NT_TAG};
 
     private final T runnable;
     private final String[] contentTypes;
