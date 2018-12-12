@@ -116,7 +116,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         if(ttlLegacy != DEFAULT_TTL && maxSizeInMb == DEFAULT_TTL){
             ttl = PropertiesUtil.toLong(configs.get(PROP_TTL_LEGACY), DEFAULT_TTL);
         }else{
-            ttl = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_TTL);
+            ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
         }
 
         if(maxSizeInMbLegacy != DEFAULT_MAX_SIZE_IN_MB && maxSizeInMb == DEFAULT_MAX_SIZE_IN_MB){
@@ -260,11 +260,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     public String getStoreType() {
         return HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
-    }
-
-    @Override
-    public void close() {
-        cache.invalidateAll();
     }
 
     //-------------------------<Mbean specific implementation>

@@ -24,6 +24,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -42,20 +43,20 @@ import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_TTL;
         description = "Cache data store implementation for in-memory storage.", configurationPid = "com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl")
 public class CaffeineStoreRegisterer {
 
-    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+    static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     @Property(label = "TTL",
             description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
             longValue = DEFAULT_TTL)
-    private static final String PROP_TTL = PN_TTL;
+    static final String PROP_TTL = PN_TTL;
     static final String JMX_NAME = "Caffeine in mem HTTP Cache Store";
     private long ttl;
 
-    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+    static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
     @Property(label = "Maximum size of this store in MB",
             description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
                     + "from the cache",
             longValue = DEFAULT_MAX_SIZE_IN_MB)
-    private static final String PROP_MAX_SIZE_IN_MB = PN_MAXSIZE;
+    static final String PROP_MAX_SIZE_IN_MB = PN_MAXSIZE;
     private long maxSizeInMb;
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineStoreRegisterer.class);
@@ -67,6 +68,9 @@ public class CaffeineStoreRegisterer {
     @Activate
     protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         try {
+            this.maxSizeInMb = PropertiesUtil.toLong(properties.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+            this.ttl         = PropertiesUtil.toLong(properties.get(PROP_TTL), DEFAULT_TTL);
+
             this.httpCacheStore = new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
 
             @SuppressWarnings("squid:S1149")
@@ -90,7 +94,7 @@ public class CaffeineStoreRegisterer {
     protected void deactivate() {
 
         if(httpCacheStore != null){
-            httpCacheStore.close();
+            httpCacheStore.invalidateAll();
         }
         if (this.storeRegistration != null) {
             this.storeRegistration.unregister();

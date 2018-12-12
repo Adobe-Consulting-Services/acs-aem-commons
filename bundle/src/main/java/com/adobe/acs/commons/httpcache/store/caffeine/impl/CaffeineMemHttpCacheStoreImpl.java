@@ -70,7 +70,7 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     private final long ttl;
     private final long maxSizeInMb;
 
-    public CaffeineMemHttpCacheStoreImpl(long ttl, long maxSizeInMb) throws NotCompliantMBeanException {
+    public CaffeineMemHttpCacheStoreImpl(Long ttl, Long maxSizeInMb) throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
         // Read config and populate values.
         expiryPolicy = new CacheExpiryPolicy(ttl);
@@ -83,10 +83,6 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         cache = buildCache();
     }
 
-    @Override
-    public void close(){
-        cache.invalidateAll();
-    }
 
     private Cache<CacheKey, MemCachePersistenceObject> buildCache() {
         return Caffeine.newBuilder()

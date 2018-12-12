@@ -320,11 +320,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         return HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
     }
 
-    @Override
-    public void close() {
-        invalidateAll();
-    }
-
     @Override public void run()
     {
         purgeExpiredEntries();

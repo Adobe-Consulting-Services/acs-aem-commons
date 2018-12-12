@@ -106,11 +106,4 @@ public interface HttpCacheStore {
      * @return
      */
     String getStoreType();
-
-    /**
-     * Close the store and free up resources.
-     */
-    default void close() {
-        //not implemented  by default.
-    }
 }
