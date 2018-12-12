@@ -47,7 +47,9 @@ public interface CacheKey extends Serializable
      * Value is in miliseconds.
      * @return the expiry time
      */
-    long getExpiryForCreation();
+    default long getExpiryForCreation(){
+        return -1L;
+    }
 
     /**
      * Gets the expiry time for the cache entry access / read.
@@ -55,7 +57,9 @@ public interface CacheKey extends Serializable
      * Value is in miliseconds.
      * @return the expiry time
      */
-    long getExpiryForAccess();
+    default long getExpiryForAccess(){
+        return -1L;
+    }
 
     /**
      * Gets the expiry time for the cache entry updated.
@@ -63,7 +67,9 @@ public interface CacheKey extends Serializable
      * Value is in miliseconds.
      * @return the expiry time
      */
-    long getExpiryForUpdate();
+    default long getExpiryForUpdate(){
+        return -1L;
+    }
 
     /**
      * Determines if the @{param cacheKey} will invalidate this cache key entry.
