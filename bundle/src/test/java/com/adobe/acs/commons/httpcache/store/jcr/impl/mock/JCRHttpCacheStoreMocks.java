@@ -112,7 +112,7 @@ public class JCRHttpCacheStoreMocks {
         Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
         Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
         Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
-        Whitebox.setInternalState(store, "defaultExpireTimeInMS", JCRHttpCacheStoreImpl.DEFAULT_EXPIRE_TIME_IN_MS);
+        Whitebox.setInternalState(store, "defaultExpireTimeInMs", JCRHttpCacheStoreImpl.DEFAULT_EXPIRE_TIME_IN_MS);
 
         doCallRealMethod().when(store).put(cacheKey, cacheContent);
         doCallRealMethod().when(store).contains(cacheKey);

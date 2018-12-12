@@ -55,7 +55,7 @@ public class RootNodeMockFactory
 {
     public static final String ROOT_PATH = "/etc/acs-commons/httpcache/root";
 
-    private static final String TEST_FILE_PATH = "com.adobe.acs.commons.httpcache.store.jcr.impl.visitor/cachecontent.html";
+    private static final String TEST_FILE_PATH = "cachecontent.html";
 
     private final Settings settings;
 
@@ -200,7 +200,7 @@ public class RootNodeMockFactory
         final Node jcrContentNode = mock(Node.class);
         final Property dataProperty = mock(Property.class);
 
-        InputStream cacheTestStream = getClass().getClassLoader().getResourceAsStream(TEST_FILE_PATH);
+        InputStream cacheTestStream = getClass().getResourceAsStream(TEST_FILE_PATH);
 
         final Binary binary = new BinaryImpl(cacheTestStream);
 

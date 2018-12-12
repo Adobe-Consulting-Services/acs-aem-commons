@@ -37,6 +37,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.ValueFactory;
 
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.value.BinaryImpl;
@@ -214,5 +215,6 @@ public class EntryNodeWriterMocks
         when(cacheContent.getStatus()).thenReturn(arguments.status);
         when(cacheContent.getHeaders()).thenReturn(arguments.cacheContentHeaders);
         when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
+        when(cacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
     }
 }

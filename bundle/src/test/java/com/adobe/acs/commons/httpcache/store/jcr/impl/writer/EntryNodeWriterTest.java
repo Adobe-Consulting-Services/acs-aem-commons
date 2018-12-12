@@ -56,7 +56,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 @PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
 public class EntryNodeWriterTest
 {
-    private static final String CACHE_CONTENT_LOCATION = "com.adobe.acs.commons.httpcache.store.jcr.impl.writer/cachecontent.html";
+    private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
 
     /**
      * Ignore this test for the moment, until I have figured out to make it work again ...
@@ -75,7 +75,7 @@ public class EntryNodeWriterTest
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
         arguments.entryNode = mock(Node.class);
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CACHE_CONTENT_LOCATION);
+        InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
         arguments.cacheContent = inputStream;
         List<String> header1Value = Arrays.asList("header-value");
         List<String> header2Value = Arrays.asList("another-header-value");
