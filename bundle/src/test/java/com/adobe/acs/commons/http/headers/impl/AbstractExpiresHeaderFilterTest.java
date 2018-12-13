@@ -187,7 +187,7 @@ public class AbstractExpiresHeaderFilterTest {
 
         when(componentContext.getProperties()).thenReturn(properties);
 
-        //filter.doActivate(componentContext);
+        filter.doActivate(componentContext);
         assertNotNull(filter.getHeaderValue());
         verify(componentContext).getProperties();
         verifyNoMoreInteractions(componentContext);

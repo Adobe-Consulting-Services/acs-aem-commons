@@ -45,16 +45,16 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
         boolean isTouch();
 
         @AttributeDefinition(name = "Touch UI Page Editor", description = "URL of the page editor used when authoring UI mode is Touch-Optimized", defaultValue = WCM_EDITOR_URL_TOUCH_DEFAULT)
-        String wcmEditorTouchURL();
+        String wcmEditorTouchUrl();
 
         @AttributeDefinition(name = "Classic UI Page Editor", description = "URL of the page editor used when authoring UI mode is Classic", defaultValue = WCM_EDITOR_URL_CLASSIC_DEFAULT)
-        String wcmEditorClassicURL();
+        String wcmEditorClassicUrl();
 
         @AttributeDefinition(name = "Touch UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Touch-Optimized", defaultValue = DAM_EDITOR_URL_TOUCH_DEFAULT)
-        String damEditorTouchURL();
+        String damEditorTouchUrl();
 
         @AttributeDefinition(name = "Classic UI Asset Editor", description = "URL of the asset editor used when authoring UI mode is Classic", defaultValue = DAM_EDITOR_URL_CLASSIC_DEFAULT)
-        String damEditorClassicURL();
+        String damEditorClassicUrl();
 
     }
 
@@ -83,16 +83,16 @@ public class AuthorUIHelperImpl implements AuthorUIHelper {
     private static final String TOUCH_UI = "isTouch";
     private boolean isTouch = DEFAULT_TOUCH_UI;
 
-    public static final String WCM_EDITOR_URL_TOUCH = "wcmEditorTouchURL";
+    public static final String WCM_EDITOR_URL_TOUCH = "wcmEditorTouchUrl";
     private String wcmEditorTouchUrl = WCM_EDITOR_URL_TOUCH_DEFAULT;
 
-    public static final String WCM_EDITOR_URL_CLASSIC = "wcmEditorClassicURL";
+    public static final String WCM_EDITOR_URL_CLASSIC = "wcmEditorClassicUrl";
     private String wcmEditorClassicUrl = WCM_EDITOR_URL_CLASSIC_DEFAULT;
 
-    public static final String DAM_EDITOR_URL_TOUCH = "damEditorTouchURL";
+    public static final String DAM_EDITOR_URL_TOUCH = "damEditorTouchUrl";
     private String damEditorTouchUrl = DAM_EDITOR_URL_TOUCH_DEFAULT;
 
-    public static final String DAM_EDITOR_URL_CLASSIC = "damEditorClassicURL";
+    public static final String DAM_EDITOR_URL_CLASSIC = "damEditorClassicUrl";
     private String damEditorClassicUrl = DAM_EDITOR_URL_CLASSIC_DEFAULT;
 
     @Override

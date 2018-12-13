@@ -44,17 +44,16 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd=PageRootProviderImpl.Config.class)
 @Deprecated
 public class PageRootProviderImpl extends PageRootProviderConfig {
-	
-	@ObjectClassDefinition()
-	public @interface Config {
-	    @AttributeDefinition(
-	            name = "Root page path pattern",
-	            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
-	            cardinality = Integer.MAX_VALUE,
-	            defaultValue = { DEFAULT_PAGE_ROOT_PATH })
-	   String[] page_root_path();
-		
-	}
+   
+   @ObjectClassDefinition()
+   public @interface Config {
+       @AttributeDefinition(
+               name = "Root page path pattern",
+               description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+               cardinality = Integer.MAX_VALUE,
+               defaultValue = { DEFAULT_PAGE_ROOT_PATH })
+      String[] page_root_path();
+   }
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderImpl.class);
 
     @Activate
