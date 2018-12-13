@@ -382,6 +382,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private JcrPackage getJcrPackage(final ResourceResolver resourceResolver, final String path) {
 
         final Resource eventResource = resourceResolver.getResource(path);
+        if (eventResource == null) {
+            log.warn("Could not find resource at path [ {} ] with the mapped service user. Either the resource has been removed meanwhile or the service user does not have the necessary rights.", path);
+            return null;
+        }
         JcrPackage jcrPackage = null;
 
         try {
