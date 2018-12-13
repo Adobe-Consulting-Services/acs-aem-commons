@@ -43,7 +43,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 @Component(service = Servlet.class,
-factory = "com.adobe.acs.commons.wcm.impl.SiteMapServlet", 
 configurationPolicy = ConfigurationPolicy.REQUIRE,
 property = 
 { SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/qr-code/config",
