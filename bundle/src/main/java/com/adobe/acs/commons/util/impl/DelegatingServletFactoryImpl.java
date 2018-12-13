@@ -49,7 +49,7 @@ import java.util.Set;
         immediate = false, 
         property= {
               "webconsole.configurationFactory.nameHint" + "=" + "Target type: {prop.target-resource-type}"})
-@Designate(ocd=DelegatingServletFactoryImpl.Config.class)
+@Designate(ocd=DelegatingServletFactoryImpl.Config.class,factory=true)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
     private static final String REQUEST_ATTR_DELEGATION_HISTORY = DelegatingServletFactoryImpl.class.getName() + "_History";

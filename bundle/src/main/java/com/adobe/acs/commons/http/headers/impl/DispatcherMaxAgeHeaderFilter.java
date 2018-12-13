@@ -34,7 +34,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
       configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
             "webconsole.configurationFactory.nameHint" + "=" + "Max Age: {max.age} for Patterns: [{filter.pattern}]"
       })
-@Designate(ocd=DispatcherMaxAgeHeaderFilter.Config.class)
+@Designate(ocd=DispatcherMaxAgeHeaderFilter.Config.class,factory=true)
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 

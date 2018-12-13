@@ -49,8 +49,6 @@ property =
 { SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/qr-code/config",
   SLING_SERVLET_EXTENSIONS + "=json", 
   SLING_SERVLET_METHODS + "=GET"})
-
-
 public class QrCodeServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(QrCodeServlet.class);
