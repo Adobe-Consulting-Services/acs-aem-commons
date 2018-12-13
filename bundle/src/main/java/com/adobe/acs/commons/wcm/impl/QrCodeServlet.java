@@ -29,7 +29,6 @@ import org.apache.sling.commons.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,6 @@ import java.io.IOException;
 import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 @Component(service = Servlet.class,
-factory = "com.adobe.acs.commons.wcm.impl.SiteMapServlet", 
 configurationPolicy = ConfigurationPolicy.REQUIRE,
 property = 
 { SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/qr-code/config",
