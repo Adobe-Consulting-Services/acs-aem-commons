@@ -220,6 +220,25 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>4.0.0</version>
+                <executions>
+                    <execution>
+                        <id>check-dependencies-for-vulnerabilities</id>
+                        <phase>validate</phase>
+                        <goals>
+                           <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <cveValidForHours>24</cveValidForHours>
+                    <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                    <skipProvidedScope>true</skipProvidedScope>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -428,7 +447,7 @@
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
-                <version>0.7.0</version>
+                <version>0.9.1</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>
@@ -545,6 +564,30 @@
                         </plugin>
                     </plugins>
                 </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>skip-dependency-check</id>
+            <activation>
+                <property>
+                    <name>env.SKIP_DEPENDENCY_CHECK</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>check-dependencies-for-vulnerabilities</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>

@@ -79,7 +79,7 @@
                             !android.util.*,
                             *
                         </Import-Package>
-                        <Embed-Dependency>guava,jjwt,jsch,jzlib;inline=true</Embed-Dependency>
+                        <Embed-Dependency>*;scope=compile;inline=true</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -145,6 +145,35 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <!-- here we need to explicitly list the set of dependencies which are allowed with scope=compile -->
+                                    <includes>
+                                        <include>com.google.guava:guava</include>
+                                        <include>io.jsonwebtoken:jjwt</include>
+                                        <include>com.jcraft:jsch</include>
+                                        <include>com.jcraft:jzlib</include>
+                                    </includes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <configuration>
+                    <suppressionFile>${basedir}/src/main/config/suppressions.xml</suppressionFile>
                 </configuration>
             </plugin>
         </plugins>
@@ -313,6 +342,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <scope>compile</scope>
         </dependency>
         <!-- MCP: Apache POI used for exporting Excel spreadsheets -->
         <dependency>
@@ -348,15 +378,15 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.54</version>
-            <scope>provided</scope>
+            <version>0.1.55</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jzlib</artifactId>
             <version>1.1.3</version>
             <optional>true</optional>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.twitter4j</groupId>
@@ -532,6 +562,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
