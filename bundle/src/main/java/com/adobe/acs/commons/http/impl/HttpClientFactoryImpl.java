@@ -60,10 +60,10 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     @ObjectClassDefinition(name = "ACS AEM Commons - Http Components Fluent Executor Factory",
         description = "ACS AEM Commons - Http Components Fluent Executor Factory")
     public @interface Config {
-    	
-    	@AttributeDefinition(name = "Factory Name", description = "Name of this factory")
+       
+       @AttributeDefinition(name = "Factory Name", description = "Name of this factory")
     String factory_name();
-    	
+       
         @AttributeDefinition(name = "host name", description = "host name")
         String hostname();
 
@@ -89,7 +89,6 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
 
         @AttributeDefinition(name = "Connect Timeout", description = "Connect timeout in milliseconds", defaultValue = ""+DEFAULT_CONNECT_TIMEOUT)
         int conn_timeout();
-    	
     }
 
     private static final String PROP_HOST_DOMAIN = "hostname";

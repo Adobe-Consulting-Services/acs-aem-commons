@@ -19,17 +19,27 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingConstants;
@@ -46,31 +56,28 @@ import org.apache.sling.auth.core.AuthUtil;
 import org.apache.sling.commons.auth.Authenticator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.*;
-import org.osgi.service.metatype.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.search.QueryBuilder;
 
 @Component(service=ErrorPageHandlerService.class, immediate = false)
 @Designate(ocd=ErrorPageHandlerImpl.Config.class)

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
-import com.adobe.acs.commons.util.AemCapabilityHelper;
+
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Activate;
@@ -47,7 +47,7 @@ import java.util.Map;
 @Deprecated
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
-        		 "webconsole.configurationFactory.nameHint" + "=" + "Index: {index.name}, Property: {property.name}, on nodes [{node.types}]"
+               "webconsole.configurationFactory.nameHint" + "=" + "Index: {index.name}, Property: {property.name}, on nodes [{node.types}]"
         })
 @Designate(ocd=EnsurePropertyIndex.Config.class, factory=true)
 public class EnsurePropertyIndex {
@@ -98,8 +98,6 @@ public class EnsurePropertyIndex {
 
         @AttributeDefinition(name = "Unique", description = "Is in this index unique?", defaultValue = ""+DEFAULT_UNIQUE)
         boolean unique();
-
-    	
     }
 
     private static final String PROP_ASYNC = "index.async";

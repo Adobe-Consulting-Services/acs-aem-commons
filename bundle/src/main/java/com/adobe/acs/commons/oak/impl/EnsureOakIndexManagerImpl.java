@@ -60,17 +60,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
         immediate = true,
         service= {DynamicMBean.class, EnsureOakIndexManager.class},
         reference= {@Reference(
-        		    name = "com.adobe.acs.commons.oak.impl.AppliableEnsureOakIndex",
+                  name = "com.adobe.acs.commons.oak.impl.AppliableEnsureOakIndex",
                 cardinality = ReferenceCardinality.MULTIPLE,
                 service = AppliableEnsureOakIndex.class,
                 policy = ReferencePolicy.DYNAMIC
         )},
         property= {
-        		"webconsole.configurationFactory.nameHint" +"="+"Additional Ignore properties: {properties.ignore}",
-        		"felix.webconsole.title" +"="+ "Ensure Oak Index",
-        		"felix.webconsole.label"+"="+ "ensureOakIndex",
-        		"felix.webconsole.category"+"="+ "Sling",
-        		"jmx.objectname" +"="+ "com.adobe.acs.commons.oak:type=Ensure Oak Index"
+              "webconsole.configurationFactory.nameHint" +"="+"Additional Ignore properties: {properties.ignore}",
+              "felix.webconsole.title" +"="+ "Ensure Oak Index",
+              "felix.webconsole.label"+"="+ "ensureOakIndex",
+              "felix.webconsole.category"+"="+ "Sling",
+              "jmx.objectname" +"="+ "com.adobe.acs.commons.oak:type=Ensure Oak Index"
         }
 )
 @Designate(ocd=EnsureOakIndexManagerImpl.Config.class)
@@ -90,7 +90,7 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
         @AttributeDefinition(name = "Additional ignore properties",
                 description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.")
         String[] properties_ignore();
-        	
+           
     }
 
     // Thread-safe ArrayList to track EnsureIndex service registrations

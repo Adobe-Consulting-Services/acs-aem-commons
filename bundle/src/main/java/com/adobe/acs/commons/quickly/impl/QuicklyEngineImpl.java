@@ -78,12 +78,9 @@ public class QuicklyEngineImpl implements QuicklyEngine {
                 cardinality = 100,
                 defaultValue = { })
         String[] result_modes();
-    	
     }
     
-    
     private static final String[] DEFAULT_RESULT_MODES = { };
-
 
     public static final String PROP_RESULT_MODES = "result.modes";
 
