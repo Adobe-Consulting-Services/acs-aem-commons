@@ -105,7 +105,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     
     @ObjectClassDefinition(name="ACS AEM Commons - CQInclude Property Namespace")
     public @interface Config {
-    	
+       
         @AttributeDefinition(name = "Property Names",
                 description = "Namespace properties defined in this list. Leave empty for on 'name'. "
                         + " Defaults to [ name, cropParameter, fileNameParameter, fileReferenceParameter, "

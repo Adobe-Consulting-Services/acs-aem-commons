@@ -61,6 +61,7 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
+
 import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 @Component(service = Servlet.class,
@@ -90,44 +91,42 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Site Map Servlet", description = "Page and Asset Site Map Servlet")
     public @interface Config {
-    	
-    	@AttributeDefinition( name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
-    	String[] sling_servlet_resourceType();
-    	
-    	@AttributeDefinition(defaultValue = DEFAULT_EXTERNALIZER_DOMAIN, name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
+       
+       @AttributeDefinition( name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
+       String[] sling_servlet_resourceType();
+       
+       @AttributeDefinition(defaultValue = DEFAULT_EXTERNALIZER_DOMAIN, name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
         String externalizer_domain();
 
-    	@AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_LAST_MODIFIED, name = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
+       @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_LAST_MODIFIED, name = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
         boolean include_lastmod();
 
-    	@AttributeDefinition(name = "Change Frequency Properties", description = "The set of JCR property names which will contain the change frequency value.")
+       @AttributeDefinition(name = "Change Frequency Properties", description = "The set of JCR property names which will contain the change frequency value.")
         String[] changefreq_properties();
 
-    	@AttributeDefinition(name = "Priority Properties", description = "The set of JCR property names which will contain the priority value.")
-    	String[] priority_properties();
+       @AttributeDefinition(name = "Priority Properties", description = "The set of JCR property names which will contain the priority value.")
+       String[] priority_properties();
 
-    	@AttributeDefinition(name = "DAM Folder Property", description = "The JCR property name which will contain DAM folders to include in the sitemap.")
+       @AttributeDefinition(name = "DAM Folder Property", description = "The JCR property name which will contain DAM folders to include in the sitemap.")
         String damassets_property();
 
-    	@AttributeDefinition(name = "DAM Asset MIME Types", description = "MIME types allowed for DAM assets.")
-    	String[] damassets_types();
+       @AttributeDefinition(name = "DAM Asset MIME Types", description = "MIME types allowed for DAM assets.")
+       String[] damassets_types();
 
-    	@AttributeDefinition(name = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+       @AttributeDefinition(name = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
         boolean exclude_property();
 
-    	@AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_INHERITANCE_VALUE, name = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
-    	boolean include_inherit();
+       @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_INHERITANCE_VALUE, name = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
+       boolean include_inherit();
 
-    	@AttributeDefinition(defaultValue = ""+DEFAULT_EXTENSIONLESS_URLS, name = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
-    	boolean extensionless_urls();
+       @AttributeDefinition(defaultValue = ""+DEFAULT_EXTENSIONLESS_URLS, name = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
+       boolean extensionless_urls();
 
-    	@AttributeDefinition(defaultValue = ""+DEFAULT_REMOVE_TRAILING_SLASH, name = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
-    	boolean remove_slash();
+       @AttributeDefinition(defaultValue = ""+DEFAULT_REMOVE_TRAILING_SLASH, name = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
+       boolean remove_slash();
 
-    	@AttributeDefinition(name = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
+       @AttributeDefinition(name = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
         String character_encoding();
-
-    	
     }
 
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";

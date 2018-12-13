@@ -67,10 +67,10 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     }
     
    @Override
-	protected void doActivate(ComponentContext context) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+   protected void doActivate(ComponentContext context) throws Exception {
+      // TODO Auto-generated method stub
+      
+   }
 
    @Activate
     protected void activate(DispatcherMaxAgeHeaderFilter.Config config) throws Exception {
