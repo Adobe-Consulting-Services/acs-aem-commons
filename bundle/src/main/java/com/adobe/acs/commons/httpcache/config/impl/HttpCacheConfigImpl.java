@@ -61,8 +61,8 @@ import com.adobe.acs.commons.httpcache.util.UserUtils;
 @Component(service=HttpCacheConfig.class,
 configurationPolicy=ConfigurationPolicy.REQUIRE,
 property= {
-      "webconsole.configurationFactory.nameHint" + "=" +
-             "Order: {httpcache.config.order}, "
+      "webconsole.configurationFactory.nameHint" + "=" 
+                 + "Order: {httpcache.config.order}, "
                  + "Request URIs: {httpcache.config.requesturi.patterns}, "
                  + "Request URIs blacklist: {httpcache.config.requesturi.patterns.blacklisted}, "
                  + "Authentication: {httpcache.config.request.authentication}, "

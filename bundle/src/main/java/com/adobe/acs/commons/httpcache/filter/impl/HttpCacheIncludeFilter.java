@@ -44,7 +44,7 @@ import java.io.IOException;
  */
 @Component(service=Filter.class,
 property= {"sling.filter.scope=INCLUDE",
-		Constants.SERVICE_RANKING +":Integer=0"})
+      Constants.SERVICE_RANKING +":Integer=0"})
 public class HttpCacheIncludeFilter extends AbstractHttpCacheFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheIncludeFilter.class);
 
