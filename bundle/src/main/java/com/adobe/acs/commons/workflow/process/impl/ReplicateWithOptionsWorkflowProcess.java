@@ -36,7 +36,7 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -144,16 +143,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = Arrays.stream(StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator())).
-                    map(StringUtils::trim).
-                    toArray(String[]::new);
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));
