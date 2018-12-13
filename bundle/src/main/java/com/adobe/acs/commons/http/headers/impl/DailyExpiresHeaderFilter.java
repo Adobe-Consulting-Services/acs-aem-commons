@@ -30,7 +30,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 //@formatter:off
 @Component(property = { "webconsole.configurationFactory.nameHint" + "="
       + "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]", }, factory = "com.adobe.acs.commons.http.headers.impl.DailyExpiresHeaderFilter", configurationPolicy = ConfigurationPolicy.REQUIRE)
-@Designate(ocd = DailyExpiresHeaderFilter.Config.class)
+@Designate(ocd = DailyExpiresHeaderFilter.Config.class, factory=true)
 // @formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
    

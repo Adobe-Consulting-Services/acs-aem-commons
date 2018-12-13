@@ -57,7 +57,7 @@ import java.util.Scanner;
               "webconsole.configurationFactory.nameHint" + "=" + "Health Check Status E-mailer running every [ {scheduler.expression} ] using Health Check Tags [ {hc.tags} ] to [ {recipients.email-addresses} ]"
         }
 )
-@Designate(ocd=HealthCheckStatusEmailer.Config.class)
+@Designate(ocd=HealthCheckStatusEmailer.Config.class, factory=true)
 public class HealthCheckStatusEmailer implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 

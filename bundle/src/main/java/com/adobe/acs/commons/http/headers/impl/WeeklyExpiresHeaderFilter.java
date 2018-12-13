@@ -39,7 +39,7 @@ service=Filter.class,
     factory = "WeeklyExpiresHeaderFilter", property= {
     		"webconsole.configurationFactory.nameHint" + "=" + "Expires Each week on day {expires.day-of-week} at {expires.time} for Patterns: [{filter.pattern}]"
     })
-@Designate(ocd=WeeklyExpiresHeaderFilter.Config.class)
+@Designate(ocd=WeeklyExpiresHeaderFilter.Config.class,factory=true)
 //@formatter:on
 public class WeeklyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 	

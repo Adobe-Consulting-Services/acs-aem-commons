@@ -66,7 +66,7 @@ import java.util.ListIterator;
                 + "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
            }
 )
-@Designate(ocd=GroupHttpCacheConfigExtension.Config.class)
+@Designate(ocd=GroupHttpCacheConfigExtension.Config.class,factory=true)
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
     

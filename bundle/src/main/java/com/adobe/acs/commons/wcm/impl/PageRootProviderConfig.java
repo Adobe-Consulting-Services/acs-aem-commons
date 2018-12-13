@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         factory = "PageRootProviderConfig",
         service=PageRootProviderConfig.class)
-@Designate(ocd=PageRootProviderConfig.Config.class)
+@Designate(ocd=PageRootProviderConfig.Config.class,factory=true)
 /**
  * Configuration instance for Page Root Provider.
  * Use service.ranking to guarantee priority between conflicting configurations.

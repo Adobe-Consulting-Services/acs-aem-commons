@@ -29,6 +29,7 @@ import org.apache.sling.commons.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,6 @@ property =
 { SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/qr-code/config",
   SLING_SERVLET_EXTENSIONS + "=json", 
   SLING_SERVLET_METHODS + "=GET"})
-
 public class QrCodeServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(QrCodeServlet.class);
 
