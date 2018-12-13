@@ -92,9 +92,9 @@ import java.util.regex.Pattern;
  * If the Enforce MD5 filter is enabled, the paths will be like /path/to/clientlib.ACSHASH123456789.css or /path/to/clientlib.min.ACSHASH1234589.css (if minification is enabled)
  */
 @Component(service = {DynamicMBean.class, TransformerFactory.class, EventHandler.class}, property= {
-		"pipeline.type" + "=" + "versioned-clientlibs",
-		EventConstants.EVENT_TOPIC  + "=" +  "com/adobe/granite/ui/librarymanager/INVALIDATED",
-		"jmx.objectname" + "=" + "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache"
+      "pipeline.type" + "=" + "versioned-clientlibs",
+      EventConstants.EVENT_TOPIC  + "=" +  "com/adobe/granite/ui/librarymanager/INVALIDATED",
+      "jmx.objectname" + "=" + "com.adobe.acs.commons.rewriter:type=VersionedClientlibsTransformerMd5Cache"
 })
 public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCacheMBean<VersionedClientLibraryMd5CacheKey, String> implements TransformerFactory, EventHandler, CacheMBean {
 
@@ -118,7 +118,6 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         @AttributeDefinition(name="Enforce MD5", description="Enables a filter which returns a 404 error if the MD5 in the request does not match the expected value",
             defaultValue = ""+DEFAULT_ENFORCE_MD5)
         boolean enforce_md5();
-    	
     }
 
     private static final String PROP_MD5_CACHE_SIZE = "md5cache.size";

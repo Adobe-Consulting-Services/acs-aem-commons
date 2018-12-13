@@ -51,8 +51,8 @@ import java.util.Map;
  */
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE, service=TransformerFactory.class, property= {
-        		"pipeline.type" + "=" + "resourceresolver-map",
-        		"webconsole.configurationFactory.nameHint"  + "=" + "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]"
+              "pipeline.type" + "=" + "resourceresolver-map",
+              "webconsole.configurationFactory.nameHint"  + "=" + "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]"
         })
 @Designate(ocd=ResourceResolverMapTransformerFactory.Config.class,factory=true)
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
@@ -62,7 +62,7 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
     @ObjectClassDefinition(name = "ACS AEM Commons - Resource Resolver Map Rewriter",
         description = "Rewriter pipeline component which resourceResolver.map's any element/attribute.")
     public @interface Config {
-    	
+       
         @AttributeDefinition(name = "Rewrite Attributes",
                 description = "List of element/attribute pairs to rewrite",
                 defaultValue = {"img:src"})

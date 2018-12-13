@@ -53,39 +53,38 @@ import com.adobe.acs.commons.util.ParameterUtil;
  */
 @Component(
       configurationPolicy = ConfigurationPolicy.REQUIRE, service=TransformerFactory.class,property= {
-    		  "webconsole.configurationFactory.nameHint" + "=" + "Pipeline: {pipeline.type}"
+            "webconsole.configurationFactory.nameHint" + "=" + "Pipeline: {pipeline.type}"
       })
-
 @Designate(ocd=StaticReferenceRewriteTransformerFactory.Config.class,factory=true)
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
-	
-	@ObjectClassDefinition(name= "ACS AEM Commons - Static Reference Rewriter",
-	        description = "Rewriter pipeline component which rewrites host name on static references "
-	                + "for cookie-less domain support")
-	public @interface Config {
-		@AttributeDefinition(name = "Rewriter Pipeline Type",
+   
+   @ObjectClassDefinition(name= "ACS AEM Commons - Static Reference Rewriter",
+           description = "Rewriter pipeline component which rewrites host name on static references "
+                   + "for cookie-less domain support")
+   public @interface Config {
+      @AttributeDefinition(name = "Rewriter Pipeline Type",
             description = "Type identifier to be referenced in rewriter pipeline configuration.")
-		String pipeline_type();
-		
-		@AttributeDefinition(name = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", defaultValue = {
-	            "img:src", "link:href", "script:src" })
-	    String[] attributes();
+      String pipeline_type();
+      
+      @AttributeDefinition(name = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", defaultValue = {
+               "img:src", "link:href", "script:src" })
+       String[] attributes();
 
-		@AttributeDefinition(name = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
-	    String[] matchingPatterns();
+      @AttributeDefinition(name = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
+       String[] matchingPatterns();
 
-		@AttributeDefinition(defaultValue = ""+DEFAULT_HOST_COUNT, name = "Static Host Count",
-	            description = "Number of static hosts available.")
-	    int host_count();
+      @AttributeDefinition(defaultValue = ""+DEFAULT_HOST_COUNT, name = "Static Host Count",
+               description = "Number of static hosts available.")
+       int host_count();
 
-		@AttributeDefinition(name = "Static Host Pattern", description = "Pattern for generating static host domain names. "
-	            + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.")
-	    String[] host_pattern();
+      @AttributeDefinition(name = "Static Host Pattern", description = "Pattern for generating static host domain names. "
+               + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.")
+       String[] host_pattern();
 
-		@AttributeDefinition(name = "Path Prefixes",
-	            description = "Path prefixes to rewrite.")
-	    String[] prefixes();
-	}
+      @AttributeDefinition(name = "Path Prefixes",
+               description = "Path prefixes to rewrite.")
+       String[] prefixes();
+   }
 
     public final class StaticReferenceRewriteTransformer extends AbstractTransformer {
 

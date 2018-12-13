@@ -86,7 +86,8 @@ public class JsonEventLogger implements EventHandler {
             return null;
         }
     }
-    @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
+    @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", 
+          description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
     public @interface Config {
         @AttributeDefinition(name = "Event Topics",
                 description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
