@@ -21,7 +21,6 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
-import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -71,12 +70,13 @@ public interface HierarchicalElement {
 
     default String getNodeName() {
         String name = getName();
-        if (isFile() && name.contains(".")) {
+        if (name == null || (isFile() && name.contains("."))) {
             return name;
-        } else if (name != null && name.matches("\\w+")) {
+        }
+        if (name.matches("\\w+")) {
             return name;
         } else {
-            return NameUtil.createValidDamName(name, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING, "-");
+            return NameUtil.createValidDamName(name);
         }
     }
 
