@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
-import com.adobe.acs.commons.functions.impl.ConsumerWithException;
-import com.adobe.acs.commons.functions.impl.FunctionWithException;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
@@ -38,9 +38,9 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.InvalidateByCacheC
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
 import com.adobe.acs.commons.util.impl.JcrCacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -422,11 +422,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     }
 
-    public void withSession(final ConsumerWithException<Session> onSuccess){
+    public void withSession(final CheckedConsumer<Session> onSuccess){
         withSession(onSuccess, null);
     }
 
-    public void withSession(final ConsumerWithException<Session> onSuccess, final ConsumerWithException<Exception> onError)
+    public void withSession(final CheckedConsumer<Session> onSuccess, final CheckedConsumer<Exception> onError)
     {
         withSession(session -> {
             onSuccess.accept(session);
@@ -436,11 +436,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         );
     }
 
-    public <T> T withSession(final FunctionWithException<Session, T> onSuccess){
+    public <T> T withSession(final CheckedFunction<Session, T> onSuccess){
         return withSession(onSuccess, null);
     }
 
-    public <T> T withSession(final FunctionWithException<Session, T> onSuccess, final ConsumerWithException<Exception> onError){
+    public <T> T withSession(final CheckedFunction<Session, T> onSuccess, final CheckedConsumer<Exception> onError){
         try(ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
             final Session session = resourceResolver.adaptTo(Session.class);
             return onSuccess.apply(session);

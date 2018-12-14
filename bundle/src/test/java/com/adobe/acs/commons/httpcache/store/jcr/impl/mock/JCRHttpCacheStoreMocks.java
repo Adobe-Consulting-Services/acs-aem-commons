@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.mock;
 
-import com.adobe.acs.commons.functions.impl.ConsumerWithException;
-import com.adobe.acs.commons.functions.impl.FunctionWithException;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
@@ -119,10 +119,10 @@ public class JCRHttpCacheStoreMocks {
         doCallRealMethod().when(store).invalidate(cacheKey);
         doCallRealMethod().when(store).clearCache();
         doCallRealMethod().when(store).getCacheEntry(any(String.class));
-        doCallRealMethod().when(store).withSession(any(ConsumerWithException.class));
-        doCallRealMethod().when(store).withSession(any(ConsumerWithException.class), any(ConsumerWithException.class));
-        doCallRealMethod().when(store).withSession(any(FunctionWithException.class));
-        doCallRealMethod().when(store).withSession(any(FunctionWithException.class), any(ConsumerWithException.class));
+        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class));
+        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class), any(CheckedConsumer.class));
+        doCallRealMethod().when(store).withSession(any(CheckedFunction.class));
+        doCallRealMethod().when(store).withSession(any(CheckedFunction.class), any(CheckedConsumer.class));
     }
 
     private CacheKeyMock generateCacheKey(Arguments arguments) {
