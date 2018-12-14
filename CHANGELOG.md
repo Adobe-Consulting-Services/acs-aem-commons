@@ -35,6 +35,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
+- #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
+- #1609 - EnsureOakIndex excludes property seeds, and sub-tree [oak:QueryIndexDefinition]/facets, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
 
 ## [3.19.0] - 2018-11-03
 

@@ -20,37 +20,20 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
-
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.vault.util.Text;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import javax.jcr.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
@@ -94,7 +77,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         if (node == null) {
             log.warn("Path [ {} ] not found while generating checksums", path);
-            return new LinkedHashMap<String, String>();
+            return new LinkedHashMap<>();
         }
 
         return traverseTree(node, options);
@@ -114,14 +97,15 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         final Map<String, String> checksums = new LinkedHashMap<>();
 
-        if (isChecksumable(node, options)) {
+        if (isExcludedSubTree(node, options)) {
+            return checksums;
+        } else if (isChecksumable(node, options) && !isExcludedNodeName(node, options)) {
             // Tree-traversal has found a node to checksum (checksum will include all valid sub-tree nodes)
-            checksums.put(node.getPath(),
-                    generatedNodeChecksum(node.getPath(), node, options));
-
-            log.debug("Top Level Node: {} ~> {}",
-                    node.getPath(),
-                    checksums.get(node.getPath()));
+            final String checksum = generatedNodeChecksum(node.getPath(), node, options);
+            if (checksum != null) {
+                checksums.put(node.getPath(), checksum);
+                log.debug("Top Level Node: {} ~> {}", node.getPath(), checksum);
+            }
         } else {
             // Traverse the tree for checksum-able node systems
             NodeIterator children = node.getNodes();
@@ -138,7 +122,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
 
     /**
-     * Ensures the node's primary type is included in the Included Node Types and NOT in the Excluded Node Types.
+     * Ensures the node's primary type is included in the Included Node Types and NOT in the Excluded Node Types and NOT in the Excluded Node Names.
      *
      * @param node    the candidate node
      * @param options the checksum options containing the included and excluded none types
@@ -168,13 +152,17 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
                                                   final ChecksumGeneratorOptions options)
             throws RepositoryException, IOException {
 
-        final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
+        if (isExcludedSubTree(node, options)) { return ""; }
 
         final Map<String, String> checksums = new LinkedHashMap<String, String>();
 
-        /* Create checksums for Node's properties */
-        checksums.put(getChecksumKey(aggregateNodePath, node.getPath()),
-                generatePropertyChecksums(aggregateNodePath, node, options));
+        if (!isExcludedNodeName(node, options)) {
+            /* Create checksums for Node's properties */
+            final String checksum = generatePropertyChecksums(aggregateNodePath, node, options);
+            if (checksum != null) {
+                checksums.put(getChecksumKey(aggregateNodePath, node.getPath()), checksum);
+            }
+        }
 
         /* Then process node's children */
 
@@ -185,26 +173,28 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         while (children.hasNext()) {
             final Node child = children.nextNode();
 
-            if (!nodeTypeExcludes.contains(child.getPrimaryNodeType().getName())) {
+            if (isExcludedSubTree(child, options)) {
+                // Skip this node!
+            } else if (!isExcludedNodeType(child, options)) {
                 if (hasOrderedChildren) {
                     // Use the order dictated by the JCR
-                    checksums.put(
-                            getChecksumKey(aggregateNodePath, child.getPath()),
-                            generatedNodeChecksum(aggregateNodePath, child, options));
+                    final String checksum = generatedNodeChecksum(aggregateNodePath, child, options);
+                    if (checksum != null) {
+                        checksums.put(getChecksumKey(aggregateNodePath, child.getPath()), checksum);
 
-                    log.debug("Aggregated Ordered Node: {} ~> {}",
-                            getChecksumKey(aggregateNodePath, child.getPath()),
-                            checksums.get(getChecksumKey(aggregateNodePath, child.getPath())));
+                        log.debug("Aggregated Ordered Node: {} ~> {}",
+                                getChecksumKey(aggregateNodePath, child.getPath()), checksum);
+                    }
+
                 } else {
-                    // If order is not dictated by JCR, collect so we can sort later
-                    lexicographicallySortedChecksums.put(
-                            getChecksumKey(aggregateNodePath, child.getPath()),
-                            generatedNodeChecksum(aggregateNodePath, child, options));
+                    final String checksum = generatedNodeChecksum(aggregateNodePath, child, options);
+                    if (checksum != null) {
+                        // If order is not dictated by JCR, collect so we can sort later
+                        lexicographicallySortedChecksums.put(getChecksumKey(aggregateNodePath, child.getPath()), checksum);
 
-                    log.debug("Aggregated Unordered Node: {} ~> {}",
-                            getChecksumKey(aggregateNodePath, child.getPath()),
-                            lexicographicallySortedChecksums.get(getChecksumKey(aggregateNodePath, child.getPath())));
-
+                        log.debug("Aggregated Unordered Node: {} ~> {}",
+                                getChecksumKey(aggregateNodePath, child.getPath()), checksum);
+                    }
                 }
             }
         }
@@ -215,9 +205,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         }
 
         final String nodeChecksum = aggregateChecksums(checksums);
-        log.debug("Node [ {} ] has a aggregated checksum of [ {} ]",
-                getChecksumKey(aggregateNodePath, node.getPath()),
-                nodeChecksum);
+        log.debug("Node [ {} ] has a aggregated checksum of [ {} ]", getChecksumKey(aggregateNodePath, node.getPath()), nodeChecksum);
 
         return nodeChecksum;
     }
@@ -372,6 +360,8 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @return the checksum value
      */
     protected String aggregateChecksums(final Map<String, String> checksums) {
+        if (checksums.isEmpty()) { return null; }
+
         StringBuilder data = new StringBuilder();
 
         for (Map.Entry<String, String> entry : checksums.entrySet()) {
@@ -379,5 +369,60 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
         }
 
         return DigestUtils.sha1Hex(data.toString());
+    }
+
+    protected boolean isExcludedSubTree(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+        for (String exclude : options.getExcludedSubTrees()) {
+            if (isPathFragmentMatch(node, exclude)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected boolean isExcludedNodeName(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+        for (String exclude : options.getExcludedNodeNames()) {
+            if (isPathFragmentMatch(node, exclude)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    protected boolean isExcludedNodeType(final Node node, final ChecksumGeneratorOptions options) throws RepositoryException {
+        return options.getExcludedNodeTypes().contains(node.getPrimaryNodeType().getName());
+    }
+
+    private boolean isPathFragmentMatch(final Node node, final String fragmentPath) throws RepositoryException {
+        final List<String> fragments = Arrays.asList(StringUtils.split(fragmentPath, "/"));
+
+        Collections.reverse(fragments);
+
+        Node current = node;
+        for (String fragment : fragments) {
+
+            fragment = StringUtils.stripToNull(fragment);
+
+            if (current == null) {
+                return false;
+            } else if (StringUtils.startsWith(fragment,"[") && StringUtils.endsWith(fragment, "]")) {
+                final String nodeType = StringUtils.stripToEmpty(StringUtils.substringBetween(fragment, "[", "]"));
+
+                if (!current.isNodeType(nodeType)) {
+                    return false;
+                }
+            } else {
+                if (!StringUtils.equals(fragment, current.getName())) {
+                    return false;
+                }
+            }
+
+            current = current.getParent();
+        }
+
+        return true;
     }
 }

@@ -76,11 +76,15 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
     static final String PN_REINDEX_COUNT = "reindexCount";
 
+    static final String PN_SEED = "seed";
+
     static final String PN_REINDEX = "reindex";
+
+    static final String NN_FACETS = "facets";
 
     static final String ENSURE_OAK_INDEX_USER_NAME = "Ensure Oak Index";
 
-    static final String[] MANDATORY_IGNORE_PROPERTIES = new String[]{
+    static final String[] MANDATORY_IGNORE_PROPERTIES = {
             // JCR Properties
             JcrConstants.JCR_PRIMARYTYPE,
             JcrConstants.JCR_LASTMODIFIED,
@@ -97,7 +101,15 @@ public class EnsureOakIndexJobHandler implements Runnable {
             // Oak Index Properties
             PN_REINDEX,
             PN_REINDEX_COUNT,
+            PN_SEED
     };
+
+    static final String[] MANDATORY_EXCLUDE_SUB_TREES = {
+            "[" + NT_OAK_QUERY_INDEX_DEFINITION + "]/" + NN_FACETS
+    };
+
+    static final String[] MANDATORY_EXCLUDE_NODE_NAMES = new String[]{ };
+
     private static final String[] NAME_PROPERTIES = new String[] {"propertyNames", "declaringNodeTypes"} ;
 
     static final String SERVICE_NAME = "ensure-oak-index";
@@ -105,6 +117,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
     private final EnsureOakIndex ensureOakIndex;
 
     private final List<String> ignoreProperties = new ArrayList<>();
+    private final List<String> excludeSubTrees = new ArrayList<>();
+    private final List<String> excludeNodeNames = new ArrayList<>();
 
     private String oakIndexesPath;
 
@@ -117,6 +131,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         this.ensureDefinitionsPath = ensureDefinitionsPath;
 
         this.ignoreProperties.addAll(Arrays.asList(MANDATORY_IGNORE_PROPERTIES));
+        this.excludeSubTrees.addAll(Arrays.asList(MANDATORY_EXCLUDE_SUB_TREES));
+        this.excludeNodeNames.addAll(Arrays.asList(MANDATORY_EXCLUDE_NODE_NAMES));
 
         if (ensureOakIndex != null) {
             this.ignoreProperties.addAll(ensureOakIndex.getIgnoreProperties());
@@ -482,6 +498,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         final CustomChecksumGeneratorOptions ensureDefinitionOptions = new CustomChecksumGeneratorOptions();
         ensureDefinitionOptions.addIncludedNodeTypes(new String[]{NT_OAK_UNSTRUCTURED});
         ensureDefinitionOptions.addExcludedProperties(this.ignoreProperties);
+        ensureDefinitionOptions.addExcludedSubTrees(this.excludeSubTrees);
+        ensureDefinitionOptions.addExcludedNodeNames(this.excludeNodeNames);
 
         final Map<String, String> srcChecksum =
                 checksumGenerator.generateChecksums(session, ensureDefinition.getPath(), ensureDefinitionOptions);
