@@ -73,10 +73,10 @@ public interface HierarchicalElement {
         String name = getName();
         if (isFile() && name.contains(".")) {
             return name;
-        } else if (JcrUtil.isValidName(name)) {
+        } else if (name != null && name.matches("\\w+")) {
             return name;
         } else {
-            return JcrUtil.createValidName(name, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING, "-");
+            return NameUtil.createValidDamName(name, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING, "-");
         }
     }
 

@@ -320,20 +320,27 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testSftpUrlSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException {
-        String urlWithPort = "sftp://somehost:20/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        configureSftpFields();
+        ingestor.fileBasePath = "sftp://somehost:20";
+        String sourcePath = "/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        String expectedSourcePath = sourcePath.replaceAll("[\\W&&[^/]]", "-");
+        String urlWithPort = "sftp://somehost:20" + sourcePath;
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(urlWithPort);
 
-        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem1.path);
+        assertEquals(sourcePath, elem1.path);
         assertEquals("sftp://somehost:20/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem1.uri.toString());
         assertEquals("somehost", elem1.uri.getHost());
         assertEquals(20, elem1.uri.getPort());
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath());
 
-        String urlWithoutPort = "sftp://somehost2/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        ingestor.fileBasePath = "sftp://somehost2";
+        String urlWithoutPort = "sftp://somehost2" + sourcePath;
         FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(urlWithoutPort);
 
-        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem2.path);
+        assertEquals(sourcePath, elem2.path);
         assertEquals("sftp://somehost2/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem2.uri.toString());
         assertEquals("somehost2", elem2.uri.getHost());
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath());
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {
