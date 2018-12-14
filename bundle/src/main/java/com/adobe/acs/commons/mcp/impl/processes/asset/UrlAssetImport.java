@@ -87,8 +87,7 @@ public class UrlAssetImport extends AssetIngestor {
     @FormField(
             name = "Import data file",
             description = "Data file containing asset import data",
-            component = FileUploadComponent.class,
-            required = true
+            component = FileUploadComponent.class
     )
     transient RequestParameter importFile;
 
@@ -107,7 +106,7 @@ public class UrlAssetImport extends AssetIngestor {
             options = ("default=30000")
     )
     private int timeout = 30000;
-    
+
     @FormField(
             name = "Username",
             description = "Username for connections that require login",
@@ -221,7 +220,7 @@ public class UrlAssetImport extends AssetIngestor {
         manager.deferredWithResolver(r -> {
             JcrUtil.createPath(jcrBasePath, DEFAULT_FOLDER_TYPE, DEFAULT_FOLDER_TYPE, r.adaptTo(Session.class), true);
             folders.values().forEach(f
-                    -> manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+                    -> manager.deferredWithResolver(Actions.retry(retries, retryPause, rr -> {
                         manager.setCurrentItem(f.getSourcePath());
                         createFolderNode(f, rr);
                     }))
@@ -238,7 +237,7 @@ public class UrlAssetImport extends AssetIngestor {
                 manager.setCurrentItem(String.format("Asset %s (line %s)", file.getItemName(), lineNumber));
                 try {
                     if (canImportFile(file.getSource())) {
-                        manager.deferredWithResolver(Actions.retry(5, 100, importAsset(file.getSource(), manager)));
+                        manager.deferredWithResolver(Actions.retry(retries, retryPause, importAsset(file.getSource(), manager)));
                     } else if (file.getSource().getLength() < 0) {
                         incrementCount(skippedFiles, 1);
                         throw new IOException("Unable to download " + file.getSourcePath());
@@ -263,7 +262,7 @@ public class UrlAssetImport extends AssetIngestor {
 
     private void importRenditions(FileOrRendition file, ActionManager manager) {
         file.getRenditions().forEach((rendition, renditionFile) -> {
-            manager.deferredWithResolver(Actions.retry(5, 500, rr -> {
+            manager.deferredWithResolver(Actions.retry(retries, retryPause, rr -> {
                 try {
                     long lineNumber = fileData.getRowNum(renditionFile.getProperties());
                     manager.setCurrentItem(String.format("Rendition %s (line %s)", renditionFile.getItemName(), lineNumber));
@@ -296,7 +295,7 @@ public class UrlAssetImport extends AssetIngestor {
     protected void updateMetadata(ActionManager manager) throws IOException {
         manager.setCurrentItem(jcrBasePath);
         files.stream().filter(this::canImportContainingFolder).forEach(file
-                -> manager.deferredWithResolver(Actions.retry(5, 500, updateMetadata(file)))
+                -> manager.deferredWithResolver(Actions.retry(retries, retryPause, updateMetadata(file)))
         );
     }
 
