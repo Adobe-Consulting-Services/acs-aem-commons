@@ -73,6 +73,14 @@ public class FileAssetIngestor extends AssetIngestor {
     String fileBasePath;
 
     @FormField(
+            name = "Connection timeout",
+            description = "Connection timeout (in milliseconds) for SFTP connection",
+            required = false,
+            options = ("default=30000")
+    )
+    int timeout = 30000;
+
+    @FormField(
             name = "Username",
             description = "Username for SFTP connection",
             required = false
@@ -324,7 +332,7 @@ public class FileAssetIngestor extends AssetIngestor {
 
                 com.jcraft.jsch.Session session = jsch.getSession(username, uri.getHost(), port);
                 session.setConfig("StrictHostKeyChecking", "no");
-                session.setTimeout(retryPause);
+                session.setTimeout(timeout);
                 session.setPassword(password);
                 session.connect();
                 channel = (ChannelSftp) session.openChannel("sftp");

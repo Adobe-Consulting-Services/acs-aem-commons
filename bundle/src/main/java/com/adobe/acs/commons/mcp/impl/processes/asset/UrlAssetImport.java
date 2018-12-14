@@ -100,6 +100,14 @@ public class UrlAssetImport extends AssetIngestor {
     private String defaultPrefix = "file:/";
 
     @FormField(
+            name = "Connection timeout",
+            description = "HTTP Connection timeout (in milliseconds)",
+            required = true,
+            options = ("default=30000")
+    )
+    private int timeout = 30000;
+
+    @FormField(
             name = "Username",
             description = "Username for connections that require login",
             required = false
@@ -131,11 +139,11 @@ public class UrlAssetImport extends AssetIngestor {
             HttpClientBuilder clientBuilder = httpFactory.newBuilder();
             clientBuilder.setDefaultSocketConfig(
                     SocketConfig.custom()
-                            .setSoTimeout(retryPause)
+                            .setSoTimeout(timeout)
                             .build());
             clientBuilder.setDefaultRequestConfig(
                     RequestConfig.custom()
-                            .setConnectTimeout(retryPause)
+                            .setConnectTimeout(timeout)
                             .build()
             );
             httpClient = clientBuilder.build();
