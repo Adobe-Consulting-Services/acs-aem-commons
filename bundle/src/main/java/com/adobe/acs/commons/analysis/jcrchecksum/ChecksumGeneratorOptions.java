@@ -73,13 +73,16 @@ public interface ChecksumGeneratorOptions {
     Set<String> getSortedProperties();
 
     /**
-     * @return the named node subTrees to exclude
+     * @return the named node subTrees to exclude (the matching node and any sub-nodes will NOT be traversed/checksumed)
      */
-    default Set<String> getExcludedSubTrees() { return  Collections.EMPTY_SET; }
+    default Set<String> getExcludedSubTrees() {
+        return  Collections.EMPTY_SET;
+    }
 
     /**
-     * @return the nodeNames to exclude (sub-nodes will be traversed)
+     * @return the nodeNames to exclude (sub-nodes WILL be traverse/checksumed)
      */
-    default Set<String> getExcludedNodeNames() { return  Collections.EMPTY_SET; }
-
+    default Set<String> getExcludedNodeNames() {
+        return  Collections.EMPTY_SET;
+    }
 }
