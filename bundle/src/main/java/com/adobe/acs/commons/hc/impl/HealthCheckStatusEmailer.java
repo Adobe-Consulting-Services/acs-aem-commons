@@ -81,9 +81,7 @@ public class HealthCheckStatusEmailer implements Runnable {
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
-    private static final Object LOCK = new Object();
-
-    private Calendar nextEmailTime = Calendar.getInstance();
+    private volatile Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
 
@@ -199,12 +197,11 @@ public class HealthCheckStatusEmailer implements Runnable {
         log.info("Executed ACS Commons Health Check E-mailer scheduled service in [ {} ms ]", timeTaken);
 
         if (!sendEmailOnlyOnFailure || failure.size() > 0) {
-            if (nextEmailTime == null || Calendar.getInstance().after(nextEmailTime)) {
+            Calendar now = Calendar.getInstance();
+            if (nextEmailTime == null || now.equals(nextEmailTime) || now.after(nextEmailTime)) {
                 sendEmail(success, failure, timeTaken);
-                synchronized (LOCK) {
-                    nextEmailTime = Calendar.getInstance();
-                    nextEmailTime.add(Calendar.MINUTE, throttleInMins);
-                }
+                now.add(Calendar.MINUTE, throttleInMins);
+                nextEmailTime = now;
             } else {
                 log.info("Did not send e-mail as it did not meet the e-mail throttle configured time of a [ {} ] minute quiet period. Next valid time to e-mail is [ {} ]", throttleInMins, nextEmailTime.getTime());
             }
