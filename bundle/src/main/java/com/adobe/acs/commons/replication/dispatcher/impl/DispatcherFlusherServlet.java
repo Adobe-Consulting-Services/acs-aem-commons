@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
         selectors = "flush", methods = "POST")
+
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
