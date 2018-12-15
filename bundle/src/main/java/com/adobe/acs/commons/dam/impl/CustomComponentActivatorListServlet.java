@@ -19,16 +19,22 @@
  */
 package com.adobe.acs.commons.dam.impl;
 
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
+
+
 import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+
+import javax.servlet.Servlet;
+
 import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,47 +47,55 @@ import com.adobe.acs.commons.util.ParameterUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+
 @SuppressWarnings("serial")
 @SlingServletPaths("/bin/acs-commons/dam/custom-components.json")
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Component()
 @Designate(ocd=CustomComponentActivatorListServlet.Config.class)
+
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 
-    private static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
-    private static final String FONTS =  "xmpTPg:Fonts=/apps/acs-commons/dam/content/admin/fonts";
-    private static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
-    private static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
+	static final String HISTORY = "xmpMM:History=/apps/acs-commons/dam/content/admin/history";
+	static final String FONTS = "xmpTPg:Fonts=/apps/acs-commons/dam/content/admin/fonts";
+	static final String COLORANTS = "xmpTPg:Colorants=/apps/acs-commons/dam/content/admin/color-swatches";
+	static final String LOCATION = "location=/apps/acs-commons/dam/content/admin/asset-location-map";
+	static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
 
-    static final String[] DEFAULT_COMPONENTS = { HISTORY, FONTS, COLORANTS, LOCATION };
+	@ObjectClassDefinition(description = "ACS AEM Commons - Custom DAM Component List Servlet")
+	public @interface Config {
 
-       
-    @ObjectClassDefinition(name="ACS AEM Commons - Custom Component Activator List Servlet")
-    public @interface Config {
-        @AttributeDefinition(defaultValue= {HISTORY, FONTS, COLORANTS, LOCATION },name="Components",
-                description="Map in the form <propertyName>=<replacement path>")
-        String[] components() default { HISTORY, FONTS, COLORANTS, LOCATION };
-    }
+		@AttributeDefinition(description = "Map in the form <propertyName>=<replacement path>", defaultValue = {
+				HISTORY, FONTS, COLORANTS, LOCATION })
+		String[] components();
+	}
 
-    private JsonObject json;
+	private JsonObject json;
 
-    @Activate
-    protected void activate(Config conf) {
-        Map<String, String> components = ParameterUtil.toMap(PropertiesUtil.toStringArray(conf.components(), DEFAULT_COMPONENTS),"=");
-        JsonArray array = new JsonArray();
-        for (Map.Entry<String, String> entry : components.entrySet()) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("propertyName", entry.getKey());
-            obj.addProperty("componentPath", entry.getValue());
-            array.add(obj);
-        }
-        this.json = new JsonObject();
-        json.add("components", array);
-    }
 
-    @Override
-    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().print(json.toString());
-    }
+	@Activate
+	protected void activate(Config config) {
+		Map<String, String> components = null;
+		if (config.components().length == 0) {
+			components = ParameterUtil.toMap(DEFAULT_COMPONENTS, "=");
+		} else {
+			components = ParameterUtil.toMap(config.components(), "=");
+		}
+		JsonArray array = new JsonArray();
+		for (Map.Entry<String, String> entry : components.entrySet()) {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("propertyName", entry.getKey());
+			obj.addProperty("componentPath", entry.getValue());
+			array.add(obj);
+		}
+		this.json = new JsonObject();
+		json.add("components", array);
+	}
+
+	@Override
+	protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().print(json.toString());
+	}
 }
