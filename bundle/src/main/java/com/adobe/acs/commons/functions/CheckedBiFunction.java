@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.functions;
 
 import aQute.bnd.annotation.ConsumerType;
-import com.adobe.acs.commons.functions.impl.FunctionWithException;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
