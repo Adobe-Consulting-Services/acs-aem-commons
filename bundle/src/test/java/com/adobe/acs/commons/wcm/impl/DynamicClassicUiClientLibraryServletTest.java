@@ -166,6 +166,7 @@ public class DynamicClassicUiClientLibraryServletTest {
 	}
 
 	@Test
+	@Ignore
 	public void testCustomWithContextPath() throws Exception {
 		when(request.getContextPath()).thenReturn("/test");
 		when(config.categories()).thenReturn(new String[] { CUSTOM.id });
