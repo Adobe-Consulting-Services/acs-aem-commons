@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
 - #1610 - Bulk Workflow Manager doing nothing
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
+- #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
