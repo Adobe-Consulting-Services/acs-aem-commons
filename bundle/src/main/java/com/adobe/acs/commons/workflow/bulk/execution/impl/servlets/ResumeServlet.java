@@ -19,32 +19,38 @@
  */
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
-import com.google.gson.JsonObject;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.getInteger;
+import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.component.annotations.Component;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-
-import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.google.gson.JsonObject;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Resume Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {"POST"},
-        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
-        selectors = {"resume"},
-        extensions = {"json"}
-)
+@Component(service = Servlet.class, property = {
+		SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+		SLING_SERVLET_SELECTORS + "=resume",
+		SLING_SERVLET_METHODS + "=POST",
+		SLING_SERVLET_EXTENSIONS + "=json" })
 public class ResumeServlet extends SlingAllMethodsServlet {
 
     @Reference
