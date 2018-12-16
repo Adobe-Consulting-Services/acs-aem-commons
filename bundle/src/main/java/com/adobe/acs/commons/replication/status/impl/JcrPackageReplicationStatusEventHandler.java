@@ -20,13 +20,20 @@
 
 package com.adobe.acs.commons.replication.status.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.jcrclustersupport.ClusterAware;
-import com.day.cq.replication.ReplicationAction;
-import com.day.cq.replication.ReplicationEvent;
-import com.day.cq.replication.ReplicationStatus;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -39,6 +46,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.discovery.TopologyEvent;
+import org.apache.sling.discovery.TopologyEventListener;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.consumer.JobConsumer;
@@ -51,24 +60,17 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.*;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.apache.sling.discovery.TopologyEvent;
-import org.apache.sling.discovery.TopologyEventListener;
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.replication.ReplicationAction;
+import com.day.cq.replication.ReplicationEvent;
+import com.day.cq.replication.ReplicationStatus;
 
 @Component( immediate = true,
         configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
@@ -79,7 +81,7 @@ import org.apache.sling.discovery.TopologyEventListener;
 )
 
 @Designate(ocd=JcrPackageReplicationStatusEventHandler.Config.class)
-public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, TopologyEventListener {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
