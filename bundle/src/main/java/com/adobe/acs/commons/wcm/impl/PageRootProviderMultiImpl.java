@@ -44,12 +44,14 @@ import com.day.cq.wcm.api.PageManager;
  *
  * @see PageRootProviderConfig
  */
-@Component(service=PageRootProvider.class)
+@Component(service=PageRootProvider.class, reference={
+		@Reference(name="configList", service = PageRootProviderConfig.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, bind="bindConfigList", unbind="unbindConfigList")	
+})
 public class PageRootProviderMultiImpl implements PageRootProvider {
 
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
-    @Reference(name = "config", service = PageRootProviderConfig.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
+    
     private RankedServices<PageRootProviderConfig> configList = new RankedServices<>(Order.ASCENDING);
 
     @Override
@@ -90,11 +92,11 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
         return null;
     }
 
-    protected void bindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+    protected void bindConfigList(final PageRootProviderConfig config, Map<String, Object> props) {
         this.configList.bind(config, props);
     }
 
-    protected void unbindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+    protected void unbindConfigList(final PageRootProviderConfig config, Map<String, Object> props) {
         this.configList.unbind(config, props);
     }
 
