@@ -67,7 +67,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     	           description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
 	public @interface Config {
 	    @AttributeDefinition(name = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",defaultValue = "4")
-        int max_threads();
+        int max_threads() default 4;
 	    @AttributeDefinition(name = "Max cpu %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.75")
         int max_cpu();
 	    @AttributeDefinition(name = "Max heap %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.85")
