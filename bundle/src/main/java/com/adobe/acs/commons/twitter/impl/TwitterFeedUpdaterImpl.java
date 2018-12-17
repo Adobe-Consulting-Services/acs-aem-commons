@@ -39,6 +39,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
 @Component(service=TwitterFeedUpdater.class)
+@Designate(ocd=TwitterFeedUpdaterImpl.Config.class)
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);

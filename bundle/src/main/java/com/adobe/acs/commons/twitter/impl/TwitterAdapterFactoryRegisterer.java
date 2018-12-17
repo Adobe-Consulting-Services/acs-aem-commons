@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 @Component(configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
+@Designate(ocd=TwitterAdapterFactoryRegisterer.Config.class)
 public class TwitterAdapterFactoryRegisterer {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
