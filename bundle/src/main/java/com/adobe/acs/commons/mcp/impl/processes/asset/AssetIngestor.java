@@ -239,6 +239,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
             ignoreExtensions = "";
         }
         ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
+        if (!preserveFileName) {
+            jcrBasePath = NameUtil.createValidDamPath(jcrBasePath);
+        }
     }
 
     @SuppressWarnings("squid:S00112")
