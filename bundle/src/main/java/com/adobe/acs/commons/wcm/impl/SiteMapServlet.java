@@ -19,6 +19,11 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +66,6 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
-import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 @Component(service = Servlet.class,
 factory = "com.adobe.acs.commons.wcm.impl.SiteMapServlet", 

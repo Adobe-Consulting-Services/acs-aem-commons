@@ -20,14 +20,24 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
-import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.util.PathInfoUtil;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -43,20 +53,14 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import static org.apache.sling.api.servlets.ServletResolverConstants.*;
-
-import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
+import com.adobe.acs.commons.util.BufferingResponse;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  * ACS AEM Commons - CQInclude Property Namespace.

@@ -20,13 +20,21 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.util.ModeUtil;
-import com.adobe.acs.commons.util.ResourceDataUtil;
-import com.adobe.acs.commons.wcm.ComponentErrorHandler;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.wcm.api.WCMMode;
-import com.day.cq.wcm.api.components.ComponentContext;
-import com.day.cq.wcm.commons.WCMUtils;
+import static org.apache.sling.engine.EngineConstants.FILTER_SCOPE_COMPONENT;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -44,17 +52,12 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import static org.apache.sling.engine.EngineConstants.*;
+import com.adobe.acs.commons.util.ModeUtil;
+import com.adobe.acs.commons.util.ResourceDataUtil;
+import com.adobe.acs.commons.wcm.ComponentErrorHandler;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.commons.WCMUtils;
 
 @Component( configurationPolicy = ConfigurationPolicy.REQUIRE,
         service= {ComponentErrorHandler.class, Filter.class},

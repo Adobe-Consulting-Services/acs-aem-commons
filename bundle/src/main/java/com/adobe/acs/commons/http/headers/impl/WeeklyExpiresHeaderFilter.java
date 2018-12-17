@@ -20,18 +20,20 @@
 package com.adobe.acs.commons.http.headers.impl;
 
 
+import java.util.Calendar;
+import java.util.Dictionary;
+
+import javax.servlet.Filter;
+
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.*;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import javax.servlet.Filter;
-
-import java.util.Calendar;
-import java.util.Dictionary;
+import org.osgi.service.metatype.annotations.Option;
 
 //@formatter:off
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
