@@ -178,10 +178,10 @@ public class UrlAssetImport extends AssetIngestor {
 
     private void trackIgnoredFiles() {
         files.stream().filter(f -> !canImportContainingFolder(f)).forEach(file -> {
-            trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file because its folder is also skipped", 0L);
+            trackDetailedActivity(file.getNodePath(preserveFileName), ACTION_SKIPPED, "Skipped file because its folder is also skipped", 0L);
             incrementCount(skippedFiles, 1 + file.getRenditions().size());
             file.getRenditions().forEach((renditionName, rendition)
-                    -> trackDetailedActivity(rendition.getNodePath(), ACTION_SKIPPED, "Skipped rendition " + renditionName + " because its parent file is skipped", 0L));
+                    -> trackDetailedActivity(rendition.getNodePath(preserveFileName), ACTION_SKIPPED, "Skipped rendition " + renditionName + " because its parent file is skipped", 0L));
             file.getRenditions().clear();
         });
     }
@@ -244,7 +244,7 @@ public class UrlAssetImport extends AssetIngestor {
                         throw new IOException("Unable to download " + file.getSourcePath());
                     } else {
                         incrementBytes(
-                                trackDetailedActivity(file.getNodePath(), ACTION_SKIPPED, "Skipped file of either file size or extension", 0L),
+                                trackDetailedActivity(file.getNodePath(preserveFileName), ACTION_SKIPPED, "Skipped file of either file size or extension", 0L),
                                 file.getSource().getLength()
                         );
                         incrementCount(skippedFiles, 1);
@@ -276,16 +276,16 @@ public class UrlAssetImport extends AssetIngestor {
                     }
                     if (!dryRunMode) {
                         commitAndRefresh(rr);
-                        Resource assetResource = rr.getResource(file.getNodePath());
+                        Resource assetResource = rr.getResource(file.getNodePath(preserveFileName));
                         if (assetResource == null) {
-                            throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath());
+                            throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath(preserveFileName));
                         }
                         Asset asset = assetResource.adaptTo(Asset.class);
                         asset.addRendition(renditionName, renditionFile.getSource().getStream(), type);
                     }
                     incrementCount(importedRenditions, 1L);
                     incrementBytes(importedData, renditionFile.getSource().getLength());
-                    trackDetailedActivity(file.getNodePath(), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
+                    trackDetailedActivity(file.getNodePath(preserveFileName), "Import Rendition", "Add rendition " + renditionName, renditionFile.getSource().getLength());
                 } finally {
                     renditionFile.getSource().close();
                 }
@@ -308,9 +308,9 @@ public class UrlAssetImport extends AssetIngestor {
             long lineNumber = fileData.getRowNum(file.getProperties());
             Actions.setCurrentItem(String.format("Metadata %s (line %s)", file.getItemName(), lineNumber));
             commitAndRefresh(rr);
-            Resource metaResource = rr.getResource(file.getNodePath() + "/jcr:content/metadata");
+            Resource metaResource = rr.getResource(file.getNodePath(preserveFileName) + "/jcr:content/metadata");
             if (metaResource == null) {
-                throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath());
+                throw new ResourceNotFoundException("Unable to find asset resource " + file.getNodePath(preserveFileName));
             }
             updateMetadataFromRow(file, metaResource.adaptTo(ModifiableValueMap.class));
         };
@@ -339,7 +339,7 @@ public class UrlAssetImport extends AssetIngestor {
     private Folder extractFolder(Map<String, CompositeVariant> assetData) {
         String folderPath = getTargetFolder(assetData);
         if (!folders.containsKey(folderPath)) {
-            String rootFolder = folderPath.replace(jcrBasePath, "");
+            String rootFolder = folderPath.replaceFirst(jcrBasePath, "");
             String[] parts = rootFolder.split(Pattern.quote("/"));
             Folder parent = null;
             String currentPath = jcrBasePath;
@@ -370,9 +370,6 @@ public class UrlAssetImport extends AssetIngestor {
         }
 
         String name = source.substring(source.lastIndexOf('/') + 1);
-        if (!preserveFileName) {
-            name = NameUtil.createValidDamName(name);
-        }
 
         Folder folder = extractFolder(assetData);
         FileOrRendition file = new FileOrRendition(clientProvider, name, source, folder, assetData);
@@ -399,11 +396,11 @@ public class UrlAssetImport extends AssetIngestor {
     private Optional<FileOrRendition> findOriginalRendition(Collection<FileOrRendition> allFiles, FileOrRendition rendition) {
         // Build list of files in the target folder
         List<FileOrRendition> filesInFolder = allFiles.stream()
-                .filter(f -> f.getParent().getNodePath().equals(rendition.getParent().getNodePath()))
+                .filter(f -> f.getParent().getNodePath(preserveFileName).equals(rendition.getParent().getNodePath(preserveFileName)))
                 .collect(Collectors.toList());
 
         if (filesInFolder.isEmpty()) {
-            LOG.error("Unable to find any other files in directory " + rendition.getParent().getNodePath());
+            LOG.error("Unable to find any other files in directory " + rendition.getParent().getNodePath(preserveFileName));
             return Optional.empty();
         } else {
             // Organize files by closest match (better match = smaller levensthein distance)

@@ -281,16 +281,16 @@ public class FileAssetIngestorTest {
         assertNull(elem1.getParent());
         assertEquals(SFTP_HOST_TEST_PATH, elem1.getSourcePath());
         // File should be a child node
-        assertEquals("/content/dam/path", elem1.getNodePath());
-        assertEquals("path", elem1.getNodeName());
+        assertEquals("/content/dam/path", elem1.getNodePath(true));
+        assertEquals("path", elem1.getNodeName(true));
 
         FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH);
         elem1.isFile = false;
         assertNull(elem2.getParent());
         assertEquals(SFTP_HOST_TEST_PATH, elem2.getSourcePath());
         // Folder should map to the root folder
-        assertEquals("/content/dam", elem2.getNodePath());
-        assertEquals("path", elem2.getNodeName());
+        assertEquals("/content/dam", elem2.getNodePath(true));
+        assertEquals("path", elem2.getNodeName(true));
     }
 
     @Test
@@ -321,6 +321,7 @@ public class FileAssetIngestorTest {
     @Test
     public void testSftpUrlSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException {
         configureSftpFields();
+        ingestor.preserveFileName = false;
         ingestor.fileBasePath = "sftp://somehost:20";
         String sourcePath = "/this/is/path with/$pecial/characters#@/some image& chars.jpg";
         String expectedSourcePath = sourcePath.replaceAll("[\\W&&[^/]]", "-");
@@ -331,7 +332,7 @@ public class FileAssetIngestorTest {
         assertEquals("sftp://somehost:20/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem1.uri.toString());
         assertEquals("somehost", elem1.uri.getHost());
         assertEquals(20, elem1.uri.getPort());
-        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath());
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath(false));
 
         ingestor.fileBasePath = "sftp://somehost2";
         String urlWithoutPort = "sftp://somehost2" + sourcePath;
@@ -340,7 +341,7 @@ public class FileAssetIngestorTest {
         assertEquals(sourcePath, elem2.path);
         assertEquals("sftp://somehost2/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem2.uri.toString());
         assertEquals("somehost2", elem2.uri.getHost());
-        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath());
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath(false));
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {

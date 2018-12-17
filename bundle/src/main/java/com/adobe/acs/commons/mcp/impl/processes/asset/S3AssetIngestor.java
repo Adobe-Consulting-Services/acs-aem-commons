@@ -159,7 +159,7 @@ public class S3AssetIngestor extends AssetIngestor {
             } catch (IOException ex) {
                 Failure failure = new Failure();
                 failure.setException(ex);
-                failure.setNodePath(ss.getElement().getNodePath());
+                failure.setNodePath(ss.getElement().getNodePath(preserveFileName));
                 manager.getFailureList().add(failure);
             } finally {
                 try {
@@ -167,7 +167,7 @@ public class S3AssetIngestor extends AssetIngestor {
                 } catch (IOException ex) {
                     Failure failure = new Failure();
                     failure.setException(ex);
-                    failure.setNodePath(ss.getElement().getNodePath());
+                    failure.setNodePath(ss.getElement().getNodePath(preserveFileName));
                     manager.getFailureList().add(failure);
                 }
             }

@@ -172,7 +172,7 @@ public class FileAssetIngestor extends AssetIngestor {
         } catch (IOException ex) {
             Failure failure = new Failure();
             failure.setException(ex);
-            failure.setNodePath(fileSource.getElement().getNodePath());
+            failure.setNodePath(fileSource.getElement().getNodePath(preserveFileName));
             manager.getFailureList().add(failure);
         } finally {
             try {
@@ -180,7 +180,7 @@ public class FileAssetIngestor extends AssetIngestor {
             } catch (IOException ex) {
                 Failure failure = new Failure();
                 failure.setException(ex);
-                failure.setNodePath(fileSource.getElement().getNodePath());
+                failure.setNodePath(fileSource.getElement().getNodePath(preserveFileName));
                 manager.getFailureList().add(failure);
             }
         }
