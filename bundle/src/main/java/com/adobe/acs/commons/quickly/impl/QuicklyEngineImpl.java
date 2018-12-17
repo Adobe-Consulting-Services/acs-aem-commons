@@ -55,13 +55,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
-	service=QuicklyEngine.class,
-	reference= {
-			@Reference(
-		        name = "operations",
-		        service = Operation.class,
-		        policy = ReferencePolicy.DYNAMIC,
-		        cardinality = ReferenceCardinality.AT_LEAST_ONE
+service=QuicklyEngine.class,
+reference= {
+@Reference(
+        name = "operations",
+        service = Operation.class,
+        policy = ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.AT_LEAST_ONE
 )})
 @Designate(ocd=QuicklyEngineImpl.Config.class)
 public class QuicklyEngineImpl implements QuicklyEngine {
@@ -78,7 +78,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
                 cardinality = 100,
                 defaultValue = { })
         String[] result_modes();
-    	
+    
     }
     
     

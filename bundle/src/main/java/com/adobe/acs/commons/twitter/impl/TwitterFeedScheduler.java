@@ -39,7 +39,7 @@ import java.util.Map;
 
 @Component(immediate = true, service= {TopologyEventListener.class, Runnable.class},
 configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-		 "scheduler.concurrent" + "=" + "false"
+ "scheduler.concurrent" + "=" + "false"
 })
 @Designate(ocd=TwitterFeedScheduler.Config.class)
 public final class TwitterFeedScheduler extends RunnableOnMaster {
@@ -50,7 +50,7 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
     private static final Map<String, Object> AUTH_INFO;
     
     @ObjectClassDefinition(name= "ACS AEM Commons - Twitter Feed Refresh Scheduler",
-    	    description = "Schedule job which refreshes Twitter Feed components on a recurring basis")
+        description = "Schedule job which refreshes Twitter Feed components on a recurring basis")
     public @interface Config {
         @AttributeDefinition( defaultValue = "0 0/15 * * * ?", name = "Refresh Interval",
                 description = "Twitter Feed Refresh interval (Quartz Cron Expression)")

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(service=ImageTransformer.class, property = {
-	      ImageTransformer.PROP_TYPE + "=" + SharpenImageTransformerImpl.TYPE})
+      ImageTransformer.PROP_TYPE + "=" + SharpenImageTransformerImpl.TYPE})
 public class SharpenImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(SharpenImageTransformerImpl.class);
 

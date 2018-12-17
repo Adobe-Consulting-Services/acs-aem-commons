@@ -67,12 +67,12 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Twitter Feed Update Service", 
-    		description = "Service to update Twitter Feed components.")
+    description = "Service to update Twitter Feed components.")
     public @interface Config {
         @AttributeDefinition(defaultValue = "acs-commons/components/content/twitter-feed",
                 name = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
         String[] twitter_component_paths();
-    	
+    
     }
 
     @Reference

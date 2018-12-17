@@ -31,7 +31,7 @@ import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 
 
 @Component(service=ResourceDefinitionBuilder.class,property= {
-		ResourceDefinitionBuilder.PROP_NAME + "=" + TitleAndNodeNameDefinitionBuilderImpl.NAME
+ResourceDefinitionBuilder.PROP_NAME + "=" + TitleAndNodeNameDefinitionBuilderImpl.NAME
 })
 public class TitleAndNodeNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_AND_NODE_NAME";

@@ -34,7 +34,7 @@ import java.awt.Rectangle;
  * ACS AEM Commons - Image Transformer - Crop with Smart-Bounding
  */
 @Component(service=ImageTransformer.class, property = {
-		ImageTransformer.PROP_TYPE + "=" + CropImageTransformerImpl.TYPE})
+ImageTransformer.PROP_TYPE + "=" + CropImageTransformerImpl.TYPE})
 public class CropImageTransformerImpl implements ImageTransformer {
     private static  final Logger log = LoggerFactory.getLogger(CropImageTransformerImpl.class);
 

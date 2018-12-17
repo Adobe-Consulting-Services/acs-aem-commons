@@ -55,7 +55,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = { SLING_SERVLET_PATHS + "=/bin/wcm/duplicateVanityCheck",
-		SLING_SERVLET_METHODS + "=GET" })
+SLING_SERVLET_METHODS + "=GET" })
 public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(VanityDuplicateCheckServlet.class);

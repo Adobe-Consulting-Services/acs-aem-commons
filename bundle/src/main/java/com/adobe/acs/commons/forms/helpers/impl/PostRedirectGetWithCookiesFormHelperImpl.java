@@ -46,7 +46,7 @@ import java.util.logging.Level;
  *
  */
 @Component(service={ FormHelper.class, PostRedirectGetWithCookiesFormHelper.class}, property= {
-		Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_WITH_COOKIES_GET})
+Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_WITH_COOKIES_GET})
 public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFormHelperImpl implements PostRedirectGetWithCookiesFormHelper {
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class);
 

@@ -60,11 +60,11 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 @Component(service=Servlet.class,
          name="ACS AEM Commons - Users to CSV - Export Servlet",
          property= {
-		SLING_SERVLET_METHODS+"=GET",
-		SLING_SERVLET_SELECTORS+"=export",
-		SLING_SERVLET_EXTENSIONS+"=csv",
-		SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/exporters/users-to-csv"
-		
+SLING_SERVLET_METHODS+"=GET",
+SLING_SERVLET_SELECTORS+"=export",
+SLING_SERVLET_EXTENSIONS+"=csv",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/exporters/users-to-csv"
+
 })
 public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);

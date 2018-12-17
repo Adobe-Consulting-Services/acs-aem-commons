@@ -57,17 +57,17 @@ public final class FileImporter implements Importer {
     private MimeTypeService mimeTypeService;
     
     @ObjectClassDefinition(name = "ACS AEM Commons - File Importer",
-    	    description = "Importer which can import a file from the file system into the content repository.")
+        description = "Importer which can import a file from the file system into the content repository.")
     public @interface Config {
-    	
-    	@AttributeDefinition(name = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
-    	        defaultValue = "File")
-    	String displayName();
+    
+    @AttributeDefinition(name = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
+            defaultValue = "File")
+    String displayName();
 
-    	@AttributeDefinition(name = "Importer Scheme",
+    @AttributeDefinition(name = "Importer Scheme",
                 description = "Scheme value that will be used for this importer. Must be unique across importers.",
                 defaultValue = DEFAULT_SCHEME)
-    	String importer_scheme();
+    String importer_scheme();
 
     }
 

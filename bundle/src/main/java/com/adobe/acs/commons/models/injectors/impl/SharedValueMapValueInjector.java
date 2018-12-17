@@ -47,7 +47,7 @@ import com.day.cq.wcm.api.Page;
 
 @Component(service=Injector.class, property= {Constants.SERVICE_RANKING +":Integer=4500"})
 public class SharedValueMapValueInjector implements Injector {
-	
+
     @Reference
     private PageRootProvider pageRootProvider;
 

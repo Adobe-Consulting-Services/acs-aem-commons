@@ -27,7 +27,7 @@ import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
 
 
 @Component(service=ResourceDefinitionBuilder.class,property= {
-		ResourceDefinitionBuilder.PROP_NAME + "=" + LowercaseWithDashesDefinitionBuilderImpl.NAME
+ResourceDefinitionBuilder.PROP_NAME + "=" + LowercaseWithDashesDefinitionBuilderImpl.NAME
 })
 public class LowercaseWithDashesDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "LOWERCASE_WITH_DASHES";

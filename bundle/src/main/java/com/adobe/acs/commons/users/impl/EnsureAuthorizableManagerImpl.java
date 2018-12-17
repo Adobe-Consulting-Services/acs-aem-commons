@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 @Component(service=DynamicMBean.class, property= {
-		"jmx.objectname" + "=" + "com.adobe.acs.commons:type=Ensure Service User"
+"jmx.objectname" + "=" + "com.adobe.acs.commons:type=Ensure Service User"
 }, reference= {
-		@Reference(service = EnsureAuthorizable.class, 
-				name="EnsureAuthorizable",
-				policy=ReferencePolicy.DYNAMIC,
-		        cardinality = ReferenceCardinality.MULTIPLE)
+@Reference(service = EnsureAuthorizable.class, 
+name="EnsureAuthorizable",
+policy=ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.MULTIPLE)
 })
 public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implements EnsureAuthorizableManager {
 

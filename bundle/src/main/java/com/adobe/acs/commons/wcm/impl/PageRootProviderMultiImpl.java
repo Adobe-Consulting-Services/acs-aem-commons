@@ -45,7 +45,7 @@ import com.day.cq.wcm.api.PageManager;
  * @see PageRootProviderConfig
  */
 @Component(service=PageRootProvider.class, reference={
-		@Reference(name="configList", service = PageRootProviderConfig.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, bind="bindConfigList", unbind="unbindConfigList")	
+@Reference(name="configList", service = PageRootProviderConfig.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, bind="bindConfigList", unbind="unbindConfigList")
 })
 public class PageRootProviderMultiImpl implements PageRootProvider {
 

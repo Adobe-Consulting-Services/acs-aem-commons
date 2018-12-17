@@ -65,7 +65,7 @@ public class BundleDisablerTest {
 
     @Test
     public void testNullProperties() {
-    	    when(config.bundles()).thenReturn(null);
+        when(config.bundles()).thenReturn(null);
         disabler.activate(componentContext, config);
         verifyNoMoreInteractions(bundleContext);
     }
@@ -85,7 +85,7 @@ public class BundleDisablerTest {
 
     @Test
     public void shouldNotDisableOwnBundle() {
-	    when(config.bundles()).thenReturn(new String[] {"my.own.bundle"});
+    when(config.bundles()).thenReturn(new String[] {"my.own.bundle"});
         disabler.activate(componentContext, config);
     }
 
@@ -96,7 +96,7 @@ public class BundleDisablerTest {
 
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
         
-	    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
+    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
         disabler.activate(componentContext, config);
 
         try {
@@ -114,7 +114,7 @@ public class BundleDisablerTest {
         when(targetBundle.getState()).thenReturn(Bundle.UNINSTALLED);
         when(targetBundle.getSymbolicName()).thenReturn("to.stop.bundle");
         
-	    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
+    when(config.bundles()).thenReturn(new String[] {"to.stop.bundle"});
         disabler.activate(componentContext, config);
 
         try {

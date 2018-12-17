@@ -77,32 +77,32 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
  */
 @SuppressWarnings({ "serial", "checkstyle:abbreviationaswordinname" })
 @Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=rte",
-		SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
+SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
 @Designate(ocd = RTEConfigurationServlet.Config.class)
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
-	
-	@ObjectClassDefinition
-	public @interface Config {
-		@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
-		String root_path();
-	}
 
-	@Reference
-	private XSSAPI xssApi;
+@ObjectClassDefinition
+public @interface Config {
+@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
+String root_path();
+}
 
-	private static final int RTE_HEIGHT = 200;
+@Reference
+private XSSAPI xssApi;
 
-	private static final int RTE_WIDTH = 430;
+private static final int RTE_HEIGHT = 200;
 
-	private static final String DEFAULT_CONFIG_NAME = "default";
+private static final int RTE_WIDTH = 430;
 
-	private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
+private static final String DEFAULT_CONFIG_NAME = "default";
 
-	private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
+private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
 
-	private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
+private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
 
-	private String rootPath;
+private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
+
+private String rootPath;
 
     @Override
     protected JsonObject createEmptyWidget(String rteName) {
@@ -176,10 +176,10 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
         gson.toJson(parent, response.getWriter());
     }
 
-	@Activate
-	protected void activate(RTEConfigurationServlet.Config config) {
-		rootPath = config.root_path();
-	}
+@Activate
+protected void activate(RTEConfigurationServlet.Config config) {
+rootPath = config.root_path();
+}
 
     @Override
     @SuppressWarnings("squid:S3776")

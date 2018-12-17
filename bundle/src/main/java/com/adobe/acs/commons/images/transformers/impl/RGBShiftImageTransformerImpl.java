@@ -36,7 +36,7 @@ import com.day.image.Layer;
  */
 //@formatter:off
 @Component(service=ImageTransformer.class, property = {
-	      ImageTransformer.PROP_TYPE + "=" + RGBShiftImageTransformerImpl.TYPE})
+      ImageTransformer.PROP_TYPE + "=" + RGBShiftImageTransformerImpl.TYPE})
 //@formatter:on
 public class RGBShiftImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(RGBShiftImageTransformerImpl.class);

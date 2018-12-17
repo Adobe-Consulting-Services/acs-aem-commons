@@ -48,39 +48,39 @@ import org.slf4j.LoggerFactory;
 service= { EnsureGroup.class, EnsureAuthorizable.class },
            immediate = true,
            configurationPolicy = ConfigurationPolicy.REQUIRE,property= {
-        		   "webconsole.configurationFactory.nameHint" + "=" + "Ensure Group: {operation} {principalName}"
+           "webconsole.configurationFactory.nameHint" + "=" + "Ensure Group: {operation} {principalName}"
            })
 @Designate(ocd=EnsureGroup.Config.class, factory=true)
 public final class EnsureGroup implements EnsureAuthorizable {
-	
-	@ObjectClassDefinition(name = "ACS AEM Commons - Ensure Group")
-	public @interface Config {
-	    @AttributeDefinition(name = "Ensure immediately", defaultValue = "true",
-	            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-	    String ensure_immediately();
-		
-	    @AttributeDefinition(
-	    		name = "Operation",
-	            description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
-	            options = { @Option(value = "add", label = "Ensure existence (add)"),
-	                    @Option(value = "remove", label = "Ensure extinction (remove)") })
-	    String operation();
 
-	    @AttributeDefinition(name = "Principal Name", description = "The grouo's principal name")
-	    String principalName();
+@ObjectClassDefinition(name = "ACS AEM Commons - Ensure Group")
+public @interface Config {
+    @AttributeDefinition(name = "Ensure immediately", defaultValue = "true",
+            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
+    String ensure_immediately();
 
-	    @AttributeDefinition(name = "ACEs",
-	            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
-	            cardinality = Integer.MAX_VALUE)
-	    String[] aces();
+    @AttributeDefinition(
+    name = "Operation",
+            description = "Defines if the group (principal name) should be adjusted to align with this config or removed completely",
+            options = { @Option(value = "add", label = "Ensure existence (add)"),
+                    @Option(value = "remove", label = "Ensure extinction (remove)") })
+    String operation();
 
-	    @AttributeDefinition(
-	    		name = "Member Of",
-	            description = "Defines groups this group must be a member of.  Group will be removed from any groups not listed.",
-	            cardinality = Integer.MAX_VALUE)
-	    String[] memberof();
+    @AttributeDefinition(name = "Principal Name", description = "The grouo's principal name")
+    String principalName();
 
-	}
+    @AttributeDefinition(name = "ACEs",
+            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+            cardinality = Integer.MAX_VALUE)
+    String[] aces();
+
+    @AttributeDefinition(
+    name = "Member Of",
+            description = "Defines groups this group must be a member of.  Group will be removed from any groups not listed.",
+            cardinality = Integer.MAX_VALUE)
+    String[] memberof();
+
+}
 
     public static final String PROP_ENSURE_IMMEDIATELY = "ensure.immediately";
 

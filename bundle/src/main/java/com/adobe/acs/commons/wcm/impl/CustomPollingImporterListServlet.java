@@ -48,7 +48,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_PATHS + "=/bin/acs-commons/custom-importers" })
+SLING_SERVLET_PATHS + "=/bin/acs-commons/custom-importers" })
 public final class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = -4921197948987912363L;

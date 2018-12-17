@@ -65,12 +65,12 @@ public class HealthCheckStatusEmailerTest {
    
 //   @Mock
 //   HealthCheckStatusEmailer.Config config;
-	
-	@Rule
-	public SlingContext context = new SlingContext();
-	
-	
-	Map<String,Object> configuration = new HashMap<>();
+
+@Rule
+public SlingContext context = new SlingContext();
+
+
+Map<String,Object> configuration = new HashMap<>();
 
     @Mock
     HealthCheckExecutor healthCheckExecutor;

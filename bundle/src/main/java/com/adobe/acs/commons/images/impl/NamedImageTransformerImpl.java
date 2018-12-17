@@ -50,13 +50,13 @@ import java.util.Map;
         service=NamedImageTransformer.class ,
         configurationPolicy=ConfigurationPolicy.REQUIRE,
         reference= {
-        		@Reference(
-        		        name = "imageTransformers",
-        		        service = ImageTransformer.class,
-        		        policy=ReferencePolicy.DYNAMIC,
-        		        cardinality = ReferenceCardinality.MULTIPLE)
+        @Reference(
+                name = "imageTransformers",
+                service = ImageTransformer.class,
+                policy=ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.MULTIPLE)
         }, property= {
-        		"webconsole.configurationFactory.nameHint" + "=" +"Transformer: {name}"
+        "webconsole.configurationFactory.nameHint" + "=" +"Transformer: {name}"
         }
 )
 @Designate(ocd=NamedImageTransformerImpl.Config.class,factory=true)
@@ -83,7 +83,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
                 description = "Transform in the format [ image-transformer-type:key1=val1&key2=val2 ]"
                         + " Order of transform rules dictates order of application.")
         String[] transforms();
-   	
+   
     }
 
     private static final String PROP_NAME = "name";

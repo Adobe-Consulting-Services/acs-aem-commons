@@ -44,7 +44,7 @@ import com.day.cq.wcm.api.Page;
  * ACS AEM Commons - Forms - Forward-as-GET Form Helper
  */
 @Component(service={ FormHelper.class, ForwardAsGetFormHelper.class }, property= {
-		Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_FORWARD_AS_GET})
+Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_FORWARD_AS_GET})
 public class ForwardAsGetFormHelperImpl extends AbstractFormHelperImpl implements ForwardAsGetFormHelper {
     private static final Logger log = LoggerFactory.getLogger(ForwardAsGetFormHelperImpl.class);
 

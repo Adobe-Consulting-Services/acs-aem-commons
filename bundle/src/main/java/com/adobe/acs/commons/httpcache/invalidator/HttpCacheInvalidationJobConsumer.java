@@ -51,7 +51,7 @@ import java.util.Map;
  */
 @Component(service=JobConsumer.class,
            immediate = true, property= {
-        		   JobConsumer.PROPERTY_TOPICS + "=" + CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB
+           JobConsumer.PROPERTY_TOPICS + "=" + CacheInvalidationJobConstants.TOPIC_HTTP_CACHE_INVALIDATION_JOB
            })
 @Designate(ocd=HttpCacheInvalidationJobConsumer.Config.class)
 public class HttpCacheInvalidationJobConsumer implements JobConsumer {
@@ -64,7 +64,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
                 description = "Whether to search for references and invalidate them in the cache.",
                 defaultValue = ""+HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES)
         boolean httpcache_config_invalidation_references();
-    	
+    
     }
 
     private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";

@@ -70,7 +70,7 @@ import com.google.gson.JsonPrimitive;
  */
 @SuppressWarnings("serial")
 @Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=tagwidget",
-		SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
+SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
 @Designate(ocd=TagWidgetConfigurationServlet.Config.class)
 public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
@@ -79,11 +79,11 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
     @Reference
     private XSSAPI xssApi;
     
-	@ObjectClassDefinition
-	public @interface Config {
-		@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
-		String root_path();
-	}
+@ObjectClassDefinition
+public @interface Config {
+@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
+String root_path();
+}
 
     private static final String DEFAULT_CONFIG = "/libs/foundation/components/page/tab_basic/items/basic/items/tags";
 

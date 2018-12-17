@@ -47,10 +47,10 @@ import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
 @SuppressWarnings("serial")
 
 @Component(service = Servlet.class, property = {
-		SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
-		SLING_SERVLET_SELECTORS + "=force-quit",
-		SLING_SERVLET_METHODS + "=POST",
-		SLING_SERVLET_EXTENSIONS + "=json" })
+SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
+SLING_SERVLET_SELECTORS + "=force-quit",
+SLING_SERVLET_METHODS + "=POST",
+SLING_SERVLET_EXTENSIONS + "=json" })
 public class ForceQuitServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ForceQuitServlet.class);
 

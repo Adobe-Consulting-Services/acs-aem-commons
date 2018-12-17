@@ -38,7 +38,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Component(service=WorkflowProcess.class)
 @Designate(ocd=ParameterizedActivatePageProcess.Config.class)
 public class ParameterizedActivatePageProcess extends ActivatePageProcess {
-	
+
     @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Parameterized Activate Resource",
             description = "Triggers an activation replication event, but only to specifically configured agents.")
     public @interface Config {

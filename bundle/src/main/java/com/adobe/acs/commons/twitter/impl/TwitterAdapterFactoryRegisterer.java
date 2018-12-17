@@ -45,7 +45,7 @@ public class TwitterAdapterFactoryRegisterer {
     private static final boolean DEFAULT_USE_SSL = true;
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Twitter Client Adapter Factory",
-    	    description = "Adapter Factory to generate TwitterClient objects.")
+        description = "Adapter Factory to generate TwitterClient objects.")
     public @interface Config {
  
         @AttributeDefinition(name = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")

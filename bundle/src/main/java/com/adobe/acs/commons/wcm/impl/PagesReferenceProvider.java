@@ -61,12 +61,12 @@ public final class PagesReferenceProvider implements ReferenceProvider {
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Pages Reference Provider", description = "ACS AEM Commons - Pages Reference Provider")
     public @interface Config {
-    	
+    
         @AttributeDefinition(name = "page root path", description = "Page root path",
                 defaultValue = DEFAULT_PAGE_ROOT_PATH)
         String page_root_path();
 
-    	
+    
     }
 
     private static final String PAGE_ROOT_PATH = "page.root.path";
