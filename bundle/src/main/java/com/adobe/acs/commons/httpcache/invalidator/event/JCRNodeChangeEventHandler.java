@@ -50,8 +50,8 @@ import java.util.Map;
            service=EventHandler.class,
            configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
                  "webconsole.configurationFactory.nameHint" + "=" + "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "}",
-                 EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_ADDED + "," +
-                   SlingConstants.TOPIC_RESOURCE_REMOVED + "]"
+                 EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_ADDED + "," 
+                 + SlingConstants.TOPIC_RESOURCE_REMOVED + "]"
            })
 @Designate(ocd=JCRNodeChangeEventHandler.Config.class)
 // @formatter:on

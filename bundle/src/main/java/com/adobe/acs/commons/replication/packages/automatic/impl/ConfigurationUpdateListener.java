@@ -55,8 +55,8 @@ import com.day.cq.replication.Replicator;
  */
 
 @Component(immediate = true, service = { EventHandler.class, AutomaticPackageReplicatorMBean.class }, property= {
-EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_ADDED + "," +
-                SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_REMOVED  + "]",
+EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_ADDED + ","
+               + SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_REMOVED  + "]",
                 "jmx.objectname" + "=" + "com.adobe.acs.commons:type=Automatic Package Replicator",
                 EventConstants.EVENT_FILTER + "=" + "(path=/etc/acs-commons/automatic-package-replication/*/jcr:content)"
 })

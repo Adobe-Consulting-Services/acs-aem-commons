@@ -99,7 +99,7 @@ Map<String,Object> configuration = new HashMap<>();
     public void setUp() throws Exception {
         //when(config.recipients_emailaddresses()).thenReturn(new String[] {"test@example.com"});
         configuration.put("recipients.emailaddresses", "test@example.com");
-        configuration.put("email.sendonlyonfailure", new Boolean(true));
+        configuration.put("email.sendonlyonfailure", Boolean.TRUE);
 //        context.registerInjectActivateService(emailService);
         context.registerService(EmailService.class, emailService);
         context.registerService(HealthCheckExecutor.class, healthCheckExecutor);

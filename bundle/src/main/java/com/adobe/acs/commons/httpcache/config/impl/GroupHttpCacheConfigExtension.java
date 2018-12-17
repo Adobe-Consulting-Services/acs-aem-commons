@@ -62,8 +62,8 @@ import java.util.ListIterator;
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
            factory = "GroupHttpCacheConfigExtension",
            property= {
-           "webconsole.configurationFactory.nameHint" + "=" +
-           "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
+           "webconsole.configurationFactory.nameHint" + "=" 
+           + "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
            }
 )
 @Designate(ocd=GroupHttpCacheConfigExtension.Config.class,factory=true)
