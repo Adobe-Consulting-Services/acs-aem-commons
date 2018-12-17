@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
+- #1612 - Retries count and retry pause is configurable for all Asset Ingestors
+
+>>>>>>> master
 ### Fixed
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -28,11 +31,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 - #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content node. If asset is skipped the message in the format "source -> destination" is written into report
 - #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
+- #1610 - Bulk Workflow Manager doing nothing
+- #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
+- #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
+
 
 ## [3.19.0] - 2018-11-03
 

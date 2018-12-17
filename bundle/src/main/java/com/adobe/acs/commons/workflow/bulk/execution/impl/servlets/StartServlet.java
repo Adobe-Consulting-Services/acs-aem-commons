@@ -26,6 +26,7 @@ import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionMana
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
@@ -70,8 +71,7 @@ public class StartServlet extends SlingAllMethodsServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            Gson gson = new Gson();
-            final JsonObject params = (JsonObject) gson.toJsonTree(request.getParameter("params"));
+            final JsonObject params = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
             final ModifiableValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
             properties.put("runnerType", getString(params, "runnerType"));
