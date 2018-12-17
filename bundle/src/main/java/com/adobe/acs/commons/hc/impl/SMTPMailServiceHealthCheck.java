@@ -48,8 +48,8 @@ import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
-@Component(service = HealthCheck.class
-      , configurationPolicy = ConfigurationPolicy.REQUIRE, 
+@Component(service = HealthCheck.class,
+     configurationPolicy = ConfigurationPolicy.REQUIRE, 
         property = {
       HealthCheck.NAME + "=SMTP Mail Service", 
       HealthCheck.TAGS + "=[integrations, smtp, email]",

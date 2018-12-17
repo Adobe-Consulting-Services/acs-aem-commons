@@ -51,8 +51,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
  * - add a configuration policy to only work with a provided configuration
  *
  */
-
-
 @Component(service=AuthenticationHandler.class,
 configurationPolicy=ConfigurationPolicy.REQUIRE,
         property= {
@@ -85,7 +83,6 @@ public class OktaLogoutHandler implements AuthenticationHandler {
         if (oktaHostName == null) {
             throw new IllegalArgumentException("Okta Host Name must be provided");
         }
-        String fromUri = config.from_uri();
 
         StringBuilder builder = new StringBuilder("https://");
         builder.append(config.okta_host_name());

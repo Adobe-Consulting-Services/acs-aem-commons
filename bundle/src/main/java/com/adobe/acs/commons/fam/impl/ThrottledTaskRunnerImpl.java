@@ -314,8 +314,6 @@ int task_timeout();
 
     @Activate
     protected void activate(ThrottledTaskRunnerImpl.Config config) {
-        int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
-
         maxCpu = config.max_cpu();
         maxHeap = config.max_heap();
         maxThreads = config.max_threads();

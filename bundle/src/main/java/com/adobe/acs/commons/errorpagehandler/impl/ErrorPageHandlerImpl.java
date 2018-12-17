@@ -211,29 +211,16 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private String systemErrorPagePath = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT;
 
-    /* Search Paths */
-    private static final String[] DEFAULT_SEARCH_PATHS = {};
-
-
     /* Not Found Default Behavior */
     private static final String DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR = RESPOND_WITH_404;
+
     private String notFoundBehavior = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
 
-
-
-    /* Not Found Path Patterns */
-    private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
     private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
-
-
 
     private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
 
     private static final boolean DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE = false;
-
-    private static final String LEGACY_PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
-
-    private static final String LEGACY_PROP_TTL = "ttl";
 
     /* Enable/Disables error images */
     private static final boolean DEFAULT_ERROR_IMAGES_ENABLED = false;

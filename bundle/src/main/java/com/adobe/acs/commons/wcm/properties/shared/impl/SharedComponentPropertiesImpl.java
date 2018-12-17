@@ -23,6 +23,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+
 @Component(service=SharedComponentProperties.class,
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
