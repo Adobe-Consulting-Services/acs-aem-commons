@@ -139,7 +139,7 @@ public class ComponentErrorHandlerImplTest {
     @Test
     public void testAccepts_suppressResourceTypes() throws Exception {
         final Map<String, String> config = new HashMap<String, String>();
-        config.put("suppress-resource-types", "acs-commons/test/demo");
+        config.put(ComponentErrorHandlerImpl.PROP_SUPPRESSED_RESOURCE_TYPES, "acs-commons/test/demo");
 
         handler.activate(config);
 
