@@ -19,14 +19,15 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,21 +35,32 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
-@Component(metatype = true, label = "ACS AEM Commons - Twitter Client Adapter Factory",
-    description = "Adapter Factory to generate TwitterClient objects.", configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
+@Component(configurationPid = "com.adobe.acs.commons.twitter.impl.TwitterAdapterFactory")
 public class TwitterAdapterFactoryRegisterer {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterAdapterFactory.class);
 
     private static final boolean DEFAULT_USE_SSL = true;
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - Twitter Client Adapter Factory",
+    	    description = "Adapter Factory to generate TwitterClient objects.")
+    public @interface Config {
+ 
+        @AttributeDefinition(name = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
+        String http_proxy_host();
 
-    @Property(label = "HTTP Proxy Host", description = "HTTP Proxy Host, leave blank for none")
+        @AttributeDefinition(name = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", defaultValue = "0")
+        int http_proxy_port();
+
+        @AttributeDefinition(name = "Use SSL", description = "Use SSL Connections", defaultValue = ""+DEFAULT_USE_SSL)
+        boolean use_ssl();
+
+    }
+
     private static final String PROP_HTTP_PROXY_HOST = "http.proxy.host";
 
-    @Property(label = "HTTP Proxy Port", description = "HTTP Proxy Port, leave 0 for none", intValue = 0)
     private static final String PROP_HTTP_PROXY_PORT = "http.proxy.port";
 
-    @Property(label = "Use SSL", description = "Use SSL Connections", boolValue = DEFAULT_USE_SSL)
     private static final String PROP_USE_SSL = "use.ssl";
 
     private ServiceRegistration<AdapterFactory> adapterFactoryServiceRegistration;

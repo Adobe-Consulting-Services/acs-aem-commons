@@ -29,11 +29,6 @@ import java.util.Map;
 import javax.jcr.Session;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -41,6 +36,10 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +59,23 @@ import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
-@Component(label = "ACS AEM Commons - Twitter Feed Update Service",
-    metatype = true, description = "Service to update Twitter Feed components.")
-@Service
+@Component(service=TwitterFeedUpdater.class)
 public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedUpdaterImpl.class);
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - Twitter Feed Update Service", 
+    		description = "Service to update Twitter Feed components.")
+    public @interface Config {
+        @AttributeDefinition(defaultValue = "acs-commons/components/content/twitter-feed",
+                name = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
+        String[] twitter_component_paths();
+    	
+    }
 
     @Reference
     private Replicator replicator;
 
-    @Property(value = "acs-commons/components/content/twitter-feed", unbounded = PropertyUnbounded.ARRAY,
-            label = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
     private static final String TWITTER_COMPONENT_PATHS = "twitter.component.paths";
 
     private String[] twitterComponentPaths = null;
