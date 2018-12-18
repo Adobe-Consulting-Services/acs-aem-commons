@@ -158,10 +158,9 @@ public class ParameterUtil {
                 if (StringUtils.stripToNull(tmp[0]) != null) {
                     map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(defaultValue));
                 }
-            } else if (tmp.length == 2) {
-                if (StringUtils.stripToNull(tmp[0]) != null) {
-                    map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(tmp[1]));
-                }
+            } else if (tmp.length == 2 &&
+                    StringUtils.stripToNull(tmp[0]) != null) {
+                map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(tmp[1]));
             }
         }
 
