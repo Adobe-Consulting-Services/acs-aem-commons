@@ -189,6 +189,7 @@ public class HealthCheckStatusEmailerTest {
         Calendar minuteAgo = Calendar.getInstance();
         // Make sure enough time has "ellapsed" so that the call to send email does something
         minuteAgo.add(Calendar.MINUTE, -1);
+        minuteAgo.add(Calendar.SECOND, -1);
         FieldUtils.writeField(healthCheckStatusEmailer, "nextEmailTime",  minuteAgo, true);
 
         // Send the first time
