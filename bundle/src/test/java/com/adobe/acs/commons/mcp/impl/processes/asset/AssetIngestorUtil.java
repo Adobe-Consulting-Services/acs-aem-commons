@@ -3,6 +3,9 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Util class for AssetIngestor tests
+ */
 public class AssetIngestorUtil {
 
     static final List<AssetIngestorPaths> FILE_PATHS = Arrays.asList(

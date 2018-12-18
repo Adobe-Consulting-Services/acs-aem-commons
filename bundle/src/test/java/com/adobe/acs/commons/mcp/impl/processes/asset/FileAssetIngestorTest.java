@@ -323,7 +323,6 @@ public class FileAssetIngestorTest {
         ingestor.preserveFileName = false;
         ingestor.fileBasePath = "sftp://somehost:20";
         String sourcePath = "/this/is/path with/$pecial/characters#@/some image& chars.jpg";
-        String expectedSourcePath = sourcePath.replaceAll("[\\W&&[^/]]", "-");
         String urlWithPort = "sftp://somehost:20" + sourcePath;
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(urlWithPort);
 
@@ -331,6 +330,7 @@ public class FileAssetIngestorTest {
         assertEquals("sftp://somehost:20/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem1.uri.toString());
         assertEquals("somehost", elem1.uri.getHost());
         assertEquals(20, elem1.uri.getPort());
+        String expectedSourcePath = sourcePath.replaceAll("[\\W&&[^/]]", "-");
         assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath(false));
 
         ingestor.fileBasePath = "sftp://somehost2";
