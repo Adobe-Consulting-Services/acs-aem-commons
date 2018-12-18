@@ -511,6 +511,8 @@ public class EnsureOakIndexJobHandler implements Runnable {
         final CustomChecksumGeneratorOptions oakIndexOptions = new CustomChecksumGeneratorOptions();
         oakIndexOptions.addIncludedNodeTypes(new String[]{NT_OAK_QUERY_INDEX_DEFINITION});
         oakIndexOptions.addExcludedProperties(this.ignoreProperties);
+        oakIndexOptions.addExcludedSubTrees(this.excludeSubTrees);
+        oakIndexOptions.addExcludedNodeNames(this.excludeNodeNames);
 
         final Map<String, String> destChecksum =
                 checksumGenerator.generateChecksums(session, oakIndex.getPath(), oakIndexOptions);
