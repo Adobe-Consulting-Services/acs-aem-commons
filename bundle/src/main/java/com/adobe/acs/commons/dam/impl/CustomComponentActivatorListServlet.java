@@ -47,7 +47,7 @@ import com.google.gson.JsonObject;
 @Component(service=Servlet.class, 
       configurationPolicy=ConfigurationPolicy.REQUIRE,
       property= {
-		SLING_SERVLET_PATHS + "=" + "/bin/acs-commons/dam/custom-components.json"
+      SLING_SERVLET_PATHS + "=" + "/bin/acs-commons/dam/custom-components.json"
 })
 @Designate(ocd=CustomComponentActivatorListServlet.Config.class)
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
