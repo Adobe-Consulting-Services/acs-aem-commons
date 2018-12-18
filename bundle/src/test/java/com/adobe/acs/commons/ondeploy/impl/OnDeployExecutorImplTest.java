@@ -94,7 +94,7 @@ public class OnDeployExecutorImplTest {
             }
         });
         context.registerInjectActivateService(impl);
-        
+
         verify(resourceResolver).close();
     }
 

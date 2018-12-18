@@ -19,7 +19,18 @@
  */
 package com.adobe.acs.commons.forms.impl;
 
-import java.io.IOException;
+import com.adobe.acs.commons.forms.FormsRouter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestDispatcherOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -27,25 +38,25 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.forms.FormsRouter;
+import java.io.IOException;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET Filter
  * Include Filter that handles internal routing of multi-step POST-Redirect-GET Form submissions.
  *
  */
-@Component(service=javax.servlet.Filter.class,
-property = {"filter.order=0", "sling.filter.scope=include"})
+@Component
+@Properties({
+        @Property(
+                name = "sling.filter.scope",
+                value = "include"
+        ),
+        @Property(
+                name = "filter.order",
+                intValue = 0
+        )
+})
+@Service
 public class FormsPostRedirectGetFilterImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostRedirectGetFilterImpl.class);
 

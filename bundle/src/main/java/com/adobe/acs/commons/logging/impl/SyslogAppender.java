@@ -22,27 +22,30 @@ package com.adobe.acs.commons.logging.impl;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
 import ch.qos.logback.core.net.SyslogAppenderBase;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import ch.qos.logback.core.Appender;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-      "webconsole.configurationFactory.nameHint" + "=" + "Host: {host}, for loggers [{loggers}]"
+@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+        label = "ACS AEM Commons - Syslog Appender",
+        description = "Logback appender to send messages using Syslog")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Host: {host}, for loggers [{loggers}]")
 })
-@Designate(ocd=SyslogAppender.Config.class, factory=true)
 public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";
@@ -54,53 +57,34 @@ public final class SyslogAppender {
     private static final String DEFAULT_FACILITY = "USER";
 
     private static final boolean DEFAULT_THROWABLE_EXCLUDED = false;
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Syslog Appender",
-        description = "Logback appender to send messages using Syslog")
-    public @interface Config {
-       
-        @AttributeDefinition(name = "Host", description = "Host of Syslog server")
-        String host();
 
-        @AttributeDefinition(name = "Logger Names", description = "List of logger categories (ROOT for all)",
-                 defaultValue = ROOT)
-        String[] loggers();
-
-        @AttributeDefinition(name = "Port", description = "Port of Syslog server", defaultValue = "-1")
-        int port();
-
-        @AttributeDefinition(name = "Suffix Pattern", description = "Logback Pattern defining the message format.",
-                defaultValue = DEFAULT_SUFFIX_PATTERN)
-        String suffix_pattern();
-
-        @AttributeDefinition(name = "Syslog Facility", defaultValue = DEFAULT_FACILITY,
-                description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
-                + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
-                + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
-                + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
-        String facility();
-
-        @AttributeDefinition(name = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
-                 + "trace line. The default value for this property is a single tab character.")
-        String stack_trace_pattern();
-
-        @AttributeDefinition(name = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
-                + "By default, this is set to false so that stack trace data is sent to the syslog server.", defaultValue = ""+DEFAULT_THROWABLE_EXCLUDED)
-        boolean throwable_excluded();
-    }
-
+    @Property(label = "Host", description = "Host of Syslog server")
     private static final String PROP_HOST = "host";
 
+    @Property(label = "Logger Names", description = "List of logger categories (ROOT for all)",
+            unbounded = PropertyUnbounded.ARRAY, value = ROOT)
     private static final String PROP_LOGGERS = "loggers";
 
+    @Property(label = "Port", description = "Port of Syslog server", intValue = -1)
     private static final String PROP_PORT = "port";
 
+    @Property(label = "Suffix Pattern", description = "Logback Pattern defining the message format.",
+            value = DEFAULT_SUFFIX_PATTERN)
     private static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
 
+    @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, propertyPrivate = true,
+            description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
+            + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
+            + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
+            + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
     private static final String PROP_FACILITY = "facility";
 
+    @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
+             + "trace line. The default value for this property is a single tab character.")
     private static final String PROP_STACK_TRACE_PATTERN = "stack.trace.pattern";
 
+    @Property(label = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
+            + "By default, this is set to false so that stack trace data is sent to the syslog server.", boolValue = DEFAULT_THROWABLE_EXCLUDED)
     private static final String PROP_THROWABLE_EXCLUDED = "throwable.excluded";
 
     private ch.qos.logback.classic.net.SyslogAppender appender;

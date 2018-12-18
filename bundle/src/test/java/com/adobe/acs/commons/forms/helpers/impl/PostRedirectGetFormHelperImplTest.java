@@ -39,7 +39,6 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -123,7 +122,6 @@ public class PostRedirectGetFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldRedirectForRenderForm() throws Exception {
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x"));
         final SlingHttpServletResponse spiedResponse = spy(response);
@@ -142,7 +140,6 @@ public class PostRedirectGetFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldSerialiseFormInRedirectUrlParameter() throws Exception {
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", "world"));
         final SlingHttpServletResponse spiedResponse = spy(response);

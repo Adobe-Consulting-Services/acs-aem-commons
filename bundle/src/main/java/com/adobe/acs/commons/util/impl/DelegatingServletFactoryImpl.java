@@ -20,17 +20,17 @@
 package com.adobe.acs.commons.util.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestDispatcherOptions;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,58 +43,55 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(factory="com.adobe.acs.commons.util.impl.DelegatingServletFactoryImpl",
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service=Servlet.class,
-        immediate = false, 
-        property= {
-              "webconsole.configurationFactory.nameHint" + "=" + "Target type: {prop.target-resource-type}"})
-@Designate(ocd=DelegatingServletFactoryImpl.Config.class,factory=true)
+@Component(
+        label = "ACS AEM Commons - Delegating Servlet",
+        description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.",
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true,
+        immediate = false)
+@Properties({
+        @Property(
+                label = "Source Resource Types",
+                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
+                name = "sling.servlet.resourceTypes",
+                cardinality = Integer.MAX_VALUE,
+                value = {""}),
+        @Property(
+                label = "Source Selectors",
+                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
+                name = "sling.servlet.selectors",
+                cardinality = Integer.MAX_VALUE,
+                value = {""}),
+        @Property(
+                label = "Source Extensions",
+                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
+                name = "sling.servlet.extensions",
+                cardinality = Integer.MAX_VALUE,
+                value = {"html"}),
+        @Property(
+                label = "Source HTTP Methods",
+                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
+                name = "sling.servlet.methods",
+                cardinality = Integer.MAX_VALUE,
+                value = {"GET"}
+        ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Target type: {prop.target-resource-type}")
+})
+@Service(Servlet.class)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
     private static final String REQUEST_ATTR_DELEGATION_HISTORY = DelegatingServletFactoryImpl.class.getName() + "_History";
-    
-    @ObjectClassDefinition(name   = "ACS AEM Commons - Delegating Servlet",
-            description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.")
-    public @interface Config {
-        @AttributeDefinition(
-              name = "Source Resource Types",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                cardinality = Integer.MAX_VALUE)
-        String[] sling_servlet_resourceTypes();
-        
-        @AttributeDefinition(
-                name = "Source Selectors",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                cardinality = Integer.MAX_VALUE)
-        String[] sling_servlet_selectors();
-        
-        @AttributeDefinition(
-              name = "Source Extensions",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                cardinality = Integer.MAX_VALUE,
-                defaultValue = {"html"})
-        String[] sling_servlet_extensions();
-        
-        @AttributeDefinition(
-                name = "Source HTTP Methods",
-                description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                cardinality = Integer.MAX_VALUE,
-                defaultValue = {"GET"}
-        )
-        String[] sling_servlet_methods();
-
-        @AttributeDefinition(name = "Target Resource Type",
-                description = "The resource type to proxy requests to.",
-                defaultValue = DEFAULT_TARGET_RESOURCE_TYPE)
-        String prop_target_resourcetype();
-
-    }
 
 
     private static final String DEFAULT_TARGET_RESOURCE_TYPE = "";
     private String targetResourceType = DEFAULT_TARGET_RESOURCE_TYPE;
-    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target.resourcetype";
+    @Property(label = "Target Resource Type",
+            description = "The resource type to proxy requests to.",
+            value = DEFAULT_TARGET_RESOURCE_TYPE)
+    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
 
     /** Safe HTTP Methods **/
 

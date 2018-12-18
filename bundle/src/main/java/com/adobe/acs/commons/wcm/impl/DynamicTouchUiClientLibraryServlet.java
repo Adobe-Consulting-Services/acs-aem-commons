@@ -19,51 +19,47 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
-
-import javax.servlet.Servlet;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 
-@Component(service = Servlet.class, 
-        property = {
-SLING_SERVLET_PATHS + "=/bin/acs-commons/dynamic-touchui-clientlibs.json" })
+import java.util.Map;
+
+@SlingServlet(paths = "/bin/acs-commons/dynamic-touchui-clientlibs.json",
+    label = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
+    description = "Allows for dynamic loading of optional Touch UI Client Libraries",
+    metatype = true)
 public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
-private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
-private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
+    private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
+    private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
 
-private static final String[] DEFAULT_CATEGORIES = new String[] { CATEGORY_LIMIT, CATEGORY_PLACEHOLDER };
+    private static final String[] DEFAULT_CATEGORIES = new String[] {
+            CATEGORY_LIMIT,
+            CATEGORY_PLACEHOLDER
+    };
 
-@ObjectClassDefinition(name = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
-description = "Allows for dynamic loading of optional Touch UI Client Libraries")
-public @interface Config {
+    private static final boolean DEFAULT_EXCLUDE_ALL = false;
 
-@AttributeDefinition(description = "Exclude all client library categories")
-boolean exclude_all();
+    @Property(label = "Client Library Categories", description = "Client Library Categories", value = {
+            CATEGORY_LIMIT,
+            CATEGORY_PLACEHOLDER
+    })
+    private static final String PROP_CATEGORIES = "categories";
 
-@AttributeDefinition(description = "Client Library Categories", defaultValue = { CATEGORY_LIMIT,
-CATEGORY_PLACEHOLDER })
-String[] categories();
+    @Property(label = "Exclude All", description = "Exclude all client library categories", boolValue = DEFAULT_EXCLUDE_ALL)
+    private static final String PROP_EXCLUDE_ALL = "exclude.all";
 
-}
+    @Reference
+    private HtmlLibraryManager htmlLibraryManager;
 
-@Reference
-private HtmlLibraryManager htmlLibraryManager;
-
-@Activate
-protected void activate(DynamicTouchUiClientLibraryServlet.Config config) {
-String[] categories = config.categories();
-if (ArrayUtils.isEmpty(categories)) {
-categories = DEFAULT_CATEGORIES;
-}
-super.activate(categories, config.exclude_all(), htmlLibraryManager);
-}
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        super.activate(PropertiesUtil.toStringArray(config.get(PROP_CATEGORIES), DEFAULT_CATEGORIES),
+                PropertiesUtil.toBoolean(config.get(PROP_EXCLUDE_ALL), DEFAULT_EXCLUDE_ALL),
+                htmlLibraryManager);
+    }
 }

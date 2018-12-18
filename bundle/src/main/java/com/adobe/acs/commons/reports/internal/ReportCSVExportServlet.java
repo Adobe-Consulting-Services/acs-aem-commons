@@ -19,11 +19,6 @@
  */
 package com.adobe.acs.commons.reports.internal;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -32,16 +27,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +49,9 @@ import com.day.text.csv.Csv;
 /**
  * Servlet for exporting the results of the report to CSV.
  */
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=GET",
-SLING_SERVLET_SELECTORS+"=report",
-SLING_SERVLET_EXTENSIONS+"=csv",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/report-builder/report-page"
-})
+@SlingServlet(label = "ACS AEM Commons - Report CSV Export Servlet", methods = { "GET" }, resourceTypes = {
+    "acs-commons/components/utilities/report-builder/report-page" }, selectors = {
+        "report" }, extensions = { "csv" }, metatype = false)
 public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private static final long serialVersionUID = 2794836639686938093L;

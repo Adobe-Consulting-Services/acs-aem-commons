@@ -22,10 +22,14 @@ package com.adobe.acs.commons.workflow.process.impl;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +44,6 @@ import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.model.WorkflowModel;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
 
 /**
  * This workflow steps invokes another workflow on the current workflow's payload.
@@ -68,8 +71,16 @@ import com.day.cq.commons.jcr.JcrConstants;
  * <p>
  * If a Workflow Model Id can be resolved, via the content hierarchy (directly) or the the default workflow id param (fallback) but that Workflow Model cannot be resolved, then a WorkflowException is thrown.
  */
-
-@Component(service=WorkflowProcess.class,property= {"process.label=Workflow Delegation"})
+@Component
+@Properties({
+        @Property(
+                label = "Workflow Label",
+                name = "process.label",
+                value = "Workflow Delegation",
+                description = "Invokes a new workflow for this payload based on a content-hierarchy based configuration"
+        )
+})
+@Service
 public class WorkflowDelegationStep implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(WorkflowDelegationStep.class);
 

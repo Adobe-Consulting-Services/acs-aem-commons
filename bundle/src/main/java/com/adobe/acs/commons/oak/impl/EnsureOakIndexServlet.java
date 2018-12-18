@@ -19,20 +19,21 @@
  */
 package com.adobe.acs.commons.oak.impl;
 
-import java.io.IOException;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.oak.EnsureOakIndexManager;
+import java.io.IOException;
 
 /**
  * HTTP POST /system/console/ensure-oak-index
@@ -41,11 +42,22 @@ import com.adobe.acs.commons.oak.EnsureOakIndexManager;
  * path = /abs/path/to/ensure/definition (optional; when blank indicates all)
  */
 //@formatter:off
-@Component(immediate = true, service=Servlet.class, property= {
-      "felix.webconsole.title=Ensure Oak Index",
-      "felix.webconsole.label=ensure-oak-index",
-      "felix.webconsole.category=Sling"
+@Component(immediate = true)
+@Properties({
+        @Property(
+                name = "felix.webconsole.title",
+                value = "Ensure Oak Index"
+        ),
+        @Property(
+                name = "felix.webconsole.label",
+                value = "ensure-oak-index"
+        ),
+        @Property(
+                name = "felix.webconsole.category",
+                value = "Sling"
+        )
 })
+@Service(Servlet.class)
 //@formatter:on
 public class EnsureOakIndexServlet extends HttpServlet {
     //@formatter:off

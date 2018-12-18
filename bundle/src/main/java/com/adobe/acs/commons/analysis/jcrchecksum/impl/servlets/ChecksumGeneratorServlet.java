@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,10 +41,11 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, property= {
-"sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
-"sling.auth.requirements=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
+@Component(property= {
+        "sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
+        "sling.auth.requirements=-"+ChecksumGeneratorServlet.SERVLET_PATH
 })
+
 public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 

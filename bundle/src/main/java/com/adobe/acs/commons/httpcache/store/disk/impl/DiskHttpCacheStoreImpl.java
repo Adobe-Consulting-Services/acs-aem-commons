@@ -26,17 +26,20 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import org.apache.commons.lang.NotImplementedException;
-import org.osgi.service.component.annotations.Component;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
 /**
  * ACS AEM Commons - HTTP Cache - Disk based cache store implementation.
  */
 
 // TODO - Placeholder component. To be implemented.
-@Component(service=HttpCacheStore.class, 
-      property= {
-      HttpCacheStore.KEY_CACHE_STORE_TYPE + "=" + HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE
-})
+@Component
+@Service
+@Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+          value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
+          propertyPrivate = true)
 public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {

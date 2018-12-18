@@ -27,10 +27,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +45,14 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class,
-       property= {"process.label" + "=" + "Set Replication Status"})
+@Component
+@Property(
+        label = "Workflow Label",
+        name = "process.label",
+        value = "Set Replication Status",
+        description = "Sets the cq:lastReplicated, cq:lastReplicateBy and cq:lastReplicatedAction on the payload to the values provided"
+)
+@Service
 public class SetReplicationStatusProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(SetReplicationStatusProcess.class);

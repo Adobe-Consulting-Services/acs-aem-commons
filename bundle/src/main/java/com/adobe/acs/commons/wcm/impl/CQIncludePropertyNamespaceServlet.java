@@ -20,11 +20,28 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
-import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
+import com.adobe.acs.commons.util.BufferingResponse;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestDispatcherOptions;
+import org.apache.sling.api.request.RequestUtil;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -35,44 +52,19 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.apache.sling.api.request.RequestUtil;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
-import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.util.PathInfoUtil;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
 
 /**
  * ACS AEM Commons - CQInclude Property Namespace.
  */
 //@formatter:off
 @SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
-@Component(service = Servlet.class,
-property = 
-{ SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default",
-  SLING_SERVLET_EXTENSIONS + "=json", 
-  SLING_SERVLET_SELECTORS + "=overlay.cqinclude.namespace" })
-@Designate(ocd=CQIncludePropertyNamespaceServlet.Config.class)
+@SlingServlet(
+        label = "ACS AEM Commons - CQInclude Property Namespace",
+        metatype = true,
+        selectors = "overlay.cqinclude.namespace",
+        extensions = "json",
+        resourceTypes = "sling/servlet/default")
 //@formatter:on
 public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet {
     //@formatter:off
@@ -108,54 +100,39 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     };
 
     private String[] namespaceablePropertyNames = null;
-    
-    @ObjectClassDefinition(name="ACS AEM Commons - CQInclude Property Namespace")
-    public @interface Config {
-    
-        @AttributeDefinition(name = "Property Names",
-                description = "Namespace properties defined in this list. Leave empty for on 'name'. "
-                        + " Defaults to [ name, cropParameter, fileNameParameter, fileReferenceParameter, "
-                        + "mapParameter, rotateParameter, widthParameter, heightParameter] ",
-                defaultValue = {
-                        PN_NAME,
-                        "cropParameter",
-                        "fileNameParameter",
-                        "fileReferenceParameter",
-                        "mapParameter",
-                        "rotateParameter",
-                        "widthParameter",
-                        "heightParameter"
-                }
-        )
-        String[] namespace_propertynames();
-        
-        @AttributeDefinition(name = "Property Value Patterns",
-                description = "Namespace properties whose values match a regex in this list. "
-                        + "Defaults to [ \"^\\\\./.*\" ]",
-                defaultValue = {"^\\./.*"})
-        String namespace_propertyvaluepatterns();
 
-        @AttributeDefinition(name = "Support Multi-level",
-                description = "When set to true, cqinclude servlet will support multi-level path-ing if nested cqinclude namespaces. Defaults to false",
-                defaultValue = "false")
-        boolean namespace_multilevel();
-
-
-    }
-
-    public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.propertynames";
+    @Property(label = "Property Names",
+            description = "Namespace properties defined in this list. Leave empty for on 'name'. "
+                    + " Defaults to [ name, cropParameter, fileNameParameter, fileReferenceParameter, "
+                    + "mapParameter, rotateParameter, widthParameter, heightParameter] ",
+            value = {
+                    PN_NAME,
+                    "cropParameter",
+                    "fileNameParameter",
+                    "fileReferenceParameter",
+                    "mapParameter",
+                    "rotateParameter",
+                    "widthParameter",
+                    "heightParameter"
+            }
+    )
+    public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.property-names";
 
     private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = new String[]{"^\\./.*"};
     private List<Pattern> namespaceablePropertyValuePatterns = new ArrayList<Pattern>();
-
-
-    public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.propertyvaluepatterns";
+    @Property(label = "Property Value Patterns",
+            description = "Namespace properties whose values match a regex in this list. "
+                    + "Defaults to [ \"^\\\\./.*\" ]",
+            value = {"^\\./.*"})
+    public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.property-value-patterns";
 
 
     private static final boolean DEFAULT_SUPPORT_MULTI_LEVEL = false;
     private boolean supportMultiLevel = DEFAULT_SUPPORT_MULTI_LEVEL;
-
-    public static final String PROP_SUPPORT_MULTI_LEVEL = "namespace.multilevel";
+    @Property(label = "Support Multi-level",
+            description = "When set to true, cqinclude servlet will support multi-level path-ing if nested cqinclude namespaces. Defaults to false",
+            boolValue = false)
+    public static final String PROP_SUPPORT_MULTI_LEVEL = "namespace.multi-level";
     //@formatter:on
 
     @Override

@@ -27,12 +27,6 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -45,30 +39,26 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet for interacting with MCP.
  */
-
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=GET,POST",
-SLING_SERVLET_SELECTORS+"=start,list,status,halt,haltAll,purge",
-SLING_SERVLET_EXTENSIONS+"=json",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/manage-controlled-processes"
-
-})
+@SlingServlet(
+        resourceTypes = "acs-commons/components/utilities/manage-controlled-processes",
+        selectors = {"start", "list", "status", "halt", "haltAll", "purge"},
+        methods = {"GET", "POST"},
+        extensions = {"json"}
+)
 public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerServlet.class);
