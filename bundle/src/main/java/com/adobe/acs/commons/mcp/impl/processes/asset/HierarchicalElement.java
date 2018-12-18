@@ -82,7 +82,7 @@ public interface HierarchicalElement {
             String extension = org.apache.commons.lang3.StringUtils.substringAfterLast(name, ".");
             return NameUtil.createValidDamName(baseName) + "." + NameUtil.createValidDamName(extension);
         }
-        return name.matches("\\w+") ? name : NameUtil.createValidDamName(name);
+        return name.matches(NameUtil.VALID_NAME_REGEXP) ? name : NameUtil.createValidDamName(name);
     }
 
     default String getNodeName(String name) {
