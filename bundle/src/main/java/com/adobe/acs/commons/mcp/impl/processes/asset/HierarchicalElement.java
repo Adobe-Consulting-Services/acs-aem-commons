@@ -72,7 +72,7 @@ public interface HierarchicalElement {
     default String getNodeName(boolean preserveName) {
         String name = getName();
         if (name == null) {
-            return name;
+            return null;
         }
         if (preserveName) {
             return getNodeName(name);
