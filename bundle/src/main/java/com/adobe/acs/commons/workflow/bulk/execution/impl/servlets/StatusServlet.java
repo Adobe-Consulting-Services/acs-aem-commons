@@ -19,46 +19,54 @@
  */
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerStats;
-import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Failure;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ReflectionException;
-import javax.servlet.ServletException;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.ReflectionException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerStats;
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Failure;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Status Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {"GET"},
-        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
-        selectors = {"status"},
-        extensions = {"json"}
-)
+@Component(service = Servlet.class, property = {
+SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+SLING_SERVLET_SELECTORS + "=status",
+SLING_SERVLET_METHODS + "=GET",
+SLING_SERVLET_EXTENSIONS + "=json" })
 public class StatusServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(StatusServlet.class);

@@ -21,13 +21,11 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.day.cq.contentsync.handler.util.RequestResponseFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.engine.SlingRequestProcessor;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+@Component(service=ProcessDefinitionFactory.class)
 public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<RefreshFolderTumbnails> {
     @Reference
     private SlingRequestProcessor slingProcessor;

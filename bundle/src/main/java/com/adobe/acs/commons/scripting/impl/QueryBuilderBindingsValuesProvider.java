@@ -21,15 +21,13 @@ package com.adobe.acs.commons.scripting.impl;
 
 import javax.script.Bindings;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.day.cq.search.QueryBuilder;
 
-@Component
-@Service
+@Component(service=BindingsValuesProvider.class)
 public class QueryBuilderBindingsValuesProvider implements BindingsValuesProvider {
 
     @Reference

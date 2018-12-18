@@ -27,9 +27,8 @@ import com.adobe.granite.taskmanagement.TaskManager;
 import com.adobe.granite.taskmanagement.TaskManagerException;
 import com.adobe.granite.taskmanagement.TaskManagerFactory;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +39,7 @@ import java.util.List;
     ACS AEM Commons - AEM Inbox Notification Sender
     Service for sending AEM Inbox Notification
  */
-@Component
-@Service
+@Component(service=InboxNotificationSender.class)
 public class InboxNotificationSenderImpl implements InboxNotificationSender {
     private static final Logger log = LoggerFactory.getLogger(InboxNotificationSenderImpl.class);
 

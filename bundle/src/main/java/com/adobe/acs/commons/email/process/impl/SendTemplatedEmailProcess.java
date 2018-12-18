@@ -91,8 +91,9 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * </dl>
  * 
  */
-@Component(properties= {
-        "process.label=Send Template Email"
+
+@Component(service=WorkflowProcess.class, property= {
+"process.label=Send Templated Email"
 })
 public class SendTemplatedEmailProcess implements WorkflowProcess {
 

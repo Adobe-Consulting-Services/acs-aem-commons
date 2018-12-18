@@ -19,12 +19,12 @@
  */
 package com.adobe.acs.commons.exporters.impl.users;
 
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -36,19 +36,25 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Arrays;
 
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
 
-@SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Init Servlet",
-        methods = {"GET"},
-        resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
-        selectors = {"init"},
-        extensions = {"json"}
-)
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_METHODS+"=GET",
+SLING_SERVLET_SELECTORS+"=init",
+SLING_SERVLET_EXTENSIONS+"=json",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/exporters/users-to-csv"
+
+})
 public class UsersInitServlet extends SlingSafeMethodsServlet {
     private static final String QUERY = "SELECT * FROM [rep:Group] WHERE ISDESCENDANTNODE([/home/groups]) ORDER BY [rep:principalName]";
     private static final String KEY_TEXT = "text";

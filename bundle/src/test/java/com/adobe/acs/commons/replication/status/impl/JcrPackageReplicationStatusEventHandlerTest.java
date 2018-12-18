@@ -167,7 +167,8 @@ public class JcrPackageReplicationStatusEventHandlerTest {
     public void testProcess() throws Exception {
         final Map<String, String> config = new HashMap<>();
 
-        config.put("replicated-by.override", "Package Replication");
+        config.put(JcrPackageReplicationStatusEventHandler.PROP_REPLICATED_BY_OVERRIDE, "Package Replication");
+        
 
         eventHandler.activate(config);
         eventHandler.process(job);

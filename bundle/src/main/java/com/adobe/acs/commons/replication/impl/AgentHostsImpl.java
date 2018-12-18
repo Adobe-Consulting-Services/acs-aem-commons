@@ -25,9 +25,8 @@ import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.AgentManager;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component
-@Service
+@Component(service=AgentHosts.class)
 public class AgentHostsImpl implements AgentHosts {
     private static final Logger log = LoggerFactory.getLogger(AgentHostsImpl.class);
 

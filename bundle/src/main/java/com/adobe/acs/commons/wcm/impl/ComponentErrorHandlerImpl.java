@@ -20,29 +20,13 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.util.ModeUtil;
-import com.adobe.acs.commons.util.ResourceDataUtil;
-import com.adobe.acs.commons.wcm.ComponentErrorHandler;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.day.cq.wcm.api.WCMMode;
-import com.day.cq.wcm.api.components.ComponentContext;
-import com.day.cq.wcm.commons.WCMUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.sling.engine.EngineConstants.FILTER_SCOPE_COMPONENT;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -50,32 +34,39 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 
-@Component(
-        label = "ACS AEM Commons - Component-Level Error Handler",
-        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
-                + "components based on WCM Mode collections (Edit, Preview, Publish).",
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.ModeUtil;
+import com.adobe.acs.commons.util.ResourceDataUtil;
+import com.adobe.acs.commons.wcm.ComponentErrorHandler;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.commons.WCMUtils;
+
+@Component( configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service= {ComponentErrorHandler.class, Filter.class},
+        property= {SLING_FILTER_SCOPE + "=" + FILTER_SCOPE_COMPONENT,
+              "filter.order" + ":Integer=" + ComponentErrorHandlerImpl.FILTER_ORDER
+              }
 )
-@Properties({
-        @Property(
-                name = "sling.filter.scope",
-                value = "component",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "filter.order",
-                intValue = ComponentErrorHandlerImpl.FILTER_ORDER,
-                propertyPrivate = true
-        )
-})
-@Service
-public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter {
+@Designate(ocd=ComponentErrorHandlerImpl.Config.class)
+public class ComponentErrorHandlerImpl implements  ComponentErrorHandler, Filter{
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
     // Magic number pushes filter lower in the chain so it executes after the OOTB WCM Debug Filter
@@ -114,9 +105,45 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
 
-    @Property(label = "Edit Error Handling",
-            description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
-            boolValue = DEFAULT_EDIT_ENABLED)
+    @ObjectClassDefinition(
+        name = "ACS AEM Commons - Component-Level Error Handler",
+        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
+                + "components based on WCM Mode collections (Edit, Preview, Publish).")
+    public @interface Config {
+       
+        @AttributeDefinition(name = "Edit Error Handling",
+                description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
+                defaultValue = ""+DEFAULT_EDIT_ENABLED)
+        boolean edit_enabled();
+
+        @AttributeDefinition(name = "Edit HTML Error Path",
+                description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
+                defaultValue = DEFAULT_EDIT_ERROR_HTML_PATH)
+        String edit_html();
+
+        @AttributeDefinition(name = "Preview Error Handling",
+                description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
+                defaultValue = ""+DEFAULT_PREVIEW_ENABLED)
+        boolean preview_enabled();
+        
+        @AttributeDefinition(name = "Preview HTML Error Path",
+                description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
+                defaultValue = DEFAULT_PREVIEW_ERROR_HTML_PATH)
+        String preview_html();
+        
+        @AttributeDefinition(name = "Publish Error Handling",
+                description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
+                defaultValue = ""+DEFAULT_PUBLISH_ENABLED)
+        boolean publish_enabled();
+        
+        @AttributeDefinition(name = "Suppressed Resource Types",
+                description = "Resource types this Filter will ignore during Sling Includes.",
+                cardinality = Integer.MAX_VALUE)
+        String[] suppress_resourcetypes();
+
+
+    }
+    
     public static final String PROP_EDIT_ENABLED = "edit.enabled";
 
     private static final String DEFAULT_EDIT_ERROR_HTML_PATH =
@@ -124,9 +151,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private String editErrorHTMLPath = DEFAULT_EDIT_ERROR_HTML_PATH;
 
-    @Property(label = "Edit HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
-            value = DEFAULT_EDIT_ERROR_HTML_PATH)
     public static final String PROP_EDIT_ERROR_HTML_PATH = "edit.html";
 
     /* Preview Mode */
@@ -135,9 +159,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean previewModeEnabled = DEFAULT_PREVIEW_ENABLED;
 
-    @Property(label = "Preview Error Handling",
-            description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
-            boolValue = DEFAULT_PREVIEW_ENABLED)
     public static final String PROP_PREVIEW_ENABLED = "preview.enabled";
 
     private static final String DEFAULT_PREVIEW_ERROR_HTML_PATH =
@@ -145,11 +166,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private String previewErrorHTMLPath = DEFAULT_PREVIEW_ERROR_HTML_PATH;
 
-    @Property(label = "Preview HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
-            value = DEFAULT_PREVIEW_ERROR_HTML_PATH)
     public static final String PROP_PREVIEW_ERROR_HTML_PATH = "preview.html";
-
 
     /* Publish Mode */
 
@@ -157,18 +174,12 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private boolean publishModeEnabled = DEFAULT_PUBLISH_ENABLED;
 
-    @Property(label = "Publish Error Handling",
-            description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
-            boolValue = DEFAULT_PUBLISH_ENABLED)
     public static final String PROP_PUBLISH_ENABLED = "publish.enabled";
 
     private static final String DEFAULT_PUBLISH_ERROR_HTML_PATH = BLANK_HTML;
 
     private String publishErrorHTMLPath = DEFAULT_PUBLISH_ERROR_HTML_PATH;
 
-    @Property(label = "Publish HTML Error Path",
-            description = "Path to html file in JCR use to display an erring component in DISABLED mode.",
-            value = DEFAULT_PUBLISH_ERROR_HTML_PATH)
     public static final String PROP_PUBLISH_ERROR_HTML_PATH = "publish.html";
 
     /* Suppressed Resource Types */
@@ -177,11 +188,7 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
 
-    @Property(label = "Suppressed Resource Types",
-            description = "Resource types this Filter will ignore during Sling Includes.",
-            cardinality = Integer.MAX_VALUE,
-            value = {})
-    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
+    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress.resourcetypes";
 
 
     @Override

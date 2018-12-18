@@ -21,11 +21,12 @@
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
+import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +37,7 @@ import java.util.List;
  * Cache only Http response status for the request is 200.
  * Do not cache the response when it's set with cache control headers marking it as not cacheable.
  */
-@Component
-@Service
+@Component(service=HttpCacheHandlingRule.class)
 public class HonorCacheControlHeaders extends AbstractHttpCacheHandlingRule {
     private static final String KEY_CACHE_CONTROL_HEADER = "Cache-Control"; // HTTP 1.1
     private static final String[] VALUES_CACHE_CONTROL = {"no-cache", "no-store", "must-revalidate"};
