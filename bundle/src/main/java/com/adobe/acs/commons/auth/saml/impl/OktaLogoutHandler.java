@@ -29,9 +29,6 @@ import org.apache.sling.auth.core.spi.AuthenticationInfo;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -51,44 +48,39 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
  * - add a configuration policy to only work with a provided configuration
  *
  */
-@Component(service=AuthenticationHandler.class,
-configurationPolicy=ConfigurationPolicy.REQUIRE,
-        property= {
-      Constants.SERVICE_DESCRIPTION + "=" + "ACS AEM Commons Okta Logout Handler",
+
+@Component(property= {
+        Constants.SERVICE_DESCRIPTION + "= ACS AEM Commons Okta Logout Handler"
 })
 @Designate(ocd=OktaLogoutHandler.Config.class)
 public class OktaLogoutHandler implements AuthenticationHandler {
-   
-   @ObjectClassDefinition(name = "ACS AEM Commons - Okta Logout Handler",
-        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout")
-   public @interface Config {
-       @AttributeDefinition(defaultValue = ""+5003)
-        int service_ranking();
-       
-       @AttributeDefinition(defaultValue = "/")
-       String path();
-       
-       @AttributeDefinition
-       String okta_host_name();
-
-       @AttributeDefinition
-       String from_uri();
+    
+    @ObjectClassDefinition(name="ACS AEM Commons - Okta Logout Handler", description="Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout")
+    @interface Config {
+        @AttributeDefinition(name="Okta host name",description="Okta host name")
+        String okta_host_name();
+        @AttributeDefinition(name="From Uri", description="From Uri")
+        String from_uri();
+        
+        @AttributeDefinition(name="Service Ranking", description = "Service Ranking")
+        int service_ranking() default 5003;
+        
+        @AttributeDefinition(name="Path", description="Path")
+        String path() default "/";
     }
 
     private String redirectLocation;
 
     @Activate
-    protected void activate(OktaLogoutHandler.Config config) {
-        String oktaHostName = config.okta_host_name();
-        if (oktaHostName == null) {
+    protected void activate(Config conf) {
+        if (conf.okta_host_name() == null) {
             throw new IllegalArgumentException("Okta Host Name must be provided");
         }
-
         StringBuilder builder = new StringBuilder("https://");
-        builder.append(config.okta_host_name());
+        builder.append(conf.okta_host_name());
         builder.append("/login/signout");
-        if (config.from_uri() != null) {
-            builder.append("?fromURI=").append(config.from_uri());
+        if (conf.from_uri() != null) {
+            builder.append("?fromURI=").append(conf.from_uri());
         }
         this.redirectLocation = builder.toString();
     }

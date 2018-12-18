@@ -25,18 +25,18 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -50,28 +50,33 @@ import java.util.Map;
  * Rewriter pipeline component which maps attribute values.
  */
 @Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE, service=TransformerFactory.class, property= {
-        "pipeline.type" + "=" + "resourceresolver-map",
-        "webconsole.configurationFactory.nameHint"  + "=" + "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]"
-        })
-@Designate(ocd=ResourceResolverMapTransformerFactory.Config.class,factory=true)
+        label = "ACS AEM Commons - Resource Resolver Map Rewriter",
+        description = "Rewriter pipeline component which resourceResolver.map's any element/attribute.",
+        metatype = true,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE)
+@Properties({ 
+    @Property(
+            label = "Rewriter Pipeline Type",
+            description = "Type identifier to be referenced in rewriter pipeline configuration.",
+            name = "pipeline.type",
+            value = "resourceresolver-map",
+            propertyPrivate = true),
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Pipeline Type: {pipeline.type}, for element:attributes [{attributes}]")
+})
+@Service
 public final class ResourceResolverMapTransformerFactory implements TransformerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceResolverMapTransformerFactory.class);
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Resource Resolver Map Rewriter",
-        description = "Rewriter pipeline component which resourceResolver.map's any element/attribute.")
-    public @interface Config {
-    
-        @AttributeDefinition(name = "Rewrite Attributes",
-                description = "List of element/attribute pairs to rewrite",
-                defaultValue = {"img:src"})
-        String[] attributes();
-    }
 
     private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src"};
     private Map<String, String[]> attributes;
-
+    @Property(label = "Rewrite Attributes",
+            description = "List of element/attribute pairs to rewrite",
+            cardinality = Integer.MAX_VALUE,
+            value = {"img:src"})
     private static final String PROP_ATTRIBUTES = "attributes";
 
     public Transformer createTransformer() {

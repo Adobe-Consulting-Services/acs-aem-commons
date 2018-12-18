@@ -31,9 +31,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
-
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +50,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 
 
 @Component(service=Servlet.class)

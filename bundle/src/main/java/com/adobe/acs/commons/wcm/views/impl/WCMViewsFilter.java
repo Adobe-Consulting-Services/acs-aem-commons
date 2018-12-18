@@ -29,16 +29,17 @@ import com.day.cq.wcm.commons.WCMUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,19 +57,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@org.osgi.service.component.annotations.Component(
-        configurationPolicy=ConfigurationPolicy.REQUIRE,
-        service=Filter.class,
-        property= {
-              "sling.filter.scope=component",
-              "filter.order" + ":Integer=" + WCMViewsFilter.FILTER_ORDER
-        }
+@org.apache.felix.scr.annotations.Component(
+        label = "ACS AEM Commons - WCM Views Filter",
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=WCMViewsFilter.Config.class)
+@Properties({
+        @Property(
+                name = "sling.filter.scope",
+                value = "component",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "filter.order",
+                intValue = WCMViewsFilter.FILTER_ORDER,
+                propertyPrivate = true
+        )
+})
+@Service
 public class WCMViewsFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsFilter.class);
 
@@ -83,27 +94,21 @@ public class WCMViewsFilter implements Filter {
     public static final String WCM_VIEW_DISABLED = "disabled";
 
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - WCM Views Filter" )
-    public @interface Config {
-       
-       @AttributeDefinition(name = "Path Prefixes to Include",
-                description = "Include paths that begin with these path prefixes. Default: [ /content ]",
-                cardinality = Integer.MAX_VALUE,
-                defaultValue = {"/content"})
-       String[] path_prefixes_include();
-       
-       @AttributeDefinition(name = "Resource Types (Regex)",
-            description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
-            cardinality = Integer.MAX_VALUE)
-       String[] resourcetypes_include();
-       
-    }
 
     private String[] includePathPrefixes = new String[]{"/content"};
+    @Property(label = "Path Prefixes to Include",
+            description = "Include paths that begin with these path prefixes. Default: [ /content ]",
+            cardinality = Integer.MAX_VALUE,
+            value = {"/content"})
+    public static final String PROP_PATH_PREFIXES_INCLUDE = "path-prefixes.include";
 
     private List<Pattern> resourceTypesIncludes = new ArrayList<Pattern>();
- 
+    @Property(label = "Resource Types (Regex)",
+            description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_RESOURCE_TYPES_INCLUDE = "resource-types.include";
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // do nothing
@@ -318,8 +323,9 @@ public class WCMViewsFilter implements Filter {
 
 
     @Activate
-    protected final void activate(WCMViewsFilter.Config config) throws Exception {
-        String[] includes = config.resourcetypes_include();
+    protected final void activate(final Map<String, String> properties) throws Exception {
+        String[] includes = PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_TYPES_INCLUDE),
+                new String[]{});
         this.resourceTypesIncludes = new ArrayList<Pattern>();
 
         for (final String include : includes) {
@@ -328,6 +334,7 @@ public class WCMViewsFilter implements Filter {
             }
         }
 
-        this.includePathPrefixes = config.path_prefixes_include();
+        this.includePathPrefixes =
+                PropertiesUtil.toStringArray(properties.get(PROP_PATH_PREFIXES_INCLUDE), new String[]{});
     }
 }

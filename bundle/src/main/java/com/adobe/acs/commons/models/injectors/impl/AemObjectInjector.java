@@ -19,20 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Type;
-
-import javax.jcr.Session;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.models.spi.DisposalCallbackRegistry;
-import org.apache.sling.models.spi.Injector;
 import org.apache.sling.xss.XSSAPI;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
-
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.ComponentContext;
@@ -40,6 +27,19 @@ import com.day.cq.wcm.api.designer.Design;
 import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
 import com.day.cq.wcm.commons.WCMUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.spi.DisposalCallbackRegistry;
+import org.apache.sling.models.spi.Injector;
+import org.osgi.framework.Constants;
+
+import javax.jcr.Session;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
 
 /**
  * Sling Models Injector which injects the Adobe AEM objects defined in
@@ -68,12 +68,14 @@ import com.day.cq.wcm.commons.WCMUtils;
  * Note: This Injector requires at least org.apache.sling.models.impl version 1.0.2
  *
  */
-@Component(service=Injector.class, property= {Constants.SERVICE_RANKING +":Integer=4500"})
+@Component
+@Service
 /*
  * SERVICE_RANKING of this service should be lower than the ranking of the OsgiServiceInjector (5000),
  * otherwise the generic XSSAPI service would be injected from the OSGi Service Registry instead of the
  * pre-configured from the current request.
  */
+@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public final class AemObjectInjector implements Injector {
 
     private static final String COM_DAY_CQ_WCM_TAGS_DEFINE_OBJECTS_TAG = "com.day.cq.wcm.tags.DefineObjectsTag";

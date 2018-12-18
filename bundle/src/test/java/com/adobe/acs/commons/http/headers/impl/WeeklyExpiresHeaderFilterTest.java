@@ -45,7 +45,7 @@ public class WeeklyExpiresHeaderFilterTest {
     WeeklyExpiresHeaderFilter filter = new WeeklyExpiresHeaderFilter();
 
     Dictionary<String, Object> properties = null;
-    
+
     @Mock
     ComponentContext componentContext;
 
@@ -56,7 +56,7 @@ public class WeeklyExpiresHeaderFilterTest {
     public void setup() throws Exception {
         properties = new Hashtable<String, Object>();
         properties.put(WeeklyExpiresHeaderFilter.PROP_EXPIRES_TIME, "02:30");
-        
+
         when(componentContext.getProperties()).thenReturn(properties);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
 

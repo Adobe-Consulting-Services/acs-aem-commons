@@ -72,7 +72,7 @@ import java.util.Map;
  */
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
 @Designate(ocd=EmailServiceImpl.Config.class)
-public class EmailServiceImpl implements EmailService {
+public final class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String MSG_INVALID_RECIPIENTS = "Invalid Recipients";

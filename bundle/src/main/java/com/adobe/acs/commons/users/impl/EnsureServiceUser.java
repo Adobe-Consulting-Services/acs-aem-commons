@@ -26,59 +26,45 @@ import java.util.Map;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(service = { EnsureServiceUser.class, EnsureAuthorizable.class }, configurationPolicy = ConfigurationPolicy.REQUIRE,
-        immediate = true, factory="com.adobe.acs.commons.users.impl.EnsureServiceUser", property= {
-        "webconsole.configurationFactory.nameHint" + "=" + "Ensure Service User: {operation} {principalName}"})
-@Designate(ocd=EnsureServiceUser.Config.class)
+@Component(label = "ACS AEM Commons - Ensure Service User", configurationFactory = true, metatype = true,
+        immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Properties({ @Property(name = "webconsole.configurationFactory.nameHint",
+        value = "Ensure Service User: {operation} {principalName}") })
+@Service(value = { EnsureServiceUser.class, EnsureAuthorizable.class })
 public final class EnsureServiceUser implements EnsureAuthorizable {
 
-@ObjectClassDefinition(name= "ACS AEM Commons - Ensure Service User")
-public @interface Config {
-    @AttributeDefinition(name = "Ensure immediately", defaultValue = "true",
+    @Property(label = "Ensure immediately", boolValue = true,
             description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-    boolean ensure_immediately();
-
-    @AttributeDefinition(
-            name = "Operation",
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
+    public static final String DEFAULT_OPERATION = "add";
+    @Property(
+            label = "Operation",
             description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
-            options = { @Option(value = "add", label = "Ensure existence (add)"),
-                    @Option(value = "remove", label = "Ensure extinction (remove)") })
-    String operation();
-    
-    @AttributeDefinition(name = "Principal Name", description = "The service user's principal name")
-    String principalName();
-    
-    @AttributeDefinition(name = "ACEs",
+            options = { @PropertyOption(name = "add", value = "Ensure existence (add)"),
+                    @PropertyOption(name = "remove", value = "Ensure extinction (remove)") })
+    public static final String PROP_OPERATION = "operation";
+    @Property(label = "Principal Name", description = "The service user's principal name")
+    public static final String PROP_PRINCIPAL_NAME = "principalName";
+    @Property(label = "ACEs",
             description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
             cardinality = Integer.MAX_VALUE)
-    String[] aces();
-    
-}
-
-    public static final String PROP_ENSURE_IMMEDIATELY = "ensure.immediately";
-    public static final String DEFAULT_OPERATION = "add";
-
-    public static final String PROP_OPERATION = "operation";
-
-    public static final String PROP_PRINCIPAL_NAME = "principalName";
-
     public static final String PROP_ACES = "aces";
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
     private static final String SERVICE_NAME = "ensure-service-user";
@@ -91,7 +77,6 @@ public @interface Config {
 
     private ServiceUser serviceUser = null;
     private Operation operation = null;
-    
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 

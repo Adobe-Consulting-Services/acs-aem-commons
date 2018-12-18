@@ -19,6 +19,48 @@
  */
 package com.adobe.acs.commons.errorpagehandler.impl;
 
+import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
+import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.wcm.ComponentHelper;
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.day.cq.commons.PathInfo;
+import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
+import com.day.cq.commons.inherit.InheritanceValueMap;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.search.QueryBuilder;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.auth.core.AuthUtil;
+import org.apache.sling.commons.auth.Authenticator;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -35,52 +77,12 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingConstants;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestProgressTracker;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.apache.sling.auth.core.AuthUtil;
-import org.apache.sling.commons.auth.Authenticator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.errorpagehandler.ErrorPageHandlerService;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCache;
-import com.adobe.acs.commons.errorpagehandler.cache.impl.ErrorPageCacheImpl;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.wcm.ComponentHelper;
-import com.adobe.acs.commons.wcm.vanity.VanityURLService;
-import com.day.cq.commons.PathInfo;
-import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
-import com.day.cq.commons.inherit.InheritanceValueMap;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
-
-@Component(service=ErrorPageHandlerService.class, immediate = false)
-@Designate(ocd=ErrorPageHandlerImpl.Config.class)
+@Component(
+        label = "ACS AEM Commons - Error Page Handler",
+        description = "Error Page Handling module which facilitates the resolution of errors "
+                + "against author-able pages for discrete content trees.",
+        immediate = false, metatype = true)
+@Service
 public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);
@@ -91,155 +93,138 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final String REDIRECT_TO_LOGIN = "redirect-to-login";
     private static final String RESPOND_WITH_404 = "respond-with-404";
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Error Page Handler",
-        description = "Error Page Handling module which facilitates the resolution of errors "
-                + "against author-able pages for discrete content trees.")
-    public @interface Config {
-       
-        @AttributeDefinition(name = "Enable", description = "Enables/Disables the error handler. [Required]",
-                defaultValue = {""+DEFAULT_ENABLED})
-        boolean enabled();
-        
-        @AttributeDefinition(name = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
-                + "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
-                + "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
-                defaultValue = "" + DEFAULT_VANITY_DISPATCH_ENABLED)
-        boolean vanity_dispatch_enabled();
-
-        @AttributeDefinition(name = "Error page extension",
-                description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
-                      defaultValue = DEFAULT_ERROR_PAGE_EXTENSION)
-        String errorpage_extension();
-
-        @AttributeDefinition(
-                name = "Fallback error page name",
-                description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
-                        + "retrieved from the Request. [Required] [Default: 500]",
-                        defaultValue = DEFAULT_FALLBACK_ERROR_NAME)
-        String errorpage_fallbackname();
-        
-        @AttributeDefinition(
-                name = "System error page",
-                description = "Absolute path to system Error page resource to serve if no other more appropriate "
-                        + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
-                        defaultValue = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
-        String errorpage_systempath();
-
-      
-        @AttributeDefinition(
-              name = "Error page paths",
-                description = "List of inclusive content trees under which error pages may reside, "
-                        + "along with the name of the the default error page for the content tree. This is a "
-                        + "fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs."
-                        + " Example: /content/geometrixx/en:errors [Optional]",
-                cardinality = Integer.MAX_VALUE)
-        String[] paths();
-
-        @AttributeDefinition(
-                name = "Not Found Behavior",
-                description = "Default resource not found behavior. [Default: Respond with 404]",
-                options = {
-                        @Option(label = "Redirect to Login", value = REDIRECT_TO_LOGIN),
-                        @Option(label = "Respond with 404", value = RESPOND_WITH_404)
-                },
-                defaultValue = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
-        String notfound_behavior();
-
-        @AttributeDefinition(
-                name = "Not Found Exclusions",
-                description = "Regex path patterns that will act in the \"other\" (redirect-to-login vs. "
-                        + " respond-with-404) way to the \"Not Found Behavior\". This allows the usual Not Found behavior"
-                        + " to be defined via \"not-found.behavior\" with specific exclusions defined here. [Optional]",
-                cardinality = Integer.MAX_VALUE)
-        String[] notfound_exclusionpathpatterns();
-        
-        @AttributeDefinition(name = "Serve authenticated from cache",
-                description = "Serve authenticated requests from the error page cache. [ Default: false ]",
-                defaultValue = ""+DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-        boolean cache_serveauthenticated();
-        
-        @AttributeDefinition(name = "TTL (in seconds)",
-                description = "TTL for each cache entry in seconds. [ Default: 300 ]",
-                defaultValue = "" + DEFAULT_TTL)
-        int cache_ttl();
-        
-        @AttributeDefinition(name = "Enable placeholder images", description = "Enable image error handling  [ Default: false ]",
-              defaultValue = ""+ DEFAULT_ERROR_IMAGES_ENABLED)
-        boolean errorimages_enabled();
-
-        
-        @AttributeDefinition(name = "Error image path/selector",
-                description = "Accepts a selectors.extension (ex. `.img.png`) absolute, or relative path. "
-                        + "If an extension or relative path, this value is applied to the resolved error page."
-                        + " Note: This concatenated path must resolve to a nt:file else a 200 response will be sent."
-                        + " [ Optional ] [ Default: .img.png ]",
-                defaultValue = DEFAULT_ERROR_IMAGE_PATH)
-        String errorimages_path();
-        
-        @AttributeDefinition(
-              name = "Error image extensions",
-                description = "List of valid image extensions (no proceeding .) to handle. "
-                        + "Example: 'png' "
-                        + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
-                cardinality = Integer.MAX_VALUE,
-                      defaultValue = { "png", "jpeg", "jpg", "gif" })
-       String[] errorimages_extensions();
-        
-
-    }
 
     /* Enable/Disable */
     private static final boolean DEFAULT_ENABLED = true;
 
     private boolean enabled = DEFAULT_ENABLED;
 
-   
+    @Property(label = "Enable", description = "Enables/Disables the error handler. [Required]",
+            boolValue = DEFAULT_ENABLED)
+    private static final String PROP_ENABLED = "enabled";
+    
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
 
     private boolean vanityDispatchCheckEnabled = DEFAULT_VANITY_DISPATCH_ENABLED;
 
+    @Property(label = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
+            + "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
+            + "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
+            boolValue = DEFAULT_VANITY_DISPATCH_ENABLED)
+    private static final String PROP_VANITY_DISPATCH_ENABLED = "vanity.dispatch.enabled";
 
     /* Error Page Extension */
     private static final String DEFAULT_ERROR_PAGE_EXTENSION = "html";
 
     private String errorPageExtension = DEFAULT_ERROR_PAGE_EXTENSION;
 
+    @Property(label = "Error page extension",
+            description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
+            value = DEFAULT_ERROR_PAGE_EXTENSION)
+    private static final String PROP_ERROR_PAGE_EXTENSION = "error-page.extension";
 
     /* Fallback Error Code Extension */
     private static final String DEFAULT_FALLBACK_ERROR_NAME = "500";
 
     private String fallbackErrorName = DEFAULT_FALLBACK_ERROR_NAME;
 
+    @Property(
+            label = "Fallback error page name",
+            description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
+                    + "retrieved from the Request. [Required] [Default: 500]",
+            value = DEFAULT_FALLBACK_ERROR_NAME)
+    private static final String PROP_FALLBACK_ERROR_NAME = "error-page.fallback-name";
 
     /* System Error Page Path */
     private static final String DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT = "";
 
     private String systemErrorPagePath = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT;
 
+    @Property(
+            label = "System error page",
+            description = "Absolute path to system Error page resource to serve if no other more appropriate "
+                    + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
+            value = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
+    private static final String PROP_ERROR_PAGE_PATH = "error-page.system-path";
+
+    /* Search Paths */
+    private static final String[] DEFAULT_SEARCH_PATHS = {};
+
+    @Property(
+            label = "Error page paths",
+            description = "List of inclusive content trees under which error pages may reside, "
+                    + "along with the name of the the default error page for the content tree. This is a "
+                    + "fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs."
+                    + " Example: /content/geometrixx/en:errors [Optional]",
+            cardinality = Integer.MAX_VALUE)
+    private static final String PROP_SEARCH_PATHS = "paths";
+
     /* Not Found Default Behavior */
     private static final String DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR = RESPOND_WITH_404;
-
     private String notFoundBehavior = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
 
+    @Property(
+            label = "Not Found Behavior",
+            description = "Default resource not found behavior. [Default: Respond with 404]",
+            options = {
+                    @PropertyOption(value = "Redirect to Login", name = REDIRECT_TO_LOGIN),
+                    @PropertyOption(value = "Respond with 404", name = RESPOND_WITH_404)
+            },
+            value = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
+    private static final String PROP_NOT_FOUND_DEFAULT_BEHAVIOR = "not-found.behavior";
+
+
+    /* Not Found Path Patterns */
+    private static final String[] DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS = {};
     private ArrayList<Pattern> notFoundExclusionPatterns = new ArrayList<Pattern>();
+
+    @Property(
+            label = "Not Found Exclusions",
+            description = "Regex path patterns that will act in the \"other\" (redirect-to-login vs. "
+                    + " respond-with-404) way to the \"Not Found Behavior\". This allows the usual Not Found behavior"
+                    + " to be defined via \"not-found.behavior\" with specific exclusions defined here. [Optional]",
+            cardinality = Integer.MAX_VALUE)
+    private static final String PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS = "not-found.exclusion-path-patterns";
+
 
     private static final int DEFAULT_TTL = 60 * 5; // 5 minutes
 
     private static final boolean DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE = false;
+
+    @Property(label = "Serve authenticated from cache",
+            description = "Serve authenticated requests from the error page cache. [ Default: false ]",
+            boolValue = DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
+    private static final String PROP_SERVE_AUTHENTICATED_FROM_CACHE = "cache.serve-authenticated";
+    private static final String LEGACY_PROP_SERVE_AUTHENTICATED_FROM_CACHE = "serve-authenticated-from-cache";
+
+    @Property(label = "TTL (in seconds)",
+            description = "TTL for each cache entry in seconds. [ Default: 300 ]",
+            intValue = DEFAULT_TTL)
+    private static final String PROP_TTL = "cache.ttl";
+    private static final String LEGACY_PROP_TTL = "ttl";
 
     /* Enable/Disables error images */
     private static final boolean DEFAULT_ERROR_IMAGES_ENABLED = false;
 
     private boolean errorImagesEnabled = DEFAULT_ERROR_IMAGES_ENABLED;
 
+    @Property(label = "Enable placeholder images", description = "Enable image error handling  [ Default: false ]",
+            boolValue = DEFAULT_ERROR_IMAGES_ENABLED)
+    private static final String PROP_ERROR_IMAGES_ENABLED = "error-images.enabled";
 
     /* Relative placeholder image path */
     private static final String DEFAULT_ERROR_IMAGE_PATH = ".img.png";
 
     private String errorImagePath = DEFAULT_ERROR_IMAGE_PATH;
 
+    @Property(label = "Error image path/selector",
+            description = "Accepts a selectors.extension (ex. `.img.png`) absolute, or relative path. "
+                    + "If an extension or relative path, this value is applied to the resolved error page."
+                    + " Note: This concatenated path must resolve to a nt:file else a 200 response will be sent."
+                    + " [ Optional ] [ Default: .img.png ]",
+            value = DEFAULT_ERROR_IMAGE_PATH)
+    private static final String PROP_ERROR_IMAGE_PATH = "error-images.path";
 
     /* Error image extensions to handle */
     private static final String[] DEFAULT_ERROR_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif"};
@@ -248,6 +233,14 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private String[] errorImageExtensions = DEFAULT_ERROR_IMAGE_EXTENSIONS;
 
+    @Property(
+            label = "Error image extensions",
+            description = "List of valid image extensions (no proceeding .) to handle. "
+                    + "Example: 'png' "
+                    + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
+            cardinality = Integer.MAX_VALUE,
+            value = { "png", "jpeg", "jpg", "gif" })
+    private static final String PROP_ERROR_IMAGE_EXTENSIONS = "error-images.extensions";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -827,6 +820,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         }
     }
 
+    @Activate
+    protected void activate(ComponentContext componentContext) {
+        configure(componentContext);
+    }
+
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         enabled = false;
@@ -837,25 +835,42 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     @SuppressWarnings("squid:S1149")
-    @Activate
-    protected void activate(ComponentContext componentContext, ErrorPageHandlerImpl.Config config) {
-        this.enabled = config.enabled();
-       
-        this.vanityDispatchCheckEnabled = config.vanity_dispatch_enabled();
+    private void configure(ComponentContext componentContext) {
+        Dictionary<?, ?> config = componentContext.getProperties();
+        final String legacyPrefix = "prop.";
+
+        this.enabled = PropertiesUtil.toBoolean(config.get(PROP_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_ENABLED),
+                        DEFAULT_ENABLED));
+        
+        this.vanityDispatchCheckEnabled = PropertiesUtil.toBoolean(config.get(PROP_VANITY_DISPATCH_ENABLED),
+                PropertiesUtil.toBoolean(config.get(legacyPrefix + PROP_VANITY_DISPATCH_ENABLED),
+                        DEFAULT_VANITY_DISPATCH_ENABLED));
 
         /** Error Pages **/
 
-        this.systemErrorPagePath = config.errorpage_systempath();
+        this.systemErrorPagePath = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_PATH),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_PATH),
+                        DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT));
 
-        this.errorPageExtension = config.errorpage_extension();
+        this.errorPageExtension = PropertiesUtil.toString(config.get(PROP_ERROR_PAGE_EXTENSION),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_ERROR_PAGE_EXTENSION),
+                        DEFAULT_ERROR_PAGE_EXTENSION));
 
-        this.fallbackErrorName = config.errorpage_fallbackname();
-        this.pathMap = configurePathMap(config.paths());
+        this.fallbackErrorName = PropertiesUtil.toString(config.get(PROP_FALLBACK_ERROR_NAME),
+                PropertiesUtil.toString(config.get(legacyPrefix + PROP_FALLBACK_ERROR_NAME),
+                        DEFAULT_FALLBACK_ERROR_NAME));
+
+        this.pathMap = configurePathMap(PropertiesUtil.toStringArray(config.get(PROP_SEARCH_PATHS),
+                PropertiesUtil.toStringArray(config.get(legacyPrefix + PROP_SEARCH_PATHS),
+                        DEFAULT_SEARCH_PATHS)));
 
         /** Not Found Handling **/
-        this.notFoundBehavior = config.notfound_behavior();
+        this.notFoundBehavior = PropertiesUtil.toString(config.get(PROP_NOT_FOUND_DEFAULT_BEHAVIOR),
+                DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR);
 
-        String[] tmpNotFoundExclusionPatterns = config.notfound_exclusionpathpatterns();
+        String[] tmpNotFoundExclusionPatterns = PropertiesUtil.toStringArray(
+                config.get(PROP_NOT_FOUND_EXCLUSION_PATH_PATTERNS), DEFAULT_NOT_FOUND_EXCLUSION_PATH_PATTERNS);
 
         this.notFoundExclusionPatterns = new ArrayList<Pattern>();
         for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
@@ -865,9 +880,12 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         /** Error Page Cache **/
 
-        int ttl = config.cache_ttl();
+        int ttl = PropertiesUtil.toInteger(config.get(PROP_TTL),
+                PropertiesUtil.toInteger(LEGACY_PROP_TTL, DEFAULT_TTL));
 
-        boolean serveAuthenticatedFromCache = config.cache_serveauthenticated();
+        boolean serveAuthenticatedFromCache = PropertiesUtil.toBoolean(config.get(PROP_SERVE_AUTHENTICATED_FROM_CACHE),
+                PropertiesUtil.toBoolean(LEGACY_PROP_SERVE_AUTHENTICATED_FROM_CACHE,
+                        DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE));
         try {
             cache = new ErrorPageCacheImpl(ttl, serveAuthenticatedFromCache);
 
@@ -882,9 +900,11 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         /** Error Images **/
 
-        this.errorImagesEnabled = config.errorimages_enabled();
+        this.errorImagesEnabled = PropertiesUtil.toBoolean(config.get(PROP_ERROR_IMAGES_ENABLED),
+                DEFAULT_ERROR_IMAGES_ENABLED);
 
-        this.errorImagePath = config.errorimages_path();
+        this.errorImagePath = PropertiesUtil.toString(config.get(PROP_ERROR_IMAGE_PATH),
+                DEFAULT_ERROR_IMAGE_PATH);
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
@@ -907,7 +927,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
 
-        this.errorImageExtensions = config.errorimages_extensions();
+        this.errorImageExtensions = PropertiesUtil.toStringArray(config.get(PROP_ERROR_IMAGE_EXTENSIONS),
+                DEFAULT_ERROR_IMAGE_EXTENSIONS);
 
         for (int i = 0; i < errorImageExtensions.length; i++) {
             this.errorImageExtensions[i] = StringUtils.lowerCase(errorImageExtensions[i], Locale.ENGLISH);

@@ -23,13 +23,12 @@ import java.util.Map;
 
 import javax.jcr.RepositoryException;
 
-import org.osgi.service.component.annotations.Component;
+import org.apache.felix.scr.annotations.Component;
 
 import com.adobe.acs.commons.contentfinder.querybuilder.impl.ContentFinderHitBuilder;
 import com.day.cq.search.Query;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.writer.ResultHitWriter;
-
 
 /**
  * ACS AEM Commons - ContentFinder Result Hit Writer

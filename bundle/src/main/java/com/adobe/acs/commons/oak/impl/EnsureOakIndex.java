@@ -26,67 +26,63 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 
 //@formatter:off
-@Component(service=AppliableEnsureOakIndex.class,
-configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-      "webconsole.configurationFactory.nameHint" + "=" + "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}"
-}
+@Component(
+        label = "ACS AEM Commons - Ensure Oak Index",
+        description = "Component Factory to manage Oak indexes.",
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true
 )
-@Designate(ocd=EnsureOakIndex.Config.class,factory=true)
+@Properties({
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}",
+                propertyPrivate = true
+        )
+})
+@Service
 //@formatter:on
 public class EnsureOakIndex implements AppliableEnsureOakIndex {
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Ensure Oak Index", description = "Component Factory to manage Oak indexes.")
-    public @interface Config {
-        @AttributeDefinition(name = "Ensure Definitions Path",
-                description = "The absolute path to the resource containing the "
-                        + "ACS AEM Commons ensure definitions",
-                defaultValue = DEFAULT_ENSURE_DEFINITIONS_PATH)
-        String ensure_definitions_path();
-
-
-       @AttributeDefinition(name = "Oak Indexes Path",
-                description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
-                defaultValue = DEFAULT_OAK_INDEXES_PATH)
-        String oak_indexes_path();
-
-        @AttributeDefinition(
-              name = "Immediate",
-                description = "Apply the indexes on startup of service. Defaults to [ true ]",
-                defaultValue = ""+DEFAULT_IMMEDIATE
-        )
-        boolean immediate();
-    }
 
     //@formatter:off
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
-
-    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure.definitions.path";
+    @Property(label = "Ensure Definitions Path",
+            description = "The absolute path to the resource containing the "
+                    + "ACS AEM Commons ensure definitions",
+            value = DEFAULT_ENSURE_DEFINITIONS_PATH)
+    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
 
 
     private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
-
-    public static final String PROP_OAK_INDEXES_PATH = "oak.indexes.path";
+    @Property(label = "Oak Indexes Path",
+            description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
+            value = DEFAULT_OAK_INDEXES_PATH)
+    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
 
     private static final boolean DEFAULT_IMMEDIATE = true;
-
+    @Property(
+            label = "Immediate",
+            description = "Apply the indexes on startup of service. Defaults to [ true ]",
+            boolValue = DEFAULT_IMMEDIATE
+    )
     public static final String PROP_IMMEDIATE = "immediate";
 
     @Reference

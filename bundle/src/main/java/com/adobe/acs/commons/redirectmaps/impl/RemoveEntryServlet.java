@@ -19,34 +19,24 @@
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet for removing a line from the redirect map text file
  */
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=POST",
-SLING_SERVLET_SELECTORS+"=removeentry",
-SLING_SERVLET_EXTENSIONS+"=json",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/redirectmappage"
-})
+@SlingServlet(methods = { "POST" }, resourceTypes = {
+        "acs-commons/components/utilities/redirectmappage" }, selectors = {
+                "removeentry" }, extensions = { "json" }, metatype = false)
 public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -5963945855717054678L;

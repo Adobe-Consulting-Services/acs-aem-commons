@@ -19,19 +19,17 @@
  */
 package com.adobe.acs.commons.dam.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
-
 import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -44,11 +42,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @SuppressWarnings("serial")
-@Component(service=Servlet.class, 
-      configurationPolicy=ConfigurationPolicy.REQUIRE,
-      property= {
-      SLING_SERVLET_PATHS + "=" + "/bin/acs-commons/dam/custom-components.json"
-})
+@SlingServletPaths("/bin/acs-commons/dam/custom-components.json")
+@Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
 @Designate(ocd=CustomComponentActivatorListServlet.Config.class)
 public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet {
 

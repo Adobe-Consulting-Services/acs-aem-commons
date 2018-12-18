@@ -19,36 +19,29 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.xss.XSSAPI;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 
 import com.adobe.acs.commons.util.PathInfoUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
+import org.apache.sling.xss.XSSAPI;
 
 /**
  * Servlet which allows for dynamic selection of tag widget configuration. To
@@ -69,31 +62,26 @@ import com.google.gson.JsonPrimitive;
  * configuration.
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=tagwidget",
-SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
-@Designate(ocd=TagWidgetConfigurationServlet.Config.class)
+@SlingServlet(extensions = "json", selectors = "tagwidget", resourceTypes = "sling/servlet/default")
 public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
     private static final String DEFAULT_CONFIG_NAME = "default";
 
     @Reference
     private XSSAPI xssApi;
-    
-@ObjectClassDefinition
-public @interface Config {
-@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
-String root_path();
-}
 
     private static final String DEFAULT_CONFIG = "/libs/foundation/components/page/tab_basic/items/basic/items/tags";
 
     private static final String DEFAULT_ROOT_PATH = "/etc/tagconfig";
 
+    @Property(value = DEFAULT_ROOT_PATH)
+    private static final String PROP_ROOT_PATH = "root.path";
+
     private String rootPath;
 
     @Activate
-    protected void activate(TagWidgetConfigurationServlet.Config config) {
-        rootPath = config.root_path();
+    protected void activate(Map<String, Object> props) {
+        rootPath = PropertiesUtil.toString(props.get(PROP_ROOT_PATH), DEFAULT_ROOT_PATH);
     }
 
     @Override

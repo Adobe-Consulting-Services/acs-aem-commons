@@ -20,17 +20,17 @@
 package com.adobe.acs.commons.httpcache.invalidator.event;
 
 import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.event.jobs.JobManager;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,28 +46,34 @@ import java.util.Map;
  * invalidated. </p>
  */
 // @formatter:off
-@Component( immediate = true,
-           service=EventHandler.class,
-           configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
-                 "webconsole.configurationFactory.nameHint" + "=" + "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "}",
-                 EventConstants.EVENT_TOPIC + "=[" + SlingConstants.TOPIC_RESOURCE_CHANGED + "," + SlingConstants.TOPIC_RESOURCE_ADDED + "," 
-                 + SlingConstants.TOPIC_RESOURCE_REMOVED + "]"
-           })
-@Designate(ocd=JCRNodeChangeEventHandler.Config.class)
+@Component(label = "ACS AEM Commons - HTTP Cache - JCR node change invalidator.",
+           description = "Watches for the configured JCR paths and triggers cache invalidation job.",
+           metatype = true,
+           immediate = true,
+           policy = ConfigurationPolicy.REQUIRE)
+@Properties({
+        @Property(label = "Event Topics",
+            // TODO: Register a Resource Change Listener instead as per the deprecation notes
+            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
+                   value = {SlingConstants.TOPIC_RESOURCE_CHANGED, SlingConstants.TOPIC_RESOURCE_ADDED,
+                           SlingConstants.TOPIC_RESOURCE_REMOVED},
+                   description = "This handler responds to resource modification event.",
+                   name = EventConstants.EVENT_TOPIC,
+                   propertyPrivate = true),
+        @Property(label = "JCR paths to watch for changes.",
+                  value = "(|(" + SlingConstants.PROPERTY_PATH + "="
+                          + "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
+                  description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))"
+                          + " - Watches for changes under /content or /etc. ",
+                  name = EventConstants.EVENT_FILTER),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                    value = "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "}",
+                    propertyPrivate = true)
+})
+@Service
 // @formatter:on
 public class JCRNodeChangeEventHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(JCRNodeChangeEventHandler.class);
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - JCR node change invalidator.",
-            description = "Watches for the configured JCR paths and triggers cache invalidation job.")
-    public @interface Config {
-        @AttributeDefinition(name = "JCR paths to watch for changes.",
-                defaultValue = "(|(" + SlingConstants.PROPERTY_PATH + "="
-                        + "/content*)(" + SlingConstants.PROPERTY_PATH + "=" + "/etc*))",
-                description = "Paths expressed in LDAP syntax. Example: (|(path=/content*)(path=/etc*))"
-                        + " - Watches for changes under /content or /etc. ")
-        String event_filter();
-    }
 
     @Reference
     private JobManager jobManager;

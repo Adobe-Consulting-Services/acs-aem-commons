@@ -38,7 +38,6 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,7 +90,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldSerialiseFormInRedirectUrlParameter() throws Exception {
         request.setMethod("POST");
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", "world"));
@@ -122,7 +120,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
 
 
     @Test
-    @Ignore
     public void shouldInvalidateCookieOnGetRequest() throws Exception {
         final SlingHttpServletResponse redirectResponse = spy(slingContext.response());
         request.setMethod("GET");
@@ -137,7 +134,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldRemoveCookieDataOnGetRequest() throws Exception {
         final SlingHttpServletResponse redirectResponse = spy(slingContext.response());
         request.setMethod("GET");

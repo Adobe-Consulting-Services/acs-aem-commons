@@ -23,10 +23,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -40,7 +41,8 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM commons Design Reference Provider.
  * Reference provider that searches for design pages for any given page resource.
  */
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE,service=ReferenceProvider.class)
+@Component(policy = ConfigurationPolicy.REQUIRE)
+@Service
 public final class DesignReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_DESIGN_PAGE = "designpage";

@@ -26,18 +26,19 @@ import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalException;
 import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,15 +51,32 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component(
-        factory="WorkflowInstanceRemoverScheduler",
-        configurationPolicy=ConfigurationPolicy.REQUIRE,
-      service=Runnable.class,
-      property= {
-            "scheduler.concurrent" + "=" + "false",
-            "webconsole.configurationFactory.nameHint" + "=" +  "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
-      }
+        label = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service",
+        metatype = true,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=WorkflowInstanceRemoverScheduler.Config.class)
+@Properties({
+        @Property(
+                label = "Cron expression defining when this Scheduled Service will run",
+                description = "[12:01am daily = 0 1 0 ? * *]; see www.cronmaker.com",
+                name = "scheduler.expression",
+                value = "0 1 0 ? * *"
+        ),
+        @Property(
+                label = "Allow concurrent executions",
+                description = "Allow concurrent executions of this Scheduled Service",
+                name = "scheduler.concurrent",
+                boolValue = false,
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                propertyPrivate = true,
+                value = "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
+        )
+})
+@Service
 public class WorkflowInstanceRemoverScheduler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverScheduler.class);
 
@@ -75,60 +93,61 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
+    private static final String[] DEFAULT_WORKFLOW_STATUSES = {"COMPLETED", "ABORTED"};
+
     private List<String> statuses = new ArrayList<String>();
-    
-    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service")
-    public @interface Config {
-       
-        @AttributeDefinition(
-                 name = "Cron expression defining when this Scheduled Service will run",
-                 description = "[12:01am daily = 0 1 0 ? * *]; see www.cronmaker.com",
-                 defaultValue = "0 1 0 ? * *"
-         )
-        String scheduler_expression();
-        
-        @AttributeDefinition(name = "Workflow Status",
-                   description = "Only remove Workflow Instances that have one of these statuses.",
-                   defaultValue = { "COMPLETED", "ABORTED" })
-           String[] workflow_statuses();
 
-        @AttributeDefinition(name = "Workflow Models",
-                   description = "Only remove Workflow Instances that belong to one of these WF Models.",
-                   cardinality = Integer.MAX_VALUE)
-           String[] workflow_models();
-        
-        @AttributeDefinition(name = "Payload Patterns",
-                   description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
-                   cardinality = Integer.MAX_VALUE)
-        String[] workflow_payloads();
+    @Property(label = "Workflow Status",
+            description = "Only remove Workflow Instances that have one of these statuses.",
+            value = { "COMPLETED", "ABORTED" })
+    public static final String PROP_WORKFLOW_STATUSES = "workflow.statuses";
 
-        @AttributeDefinition(name = "Older Than UTC TS",
-                   description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis")
-           long workflow_older_than();
-        
-        @AttributeDefinition(name = "Batch Size",
-                   description = "Save removals to JCR in batches of this defined size.",
-                   defaultValue = ""+DEFAULT_BATCH_SIZE)
-           int batch_size();
 
-        @AttributeDefinition(name = "Max duration (in minutes)",
-                   description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
-                           + "[ Default: 0 ]",
-                   defaultValue = "" + DEFAULT_MAX_DURATION)
-           int max_duration();
-    }
+    private static final String[] DEFAULT_WORKFLOW_MODELS = {};
 
     private List<String> models = new ArrayList<String>();
 
+    @Property(label = "Workflow Models",
+            description = "Only remove Workflow Instances that belong to one of these WF Models.",
+            cardinality = Integer.MAX_VALUE,
+            value = { })
+    public static final String PROP_WORKFLOW_MODELS = "workflow.models";
+
+
+    private static final String[] DEFAULT_WORKFLOW_PAYLOADS = {};
+
     private List<Pattern> payloads = new ArrayList<Pattern>();
+
+    @Property(label = "Payload Patterns",
+            description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
+            cardinality = Integer.MAX_VALUE,
+            value = { })
+    public static final String PROP_WORKFLOW_PAYLOADS = "workflow.payloads";
+
 
     private Calendar olderThan = null;
 
+    @Property(label = "Older Than UTC TS",
+            description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis",
+            longValue = 0)
+    public static final String PROP_WORKFLOWS_OLDER_THAN = "workflow.older-than";
+
+
     private static final int DEFAULT_BATCH_SIZE = 1000;
     private int batchSize = DEFAULT_BATCH_SIZE;
+    @Property(label = "Batch Size",
+            description = "Save removals to JCR in batches of this defined size.",
+            intValue = DEFAULT_BATCH_SIZE)
+    public static final String PROP_BATCH_SIZE = "batch-size";
+
 
     private static final int DEFAULT_MAX_DURATION = 0;
     private int maxDuration = DEFAULT_MAX_DURATION;
+    @Property(label = "Max duration (in minutes)",
+            description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
+                    + "[ Default: 0 ]",
+            intValue = DEFAULT_MAX_DURATION)
+    public static final String PROP_MAX_DURATION = "max-duration";
 
     @Override
     @SuppressWarnings("squid:S2142")
@@ -177,13 +196,15 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     }
 
     @Activate
-    protected final void activate(WorkflowInstanceRemoverScheduler.Config config) {
+    protected final void activate(final Map<String, String> config) {
 
-        statuses = arrayToList(config.workflow_statuses());
+        statuses = arrayToList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_STATUSES), DEFAULT_WORKFLOW_STATUSES));
 
-        models = arrayToList(config.workflow_models());
+        models = arrayToList(PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_MODELS), DEFAULT_WORKFLOW_MODELS));
 
-        final String[] payloadsArray =config.workflow_payloads();
+        final String[] payloadsArray =
+                PropertiesUtil.toStringArray(config.get(PROP_WORKFLOW_PAYLOADS), DEFAULT_WORKFLOW_PAYLOADS);
+
         for (final String payload : payloadsArray) {
             if (StringUtils.isNotBlank(payload)) {
                 final Pattern p = Pattern.compile(payload);
@@ -193,19 +214,19 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             }
         }
 
-        final Long olderThanTs = config.workflow_older_than();
+        final Long olderThanTs = PropertiesUtil.toLong(config.get(PROP_WORKFLOWS_OLDER_THAN), 0);
 
         if (olderThanTs > 0) {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
         }
         
-        batchSize = config.batch_size();
+        batchSize = PropertiesUtil.toInteger(config.get(PROP_BATCH_SIZE), DEFAULT_BATCH_SIZE);
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;
         }
 
-        maxDuration = config.max_duration();
+        maxDuration = PropertiesUtil.toInteger(config.get(PROP_MAX_DURATION), DEFAULT_MAX_DURATION);
 
         final InfoWriter iw = new InfoWriter();
         iw.title("Workflow Instance Removal Configuration");

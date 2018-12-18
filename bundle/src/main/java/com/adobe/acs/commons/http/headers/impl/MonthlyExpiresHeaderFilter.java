@@ -20,52 +20,48 @@
 package com.adobe.acs.commons.http.headers.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import java.util.Calendar;
 import java.util.Dictionary;
 
-import javax.servlet.Filter;
-
 //@formatter:off
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
-service=Filter.class,
-    factory = "MonthlyExpiresHeaderFilter", property= {
-    "webconsole.configurationFactory.nameHint" + "=" + "Expires each month on the {expires.day-of-month} day at {expires.time} for Patterns: [{filter.pattern}]"
-    })
-@Designate(ocd=MonthlyExpiresHeaderFilter.Config.class,factory=true)
-
+@Component(
+    label = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
+    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
+    metatype = true,
+    configurationFactory = true,
+    policy = ConfigurationPolicy.REQUIRE)
+@Properties({
+  @Property(label = "Filter Patterns",
+      description = "Patterns on which to apply this Expires rule.",
+      cardinality = Integer.MAX_VALUE,
+      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
+      propertyPrivate = false,
+      value = { }),
+  @Property(label = "Expires Time",
+      description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
+      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
+      propertyPrivate = false),
+  @Property(
+        name = "webconsole.configurationFactory.nameHint",
+        value = "Expires each month on the {expires.day-of-month} day at {expires.time} for Patterns: [{filter.pattern}]",
+        propertyPrivate = true)
+})
 //@formatter:on
 public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
     private static final String LAST = "LAST";
-    
-@ObjectClassDefinition( name = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.")
-public @interface Config {
 
- @AttributeDefinition(name = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE)
- String[] filter_pattern();
- 
- @AttributeDefinition(name = "Expires Time",
-      description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.")
-  String expires_time();
-
-    @AttributeDefinition(name = "Expires Day", description = "Day of month on which content expires. "
+    @Property(label = "Expires Day", description = "Day of month on which content expires. "
             + "Use keyword 'LAST' to enable last day of month, as setting to 31 will generate errors in February.")
-         String expires_dayofmonth();
-
-}
-
     static final String PROP_EXPIRES_DAY_OF_MONTH = "expires.day-of-month";
 
     private String dayOfMonth;
