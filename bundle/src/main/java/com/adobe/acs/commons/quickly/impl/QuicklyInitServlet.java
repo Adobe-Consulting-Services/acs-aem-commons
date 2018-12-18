@@ -19,24 +19,29 @@
  */
 package com.adobe.acs.commons.quickly.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
 
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import java.io.IOException;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 
-import javax.servlet.ServletException;
-
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * ACS AEM Commons - Quickly - Init Servlet
  *
  */
 @SuppressWarnings("serial")
-@SlingServlet(paths = "/bin/quickly.init.json")
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_PATHS+"=/bin/quickly.init.json"})
 public class QuicklyInitServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)

@@ -22,25 +22,31 @@ package com.adobe.acs.commons.exporters.impl.users;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.CUSTOM_PROPERTIES;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.GROUPS;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.GROUP_FILTER;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
 
 import java.io.IOException;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 
-@SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Save Servlet",
-        methods = {"POST"},
-        resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
-        selectors = {"save"},
-        extensions = {"json"}
-        )
+
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_METHODS+"=POST",
+SLING_SERVLET_SELECTORS+"=save",
+SLING_SERVLET_EXTENSIONS+"=json",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/exporters/users-to-csv"
+})
 public class UsersSaveServlet extends SlingAllMethodsServlet {
 
     /**

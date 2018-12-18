@@ -28,15 +28,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import com.day.cq.commons.PathInfo;
 import com.day.cq.wcm.api.Page;
@@ -48,17 +50,25 @@ import com.day.cq.wcm.api.reference.ReferenceProvider;
  * ACS AEM Commons - Pages Reference Provider
  * Reference provider that searches for  pages referenced inside any given page resource
  */
-@Component(policy = ConfigurationPolicy.REQUIRE, metatype = true, label = "ACS AEM Commons - Pages Reference Provider", description = "ACS AEM Commons - Pages Reference Provider")
-@Service
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE )
+@Designate(ocd=PagesReferenceProvider.Config.class)
 public final class PagesReferenceProvider implements ReferenceProvider {
 
     private static final String TYPE_PAGE = "page";
     private static final String DEFAULT_PAGE_ROOT_PATH = "/content/";
 
     private String pageRootPath = DEFAULT_PAGE_ROOT_PATH;
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - Pages Reference Provider", description = "ACS AEM Commons - Pages Reference Provider")
+    public @interface Config {
+    
+        @AttributeDefinition(name = "page root path", description = "Page root path",
+                defaultValue = DEFAULT_PAGE_ROOT_PATH)
+        String page_root_path();
 
-    @Property(label = "page root path", description = "Page root path",
-            value = DEFAULT_PAGE_ROOT_PATH)
+    
+    }
+
     private static final String PAGE_ROOT_PATH = "page.root.path";
 
     // any text containing /content/

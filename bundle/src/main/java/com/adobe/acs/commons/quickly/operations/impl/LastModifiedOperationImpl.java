@@ -37,15 +37,14 @@ import com.day.cq.wcm.api.PageManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,14 +62,9 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
  */
-@Component
-@Properties({
-        @Property(
-                name = Operation.PROP_CMD,
-                value = LastModifiedOperationImpl.CMD
-        )
+@Component(service=Operation.class, property= {
+    Operation.PROP_CMD + "=" + LastModifiedOperationImpl.CMD
 })
-@Service
 public class LastModifiedOperationImpl extends AbstractOperation {
     private static final Logger log = LoggerFactory.getLogger(LastModifiedOperationImpl.class);
 

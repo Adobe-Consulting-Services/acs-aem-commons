@@ -19,45 +19,35 @@
  */
 package com.adobe.acs.commons.forms.impl;
 
-import com.adobe.acs.commons.forms.FormsRouter;
-import com.adobe.acs.commons.forms.helpers.FormHelper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.request.RequestDispatcherOptions;
-import org.apache.sling.api.request.RequestParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestDispatcherOptions;
+import org.apache.sling.api.request.RequestParameter;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.forms.FormsRouter;
+import com.adobe.acs.commons.forms.helpers.FormHelper;
 
 /**
  * ACS AEM Commons - Forms - Forms POST-Handler Filter
  * Request Filter that handles some internal routing of ACS-AEM-Commons Form POST requests
  *  to Page URIs.
  */
-@Component
-@Properties({
-        @Property(
-                name = "sling.filter.scope",
-                value = "request"
-        ),
-        @Property(
-                name = "filter.order",
-                intValue = 0
-        )
-})
-@Service
+
+@Component(service=javax.servlet.Filter.class,
+    property = {"filter.order=0", "sling.filter.scope=request"})
 public class FormsPostFilterImpl implements javax.servlet.Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostFilterImpl.class);
 
