@@ -105,7 +105,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
     };
 
     static final String[] MANDATORY_EXCLUDE_SUB_TREES = {
-            "[" + NT_OAK_QUERY_INDEX_DEFINITION + "]/" + NN_FACETS + "/" + JcrConstants.JCR_CONTENT
+            // For the real index definition node
+            "[" + NT_OAK_QUERY_INDEX_DEFINITION + "]/" + NN_FACETS + "/" + JcrConstants.JCR_CONTENT,
+            // For the ensure oak index definition node
+            "[" + NT_OAK_UNSTRUCTURED + "]/" + NN_FACETS + "/" + JcrConstants.JCR_CONTENT
     };
 
     static final String[] MANDATORY_EXCLUDE_NODE_NAMES = new String[]{ };
