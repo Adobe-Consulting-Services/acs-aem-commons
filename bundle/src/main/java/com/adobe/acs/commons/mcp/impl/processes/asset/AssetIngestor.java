@@ -55,7 +55,11 @@ import java.util.TreeSet;
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
-    public static final String ALL_ASSETS = "All Assets";
+    private static final String ALL_ASSETS = "All Assets";
+    private static final int DEFAULT_TIMEOUT = 200;
+    private static final int DEFAULT_RETRIES = 10;
+
+
     static final String[] AUTHORIZED_GROUPS = new String[]{
             "administrators",
             "asset-ingest",
@@ -73,6 +77,20 @@ public abstract class AssetIngestor extends ProcessDefinition {
     public AssetIngestor(MimeTypeService mimeTypeService) {
         this.mimetypeService = mimeTypeService;
     }
+
+    @FormField(
+            name = "Retry pause",
+            description = "Used as retry pause between createFolder, createAsset actions and etc...",
+            options = ("default=200")
+    )
+    int retryPause = DEFAULT_TIMEOUT;
+
+    @FormField(
+            name = "Retries",
+            description = "Actions to attempt",
+            options = ("default=10")
+    )
+    int retries = DEFAULT_RETRIES;
 
     @FormField(
             name = "Dry run",
@@ -231,14 +249,25 @@ public abstract class AssetIngestor extends ProcessDefinition {
             ignoreFolders = "";
         }
         ignoreFolderList = Arrays.asList(ignoreFolders.trim().toLowerCase().split(","));
+
         if (ignoreFiles == null) {
             ignoreFiles = "";
         }
         ignoreFileList = Arrays.asList(ignoreFiles.trim().toLowerCase().split(","));
+
         if (ignoreExtensions == null) {
             ignoreExtensions = "";
         }
         ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
+
+        if (this.retries <= 0) {
+            this.retries = DEFAULT_RETRIES;
+        }
+
+        if (this.retryPause <= 0) {
+            this.retryPause = DEFAULT_TIMEOUT;
+        }
+
         if (!preserveFileName) {
             jcrBasePath = NameUtil.createValidDamPath(jcrBasePath);
         }
