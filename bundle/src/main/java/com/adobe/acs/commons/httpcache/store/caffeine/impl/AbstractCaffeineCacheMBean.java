@@ -61,7 +61,7 @@ public abstract class AbstractCaffeineCacheMBean <K, V> extends AbstractCacheMBe
     @Override
     @SuppressWarnings("squid:S1192")
     public final TabularData getCacheStats() throws OpenDataException {
-        // Exposing all google guava stats.
+        // Exposing all caffeine cache stats.
         final CompositeType cacheEntryType = new CompositeType(JMX_PN_CACHESTATS, JMX_PN_CACHESTATS,
                 new String[] { JMX_PN_STAT, JMX_PN_VALUE }, new String[] { JMX_PN_STAT, JMX_PN_VALUE },
                 new OpenType[] { SimpleType.STRING, SimpleType.STRING });
