@@ -19,18 +19,26 @@
  */
 package com.adobe.acs.commons.reports.internal;
 
-import com.adobe.granite.ui.components.rendercondition.RenderCondition;
-import com.github.jknack.handlebars.Handlebars;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+
+import java.io.IOException;
+
+import javax.annotation.Nonnull;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
-import java.io.IOException;
+import com.adobe.granite.ui.components.rendercondition.RenderCondition;
+import com.github.jknack.handlebars.Handlebars;
 
-@SlingServlet(resourceTypes = "acs-commons/components/report-builder/rendercondition")
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/report-builder/rendercondition"
+})
 public class ReportsRenderCondition extends SlingSafeMethodsServlet {
 
     @Override

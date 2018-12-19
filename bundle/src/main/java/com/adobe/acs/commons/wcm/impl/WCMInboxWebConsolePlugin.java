@@ -36,24 +36,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Web console plugin which allows for management of users WCM Notification Inboxes.
  */
 @SuppressWarnings("serial")
-@Component
-@Service
-@Properties({ @Property(name = "felix.webconsole.label", value = "wcm-inbox"),
-        @Property(name = "felix.webconsole.title", value = "WCM Inbox") })
+@Component(service=HttpServlet.class,property= {"felix.webconsole.label=wcm-inbox",
+      "felix.webconsole.title=WCM Inbox"})
 public class WCMInboxWebConsolePlugin extends HttpServlet {
 
     @Reference

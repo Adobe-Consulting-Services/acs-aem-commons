@@ -110,7 +110,7 @@ public class CQIncludePropertyNamespaceServletTest {
         final Map<String, Object> config = new HashMap<String, Object>();
         config.put(CQIncludePropertyNamespaceServlet.PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS,
                 new String[]{"^\\./.*"});
-        config.put("namespace.multi-level", true);
+        config.put(CQIncludePropertyNamespaceServlet.PROP_SUPPORT_MULTI_LEVEL, true);
 
         final CQIncludePropertyNamespaceServlet servlet = new CQIncludePropertyNamespaceServlet();
         servlet.activate(config);

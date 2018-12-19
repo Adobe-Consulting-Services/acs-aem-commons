@@ -22,7 +22,6 @@ package com.adobe.acs.commons.replication.impl;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -34,11 +33,10 @@ import javax.jcr.Session;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionIterator;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +56,7 @@ import com.day.cq.wcm.api.NameConstants;
  * Service used to replicate specific version of a resource tree through a
  * specific replication agent
  */
-@Component
-@Service
+@Component(service=ReplicateVersion.class)
 public class ReplicateVersionImpl implements
         ReplicateVersion {
 

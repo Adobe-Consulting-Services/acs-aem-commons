@@ -21,17 +21,17 @@
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.rule.AbstractHttpCacheHandlingRule;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * ACS AEM Commons - HTTP Cache - Rule: Do not cache response which is size zero. Cancel the caching of response when it
  * has no bytes.
  */
-@Component
-@Service
+@Component(service=HttpCacheHandlingRule.class)
 public class DoNotCacheZeroSizeResponse extends AbstractHttpCacheHandlingRule {
 
     @Override

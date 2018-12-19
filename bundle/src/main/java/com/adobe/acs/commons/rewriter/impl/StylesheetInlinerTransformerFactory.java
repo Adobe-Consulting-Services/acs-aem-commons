@@ -25,17 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -52,13 +49,9 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
  * them as <style> elements. Links found in <head> are added to the beginning of
  * <body>, whereas those in <body> are included where they're found.
  */
-@Component(
-        metatype = false,
-        label = "Stylesheet Inliner Transformer Factory",
-        description = "Sling Rewriter Transformer Factory which inlines CSS references")
-@Properties({
-    @Property(name = "pipeline.type", value = "inline-css", propertyPrivate = true)})
-@Service(value = {TransformerFactory.class})
+@Component(service = {TransformerFactory.class}, property= {
+      "pipeline.type" + "=" + "inline-css"
+})
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
     private static final char[] NEWLINE = new char[]{'\n'};

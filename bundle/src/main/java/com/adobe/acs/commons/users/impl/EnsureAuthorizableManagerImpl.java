@@ -27,26 +27,24 @@ import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
-@Component
-@Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
-        value = "com.adobe.acs.commons:type=Ensure Service User", propertyPrivate = true) })
-@References({ @Reference(referenceInterface = EnsureAuthorizable.class, policy = ReferencePolicy.DYNAMIC,
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
-@Service(value = DynamicMBean.class)
+@Component(service=DynamicMBean.class, property= {
+"jmx.objectname" + "=" + "com.adobe.acs.commons:type=Ensure Service User"
+}, reference= {
+@Reference(service = EnsureAuthorizable.class, 
+name="EnsureAuthorizable",
+policy=ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.MULTIPLE)
+})
 public class EnsureAuthorizableManagerImpl extends AnnotatedStandardMBean implements EnsureAuthorizableManager {
 
     private static final Logger log = LoggerFactory.getLogger(EnsureAuthorizableManagerImpl.class);

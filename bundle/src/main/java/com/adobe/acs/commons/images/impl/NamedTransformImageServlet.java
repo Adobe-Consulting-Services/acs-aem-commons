@@ -35,15 +35,6 @@ import com.day.image.Layer;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -54,6 +45,14 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,55 +71,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
-@Component(
-        label = "ACS AEM Commons - Named Transform Image Servlet",
-        description = "Transform images programatically by applying a named transform to the requested Image.",
-        metatype = true
-)
-@Properties({
-        @Property(
-                label = "Resource Types",
-                description = "Resource Types and Node Types to bind this servlet to.",
-                name = "sling.servlet.resourceTypes",
-                value = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
-                        "foundation/components/image", "foundation/components/parbase", "foundation/components/page" },
-                propertyPrivate = false
-        ),
-        @Property(
-            label = "Allows Suffix Patterns",
-            description = "Regex pattern to filter allowed file names. Defaults to [ "
-                    + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
-            name = NamedTransformImageServlet.NAMED_IMAGE_FILENAME_PATTERN,
-            value = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN
-        ),
-        @Property(
-                label = "Extension",
-                description = "",
-                name = "sling.servlet.extensions",
-                value = { "transform" },
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "sling.servlet.methods",
-                value = { "GET" },
-                propertyPrivate = true
-        )
-})
-@References({
+@Component(service=Servlet.class,reference={
         @Reference(
                 name = "namedImageTransformers",
-                referenceInterface = NamedImageTransformer.class,
+                service = NamedImageTransformer.class,
                 policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+                cardinality = ReferenceCardinality.MULTIPLE
         ),
         @Reference(
                 name = "imageTransformers",
-                referenceInterface = ImageTransformer.class,
+                service = ImageTransformer.class,
                 policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+                cardinality = ReferenceCardinality.MULTIPLE
         )
-})
-@Service(Servlet.class)
+}, property= {
+      "sling.servlet.extensions" + "=" + "transform",
+      "sling.servlet.methods"  + "=" + "GET"
+}
+)
+@Designate(ocd=NamedTransformImageServlet.Config.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
@@ -156,12 +125,34 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     /* Asset Rendition Pattern Picker */
 
     private static final String DEFAULT_ASSET_RENDITION_PICKER_REGEX = "cq5dam\\.web\\.(.*)";
+    
+    @ObjectClassDefinition(name  = "ACS AEM Commons - Named Transform Image Servlet",
+        description = "Transform images programatically by applying a named transform to the requested Image.")
+    public @interface Config {
+       
+        @AttributeDefinition(
+              name = "Resource Types",
+                description = "Resource Types and Node Types to bind this servlet to.",
+                defaultValue = { "nt/file", "nt/resource", "dam/Asset", "cq/Page", "cq/PageContent", "nt/unstructured",
+                        "foundation/components/image", "foundation/components/parbase", "foundation/components/page" }
+        )
+        String[] sling_servlet_resourceTypes();
+        
+        @AttributeDefinition(
+              name = "Allows Suffix Patterns",
+            description = "Regex pattern to filter allowed file names. Defaults to [ "
+                    + NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN + " ]",
+            defaultValue = NamedTransformImageServlet.DEFAULT_FILENAME_PATTERN)
+        String acs_commons_namedimage_filename_pattern();
+        
+        @AttributeDefinition(name = "Asset Rendition Picker Regex",
+                description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
+                        + " [ Default: cq5dam.web.(.*) ]",
+                defaultValue = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
+        String prop_asset_rendition_picker_regex();
+    }
 
-    @Property(label = "Asset Rendition Picker Regex",
-            description = "Regex to select the Rendition to transform when directly transforming a DAM Asset."
-                    + " [ Default: cq5dam.web.(.*) ]",
-            value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
-    private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
+    private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset_rendition_picker_regex";
 
     private RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
