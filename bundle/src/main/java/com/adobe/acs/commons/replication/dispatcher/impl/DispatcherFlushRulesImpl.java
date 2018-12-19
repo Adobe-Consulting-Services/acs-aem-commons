@@ -41,6 +41,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -128,7 +129,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Reference
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private DispatcherFlusher dispatcherFlusher;
 
     @Reference
