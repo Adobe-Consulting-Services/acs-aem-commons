@@ -19,13 +19,13 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
+
 import java.io.IOException;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -36,6 +36,9 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.apache.sling.xss.XSSAPI;
@@ -44,7 +47,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@SlingServlet(paths = "/bin/acs-commons/custom-importers")
+@Component(service = Servlet.class, property = {
+SLING_SERVLET_PATHS + "=/bin/acs-commons/custom-importers" })
 public final class CustomPollingImporterListServlet extends SlingSafeMethodsServlet {
 
     private static final long serialVersionUID = -4921197948987912363L;

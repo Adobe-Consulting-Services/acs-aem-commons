@@ -19,17 +19,13 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.rewriter.Generator;
 import org.apache.sling.rewriter.GeneratorFactory;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
-@Service
-@Property(name = "pipeline.type", value = "xml-generator")
+@Component(service=GeneratorFactory.class, property= {"pipeline.type=xml-generator"})
 public final class XMLParserGeneratorFactory implements GeneratorFactory {
 
     private static final Logger log = LoggerFactory.getLogger(XMLParserGeneratorFactory.class);

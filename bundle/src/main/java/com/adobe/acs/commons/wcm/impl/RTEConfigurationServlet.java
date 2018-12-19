@@ -19,16 +19,17 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -42,6 +43,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.sling.xss.XSSAPI;
+
+
+import org.apache.sling.xss.XSSAPI;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+
 
 import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
 
@@ -63,30 +75,34 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
  * site (by regex). Then, look for a node named CONFIGNAME and use that
  * configuration.
  */
-@SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
-@SlingServlet(extensions = "json", selectors = "rte", resourceTypes = "sling/servlet/default")
+@SuppressWarnings({ "serial", "checkstyle:abbreviationaswordinname" })
+@Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=rte",
+SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
+@Designate(ocd = RTEConfigurationServlet.Config.class)
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
-    private static final int RTE_HEIGHT = 200;
+@ObjectClassDefinition
+public @interface Config {
+@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
+String root_path();
+}
 
-    private static final int RTE_WIDTH = 430;
+@Reference
+private XSSAPI xssApi;
 
-    private static final String DEFAULT_CONFIG_NAME = "default";
+private static final int RTE_HEIGHT = 200;
 
-    @Reference
-    private XSSAPI xssApi;
+private static final int RTE_WIDTH = 430;
 
-    private static final String DEFAULT_CONFIG
-            = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
+private static final String DEFAULT_CONFIG_NAME = "default";
 
-    private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
+private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
 
-    @Property(value = DEFAULT_ROOT_PATH)
-    private static final String PROP_ROOT_PATH = "root.path";
+private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
 
-    private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
+private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
 
-    private String rootPath;
+private String rootPath;
 
     @Override
     protected JsonObject createEmptyWidget(String rteName) {
@@ -160,10 +176,10 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
         gson.toJson(parent, response.getWriter());
     }
 
-    @Activate
-    protected void activate(Map<String, Object> props) {
-        rootPath = PropertiesUtil.toString(props.get(PROP_ROOT_PATH), DEFAULT_ROOT_PATH);
-    }
+@Activate
+protected void activate(RTEConfigurationServlet.Config config) {
+rootPath = config.root_path();
+}
 
     @Override
     @SuppressWarnings("squid:S3776")
