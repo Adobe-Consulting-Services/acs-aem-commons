@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
+- #1633 - Make Reference greedy to allow plugging in custom DispatcherFlusher service
 
 
 ## [3.19.0] - 2018-11-03
