@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
 - #1560 - Changing to osgi annotations
+- #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 
 ## [3.19.0] - 2018-11-03
 
