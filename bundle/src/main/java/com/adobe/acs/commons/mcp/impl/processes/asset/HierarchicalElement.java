@@ -60,17 +60,32 @@ public interface HierarchicalElement {
 
     String getJcrBasePath();
 
-    default String getNodePath() {
+    default String getNodePath(boolean preserveName) {
         HierarchicalElement parent = getParent();
         if (excludeBaseFolder()) {
-            return parent == null ? getJcrBasePath() : parent.getNodePath() + "/" + getNodeName();
+            return parent == null ? getJcrBasePath() : parent.getNodePath(preserveName) + "/" + getNodeName(preserveName);
         } else {
-            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
+            return (parent == null ? getJcrBasePath() : parent.getNodePath(preserveName)) + "/" + getNodeName(preserveName);
         }
     }
 
-    default String getNodeName() {
+    default String getNodeName(boolean preserveName) {
         String name = getName();
+        if (name == null) {
+            return null;
+        }
+        if (preserveName) {
+            return getNodeName(name);
+        }
+        if (isFile() && name.contains(".")) {
+            String baseName = org.apache.commons.lang3.StringUtils.substringBeforeLast(name, ".");
+            String extension = org.apache.commons.lang3.StringUtils.substringAfterLast(name, ".");
+            return NameUtil.createValidDamName(baseName) + "." + NameUtil.createValidDamName(extension);
+        }
+        return name.matches(NameUtil.VALID_NAME_REGEXP) ? name : NameUtil.createValidDamName(name);
+    }
+
+    default String getNodeName(String name) {
         if (isFile() && name.contains(".")) {
             return name;
         } else if (JcrUtil.isValidName(name)) {
