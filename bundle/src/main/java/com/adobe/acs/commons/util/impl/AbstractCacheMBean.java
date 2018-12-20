@@ -36,7 +36,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
-public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements  CacheMBean
+public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements CacheMBean
 {
     /** jmx labels **/
     protected static final String JMX_PN_CACHESTATS = "Cache Stats";

@@ -51,7 +51,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- TODO: Remove this plugin-->                
+                <!-- TODO: Remove this plugin-->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
@@ -78,7 +78,7 @@
                         <execution>
                             <id>baseline</id>
                             <goals>
-                                <goal>baseline</goal>   
+                                <goal>baseline</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -327,6 +327,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.5</version>
@@ -424,7 +430,7 @@
                 <version>15.0</version>
                 <scope>provided</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>

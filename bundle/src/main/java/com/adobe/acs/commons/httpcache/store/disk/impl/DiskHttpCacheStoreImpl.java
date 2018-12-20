@@ -77,4 +77,11 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     public TempSink createTempSink() {
         throw new NotImplementedException();
     }
+
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE;
+    }
+
+
 }

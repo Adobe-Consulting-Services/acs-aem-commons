@@ -105,7 +105,6 @@ public class TeeServletOutputStream extends ServletOutputStream {
             writeListener.onWritePossible();
         } catch (IOException e) {
             listener.onError(e);
-            e.printStackTrace();
         }
     }
 }
