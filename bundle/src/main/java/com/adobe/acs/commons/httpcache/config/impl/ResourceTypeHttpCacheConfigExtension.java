@@ -67,13 +67,13 @@ import java.util.regex.Pattern;
 @Designate(ocd=ResourceTypeHttpCacheConfigExtension.Config.class, factory=true)
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeHttpCacheConfigExtension.class);
-    
+
     @ObjectClassDefinition(name= "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory.")
     public @interface Config {
         @AttributeDefinition(name = "Allowed paths",
                 description = "Regex of content paths that can be cached.")
         String[] httpcache_config_extension_paths_allowed();
-        
+
         @AttributeDefinition(name = "Allowed resource types",
                 description = "Regex of resource types that can be cached.")
         String[] httpcache_config_extension_resourcetypes_allowed();
@@ -81,7 +81,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         @AttributeDefinition(name = "Check RT of ./jcr:content?",
                 description = "Should the resourceType check be applied to ./jcr:content ?",
                 defaultValue = "false")
-        boolean httpcacheconfig_extension_resourcetypes_page_content();    
+        boolean httpcacheconfig_extension_resourcetypes_page_content();
+
+        @AttributeDefinition(name = "Config Name")
+        String configName();
     }
 
     // Custom cache config attributes

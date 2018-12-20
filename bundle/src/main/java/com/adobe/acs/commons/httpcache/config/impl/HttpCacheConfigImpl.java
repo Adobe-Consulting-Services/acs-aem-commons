@@ -90,7 +90,6 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     // Cache store
     private FilterScope filterScope;
 
-
     // Making the cache config extension configurable.
     @Reference(cardinality = ReferenceCardinality.OPTIONAL,
                policy = ReferencePolicy.DYNAMIC,
@@ -104,35 +103,49 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
                name = "cacheKeyFactory")
     private volatile CacheKeyFactory cacheKeyFactory;
 
-    private static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
     private List<String> cacheHandlingRulesPid;
 
+
+    private long expiryOnCreate;
+    private long expiryOnAccess;
+    private long expiryOnUpdate;
+
     @Activate
-    protected void activate(Config config) {
+    protected void activate(Map<String,Object> configs) {
 
         // Request URIs - Whitelisted.
-        requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(config.httpcache_config_requesturi_patterns()));
+        requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(Config.PROP_REQUEST_URI_PATTERNS), new
+                String[]{}));
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(config.httpcache_config_requesturi_patterns_blacklisted()));
+        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+                .get(Config.PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
         blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
         // Authentication requirement.
-        authenticationRequirement = config.httpcache_config_request_authentication();
+        authenticationRequirement = PropertiesUtil.toString(configs.get(Config.PROP_AUTHENTICATION_REQUIREMENT),
+                Config.DEFAULT_AUTHENTICATION_REQUIREMENT);
 
         // Cache store
-        cacheStore = config.httpcache_config_cachestore();
+        cacheStore = PropertiesUtil.toString(configs.get(Config.PROP_CACHE_STORE), Config.DEFAULT_CACHE_STORE);
+
+        // Custom expiry
+        expiryOnCreate = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_CREATE), Config.DEFAULT_EXPIRY_ON_CREATE);
+        expiryOnAccess = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_ACCESS), Config.DEFAULT_EXPIRY_ON_ACCESS);
+        expiryOnUpdate = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_UPDATE), Config.DEFAULT_EXPIRY_ON_UPDATE);
 
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = Arrays.asList(config.httpcache_config_invalidation_oak_paths());
+        cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
+                .get(Config.PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
-        order = config.httpcache_config_order();
+        order = PropertiesUtil.toInteger(configs.get(Config.PROP_ORDER), Config.DEFAULT_ORDER);
 
-        filterScope = FilterScope.valueOf(config.httpcache_config_filter_scope().toUpperCase());
+        filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(Config.PROP_FILTER_SCOPE), Config.DEFAULT_FILTER_SCOPE).toUpperCase());
         // PIDs of cache handling rules.
-        cacheHandlingRulesPid = new ArrayList<>(Arrays.asList(config.httpcache_config_cache_handling_rules_pid()));
+        cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
+                .get(Config.PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = cacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -275,6 +288,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public boolean knows(CacheKey key) throws HttpCacheKeyCreationException {
         return this.cacheKeyFactory.doesKeyMatchConfig(key, this);
+    }
+
+    @Override
+    public long getExpiryOnCreate() {
+        return expiryOnCreate;
+    }
+
+    @Override
+    public long getExpiryForAccess() {
+        return expiryOnAccess;
+    }
+
+    @Override
+    public long getExpiryForUpdate() {
+        return expiryOnUpdate;
     }
 
     @Override

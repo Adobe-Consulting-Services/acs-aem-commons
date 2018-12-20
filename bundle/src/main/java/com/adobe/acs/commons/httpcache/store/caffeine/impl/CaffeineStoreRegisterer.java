@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.httpcache.store.caffeine.impl;
 
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.management.DynamicMBean;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 
 @Component(
@@ -50,17 +52,17 @@ public class CaffeineStoreRegisterer {
 
 
     @Activate
-    protected void activate(BundleContext bundleContext, Config config) {
+    protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
         try {
-            this.maxSizeInMb = config.httpcache_cachestore_caffeinecache_maxsize();
-            this.ttl         = config.httpcache_cachestore_caffeinecache_ttl();
+            this.maxSizeInMb = PropertiesUtil.toLong(properties.get(Config.PROP_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
+            this.ttl         = PropertiesUtil.toLong(properties.get(Config.PROP_TTL), Config.DEFAULT_TTL);
 
             this.httpCacheStore = new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
 
             @SuppressWarnings("squid:S1149")
             Dictionary<String, Object> serviceProps = new Hashtable<>();
-            serviceProps.put("httpcache.cachestore.caffeinecache.maxsize", config.httpcache_cachestore_caffeinecache_maxsize());
-            serviceProps.put("httpcache.cachestore.caffeinecache.ttl", config.httpcache_cachestore_caffeinecache_ttl());
+            serviceProps.put("httpcache.cachestore.caffeinecache.maxsize", maxSizeInMb);
+            serviceProps.put("httpcache.cachestore.caffeinecache.ttl", ttl);
 
             serviceProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, httpCacheStore.getStoreType());
             serviceProps.put("jmx.objectname", "com.adobe.acs.httpcache:type=" + JMX_NAME);

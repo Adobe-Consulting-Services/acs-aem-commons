@@ -32,7 +32,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.lang.annotation.Annotation;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,36 +62,19 @@ public class CaffeineStoreRegistererTest {
     private long valueTtl = 30L;
     private long valueMaxSize = 20L;
 
-    Config config;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         systemUnderTest = new CaffeineStoreRegisterer();
 
-        config = new Config(){
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public long httpcache_cachestore_caffeinecache_ttl() {
-                return valueTtl;
-            }
-
-            @Override
-            public long httpcache_cachestore_caffeinecache_maxsize() {
-                return valueMaxSize;
-            }
-        };
+        properties.put(Config.PROP_TTL, valueTtl);
+        properties.put(Config.PROP_MAX_SIZE_IN_MB, valueMaxSize);
     }
 
     @Test
     public void test_register(){
 
-        systemUnderTest.activate(bundleContext, config);
+        systemUnderTest.activate(bundleContext, properties);
         verify(bundleContext, atLeastOnce()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
         assertEquals(HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,argumentCaptor.getValue().get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
     }
@@ -101,7 +83,7 @@ public class CaffeineStoreRegistererTest {
     public void test_class_not_found() throws Exception {
 
         PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withArguments(valueTtl, valueMaxSize).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
-        systemUnderTest.activate(bundleContext, config);
+        systemUnderTest.activate(bundleContext, properties);
         verify(bundleContext, never()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
     }
 

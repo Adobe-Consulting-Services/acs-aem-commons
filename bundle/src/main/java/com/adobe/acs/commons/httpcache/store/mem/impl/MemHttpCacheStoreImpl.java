@@ -80,10 +80,10 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     @Activate
-    protected void activate(Config config) {
+    protected void activate(Map<String,Object> properties) {
         // Read config and populate values.
-        ttl = config.httpcache_cachestore_memcache_ttl();
-        maxSizeInMb = config.httpcache_cachestore_memcache_maxsize();
+        ttl = PropertiesUtil.toLong(properties.get(Config.PROP_TTL), Config.DEFAULT_TTL);
+        maxSizeInMb = PropertiesUtil.toLong(properties.get(Config.PROP_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.

@@ -47,6 +47,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -91,7 +92,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     //fields
     private String cacheRootPath;
-    private String schedulerExpression;
     private int bucketTreeDepth;
     private int deltaSaveThreshold;
     private long expireTimeInMilliSeconds;
@@ -110,12 +110,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Activate
-    protected void activate(Config config) {
-        cacheRootPath = config.httpcache_config_jcr_rootpath() + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
-        bucketTreeDepth =config.httpcache_config_jcr_bucketdepth();
-        deltaSaveThreshold =  config.httpcache_config_jcr_savedelta();
-        expireTimeInMilliSeconds = config.httpcache_config_jcr_expiretimeinmiliseconds();
-        schedulerExpression = config.scheduler_expression();
+    protected void activate(Map<String,Object> properties) {
+        cacheRootPath = PropertiesUtil.toString(properties.get(Config.PN_ROOTPATH), Config.DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
+        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(Config.PN_BUCKETDEPTH), Config.DEFAULT_BUCKETDEPTH);
+        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(Config.PN_SAVEDELTA), Config.DEFAULT_SAVEDELTA);
+        expireTimeInMilliSeconds = PropertiesUtil.toLong(properties.get(Config.PN_EXPIRETIMEINMILLISECONDS), Config.DEFAULT_EXPIRETIMEINMILISECONDS);
     }
 
     @Override
@@ -129,7 +128,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
             final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
 
-            new EntryNodeWriter(session, entryNode, key, content).write();
+            long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : expireTimeInMilliSeconds;
+
+            new EntryNodeWriter(session, entryNode, key, content,expiryTime).write();
             session.save();
 
             incrementLoadSuccessCount();

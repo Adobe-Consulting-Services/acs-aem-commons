@@ -54,7 +54,7 @@ public class HttpCacheIncludeFilter extends AbstractHttpCacheFilter implements F
     // Only instantiate this Filter if there is at least 1 INCLUE-based cache config
     @Reference(
             cardinality = ReferenceCardinality.MANDATORY,
-            target = "(httpcache.config.filter-scope=INCLUDE)"
+            target = "(httpcache.config.filter.scope=INCLUDE)"
     )
     private HttpCacheConfig inludeScopeCacheConfigs;
 
