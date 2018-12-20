@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 public class JCRHttpCacheStoreMocks {
@@ -135,13 +136,13 @@ public class JCRHttpCacheStoreMocks {
 
     private void mockEntryNodeWriter() throws Exception {
         whenNew(EntryNodeWriter.class)
-                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, Integer.class)
-                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(Integer.class))
+                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, long.class)
+                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class))
                 .thenReturn(entryNodeWriter);
     }
 
     private void mockBucketNodeHandler() throws Exception {
-        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class)))
+        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
                 .thenReturn(entryNode);
         whenNew(BucketNodeHandler.class)
                 .withParameterTypes(Node.class, DynamicClassLoaderManager.class)

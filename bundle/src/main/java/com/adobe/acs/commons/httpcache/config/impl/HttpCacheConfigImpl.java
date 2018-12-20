@@ -209,6 +209,26 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
     private List<String> cacheHandlingRulesPid;
 
+    @Property(label = "Expiry on create",
+        description = "Specifies a custom expiry on create. Overrules the global expiry, unless the value is 0.")
+    private static final String PROP_EXPIRY_ON_CREATE = "httpcache.config.expiry.on.create";
+    public long DEFAULT_EXPIRY_ON_CREATE = 0L;
+    private long expiryOnCreate;
+
+
+    @Property(label = "Expiry on access",
+        description = "Specifies a custom expiry on access. This refreshes the expiry of the entry if it's used. Lower then 0 means no expiry on access. ")
+    private static final String PROP_EXPIRY_ON_ACCESS = "httpcache.config.expiry.on.access";
+    public long DEFAULT_EXPIRY_ON_ACCESS = 0L;
+    private long expiryOnAccess;
+
+
+    @Property(label = "Expiry on update",
+        description = "Specifies a custom expiry on update. This refreshes the expiry of the entry if it's updated. Lower then 0 means no expiry on update.")
+    private static final String PROP_EXPIRY_ON_UPDATE = "httpcache.config.expiry.on.update";
+    public long DEFAULT_EXPIRY_ON_UPDATE = 0L;
+    private long expiryOnUpdate;
+
     @Activate
     protected void activate(Map<String, Object> configs) {
 
@@ -228,6 +248,11 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
         // Cache store
         cacheStore = PropertiesUtil.toString(configs.get(PROP_CACHE_STORE), DEFAULT_CACHE_STORE);
+
+        // Custom expiry
+        expiryOnCreate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_CREATE), DEFAULT_EXPIRY_ON_CREATE);
+        expiryOnAccess = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_ACCESS), DEFAULT_EXPIRY_ON_ACCESS);
+        expiryOnUpdate = PropertiesUtil.toLong(configs.get(PROP_EXPIRY_ON_UPDATE), DEFAULT_EXPIRY_ON_UPDATE);
 
         // Cache invalidation paths.
         cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -382,6 +407,21 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public boolean knows(CacheKey key) throws HttpCacheKeyCreationException {
         return this.cacheKeyFactory.doesKeyMatchConfig(key, this);
+    }
+
+    @Override
+    public long getExpiryOnCreate() {
+        return expiryOnCreate;
+    }
+
+    @Override
+    public long getExpiryForAccess() {
+        return expiryOnAccess;
+    }
+
+    @Override
+    public long getExpiryForUpdate() {
+        return expiryOnUpdate;
     }
 
     @Override

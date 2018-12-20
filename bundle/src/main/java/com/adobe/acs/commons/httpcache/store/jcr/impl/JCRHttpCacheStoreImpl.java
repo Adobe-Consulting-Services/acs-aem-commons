@@ -191,12 +191,16 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         incrementLoadCount();
 
         withSession((Session session) -> {
+            final long expireTimeInMilliSeconds = expireTimeInSeconds * 1000;
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
-            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key);
+            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
 
-            new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
+            long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : expireTimeInMilliSeconds;
+
+            new EntryNodeWriter(session, entryNode, key, content, expiryTime).write();
+
             session.save();
 
             incrementLoadSuccessCount();
@@ -311,6 +315,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public TempSink createTempSink() {
         return new MemTempSinkImpl();
+    }
+
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
     }
 
     @Override

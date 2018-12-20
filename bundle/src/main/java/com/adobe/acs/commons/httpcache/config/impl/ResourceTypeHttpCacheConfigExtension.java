@@ -93,6 +93,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
     private boolean checkContentResourceType;
 
+    @Property(label = "Config Name",
+        description = "")
+    private static final String PROP_CONFIG_NAME = "config.name";
+
     //-------------------------<HttpCacheConfigExtension methods>
 
     @Override

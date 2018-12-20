@@ -60,7 +60,8 @@
                             org.apache.poi.ss.util;version="[2.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
-                            !org.bouncycastle.jce.*, 
+                            com.github.benmanes.caffeine*;resolution:=optional,
+                            !org.bouncycastle.jce.*,
                             !android.util.*,
                             *
                         </Import-Package>
@@ -385,6 +386,10 @@
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>

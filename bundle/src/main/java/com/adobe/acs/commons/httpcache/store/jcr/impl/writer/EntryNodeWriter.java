@@ -50,15 +50,14 @@ public class EntryNodeWriter
     private final Node entryNode;
     private final CacheKey cacheKey;
     private final CacheContent cacheContent;
-    private final int expireTimeInSeconds;
+    private final long expireTimeInMilliSeconds;
 
-    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent,
-            Integer expireTimeInSeconds){
+    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent, long expireTimeInMilliSeconds){
         this.session = session;
         this.entryNode = entryNode;
         this.cacheKey = cacheKey;
         this.cacheContent = cacheContent;
-        this.expireTimeInSeconds = expireTimeInSeconds;
+        this.expireTimeInMilliSeconds = expireTimeInMilliSeconds;
     }
 
     /**
@@ -74,7 +73,7 @@ public class EntryNodeWriter
         populateBinaryContent();
 
         //if we the expire time is set, set it on the node
-        if(expireTimeInSeconds > 0){
+        if(expireTimeInMilliSeconds > 0){
             setExpireTime();
         }
 
@@ -85,9 +84,7 @@ public class EntryNodeWriter
 
     private void setExpireTime() throws RepositoryException
     {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, expireTimeInSeconds);
-        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  expireTimeInMilliSeconds + System.currentTimeMillis() );
     }
 
     private void populateMetaData() throws RepositoryException

@@ -154,6 +154,21 @@ public class EntryNodeMapVisitorTest
                 return randomString;
             }
 
+            @Override
+            public long getExpiryForCreation() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForAccess() {
+                return -1;
+            }
+
+            @Override
+            public long getExpiryForUpdate() {
+                return -1;
+            }
+
             @Override public boolean isInvalidatedBy(CacheKey cacheKey)
             {
                 return false;
