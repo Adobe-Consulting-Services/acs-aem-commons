@@ -35,13 +35,13 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,70 +60,30 @@ import java.util.concurrent.TimeUnit;
 /**
  * In-memory cache store implementation. Uses Google Guava Cache.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
-           description = "Cache data store implementation for in-memory storage.",
-           metatype = true)
-@Properties({
-        @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-                    value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
-                    propertyPrivate = true),
-        @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
-                    propertyPrivate = true),
-        @Property(name = "webconsole.configurationFactory.nameHint",
-                    value = "TTL: {httpcache.cachestore.ttl}, "
-                            + "Max size in MB: {httpcache.cachestore.maxsize}",
-                    propertyPrivate = true)
+@Component(service={DynamicMBean.class, HttpCacheStore.class}, property= {
+      HttpCacheStore.KEY_CACHE_STORE_TYPE + "=" + HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
+      "jmx.objectname" + "=" + "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
+      "webconsole.configurationFactory.nameHint" + "=" +  "TTL: {httpcache.cachestore.memcache.ttl}, "
+                + "Max size in MB: {httpcache.cachestore.memcache.maxsize}"
 })
-@Service(value = {DynamicMBean.class, HttpCacheStore.class})
+@Designate(ocd=Config.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
-    static final long MEGABYTE = 1024L * 1024L;
+    private static final long MEGABYTE = 1024L * 1024L;
 
-    @Property(label = "TTL",
-              description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-              longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
-    static final String PROP_TTL = HttpCacheStore.PN_TTL;
-    static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
     private long ttl;
-
-    @Property(propertyPrivate = true,
-            longValue = MemHttpCacheStoreImpl.DEFAULT_TTL)
-    static final String PROP_TTL_LEGACY = "httpcache.cachestore.memcache.ttl";
-    private long ttlLegacy;
-
-    @Property(label = "Maximum size of this store in MB",
-              description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                      + "from the cache",
-              longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    static final String PROP_MAX_SIZE_IN_MB = HttpCacheStore.PN_MAXSIZE;
-    static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
     private long maxSizeInMb;
-
-    @Property(propertyPrivate = true,
-            longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-    static final String PROP_MAX_SIZE_IN_MB_LEGACY = "httpcache.cachestore.memcache.maxsize";
-    private long maxSizeInMbLegacy;
 
     /** Cache - Uses Google Guava's cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     @Activate
-    protected void activate(Map<String, Object> configs) {
-        //legacy support for configurations that still use the old key, to be backwards compatible.
-        if(ttlLegacy != DEFAULT_TTL && maxSizeInMb == DEFAULT_TTL){
-            ttl = PropertiesUtil.toLong(configs.get(PROP_TTL_LEGACY), DEFAULT_TTL);
-        }else{
-            ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
-        }
-
-        if(maxSizeInMbLegacy != DEFAULT_MAX_SIZE_IN_MB && maxSizeInMb == DEFAULT_MAX_SIZE_IN_MB){
-            maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB_LEGACY), DEFAULT_MAX_SIZE_IN_MB);
-        }else{
-            maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
-        }
+    protected void activate(Config config) {
+        // Read config and populate values.
+        ttl = config.httpcache_cachestore_memcache_ttl();
+        maxSizeInMb = config.httpcache_cachestore_memcache_maxsize();
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.
@@ -132,7 +92,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
             cache.invalidateAll();
             log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
-        if (ttl != DEFAULT_TTL) {
+        if (ttl != Config.DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
             cache = CacheBuilder.newBuilder()
                     .maximumWeight(maxSizeInMb * MEGABYTE)

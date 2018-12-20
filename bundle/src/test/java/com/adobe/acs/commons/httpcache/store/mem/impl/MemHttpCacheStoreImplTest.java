@@ -37,6 +37,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,17 +53,29 @@ import static org.mockito.Mockito.when;
 public class MemHttpCacheStoreImplTest {
 
     MemHttpCacheStoreImpl systemUnderTest ;
-    private Map<String, Object> properties = new HashMap<>();
     private long valueTtl = 30L;
     private long valueMaxSize = 20L;
 
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
+        systemUnderTest.activate(new Config(){
 
-        properties.put(MemHttpCacheStoreImpl.PROP_TTL, valueTtl);
-        properties.put(MemHttpCacheStoreImpl.PROP_MAX_SIZE_IN_MB, valueMaxSize);
-        systemUnderTest.activate(properties);
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return null;
+            }
+
+            @Override
+            public long httpcache_cachestore_memcache_ttl() {
+                return valueTtl;
+            }
+
+            @Override
+            public long httpcache_cachestore_memcache_maxsize() {
+                return valueMaxSize;
+            }
+        });
     }
 
     @Test

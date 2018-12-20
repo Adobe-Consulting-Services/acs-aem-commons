@@ -21,11 +21,9 @@ package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import com.adobe.acs.commons.util.WorkflowHelper;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +38,9 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 /**
  * Workflow process for kicking off an AutomaticPackageReplicatorJob
  */
-@Component
-@Property(label = "Workflow Label", name = "process.label", value = "Build and Replicate Package", description = "Builds and Replicates a Package of Content, set the path of the package to replicate as the argument.")
-@Service
+@Component(service=WorkflowProcess.class, property= {
+      "process.label" + "=" + "Build and Replicate Package"
+})
 public class ReplicatePackageProcess implements WorkflowProcess {
 
     private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);

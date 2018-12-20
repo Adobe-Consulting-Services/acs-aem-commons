@@ -20,23 +20,23 @@
 
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.VersionService;
-import com.day.cq.wcm.api.NameConstants;
-import com.google.common.collect.Iterators;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Iterator;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionManager;
-import java.util.Iterator;
 
-@Component
-@Service
+import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.wcm.comparisons.VersionService;
+import com.day.cq.wcm.api.NameConstants;
+import com.google.common.collect.Iterators;
+
+@Component(service=VersionService.class)
 public class VersionServiceImpl implements VersionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionServiceImpl.class);

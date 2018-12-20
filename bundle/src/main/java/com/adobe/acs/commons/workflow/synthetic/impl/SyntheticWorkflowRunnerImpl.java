@@ -33,14 +33,6 @@ import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkflowProcess;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -48,6 +40,12 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,25 +65,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * ACS AEM Commons - Synthetic Workflow Runner
  * Facilitates the execution of synthetic workflow.
  */
-@Component(immediate = true)
-@References({
-        @Reference(
-                referenceInterface = WorkflowProcess.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-                bind = "bindCqWorkflowProcesses",
-                unbind = "unbindCqWorkflowProcesses"
-        ),
-        @Reference(
-                referenceInterface = com.adobe.granite.workflow.exec.WorkflowProcess.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-                bind = "bindGraniteWorkflowProcesses",
-                unbind = "unbindGraniteWorkflowProcesses"
-        )
+@Component(immediate = true, 
+         service = SyntheticWorkflowRunner.class, 
+         reference = {
+         @Reference(name = "workflowprocesses",
+                   service = WorkflowProcess.class,
+                   policy = ReferencePolicy.DYNAMIC,
+                   cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                   bind = "bindCqWorkflowProcesses",
+                   unbind = "unbindCqWorkflowProcesses"
+           ),
+           @Reference(name = "workflowGraniteprocesses",
+                 service = com.adobe.granite.workflow.exec.WorkflowProcess.class,
+                   policy = ReferencePolicy.DYNAMIC,
+                   cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                   bind = "bindGraniteWorkflowProcesses",
+                   unbind = "unbindGraniteWorkflowProcesses"
+           )   
 })
 // Explicitly register to the SyntheticWorkflowRunner interface (as this extends WorkflowService, which we do not want to register a service against)
-@Service(value = SyntheticWorkflowRunner.class)
 public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(SyntheticWorkflowRunnerImpl.class);
 
