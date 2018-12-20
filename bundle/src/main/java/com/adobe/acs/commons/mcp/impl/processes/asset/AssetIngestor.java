@@ -267,6 +267,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
         if (this.retryPause <= 0) {
             this.retryPause = DEFAULT_TIMEOUT;
         }
+
+        if (!preserveFileName) {
+            jcrBasePath = NameUtil.createValidDamPath(jcrBasePath);
+        }
     }
 
     @SuppressWarnings("squid:S00112")
@@ -361,7 +365,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         if (dryRunMode) {
             return true;
         }
-        String folderPath = el.getNodePath();
+        String folderPath = el.getNodePath(preserveFileName);
         synchronized (alreadyCreatedFolders) {
             if (alreadyCreatedFolders.contains(folderPath)) {
                 return false;
@@ -390,20 +394,20 @@ public abstract class AssetIngestor extends ProcessDefinition {
             String nodeName;
 
             if (parent != null) {
-                parentPath = parent.getNodePath();
-                nodeName = el.getNodeName();
+                parentPath = parent.getNodePath(preserveFileName);
+                nodeName = el.getNodeName(preserveFileName);
                 if (!jcrBasePath.equals(parentPath)) {
                     createFolderNode(parent, r);
                 }
             } else {
-                parentPath = StringUtils.substringBeforeLast(el.getNodePath(),"/");
-                nodeName = StringUtils.substringAfterLast(el.getNodePath(),"/");
+                parentPath = StringUtils.substringBeforeLast(el.getNodePath(preserveFileName),"/");
+                nodeName = StringUtils.substringAfterLast(el.getNodePath(preserveFileName),"/");
             }
             Node child = s.getNode(parentPath).addNode(nodeName, DEFAULT_FOLDER_TYPE);
 
             setFolderTitle(child, name);
 
-            trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
+            trackDetailedActivity(el.getNodePath(preserveFileName), "Create Folder", "Create folder", 0L);
             incrementCount(createdFolders, 1L);
             r.commit();
             r.refresh();
@@ -428,18 +432,14 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
-            createFolderNode(source.getElement().getParent(), r);
-            actionManager.setCurrentItem(source.getElement().getSourcePath());
             HierarchicalElement el = source.getElement();
-            String path = source.getElement().getNodePath();
-            if(null != el && el.isFile() && el.getName().contains(".") && !preserveFileName){
-                String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
-                String extension = StringUtils.substringAfterLast(el.getName(), ".");
-                path = (el.getParent() == null ? el.getJcrBasePath() : el.getParent().getNodePath()) + "/"
-                        + NameUtil.createValidDamName(baseName,NameUtil.CASE_SENSITIVE_HYPHEN_LABEL_CHAR_MAPPING,"-")
-                        + "." + NameUtil.createValidDamName(extension,NameUtil.CASE_SENSITIVE_HYPHEN_LABEL_CHAR_MAPPING,"-");
+            if (null != el) {
+                createFolderNode(el.getParent(), r);
+                actionManager.setCurrentItem(el.getSourcePath());
+
+                String path = el.getNodePath(preserveFileName);
+                handleExistingAsset(source, path, r);
             }
-            handleExistingAsset(source, path, r);
         };
     }
 

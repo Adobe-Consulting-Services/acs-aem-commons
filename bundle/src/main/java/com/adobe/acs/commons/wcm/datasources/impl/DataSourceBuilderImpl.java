@@ -19,6 +19,22 @@
  */
 package com.adobe.acs.commons.wcm.datasources.impl;
 
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.service.component.annotations.Component;
+
 import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
 import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 import com.adobe.granite.ui.components.ds.DataSource;
@@ -28,27 +44,11 @@ import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * ACS AEM Commons - WCM DataSource Builder
  */
-@Component
-@Service
+@Component(service=DataSourceBuilder.class)
 public class DataSourceBuilderImpl implements DataSourceBuilder {
 
     @Override

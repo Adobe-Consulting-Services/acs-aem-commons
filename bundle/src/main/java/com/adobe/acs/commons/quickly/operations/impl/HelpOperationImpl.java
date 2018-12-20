@@ -26,11 +26,9 @@ import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.impl.lists.HelpResults;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +36,9 @@ import java.util.List;
 /**
  * ACS AEM Commons - Quickly - Help Operation
  */
-@Component
-@Property(
-    name = Operation.PROP_CMD,
-    value = HelpOperationImpl.CMD
-)
-@Service
+@Component(service=Operation.class, property= {
+   Operation.PROP_CMD + "=" + HelpOperationImpl.CMD
+})
 public class HelpOperationImpl extends AbstractOperation {
     public static final String CMD = "help";
 

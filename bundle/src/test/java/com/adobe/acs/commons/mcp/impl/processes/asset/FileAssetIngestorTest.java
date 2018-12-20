@@ -29,6 +29,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -36,6 +37,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,12 +45,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import javax.annotation.Nullable;
-
+import javax.jcr.RepositoryException;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -103,6 +104,7 @@ public class FileAssetIngestorTest {
         context.resourceResolver().commit();
         tempDirectory = Files.createTempDir();
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
+        ingestor.timeout = 1;
         ingestor.jcrBasePath = "/content/dam";
         ingestor.ignoreFileList = Collections.emptyList();
         ingestor.ignoreExtensionList = Collections.emptyList();
@@ -110,13 +112,10 @@ public class FileAssetIngestorTest {
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
         ingestor.fileBasePath = tempDirectory.getAbsolutePath();
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];
-                method.accept(context.resourceResolver());
-                return null;
-            }
+        doAnswer(invocation -> {
+            CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];
+            method.accept(context.resourceResolver());
+            return null;
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
     }
 
@@ -272,7 +271,7 @@ public class FileAssetIngestorTest {
         newDir.mkdir();
         return newDir;
     }
-    
+
     @Test
     public void testSftpStructures() throws URISyntaxException, JSchException, UnsupportedEncodingException {
         configureSftpFields();
@@ -281,16 +280,16 @@ public class FileAssetIngestorTest {
         assertNull(elem1.getParent());
         assertEquals(SFTP_HOST_TEST_PATH, elem1.getSourcePath());
         // File should be a child node
-        assertEquals("/content/dam/path", elem1.getNodePath());
-        assertEquals("path", elem1.getNodeName());
+        assertEquals("/content/dam/path", elem1.getNodePath(true));
+        assertEquals("path", elem1.getNodeName(true));
 
         FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH);
         elem1.isFile = false;
         assertNull(elem2.getParent());
         assertEquals(SFTP_HOST_TEST_PATH, elem2.getSourcePath());
         // Folder should map to the root folder
-        assertEquals("/content/dam", elem2.getNodePath());
-        assertEquals("path", elem2.getNodeName());
+        assertEquals("/content/dam", elem2.getNodePath(true));
+        assertEquals("path", elem2.getNodeName(true));
     }
 
     @Test
@@ -299,7 +298,7 @@ public class FileAssetIngestorTest {
         ChannelSftp channel = mock(ChannelSftp.class);
         when(channel.isConnected()).thenReturn(true);
         when(channel.getSession()).thenReturn(mock(Session.class));
-        
+
         Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
                 .addDirectory(".")
                 .addDirectory("..")
@@ -307,7 +306,7 @@ public class FileAssetIngestorTest {
                 .addFile("file2.png", 4567L)
                 .asVector();
         when(channel.ls(anyObject())).thenReturn(entries);
-        
+
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         int count = 0;
         for (HierarchicalElement e : elem1.getChildren().collect(Collectors.toList())) {
@@ -320,20 +319,82 @@ public class FileAssetIngestorTest {
 
     @Test
     public void testSftpUrlSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException {
-        String urlWithPort = "sftp://somehost:20/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        configureSftpFields();
+        ingestor.preserveFileName = false;
+        ingestor.fileBasePath = "sftp://somehost:20";
+        String sourcePath = "/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        String urlWithPort = "sftp://somehost:20" + sourcePath;
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(urlWithPort);
 
-        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem1.path);
+        assertEquals(sourcePath, elem1.path);
         assertEquals("sftp://somehost:20/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem1.uri.toString());
         assertEquals("somehost", elem1.uri.getHost());
         assertEquals(20, elem1.uri.getPort());
+        String expectedSourcePath = sourcePath.replaceAll("[\\W&&[^/]]", "-");
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath(false));
 
-        String urlWithoutPort = "sftp://somehost2/this/is/path with/$pecial/characters#@/some image& chars.jpg";
+        ingestor.fileBasePath = "sftp://somehost2";
+        String urlWithoutPort = "sftp://somehost2" + sourcePath;
         FileAssetIngestor.SftpHierarchicalElement elem2 = ingestor.new SftpHierarchicalElement(urlWithoutPort);
 
-        assertEquals("/this/is/path with/$pecial/characters#@/some image& chars.jpg", elem2.path);
+        assertEquals(sourcePath, elem2.path);
         assertEquals("sftp://somehost2/this/is/path+with/%24pecial/characters%23%40/some+image%26+chars.jpg", elem2.uri.toString());
         assertEquals("somehost2", elem2.uri.getHost());
+        assertEquals(ingestor.jcrBasePath + expectedSourcePath, elem1.getNodePath(false));
+    }
+
+    @Test
+    public void testPathSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException, RepositoryException {
+        configureSftpFields();
+        ingestor.preserveFileName = false;
+        ingestor.jcrBasePath = ingestor.jcrBasePath.concat("#");
+        ingestor.init();
+
+        Assert.assertTrue(ingestor.jcrBasePath.endsWith("-"));
+
+        for (AssetIngestorPaths pathsToValidate : FILE_PATHS) {
+            String expectedPath = pathsToValidate.getExpectedPath();
+            String actualPath = pathsToValidate.getActualPath();
+            FileAssetIngestor.SftpHierarchicalElement elem = ingestor.new SftpHierarchicalElement(ingestor.fileBasePath + actualPath);
+            elem.isFile = true;
+            boolean validPath = StringUtils.substringBeforeLast(actualPath.replaceAll(NameUtil.PATH_SEPARATOR, StringUtils.EMPTY), ".")
+                    .matches(NameUtil.VALID_NAME_REGEXP);
+            Assert.assertEquals(validPath, expectedPath.equals(actualPath));
+            Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(false));
+        }
+
+        for (AssetIngestorPaths pathsToValidate : FOLDER_PATHS) {
+            String expectedPath = pathsToValidate.getExpectedPath();
+            String actualPath = pathsToValidate.getActualPath();
+            FileAssetIngestor.SftpHierarchicalElement elem = ingestor.new SftpHierarchicalElement(ingestor.fileBasePath + actualPath);
+            boolean validPath = actualPath.replaceAll(NameUtil.PATH_SEPARATOR, StringUtils.EMPTY).matches(NameUtil.VALID_NAME_REGEXP);
+            Assert.assertEquals(validPath, expectedPath.equals(actualPath));
+            Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(false));
+        }
+    }
+
+    @Test
+    public void testPreservePathWithSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException, RepositoryException {
+        configureSftpFields();
+        ingestor.jcrBasePath = ingestor.jcrBasePath.concat("#");
+        ingestor.init();
+
+        Assert.assertTrue(ingestor.jcrBasePath.endsWith("#"));
+
+        for (AssetIngestorPaths pathsToValidate : FILE_PATHS) {
+            String expectedPath = pathsToValidate.getExpectedPreservedPath();
+            String actualPath = pathsToValidate.getActualPath();
+            FileAssetIngestor.SftpHierarchicalElement elem = ingestor.new SftpHierarchicalElement(ingestor.fileBasePath + actualPath);
+            elem.isFile = true;
+            Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(true));
+        }
+
+        for (AssetIngestorPaths pathsToValidate : FOLDER_PATHS) {
+            String expectedPath = pathsToValidate.getExpectedPreservedPath();
+            String actualPath = pathsToValidate.getActualPath();
+            FileAssetIngestor.SftpHierarchicalElement elem = ingestor.new SftpHierarchicalElement(ingestor.fileBasePath + actualPath);
+            Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(true));
+        }
     }
 
     private File addFile(File dir, String name, String resourcePath) throws IOException {

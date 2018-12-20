@@ -19,14 +19,16 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.discovery.TopologyEventListener;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,21 +37,26 @@ import com.adobe.acs.commons.util.RunnableOnMaster;
 import java.util.Collections;
 import java.util.Map;
 
-@Component(immediate = true, metatype = true,
-    label = "ACS AEM Commons - Twitter Feed Refresh Scheduler",
-    description = "Schedule job which refreshes Twitter Feed components on a recurring basis",
-    policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties(value = {
-        @Property(name = "scheduler.expression", value = "0 0/15 * * * ?", label = "Refresh Interval",
-                description = "Twitter Feed Refresh interval (Quartz Cron Expression)"),
-        @Property(name = "scheduler.concurrent", boolValue = false, propertyPrivate = true) })
+@Component(immediate = true, service= {TopologyEventListener.class, Runnable.class},
+configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+ "scheduler.concurrent" + "=" + "false"
+})
+@Designate(ocd=TwitterFeedScheduler.Config.class)
 public final class TwitterFeedScheduler extends RunnableOnMaster {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);
 
     private static final String SERVICE_NAME = "twitter-updater";
     private static final Map<String, Object> AUTH_INFO;
+    
+    @ObjectClassDefinition(name= "ACS AEM Commons - Twitter Feed Refresh Scheduler",
+        description = "Schedule job which refreshes Twitter Feed components on a recurring basis")
+    public @interface Config {
+        @AttributeDefinition( defaultValue = "0 0/15 * * * ?", name = "Refresh Interval",
+                description = "Twitter Feed Refresh interval (Quartz Cron Expression)")
+        String scheduler_expression();
+
+    }
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
