@@ -36,9 +36,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 
-@Component(
-        name = "ACS AEM Commons - HTTP Cache - Caffeine cache store.",
-        configurationPid = "com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl")
+@Component(configurationPid = "com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl")
 @Designate(ocd = Config.class)
 public class CaffeineStoreRegisterer {
 

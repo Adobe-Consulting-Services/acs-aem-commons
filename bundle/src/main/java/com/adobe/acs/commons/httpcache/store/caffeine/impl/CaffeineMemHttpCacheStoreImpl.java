@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * In-memory cache store implementation. Uses Google Guava Cache.
+ * In-memory cache store implementation. Uses Caffeine Cache.
  */
 public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
