@@ -257,6 +257,10 @@ public class EmailServiceImpl implements EmailService {
             email.setSocketTimeout(soTimeout);
         }
 
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
+        }
+
         // #1008 setting the subject via the setSubject(..) parameter.
         if (params.containsKey(EmailServiceConstants.SUBJECT)) {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));

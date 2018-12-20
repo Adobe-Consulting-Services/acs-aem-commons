@@ -28,7 +28,6 @@ import aQute.bnd.annotation.ProviderType;
 @ProviderType
 public final class EmailServiceConstants {
 
-
     private EmailServiceConstants() {
 
     }
@@ -45,10 +44,14 @@ public final class EmailServiceConstants {
      */
     public static final String SENDER_NAME = "senderName";
 
-
     /**
      * Subject line variable used to specify the subject in the input parameter map.
      */
     public static final String SUBJECT = "subject";
+
+    /**
+     * Variable used to specify the bounce address. Also referred to as the envelope FROM address.
+     */
+    public static final String BOUNCE_ADDRESS = "bounceAddress";
 
 }

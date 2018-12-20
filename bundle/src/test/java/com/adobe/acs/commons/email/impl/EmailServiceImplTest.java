@@ -23,6 +23,8 @@ import com.adobe.acs.commons.email.EmailService;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
+import junitx.util.PrivateAccessor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.ByteArrayDataSource;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
@@ -42,6 +44,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -61,8 +64,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(MailTemplate.class)
+@RunWith(MockitoJUnitRunner.class)
 public class EmailServiceImplTest {
 
     @Mock
@@ -77,7 +79,7 @@ public class EmailServiceImplTest {
     private EmailService emailService = new EmailServiceImpl();
 
     @Rule
-    private ExpectedException thrown = ExpectedException.none();
+    public ExpectedException thrown = ExpectedException.none();
     
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
@@ -89,10 +91,7 @@ public class EmailServiceImplTest {
     private static final String EMAIL_TEMPLATE_ATTACHMENT = "emailTemplateAttachment.html";
 
     @Before
-    public final void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
+    public final void setUp() {
         context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE),emailTemplatePath);
         context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE_ATTACHMENT), emailTemplateAttachmentPath);
 
@@ -106,7 +105,7 @@ public class EmailServiceImplTest {
 
 
     @Test
-    public final void testSendEmailMultipleRecipients() throws Exception {
+    public final void testSendEmailMultipleRecipients() {
 
         final String expectedMessage = "This is just a message";
         final String expectedSenderName = "John Smith";
@@ -142,7 +141,7 @@ public class EmailServiceImplTest {
 
 
     @Test
-    public final void testSendEmailSingleRecipient() throws Exception {
+    public final void testSendEmailSingleRecipient() {
 
         final String expectedMessage = "This is just a message";
         final String expectedSenderName = "John Smith";
@@ -214,7 +213,7 @@ public class EmailServiceImplTest {
     }
 
     @Test
-    public final void testSendEmailNoRecipients() throws Exception {
+    public final void testSendEmailNoRecipients() {
         final String templatePath = emailTemplatePath;
         final Map<String, String> params = new HashMap<String, String>();
         final String[] recipients = new String[] {};
@@ -226,7 +225,7 @@ public class EmailServiceImplTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public final void testBlankTemplatePath() throws Exception {
+    public final void testBlankTemplatePath() {
         final String templatePath = null;
         final Map<String, String> params = new HashMap<String, String>();
         final String recipient =  "upasanac@acs.com";
@@ -235,7 +234,7 @@ public class EmailServiceImplTest {
      }
 
     @Test
-    public final void testInValidTemplatePath() throws Exception {
+    public final void testInValidTemplatePath() {
         final String templatePath = "/invalidTemplatePath.txt";
         final Map<String, String> params = new HashMap<String, String>();
         final String recipient =  "upasanac@acs.com";
@@ -247,7 +246,6 @@ public class EmailServiceImplTest {
 
     @Test
     public void testDefaultTimeouts() {
-        //emailService.activate(Collections.emptyMap());
         context.registerInjectActivateService(emailService,Collections.emptyMap());
         SimpleEmail email = sendTestEmail();
         assertEquals(30000, email.getSocketConnectionTimeout());
@@ -284,7 +282,7 @@ public class EmailServiceImplTest {
     }
 
     @Test
-    public final void testSubjectSetting() throws Exception {
+    public final void testSubjectSetting() {
         final String expectedSubject = "问候";
 
         final Map<String, String> params = new HashMap<String, String>();
@@ -300,9 +298,23 @@ public class EmailServiceImplTest {
         assertEquals(expectedSubject, captor.getValue().getSubject());
     }
 
+    @Test
+    public final void testBounceAddress() throws Exception {
+        final String expectedBounceAddress = RandomStringUtils.randomAlphabetic(10) + "@test.com";
 
-    @After
-    public final void tearDown() {
-        Mockito.reset();
+        final Map<String, String> params = new HashMap<String, String>();
+        params.put("bounceAddress", expectedBounceAddress);
+
+        final String recipient =  "upasanac@acs.com";
+
+        ArgumentCaptor<SimpleEmail> captor = ArgumentCaptor.forClass(SimpleEmail.class);
+
+        emailService.sendEmail(emailTemplatePath, params, recipient);
+        verify(messageGatewaySimpleEmail, times(1)).send(captor.capture());
+
+        // getter isn't available until 1.4. See https://issues.apache.org/jira/browse/EMAIL-146
+        Object actualBounceAddress = PrivateAccessor.getField(captor.getValue(), "bounceAddress");
+
+        assertEquals(expectedBounceAddress, actualBounceAddress);
     }
 }
