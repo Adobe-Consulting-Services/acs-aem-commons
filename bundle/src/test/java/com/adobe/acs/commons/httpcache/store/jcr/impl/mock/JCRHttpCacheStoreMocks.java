@@ -137,8 +137,8 @@ public class JCRHttpCacheStoreMocks {
 
     private void mockEntryNodeWriter() throws Exception {
         whenNew(EntryNodeWriter.class)
-                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class)
-                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class))
+                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, long.class)
+                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class))
                 .thenReturn(entryNodeWriter);
     }
 

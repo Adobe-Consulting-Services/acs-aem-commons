@@ -99,7 +99,7 @@ public class EntryNodeWriterMocks
         mockStatic(JcrUtil.class);
         mockJCRUtil();
 
-        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent);
+        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, 1000l);
         entryNodeWriter = spy(writer);
     }
 
