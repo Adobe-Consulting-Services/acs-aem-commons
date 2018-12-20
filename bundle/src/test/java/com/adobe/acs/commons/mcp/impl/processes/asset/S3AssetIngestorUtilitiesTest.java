@@ -45,7 +45,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertEquals("testbucket:folder1/folder2/", el.getItemName());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
-        assertEquals("/content/dam/folder1/folder2", el.getNodePath());
+        assertEquals("/content/dam/folder1/folder2", el.getNodePath(true));
         assertEquals("folder2", el.getName());
 
         HierarchicalElement parent = el.getParent();
@@ -65,7 +65,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertEquals("testbucket:folder1/folder2/folder3/", el.getItemName());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
-        assertEquals("/content/dam/folder2/folder3", el.getNodePath());
+        assertEquals("/content/dam/folder2/folder3", el.getNodePath(true));
         assertEquals("folder3", el.getName());
 
         HierarchicalElement parent = el.getParent();
@@ -73,7 +73,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertNotNull(parent);
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
-        assertEquals("/content/dam/folder2", parent.getNodePath());
+        assertEquals("/content/dam/folder2", parent.getNodePath(true));
         assertEquals("folder2", parent.getName());
 
         assertNull(parent.getParent());
@@ -112,7 +112,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
         assertEquals("image.png", el.getName());
-        assertEquals("/content/dam/folder2/folder3/image.png", el.getNodePath());
+        assertEquals("/content/dam/folder2/folder3/image.png", el.getNodePath(true));
 
         HierarchicalElement parent = el.getParent();
         assertEquals("testbucket:folder1/folder2/folder3/", parent.getItemName());
@@ -120,7 +120,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
         assertEquals("folder3", parent.getName());
-        assertEquals("/content/dam/folder2/folder3", parent.getNodePath());
+        assertEquals("/content/dam/folder2/folder3", parent.getNodePath(true));
 
         parent = parent.getParent();
         assertEquals("testbucket:folder1/folder2/", parent.getItemName());
@@ -128,7 +128,7 @@ public class S3AssetIngestorUtilitiesTest {
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
         assertEquals("folder2", parent.getName());
-        assertEquals("/content/dam/folder2", parent.getNodePath());
+        assertEquals("/content/dam/folder2", parent.getNodePath(true));
 
         assertNull(parent.getParent());
     }
