@@ -45,20 +45,20 @@ import org.json.JSONObject;
  * compatibility check.</dd>
  * </dl>
  */
-public class AcsCommonsAuthorizableCompatibilityCheck implements ProgressCheckFactory {
+public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SCOPE_IDS = "scopeIds";
 
-    class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheck {
         private final List<Rule> scopeIds;
 
-        public Check(final List<Rule> scopeIds) {
+        Check(final List<Rule> scopeIds) {
             this.scopeIds = scopeIds;
         }
 
         @Override
         public String getCheckName() {
-            return AcsCommonsAuthorizableCompatibilityCheck.this.getClass().getSimpleName();
+            return AcsCommonsAuthorizableCompatibilityCheck.class.getSimpleName();
         }
 
         @Override
@@ -77,22 +77,17 @@ public class AcsCommonsAuthorizableCompatibilityCheck implements ProgressCheckFa
                 final String id = authz.getID();
 
                 // check for inclusion based on authorizableId
-                Rule lastMatched = Rule.fuzzyDefaultAllow(scopeIds);
-                for (Rule scopeId : scopeIds) {
-                    if (scopeId.matches(id)) {
-                        lastMatched = scopeId;
-                    }
-                }
+                Rule lastMatched = Rule.lastMatch(scopeIds, id);
 
                 // if id is excluded, short circuit
-                if (lastMatched.isDeny()) {
+                if (lastMatched.isExclude()) {
                     return;
                 }
 
                 if (authz.getID().startsWith("acs-commons")) {
-                    reportViolation(new SimpleViolation(Violation.Severity.MAJOR,
+                    reportViolation(Violation.Severity.MAJOR,
                             String.format("%s: reserved ID prefix [%s]", path, authz.getID()),
-                            packageId));
+                            packageId);
                 }
             }
         }

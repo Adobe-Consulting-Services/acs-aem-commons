@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.OrgJson.arr;
+import static net.adamcin.oakpal.core.OrgJson.key;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -78,14 +80,17 @@ public class ContentClassificationsTest extends CheckTestBase {
     }
 
     private ProgressCheck checkForPath(final String path) {
-        return new ContentClassifications().newInstance(
-                new JSONObject(String.format("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\"%s\"}]}", path)));
+        return new ContentClassifications()
+                .newInstance(key("scopePaths", arr(key("type", "allow").key("pattern", path))).get());
     }
 
     @Test
     public void testCheckAllValid() throws Exception {
-        ProgressCheck checkValid = new ContentClassifications().newInstance(
-                new JSONObject("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\".*/valid.*\"},{\"type\":\"allow\",\"pattern\":\"/apps/acs/(abstract|public).*\"}]}"));
+        ProgressCheck checkValid = new ContentClassifications()
+                .newInstance(key("scopePaths", arr()
+                        .val(key("type", "allow").key("pattern", ".*/valid.*"))
+                        .val(key("type", "allow").key("pattern", "/apps/acs/(abstract|public).*"))
+                ).get());
         CheckReport reportValid = scanWithCheck(checkValid, pack);
         assertEquals("No violations when deny invalid paths.", 0, reportValid.getViolations().size());
     }

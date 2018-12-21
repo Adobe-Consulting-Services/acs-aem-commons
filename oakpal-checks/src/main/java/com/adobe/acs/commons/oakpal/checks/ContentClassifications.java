@@ -94,13 +94,13 @@ public final class ContentClassifications implements ProgressCheckFactory {
         return new Check(libsPathPrefix, severity, scopePaths, searchPaths);
     }
 
-    class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheck {
         final String libsPathPrefix;
         final Violation.Severity severity;
         final List<Rule> scopePaths;
         final List<String> searchPaths;
 
-        public Check(final String libsPathPrefix, final Violation.Severity severity,
+        Check(final String libsPathPrefix, final Violation.Severity severity,
                      final List<Rule> scopePaths, final List<String> searchPaths) {
             this.libsPathPrefix = libsPathPrefix;
             this.severity = severity;
@@ -110,7 +110,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
         @Override
         public String getCheckName() {
-            return ContentClassifications.this.getClass().getSimpleName();
+            return ContentClassifications.class.getSimpleName();
         }
 
         @Override
@@ -125,15 +125,10 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
             // default to ALLOW ALL
             // if first rule is allow, change default to DENY ALL
-            Rule lastMatched = Rule.fuzzyDefaultAllow(scopePaths);
-            for (Rule rule : scopePaths) {
-                if (rule.matches(path)) {
-                    lastMatched = rule;
-                }
-            }
+            Rule lastMatched = Rule.lastMatch(scopePaths, path);
 
             // if path is denied from scope, short circuit.
-            if (lastMatched.isDeny()) {
+            if (lastMatched.isExclude()) {
                 return;
             }
 
@@ -160,8 +155,8 @@ public final class ContentClassifications implements ProgressCheckFactory {
             final String libsRt = libsPathPrefix + relPath;
 
             assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
-                    .ifPresent(message -> reportViolation(new SimpleViolation(severity,
-                            String.format("%s [restricted overlay]: %s", path, message), packageId)));
+                    .ifPresent(message -> reportViolation(severity,
+                            String.format("%s [restricted overlay]: %s", path, message), packageId));
 
         }
 
@@ -178,9 +173,9 @@ public final class ContentClassifications implements ProgressCheckFactory {
                     }
 
                     assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_TYPE)
-                            .ifPresent(message -> reportViolation(new SimpleViolation(severity,
+                            .ifPresent(message -> reportViolation(severity,
                                     String.format("%s [restricted resource type]: %s", path, message),
-                                    packageId)));
+                                    packageId));
                 }
             }
         }
@@ -198,9 +193,9 @@ public final class ContentClassifications implements ProgressCheckFactory {
                     }
 
                     assertClassifications(node.getSession(), libsRst, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
-                            .ifPresent(message -> reportViolation(new SimpleViolation(severity,
+                            .ifPresent(message -> reportViolation(severity,
                                     String.format("%s [restricted super type]: %s", path, message),
-                                    packageId)));
+                                    packageId));
                 }
             }
         }

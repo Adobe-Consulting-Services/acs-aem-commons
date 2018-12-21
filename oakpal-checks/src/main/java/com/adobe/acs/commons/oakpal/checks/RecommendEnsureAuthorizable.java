@@ -51,7 +51,7 @@ import org.json.JSONObject;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public class RecommendEnsureAuthorizable implements ProgressCheckFactory {
+public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -67,12 +67,12 @@ public class RecommendEnsureAuthorizable implements ProgressCheckFactory {
         return new Check(severity, recommendation, scopeIds);
     }
 
-    class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheck {
         private final Violation.Severity severity;
         private final String recommendation;
         private final List<Rule> scopeIds;
 
-        public Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopeIds) {
+        Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopeIds) {
             this.severity = severity;
             this.recommendation = recommendation;
             this.scopeIds = scopeIds;
@@ -80,7 +80,7 @@ public class RecommendEnsureAuthorizable implements ProgressCheckFactory {
 
         @Override
         public String getCheckName() {
-            return RecommendEnsureAuthorizable.this.getClass().getSimpleName();
+            return RecommendEnsureAuthorizable.class.getSimpleName();
         }
 
         @Override
@@ -99,22 +99,17 @@ public class RecommendEnsureAuthorizable implements ProgressCheckFactory {
                 final String id = authz.getID();
 
                 // check for inclusion based on authorizableId
-                Rule lastMatched = Rule.fuzzyDefaultAllow(scopeIds);
-                for (Rule scopeId : scopeIds) {
-                    if (scopeId.matches(id)) {
-                        lastMatched = scopeId;
-                    }
-                }
+                Rule lastMatched = Rule.lastMatch(scopeIds, id);
 
                 // if id is excluded, or is user and not system user, short circuit
-                if (lastMatched.isDeny() || (!authz.isGroup() && !((User) authz).isSystemUser())) {
+                if (lastMatched.isExclude() || (!authz.isGroup() && !((User) authz).isSystemUser())) {
                     return;
                 }
 
                 // report for groups and system users
-                reportViolation(new SimpleViolation(severity,
+                reportViolation(severity,
                         String.format("%s: imported explicit %s. %s",
-                                path, authz.isGroup() ? "group" : "system user", recommendation), packageId));
+                                path, authz.isGroup() ? "group" : "system user", recommendation), packageId);
             }
         }
     }
