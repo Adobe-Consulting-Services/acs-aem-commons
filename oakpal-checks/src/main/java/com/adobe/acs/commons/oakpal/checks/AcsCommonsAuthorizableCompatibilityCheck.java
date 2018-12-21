@@ -26,7 +26,6 @@ import javax.jcr.RepositoryException;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
 import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.SimpleViolation;
 import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.api.JackrabbitSession;
@@ -66,28 +65,26 @@ public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressC
                 throws RepositoryException {
             // fast check for authorizables
             if (node.isNodeType(NT_REP_AUTHORIZABLE)) {
-                UserManager userManager = ((JackrabbitSession) node.getSession()).getUserManager();
-                Authorizable authz = userManager.getAuthorizableByPath(path);
+                final UserManager userManager = ((JackrabbitSession) node.getSession()).getUserManager();
+                final Authorizable authz = userManager.getAuthorizableByPath(path);
 
                 // if an authorizable is not loaded from the path, short circuit.
-                if (authz == null) {
-                    return;
-                }
+                if (authz != null) {
+                    final String id = authz.getID();
 
-                final String id = authz.getID();
+                    // check for inclusion based on authorizableId
+                    Rule lastMatched = Rule.lastMatch(scopeIds, id);
 
-                // check for inclusion based on authorizableId
-                Rule lastMatched = Rule.lastMatch(scopeIds, id);
+                    // if id is excluded, short circuit
+                    if (lastMatched.isExclude()) {
+                        return;
+                    }
 
-                // if id is excluded, short circuit
-                if (lastMatched.isExclude()) {
-                    return;
-                }
-
-                if (authz.getID().startsWith("acs-commons")) {
-                    reportViolation(Violation.Severity.MAJOR,
-                            String.format("%s: reserved ID prefix [%s]", path, authz.getID()),
-                            packageId);
+                    if (authz.getID().startsWith("acs-commons")) {
+                        reportViolation(Violation.Severity.MAJOR,
+                                String.format("%s: reserved ID prefix [%s]", path, authz.getID()),
+                                packageId);
+                    }
                 }
             }
         }
