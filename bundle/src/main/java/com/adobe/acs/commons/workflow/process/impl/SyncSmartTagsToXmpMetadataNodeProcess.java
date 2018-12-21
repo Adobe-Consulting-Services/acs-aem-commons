@@ -34,7 +34,11 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.*;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -158,10 +162,10 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
     }
 
     protected static class ProcessArgs {
-        private final String ARG_SEQUENCE_NAME = "sequenceName";
-        private final String ARG_NAME_PROPERTY = "nameProperty";
-        private final String ARG_CONFIDENCE_PROPERTY = "confidenceProperty";
-        private final String ARG_MINIMUM_CONFIDENCE = "minimumConfidence";
+        private static final String ARG_SEQUENCE_NAME = "sequenceName";
+        private static final String ARG_NAME_PROPERTY = "nameProperty";
+        private static final String ARG_CONFIDENCE_PROPERTY = "confidenceProperty";
+        private static final String ARG_MINIMUM_CONFIDENCE = "minimumConfidence";
 
         private String sequenceName;
         private String nameProperty;
