@@ -34,10 +34,7 @@ import com.day.cq.dam.commons.util.DamUtil;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.*;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -133,18 +130,7 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
                     .filter(properties -> properties.get(PN_SMART_TAG_CONFIDENCE, 0D) >= processArgs.getMinimumConfidence())
                     .filter(properties -> StringUtils.isNotBlank(properties.get(PN_SMART_TAG_NAME, String.class)))
                     .forEach(properties -> {
-                        try {
-                            resourceResolver.create(parentResource, String.valueOf(count.incrementAndGet()),
-                                    new ImmutableMap.Builder<String, Object>()
-                                            .put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED)
-                                            .put("xmpNodeType", "xmpStruct")
-                                            .put(processArgs.getNameProperty(), properties.get(PN_SMART_TAG_NAME, String.class))
-                                            .put(processArgs.getConfidenceProperty(), properties.get(PN_SMART_TAG_CONFIDENCE, Double.class))
-                                            .build());
-                        } catch (PersistenceException e) {
-                            log.error("Unable to sync Smart Tag [ {} ] to XMP Metadata structure for asset [ {} ]",
-                                    properties.get("name", String.class), asset.getPath(), e);
-                        }
+                        createSequenceItemResource(asset, processArgs, resourceResolver, parentResource, count, properties);
                     });
         }
 
@@ -155,11 +141,27 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
                 asset.getPath() + "/jcr:content/metadata/" + processArgs.getSequenceName());
     }
 
+    private void createSequenceItemResource(Asset asset, ProcessArgs processArgs, ResourceResolver resourceResolver,
+                                            Resource parentResource, AtomicInteger count, ValueMap properties) {
+        try {
+            resourceResolver.create(parentResource, String.valueOf(count.incrementAndGet()),
+                    new ImmutableMap.Builder<String, Object>()
+                            .put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_UNSTRUCTURED)
+                            .put("xmpNodeType", "xmpStruct")
+                            .put(processArgs.getNameProperty(), properties.get(PN_SMART_TAG_NAME, String.class))
+                            .put(processArgs.getConfidenceProperty(), properties.get(PN_SMART_TAG_CONFIDENCE, Double.class))
+                            .build());
+        } catch (PersistenceException e) {
+            log.error("Unable to sync Smart Tag [ {} ] to XMP Metadata structure for asset [ {} ]",
+                    properties.get("name", String.class), asset.getPath(), e);
+        }
+    }
+
     protected static class ProcessArgs {
-        private String ARG_SEQUENCE_NAME = "sequenceName";
-        private String ARG_NAME_PROPERTY = "nameProperty";
-        private String ARG_CONFIDENCE_PROPERTY = "confidenceProperty";
-        private String ARG_MINIMUM_CONFIDENCE = "minimumConfidence";
+        private final String ARG_SEQUENCE_NAME = "sequenceName";
+        private final String ARG_NAME_PROPERTY = "nameProperty";
+        private final String ARG_CONFIDENCE_PROPERTY = "confidenceProperty";
+        private final String ARG_MINIMUM_CONFIDENCE = "minimumConfidence";
 
         private String sequenceName;
         private String nameProperty;
@@ -188,7 +190,7 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
             }
 
             if (minimumConfidence < 0 || minimumConfidence > 1) {
-                log.warn("Minimum confidence score outside of range [ 0 to 1 ] defaulting to [ {} ]", data.get(ARG_MINIMUM_CONFIDENCE), DEFAULT_MINIMUM_CONFIDENCE);
+                log.warn("Minimum confidence score [ {} ] outside of range [ 0 to 1 ] defaulting to [ {} ]", data.get(ARG_MINIMUM_CONFIDENCE), DEFAULT_MINIMUM_CONFIDENCE);
                 minimumConfidence = DEFAULT_MINIMUM_CONFIDENCE;
             }
         }
