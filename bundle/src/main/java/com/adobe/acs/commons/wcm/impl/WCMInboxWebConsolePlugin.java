@@ -36,24 +36,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Web console plugin which allows for management of users WCM Notification Inboxes.
  */
 @SuppressWarnings("serial")
-@Component
-@Service
-@Properties({ @Property(name = "felix.webconsole.label", value = "wcm-inbox"),
-        @Property(name = "felix.webconsole.title", value = "WCM Inbox") })
+@Component(service=HttpServlet.class,property= {"felix.webconsole.label=wcm-inbox",
+      "felix.webconsole.title=WCM Inbox"})
 public class WCMInboxWebConsolePlugin extends HttpServlet {
 
     @Reference
@@ -74,9 +70,7 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
         PrintWriter pw = resp.getWriter();
 
-        ResourceResolver resolver = null;
-        try {
-            resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             pw.println("<p class='statline ui-state-highlight'>Inbox Notification Configurations</p>");
             pw.println("<ul>");
@@ -115,10 +109,6 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
         } catch (Exception e) {
             throw new ServletException(e);
-        } finally {
-            if (resolver != null && resolver.isLive()) {
-                resolver.close();
-            }
         }
     }
     
@@ -126,10 +116,8 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getParameter("path");
         if (path != null) {
-            ResourceResolver resolver = null;
-            try {
+            try (ResourceResolver resolver = rrFactory.getServiceResourceResolver(AUTH_INFO)){
                 int counter = 0;
-                resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
                 Session session = resolver.adaptTo(Session.class);
                 Node node = session.getNode(path);
                 NodeIterator it = node.getNodes();
@@ -142,10 +130,6 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
                 resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>%n", counter);
             } catch (Exception e) {
                 throw new ServletException(e);
-            } finally {
-                if (resolver != null && resolver.isLive()) {
-                    resolver.close();
-                }
             }
         }
         resp.sendRedirect((String) req.getAttribute("felix.webconsole.pluginRoot"));

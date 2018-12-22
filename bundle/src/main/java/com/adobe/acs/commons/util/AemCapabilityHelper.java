@@ -28,8 +28,12 @@ public interface AemCapabilityHelper {
 
     /**
      * Determines if the AEM installation is running on an Apache Jackrabbit Oak-based repository.
+     * 
+     * With the current versions of ACS AEM Commons the support for non-Oak based AEM versions has been dropped,
+     * so the usage of this method is no longer required.
      * @return true is running on Oak
      * @throws RepositoryException
+     * @Deprecated
      */
     boolean isOak() throws RepositoryException;
 }

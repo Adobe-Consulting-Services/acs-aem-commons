@@ -23,60 +23,60 @@ package com.adobe.acs.commons.redirectmaps.models;
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
 public class MapEntry {
-	private int id;
-	private final String origin;
-	private final String source;
-	private String status;
-	private final String target;
-	private boolean valid = true;
+    private int id;
+    private final String origin;
+    private final String source;
+    private String status;
+    private final String target;
+    private boolean valid = true;
 
-	public MapEntry(int id, String source, String target, String origin) {
-		source = source.trim();
-		this.source = source;
-		this.target = target;
-		this.origin = origin;
-		this.id = id;
-	}
+    public MapEntry(int id, String source, String target, String origin) {
+        source = source.trim();
+        this.source = source;
+        this.target = target;
+        this.origin = origin;
+        this.id = id;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public String getOrigin() {
-		return origin;
-	}
+    public String getOrigin() {
+        return origin;
+    }
 
-	public String getSource() {
-		return source;
-	}
+    public String getSource() {
+        return source;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public String getTarget() {
-		return target;
-	}
+    public String getTarget() {
+        return target;
+    }
 
-	public boolean isValid() {
-		return valid;
-	}
+    public boolean isValid() {
+        return valid;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public void setValid(boolean valid) {
-		this.valid = valid;
-	}
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
 
-	@Override
-	public String toString() {
-		return "MapEntry [origin=" + origin + ", source=" + source + ", status=" + status + ", target=" + target
-				+ ", valid=" + valid + "]";
-	}
+    @Override
+    public String toString() {
+        return "MapEntry [origin=" + origin + ", source=" + source + ", status=" + status + ", target=" + target
+                + ", valid=" + valid + "]";
+    }
 }

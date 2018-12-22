@@ -59,21 +59,22 @@ public class FileAssetIngestorUtilitiesTest {
         File folder2 = new File(folder1, "folder2");
         folder2.mkdir();
 
-        AssetIngestor.HierarchialElement el = ingestor.new FileHierarchialElement(folder2);
-        assertEquals(folder2.getAbsolutePath(), el.getItemName());
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(folder2);
+        assertEquals(folder2.getAbsolutePath(), el.getSourcePath());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
-        assertEquals("/content/dam/folder1/folder2", el.getNodePath());
+        assertEquals("/content/dam/folder1/folder2", el.getNodePath(true));
         assertEquals("folder2", el.getName());
 
-        AssetIngestor.HierarchialElement parent = el.getParent();
-        assertEquals(folder1.getAbsolutePath(), parent.getItemName());
+        HierarchicalElement parent = el.getParent();
+        assertEquals(folder1.getAbsolutePath(), parent.getSourcePath());
         assertNotNull(parent);
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
         assertEquals("folder1", parent.getName());
 
-        assertNull(parent.getParent());
+        assertNotNull(parent.getParent());
+        assertNull(parent.getParent().getParent());
     }
 
     @Test
@@ -85,53 +86,56 @@ public class FileAssetIngestorUtilitiesTest {
         File image = new File(folder2, "image.png");
         FileUtils.writeByteArrayToFile(image, new byte[0]);
 
-        AssetIngestor.HierarchialElement el = ingestor.new FileHierarchialElement(image);
-        assertEquals(image.getAbsolutePath(), el.getItemName());
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(image);
+        assertEquals(image.getAbsolutePath(), el.getSourcePath());
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
         assertEquals("image.png", el.getName());
 
-        AssetIngestor.HierarchialElement parent = el.getParent();
-        assertEquals(folder2.getAbsolutePath(), parent.getItemName());
+        HierarchicalElement parent = el.getParent();
+        assertEquals(folder2.getAbsolutePath(), parent.getSourcePath());
         assertNotNull(parent);
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
         assertEquals("folder2", parent.getName());
 
         parent = parent.getParent();
-        assertEquals(folder1.getAbsolutePath(), parent.getItemName());
+        assertEquals(folder1.getAbsolutePath(), parent.getSourcePath());
         assertNotNull(parent);
         assertTrue(parent.isFolder());
         assertFalse(parent.isFile());
         assertEquals("folder1", parent.getName());
 
-        assertNull(parent.getParent());
+        assertNotNull(parent.getParent());
+        assertNull(parent.getParent().getParent());
     }
 
     @Test
     public void testHierarchialElementForFileInRoot() throws Exception {
         File image = new File(tempDirectory, "image.png");
         FileUtils.writeByteArrayToFile(image, new byte[0]);
-        AssetIngestor.HierarchialElement el = ingestor.new FileHierarchialElement(image);
-        assertEquals(image.getAbsolutePath(), el.getItemName());
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(image);
+        assertEquals(image.getAbsolutePath(), el.getSourcePath());
         assertFalse(el.isFolder());
         assertTrue(el.isFile());
         assertEquals("image.png", el.getName());
 
-        assertNull(el.getParent());
+        assertNotNull(el.getParent());
+        assertNull(el.getParent().getParent());
     }
 
     @Test
     public void testHierarchialElementForFolderInRoot() {
         File folder1 = new File(tempDirectory, "folder1");
         folder1.mkdir();
-        AssetIngestor.HierarchialElement el = ingestor.new FileHierarchialElement(folder1);
-        assertEquals(folder1.getAbsolutePath(), el.getItemName());
+        HierarchicalElement el = ingestor.new FileHierarchicalElement(folder1);
+        assertEquals(folder1.getAbsolutePath(), el.getSourcePath());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
         assertEquals("folder1", el.getName());
 
-        assertNull(el.getParent());
+        assertNotNull(el.getParent());
+        assertNull(el.getParent().getParent());
     }
 
 }

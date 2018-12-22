@@ -20,18 +20,11 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
-import com.day.cq.workflow.WorkflowService;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.model.WorkflowModel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jcr.Session;
+
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -41,15 +34,22 @@ import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.event.jobs.Queue;
 import org.apache.sling.event.jobs.Statistics;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
-import java.util.ArrayList;
-import java.util.List;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowRunner;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Status;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
+import com.day.cq.workflow.WorkflowService;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.model.WorkflowModel;
 
-@Component
-@Service(value = BulkWorkflowRunner.class)
+@Component(service = BulkWorkflowRunner.class)
 public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(AEMTransientWorkflowRunnerImpl.class);
 
@@ -128,13 +128,11 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         public void run() {
             log.debug("Running Bulk AEM Transient Workflow job [ {} ]", jobName);
 
-            ResourceResolver serviceResourceResolver = null;
             Resource configResource = null;
             Config config = null;
             Workspace workspace = null;
 
-            try {
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
@@ -221,10 +219,6 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     stop(workspace);
                 } catch (PersistenceException e1) {
                     log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
-                }
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
                 }
             }
         }

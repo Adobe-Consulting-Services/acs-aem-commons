@@ -19,29 +19,11 @@
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
-import com.adobe.acs.commons.wcm.PageRootProvider;
-import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageInfoProvider;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.api.components.ComponentManager;
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.jcr.api.SlingRepository;
-import org.apache.sling.jcr.base.util.AccessControlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.jcr.LoginException;
 import javax.jcr.Node;
@@ -53,11 +35,29 @@ import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.jcr.api.SlingRepository;
+import org.apache.sling.jcr.base.util.AccessControlUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+
+import com.adobe.acs.commons.wcm.PageRootProvider;
+import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageInfoProvider;
+import com.day.cq.wcm.api.components.Component;
+import com.day.cq.wcm.api.components.ComponentManager;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 /**
  * PageInfoProvider which indicates that shared component properties
@@ -66,8 +66,7 @@ import java.util.Map;
  * <p>
  * https://docs.adobe.com/docs/en/cq/5-6-1/developing/pageinfo.html#Creating a Page Information Provider
  */
-@org.apache.felix.scr.annotations.Component
-@Service(PageInfoProvider.class)
+@org.osgi.service.component.annotations.Component(service=PageInfoProvider.class)
 public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvider, EventListener {
     private static final Logger log = LoggerFactory.getLogger(SharedComponentPropertiesPageInfoProvider.class);
 
@@ -98,14 +97,15 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * can determine whether or not to enable shared/global properties for a component on a site.
      */
     @Override
-    public void updatePageInfo(SlingHttpServletRequest request, JSONObject info, Resource resource)
-            throws JSONException {
+    @SuppressWarnings( "deprecation" )
+    public void updatePageInfo(SlingHttpServletRequest request, org.apache.sling.commons.json.JSONObject info, Resource resource)
+            throws org.apache.sling.commons.json.JSONException {
         if (scheduledSharedComponentsMapUpdate > 0 && System.currentTimeMillis() > scheduledSharedComponentsMapUpdate) {
             scheduledSharedComponentsMapUpdate = -1L;
             updateSharedComponentsMap();
         }
 
-        JSONObject props = new JSONObject();
+        org.apache.sling.commons.json.JSONObject props = new org.apache.sling.commons.json.JSONObject();
         props.put("enabled", false);
 
         Page page = pageRootProvider.getRootPage(resource);
@@ -120,7 +120,7 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
                 if (accessControlManager.hasPrivileges(page.getPath() + "/jcr:content", requiredPrivs)) {
                     props.put("enabled", true);
                     props.put("root", page.getPath());
-                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) JSONArray::new));
+                    props.put("components", Maps.transformValues(componentsWithSharedProperties, (Function<List<Boolean>, Object>) org.apache.sling.commons.json.JSONArray::new));
                 } else {
                     log.debug("User does not have [ {} ] on [ {} ]", requiredPrivs, page.getPath() + "/jcr:content");
                 }
@@ -185,12 +185,10 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
      * options for editing shared/global configs.
      */
     private void updateSharedComponentsMap() {
-        ResourceResolver resourceResolver = null;
-        try {
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)){
             log.debug("Calculating map of components with shared properties dialogs");
 
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
             resourceResolver.refresh();
             ComponentManager componentManager = resourceResolver.adaptTo(ComponentManager.class);
             Map<String, List<Boolean>> localComponentsWithSharedProperties = new HashMap<>();
@@ -213,10 +211,6 @@ public class SharedComponentPropertiesPageInfoProvider implements PageInfoProvid
             log.error("Unable to log into service user to determine list of components with shared properties dialogs", e);
         } catch (RepositoryException e) {
             log.error("Unexpected error attempting to determine list of components with shared properties dialogs", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

@@ -3,10 +3,119 @@
 All notable changes to this project will be documented in this file. This format was adapated
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
+The format is based on [Keep a Changelog](http://keepachangelog.com)
+
+## [Unreleased]
+
+### Added
+- Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
+- #1564 - Added SFTP support for asset ingest utilities
+- #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
+- #1612 - Retries count and retry pause is configurable for all Asset Ingestors
+- #1637 - Add support for bounce address setting in EmailService
+
+
+### Fixed
+- #1607 - HttpCache: improved the write to response mechanism.
+- #1590 - Multifield component doesn't render non-composite at all (NPE error)
+- #1588 - Updated error handler JSP to use ModeUtils
+- #1583 - Asset Ingestor may try to create asset folders when they already exist
+- #1578 - Added user/password handling as well as timeout specification in SFTP import
+- #1576 - SFTP import folder handling bugs
+- #1572 - Update JSCH version used for SFTP support
+- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
+- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
+- #1563 - Limiting the parsys does not work when pasting multiple paragraphs
+- #1593 - Sftp Asset Injector throws URISyntaxException if item contains special characters
+- #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
+- #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content node. If asset is skipped the message in the format "source -> destination" is written into report
+- #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
+- #1610 - Bulk Workflow Manager doing nothing
+- #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
+- #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
+- #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+
+### Changed
+- #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
+- #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
+- #1578 - Asset import needs additional configuration inputs
+- #1560 - Changing to osgi annotations
+- #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
+
+## [3.19.0] - 2018-11-03
+
+### Added
+- #1410 - Show/Hide fields and tabs based on dropdown and/or checkbox selections
+- #1446 - Renovator combines and replaces previous relocator tools in MCP
+- #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
+- #1529 - Instant Package Utility
+- #1530 - New [MCP] Form API features allow sling models to annotate properties and generate forms directly from models with very little coding.
+- #1531 - Content Fragment Importer tool added
+- #1532 - Request Throttler tool added
+
+### Changed
+- #1523 - Added check to EnsureACEs to avoid duplicate path processing.
+
+### Fixed
+- #1464 - ResourceResolverMapTransformer decodes URI-encoded values correctly now
+- #1495 - Error page handler resets component context attribute correctly now
+- #1497 - Javadoc improvement in EndpointService
+- #1501 - Error downloading reports from MCP processes with 6.3.3.0
+- #1506 - Fixed path browser input fields in MCP to work on AEM 6.4
+- #1513 - PageCompare popovers and legend fixed
+- #1516 - Undefined exception on configure-limit-parsys.min.js
+- #1523 - Resource check duplication fixed in Ensure ACE feature
+- #1524 - Audit log search UI fixes (also fixes #1351)
+- #1533 - Cleaned up leftovers from archetype template
+- #1537 - Fixed leaking ResourceResolver in FastActionManagerRunnerImpl
+
+### Removed
+
+- #1446 - Removed Folder Relocator and Page Relocator tools
+
+## [3.18.2] - 2018-09-26
+
+### Fixed
+- #1492 - Avoid double encoding with Resource Resolver Mapping Rewriter
+- #1486 - By default include policy mapping nodes for the replication status handler
+- #1490 - Fixed issue in Error Page Handler where /etc/map'd content confused 'real resource' look-up.
+- #1457 - Forward ported fixed from ACS Commons 2.x line for Parsys Placeholder feature
+- #1498 - Inadventantly included ServletResovler configs causing incorrect servlet resolution behaviour in AEM (default JSON servlet not working)
+
+### Changed
+- #1462 - Updated ACS Commons multifield to support Colorfields
+- #1479 - Package Replication Status Updater processes each package in its own job to isolate effects of expections
+
+## [3.18.0] - 2018-09-24
+
+### Added
+- #1460 - Adobe.IO Integration donated by Emerging Technologies EMEA team
+
+### Fixed
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1428 - URL Asset Import retain case sensitivity in column names
+- #1458 - Fixed issue where page date was not updated when modifying redirect map file
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1469 - Commons Imaging dependency from wcm.io should be excluded
+- #1476 - Asset ingestor modifies file names unnecessarily
+- #1480 - Adobe I/O healthcheck must only check 1 onepoint
+- #1487 - Fixing defect in touchui-limit-parsys that breaks touch ui authoring in 6.2
+- #1488 - TouchUI breaks in 6.2 because of using 6.3 JS functions
+- #1495 - Error Page Handler doesn't reset the `com.day.cq.wcm.componentcontext` request attribute
+- #1467 - Versioned ClientLibs cause WARN log messages on AEM 6.3
+- #1458 - Fixed issue where page date was not updated when modifying redirect map file
+
+### Changed
+- #1469 - Exclude transitive dependency on unreleased commons-imaging via AEM Mocks.
+- #1472 - Ensure that only Central and Adobe Public Maven repository are used in Travis builds.
+- #1459 - Added ability to edit individual entries in the redirect map and a confirmation for deletes
+- #1476 - Asset ingestion no longer mangles folder names, if they are already valid JCR node names
 
 ## [3.17.4] - 2018-08-15
 
+### Fixed
 - #1413 - Added ACL to make the redirect maps globally readable
 
 ## [3.17.2] - 2018-08-13
@@ -37,6 +146,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - #1401 - Added AEM 6.3 support for conditional hiding in edit dialogs
 - #1420 - MCP page component no longer extends "final" GraniteUI shell component
 - #1435 - Updated Throttled Task Runner configuration defaults to be better optimized for production situations.
+
+### Added
+- #1410 - Added support to hide/show dialog fields and tabs based on values selected for dropdown and or checkbox.
 
 ## [3.17.0] - 2018-05-22
 
@@ -86,15 +198,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - #1284 - Expose the shared and global properties resources via bindings.
-- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration 
+- #1323 - Remove PMD from pom.xml and added logging rules to CodeClimate's PMD configuration
 - #1321 - Switch Jacoco coverage to run offline to improve reporting of Powermock covered code.
 
 ### Added
 - #1314 - Added cards to Tools > ACS Commons for the missing ACS Commons tooling.
-- #1237 - Reporting feature: Adding a report column for finding references to a resource 
+- #1237 - Reporting feature: Adding a report column for finding references to a resource
 - #1279 - New import tools for node metadata and file/url-based asset ingestion
 - #1307 - MCP now has error reporting and also XLSX export for errors.
-- #1238 - HTTP cache JCR storage 
+- #1238 - HTTP cache JCR storage
 - #1245 - On-Deploy Scripts Framework
 
 ### Fixed
@@ -172,7 +284,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
-- #1213 - Fixing Redirect Manager Action Load Issues 
+- #1213 - Fixing Redirect Manager Action Load Issues
 - #1204 - Unclosed stream in VersionedClientlibsTransformerFactory
 - #1205 - Calculate MD5 based on minified clientlib (in case minification is enabled). This is a workaround around the AEM limitation to only correctly invalidate either the minified or unminified clientlib).
 - #1217 - Make compile-scope dependencies provided-scope and add enforcer rule to ensure no compile scope dependencies are added in the future.
@@ -217,7 +329,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 - #1148 - Properly handle blank character encoding in SiteMapServlet
 - #1122 - Add clientlib category to touchui-widgets to load in Create Page wizard.
-- #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog 
+- #1150 - Fix the empty datetime value displayed as "invalid date" in the touchui dialog
 - #842 - Fix issue with Environment Indicator title being reset
 - #1143 - Remove current page from result from PagesReferenceProvider
 - #1156 - Remove unnecessary initialization of `window.Granite.author`
@@ -246,11 +358,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### Added
 
 - #916: AEM Assets Brand Portal workflow process and Agent filter
-- #958: Named Image Transform Servlet Sharpen transform 
+- #958: Named Image Transform Servlet Sharpen transform
 - #1005: Asset Folder Properties Support to allow custom fields/properties to be added to AEM Assets Folders in UI
 - #1039: Health Check Status E-mailer
 - #1041: QR Code to Publish in Page Editor
-- #1067: Vanity Path Web server re-writer mapping 
+- #1067: Vanity Path Web server re-writer mapping
 - Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 - Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work
@@ -264,14 +376,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Fixed
 
-- #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa' 
+- #982: Fixed issue with Touch UI Icon Picker was prefixing icon classes with 'fa'
 - #1008: E-mail subject mangled for non-latin chars
-- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat) 
-- #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened 
-- #1051: Emails sent via EmailService do not have connection/socket timeouts 
+- #1043: JCR Package Replication now populates the replicated by properties of the packaged resources with the actual user that requested the replication of the package (with configurable override via OSGi config for backwards compat)
+- #1044: JCR Package Replication fixes a resource leak where the JCR Packages were not closed after being opened
+- #1051: Emails sent via EmailService do not have connection/socket timeouts
 - #1064: Fixed NPE in ResourceServiceManager when no serviceReferences exist
 - Error page handler OSGi configuration missing web hint for 'not-found' behavior.
-- Touch UI Multi-field saved User-picker values were not populated in dialog 
+- Touch UI Multi-field saved User-picker values were not populated in dialog
 - Fast Action Manager is much more efficient in how it gauges CPU usage, which makes it even faster than before.
 
 ### Security
@@ -281,7 +393,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - com.adobe.acs.commons.wcm.impl.PageRootProviderImpl has been deprecated. com.adobe.acs.commons.wcm.impl.PageRootProviderConfig should be used instead.
 
 <!---
- 
+
 ### Removed
 
 ---->

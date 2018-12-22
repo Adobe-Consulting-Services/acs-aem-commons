@@ -19,16 +19,13 @@
  */
 package com.adobe.acs.commons.wcm.notifications.impl;
 
-import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.settings.SlingSettingsService;
-import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,12 +35,7 @@ import org.osgi.service.event.EventHandler;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -160,7 +152,7 @@ public class SystemNotificationsImplTest {
         aemContext.registerInjectActivateService(notifications);
 
         aemContext.request().setResource(aemContext.resourceResolver().getResource("/"));
-        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.shaHex("/etc/acs-commons/notifications/enabled0")));
+        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.sha1Hex("/etc/acs-commons/notifications/enabled0")));
 
         notifications.doFilter(aemContext.request(), aemContext.response(), outputChain);
         String output = aemContext.response().getOutputAsString();

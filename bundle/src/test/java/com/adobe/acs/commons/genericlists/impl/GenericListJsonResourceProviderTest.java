@@ -19,10 +19,9 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Collections;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+import org.apache.sling.spi.resource.provider.ResolveContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GenericListJsonResourceProviderTest {
@@ -52,6 +52,9 @@ public class GenericListJsonResourceProviderTest {
 
     @Mock
     private Page invalidPage;
+    
+    @Mock
+    private GenericListJsonResourceProvider.Config config;
 
     @Mock
     private GenericList list;
@@ -66,39 +69,43 @@ public class GenericListJsonResourceProviderTest {
 
     private String nonExisting = GenericListJsonResourceProvider.ROOT + "/non-existing";
 
+    @Mock
+    private ResolveContext resolveContext;
+    
     @Before
     public void setup() {
-        provider.activate(Collections.<String, String>emptyMap());
+        provider.activate(config);
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(pageManager.getPage(goodPagePath)).thenReturn(validPage);
         when(pageManager.getPage(badPagePath)).thenReturn(invalidPage);
         when(validPage.adaptTo(GenericList.class)).thenReturn(list);
+        when(resolveContext.getResourceResolver()).thenReturn(resourceResolver);
     }
 
     @Test
     public void testRootResource() {
-        assertNull(provider.getResource(null, GenericListJsonResourceProvider.ROOT));
+        assertNull(provider.getResource(resolveContext, GenericListJsonResourceProvider.ROOT, null, null));
     }
 
     @Test
     public void testPageWhichDoesntExist() {
-        assertNull(provider.getResource(resourceResolver, nonExisting));
+        assertNull(provider.getResource(resolveContext, nonExisting, null, null));
     }
 
     @Test
     public void testPageWhichDoesntAdapt() {
-        assertNull(provider.getResource(resourceResolver, badMntPath));
+        assertNull(provider.getResource(resolveContext, badMntPath, null, null));
     }
 
     @Test
     public void testPageWhichDoesAdapt() {
-        Resource r = provider.getResource(resourceResolver, goodMntPath);
+        Resource r = provider.getResource(resolveContext, goodMntPath, null, null);
         assertNotNull(r);
     }
 
     @Test
     public void testPageWhichDoesAdaptWithExtension() {
-        Resource r = provider.getResource(resourceResolver, goodMntPath + ".json");
+        Resource r = provider.getResource(resolveContext, goodMntPath + ".json", null, null);
         assertNotNull(r);
     }
 
