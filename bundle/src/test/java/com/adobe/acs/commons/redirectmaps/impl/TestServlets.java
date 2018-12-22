@@ -35,6 +35,7 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -178,6 +179,16 @@ public class TestServlets {
 
         }
 
+		@Override
+		public boolean isReady() {
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+			// No need to do anything
+		}
+
     };
 
     @InjectMocks
@@ -235,9 +246,6 @@ public class TestServlets {
 
         };
         mockResolver.addResource(mockResource);
-
-        doReturn(contentProperties).when(mockResource).adaptTo(ModifiableValueMap.class);
-        doReturn(null).when(contentProperties).put(org.mockito.Matchers.anyString(), org.mockito.Matchers.any());
 
         log.debug("Setting up the request...");
         doReturn(mockResource).when(mockSlingRequest).getResource();
