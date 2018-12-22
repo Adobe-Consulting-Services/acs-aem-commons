@@ -34,17 +34,18 @@ import org.slf4j.LoggerFactory;
  * Servlet rendering the redirect map to a JSON Array
  */
 @SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
-        "redirectentries" }, extensions = { "json" }, metatype = false)
+		"redirectentries" }, extensions = { "json" }, metatype = false)
 public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
 
-    private static final long serialVersionUID = -2825679173210628699L;
-    private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
+	private static final long serialVersionUID = -2825679173210628699L;
+	private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
 
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
-            throws ServletException, IOException {
-        log.trace("doGet");
+	@Override
+	protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
+			throws ServletException, IOException {
+		log.trace("doGet");
 
-        RedirectEntriesUtils.writeEntriesToResponse(request, response,"Retrieved Redirect Maps");
-    }
-    
+		RedirectEntriesUtils.writeEntriesToResponse(request, response, "Retrieved Redirect Maps");
+	}
+
 }

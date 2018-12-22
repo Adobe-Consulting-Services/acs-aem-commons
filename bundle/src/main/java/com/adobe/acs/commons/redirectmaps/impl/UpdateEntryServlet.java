@@ -42,6 +42,7 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
 	private static final long serialVersionUID = -1704915461516132101L;
 	private static final Logger log = LoggerFactory.getLogger(UpdateEntryServlet.class);
 
+	@Override
 	protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
 			throws ServletException, IOException {
 		log.trace("doPost");
@@ -52,9 +53,13 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
 		log.debug("Updating entry {} with {} {}", idx, source, target);
 
 		List<String> lines = RedirectEntriesUtils.readEntries(request);
+		
+		log.trace("Retrieved lines: {}",lines);
 
 		lines.set(idx, source + " " + target);
 		log.debug("Updated entry...");
+		
+		log.trace("Updated lines: {}",lines);
 
 		RedirectEntriesUtils.updateRedirectMap(request, lines);
 		RedirectEntriesUtils.writeEntriesToResponse(request, response,
