@@ -179,15 +179,15 @@ public class TestServlets {
 
         }
 
-		@Override
-		public boolean isReady() {
-			return false;
-		}
+        @Override
+        public boolean isReady() {
+            return false;
+        }
 
-		@Override
-		public void setWriteListener(WriteListener writeListener) {
-			// No need to do anything
-		}
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            // No need to do anything
+        }
 
     };
 

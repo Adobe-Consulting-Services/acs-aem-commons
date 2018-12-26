@@ -36,6 +36,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
