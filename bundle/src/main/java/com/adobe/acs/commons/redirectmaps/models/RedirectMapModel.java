@@ -81,9 +81,9 @@ public class RedirectMapModel {
         while (items.hasNext()) {
             Resource item = items.next();
             String path = item.getPath();
-            ValueMap properties = new ValueMapDecorator(new HashMap<String,Object>());
+            ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
             Resource child = item.getChild(JcrConstants.JCR_CONTENT);
-            if(child != null) {
+            if (child != null) {
                 properties = child.getValueMap();
             }
             FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
@@ -94,7 +94,7 @@ public class RedirectMapModel {
             String[] sources = properties.get(config.getProperty(), String[].class);
             int i = 0;
             for (String source : sources) {
-                MapEntry entry = new MapEntry(++i, source, pageUrl, item.getPath());
+                MapEntry entry = new MapEntry(i++, source, pageUrl, item.getPath());
                 if (source.matches(".*\\s+.*")) {
                     String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
                     log.warn(msg);
@@ -135,7 +135,7 @@ public class RedirectMapModel {
             InputStream is = redirectMap.adaptTo(InputStream.class);
             int i = 0;
             for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
-                MapEntry entry = toEntry(++i, line);
+                MapEntry entry = toEntry(i++, line);
                 if (entry != null) {
                     entries.add(entry);
                 }

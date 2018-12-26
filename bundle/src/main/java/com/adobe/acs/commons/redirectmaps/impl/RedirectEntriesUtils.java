@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,14 +64,13 @@ public class RedirectEntriesUtils {
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesUtils.class);
 
     protected static final List<String> readEntries(SlingHttpServletRequest request) throws IOException {
-        RedirectMapModel redirectMap = request.getResource().adaptTo(RedirectMapModel.class);
 
         List<String> lines = new ArrayList<>();
+        Resource redirectMap = request.getResource().getChild(RedirectMapModel.MAP_FILE_NODE);
         if (redirectMap != null) {
-            InputStream is = new ByteArrayInputStream(redirectMap.getRedirectMap().getBytes(StandardCharsets.UTF_8));
-            lines = IOUtils.readLines(is, StandardCharsets.UTF_8);
-            log.debug("Loaded {} lines", lines.size());
+            lines = IOUtils.readLines(redirectMap.adaptTo(InputStream.class), StandardCharsets.UTF_8);
         }
+        log.trace("Loaded lines: {}", lines);
 
         return lines;
     }
@@ -132,10 +130,6 @@ public class RedirectEntriesUtils {
         if (redirectMap != null) {
             JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
             }.getType());
-            Iterator<JsonElement> it = entries.getAsJsonArray().iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                it.next().getAsJsonObject().addProperty("id", i);
-            }
             res.add("entries", entries);
             res.add("invalidEntries", gson.toJsonTree(redirectMap.getInvalidEntries(), new TypeToken<List<MapEntry>>() {
             }.getType()));

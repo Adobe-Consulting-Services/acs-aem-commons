@@ -40,13 +40,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Servlet for updating a line in the redirect map text file
  */
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=POST",
-SLING_SERVLET_SELECTORS+"=updateentry",
-SLING_SERVLET_EXTENSIONS+"=json",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/redirectmappage"
-})
+@Component(service = Servlet.class, property = { SLING_SERVLET_METHODS + "=POST",
+        SLING_SERVLET_SELECTORS + "=updateentry", SLING_SERVLET_EXTENSIONS + "=json",
+        SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/redirectmappage" })
 public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
@@ -67,6 +63,7 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
         lines.set(idx, source + " " + target);
         log.debug("Updated entry...");
 
+        log.trace("Saving lines {}", lines);
         RedirectEntriesUtils.updateRedirectMap(request, lines);
         RedirectEntriesUtils.writeEntriesToResponse(request, response,
                 "Updated entry " + idx + " to " + source + " " + target);
