@@ -17,9 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.models.injectors.impl;
+package com.adobe.acs.commons.models.injectors.impl.model.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
+import com.adobe.acs.commons.models.injectors.impl.SharedValueMapValueInjectorTest;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import org.apache.sling.api.SlingHttpServletRequest;
