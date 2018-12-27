@@ -84,7 +84,7 @@ public class RedirectEntriesUtils {
         Calendar now = Calendar.getInstance();
         ModifiableValueMap contentProperties = resource.adaptTo(ModifiableValueMap.class);
         if (contentProperties == null) {
-            throw new PersistenceException("Retrieve resource " + resource + " for editing");
+            throw new PersistenceException("Failed to retrieve resource " + resource + " for editing");
         }
         contentProperties.put(NameConstants.PN_PAGE_LAST_MOD, now);
         contentProperties.put(NameConstants.PN_PAGE_LAST_MOD_BY, request.getResourceResolver().getUserID());
