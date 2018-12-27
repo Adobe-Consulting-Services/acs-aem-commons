@@ -31,9 +31,6 @@ import java.util.Locale;
  */
 public interface I18nProvider {
 
-    //target of the resource bundle provider
-    String RESOURCE_BUNDLE_PROVIDER_TARGET = "(component.name=org.apache.sling.i18n.impl.JcrResourceBundleProvider)";
-
     /**
      * Provides the translated value based on resource
      *

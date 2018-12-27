@@ -31,17 +31,20 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.Constants;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import javax.management.NotCompliantMBeanException;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
@@ -76,12 +79,20 @@ public class I18nProviderImplTest {
     @Mock
     private Page resourcePage;
 
-    @InjectMocks
-    private I18nProviderImpl i18nProvider;
+    private final I18nProviderImpl i18nProvider = new I18nProviderImpl();
+
+    private Map<String,Object> properties = new HashMap<>();
+
+    public I18nProviderImplTest() throws NotCompliantMBeanException {
+    }
 
     @Before
     public void setUp(){
 
+        HashMap<String,Object> props = new HashMap<>();
+        props.put(Constants.SERVICE_ID, 11L);
+        props.put(Constants.SERVICE_RANKING, 11);
+        i18nProvider.bindResourceBundleProvider(resourceBundleProvider, props);
         when(resourceBundleProvider.getResourceBundle(Locale.US)).thenReturn(resourceBundle);
         when(resource.getPath()).thenReturn("/some/path");
 
@@ -101,18 +112,10 @@ public class I18nProviderImplTest {
         when(InjectorUtils.getResourcePage(resource)).thenReturn(resourcePage);
         when(resourcePage.getLanguage(false)).thenReturn(Locale.US);
 
-        i18nProvider.activate(new Config(){
+        properties.put(Config.PN_MAX_SIZE_IN_MB, 10L);
+        properties.put(Config.PN_TTL, 10L);
 
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public boolean useResourceCache() {
-                return false;
-            }
-        });
+        i18nProvider.activate(properties);
     }
 
     @Test
@@ -202,19 +205,6 @@ public class I18nProviderImplTest {
 
     @Test
     public void test_i18n_resource_withcaching() throws Exception {
-
-        i18nProvider.activate(new Config(){
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public boolean useResourceCache() {
-                return true;
-            }
-        });
 
         I18n mocked = mock(I18n.class);
 

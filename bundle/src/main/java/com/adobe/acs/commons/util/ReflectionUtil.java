@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.util;
 
 import com.adobe.acs.commons.util.impl.ValueMapTypeConverter;
@@ -28,9 +47,9 @@ public class ReflectionUtil {
     }
 
     public static <T> T[] toArray(Collection<T> c, T[] a) {
-        return c.size() > a.length ?
-                c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size())) :
-                c.toArray(a);
+        return c.size() > a.length
+                ? c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size()))
+                : c.toArray(a);
     }
 
     /**
@@ -69,6 +88,10 @@ public class ReflectionUtil {
         }
     }
 
+    public static boolean isCollectionType(Class<?> collectionType) {
+        return collectionType.equals(Collection.class);
+    }
+
     public static boolean isSetType(Type declaredType) {
         if (declaredType instanceof Class<?>) {
             Class<?> clazz = (Class<?>) declaredType;
@@ -77,6 +100,10 @@ public class ReflectionUtil {
             ParameterizedType parameterizedType = (ParameterizedType) declaredType;
             return isSetType(parameterizedType.getRawType());
         }
+    }
+
+    public static boolean isSetType(Class<?> collectionType) {
+        return collectionType.equals(Set.class);
     }
 
     public static boolean isListType(Type declaredType) {
@@ -89,6 +116,10 @@ public class ReflectionUtil {
         }
     }
 
+    public static boolean isListType(Class<?> collectionType) {
+        return collectionType.equals(List.class);
+    }
+
     public static Class<?> getClassOrGenericParam(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -97,18 +128,6 @@ public class ReflectionUtil {
             Class<?> clazz = (Class<?>) type;
             return clazz;
         }
-    }
-
-    public static boolean isListType(Class<?> collectionType) {
-        return collectionType.equals(List.class);
-    }
-
-    public static boolean isSetType(Class<?> collectionType) {
-        return collectionType.equals(Set.class);
-    }
-
-    public static boolean isCollectionType(Class<?> collectionType) {
-        return collectionType.equals(Collection.class);
     }
 
     public static boolean isAssignableFrom(Type type, Class<?> isAssignableFrom) {
