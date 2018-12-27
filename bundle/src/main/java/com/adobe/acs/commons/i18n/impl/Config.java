@@ -29,11 +29,15 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 )
 public @interface Config {
 
-    @AttributeDefinition(
-            name = "Enable resource cache",
-            description = "If enabled, will cache I18n maps for resource based retrieval"
-                    + " so if another call is made on the same resource, it won't need to retrieve it a second time."
-                    + " Helps if there are Sling Models with alot of I18n keys on the same model resource.",
-            defaultValue = "false")
-    boolean useResourceCache();
+    String PN_MAX_SIZE_IN_MB = "maxSizeCount";
+    String PN_TTL = "ttl";
+
+    long DEFAULT_MAX_SIZE_IN_MB = 10L;
+    long DEFAULT_TTL = -1L;
+
+    @AttributeDefinition(name = "CacheSize (count)", description = "This determines the cache size of caching I18n maps to resources.")
+    String maxSizeCount();
+
+    @AttributeDefinition(name = "Cache expiry", description = "This determines the cache expiry time in seconds of caching I18n maps to resources.")
+    String getTtl();
 }
