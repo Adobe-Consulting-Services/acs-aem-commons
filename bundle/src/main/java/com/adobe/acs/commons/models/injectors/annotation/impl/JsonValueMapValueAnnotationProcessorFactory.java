@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.Json;
+import com.adobe.acs.commons.models.injectors.annotation.JsonValueMapValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
@@ -30,22 +30,22 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Optional;
 
 /**
- * The annotation processor for the {@link Json} annotation
+ * The annotation processor for the {@link JsonValueMapValue} annotation
  * <p>
  * Note: This can only be used together with Sling Models API bundle in version 1.2.0 (due to the dependency on InjectionStrategy)
  */
 @Component(service = StaticInjectAnnotationProcessorFactory.class)
-public class JsonAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory {
+public class JsonValueMapValueAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory {
 
     @Override
     public InjectAnnotationProcessor2 createAnnotationProcessor(AnnotatedElement element) {
-        return Optional.ofNullable(element.getAnnotation(Json.class)).map(JsonAnnotationProcessorFactory.InjectAnnotationProcessor2::new).orElse(null);
+        return Optional.ofNullable(element.getAnnotation(JsonValueMapValue.class)).map(JsonValueMapValueAnnotationProcessorFactory.InjectAnnotationProcessor2::new).orElse(null);
     }
 
     private static class InjectAnnotationProcessor2 extends AbstractInjectAnnotationProcessor2 {
-        private final Json annotation;
+        private final JsonValueMapValue annotation;
 
-        public InjectAnnotationProcessor2(Json annotation) {
+        public InjectAnnotationProcessor2(JsonValueMapValue annotation) {
             this.annotation = annotation;
         }
 

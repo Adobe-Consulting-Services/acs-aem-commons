@@ -75,6 +75,7 @@ public class ValueMapTypeConverter {
                 if (clazz.isArray()) {
                     return handleArrayProperty(clazz);
                 }
+                return null;
             }
         } else if (ParameterizedType.class.isInstance(declaredType)) {
             return handleCollectionTypes((ParameterizedType) declaredType);

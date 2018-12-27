@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.impl.model.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.Json;
+import com.adobe.acs.commons.models.injectors.annotation.JsonValueMapValue;
 import com.adobe.acs.commons.models.injectors.impl.model.TestJsonObjectInjection;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -35,28 +35,28 @@ import java.util.Set;
         adaptables = {SlingHttpServletRequest.class, Resource.class}, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class TestJsonObjectInjectionImpl implements TestJsonObjectInjection {
 
-    @Json(name = "single")
+    @JsonValueMapValue(name = "single")
     private TestJsonObject testJsonObject;
 
-    @Json(name = "multiple")
+    @JsonValueMapValue(name = "multiple")
     private List<TestJsonObject> testJsonObjectList;
 
-    @Json(name = "multiple")
+    @JsonValueMapValue(name = "multiple")
     private Set<TestJsonObject> testJsonObjectSet;
 
-    @Json(name = "multiple")
+    @JsonValueMapValue(name = "multiple")
     private TestJsonObject[] testJsonObjectArray;
 
-    @Json(name = "nonExistingProp")
+    @JsonValueMapValue(name = "nonExistingProp")
     private TestJsonObject testJsonObjectEmpty;
 
-    @Json(name = "nonExistingProp")
+    @JsonValueMapValue(name = "nonExistingProp")
     private List<TestJsonObject> testJsonObjectListEmpty;
 
-    @Json(name = "nonExistingProp")
+    @JsonValueMapValue(name = "nonExistingProp")
     private Set<TestJsonObject> testJsonObjectSetEmpty;
 
-    @Json(name = "nonExistingProp")
+    @JsonValueMapValue(name = "nonExistingProp")
     private TestJsonObject[] testJsonObjectArrayEmpty;
 
 

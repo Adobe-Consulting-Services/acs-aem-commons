@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.impl.JsonAnnotationProcessorFactory;
+import com.adobe.acs.commons.models.injectors.annotation.impl.JsonValueMapValueAnnotationProcessorFactory;
 import com.adobe.acs.commons.models.injectors.impl.model.TestJsonObjectInjection;
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestJsonObjectInjectionImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -39,20 +39,20 @@ import static junit.framework.TestCase.assertNull;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class JsonInjectorTest {
+public class JsonValueMapValueInjectorTest {
 
     @Rule
     public final AemContext context = InjectorAEMContext.provide();
 
     @InjectMocks
-    private JsonInjector jsonInjector;
+    private JsonValueMapValueInjector jsonValueMapValueInjector;
     private TestJsonObjectInjection adapted;
 
     @Before
     public void setUp() throws Exception {
         context.currentResource("/content/we-retail/language-masters/en/jcr:content/jsonTest");
-        context.registerService(Injector.class, jsonInjector);
-        context.registerService(StaticInjectAnnotationProcessorFactory.class, new JsonAnnotationProcessorFactory());
+        context.registerService(Injector.class, jsonValueMapValueInjector);
+        context.registerService(StaticInjectAnnotationProcessorFactory.class, new JsonValueMapValueAnnotationProcessorFactory());
         context.addModelsForClasses(TestJsonObjectInjectionImpl.class);
 
         Resource adaptable = context.request().getResource();
@@ -67,12 +67,14 @@ public class JsonInjectorTest {
         assertEquals(22, adapted.getTestJsonObject().getProperty3());
     }
 
+    @Test
     public void test_collections() {
-        assertEquals(4, adapted.getTestJsonObjectArray());
-        assertEquals(4, adapted.getTestJsonObjectList());
-        assertEquals(3, adapted.getTestJsonObjectSet());
+        assertEquals(4, adapted.getTestJsonObjectArray().length);
+        assertEquals(4, adapted.getTestJsonObjectList().size());
+        assertEquals(3, adapted.getTestJsonObjectSet().size());
     }
 
+    @Test
     public void test_empty_collections_are_null() {
         assertNull(adapted.getTestJsonObjectArrayEmpty());
         assertNull(adapted.getTestJsonObjectSetEmpty());

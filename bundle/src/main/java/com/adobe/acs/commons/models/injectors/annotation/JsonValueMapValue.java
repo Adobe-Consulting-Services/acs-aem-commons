@@ -40,10 +40,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source(Json.SOURCE)
-public @interface Json {
+@Source(JsonValueMapValue.SOURCE)
+public @interface JsonValueMapValue {
 
-    String SOURCE = "json";
+    String SOURCE = "json-valuemap-value";
 
     /**
      * Specifies the name of the value from the value map to take.

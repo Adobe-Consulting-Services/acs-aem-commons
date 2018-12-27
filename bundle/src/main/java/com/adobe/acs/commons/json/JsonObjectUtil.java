@@ -36,7 +36,7 @@ import org.apache.sling.api.resource.Resource;
 
 /**
  * Provide convenience methods to help use GSON JsonObjects similar to the
- * deprecated JSONObject in Sling Json.
+ * deprecated JSONObject in Sling JsonValueMapValue.
  */
 public class JsonObjectUtil {
 
@@ -63,13 +63,13 @@ public class JsonObjectUtil {
             return gson.toJsonTree(source).getAsJsonObject();
         }
     }
-    
+
     public static <T> JsonObject toJsonObject(T source, int depth) {
         JsonObject obj = toJsonObject(source);
         pruneToDepth(obj, depth);
         return obj;
-    }    
-    
+    }
+
     public static void pruneToDepth(JsonObject obj, int depth) {
         AbstractJSONObjectVisitor prune = new AbstractJSONObjectVisitor() {
             @Override
@@ -80,15 +80,15 @@ public class JsonObjectUtil {
                 }
             }
         };
-        prune.accept(obj);        
+        prune.accept(obj);
     }
-    
+
     public static <T> String getAsJsonString(T source, int depth) {
         Gson gson = new Gson();
         JsonObject object = toJsonObject(source, depth);
         return gson.toJson(object);
     }
-        
+
     public static boolean isSingularElement(JsonElement elem) {
         return elem.isJsonPrimitive() || (elem.isJsonArray() && elem.getAsJsonArray().size() <= 1);
     }
@@ -103,10 +103,10 @@ public class JsonObjectUtil {
                 .map(getter)
                 .orElse(defaultValue);
     }
-    
+
     public static Optional<JsonObject> getOptionalObject(JsonObject obj, String prop) {
         return Optional.ofNullable(obj.getAsJsonObject(prop));
-    }    
+    }
 
     public static String getString(JsonObject obj, String prop, String defaultValue) {
         return getOptionalProperty(obj, prop, JsonElement::getAsString, defaultValue);
@@ -137,6 +137,6 @@ public class JsonObjectUtil {
     }
 
     public static Boolean getBoolean(JsonObject obj, String prop) {
-        return getOptionalProperty(obj, prop, JsonElement::getAsBoolean, null);        
-    }    
+        return getOptionalProperty(obj, prop, JsonElement::getAsBoolean, null);
+    }
 }

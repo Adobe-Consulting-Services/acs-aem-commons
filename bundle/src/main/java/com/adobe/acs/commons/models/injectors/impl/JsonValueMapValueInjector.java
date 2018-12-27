@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 
-import com.adobe.acs.commons.models.injectors.annotation.Json;
+import com.adobe.acs.commons.models.injectors.annotation.JsonValueMapValue;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 /**
- * JsonInjector
+ * JsonValueMapValueInjector
  * Injects a POJO into a field using GSON.
  * Supports a list or a single value.
  */
@@ -61,11 +61,11 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
         },
         service = Injector.class
 )
-public class JsonInjector implements Injector {
+public class JsonValueMapValueInjector implements Injector {
 
     @Override
     public String getName() {
-        return Json.SOURCE;
+        return JsonValueMapValue.SOURCE;
     }
 
     private static final Gson GSON = new Gson();
@@ -73,9 +73,9 @@ public class JsonInjector implements Injector {
     @Override
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
 
-        if (element.isAnnotationPresent(Json.class)) {
+        if (element.isAnnotationPresent(JsonValueMapValue.class)) {
             Resource resource = getResource(adaptable);
-            Json annotation = element.getAnnotation(Json.class);
+            JsonValueMapValue annotation = element.getAnnotation(JsonValueMapValue.class);
             String key = defaultIfEmpty(annotation.name(), name);
 
             if (isSetType(declaredType)) {
