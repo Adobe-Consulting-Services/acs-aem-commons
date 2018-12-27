@@ -39,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Designate(ocd = Config.class)
 public class I18nProviderImpl implements I18nProvider {
+    //target of the resource bundle provider
+    static final String RESOURCE_BUNDLE_PROVIDER_TARGET = "(component.name=org.apache.sling.i18n.impl.JcrResourceBundleProvider)";
 
     @Reference(target = RESOURCE_BUNDLE_PROVIDER_TARGET)
     private ResourceBundleProvider resourceBundleProvider;

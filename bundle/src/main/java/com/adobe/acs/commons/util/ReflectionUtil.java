@@ -47,9 +47,9 @@ public class ReflectionUtil {
     }
 
     public static <T> T[] toArray(Collection<T> c, T[] a) {
-        return c.size() > a.length ?
-                c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size())) :
-                c.toArray(a);
+        return c.size() > a.length
+                ? c.toArray((T[]) Array.newInstance(a.getClass().getComponentType(), c.size()))
+                : c.toArray(a);
     }
 
     /**
@@ -88,6 +88,10 @@ public class ReflectionUtil {
         }
     }
 
+    public static boolean isCollectionType(Class<?> collectionType) {
+        return collectionType.equals(Collection.class);
+    }
+
     public static boolean isSetType(Type declaredType) {
         if (declaredType instanceof Class<?>) {
             Class<?> clazz = (Class<?>) declaredType;
@@ -96,6 +100,10 @@ public class ReflectionUtil {
             ParameterizedType parameterizedType = (ParameterizedType) declaredType;
             return isSetType(parameterizedType.getRawType());
         }
+    }
+
+    public static boolean isSetType(Class<?> collectionType) {
+        return collectionType.equals(Set.class);
     }
 
     public static boolean isListType(Type declaredType) {
@@ -108,6 +116,10 @@ public class ReflectionUtil {
         }
     }
 
+    public static boolean isListType(Class<?> collectionType) {
+        return collectionType.equals(List.class);
+    }
+
     public static Class<?> getClassOrGenericParam(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -116,18 +128,6 @@ public class ReflectionUtil {
             Class<?> clazz = (Class<?>) type;
             return clazz;
         }
-    }
-
-    public static boolean isListType(Class<?> collectionType) {
-        return collectionType.equals(List.class);
-    }
-
-    public static boolean isSetType(Class<?> collectionType) {
-        return collectionType.equals(Set.class);
-    }
-
-    public static boolean isCollectionType(Class<?> collectionType) {
-        return collectionType.equals(Collection.class);
     }
 
     public static boolean isAssignableFrom(Type type, Class<?> isAssignableFrom) {

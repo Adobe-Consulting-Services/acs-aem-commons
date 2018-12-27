@@ -1,4 +1,3 @@
-package com.adobe.acs.commons.util.impl;
 /*
  * #%L
  * ACS AEM Commons Bundle
@@ -18,6 +17,8 @@ package com.adobe.acs.commons.util.impl;
  * limitations under the License.
  * #L%
  */
+package com.adobe.acs.commons.util.impl;
+
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.api.resource.ValueMap;
