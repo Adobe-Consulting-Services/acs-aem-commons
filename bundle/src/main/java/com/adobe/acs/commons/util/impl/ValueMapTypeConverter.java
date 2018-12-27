@@ -71,10 +71,6 @@ public class ValueMapTypeConverter {
             try {
                 return getValueFromMap(clazz);
             } catch (ClassCastException e) {
-                // handle case of primitive/wrapper arrays
-                if (clazz.isArray()) {
-                    return handleArrayProperty(clazz);
-                }
                 return null;
             }
         } else if (ParameterizedType.class.isInstance(declaredType)) {

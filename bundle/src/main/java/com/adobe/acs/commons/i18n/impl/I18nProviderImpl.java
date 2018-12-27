@@ -22,37 +22,84 @@ package com.adobe.acs.commons.i18n.impl;
 
 import com.adobe.acs.commons.i18n.I18nProvider;
 import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
+import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
+import com.adobe.acs.commons.util.impl.CacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.day.cq.i18n.I18n;
 import com.day.cq.wcm.api.Page;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.osgi.Order;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.i18n.ResourceBundleProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
 
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-@Component
+@Component(
+        property= {
+            "jmx.objectname=com.adobe.acs.httpcache:type=I18N Provider Cache"
+        },
+        service = {I18nProvider.class,DynamicMBean.class},
+        immediate = true,
+        reference = {
+            @Reference(
+                    name="resourceBundleProviders",
+                    service = ResourceBundleProvider.class,
+                    cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                    policy = ReferencePolicy.DYNAMIC,
+                    bind="bindResourceBundleProvider",
+                    unbind="unbindResourceBundleProvider"
+            )
+        }
+)
 @Designate(ocd = Config.class)
-public class I18nProviderImpl implements I18nProvider {
-    //target of the resource bundle provider
-    static final String RESOURCE_BUNDLE_PROVIDER_TARGET = "(component.name=org.apache.sling.i18n.impl.JcrResourceBundleProvider)";
+public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> implements I18nProvider, DynamicMBean {
 
-    @Reference(target = RESOURCE_BUNDLE_PROVIDER_TARGET)
-    private ResourceBundleProvider resourceBundleProvider;
+    private static final String JMX_PN_I18N = "I18n Object";
 
-    private Map<String, I18n> cache;
-    private boolean useCache;
+    private final RankedServices<ResourceBundleProvider> resourceBundleProviders = new RankedServices<>(Order.ASCENDING);
 
-    protected void activate(Config config)
+    private Cache<String, I18n> cache;
+
+    public I18nProviderImpl() throws NotCompliantMBeanException {
+        super(CacheMBean.class);
+    }
+
+    protected void activate(Map<String, Object> properties)
     {
-        this.useCache = config.useResourceCache();
-        if(this.useCache){
-            this.cache = new ConcurrentHashMap<>();
+        long size = PropertiesUtil.toLong(properties.get(Config.PN_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
+        long ttl = PropertiesUtil.toLong(properties.get(Config.PN_TTL), Config.DEFAULT_TTL);
+
+        if (ttl != Config.DEFAULT_TTL) {
+            // If ttl is present, attach it to guava cache configuration.
+            cache = CacheBuilder.newBuilder()
+                    .maximumSize(size )
+                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
+                    .recordStats()
+                    .build();
+        } else {
+            // If ttl is absent, go only with the maximum weight condition.
+            cache = CacheBuilder.newBuilder()
+                    .maximumSize(size)
+                    .recordStats()
+                    .build();
         }
     }
 
@@ -77,15 +124,13 @@ public class I18nProviderImpl implements I18nProvider {
 
     @Override
     public I18n i18n(Resource resource) {
-        if (useCache) {
-            if (cache.containsKey(resource.getPath())) {
-                return cache.get(resource.getPath());
-            }
+        I18n cached = cache.getIfPresent(resource.getPath());
+        if (cached != null) {
+            return cached;
+        }else{
             I18n i18n = new I18n(getResourceBundleFromPageLocale(resource));
             cache.put(resource.getPath(), i18n);
             return i18n;
-        } else {
-            return new I18n(getResourceBundleFromPageLocale(resource));
         }
     }
 
@@ -113,8 +158,50 @@ public class I18nProviderImpl implements I18nProvider {
     }
 
     private ResourceBundle getResourceBundle(Locale locale) {
-        return resourceBundleProvider.getResourceBundle(locale);
+        for(ResourceBundleProvider provider : resourceBundleProviders){
+            ResourceBundle resourceBundle = provider.getResourceBundle(locale);
+            if(resourceBundle != null){
+                return resourceBundle;
+            }
+        }
+        return null;
     }
 
 
+    @Override
+    protected Cache<String, I18n> getCache() {
+        return cache;
+    }
+
+    @Override
+    protected long getBytesLength(I18n cacheObj) {
+        return 0L;
+    }
+
+    @Override
+    protected void addCacheData(Map<String, Object> data, I18n cacheObj) {
+        data.put(JMX_PN_I18N,cacheObj.toString());
+    }
+
+    @Override
+    protected String toString(I18n cacheObj) throws CacheMBeanException {
+        return cacheObj.toString();
+    }
+
+    @Override
+    protected CompositeType getCacheEntryType() throws OpenDataException {
+        return new CompositeType(JMX_PN_CACHEENTRY, JMX_PN_CACHEENTRY,
+                new String[] { JMX_PN_CACHEKEY, JMX_PN_I18N },
+                new String[] { JMX_PN_CACHEKEY, JMX_PN_I18N },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING, });
+
+    }
+
+    protected void bindResourceBundleProvider(ResourceBundleProvider resourceBundleProvider, Map<String,Object> props){
+        resourceBundleProviders.bind(resourceBundleProvider, props);
+    }
+
+    protected void unbindResourceBundleProvider(ResourceBundleProvider resourceBundleProvider, Map<String,Object> props){
+        resourceBundleProviders.unbind(resourceBundleProvider, props);
+    }
 }
