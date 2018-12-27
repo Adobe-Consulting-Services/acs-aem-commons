@@ -19,15 +19,14 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
-import java.lang.reflect.AnnotatedElement;
-
+import com.adobe.acs.commons.models.injectors.annotation.AemObject;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.osgi.service.component.annotations.Component;
 
-import com.adobe.acs.commons.models.injectors.annotation.AemObject;
+import java.lang.reflect.AnnotatedElement;
 
 /**
  * The annotation processor for the {@link AemObject} annotation
