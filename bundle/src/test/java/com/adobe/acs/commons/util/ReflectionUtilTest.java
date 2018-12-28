@@ -56,14 +56,14 @@ public class ReflectionUtilTest {
 
     @Test
     public void convertValueMapValue() {
-        Integer myIntegerField = (Integer) ReflectionUtil.convertValueMapValue(valueMap, "myIntegerField", Integer.class);
+        Integer myIntegerField = ReflectionUtil.convertValueMapValue(valueMap, "myIntegerField", Integer.class);
         assertEquals(22, myIntegerField.intValue());
 
-        Integer[] myIntegerArray = (Integer[]) ReflectionUtil.convertValueMapValue(valueMap, "myIntegerArray", Integer[].class);
+        Integer[] myIntegerArray = ReflectionUtil.convertValueMapValue(valueMap, "myIntegerArray", Integer[].class);
         assertEquals(2, myIntegerArray.length);
         assertEquals(33, myIntegerArray[1].intValue());
 
-        Double[] myDoubleArray = (Double[]) ReflectionUtil.convertValueMapValue(valueMap, "myDoubleArray", Double[].class);
+        Double[] myDoubleArray = ReflectionUtil.convertValueMapValue(valueMap, "myDoubleArray", Double[].class);
         assertEquals(2, myDoubleArray.length);
         assertEquals(22.22, myDoubleArray[1], 0);
 
@@ -72,7 +72,7 @@ public class ReflectionUtilTest {
     @Test
     public void test_inheritanceValueMap() {
         InheritanceValueMap inheritanceValueMap = new HierarchyNodeInheritanceValueMap(valueMap);
-        Integer myInheritedIntegerField = (Integer) ReflectionUtil.convertValueMapValue(inheritanceValueMap, "myIntegerField", Integer.class);
+        Integer myInheritedIntegerField = ReflectionUtil.convertValueMapValue(inheritanceValueMap, "myIntegerField", Integer.class);
         assertEquals(22, myInheritedIntegerField.intValue());
     }
 

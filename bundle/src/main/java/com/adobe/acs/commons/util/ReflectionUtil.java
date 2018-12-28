@@ -38,12 +38,12 @@ public class ReflectionUtil {
         // static methods only
     }
 
-    public static Object convertValueMapValue(ValueMap valueMap, String name, Type declaredType) {
-        return new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
+    public static <T> T convertValueMapValue(ValueMap valueMap, String name, Type declaredType) {
+        return (T) new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
     }
 
-    public static Object convertValueMapValue(InheritanceValueMap valueMap, String name, Type declaredType) {
-        return new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
+    public static <T> T convertValueMapValue(InheritanceValueMap valueMap, String name, Type declaredType) {
+        return (T) new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
     }
 
     public static <T> T[] toArray(Collection<T> c, T[] a) {

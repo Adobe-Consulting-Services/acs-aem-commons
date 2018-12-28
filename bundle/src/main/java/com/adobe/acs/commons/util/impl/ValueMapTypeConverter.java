@@ -67,14 +67,15 @@ public class ValueMapTypeConverter {
 
     private Object convertValue() {
         if (declaredType instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) declaredType;
+            Class<?> clazz;
             try {
-                return getValueFromMap(clazz);
-            } catch (ClassCastException e) {
-                // handle case of primitive/wrapper arrays
-                if (clazz.isArray()) {
+                clazz = (Class<?>) declaredType;
+                if(clazz.isArray()){
                     return handleArrayProperty(clazz);
+                }else{
+                    return getValueFromMap(clazz);
                 }
+            } catch (ClassCastException e) {
                 return null;
             }
         } else if (ParameterizedType.class.isInstance(declaredType)) {
@@ -129,6 +130,11 @@ public class ValueMapTypeConverter {
                 if (wrapperArray != null) {
                     return unwrapArray(wrapperArray, componentType);
                 }
+            }
+        }else{
+            Object wrapperArray = getValueFromMap(Array.newInstance(componentType, 0).getClass());
+            if (wrapperArray != null) {
+                return unwrapArray(wrapperArray, componentType);
             }
         }
         return null;
