@@ -112,7 +112,7 @@ public class EndpointServiceImplTest {
         when(config.method()).thenReturn("GET");
         endpointService.activate(config);
         String[] customHeaders = new String[1];
-        customHeaders[0] = "Content-Type:application/vnd.adobe.target.v1+json";
+        customHeaders[0] = "content-type:application/vnd.adobe.target.v1+json";
         JsonObject result = endpointService.performIO_Action("https://test.com", "GET",  customHeaders, null);
         JSONAssert.assertEquals("{'result':'ok'}", result.toString(), false);
 

@@ -245,7 +245,7 @@ public class EndpointServiceImpl implements EndpointService {
       } else {
         addHeaders(get, convertServiceSpecificHeaders(headers));
       }
-      Header[] contentTypeHeaders = get.getHeaders(HttpHeaders.CONTENT_TYPE);
+      Header[] contentTypeHeaders = get.getHeaders(CONTENT_TYPE);
       // If no content type is given, then default to application/json
       if (contentTypeHeaders == null || contentTypeHeaders.length == 0) {
          get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
