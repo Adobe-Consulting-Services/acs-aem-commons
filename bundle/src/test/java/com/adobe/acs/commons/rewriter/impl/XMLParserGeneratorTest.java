@@ -23,6 +23,11 @@ import static org.mockito.Mockito.*;
 
 import java.io.PrintWriter;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +37,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class XMLParserGeneratorTest {
@@ -65,5 +73,31 @@ public class XMLParserGeneratorTest {
         verify(contentHandler).endPrefixMapping("fo");
         verify(contentHandler).endDocument();
         verifyNoMoreInteractions(contentHandler);
+    }
+
+    @Test
+    public void testParserException() {
+        SAXParserFactory fakeParserFactory = new SAXParserFactory() {
+            @Override
+            public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+                throw new ParserConfigurationException("failers gonna fail.");
+            }
+
+            @Override
+            public void setFeature(final String name, final boolean value)
+                    throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+
+            }
+
+            @Override
+            public boolean getFeature(final String name)
+                    throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+                return false;
+            }
+        };
+
+        XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
+        XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator(fakeParserFactory);
+        Assert.assertNull("generator is null when parser factory throws config exception.", generator);
     }
 }
