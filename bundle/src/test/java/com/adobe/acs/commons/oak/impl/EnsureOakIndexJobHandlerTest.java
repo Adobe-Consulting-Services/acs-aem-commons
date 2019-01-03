@@ -91,7 +91,6 @@ public class EnsureOakIndexJobHandlerTest {
         context.build().resource(OAK_INDEX).commit();
         
         // setup dependencies
-        EnsureOakIndex eoi = new EnsureOakIndex();
         Map<String,Object> props = new HashMap<>();
         props.put("oak.indexes.path", OAK_INDEX);
         props.put("ensure.definitions.path",DEFINITION_PATH);
@@ -99,6 +98,7 @@ public class EnsureOakIndexJobHandlerTest {
         
         context.registerService(Scheduler.class,scheduler);
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
+        EnsureOakIndex eoi = new EnsureOakIndex();
         context.registerInjectActivateService(eoi, props);
         
 
