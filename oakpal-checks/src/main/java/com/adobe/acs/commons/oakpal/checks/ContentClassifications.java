@@ -35,7 +35,6 @@ import javax.jcr.Session;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
 import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.SimpleViolation;
 import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.vault.packaging.PackageId;
@@ -101,7 +100,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
         final List<String> searchPaths;
 
         Check(final String libsPathPrefix, final Violation.Severity severity,
-                     final List<Rule> scopePaths, final List<String> searchPaths) {
+              final List<Rule> scopePaths, final List<String> searchPaths) {
             this.libsPathPrefix = libsPathPrefix;
             this.severity = severity;
             this.scopePaths = scopePaths;
@@ -202,8 +201,8 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
         Optional<String> assertClassifications(final Session session, final String libsPath,
                                                final Set<AreaType> allowedAreas) throws RepositoryException {
-            final Node leaf = getLibsLeaf(session, libsPath);
-            if (leaf != null) {
+            if (libsPath.startsWith(libsPathPrefix)) {
+                final Node leaf = getLeafNode(session, libsPath);
                 final AreaType leafArea = AreaType.fromNode(leaf);
                 if (leafArea == AreaType.FINAL && libsPath.startsWith(leaf.getPath() + "/")) {
                     return Optional.of(String.format("%s is implicitly marked %s", libsPath, AreaType.INTERNAL));
@@ -216,22 +215,19 @@ public final class ContentClassifications implements ProgressCheckFactory {
             return Optional.empty();
         }
 
-        Node getLibsLeaf(final Session session, final String absPath) throws RepositoryException {
+        Node getLeafNode(final Session session, final String absPath) throws RepositoryException {
             if ("/".equals(absPath)) {
                 return session.getRootNode();
-            } else if (absPath.startsWith(libsPathPrefix)) {
+            } else {
                 final String parentPath = Text.getRelativeParent(absPath, 1, true);
-                Node parent = getLibsLeaf(session, parentPath);
-                if (parent != null) {
-                    final String name = Text.getName(absPath, true);
-                    if (parent.getPath().equals(parentPath) && parent.hasNode(name)) {
-                        return parent.getNode(name);
-                    } else {
-                        return parent;
-                    }
+                final Node parent = getLeafNode(session, parentPath);
+                final String name = Text.getName(absPath, true);
+                if (parent.getPath().equals(parentPath) && parent.hasNode(name)) {
+                    return parent.getNode(name);
+                } else {
+                    return parent;
                 }
             }
-            return null;
         }
     }
 

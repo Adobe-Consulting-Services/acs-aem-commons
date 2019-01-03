@@ -54,6 +54,8 @@ public class ContentClassificationsTest extends CheckTestBase {
                         "granite:PublicArea")
                 .withForcedRoot("/libs/acs/final", "sling:Folder",
                         "granite:FinalArea")
+                .withForcedRoot("/libs/acs/final/child",
+                        "sling:Folder")
                 .withForcedRoot("/libs/acs/final/public", "sling:Folder",
                         "granite:PublicArea")
                 .withForcedRoot("/libs/acs/abstract", "sling:Folder",
@@ -101,8 +103,9 @@ public class ContentClassificationsTest extends CheckTestBase {
         ProgressCheck check = checkForPath(path);
         CheckReport report = scanWithCheck(check, pack);
         assertEquals(String.format("One violation: %s", description), 1, report.getViolations().size());
-        assertTrue(String.format("Violation contains 'marked %s' (actual: %s): %s.", marked,
-                report.getViolations().iterator().next().getDescription(), description),
+        assertTrue(
+                String.format("Violation contains 'marked %s' (actual: %s): %s.", marked,
+                        report.getViolations().iterator().next().getDescription(), description),
                 report.getViolations().iterator().next().getDescription().contains(String.format("marked %s", marked)));
     }
 
@@ -144,6 +147,11 @@ public class ContentClassificationsTest extends CheckTestBase {
     @Test
     public void testCheckInvalidPageFinalChild() throws Exception {
         checkInvalidPath("/content/acs/invalidpage_final_child", "INTERNAL", "use final child");
+    }
+
+    @Test
+    public void testCheckInvalidPageFinalImplicitChild() throws Exception {
+        checkInvalidPath("/content/acs/invalidpage_final_implicitchild", "INTERNAL", "use final implicit child");
     }
 
     @Test
