@@ -102,5 +102,10 @@ public class XMLParserGeneratorTest {
         Assert.assertNull("generator is null when parser factory throws config exception.", generator);
     }
 
-
+    @Test
+    public void testOwnParser() {
+        XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
+        XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator(SAXParserFactory.newInstance());
+        Assert.assertNotNull("generator is not null with own default sax parser.", generator);
+    }
 }
