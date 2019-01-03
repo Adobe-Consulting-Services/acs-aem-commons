@@ -54,13 +54,15 @@ public class XMLParserGeneratorTest {
         
         XMLParserGeneratorFactory factory = new XMLParserGeneratorFactory();
         XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator();
+        // nothing to do, nothing to mock...
+        generator.init(null, null);
         generator.setContentHandler(contentHandler);
-        
         PrintWriter printWriter = generator.getWriter();
         printWriter.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         printWriter.println("<fo:root xmlns:fo=\"http://www.w3.org/1999/XSL/Format\"></fo:root>");
         
         generator.finished();
+        generator.dispose();
         
         verify(contentHandler).startDocument();
         verify(contentHandler).setDocumentLocator((Locator) anyObject());
@@ -86,7 +88,6 @@ public class XMLParserGeneratorTest {
             @Override
             public void setFeature(final String name, final boolean value)
                     throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
-
             }
 
             @Override
@@ -100,4 +101,6 @@ public class XMLParserGeneratorTest {
         XMLParserGenerator generator = (XMLParserGenerator) factory.createGenerator(fakeParserFactory);
         Assert.assertNull("generator is null when parser factory throws config exception.", generator);
     }
+
+
 }

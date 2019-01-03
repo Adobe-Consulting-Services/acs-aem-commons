@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.sling.rewriter.Generator;
@@ -35,7 +34,7 @@ public final class XMLParserGeneratorFactory implements GeneratorFactory {
 
     @Override
     public Generator createGenerator() {
-        return createGenerator(SAXParserFactory.newInstance());
+        return createGenerator(null);
     }
 
     Generator createGenerator(final SAXParserFactory saxParserFactory) {
