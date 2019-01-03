@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -247,7 +248,7 @@ public class EndpointServiceImpl implements EndpointService {
       }
       Header[] contentTypeHeaders = get.getHeaders(CONTENT_TYPE);
       // If no content type is given, then default to application/json
-      if (contentTypeHeaders == null || contentTypeHeaders.length == 0) {
+      if (ArrayUtils.isEmpty(contentTypeHeaders)) {
          get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       }
 
