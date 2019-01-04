@@ -45,6 +45,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChecksumGeneratorImplTest {
@@ -166,6 +168,106 @@ public class ChecksumGeneratorImplTest {
                 actual.get("/content/test-page/jcr:content"));
     }
 
+
+    @Test
+    public void testNodeNameExcludes_ExcludeLeaf() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeLeafByFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeBranch() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured").addNode("dont-ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("f3dc7765a8857e0f59129f971f81e29dfee4d2b1",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeBranchByFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured").addNode("dont-ignore", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedNodeNames(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("f3dc7765a8857e0f59129f971f81e29dfee4d2b1",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeSubTree() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured")
+                .addNode("also-ignore-me", "nt:unstructured")
+                .addNode("and-ignore-me-too", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedSubTrees(new String[]{ "ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
+
+    @Test
+    public void testNodeNameExcludes_ExcludeSubTreeWithFragment() throws RepositoryException, IOException {
+        Node page = setupPage1();
+        page.addNode("ignore", "nt:unstructured")
+                .addNode("also-ignore-me", "nt:unstructured")
+                .addNode("and-ignore-me-too", "nt:unstructured");
+        session.save();
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addIncludedNodeTypes(new String[]{ "cq:PageContent" });
+        opts.addExcludedSubTrees(new String[]{ "test-page/jcr:content/ignore" });
+
+        Map<String, String> actual = checksumGenerator.generateChecksums(session, "/content", opts);
+
+        assertEquals("0362210a336ba79c6cab30bf09deaf2f1a749e6f",
+                actual.get("/content/test-page/jcr:content"));
+    }
 
     @Test
     public void testDamAsset() throws IOException, RepositoryException {
@@ -434,5 +536,74 @@ public class ChecksumGeneratorImplTest {
         String actual = checksumGenerator.aggregateChecksums(checksums);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testIsExcludedSubTree_ByPath() throws RepositoryException {
+        session.getRootNode()
+            .addNode("content")
+            .addNode("one", "nt:unstructured")
+            .addNode("two", "nt:unstructured")
+            .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+    @Test
+    public void testIsExcludedNodeName_ByPath() throws RepositoryException {
+        session.getRootNode()
+                .addNode("content")
+                .addNode("one", "nt:unstructured")
+                .addNode("two", "nt:unstructured")
+                .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+
+    @Test
+    public void testIsExcludedSubTree_ByNodeType() throws RepositoryException {
+        session.getRootNode()
+                .addNode("content")
+                .addNode("one", "nt:unstructured")
+                .addNode("two", "nt:unstructured")
+                .addNode("three", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "one/two" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content"), opts));
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/one"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/one/two"), opts));
+    }
+
+    @Test
+    public void testIsExcludedNodeName_ByNodeType() throws RepositoryException {
+        Node content = session.getRootNode().addNode("content");
+
+        Node parent1 = content.addNode("parent1", "nt:unstructured");
+        Node parent2 = content.addNode("parent2", "sling:Folder");
+
+        parent1.addNode("child", "nt:unstructured");
+        parent2.addNode("child", "nt:unstructured");
+
+
+        CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
+        opts.addExcludedSubTrees(new String[]{ "[sling:Folder]/child" });
+
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content"), opts));
+        assertFalse(checksumGenerator.isExcludedSubTree(session.getNode("/content/parent1/child"), opts));
+        assertTrue(checksumGenerator.isExcludedSubTree(session.getNode("/content/parent2/child"), opts));
     }
 }

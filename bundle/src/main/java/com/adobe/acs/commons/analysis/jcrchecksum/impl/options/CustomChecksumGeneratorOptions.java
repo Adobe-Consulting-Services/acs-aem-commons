@@ -73,4 +73,25 @@ public class CustomChecksumGeneratorOptions extends AbstractChecksumGeneratorOpt
         }
     }
 
+    @Override
+    public void addExcludedNodeNames(String[] arr) {
+        super.addExcludedNodeNames(arr);
+    }
+
+    public void addExcludedNodeNames(Collection<String> col) {
+        if (col != null) {
+            super.addExcludedNodeNames(col.toArray(new String[col.size()]));
+        }
+    }
+
+    @Override
+    public void addExcludedSubTrees(String[] arr) {
+        super.addExcludedSubTrees(arr);
+    }
+
+    public void addExcludedSubTrees(Collection<String> col) {
+        if (col != null) {
+            super.addExcludedSubTrees(col.toArray(new String[col.size()]));
+        }
+    }
 }

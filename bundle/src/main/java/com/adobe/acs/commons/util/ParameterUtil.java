@@ -155,9 +155,12 @@ public class ParameterUtil {
                     continue;
                 }
 
-                map.put(tmp[0], defaultValue);
-            } else if (tmp.length == 2) {
-                map.put(tmp[0], tmp[1]);
+                if (StringUtils.stripToNull(tmp[0]) != null) {
+                    map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(defaultValue));
+                }
+            } else if (tmp.length == 2
+                    && StringUtils.stripToNull(tmp[0]) != null) {
+                map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(tmp[1]));
             }
         }
 
