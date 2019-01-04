@@ -262,6 +262,10 @@ public class EmailServiceImpl implements EmailService {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));
         }
 
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
+        }
+
         return email;
     }
 

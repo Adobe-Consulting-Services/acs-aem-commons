@@ -30,9 +30,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +45,11 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
 
-@Component(service = WorkflowProcess.class)
-@Designate(ocd = BrandPortalSyncProcess.Config.class)
+@Component(service = WorkflowProcess.class, property= {
+        "process.label = ACS AEM Commons - Brand Portal Sync"
+})
 public class BrandPortalSyncProcess implements WorkflowProcess {
    private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
-
-   @ObjectClassDefinition(description = "Syncs assets with AEM Assets Brand Portal", name = "ACS AEM Commons - Workflow Process - Brand Portal Sync")
-   public @interface Config {
-      @AttributeDefinition(defaultValue = {
-            "Brand Portal Sync" }, name = "Workflow Label", description = "ACS AEM Commons - Workflow Process - Brand Portal Sync")
-      String process_label();
-   }
 
    @Reference
    private WorkflowHelper workflowHelper;

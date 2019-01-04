@@ -21,9 +21,6 @@ package com.adobe.acs.commons.workflow.process.impl;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
@@ -35,18 +32,10 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class)
-@Designate(ocd=ParameterizedDeactivatePageProcess.Config.class)
+@Component(service=WorkflowProcess.class, property= {
+        "process.label = ACS AEM Commons - Parameterized Deactivate Resource Process"
+})
 public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
-
-    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Parameterized Deactivate Resource",
-            description = "Triggers a deactivation replication event, but only to specifically configured agents.")
-    public @interface Config {
-       @AttributeDefinition(defaultValue = {
-             "Parameterized Deactivate Resource Process" }, name = "Workflow Label", description = "Triggers a deactivation replication event, but only to specifically configured agents.")
-       String process_label();
-    }
-
 
     private static final String AGENT_ARG = "replicationAgent";
 

@@ -62,21 +62,23 @@ import java.util.ListIterator;
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
            factory = "GroupHttpCacheConfigExtension",
            property= {
-           "webconsole.configurationFactory.nameHint" + "=" 
+           "webconsole.configurationFactory.nameHint" + "="
            + "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
            }
 )
 @Designate(ocd=GroupHttpCacheConfigExtension.Config.class,factory=true)
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
            description = "HttpCacheConfig custom extension for group based configuration and associated cache key "+ "creation.")
     public @interface Config {
-    @AttributeDefinition(name = "Allowed user groups",
-              description = "Users groups that are used to accept and create cache keys.")
-    String[] httpcache_config_extension_user_groups_allowed();
-    
+        @AttributeDefinition(name = "Allowed user groups",
+                description = "Users groups that are used to accept and create cache keys.")
+        String[] httpcache_config_extension_user_groups_allowed();
+
+        @AttributeDefinition(name = "Config Name")
+        String configName();
     }
     private List<String> userGroups;
 

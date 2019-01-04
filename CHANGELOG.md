@@ -10,7 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
+- #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
+- #1637 - Add support for bounce address setting in EmailService
+- #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 
 ### Fixed
 - #1607 - HttpCache: improved the write to response mechanism.
@@ -32,6 +35,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1610 - Bulk Workflow Manager doing nothing
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
+- #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
@@ -39,6 +44,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1578 - Asset import needs additional configuration inputs
 - #1560 - Changing to osgi annotations
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
+- #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
+- #1649 - Added support for custom Content-Type header.
+
+### Removed
+- #1635 - Removed WCM Inbox Web Console Plugin
 
 ## [3.19.0] - 2018-11-03
 

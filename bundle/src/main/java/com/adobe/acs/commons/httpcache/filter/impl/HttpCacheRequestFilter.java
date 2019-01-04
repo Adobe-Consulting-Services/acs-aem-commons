@@ -54,7 +54,7 @@ public class HttpCacheRequestFilter extends AbstractHttpCacheFilter implements F
     // Only instantiate this Filter if there is at least 1 REQUEST-based cache config
     @Reference(
             cardinality = ReferenceCardinality.MANDATORY,
-            target = "(httpcache.config.filter-scope=REQUEST)"
+            target = "(httpcache.config.filter.scope=REQUEST)"
     )
     private HttpCacheConfig requestScopeCacheConfigs;
 

@@ -19,12 +19,16 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.OrgJson.arr;
+import static net.adamcin.oakpal.core.OrgJson.key;
+import static net.adamcin.oakpal.core.OrgJson.obj;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
 import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.ProgressCheck;
+import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -42,23 +46,22 @@ public class AcsCommonsAuthorizableCompatibilityCheckTest extends CheckTestBase 
 
     @Test
     public void testCheckNone() throws Exception {
-        ProgressCheck check = new AcsCommonsAuthorizableCompatibilityCheck().newInstance(
-                new JSONObject("{\"scopeIds\":[{\"type\":\"deny\",\"pattern\":\".*\"}]}"));
+        ProgressCheck check = new AcsCommonsAuthorizableCompatibilityCheck()
+                .newInstance(key("scopeIds", arr(Rule.DEFAULT_DENY)).get());
         CheckReport reportValid = scanWithCheck(check, pack);
         assertEquals("No violations when deny all authorizable ids.", 0, reportValid.getViolations().size());
     }
 
     @Test
     public void testCheckAll() throws Exception {
-        ProgressCheck check = new AcsCommonsAuthorizableCompatibilityCheck().newInstance(
-                new JSONObject("{}"));
+        ProgressCheck check = new AcsCommonsAuthorizableCompatibilityCheck().newInstance(obj().get());
         CheckReport reportValid = scanWithCheck(check, pack);
         assertEquals("3 violations when allow all authorizable ids.", 3, reportValid.getViolations().size());
     }
 
     private void checkSpecificId(final String authorizableId, final boolean expectValid) throws Exception {
         ProgressCheck checkValid = new AcsCommonsAuthorizableCompatibilityCheck().newInstance(
-                new JSONObject(String.format("{\"scopeIds\":[{\"type\":\"allow\",\"pattern\":\"%s\"}]}", authorizableId)));
+                key("scopeIds", arr(key("type", "allow").key("pattern", authorizableId))).get());
         CheckReport reportValid = scanWithCheck(checkValid, pack);
         assertEquals("check specific authorizableId: " + authorizableId, expectValid ? 0 : 1,
                 reportValid.getViolations().size());

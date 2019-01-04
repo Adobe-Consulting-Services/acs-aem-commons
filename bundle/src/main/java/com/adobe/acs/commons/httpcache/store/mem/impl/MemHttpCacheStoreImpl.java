@@ -66,43 +66,24 @@ import java.util.concurrent.TimeUnit;
       "webconsole.configurationFactory.nameHint" + "=" +  "TTL: {httpcache.cachestore.memcache.ttl}, "
                 + "Max size in MB: {httpcache.cachestore.memcache.maxsize}"
 })
-@Designate(ocd=MemHttpCacheStoreImpl.Config.class)
+@Designate(ocd=Config.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
-            description = "Cache data store implementation for in-memory storage.")
-    public @interface Config {
-          @AttributeDefinition(name = "TTL",
-                     description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
-                     defaultValue = ""+MemHttpCacheStoreImpl.DEFAULT_TTL)
-           long httpcache_cachestore_memcache_ttl();
-          
-          @AttributeDefinition(name = "Maximum size of this store in MB",
-                     description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
-                             + "from the cache",
-                     defaultValue = ""+MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
-           long httpcache_cachestore_memcache_maxsize();
-    }
-    private static final String PROP_TTL = "httpcache.cachestore.memcache.ttl";
-    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
-    private long ttl;
 
-    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
-    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+    private long ttl;
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     @Activate
-    protected void activate(Map<String, Object> configs) {
+    protected void activate(Map<String,Object> properties) {
         // Read config and populate values.
-        ttl = PropertiesUtil.toLong(configs.get(PROP_TTL), DEFAULT_TTL);
-        maxSizeInMb = PropertiesUtil.toLong(configs.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+        ttl = PropertiesUtil.toLong(properties.get(Config.PROP_TTL), Config.DEFAULT_TTL);
+        maxSizeInMb = PropertiesUtil.toLong(properties.get(Config.PROP_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.
@@ -111,7 +92,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
             cache.invalidateAll();
             log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
-        if (ttl != DEFAULT_TTL) {
+        if (ttl != Config.DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
             cache = CacheBuilder.newBuilder()
                     .maximumWeight(maxSizeInMb * MEGABYTE)
@@ -234,6 +215,11 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     public TempSink createTempSink() {
         return new MemTempSinkImpl();
+    }
+
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
     }
 
     //-------------------------<Mbean specific implementation>

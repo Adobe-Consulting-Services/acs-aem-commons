@@ -87,19 +87,29 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 "webconsole.configurationFactory.nameHint" + "=" + "Global handling rules: {httpcache.engine.cache-handling-rules.global}"
 }, reference = {
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
+                bind = "bindHttpCacheConfig",
+                unbind = "unbindHttpCacheConfig",
                 service = HttpCacheConfig.class,
                 policy = ReferencePolicy.DYNAMIC,
                 cardinality = ReferenceCardinality.AT_LEAST_ONE),
 
-        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-        service = HttpCacheHandlingRule.class,
-               policy = ReferencePolicy.DYNAMIC,
-               cardinality = ReferenceCardinality.MULTIPLE),
+        @Reference(
+                name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
+                bind = "bindHttpCacheHandlingRule",
+                unbind = "unbindHttpCacheHandlingRule",
+                service = HttpCacheHandlingRule.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.MULTIPLE),
 
-        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-        service = HttpCacheStore.class,
-               policy = ReferencePolicy.DYNAMIC,
-               cardinality = ReferenceCardinality.AT_LEAST_ONE) } )
+        @Reference(
+                name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+                bind = "bindHttpCacheStore",
+                unbind = "unbindHttpCacheStore",
+                service = HttpCacheStore.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.AT_LEAST_ONE
+        )
+} )
 @Designate(ocd=HttpCacheEngineImpl.Config.class)
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
@@ -135,7 +145,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Engine",
             description = "Controlling service for http cache implementation.")
     public @interface Config {
-    
+
         @AttributeDefinition(name = "Global HttpCacheHandlingRules",
                 description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
                 defaultValue = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
@@ -143,9 +153,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                         "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
                         "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
                 })
-      String[] httpcache_engine_cachehandling_rules_global();    
+      String[] httpcache_engine_cachehandling_rules_global();
     }
-    
+
     private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cachehandling.rules.global";
     private List<String> globalCacheHandlingRulesPid;
 

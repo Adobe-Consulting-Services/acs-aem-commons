@@ -28,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Value for cache item in mem store.
  */
-class MemCachePersistenceObject {
+public class MemCachePersistenceObject implements Serializable {
     /** Response status **/
     private int status;
     /** Response character encoding */
@@ -56,7 +57,8 @@ class MemCachePersistenceObject {
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
      */
-    MemCachePersistenceObject() {
+    public MemCachePersistenceObject() {
+        //empty constructor
     }
 
     /**
