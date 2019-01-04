@@ -39,6 +39,7 @@ public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLib
 
     private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
     private static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-authoring.add-ons.touchui-parsys-placeholder";
+    private static final String[] DEFAULT_CATEGORIES = new String[] { CATEGORY_LIMIT, CATEGORY_PLACEHOLDER };
 
     @ObjectClassDefinition(name = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
             description = "Allows for dynamic loading of optional Touch UI Client Libraries")
@@ -58,6 +59,10 @@ public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLib
 
     @Activate
     protected void activate(DynamicTouchUiClientLibraryServlet.Config config) {
-        super.activate(config.categories(), config.exclude_all(), htmlLibraryManager);
+        String[] categories = config.categories();
+        if (ArrayUtils.isEmpty(categories)) {
+            categories = DEFAULT_CATEGORIES;
+        }
+        super.activate(categories, config.exclude_all(), htmlLibraryManager);
     }
 }

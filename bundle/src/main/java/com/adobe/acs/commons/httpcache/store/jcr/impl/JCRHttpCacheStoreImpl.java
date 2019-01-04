@@ -161,7 +161,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Activate
-    protected void activate(Config config) {
+    public void activate(Config config) {
         this.config = config;
     }
 
