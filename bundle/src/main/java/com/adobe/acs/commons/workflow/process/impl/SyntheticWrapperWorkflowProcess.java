@@ -28,9 +28,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +45,11 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class)
-@Designate(ocd=SyntheticWrapperWorkflowProcess.Config.class)
+@Component(service=WorkflowProcess.class,property={
+        "process.label = ACS AEM Commons - Synthetic Workflow Wrapper"
+})
 public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
 
-    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Synthetic Workflow Wrapper Process",
-            description = "Executes an AEM Workflow model as a Synthetic Workflow using FAM")
-    public @interface Config {
-       @AttributeDefinition(defaultValue = {
-             "Synthetic Workflow Wrapper" }, name = "Workflow Label", description = "Executes an AEM Workflow model as a Synthetic Workflow (serial execution)")
-       String process_label();
-    }
     private static final Logger log = LoggerFactory.getLogger(SyntheticWrapperWorkflowProcess.class);
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_SAVE_INTERVAL = "saveInterval";
