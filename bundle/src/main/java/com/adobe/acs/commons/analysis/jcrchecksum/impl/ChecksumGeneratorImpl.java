@@ -94,7 +94,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         if (node == null) {
             log.warn("Path [ {} ] not found while generating checksums", path);
-            return new LinkedHashMap<String, String>();
+            return new LinkedHashMap<>();
         }
 
         return traverseTree(node, options);
@@ -170,7 +170,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
 
-        final Map<String, String> checksums = new LinkedHashMap<String, String>();
+        final Map<String, String> checksums = new LinkedHashMap<>();
 
         /* Create checksums for Node's properties */
         checksums.put(getChecksumKey(aggregateNodePath, node.getPath()),
@@ -178,7 +178,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         /* Then process node's children */
 
-        final Map<String, String> lexicographicallySortedChecksums = new TreeMap<String, String>();
+        final Map<String, String> lexicographicallySortedChecksums = new TreeMap<>();
         final boolean hasOrderedChildren = hasOrderedChildren(node);
         final NodeIterator children = node.getNodes();
 

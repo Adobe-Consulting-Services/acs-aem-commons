@@ -72,6 +72,8 @@ public class JSONDumpServlet extends BaseChecksumServlet {
         }
     }
 
+
+    @Override
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
     ServletException, IOException {
         try {
@@ -108,13 +110,10 @@ public class JSONDumpServlet extends BaseChecksumServlet {
         Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
         if (CollectionUtils.isEmpty(paths)) {
-            try {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print(
-                        "ERROR: At least one path must be specified");
-            } catch (IOException ioe) {
-                throw ioe;
-            }
+
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().print("ERROR: At least one path must be specified");
+
         } else {
             Session session = request.getResourceResolver().adaptTo(Session.class);
 

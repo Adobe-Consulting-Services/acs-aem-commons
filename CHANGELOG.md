@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
 - #1637 - Add support for bounce address setting in EmailService
-
+- #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 
 ### Fixed
 - #1607 - HttpCache: improved the write to response mechanism.
@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 - #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
+- #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
@@ -44,6 +45,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1578 - Asset import needs additional configuration inputs
 - #1560 - Changing to osgi annotations
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
+
+### Removed
+- #1635 - Removed WCM Inbox Web Console Plugin
 
 ## [3.19.0] - 2018-11-03
 
