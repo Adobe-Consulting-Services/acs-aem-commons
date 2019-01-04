@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.OrgJson.arr;
+import static net.adamcin.oakpal.core.OrgJson.key;
+import static net.adamcin.oakpal.core.OrgJson.obj;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +32,6 @@ import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.InitStage;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.testing.TestPackageUtil;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +54,8 @@ public class ContentClassificationsTest extends CheckTestBase {
                         "granite:PublicArea")
                 .withForcedRoot("/libs/acs/final", "sling:Folder",
                         "granite:FinalArea")
+                .withForcedRoot("/libs/acs/final/child",
+                        "sling:Folder")
                 .withForcedRoot("/libs/acs/final/public", "sling:Folder",
                         "granite:PublicArea")
                 .withForcedRoot("/libs/acs/abstract", "sling:Folder",
@@ -78,14 +82,19 @@ public class ContentClassificationsTest extends CheckTestBase {
     }
 
     private ProgressCheck checkForPath(final String path) {
-        return new ContentClassifications().newInstance(
-                new JSONObject(String.format("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\"%s\"}]}", path)));
+        return new ContentClassifications()
+                .newInstance(key("scopePaths", arr(key("type", "allow").key("pattern", path))).get());
     }
 
     @Test
     public void testCheckAllValid() throws Exception {
-        ProgressCheck checkValid = new ContentClassifications().newInstance(
-                new JSONObject("{\"scopePaths\":[{\"type\":\"allow\",\"pattern\":\".*/valid.*\"},{\"type\":\"allow\",\"pattern\":\"/apps/acs/(abstract|public).*\"}]}"));
+        ProgressCheck checkValid = new ContentClassifications()
+                .newInstance(obj()
+                        .key("scopePaths", arr()
+                                .val(key("type", "allow").key("pattern", ".*/valid.*"))
+                                .val(key("type", "allow").key("pattern", "/apps/acs/(abstract|public).*")))
+                        .key("searchPaths", arr("/apps", "/libs"))
+                        .get());
         CheckReport reportValid = scanWithCheck(checkValid, pack);
         assertEquals("No violations when deny invalid paths.", 0, reportValid.getViolations().size());
     }
@@ -94,8 +103,9 @@ public class ContentClassificationsTest extends CheckTestBase {
         ProgressCheck check = checkForPath(path);
         CheckReport report = scanWithCheck(check, pack);
         assertEquals(String.format("One violation: %s", description), 1, report.getViolations().size());
-        assertTrue(String.format("Violation contains 'marked %s' (actual: %s): %s.", marked,
-                report.getViolations().iterator().next().getDescription(), description),
+        assertTrue(
+                String.format("Violation contains 'marked %s' (actual: %s): %s.", marked,
+                        report.getViolations().iterator().next().getDescription(), description),
                 report.getViolations().iterator().next().getDescription().contains(String.format("marked %s", marked)));
     }
 
@@ -137,6 +147,11 @@ public class ContentClassificationsTest extends CheckTestBase {
     @Test
     public void testCheckInvalidPageFinalChild() throws Exception {
         checkInvalidPath("/content/acs/invalidpage_final_child", "INTERNAL", "use final child");
+    }
+
+    @Test
+    public void testCheckInvalidPageFinalImplicitChild() throws Exception {
+        checkInvalidPath("/content/acs/invalidpage_final_implicitchild", "INTERNAL", "use final implicit child");
     }
 
     @Test

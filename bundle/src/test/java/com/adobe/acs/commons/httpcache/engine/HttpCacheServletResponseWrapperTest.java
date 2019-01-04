@@ -19,14 +19,20 @@
  */
 package com.adobe.acs.commons.httpcache.engine;
 
+import com.adobe.acs.commons.httpcache.store.TempSink;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
+import com.day.cq.commons.feed.StringResponseWrapper;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -37,12 +43,60 @@ public class HttpCacheServletResponseWrapperTest {
     @Spy
     SlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
+    @Before
+    public void init(){
+        response.setCharacterEncoding("utf-8");
+    }
+
     @Test
     public void getHeaderNames_NullHeaderNames() throws IOException {
+        TempSink tempSink = new MemTempSinkImpl();
         when(response.getHeaderNames()).thenThrow(AbstractMethodError.class);
 
-        HttpCacheServletResponseWrapper responseWrapper = new HttpCacheServletResponseWrapper(response, null);
+        HttpCacheServletResponseWrapper systemUnderTest = new HttpCacheServletResponseWrapper(response, tempSink);
 
-        assertEquals(0, responseWrapper.getHeaderNames().size());
+        assertEquals(0, systemUnderTest.getHeaderNames().size());
+    }
+
+    @Test
+    public void test_printwriter() throws IOException {
+        TempSink tempSink = new MemTempSinkImpl();
+
+        HttpCacheServletResponseWrapper systemUnderTest = new HttpCacheServletResponseWrapper(response, tempSink);
+        PrintWriter writer = systemUnderTest.getWriter();
+        assertNotNull(writer);
+        assertEquals(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER, systemUnderTest.getWriteMethod());
+
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void test_printwriter_exception() throws IOException {
+        TempSink tempSink = new MemTempSinkImpl();
+
+        HttpCacheServletResponseWrapper systemUnderTest = new HttpCacheServletResponseWrapper(response, tempSink);
+        systemUnderTest.getWriter();
+        systemUnderTest.getOutputStream();
+
+    }
+
+    @Test
+    public void test_outputstream() throws IOException {
+        TempSink tempSink = new MemTempSinkImpl();
+
+        HttpCacheServletResponseWrapper systemUnderTest = new HttpCacheServletResponseWrapper(new StringResponseWrapper(response), tempSink);
+        OutputStream outputStream = systemUnderTest.getOutputStream();
+        assertNotNull(outputStream);
+        assertEquals(HttpCacheServletResponseWrapper.ResponseWriteMethod.OUTPUTSTREAM, systemUnderTest.getWriteMethod());
+
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void test_outputstream_exception() throws IOException {
+        TempSink tempSink = new MemTempSinkImpl();
+
+        HttpCacheServletResponseWrapper systemUnderTest = new HttpCacheServletResponseWrapper(new StringResponseWrapper(response), tempSink);
+        systemUnderTest.getOutputStream();
+        systemUnderTest.getWriter();
+
     }
 }

@@ -20,6 +20,26 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
@@ -31,30 +51,15 @@ import com.day.cq.workflow.model.WorkflowModel;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.Session;
-import javax.servlet.ServletException;
-import java.io.IOException;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Init Form Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {"GET"},
-        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
-        selectors = {"init-form"},
-        extensions = {"json"}
-)
+@Component(service = Servlet.class, property = {
+SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+SLING_SERVLET_SELECTORS + "=init-form",
+SLING_SERVLET_EXTENSIONS + "=json" })
 public class InitFormServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(InitFormServlet.class);
     private static final String KEY_RUNNER_TYPES = "runnerTypes";

@@ -45,13 +45,13 @@
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
-        <oakpal.version>1.1.9</oakpal.version>
+        <oakpal.version>1.1.13</oakpal.version>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
-                <!-- TODO: Remove this plugin-->                
+                <!-- TODO: Remove this plugin-->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
@@ -78,7 +78,7 @@
                         <execution>
                             <id>baseline</id>
                             <goals>
-                                <goal>baseline</goal>   
+                                <goal>baseline</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -346,6 +346,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.5</version>
@@ -455,7 +461,7 @@
                 <version>1.0.1</version>
                 <scope>provided</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>

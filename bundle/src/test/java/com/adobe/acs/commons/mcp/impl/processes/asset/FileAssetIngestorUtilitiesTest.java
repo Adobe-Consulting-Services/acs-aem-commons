@@ -63,7 +63,7 @@ public class FileAssetIngestorUtilitiesTest {
         assertEquals(folder2.getAbsolutePath(), el.getSourcePath());
         assertTrue(el.isFolder());
         assertFalse(el.isFile());
-        assertEquals("/content/dam/folder1/folder2", el.getNodePath());
+        assertEquals("/content/dam/folder1/folder2", el.getNodePath(true));
         assertEquals("folder2", el.getName());
 
         HierarchicalElement parent = el.getParent();

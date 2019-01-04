@@ -27,23 +27,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-descriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <service.vendor>Adobe Systems Incorporated</service.vendor>
-                            </properties>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <executions>
@@ -59,7 +42,7 @@
                     <exportScr>true</exportScr>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
+                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
                             sun.misc.*;resolution:=optional,
@@ -75,7 +58,8 @@
                             org.apache.poi.ss.util;version="[2.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
-                            !org.bouncycastle.jce.*, 
+                            com.github.benmanes.caffeine*;resolution:=optional,
+                            !org.bouncycastle.jce.*,
                             !android.util.*,
                             *
                         </Import-Package>
@@ -89,6 +73,7 @@
                             com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
                         <_dsannotations>*</_dsannotations>
+                        <_dsannotations-options>inherit</_dsannotations-options>
                         <_metatypeannotations>*</_metatypeannotations>
                         <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
@@ -189,11 +174,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>biz.aQute</groupId>
@@ -391,6 +371,10 @@
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -460,11 +444,11 @@
             <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency> 
-            <artifactId>jackrabbit-api</artifactId> 
-            <version>2.16.3</version> 
-            <groupId>org.apache.jackrabbit</groupId> 
-            <scope>test</scope> 
+        <dependency>
+            <artifactId>jackrabbit-api</artifactId>
+            <version>2.16.3</version>
+            <groupId>org.apache.jackrabbit</groupId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -593,14 +577,14 @@
         </dependency>
 
 
-        <!--  Build Dependencies -->        
+        <!--  Build Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.annotation</artifactId>
             <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
-            
+
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>
@@ -618,6 +602,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
     </dependencies>
 </project>

@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import org.osgi.service.component.annotations.Component;
+
 import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
+@Component(service=ProcessDefinitionFactory.class)
 public class ProcessCleanupFactory extends AdministratorsOnlyProcessDefinitionFactory<ProcessCleanup> {
 
     @Override

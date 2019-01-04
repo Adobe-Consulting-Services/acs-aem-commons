@@ -21,37 +21,6 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-
-import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
@@ -72,74 +41,45 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.adobe.acs.commons.util.impl.AbstractJCRCacheMBean;
 import com.adobe.acs.commons.util.impl.JcrCacheMBean;
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.Session;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
-@Component(label = "ACS AEM Commons - Http Cache - JCR Cache Store.",
-        description = "Cache data store implementation for JCR storage.",
-        metatype = true)
-@Service(value = {HttpCacheStore.class, JcrCacheMBean.class, Runnable.class})
-@Properties({
-    @Property(
-            name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
-            value = HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
-            propertyPrivate = true),
-    @Property(name = "jmx.objectname",
-            value = "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
-            propertyPrivate = true),
-    @Property(
-            label = "Cache clean-up schedule",
-            description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
-            name = "scheduler.expression",
-            value = "0 0 12 1/1 * ? *"
-    ),
-    @Property(
-            label = "Allow concurrent executions",
-            description = "Allow concurrent executions of this Scheduled Service. This is almost always false.",
-            name = "scheduler.concurrent",
-            propertyPrivate = true,
-            boolValue = false
-    ),
-    @Property(
-            label = "Cache-root Parent Path location",
-            description = "Points to the location of the cache root parent node in the JCR repository",
-            name = JCRHttpCacheStoreImpl.PN_ROOTPATH,
-            value = JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH
-    ),
-    @Property(
-            label = "Cache bucketing tree depth",
-            description = "The depth the bucket tree goes. Minimum value is 1. "
-            + "This value can be used for tweaking performance. "
-            + "The more data cached, the higher this value should be. "
-            + "Downside is that the higher the value, the longer the retrieval of cache entries takes if the buckets are relatively low on entries.",
-            name = JCRHttpCacheStoreImpl.PN_BUCKETDEPTH,
-            intValue = JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH,
-            propertyPrivate = true
-    ),
-    @Property(
-            label = "Save threshold",
-            description = "The threshold to add,remove and modify nodes when handling the cache",
-            name = JCRHttpCacheStoreImpl.PN_SAVEDELTA,
-            intValue = JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA
-    ),
-    @Property(
-            label = "Expire time in seconds",
-            description = "The time seconds after which nodes will be removed by the scheduled cleanup service. ",
-            name = JCRHttpCacheStoreImpl.PN_EXPIRETIMEINSECONDS,
-            intValue = JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS
-    )
+
+@Component(service = {HttpCacheStore.class, JcrCacheMBean.class, Runnable.class}, property = {
+        HttpCacheStore.KEY_CACHE_STORE_TYPE + "=" + HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
+        "jmx.objectname" + "=" + "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
+        "scheduler.concurrent" + "=" + "false"
+
 })
+@Designate(ocd = Config.class)
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
 
-    //property keys
-    public static final String PN_ROOTPATH = "httpcache.config.jcr.rootpath";
-    public static final String PN_BUCKETDEPTH = "httpcache.config.jcr.bucketdepth";
-    public static final String PN_SAVEDELTA = "httpcache.config.jcr.savedelta";
-    public static final String PN_EXPIRETIMEINSECONDS = "httpcache.config.jcr.expiretimeinseconds";
-
-    //defaults
-    public static final String DEFAULT_ROOTPATH = "/var/acs-commons/httpcache";
     private static final String SERVICE_NAME = "httpcache-jcr-storage-service";
 
     private static final Map<String, Object> AUTH_INFO;
@@ -148,27 +88,20 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
-    public static final int DEFAULT_BUCKETDEPTH = 10;
-
-    //Perform a save on a delta of 500 by default.
-    public static final int DEFAULT_SAVEDELTA = 500;
-
-    // 1 week.
-    public static final int DEFAULT_EXPIRETIMEINSECONDS = 604800;
-
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
     //fields
     private String cacheRootPath;
     private int bucketTreeDepth;
     private int deltaSaveThreshold;
-    private int expireTimeInSeconds;
+    private long expireTimeInMilliSeconds;
+
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
     private DynamicClassLoaderManager dclm;
+
 
     private final CopyOnWriteArrayList<CacheKeyFactory> cacheKeyFactories = new CopyOnWriteArrayList<CacheKeyFactory>();
 
@@ -177,12 +110,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Activate
-    protected void activate(ComponentContext context) {
-        Dictionary<?, ?> properties = context.getProperties();
-        cacheRootPath = PropertiesUtil.toString(properties.get(PN_ROOTPATH), DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
-        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(PN_BUCKETDEPTH), DEFAULT_BUCKETDEPTH);
-        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(PN_SAVEDELTA), DEFAULT_SAVEDELTA);
-        expireTimeInSeconds = PropertiesUtil.toInteger(properties.get(PN_EXPIRETIMEINSECONDS), DEFAULT_EXPIRETIMEINSECONDS);
+    protected void activate(Map<String,Object> properties) {
+        cacheRootPath = PropertiesUtil.toString(properties.get(Config.PN_ROOTPATH), Config.DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
+        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(Config.PN_BUCKETDEPTH), Config.DEFAULT_BUCKETDEPTH);
+        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(Config.PN_SAVEDELTA), Config.DEFAULT_SAVEDELTA);
+        expireTimeInMilliSeconds = PropertiesUtil.toLong(properties.get(Config.PN_EXPIRETIMEINMILLISECONDS), Config.DEFAULT_EXPIRETIMEINMILISECONDS);
     }
 
     @Override
@@ -194,9 +126,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
             final Node bucketNode = factory.getBucketNode();
 
-            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key);
+            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
 
-            new EntryNodeWriter(session, entryNode, key, content, expireTimeInSeconds).write();
+            long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : expireTimeInMilliSeconds;
+
+            new EntryNodeWriter(session, entryNode, key, content,expiryTime).write();
             session.save();
 
             incrementLoadSuccessCount();
@@ -314,6 +248,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
+    }
+
+    @Override
     public void run() {
         purgeExpiredEntries();
     }
@@ -331,7 +270,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public long getTtl() {
-        return expireTimeInSeconds;
+        return expireTimeInMilliSeconds;
     }
 
     @Override

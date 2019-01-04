@@ -24,13 +24,13 @@ import aQute.bnd.annotation.ConsumerType;
 /**
  * Created work-alike for functionality not introduced until Java 8
  * Represents a function that accepts two arguments and produces a result.
- * This is the two-arity specialization of {@link Function}.
+ * This is the two-arity specialization of {@link FunctionWithException}.
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
  * @param <R> the type of the result of the function
  *
- * @see Function
+ * @see FunctionWithException
  */
 @ConsumerType
 @FunctionalInterface

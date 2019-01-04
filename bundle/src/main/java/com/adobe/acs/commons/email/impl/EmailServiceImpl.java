@@ -72,7 +72,7 @@ import java.util.Map;
  */
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
 @Designate(ocd=EmailServiceImpl.Config.class)
-public final class EmailServiceImpl implements EmailService {
+public class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String MSG_INVALID_RECIPIENTS = "Invalid Recipients";
@@ -260,6 +260,10 @@ public final class EmailServiceImpl implements EmailService {
         // #1008 setting the subject via the setSubject(..) parameter.
         if (params.containsKey(EmailServiceConstants.SUBJECT)) {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));
+        }
+
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
         }
 
         return email;

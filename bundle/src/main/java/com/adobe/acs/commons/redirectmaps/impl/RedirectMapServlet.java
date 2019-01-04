@@ -19,15 +19,21 @@
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +44,13 @@ import com.google.common.net.MediaType;
  * Servlet for generating an Apache RedirectMap text file from an uploaded file
  * and a list vanity properties in cq:Page and dam:Asset nodes.
  */
-@SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
-        "redirectmap" }, extensions = { "txt" }, metatype = false)
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_METHODS+"=GET",
+SLING_SERVLET_SELECTORS+"=redirectmap",
+SLING_SERVLET_EXTENSIONS+"=txt",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/redirectmappage"
+})
 public class RedirectMapServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);

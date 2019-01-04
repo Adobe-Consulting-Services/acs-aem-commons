@@ -21,12 +21,15 @@ package com.adobe.acs.commons.wcm.impl;
 
 import java.util.Iterator;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +42,9 @@ import com.day.cq.wcm.api.PageInfoProvider;
  * 
  * Must run <b>after</b> <code>com.day.cq.wcm.core.impl.DefaultPageStatusProvider</code>
  */
-@Component
-@Service
+
 @SuppressWarnings( "deprecation" )
+@Component(service=PageInfoProvider.class)
 public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 
     private static final String KEY_MODELS = "models";

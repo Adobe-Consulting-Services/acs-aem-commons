@@ -24,7 +24,6 @@ import com.day.text.csv.Csv;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -33,11 +32,13 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Writer;
@@ -54,14 +55,16 @@ import java.util.List;
 import java.util.Set;
 
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
-@SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Export Servlet",
-        methods = {"GET"},
-        resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
-        selectors = {"export"},
-        extensions = {"csv"}
-)
+@Component(service=Servlet.class,
+         property= {
+SLING_SERVLET_METHODS+"=GET",
+SLING_SERVLET_SELECTORS+"=export",
+SLING_SERVLET_EXTENSIONS+"=csv",
+SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/exporters/users-to-csv"
+
+})
 public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);
 

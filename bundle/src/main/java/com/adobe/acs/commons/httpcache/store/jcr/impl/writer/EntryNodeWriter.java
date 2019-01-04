@@ -19,8 +19,16 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
-import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
+import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
+import com.day.cq.commons.jcr.JcrConstants;
+import org.apache.jackrabbit.commons.JcrUtils;
 
+import javax.jcr.Binary;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,17 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.jcr.Binary;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import org.apache.jackrabbit.commons.JcrUtils;
-
-import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
-import com.day.cq.commons.jcr.JcrConstants;
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
 
 public class EntryNodeWriter
 {
@@ -50,15 +48,14 @@ public class EntryNodeWriter
     private final Node entryNode;
     private final CacheKey cacheKey;
     private final CacheContent cacheContent;
-    private final int expireTimeInSeconds;
+    private final long expireTimeInMilliSeconds;
 
-    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent,
-            Integer expireTimeInSeconds){
+    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent, long expireTimeInMilliSeconds){
         this.session = session;
         this.entryNode = entryNode;
         this.cacheKey = cacheKey;
         this.cacheContent = cacheContent;
-        this.expireTimeInSeconds = expireTimeInSeconds;
+        this.expireTimeInMilliSeconds = expireTimeInMilliSeconds;
     }
 
     /**
@@ -74,7 +71,7 @@ public class EntryNodeWriter
         populateBinaryContent();
 
         //if we the expire time is set, set it on the node
-        if(expireTimeInSeconds > 0){
+        if(expireTimeInMilliSeconds > 0){
             setExpireTime();
         }
 
@@ -85,9 +82,7 @@ public class EntryNodeWriter
 
     private void setExpireTime() throws RepositoryException
     {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, expireTimeInSeconds);
-        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  calendar );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  expireTimeInMilliSeconds + System.currentTimeMillis() );
     }
 
     private void populateMetaData() throws RepositoryException

@@ -21,26 +21,22 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
-@References({
+@Component(service=ProcessDefinitionFactory.class, reference={
         @Reference(
                 name = "resourceDefinitionBuilder",
-                referenceInterface = ResourceDefinitionBuilder.class,
+                service = ResourceDefinitionBuilder.class,
                 policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+                cardinality = ReferenceCardinality.MULTIPLE)
 })
-@Service(ProcessDefinitionFactory.class)
 public class TagCreatorFactory extends ProcessDefinitionFactory<TagCreator> {
 
     private Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders = new ConcurrentHashMap<String, ResourceDefinitionBuilder>();
