@@ -44,6 +44,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1578 - Asset import needs additional configuration inputs
 - #1560 - Changing to osgi annotations
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
+- #1649 - Added support for custom Content-Type header.
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
