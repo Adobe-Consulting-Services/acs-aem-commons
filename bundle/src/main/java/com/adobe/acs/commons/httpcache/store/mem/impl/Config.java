@@ -30,10 +30,6 @@ import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_TTL;
         description = "Cache data store implementation for in-memory storage.")
 public @interface Config {
 
-    String PROP_TTL = PN_TTL;
-
-    String PROP_MAX_SIZE_IN_MB = PN_MAXSIZE;
-
     long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
 
     long DEFAULT_MAX_SIZE_IN_MB = 10L;
@@ -41,11 +37,11 @@ public @interface Config {
     @AttributeDefinition(name = "TTL",
             description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
             defaultValue = ""+DEFAULT_TTL)
-    long httpcache_cachestore_memcache_ttl();
+    long httpcache_cachestore_memcache_ttl() default DEFAULT_TTL;
 
     @AttributeDefinition(name = "Maximum size of this store in MB",
             description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
                     + "from the cache",
             defaultValue = ""+ DEFAULT_MAX_SIZE_IN_MB)
-    long httpcache_cachestore_memcache_maxsize();
+    long httpcache_cachestore_memcache_maxsize() default DEFAULT_MAX_SIZE_IN_MB;
 }
