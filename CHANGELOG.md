@@ -44,6 +44,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1560 - Changing to osgi annotations
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 
+### Removed
+- #1635 - Removed WCM Inbox Web Console Plugin
+
 ## [3.19.0] - 2018-11-03
 
 ### Added
