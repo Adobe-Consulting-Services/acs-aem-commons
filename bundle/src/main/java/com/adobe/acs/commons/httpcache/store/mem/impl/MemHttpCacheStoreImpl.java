@@ -28,7 +28,6 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import com.adobe.granite.confmgr.Conf;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -36,7 +35,6 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -67,8 +65,29 @@ import java.util.concurrent.TimeUnit;
       "webconsole.configurationFactory.nameHint" + "=" +  "TTL: {httpcache.cachestore.memcache.ttl}, "
                 + "Max size in MB: {httpcache.cachestore.memcache.maxsize}"
 })
-@Designate(ocd=Config.class)
+@Designate(ocd= MemHttpCacheStoreImpl.Config.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
+            description = "Cache data store implementation for in-memory storage.")
+    public static @interface Config {
+
+        long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+
+        long DEFAULT_MAX_SIZE_IN_MB = 10L;
+
+        @AttributeDefinition(name = "TTL",
+                description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
+                defaultValue = ""+DEFAULT_TTL)
+        long httpcache_cachestore_memcache_ttl() default DEFAULT_TTL;
+
+        @AttributeDefinition(name = "Maximum size of this store in MB",
+                description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
+                        + "from the cache",
+                defaultValue = ""+ DEFAULT_MAX_SIZE_IN_MB)
+        long httpcache_cachestore_memcache_maxsize() default DEFAULT_MAX_SIZE_IN_MB;
+    }
+
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
@@ -276,5 +295,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
                 new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
 
     }
+
 
 }

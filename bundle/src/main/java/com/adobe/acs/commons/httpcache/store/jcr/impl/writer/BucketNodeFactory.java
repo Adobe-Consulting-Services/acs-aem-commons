@@ -26,7 +26,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import com.adobe.acs.commons.httpcache.store.jcr.impl.Config;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 
@@ -56,7 +56,7 @@ public class BucketNodeFactory
         this.cacheRoot = session.getNode(cacheRootPath);
     }
 
-    public BucketNodeFactory(Session session, CacheKey key, Config config) throws RepositoryException, BucketNodeFactoryException {
+    public BucketNodeFactory(Session session, CacheKey key, JCRHttpCacheStoreImpl.Config config) throws RepositoryException, BucketNodeFactoryException {
         this.key = key;
         this.cacheKeySplitDepth = config.httpcache_config_jcr_bucketdepth();
 

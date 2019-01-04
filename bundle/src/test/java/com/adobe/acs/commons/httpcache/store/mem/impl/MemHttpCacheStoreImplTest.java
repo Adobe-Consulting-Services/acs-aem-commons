@@ -60,7 +60,7 @@ public class MemHttpCacheStoreImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
-        systemUnderTest.activate(new Config(){
+        systemUnderTest.activate(new MemHttpCacheStoreImpl.Config(){
 
             @Override
             public Class<? extends Annotation> annotationType() {
