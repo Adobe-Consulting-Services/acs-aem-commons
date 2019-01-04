@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
 - #1560 - Changing to osgi annotations
+- #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
 
