@@ -39,14 +39,14 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 /**
  * When using the SAML 2.0 Template from Okta, traditional Single Log Out (SLO) support
  * is not available. Logout is instead supported through a special URL.
- * 
+ *
  * Details are here: https://community.okta.com/community/okta/blog/2014/01/31/logout-and-redirect-to-an-url
  */
 
 
 /**
- * 
- * TODO: 
+ *
+ * TODO:
  * - improve the descriptions
  * - add a configuration policy to only work with a provided configuration
  *
@@ -58,16 +58,20 @@ configurationPolicy=ConfigurationPolicy.REQUIRE,
 })
 @Designate(ocd=OktaLogoutHandler.Config.class)
 public class OktaLogoutHandler implements AuthenticationHandler {
-   
+
    @ObjectClassDefinition(name = "ACS AEM Commons - Okta Logout Handler",
         description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout")
    public @interface Config {
-       @AttributeDefinition(defaultValue = ""+5003)
-        int service_ranking();
-       
-       @AttributeDefinition(defaultValue = "/")
-       String path();
-       
+
+       int DEFAULT_SERVICE_RANKING = 5003;
+       String DEFAULT_PATH = "/";
+
+       @AttributeDefinition(defaultValue = ""+ DEFAULT_SERVICE_RANKING)
+       int service_ranking() default DEFAULT_SERVICE_RANKING;
+
+       @AttributeDefinition(defaultValue = DEFAULT_PATH)
+       String path() default DEFAULT_PATH;
+
        @AttributeDefinition
        String okta_host_name();
 
