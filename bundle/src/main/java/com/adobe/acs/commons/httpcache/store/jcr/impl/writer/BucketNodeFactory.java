@@ -26,6 +26,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.httpcache.store.jcr.impl.Config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 
@@ -53,6 +54,16 @@ public class BucketNodeFactory
             throw new BucketNodeFactoryException("Cache root path " + cacheRootPath + " not found!");
         }
         this.cacheRoot = session.getNode(cacheRootPath);
+    }
+
+    public BucketNodeFactory(Session session, CacheKey key, Config config) throws RepositoryException, BucketNodeFactoryException {
+        this.key = key;
+        this.cacheKeySplitDepth = config.httpcache_config_jcr_bucketdepth();
+
+        if(!session.nodeExists(config.httpcache_config_jcr_rootpath())) {
+            throw new BucketNodeFactoryException("Cache root path " + config.httpcache_config_jcr_rootpath() + " not found!");
+        }
+        this.cacheRoot = session.getNode(config.httpcache_config_jcr_rootpath());
     }
 
     public Node getBucketNode() throws RepositoryException

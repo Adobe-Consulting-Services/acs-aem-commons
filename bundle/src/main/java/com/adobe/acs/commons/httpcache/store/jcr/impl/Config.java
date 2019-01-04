@@ -26,12 +26,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
         description = "Cache data store implementation for JCR storage.")
 public @interface Config {
 
-    //property keys
-    String PN_ROOTPATH = "httpcache.config.jcr.rootpath";
-    String PN_BUCKETDEPTH = "httpcache.config.jcr.bucketdepth";
-    String PN_SAVEDELTA = "httpcache.config.jcr.savedelta";
-    String PN_EXPIRETIMEINMILLISECONDS = "httpcache.config.jcr.expiretimeinmilliseconds";
-
     //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
     int DEFAULT_BUCKETDEPTH = 10;
 
@@ -42,13 +36,14 @@ public @interface Config {
     long DEFAULT_EXPIRETIMEINMILISECONDS = 604800;
 
     String DEFAULT_ROOTPATH = "/var/acs-commons/httpcache";
+    String DEFAULT_CRON_EXPRESSION = "0 0 12 1/1 * ? *";
 
     @AttributeDefinition(
             name = "Cache clean-up schedule",
             description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
-            defaultValue = "0 0 12 1/1 * ? *"
+            defaultValue = DEFAULT_CRON_EXPRESSION
     )
-    String scheduler_expression();
+    String scheduler_expression() default DEFAULT_CRON_EXPRESSION;
 
     @AttributeDefinition(
             name = "Cache bucketing tree depth",
@@ -57,9 +52,8 @@ public @interface Config {
                     + "The more data cached, the higher this value should be. "
                     + "Downside is that the higher the value, the longer the retrieval of cache entries takes if the buckets are relatively low on entries.",
             defaultValue = "" + DEFAULT_BUCKETDEPTH
-
     )
-    int httpcache_config_jcr_bucketdepth();
+    int httpcache_config_jcr_bucketdepth() default DEFAULT_BUCKETDEPTH;
 
 
     @AttributeDefinition(
@@ -67,19 +61,19 @@ public @interface Config {
             description = "Points to the location of the cache root parent node in the JCR repository",
             defaultValue = DEFAULT_ROOTPATH
     )
-    String httpcache_config_jcr_rootpath();
+    String httpcache_config_jcr_rootpath() default DEFAULT_ROOTPATH;
 
     @AttributeDefinition(
             name = "Save threshold",
             description = "The threshold to add,remove and modify nodes when handling the cache",
             defaultValue = "" + DEFAULT_SAVEDELTA
     )
-    int httpcache_config_jcr_savedelta();
+    int httpcache_config_jcr_savedelta() default DEFAULT_SAVEDELTA;
 
     @AttributeDefinition(
             name = "Expire time in miliseconds",
             description = "The time in miliseconds after which nodes will be removed by the scheduled cleanup service. ",
             defaultValue = "" + DEFAULT_EXPIRETIMEINMILISECONDS
     )
-    long httpcache_config_jcr_expiretimeinmiliseconds();
+    long httpcache_config_jcr_expiretimeinmiliseconds() default DEFAULT_EXPIRETIMEINMILISECONDS;
 }
