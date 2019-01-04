@@ -32,16 +32,18 @@
 		<label acs-coral-heading>
 			Include Children?
 		</label>
-		<div class="coral-Selector">
-			<label class="coral-Selector-option">
-				<input ng-model="form.includeChildren" type="radio" class="coral-Selector-input" name="includeChildren" value="true" />
-				<span class="coral-Selector-description">Yes</span>
-			</label>
-			<label class="coral-Selector-option">
-				<input ng-model="form.includeChildren" type="radio" class="coral-Selector-input" name="includeChildren" value="false" />
-				<span class="coral-Selector-description">No</span>
-			</label>
-		</div>
+		<span>
+			<div class="coral-Selector">
+				<label class="coral-Selector-option">
+					<input ng-model="form.includeChildren" type="radio" class="coral-Selector-input" name="includeChildren" value="true" />
+					<span class="coral-Selector-description">Yes</span>
+				</label>
+				<label class="coral-Selector-option">
+					<input ng-model="form.includeChildren" type="radio" class="coral-Selector-input" name="includeChildren" value="false" />
+					<span class="coral-Selector-description">No</span>
+				</label>
+			</div>
+		</span>
 	</div>
 	
 	<div class="form-row">

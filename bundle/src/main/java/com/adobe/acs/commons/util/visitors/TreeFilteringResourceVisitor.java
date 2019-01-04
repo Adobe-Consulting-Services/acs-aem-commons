@@ -21,7 +21,7 @@ package com.adobe.acs.commons.util.visitors;
 
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 
 /**
  * Tree visitor which allows special cases such as how to handle child nodes

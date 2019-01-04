@@ -19,46 +19,45 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
 /**
- * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.
+ * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
+ * objects.
  */
-@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
-    label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
-@SuppressWarnings("PMD.MoreThanOneLogger")
-@Properties({
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
+@Component( configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+      "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
 })
+@SuppressWarnings("PMD.MoreThanOneLogger")
+@Designate(ocd=JsonEventLogger.Config.class, factory=true)
 public class JsonEventLogger implements EventHandler {
 
     /**
@@ -66,7 +65,9 @@ public class JsonEventLogger implements EventHandler {
      */
     private static final Logger log = LoggerFactory.getLogger(JsonEventLogger.class);
 
-    /** We add this timestamp property to all logged events */
+    /**
+     * We add this timestamp property to all logged events
+     */
     private static final String PROP_TIMESTAMP = "_timestamp";
 
     private static final String DEFAULT_LEVEL = "INFO";
@@ -88,24 +89,34 @@ public class JsonEventLogger implements EventHandler {
             return null;
         }
     }
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
+    public @interface Config {
+        @AttributeDefinition(name = "Event Topics",
+                description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
+        String[] event_topics();
 
-    @Property(label = "Event Topics", unbounded = PropertyUnbounded.ARRAY,
-            description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
+        @AttributeDefinition(name = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
+        String event_filter();
+
+        @AttributeDefinition(name = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
+        String event_logger_category();
+
+        @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
+                @Option(value = "TRACE", label = "Trace"),
+                @Option(value = "DEBUG", label = "Debug"),
+                @Option(value = "INFO", label = "Information"),
+                @Option(value = "WARN", label = "Warnings"),
+                @Option(value = "ERROR", label = "Error")})
+        String event_logger_level();
+    }
+
     private static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
 
-    @Property(label = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
     private static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
 
-    @Property(label = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
     private static final String OSGI_CATEGORY = "event.logger.category";
 
-    @Property(label = "Logger Level", value = DEFAULT_LEVEL, options = {
-            @PropertyOption(name = "TRACE", value = "Trace"),
-            @PropertyOption(name = "DEBUG", value = "Debug"),
-            @PropertyOption(name = "INFO", value = "Information"),
-            @PropertyOption(name = "WARN", value = "Warnings"),
-            @PropertyOption(name = "ERROR", value = "Error")
-    }, description = "Select the logging level the messages should be sent with.")
     private static final String OSGI_LEVEL = "event.logger.level";
 
     private String[] topics;
@@ -115,9 +126,9 @@ public class JsonEventLogger implements EventHandler {
     private boolean valid;
 
     /**
-     * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to have an
-     * SCR-configurable logger separate from the normal class-level log object defined
-     * above.
+     * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to
+     * have an SCR-configurable logger separate from the normal class-level log
+     * object defined above.
      */
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private Logger eventLogger;
@@ -127,30 +138,28 @@ public class JsonEventLogger implements EventHandler {
 
     /**
      * Writes an event to the configured logger using the configured log level
+     *
      * @param event an OSGi Event
      */
     private void logEvent(Event event) {
         log.trace("[logEvent] event={}", event);
-        try {
-            String message = constructMessage(event);
-            if (logLevel == LogLevel.ERROR) {
-                this.eventLogger.error(message);
-            } else if (logLevel == LogLevel.WARN) {
-                this.eventLogger.warn(message);
-            } else if (logLevel == LogLevel.INFO) {
-                this.eventLogger.info(message);
-            } else if (logLevel == LogLevel.DEBUG) {
-                this.eventLogger.debug(message);
-            } else if (logLevel == LogLevel.TRACE) {
-                this.eventLogger.trace(message);
-            }
-        } catch (JSONException e) {
-            log.error("[logEvent] failed to construct log message from event: " + event.toString(), e);
+        String message = constructMessage(event);
+        if (logLevel == LogLevel.ERROR) {
+            this.eventLogger.error(message);
+        } else if (logLevel == LogLevel.WARN) {
+            this.eventLogger.warn(message);
+        } else if (logLevel == LogLevel.INFO) {
+            this.eventLogger.info(message);
+        } else if (logLevel == LogLevel.DEBUG) {
+            this.eventLogger.debug(message);
+        } else if (logLevel == LogLevel.TRACE) {
+            this.eventLogger.trace(message);
         }
     }
 
     /**
      * Determines if the logger category is enabled at the configured level
+     *
      * @return true if the logger is enabled at the configured log level
      */
     private boolean isLoggerEnabled() {
@@ -171,65 +180,37 @@ public class JsonEventLogger implements EventHandler {
     }
 
     /**
-     * Serializes an OSGi {@link org.osgi.service.event.Event} into a JSON object string
+     * Serializes an OSGi {@link org.osgi.service.event.Event} into a JSON
+     * object string
      *
      * @param event the event to be serialized as
      * @return a serialized JSON object
      * @throws org.apache.sling.commons.json.JSONException
      */
-    protected static String constructMessage(Event event) throws JSONException {
-        JSONObject obj = new JSONObject();
+    protected static String constructMessage(Event event) {
+        Map<String, Object> eventProperties = new LinkedHashMap<>();
         for (String prop : event.getPropertyNames()) {
             Object val = event.getProperty(prop);
             Object converted = convertValue(val);
-            obj.put(prop, converted == null ? val : converted);
+            eventProperties.put(prop, converted == null ? val : converted);
         }
-        obj.put(PROP_TIMESTAMP, ISO8601.format(Calendar.getInstance()));
-        return obj.toString();
+        eventProperties.put(PROP_TIMESTAMP, ISO8601.format(Calendar.getInstance()));
+        Gson gson = new Gson();
+        return gson.toJson(eventProperties);
     }
 
     /**
-     * Converts individual java objects to JSONObjects using reflection and recursion
+     * Converts individual java objects to JSONObjects using reflection and
+     * recursion
+     *
      * @param val an untyped Java object to try to convert
-     * @return {@code val} if not handled, or return a converted JSONObject, JSONArray, or String
+     * @return {@code val} if not handled, or return a converted JSONObject,
+     * JSONArray, or String
      * @throws JSONException
      */
     @SuppressWarnings({"unchecked", "squid:S3776"})
-    protected static Object convertValue(Object val) throws JSONException {
-        if (val.getClass().isArray()) {
-            Object[] vals = (Object[]) val;
-            JSONArray array = new JSONArray();
-            for (Object arrayVal : vals) {
-                Object converted = convertValue(arrayVal);
-                array.put(converted == null ? arrayVal : converted);
-            }
-            return array;
-        } else if (val instanceof Collection) {
-            JSONArray array = new JSONArray();
-            for (Object arrayVal : (Collection<?>) val) {
-                Object converted = convertValue(arrayVal);
-                array.put(converted == null ? arrayVal : converted);
-            }
-            return array;
-        } else if (val instanceof Map) {
-            Map<?, ?> valMap = (Map<?, ?>) val;
-            JSONObject obj = new JSONObject();
-            if (valMap.isEmpty()) {
-                return obj;
-            } else if (valMap.keySet().iterator().next() instanceof String) {
-                for (Map.Entry<String, ?> entry : ((Map<String, ?>) valMap).entrySet()) {
-                    Object converted = convertValue(entry.getValue());
-                    obj.put(entry.getKey(), converted == null ? entry.getValue() : converted);
-                }
-            } else {
-                for (Map.Entry<?, ?> entry : valMap.entrySet()) {
-                    Object converted = convertValue(entry.getValue());
-                    obj.put(entry.getKey().toString(),
-                            converted == null ? entry.getValue() : converted);
-                }
-            }
-            return obj;
-        } else if (val instanceof Calendar) {
+    protected static Object convertValue(Object val) {
+        if (val instanceof Calendar) {
             try {
                 return ISO8601.format((Calendar) val);
             } catch (IllegalArgumentException e) {
@@ -251,7 +232,6 @@ public class JsonEventLogger implements EventHandler {
     //
     // ---------------------------------------------------------< EventHandler methods >-----
     //
-
     /**
      * {@inheritDoc}
      */
@@ -265,7 +245,6 @@ public class JsonEventLogger implements EventHandler {
     //
     // ---------------------------------------------------------< SCR methods >-------------
     //
-
     @Activate
     @SuppressWarnings("squid:S1149")
     protected void activate(ComponentContext ctx) {
@@ -309,7 +288,6 @@ public class JsonEventLogger implements EventHandler {
     //
     // ---------------------------------------------------------< Object methods >-------------
     //
-
     @Override
     public String toString() {
         return "EventLogger{"
@@ -321,6 +299,5 @@ public class JsonEventLogger implements EventHandler {
                 + ", enabled=" + isLoggerEnabled()
                 + '}';
     }
-
 
 }

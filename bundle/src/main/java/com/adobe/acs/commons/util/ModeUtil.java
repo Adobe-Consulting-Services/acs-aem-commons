@@ -22,10 +22,11 @@ package com.adobe.acs.commons.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.felix.scr.annotations.Component;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.component.annotations.Component;
 
 import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.AuthoringUIMode;
@@ -44,6 +45,19 @@ public final class ModeUtil {
     private static boolean isPublish = false;
 
     private static Set<String> runmodes = new HashSet<String>();
+
+    public static WCMMode getMode(SlingHttpServletRequest req) {
+        if (req.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME) == null) {
+            return WCMMode.DISABLED;
+        } else {
+            String mode = String.valueOf(req.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME));
+            try {
+                return WCMMode.valueOf(mode);
+            } catch (IllegalArgumentException ex) {
+                return WCMMode.DISABLED;
+            }
+        }
+    }
 
     /**
      * Is AEM runmode author.
@@ -82,7 +96,7 @@ public final class ModeUtil {
      * @return true if the request is in analytics mode
      */
     public static boolean isAnalytics(SlingHttpServletRequest request) {
-        return WCMMode.ANALYTICS == WCMMode.fromRequest(request);
+        return WCMMode.ANALYTICS == getMode(request);
     }
 
     /**
@@ -93,7 +107,7 @@ public final class ModeUtil {
      * @return true if the request is in design mode
      */
     public static boolean isDesign(SlingHttpServletRequest request) {
-        return WCMMode.DESIGN == WCMMode.fromRequest(request);
+        return WCMMode.DESIGN == getMode(request);
     }
 
     /**
@@ -104,7 +118,7 @@ public final class ModeUtil {
      * @return true if the request is in disabled mode
      */
     public static boolean isDisabled(SlingHttpServletRequest request) {
-        return WCMMode.DISABLED == WCMMode.fromRequest(request);
+        return WCMMode.DISABLED == getMode(request);
     }
 
     /**
@@ -115,7 +129,7 @@ public final class ModeUtil {
      * @return true if the request is in edit mode
      */
     public static boolean isEdit(SlingHttpServletRequest request) {
-        return WCMMode.EDIT == WCMMode.fromRequest(request);
+        return WCMMode.EDIT == getMode(request);
     }
 
     /**
@@ -126,7 +140,7 @@ public final class ModeUtil {
      * @return true if the request is in preview mode
      */
     public static boolean isPreview(SlingHttpServletRequest request) {
-        return WCMMode.PREVIEW == WCMMode.fromRequest(request);
+        return WCMMode.PREVIEW == getMode(request);
     }
 
     /**
@@ -137,7 +151,7 @@ public final class ModeUtil {
      * @return true if the request is in read-only mode
      */
     public static boolean isReadOnly(SlingHttpServletRequest request) {
-        return WCMMode.READ_ONLY == WCMMode.fromRequest(request);
+        return WCMMode.READ_ONLY == getMode(request);
     }
 
     /**

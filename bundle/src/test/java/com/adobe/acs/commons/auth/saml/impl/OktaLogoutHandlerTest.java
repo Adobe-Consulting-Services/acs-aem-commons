@@ -19,24 +19,37 @@
  */
 package com.adobe.acs.commons.auth.saml.impl;
 
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
+@RunWith(MockitoJUnitRunner.class)
 public class OktaLogoutHandlerTest {
 
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
+    @Mock
+    private OktaLogoutHandler.Config config;
+    
+    
     private OktaLogoutHandler underTest = new OktaLogoutHandler();
 
     @Test
@@ -49,14 +62,17 @@ public class OktaLogoutHandlerTest {
         assertFalse(underTest.requestCredentials(context.request(), context.response()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = Exception.class)
     public void activateWithoutHostThrowsIllegalArgumentException() {
-        underTest.activate(Collections.emptyMap());
+
+        context.registerInjectActivateService(underTest, Collections.emptyMap());
+
     }
 
     @Test
     public void testDropCredentials() throws Exception {
-        underTest.activate(Collections.singletonMap("okta.host.name", "www.okta.com"));
+
+        context.registerInjectActivateService(underTest, Collections.singletonMap("okta.host.name", "www.okta.com"));
         underTest.dropCredentials(context.request(), context.response());
 
         assertRedirect("https://www.okta.com/login/signout", context.response());
@@ -64,11 +80,12 @@ public class OktaLogoutHandlerTest {
 
     @Test
     public void testDropCredentialsWithFromUri() throws Exception {
+
         Map<String, Object> properties = new HashMap<>();
         properties.put("okta.host.name", "www.okta.com");
         properties.put("from.uri", "www.myco.com");
+        context.registerInjectActivateService(underTest, properties);
 
-        underTest.activate(properties);
         underTest.dropCredentials(context.request(), context.response());
 
         assertRedirect("https://www.okta.com/login/signout?fromURI=www.myco.com", context.response());

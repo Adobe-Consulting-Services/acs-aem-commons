@@ -20,40 +20,35 @@
 package com.adobe.acs.commons.http.impl;
 
 import com.adobe.acs.commons.http.HttpClientFactory;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 
-
-@Component(
-        label = "ACS AEM Commons - Http Components Fluent Executor Factory",
-        description = "ACS AEM Commons - Http Components Fluent Executor Factory",
-        configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
-        metatype = true)
-@Service
-@Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = HttpClientFactory.class)
+@Designate(ocd=HttpClientFactoryImpl.Config.class,factory=true)
 public class HttpClientFactoryImpl implements HttpClientFactory {
+
     public static final boolean DEFAULT_USE_SSL = false;
 
     public static final boolean DEFAULT_DISABLE_CERT_CHECK = false;
@@ -61,31 +56,57 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
     public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
 
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - Http Components Fluent Executor Factory",
+        description = "ACS AEM Commons - Http Components Fluent Executor Factory")
+    public @interface Config {
+    
+    @AttributeDefinition(name = "Factory Name", description = "Name of this factory")
+    String factory_name();
+    
+        @AttributeDefinition(name = "host name", description = "host name")
+        String hostname();
 
-    @Property(label = "host name", description = "host name")
+        @AttributeDefinition(name = "port", description = "port")
+        int port();
+
+        @AttributeDefinition(name = "Use SSL", description = "Select it if only using https connection for calls.", defaultValue = ""+DEFAULT_USE_SSL)
+        boolean use_ssl();
+
+        @AttributeDefinition(name = "Disable certificate check", description = "If selected it will disable certificate check for the SSL connection.",
+                defaultValue = ""+DEFAULT_DISABLE_CERT_CHECK)
+        boolean disable_certificate_check();
+
+        @AttributeDefinition(name = "Username", description = "Username for requests (using basic authentication)")
+        String username();
+
+        @AttributeDefinition(name = "Password", description = "Password for requests (using basic authentication)")
+        @SuppressWarnings("squid:S2068")
+        String password();
+
+        @AttributeDefinition(name = "Socket Timeout", description = "Socket timeout in milliseconds", defaultValue = ""+DEFAULT_SOCKET_TIMEOUT)
+        int so_timeout();
+
+        @AttributeDefinition(name = "Connect Timeout", description = "Connect timeout in milliseconds", defaultValue = ""+DEFAULT_CONNECT_TIMEOUT)
+        int conn_timeout();
+    
+    }
+
     private static final String PROP_HOST_DOMAIN = "hostname";
 
-    @Property(label = "port", description = "port")
     private static final String PROP_GATEWAY_PORT = "port";
 
-    @Property(label = "Use SSL", description = "Select it if only using https connection for calls.", boolValue = DEFAULT_USE_SSL)
     private static final String PROP_USE_SSL = "use.ssl";
 
-    @Property(label = "Disable certificate check", description = "If selected it will disable certificate check for the SSL connection.",
-            boolValue = DEFAULT_DISABLE_CERT_CHECK)
     private static final String PROP_DISABLE_CERT_CHECK = "disable.certificate.check";
 
-    @Property(label = "Username", description = "Username for requests (using basic authentication)")
     private static final String PROP_USERNAME = "username";
 
-    @Property(label = "Password", description = "Password for requests (using basic authentication)")
     @SuppressWarnings("squid:S2068")
     private static final String PROP_PASSWORD = "password";
 
-    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
     private static final String PROP_SO_TIMEOUT = "so.timeout";
 
-    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
     private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
 
     @Reference
@@ -123,12 +144,12 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
         boolean disableCertCheck = PropertiesUtil.toBoolean(config.get(PROP_DISABLE_CERT_CHECK), DEFAULT_DISABLE_CERT_CHECK);
 
         if (useSSL && disableCertCheck) {
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    return true;
-                }
-            }).build();
-            builder.setHostnameVerifier(new AllowAllHostnameVerifier()).setSslcontext(sslContext);
+            // Disable hostname verification and allow self-signed certificates
+            SSLContextBuilder sslbuilder = new SSLContextBuilder();
+            sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
+            builder.setSSLSocketFactory(sslsf);
         }
         httpClient = builder.build();
         executor = Executor.newInstance(httpClient);

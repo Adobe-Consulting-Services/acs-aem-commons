@@ -23,6 +23,11 @@ package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 import java.util.Collection;
 
 public class CustomChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
+    
+    /**
+     * TODO: Please clarifiy the purpose of this class ... we should make the AbstractChecksumGeneratorOptions
+     * a non-abstract class and use it.
+     */
 
     @Override
     public void addIncludedNodeTypes(String[] arr) {

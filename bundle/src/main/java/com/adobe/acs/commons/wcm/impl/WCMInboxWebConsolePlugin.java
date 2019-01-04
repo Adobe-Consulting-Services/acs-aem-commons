@@ -36,134 +36,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Web console plugin which allows for management of users WCM Notification Inboxes.
  */
 @SuppressWarnings("serial")
-@Component
-@Service
-@Properties({ @Property(name = "felix.webconsole.label", value = "wcm-inbox"),
-        @Property(name = "felix.webconsole.title", value = "WCM Inbox") })
+@Component(service=HttpServlet.class,property= {"felix.webconsole.label=wcm-inbox",
+      "felix.webconsole.title=WCM Inbox"})
 public class WCMInboxWebConsolePlugin extends HttpServlet {
-
-    @Reference
-    private ResourceResolverFactory rrFactory;
-
-    private static final String SERVICE_NAME = "wcm-inbox-cleanup";
-    private static final Map<String, Object> AUTH_INFO;
-
-    static {
-        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date yesterday = cal.getTime();
 
         PrintWriter pw = resp.getWriter();
-
-        ResourceResolver resolver = null;
-        try {
-            resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
-
-            pw.println("<p class='statline ui-state-highlight'>Inbox Notification Configurations</p>");
-            pw.println("<ul>");
-
-            @SuppressWarnings("deprecation")
-            Iterator<Resource> configured = resolver
-                    .findResources(
-                            "/jcr:root//element(*, rep:User)/wcm/notification/config/subscriptions/element(*)[@channel='inbox']",
-                            Query.XPATH);
-            while (configured.hasNext()) {
-                String path = configured.next().getPath();
-                pw.println("<li>");
-                pw.printf("<a target='_new' href='/crx/de/index.jsp#%s'>%s</a>", path, path);
-                pw.println("</li>");
-            }
-            pw.println("</ul>");
-
-            pw.println("<br/>");
-
-            pw.println("<p class='statline ui-state-highlight'>Inbox Notification Sizes</p>");
-            pw.println("<table class='content'>");
-            pw.println("<tr><th class='content'>Path</th><th class='content'>Count</th><th class='content'>In Last 24 Hours</th><th></th></tr>");
-
-            @SuppressWarnings("deprecation")
-            Iterator<Resource> inboxes = resolver.findResources(
-                    "/jcr:root//element(*, rep:User)/wcm/notification/inbox", Query.XPATH);
-            while (inboxes.hasNext()) {
-                Resource inbox = inboxes.next();
-                long[] childCount = countChildren(inbox, yesterday);
-                pw.printf(
-                        "<tr><td class='content'>%s</td><td class='content'>%s</td><td class='content'>%s</td><td><form method='POST' action=''><input type='hidden' name='path' value='%s'><input type='submit' value='Clear'></form></td></tr>%n",
-                        inbox.getPath(), childCount[0], childCount[1], inbox.getPath());
-            }
-
-            pw.println("</table>");
-
-        } catch (Exception e) {
-            throw new ServletException(e);
-        } finally {
-            if (resolver != null && resolver.isLive()) {
-                resolver.close();
-            }
-        }
-    }
-    
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getParameter("path");
-        if (path != null) {
-            ResourceResolver resolver = null;
-            try {
-                int counter = 0;
-                resolver = rrFactory.getServiceResourceResolver(AUTH_INFO);
-                Session session = resolver.adaptTo(Session.class);
-                Node node = session.getNode(path);
-                NodeIterator it = node.getNodes();
-                while (it.hasNext()) {
-                    it.nextNode().remove();
-                    counter++;
-                }
-                session.save();
-
-                resp.getWriter().printf("<p class='statline ui-state-error'>Deleted %s notifications</p>%n", counter);
-            } catch (Exception e) {
-                throw new ServletException(e);
-            } finally {
-                if (resolver != null && resolver.isLive()) {
-                    resolver.close();
-                }
-            }
-        }
-        resp.sendRedirect((String) req.getAttribute("felix.webconsole.pluginRoot"));
-    }
-
-    private long[] countChildren(Resource inbox, Date yesterday) {
-        long counter = 0;
-        long yesterdayCounter = 0;
-        Iterator<Resource> children = inbox.listChildren();
-        while (children.hasNext()) {
-            Resource child = children.next();
-            ValueMap map = child.adaptTo(ValueMap.class);
-            Date date = map.get("modifiedDate", Date.class);
-            if (date != null && date.after(yesterday)) {
-                yesterdayCounter++;
-            }
-            counter++;
-        }
-        return new long[] { counter, yesterdayCounter };
+        pw.println("This web console plugin has been removed as it is specific to the Classic UI.");
     }
 }

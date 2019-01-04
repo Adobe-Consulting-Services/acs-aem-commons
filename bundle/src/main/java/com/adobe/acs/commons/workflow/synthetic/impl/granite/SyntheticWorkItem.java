@@ -36,11 +36,14 @@ public class SyntheticWorkItem implements WorkItem {
     private final UUID uuid = UUID.randomUUID();
     private Date timeStarted = null;
     private Date timeEnded = null;
+    private Date dueTime = null;
+    private Date progressBeginTime = null;
     private Workflow workflow;
 
     private final WorkflowData workflowData;
 
     private MetaDataMap metaDataMap = new SyntheticMetaDataMap();
+    private Priority priority = null;
 
     public SyntheticWorkItem(final WorkflowData workflowData) {
         this.workflowData = workflowData;
@@ -62,6 +65,16 @@ public class SyntheticWorkItem implements WorkItem {
         return this.timeEnded == null ? null : (Date) this.timeEnded.clone();
     }
 
+    @Override
+    public Date getDueTime() {
+        return dueTime;
+    }
+
+    @Override
+    public Date getProgressBeginTime() {
+        return progressBeginTime;
+    }
+
     public final void setTimeEnded(final Date timeEnded) {
         if (timeEnded == null) {
             this.timeEnded = null;
@@ -78,6 +91,21 @@ public class SyntheticWorkItem implements WorkItem {
     @Override
     public final String getCurrentAssignee() {
         return CURRENT_ASSIGNEE;
+    }
+
+    @Override
+    public void setDueTime(Date date) {
+        dueTime = date;
+    }
+
+    @Override
+    public void setProgressBeginTime(Date date) {
+        progressBeginTime = date;
+    }
+
+    @Override
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 
     /**
@@ -129,5 +157,10 @@ public class SyntheticWorkItem implements WorkItem {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Priority getPriority() {
+        return priority;
     }
 }

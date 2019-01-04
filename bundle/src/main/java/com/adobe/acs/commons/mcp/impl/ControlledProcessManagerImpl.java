@@ -37,31 +37,29 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of ControlProcessManager service
  */
-@Component
-@Service(ControlledProcessManager.class)
-@Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Manage Controlled Processes")
+@Component(service=ControlledProcessManager.class, property= {
+"jmx.objectname" + "=" + "com.adobe.acs.commons:type=Manage Controlled Processes"
+})
 public class ControlledProcessManagerImpl implements ControlledProcessManager {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerImpl.class);
 
     private static final String SERVICE_NAME = "manage-controlled-processes";
     private static final Map<String, Object> AUTH_INFO;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinitionFactory", unbind = "unbindDefinitionFactory", referenceInterface = ProcessDefinitionFactory.class, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, bind = "bindDefinitionFactory", unbind = "unbindDefinitionFactory", service = ProcessDefinitionFactory.class, policy = ReferencePolicy.DYNAMIC)
     private final List<ProcessDefinitionFactory> processDefinitionFactories = new CopyOnWriteArrayList<>();
 
     static {
@@ -184,7 +182,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
                 }
             });
             visitor.accept(tree);
-        } catch (LoginException ex) {
+        } catch (Exception ex) {
             LOG.error("Error getting inactive process list", ex);
         }
         return processes;

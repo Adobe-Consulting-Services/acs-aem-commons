@@ -27,12 +27,9 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGe
 import com.google.gson.stream.JsonWriter;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,19 +45,16 @@ import java.util.Date;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component
-@Properties({
-    @Property(
-            name="sling.servlet.paths",
-            value= JSONDumpServlet.SERVLET_PATH
-            ),
-    @Property(
-            name="sling.auth.requirements",
-            value= "-" + JSONDumpServlet.SERVLET_PATH
-            )
-})
-@Service
+@Component(property= {
+        "sling.servlet.paths="+JSONDumpServlet.SERVLET_PATH,
+        "sling.auth.requirements=-"+JSONDumpServlet.SERVLET_PATH
+        })
+
 public class JSONDumpServlet extends BaseChecksumServlet {
+    
+    
+    
+    
     private static final Logger log = LoggerFactory.getLogger(JSONDumpServlet.class);
 
     public static final String SERVLET_PATH =  ServletConstants.SERVLET_PATH  + "."
@@ -78,6 +72,8 @@ public class JSONDumpServlet extends BaseChecksumServlet {
         }
     }
 
+
+    @Override
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
     ServletException, IOException {
         try {
@@ -114,13 +110,10 @@ public class JSONDumpServlet extends BaseChecksumServlet {
         Set<String> paths = RequestChecksumGeneratorOptions.getPaths(request);
 
         if (CollectionUtils.isEmpty(paths)) {
-            try {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print(
-                        "ERROR: At least one path must be specified");
-            } catch (IOException ioe) {
-                throw ioe;
-            }
+
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().print("ERROR: At least one path must be specified");
+
         } else {
             Session session = request.getResourceResolver().adaptTo(Session.class);
 

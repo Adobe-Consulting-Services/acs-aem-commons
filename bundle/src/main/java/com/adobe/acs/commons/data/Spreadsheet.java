@@ -44,8 +44,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.request.RequestParameter;
 
 /**
- * Simple abstraction of reading a single spreadsheet of values. Expects a header row of named columns (case-sensitive)
- * If provided, will also filter data rows missing required columns to prevent processing errors.
+ * Simple abstraction of reading a single spreadsheet of values. Expects a
+ * header row of named columns (case-sensitive) If provided, will also filter
+ * data rows missing required columns to prevent processing errors.
  */
 @ProviderType
 public class Spreadsheet {
@@ -116,8 +117,7 @@ public class Spreadsheet {
 
         Row firstRow = rows.next();
         headerRow = readRow(firstRow).stream()
-                .map(Variant::toString)
-                .map(this::convertHeaderName)
+                .map(v -> v != null ? convertHeaderName(v.toString()) : null)
                 .collect(Collectors.toList());
         headerTypes = readRow(firstRow).stream()
                 .map(Variant::toString)
@@ -157,7 +157,7 @@ public class Spreadsheet {
         boolean empty = true;
         for (int i = 0; i < data.size() && i < getHeaderRow().size(); i++) {
             String colName = getHeaderRow().get(i);
-            if (data.get(i) != null && !data.get(i).isEmpty()) {
+            if (colName != null && data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
                 if (!out.containsKey(colName)) {
                     out.put(colName, new CompositeVariant(headerTypes.get(colName)));
@@ -171,7 +171,7 @@ public class Spreadsheet {
                     }
                 } else {
                     out.get(colName).addValue(data.get(i));
-                }                    
+                }
             }
         }
         if (empty || (!requiredColumns.isEmpty() && !out.keySet().containsAll(requiredColumns))) {
@@ -208,7 +208,7 @@ public class Spreadsheet {
     public List<Map<String, CompositeVariant>> getDataRowsAsCompositeVariants() {
         return dataRows;
     }
-    
+
     public Long getRowNum(Map<String, CompositeVariant> row) {
         if (row.containsKey(ROW_NUMBER)) {
             return (Long) row.get(ROW_NUMBER).getValueAs(Long.class);
@@ -225,27 +225,33 @@ public class Spreadsheet {
     }
 
     public String convertHeaderName(String str) {
-        if (enableHeaderNameConversion) {
-            if (str.contains("@")) {
-                str = StringUtils.substringBefore(str, "@");
-            }
-            return String.valueOf(str).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
+        String name;
+        if (str.contains("@")) {
+            name = StringUtils.substringBefore(str, "@");
         } else {
-            return String.valueOf(str);
+            name = str;
         }
+        if (enableHeaderNameConversion) {
+            name = String.valueOf(name).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
+        }
+        return name;
     }
 
     /**
-     * Look for type hints in the name of a column to extract a usable type. Also look for array hints as well. <br>
-     * Possible formats: 
+     * Look for type hints in the name of a column to extract a usable type.
+     * Also look for array hints as well. <br>
+     * Possible formats:
      * <ul>
      * <li>column-name - A column named "column-name" </li>
      * <li>col@int - An integer column named "col" </li>
-     * <li>col2@int[] - An integer array colum named "col2", assumes standard delimiter (,) </li>
-     * <li>col3@string[] or col3@[] - A String array named "col3", assumes standard delimiter (,)</li>
-     * <li>col4@string[||] - A string array where values are using a custom delimiter (||)</li>
+     * <li>col2@int[] - An integer array colum named "col2", assumes standard
+     * delimiter (,) </li>
+     * <li>col3@string[] or col3@[] - A String array named "col3", assumes
+     * standard delimiter (,)</li>
+     * <li>col4@string[||] - A string array where values are using a custom
+     * delimiter (||)</li>
      * </ul>
-     * 
+     *
      * @param name
      * @return
      */
@@ -298,9 +304,10 @@ public class Spreadsheet {
     }
 
     /**
-     * Consider if a column is seen twice then that column type should be considered an array. Because String is a
-     * default assumption when no type is specified, any redefinition of a column to a more specific type will be then
-     * assumed for that property altogether.
+     * Consider if a column is seen twice then that column type should be
+     * considered an array. Because String is a default assumption when no type
+     * is specified, any redefinition of a column to a more specific type will
+     * be then assumed for that property altogether.
      *
      * @param a
      * @param b
@@ -326,5 +333,5 @@ public class Spreadsheet {
         } else {
             return Array.newInstance(clazz, 0).getClass();
         }
-    }    
+    }
 }

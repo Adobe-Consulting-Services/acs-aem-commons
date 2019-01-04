@@ -31,13 +31,10 @@ import com.adobe.acs.commons.quickly.results.impl.lists.DevConsoleResults;
 import com.adobe.acs.commons.quickly.results.impl.lists.OpsConsoleResults;
 import com.adobe.acs.commons.quickly.results.impl.lists.TouchConsoleResults;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,18 +42,10 @@ import java.util.List;
 /**
  * ACS AEM Commons - Quickly - Go Operation
  */
-@Component
-@Properties({
-        @Property(
-                name = Operation.PROP_CMD,
-                value = GoOperationImpl.CMD
-        ),
-        @Property(
-                name = Operation.PROP_DESCRIPTION,
-                value = "Go straight to specific consoles in AEM"
-        )
+@Component(service=Operation.class, property= {
+   Operation.PROP_CMD + "=" + GoOperationImpl.CMD,
+   Operation.PROP_DESCRIPTION + "=" + "Go straight to specific consoles in AEM"
 })
-@Service
 public class GoOperationImpl extends AbstractOperation {
     public static final String CMD = "go";
 

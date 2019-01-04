@@ -19,27 +19,14 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
@@ -50,14 +37,26 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import com.day.cq.commons.jcr.JcrConstants;
 
 /**
  * A service that triggers scripts on deployment to an AEM server.
@@ -74,13 +73,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * than once.  This also covers the scenario where a script is run a second
  * time after failing the first time.
  */
-@Component(
-        label = "ACS AEM Commons - On-Deploy Scripts Executor",
-        description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
-        metatype = true, policy = ConfigurationPolicy.REQUIRE)
-@Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
-        value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
-@Service(value = DynamicMBean.class)
+@Component(service = DynamicMBean.class, configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+"jmx.objectname" + "=" + "com.adobe.acs.commons:type=On-Deploy Scripts"
+})
 public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutor {
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
 
@@ -98,7 +93,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    @Reference(service = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, bind="bindScriptProviders",unbind="unbindScriptProviders")
     private List<OnDeployScriptProvider> scriptProviders = new CopyOnWriteArrayList<>();
 
     private static transient String[] scriptsItemNames;
@@ -133,7 +128,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     /**
      * Executes all on-deploy scripts on bind of a script provider.
      */
-    protected void bindScriptProvider(OnDeployScriptProvider scriptProvider) {
+    protected void bindScriptProviders(OnDeployScriptProvider scriptProvider) {
         logger.info("Executing on-deploy scripts from scriptProvider: {}", scriptProvider.getClass().getName());
         scriptProviders.add(scriptProvider);
 
@@ -157,7 +152,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         }
     }
 
-    protected void unbindScriptProvider(OnDeployScriptProvider scriptProvider) {
+    protected void unbindScriptProviders(OnDeployScriptProvider scriptProvider) {
        scriptProviders.remove(scriptProvider);
     }
 

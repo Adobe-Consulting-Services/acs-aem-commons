@@ -20,12 +20,16 @@
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
+
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
@@ -34,15 +38,30 @@ import org.apache.sling.api.resource.ResourceMetadata;
  */
 @ProviderType
 public abstract class RadioComponent extends FieldComponent {
+    private static final String DESCRIPTION_DELIMITER = "::";
+
     public static class EnumerationSelector extends RadioComponent {
 
         @Override
         public Map<String, String> getOptions() {
             return Stream.of((Enum[]) getField().getType().getEnumConstants())
-                    .collect(Collectors.toMap(Enum::name, e->StringUtil.getFriendlyName(e.name())));
-        }        
+                    .collect(Collectors.toMap(Enum::name, this::getName));
+        }
+
+        private String getName(Enum e) {
+            String name = StringUtil.getFriendlyName(e.name());
+            try {
+                Description desc = e.getClass().getField(e.name()).getAnnotation(Description.class);
+                if (desc != null) {
+                    name = name + DESCRIPTION_DELIMITER + desc.value();
+                }
+            } catch (NoSuchFieldException | SecurityException ex) {
+                Logger.getLogger(RadioComponent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return name;
+        }
     }
-    
+
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/radiogroup");
@@ -57,24 +76,29 @@ public abstract class RadioComponent extends FieldComponent {
         AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
         component.addChild(options);
-        
+
         String defaultValue = getOption("default").orElse(null);
-        
-        getOptions().forEach((value, name)->{
+
+        getOptions().forEach((value, name) -> {
             final ResourceMetadata meta = new ResourceMetadata();
             final String nodeName = JcrUtil.escapeIllegalJcrChars(value);
-            
+
             if (value.equals(defaultValue)) {
                 meta.put("checked", true);
             }
             meta.put("name", getName());
             meta.put("value", value);
+            if (name.contains("::")) {
+                String description = StringUtils.substringAfter(name, DESCRIPTION_DELIMITER);
+                meta.put("title", description);
+                name = StringUtils.substringBefore(name, DESCRIPTION_DELIMITER);
+            }
             meta.put("text", name);
-            AbstractResourceImpl option = new AbstractResourceImpl("option_"+nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", meta);
+            AbstractResourceImpl option = new AbstractResourceImpl("option_" + nodeName, "granite/ui/components/foundation/form/radio", "granite/ui/components/foundation/form/field", meta);
             options.addChild(option);
         });
         return component;
     }
-    
+
     public abstract Map<String, String> getOptions();
 }

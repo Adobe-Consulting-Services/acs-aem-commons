@@ -37,17 +37,14 @@ import com.day.cq.wcm.api.PageManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,17 +57,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
  */
-@Component
-@Properties({
-        @Property(
-                name = Operation.PROP_CMD,
-                value = LastModifiedOperationImpl.CMD
-        )
+@Component(service=Operation.class, property= {
+    Operation.PROP_CMD + "=" + LastModifiedOperationImpl.CMD
 })
-@Service
 public class LastModifiedOperationImpl extends AbstractOperation {
     private static final Logger log = LoggerFactory.getLogger(LastModifiedOperationImpl.class);
 
@@ -193,11 +187,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         map.put("p.limit", String.valueOf(limit));
         map.put("p.guessTotal", "true");
 
-        try {
-            log.debug("Lastmod QueryBuilder Map: {}", new JSONObject(map).toString(2));
-        } catch (JSONException e) {
-            // no-op
-        }
+        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2).toString());
 
         final Query query = queryBuilder.createQuery(PredicateGroup.create(map),
                 resourceResolver.adaptTo(Session.class));

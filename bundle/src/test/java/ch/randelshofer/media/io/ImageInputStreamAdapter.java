@@ -47,7 +47,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public int read() throws IOException {
-	return iis.read();
+return iis.read();
     }
 
     /**
@@ -74,7 +74,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public int read(byte b[], int off, int len) throws IOException {
-	return iis.read(b, off, len);
+return iis.read(b, off, len);
     }
 
     /**
@@ -84,7 +84,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public long skip(long n) throws IOException {
-	return iis.skipBytes(n);
+return iis.skipBytes(n);
     }
 
     /**
@@ -102,7 +102,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public int available() throws IOException {
-	return  (iis.isCached()) ? //
+return  (iis.isCached()) ? //
             (int)Math.min(Integer.MAX_VALUE, iis.length() - iis.getStreamPosition()) :
             0;
     }
@@ -118,7 +118,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public void close() throws IOException {
-	iis.close();
+iis.close();
     }
 
     /**
@@ -139,7 +139,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public synchronized void mark(int readlimit) {
-	iis.mark();
+iis.mark();
     }
 
     /**
@@ -165,7 +165,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public synchronized void reset() throws IOException {
-	iis.reset();
+iis.reset();
     }
 
     /**
@@ -183,7 +183,7 @@ public class ImageInputStreamAdapter extends FilterInputStream {
      */
     @Override
     public boolean markSupported() {
-	return true;
+return true;
     }
 
 }

@@ -116,15 +116,17 @@
     }
 
     function isWithinLimit(parsysEditable){
-        var children = getChildEditables(parsysEditable),
-            isWithin = true, currentLimit = "";
+        var isWithin = true, currentLimit = "";
 
         currentLimit = _findPropertyFromDesign(parsysEditable, Granite.author.pageDesign, ACS_COMPONENTS_LIMIT);
         if (currentLimit === null) {
             return true;
         }
         var limit = parseInt(currentLimit);
-        isWithin = children.length <= limit;
+        var children = getChildEditables(parsysEditable);
+        //Take into account also the number of components in the clipboard in case this is a "paste"
+        var itemsToAdd = Granite.author.clipboard.length < 1 ? 1 : Granite.author.clipboard.length;
+        isWithin = children.length - 1 + itemsToAdd <= limit;
 
         if(!isWithin){
             showErrorAlert("Limit of paragraphs within this paragraph system exceeded, allowed only up to " + currentLimit + " paragraphs.");
