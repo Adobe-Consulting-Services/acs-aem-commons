@@ -43,6 +43,11 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
 
     protected Set<String> sortedProperties = new HashSet<>();
 
+    protected Set<String> excludedNodeNames = new HashSet<String>();
+
+    protected Set<String> excludedSubTrees = new HashSet<String>();
+
+
     public void addIncludedNodeTypes(String... data) {
         if (data != null) {
             this.includedNodeTypes.addAll(Arrays.asList(data));
@@ -83,6 +88,27 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.sortedProperties;
     }
 
+
+    public Set<String> getExcludedNodeNames() {
+        return this.excludedNodeNames;
+    }
+
+    public void addExcludedNodeNames(String... data) {
+        if (data != null) {
+            this.excludedNodeNames.addAll(Arrays.asList(data));
+        }
+    }
+
+    public Set<String> getExcludedSubTrees() {
+        return this.excludedSubTrees;
+    }
+
+    public void addExcludedSubTrees(String... data) {
+        if (data != null) {
+            this.excludedSubTrees.addAll(Arrays.asList(data));
+        }
+    }
+
     public String toString() {
         InfoWriter iw = new InfoWriter();
 
@@ -90,6 +116,8 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         iw.message("Node Type Includes: {}", this.getIncludedNodeTypes());
         iw.message("Node Type Excludes: {}", this.getExcludedNodeTypes());
         iw.message("Property Excludes: {}", this.getExcludedProperties());
+        iw.message("Node Name Excludes: {}", this.getExcludedNodeNames());
+        iw.message("Sub Tree Excludes: {}", this.getExcludedSubTrees());
         iw.message("Sorted Properties: {}", this.getSortedProperties());
 
         return iw.toString();
