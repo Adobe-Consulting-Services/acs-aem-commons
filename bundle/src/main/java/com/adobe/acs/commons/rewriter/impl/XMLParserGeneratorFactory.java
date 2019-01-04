@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
@@ -36,12 +38,19 @@ public final class XMLParserGeneratorFactory implements GeneratorFactory {
 
     @Override
     public Generator createGenerator() {
+        return createGenerator(null);
+    }
+
+    Generator createGenerator(final SAXParserFactory saxParserFactory) {
         try {
-            return new XMLParserGenerator();
+            if (saxParserFactory == null) {
+                return new XMLParserGenerator();
+            } else {
+                return new XMLParserGenerator(saxParserFactory);
+            }
         } catch (Exception e) {
             log.error("Unable to create parser", e);
             return null;
         }
     }
-
 }
