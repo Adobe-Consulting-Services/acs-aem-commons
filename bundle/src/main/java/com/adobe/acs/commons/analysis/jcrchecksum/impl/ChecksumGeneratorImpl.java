@@ -20,26 +20,6 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.vault.util.Text;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -52,13 +32,32 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Property;
+import javax.jcr.PropertyIterator;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.jackrabbit.vault.util.Text;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal
  * and calculates an aggregate checksum on the nodes with the specified node types
  * (via {@link ChecksumGeneratorOptions}).
  */
 @Component
-@Service
 public class ChecksumGeneratorImpl implements ChecksumGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorImpl.class);
 
@@ -95,7 +94,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         if (node == null) {
             log.warn("Path [ {} ] not found while generating checksums", path);
-            return new LinkedHashMap<String, String>();
+            return new LinkedHashMap<>();
         }
 
         return traverseTree(node, options);
@@ -171,7 +170,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         final Set<String> nodeTypeExcludes = options.getExcludedNodeTypes();
 
-        final Map<String, String> checksums = new LinkedHashMap<String, String>();
+        final Map<String, String> checksums = new LinkedHashMap<>();
 
         /* Create checksums for Node's properties */
         checksums.put(getChecksumKey(aggregateNodePath, node.getPath()),
@@ -179,7 +178,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         /* Then process node's children */
 
-        final Map<String, String> lexicographicallySortedChecksums = new TreeMap<String, String>();
+        final Map<String, String> lexicographicallySortedChecksums = new TreeMap<>();
         final boolean hasOrderedChildren = hasOrderedChildren(node);
         final NodeIterator children = node.getNodes();
 
@@ -329,7 +328,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
 
         try {
             stream = value.getBinary().getStream();
-            return DigestUtils.shaHex(stream);
+            return DigestUtils.sha1Hex(stream);
         } finally {
             if (stream != null) {
                 stream.close();
@@ -344,7 +343,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @throws RepositoryException
      */
     protected static String getStringChecksum(final Value value) throws RepositoryException {
-        return DigestUtils.shaHex(value.getString());
+        return DigestUtils.sha1Hex(value.getString());
     }
 
     /**
@@ -379,6 +378,6 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
             data.append(entry.getKey() + "=" + entry.getValue());
         }
 
-        return DigestUtils.shaHex(data.toString());
+        return DigestUtils.sha1Hex(data.toString());
     }
 }

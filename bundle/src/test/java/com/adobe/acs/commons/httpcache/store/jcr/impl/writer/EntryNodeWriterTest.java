@@ -25,6 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +39,12 @@ import javax.jcr.RepositoryException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import com.day.cq.commons.jcr.JcrUtil;
 import org.mockito.Matchers;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -49,10 +53,20 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants
 import com.day.cq.commons.jcr.JcrConstants;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({EntryNodeWriter.class,JcrUtils.class})
+@PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
 public class EntryNodeWriterTest
 {
-    private static final String CACHE_CONTENT_LOCATION = "com.adobe.acs.commons.httpcache.store.jcr.impl.writer/cachecontent.html";
+    private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
+
+    /**
+     * Ignore this test for the moment, until I have figured out to make it work again ...
+     */
+
+    @Before
+    public void setUp(){
+        mockStatic(JcrUtil.class);
+        mockStatic(JcrUtils.class);
+    }
 
     @Test
     public void testValid() throws IOException, RepositoryException
@@ -61,7 +75,7 @@ public class EntryNodeWriterTest
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
         arguments.entryNode = mock(Node.class);
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CACHE_CONTENT_LOCATION);
+        InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
         arguments.cacheContent = inputStream;
         List<String> header1Value = Arrays.asList("header-value");
         List<String> header2Value = Arrays.asList("another-header-value");

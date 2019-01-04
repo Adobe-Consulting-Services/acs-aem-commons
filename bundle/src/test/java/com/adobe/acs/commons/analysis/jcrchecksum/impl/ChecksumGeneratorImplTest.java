@@ -177,10 +177,10 @@ public class ChecksumGeneratorImplTest {
 
         // jcr:content/renditions/original/jcr:content
         String propertiesChecksum =
-                "jcr:content/renditions/original/jcr:content/data="+ DigestUtils.shaHex("test binary string")
-                        + "jcr:content/renditions/original/jcr:content/jcr:primaryType="+ DigestUtils.shaHex("nt:resource");
-        String aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        String nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions/original/jcr:content="
+                "jcr:content/renditions/original/jcr:content/data="+ DigestUtils.sha1Hex("test binary string")
+                        + "jcr:content/renditions/original/jcr:content/jcr:primaryType="+ DigestUtils.sha1Hex("nt:resource");
+        String aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        String nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions/original/jcr:content="
                 + aggregatedPopertiesChecksum);
 
         final String originalJcrContentChecksum = nodeChecksum;
@@ -190,9 +190,9 @@ public class ChecksumGeneratorImplTest {
 
         // jcr:content/renditions/original
         propertiesChecksum =
-                "jcr:content/renditions/original/jcr:primaryType=" + DigestUtils.shaHex("nt:file");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions/original="
+                "jcr:content/renditions/original/jcr:primaryType=" + DigestUtils.sha1Hex("nt:file");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions/original="
                         + aggregatedPopertiesChecksum
                         + "jcr:content/renditions/original/jcr:content=" +  originalJcrContentChecksum
         );
@@ -204,9 +204,9 @@ public class ChecksumGeneratorImplTest {
 
 
         // jcr:content/renditions
-        propertiesChecksum = "jcr:content/renditions/jcr:primaryType=" + DigestUtils.shaHex("nt:folder");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/renditions=" + aggregatedPopertiesChecksum
+        propertiesChecksum = "jcr:content/renditions/jcr:primaryType=" + DigestUtils.sha1Hex("nt:folder");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/renditions=" + aggregatedPopertiesChecksum
                 + "jcr:content/renditions/original=" +  originalChecksum);
 
         final String renditionsChecksum = nodeChecksum;
@@ -215,10 +215,10 @@ public class ChecksumGeneratorImplTest {
                 asset.getNode("renditions"), opts));
 
         // jcr:content/metadata
-        propertiesChecksum = "jcr:content/metadata/dc:title=" + DigestUtils.shaHex("Foo")
-                + "jcr:content/metadata/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content/metadata=" + aggregatedPopertiesChecksum);
+        propertiesChecksum = "jcr:content/metadata/dc:title=" + DigestUtils.sha1Hex("Foo")
+                + "jcr:content/metadata/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content/metadata=" + aggregatedPopertiesChecksum);
 
         final String metadataChecksum = nodeChecksum;
 
@@ -227,10 +227,10 @@ public class ChecksumGeneratorImplTest {
 
 
         // jcr:content
-        propertiesChecksum = "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("dam:AssetContent")
-                + "jcr:content/text=" + DigestUtils.shaHex("t");
-        aggregatedPopertiesChecksum = DigestUtils.shaHex(propertiesChecksum);
-        nodeChecksum =  DigestUtils.shaHex("jcr:content=" + aggregatedPopertiesChecksum
+        propertiesChecksum = "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("dam:AssetContent")
+                + "jcr:content/text=" + DigestUtils.sha1Hex("t");
+        aggregatedPopertiesChecksum = DigestUtils.sha1Hex(propertiesChecksum);
+        nodeChecksum =  DigestUtils.sha1Hex("jcr:content=" + aggregatedPopertiesChecksum
                 + "jcr:content/metadata=" + metadataChecksum
                 + "jcr:content/renditions=" + renditionsChecksum);
 
@@ -281,15 +281,15 @@ public class ChecksumGeneratorImplTest {
         session.save();
 
         final String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true")
-                        + "jcr:content/double=" + DigestUtils.shaHex("99.99")
-                        + "jcr:content/jcr:description=" + DigestUtils.shaHex("This is my test node")
-                        + "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured")
-                        + "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title")
-                        + "jcr:content/long=" + DigestUtils.shaHex("100");
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:description=" + DigestUtils.sha1Hex("This is my test node")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/long=" + DigestUtils.sha1Hex("100");
 
-        final String propertiesChecksum = DigestUtils.shaHex(raw);
-        final String expected = DigestUtils.shaHex("jcr:content=" + propertiesChecksum);
+        final String propertiesChecksum = DigestUtils.sha1Hex(raw);
+        final String expected = DigestUtils.sha1Hex("jcr:content=" + propertiesChecksum);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
@@ -312,31 +312,31 @@ public class ChecksumGeneratorImplTest {
         session.save();
 
         // Test
-        String bChecksum = DigestUtils.shaHex("jcr:content/a/b/jcr:primaryType="
-                + DigestUtils.shaHex("nt:unstructured"));
-        bChecksum = DigestUtils.shaHex("jcr:content/a/b=" + bChecksum);
+        String bChecksum = DigestUtils.sha1Hex("jcr:content/a/b/jcr:primaryType="
+                + DigestUtils.sha1Hex("nt:unstructured"));
+        bChecksum = DigestUtils.sha1Hex("jcr:content/a/b=" + bChecksum);
 
         //System.out.println("jcr:content/a/b Checksum: " + bChecksum);
 
-        String cChecksum = DigestUtils.shaHex("jcr:content/a/c/jcr:primaryType="
-                + DigestUtils.shaHex("nt:unstructured"));
-        cChecksum = DigestUtils.shaHex("jcr:content/a/c=" + cChecksum);
+        String cChecksum = DigestUtils.sha1Hex("jcr:content/a/c/jcr:primaryType="
+                + DigestUtils.sha1Hex("nt:unstructured"));
+        cChecksum = DigestUtils.sha1Hex("jcr:content/a/c=" + cChecksum);
 
         //System.out.println("jcr:content/a/c Checksum: " + cChecksum);
 
-        String aChecksum = DigestUtils.shaHex("jcr:content/a/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
+        String aChecksum = DigestUtils.sha1Hex("jcr:content/a/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured"))
                 + "jcr:content/a/b=" + bChecksum
                 + "jcr:content/a/c=" + cChecksum;
-        aChecksum = DigestUtils.shaHex("jcr:content/a=" + aChecksum);
+        aChecksum = DigestUtils.sha1Hex("jcr:content/a=" + aChecksum);
 
-        //System.out.println("jcr:content/a Checksum: " + DigestUtils.shaHex("jcr:content/=" + aChecksum));
+        //System.out.println("jcr:content/a Checksum: " + DigestUtils.sha1Hex("jcr:content/=" + aChecksum));
 
-        String jcrContentChecksum = DigestUtils.shaHex("jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured"))
+        String jcrContentChecksum = DigestUtils.sha1Hex("jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured"))
                 + "jcr:content/a=" + aChecksum;
 
         //System.out.println("jcrContentChecksum: " + jcrContentChecksum);
 
-        jcrContentChecksum = DigestUtils.shaHex("jcr:content=" + jcrContentChecksum);
+        jcrContentChecksum = DigestUtils.sha1Hex("jcr:content=" + jcrContentChecksum);
         final String expected = jcrContentChecksum;
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
@@ -367,18 +367,18 @@ public class ChecksumGeneratorImplTest {
 
         // Expected to be sorted alphabetically
         String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true")
-                        + "jcr:content/double=" + DigestUtils.shaHex("99.99")
-                        + "jcr:content/jcr:description=" + DigestUtils.shaHex("This is my test node")
-                        + "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured")
-                        + "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title")
-                        + "jcr:content/long=" + DigestUtils.shaHex("100")
-                        + "jcr:content/sorted=" + DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf")
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:description=" + DigestUtils.sha1Hex("This is my test node")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/long=" + DigestUtils.sha1Hex("100")
+                        + "jcr:content/sorted=" + DigestUtils.sha1Hex("yelp") + "," + DigestUtils.sha1Hex("arf")
                         // This order is dictated by the sorted values of the corresponding hashes
-                        + "jcr:content/unsorted=" + DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
-                        + DigestUtils.shaHex("woof");
+                        + "jcr:content/unsorted=" + DigestUtils.sha1Hex("howl") + "," + DigestUtils.sha1Hex("bark") + ","
+                        + DigestUtils.sha1Hex("woof");
 
-        String expected = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.sha1Hex(raw);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
@@ -404,16 +404,16 @@ public class ChecksumGeneratorImplTest {
 
         // Expected to be sorted alphabetically
         String raw =
-                "jcr:content/boolean=" + DigestUtils.shaHex("true")
-                        + "jcr:content/double=" + DigestUtils.shaHex("99.99")
-                        + "jcr:content/jcr:primaryType=" + DigestUtils.shaHex("nt:unstructured")
-                        + "jcr:content/jcr:title=" + DigestUtils.shaHex("My Title")
-                        + "jcr:content/sorted=" + DigestUtils.shaHex("yelp") + "," + DigestUtils.shaHex("arf")
+                "jcr:content/boolean=" + DigestUtils.sha1Hex("true")
+                        + "jcr:content/double=" + DigestUtils.sha1Hex("99.99")
+                        + "jcr:content/jcr:primaryType=" + DigestUtils.sha1Hex("nt:unstructured")
+                        + "jcr:content/jcr:title=" + DigestUtils.sha1Hex("My Title")
+                        + "jcr:content/sorted=" + DigestUtils.sha1Hex("yelp") + "," + DigestUtils.sha1Hex("arf")
                         // This order is dictated by the sorted values of the corresponding hashes
-                        + "jcr:content/unsorted=" + DigestUtils.shaHex("howl") + "," + DigestUtils.shaHex("bark") + ","
-                        + DigestUtils.shaHex("woof");
+                        + "jcr:content/unsorted=" + DigestUtils.sha1Hex("howl") + "," + DigestUtils.sha1Hex("bark") + ","
+                        + DigestUtils.sha1Hex("woof");
 
-        String expected = DigestUtils.shaHex(raw);
+        String expected = DigestUtils.sha1Hex(raw);
 
         CustomChecksumGeneratorOptions opts = new CustomChecksumGeneratorOptions();
         opts.addSortedProperties(new String[]{ "sorted" });
@@ -430,7 +430,7 @@ public class ChecksumGeneratorImplTest {
         checksums.put("jcr:content/foo", "1234");
         checksums.put("jcr:content/bar", "5678,9012");
 
-        String expected = DigestUtils.shaHex("jcr:content/foo=1234jcr:content/bar=5678,9012");
+        String expected = DigestUtils.sha1Hex("jcr:content/foo=1234jcr:content/bar=5678,9012");
         String actual = checksumGenerator.aggregateChecksums(checksums);
 
         assertEquals(expected, actual);

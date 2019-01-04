@@ -20,8 +20,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
+import com.google.gson.JsonObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,20 +58,20 @@ public class CQIncludePropertyNamespaceServletTest {
         final CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater visitor =
                 servlet.new PropertyNamespaceUpdater("test");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        json.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
-        json.put("name", "./myValue");
-        json.put("fileName", "./myFile");
-        json.put("jcr:description", "words");
-        json.put("noDotSlash", "no dot slash");
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("name", "./myValue");
+        json.addProperty("fileName", "./myFile");
+        json.addProperty("jcr:description", "words");
+        json.addProperty("noDotSlash", "no dot slash");
 
         visitor.accept(json);
 
-        assertEquals("./test/myValue", json.get("name"));
-        assertEquals("./test/myFile", json.get("fileName"));
-        assertEquals("words", json.get("jcr:description"));
-        assertEquals("test/no dot slash", json.get("noDotSlash"));
+        assertEquals("./test/myValue", json.get("name").getAsString());
+        assertEquals("./test/myFile", json.get("fileName").getAsString());
+        assertEquals("words", json.get("jcr:description").getAsString());
+        assertEquals("test/no dot slash", json.get("noDotSlash").getAsString());
     }
 
 
@@ -88,20 +87,20 @@ public class CQIncludePropertyNamespaceServletTest {
         final CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater visitor =
                 servlet.new PropertyNamespaceUpdater("test");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        json.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
-        json.put("name", "./myValue");
-        json.put("fileName", "./image/myFile");
-        json.put("jcr:description", "words");
-        json.put("noDotSlash", "no dot slash");
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("name", "./myValue");
+        json.addProperty("fileName", "./image/myFile");
+        json.addProperty("jcr:description", "words");
+        json.addProperty("noDotSlash", "no dot slash");
 
         visitor.accept(json);
 
-        assertEquals("./test/myValue", json.get("name"));
-        assertEquals("./test/image/myFile", json.get("fileName"));
-        assertEquals("words", json.get("jcr:description"));
-        assertEquals("no dot slash", json.get("noDotSlash"));
+        assertEquals("./test/myValue", json.get("name").getAsString());
+        assertEquals("./test/image/myFile", json.get("fileName").getAsString());
+        assertEquals("words", json.get("jcr:description").getAsString());
+        assertEquals("no dot slash", json.get("noDotSlash").getAsString());
     }
 
 
@@ -111,7 +110,7 @@ public class CQIncludePropertyNamespaceServletTest {
         final Map<String, Object> config = new HashMap<String, Object>();
         config.put(CQIncludePropertyNamespaceServlet.PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS,
                 new String[]{"^\\./.*"});
-        config.put("namespace.multi-level", true);
+        config.put(CQIncludePropertyNamespaceServlet.PROP_SUPPORT_MULTI_LEVEL, true);
 
         final CQIncludePropertyNamespaceServlet servlet = new CQIncludePropertyNamespaceServlet();
         servlet.activate(config);
@@ -119,43 +118,43 @@ public class CQIncludePropertyNamespaceServletTest {
         final CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater visitor =
                 servlet.new PropertyNamespaceUpdater("test");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        json.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
-        json.put("xtype", "cqinclude");
-        json.put("path", "/apps/test.cqinclude.namespace.level-1.json");
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("xtype", "cqinclude");
+        json.addProperty("path", "/apps/test.cqinclude.namespace.level-1.json");
 
         visitor.accept(json);
 
-        assertEquals("/apps/test.cqinclude.namespace.test%252Flevel-1.json", json.get("path"));
+        assertEquals("/apps/test.cqinclude.namespace.test%252Flevel-1.json", json.get("path").getAsString());
     }
 
     @Test
-    public void testIsCqincludeNamspaceWidget() throws JSONException {
+    public void testIsCqincludeNamspaceWidget() {
         final CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater pnu = new CQIncludePropertyNamespaceServlet().new PropertyNamespaceUpdater("my-namespace");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        json.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
-        json.put("xtype", "cqinclude");
-        json.put("path", "/apps/test.cqinclude.namespace.test.json");
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("xtype", "cqinclude");
+        json.addProperty("path", "/apps/test.cqinclude.namespace.test.json");
 
         assertEquals(true, pnu.isCqincludeNamespaceWidget(json));
     }
 
     @Test
-    public void testMakeMultiLevel() throws JSONException {
+    public void testMakeMultiLevel() {
 
         CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater pnu = new CQIncludePropertyNamespaceServlet().new PropertyNamespaceUpdater("my-namespace");
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
-        json.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
-        json.put("xtype", "cqinclude");
-        json.put("path", "/apps/test.cqinclude.namespace.test.json");
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("xtype", "cqinclude");
+        json.addProperty("path", "/apps/test.cqinclude.namespace.test.json");
 
-        JSONObject actual = pnu.makeMultiLevel(json);
+        JsonObject actual = pnu.makeMultiLevel(json);
 
-        assertEquals("/apps/test.cqinclude.namespace.my-namespace%252Ftest.json", actual.getString("path"));
+        assertEquals("/apps/test.cqinclude.namespace.my-namespace%252Ftest.json", actual.get("path").getAsString());
     }
 }

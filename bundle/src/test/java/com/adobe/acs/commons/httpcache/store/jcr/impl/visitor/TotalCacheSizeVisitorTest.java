@@ -37,8 +37,8 @@ public class TotalCacheSizeVisitorTest
     private static final long TEST_FILE_SIZE_WIN = 63 + 4;
     private static final long TEST_FILE_SIZE_POSIX = 63 + 2;
 
-    @Test public void test() throws Exception
-    {
+    @Test
+    public void test() throws Exception{
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
         settings.setExpiredEntryNodeCount(20);

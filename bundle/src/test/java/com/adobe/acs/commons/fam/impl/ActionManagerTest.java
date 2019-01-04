@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,11 +52,19 @@ public class ActionManagerTest {
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
-        }).when(taskRunner).scheduleWork(any());
+        }).when(taskRunner).scheduleWork(any(Runnable.class));
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
-        }).when(taskRunner).scheduleWork(any(), any());
+        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
+        doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class), any(CancelHandler.class), anyInt());
+        doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class), anyInt());
 
         return taskRunner;
     }

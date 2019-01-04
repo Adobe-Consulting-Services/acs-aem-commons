@@ -20,37 +20,43 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowService;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.model.WorkflowModel;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import javax.jcr.Session;
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.util.Arrays;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.WorkflowService;
+import com.day.cq.workflow.WorkflowSession;
+import com.day.cq.workflow.model.WorkflowModel;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * ACS AEM Commons - Workflow Instance Remover - Init Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = { "GET" },
-        resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
-        selectors = { "init" },
-        extensions = { "json" }
-)
+@Component(service = Servlet.class, property = {
+SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
+SLING_SERVLET_SELECTORS + "=init",
+SLING_SERVLET_METHODS + "=GET",
+SLING_SERVLET_EXTENSIONS + "=json" })
 public class InitServlet extends SlingSafeMethodsServlet {
 
     private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
@@ -67,13 +73,13 @@ public class InitServlet extends SlingSafeMethodsServlet {
         response.setCharacterEncoding("UTF-8");
 
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
         try {
             // Only populate the form if removal is not running.
-            json.put("form", this.getFormJSONObject(request.getResourceResolver()));
-
-            response.getWriter().write(json.toString());
+            json.add("form", this.getFormJSONObject(request.getResourceResolver()));
+            Gson gson = new Gson();
+            gson.toJson(json, response.getWriter());
         } catch (Exception e) {
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(e.getMessage());
@@ -86,27 +92,27 @@ public class InitServlet extends SlingSafeMethodsServlet {
      * @param resourceResolver
      * @return
      * @throws WorkflowException
-     * @throws JSONException
      */
-    private JSONObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException,
-            JSONException {
+    private JsonObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException {
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
         final WorkflowSession workflowSession = workflowService.getWorkflowSession(
                 resourceResolver.adaptTo(Session.class));
 
         final WorkflowModel[] workflowModels = workflowSession.getModels();
 
+        JsonArray models = new JsonArray();
+        json.add("workflowModels", models);
         for (final WorkflowModel workflowModel : workflowModels) {
-            final JSONObject jsonWorkflow = new JSONObject();
-
-            jsonWorkflow.put("title", workflowModel.getTitle());
-            jsonWorkflow.put("id", workflowModel.getId());
-            json.accumulate("workflowModels", jsonWorkflow);
+            final JsonObject jsonWorkflow = new JsonObject();
+            jsonWorkflow.addProperty("title", workflowModel.getTitle());
+            jsonWorkflow.addProperty("id", workflowModel.getId());
+            models.add(jsonWorkflow);
         }
 
-        json.put("statuses", new JSONArray(Arrays.asList(WORKFLOW_STATUSES)));
+        Gson gson = new Gson();
+        json.add("statuses", gson.toJsonTree(Arrays.asList(WORKFLOW_STATUSES)));
 
         return json;
     }

@@ -20,12 +20,27 @@
 package com.adobe.acs.commons.util;
 
 import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.sling.discovery.InstanceDescription;
+import org.apache.sling.discovery.TopologyEvent;
+import org.apache.sling.discovery.TopologyView;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RunnableOnMasterTest {
 
+    public TopologyEvent createLeaderChangeEvent(boolean isLeader) {
+        TopologyEvent te = mock(TopologyEvent.class);
+        TopologyView view = mock(TopologyView.class);
+        InstanceDescription instanceDescription = mock(InstanceDescription.class);
+        when(te.getNewView()).thenReturn(view);
+        when(view.getLocalInstance()).thenReturn(instanceDescription);
+        when(instanceDescription.isLeader()).thenReturn(isLeader);
+        return te;
+    }
+    
     @Test
     public void test_that_without_bind_called_not_run() {
         Harness harness = new Harness();
@@ -36,7 +51,7 @@ public class RunnableOnMasterTest {
     @Test
     public void test_that_run_called_after_bind_as_master() {
         Harness harness = new Harness();
-        harness.bindRepository(null, null, true);
+        harness.handleTopologyEvent(createLeaderChangeEvent(true));
         harness.run();
         assertEquals(1, harness.counter.intValue());
     }
@@ -44,7 +59,7 @@ public class RunnableOnMasterTest {
     @Test
     public void test_that_bind_as_slave_not_run() {
         Harness harness = new Harness();
-        harness.bindRepository(null, null, false);
+        harness.handleTopologyEvent(createLeaderChangeEvent(false));
         harness.run();
         assertEquals(0, harness.counter.intValue());
     }
@@ -52,10 +67,10 @@ public class RunnableOnMasterTest {
     @Test
     public void test_that_run_not_called_after_unbding() {
         Harness harness = new Harness();
-        harness.bindRepository(null, null, true);
+        harness.handleTopologyEvent(createLeaderChangeEvent(true));
         harness.run();
         assertEquals(1, harness.counter.intValue());
-        harness.unbindRepository();
+        harness.handleTopologyEvent(createLeaderChangeEvent(false));
         harness.run();
         assertEquals(1, harness.counter.intValue());
     }

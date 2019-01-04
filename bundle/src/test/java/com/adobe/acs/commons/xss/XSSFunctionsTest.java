@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.xss;
 
-import com.adobe.granite.xss.XSSAPI;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Random;
+import org.apache.sling.xss.XSSAPI;
 
 import static org.mockito.Mockito.*;
 

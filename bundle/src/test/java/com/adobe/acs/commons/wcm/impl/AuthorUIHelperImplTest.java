@@ -88,7 +88,7 @@ public class AuthorUIHelperImplTest {
         String touchPageUrlOverride = "/override.html/content/main/testPage.html";
 
         //override touch ui page editor
-        osgiConfig.put("wcmEditorTouchURL", "/override.html");
+        osgiConfig.put(AuthorUIHelperImpl.WCM_EDITOR_URL_TOUCH, "/override.html");
         authorUIHelper.activate(osgiConfig);
         String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
         assertEquals(touchPageUrlOverride, overrideAuthorPageLink);
@@ -115,7 +115,7 @@ public class AuthorUIHelperImplTest {
 
         //override classic ui page editor
         osgiConfig.put("isTouch", "false");
-        osgiConfig.put("wcmEditorClassicURL", "/override.html");
+        osgiConfig.put(AuthorUIHelperImpl.WCM_EDITOR_URL_CLASSIC, "/override.html");
 
         authorUIHelper.activate(osgiConfig);
         String overrideAuthorPageLink = authorUIHelper.generateEditPageLink(pagePath, false, null);
@@ -140,7 +140,7 @@ public class AuthorUIHelperImplTest {
         String touchAssetUrlOverride = "/override.html/content/dam/testAsset.jpg";
 
         //override touch ui page editor
-        osgiConfig.put("damEditorTouchURL", "/override.html");
+        osgiConfig.put(AuthorUIHelperImpl.DAM_EDITOR_URL_TOUCH, "/override.html");
         authorUIHelper.activate(osgiConfig);
         String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);
         assertEquals(touchAssetUrlOverride, overrideAuthorPageLink);
@@ -167,7 +167,7 @@ public class AuthorUIHelperImplTest {
 
         //override classic ui asset editor
         osgiConfig.put("isTouch", "false");
-        osgiConfig.put("damEditorClassicURL", "/override.html");
+        osgiConfig.put(AuthorUIHelperImpl.DAM_EDITOR_URL_CLASSIC, "/override.html");
 
         authorUIHelper.activate(osgiConfig);
         String overrideAuthorPageLink = authorUIHelper.generateEditAssetLink(assetPath, false, null);

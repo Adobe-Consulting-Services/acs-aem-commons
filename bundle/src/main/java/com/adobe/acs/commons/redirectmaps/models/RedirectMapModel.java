@@ -126,7 +126,7 @@ public class RedirectMapModel {
         List<MapEntry> entries = new ArrayList<MapEntry>();
         if (redirectMap != null) {
             InputStream is = redirectMap.adaptTo(InputStream.class);
-            for (String line : IOUtils.readLines(is)) {
+            for (String line : IOUtils.readLines(is, "UTF-8")) {
                 MapEntry entry = toEntry(line);
                 if (entry != null) {
                     entries.add(entry);
@@ -195,7 +195,7 @@ public class RedirectMapModel {
             log.debug("Loading RedirectMap file from {}", redirectMap);
             sb.append("# Redirect Map File\n");
             InputStream is = redirectMap.adaptTo(InputStream.class);
-            sb.append(IOUtils.toString(is));
+            sb.append(IOUtils.toString(is, "UTF-8"));
         } else {
             log.debug("No redirect map specified");
         }

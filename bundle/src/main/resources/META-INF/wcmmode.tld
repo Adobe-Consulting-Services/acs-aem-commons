@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib version="2.1" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <tlib-version>1.0</tlib-version>
+    <uri>http://www.adobe.com/consulting/acs-aem-commons/wcmmode</uri>
+    <tag>
+        <name>preview</name>
+        <tag-class>com.adobe.acs.commons.wcm.tags.wcmmode.PreviewMode</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>not</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Boolean</type>
+        </attribute>
+    </tag>
+    <tag>
+        <name>design</name>
+        <tag-class>com.adobe.acs.commons.wcm.tags.wcmmode.DesignMode</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>not</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Boolean</type>
+        </attribute>
+    </tag>
+    <tag>
+        <name>disabled</name>
+        <tag-class>com.adobe.acs.commons.wcm.tags.wcmmode.DisabledMode</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>not</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Boolean</type>
+        </attribute>
+    </tag>
+    <tag>
+        <name>edit</name>
+        <tag-class>com.adobe.acs.commons.wcm.tags.wcmmode.EditMode</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>not</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Boolean</type>
+        </attribute>
+    </tag>
+    <tag>
+        <name>setMode</name>
+        <tag-class>com.adobe.acs.commons.wcm.tags.wcmmode.SetWCMMode</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>mode</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>restore</name>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Boolean</type>
+        </attribute>
+    </tag>
+    <function>
+        <name>isDesign</name>
+        <function-class>com.adobe.acs.commons.wcm.tags.wcmmode.WCMModeFunctions</function-class>
+        <function-signature>boolean isDesign(javax.servlet.jsp.PageContext)</function-signature>
+    </function>
+    <function>
+        <name>isDisabled</name>
+        <function-class>com.adobe.acs.commons.wcm.tags.wcmmode.WCMModeFunctions</function-class>
+        <function-signature>boolean isDisabled(javax.servlet.jsp.PageContext)</function-signature>
+    </function>
+    <function>
+        <name>isEdit</name>
+        <function-class>com.adobe.acs.commons.wcm.tags.wcmmode.WCMModeFunctions</function-class>
+        <function-signature>boolean isEdit(javax.servlet.jsp.PageContext)</function-signature>
+    </function>
+    <function>
+        <name>isPreview</name>
+        <function-class>com.adobe.acs.commons.wcm.tags.wcmmode.WCMModeFunctions</function-class>
+        <function-signature>boolean isPreview(javax.servlet.jsp.PageContext)</function-signature>
+    </function>
+</taglib>

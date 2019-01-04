@@ -35,13 +35,13 @@ import java.util.Set;
 @ProviderType
 public abstract class AbstractChecksumGeneratorOptions implements ChecksumGeneratorOptions {
 
-    protected Set<String> includedNodeTypes = new HashSet<String>();
+    protected Set<String> includedNodeTypes = new HashSet<>();
 
-    protected Set<String> excludedNodeTypes = new HashSet<String>();
+    protected Set<String> excludedNodeTypes = new HashSet<>();
 
-    protected Set<String> excludedProperties = new HashSet<String>();
+    protected Set<String> excludedProperties = new HashSet<>();
 
-    protected Set<String> sortedProperties = new HashSet<String>();
+    protected Set<String> sortedProperties = new HashSet<>();
 
     public void addIncludedNodeTypes(String... data) {
         if (data != null) {

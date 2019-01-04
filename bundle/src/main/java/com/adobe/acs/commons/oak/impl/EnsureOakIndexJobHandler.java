@@ -126,12 +126,10 @@ public class EnsureOakIndexJobHandler implements Runnable {
     @Override
     @SuppressWarnings("squid:S1141")
     public void run() {
-        ResourceResolver resourceResolver = null;
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo)) {
 
-        try {
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo);
-
+            // we should rethink this nested try here ...
             try {
                 this.ensure(resourceResolver, ensureDefinitionsPath, oakIndexesPath);
             } catch (IOException e) {
@@ -143,10 +141,6 @@ public class EnsureOakIndexJobHandler implements Runnable {
             log.error("Could not get an admin resource resolver to ensure Oak Indexes", e);
         } catch (Exception e) {
             log.error("Unknown error occurred while ensuring indexes", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
@@ -220,7 +214,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
         }
 
         if (resourceResolver.hasChanges()) {
-            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now..");
+            log.info("Saving all CREATE, UPDATES, and RE-INDEXES, re-indexing may start now.");
             resourceResolver.commit();
             log.debug("Commit succeeded");
         }
@@ -326,7 +320,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
 
         final ModifiableValueMap mvm = oakIndex.adaptTo(ModifiableValueMap.class);
         if (mvm == null ) {
-            String msg = String.format("Cannot adapt {} to a ModifiableValueMap (permissions?)", oakIndex.getPath());
+            String msg = String.format("Cannot adapt %s to a ModifiableValueMap (permissions?)", oakIndex.getPath());
             throw new PersistenceException(msg);
         }
         mvm.put(PN_REINDEX, true);
@@ -343,7 +337,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws PersistenceException
      * @throws RepositoryException
      */
-    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws PersistenceException,
+    public Resource create(final @Nonnull Resource ensuredDefinition, final @Nonnull Resource oakIndexes) throws
             RepositoryException {
 
         final Node oakIndex = JcrUtil.copy(
@@ -511,7 +505,7 @@ public class EnsureOakIndexJobHandler implements Runnable {
      * @throws RepositoryException
      * @throws PersistenceException
      */
-    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException, PersistenceException {
+    public void delete(final @Nonnull Resource oakIndex) throws RepositoryException {
 
         if (oakIndex.adaptTo(Node.class) != null) {
             // Remove the node and its descendants
