@@ -50,15 +50,15 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component(
-        factory="WorkflowInstanceRemoverScheduler",
-        configurationPolicy=ConfigurationPolicy.REQUIRE,
-      service=Runnable.class,
-      property= {
-            "scheduler.concurrent" + "=" + "false",
-            "webconsole.configurationFactory.nameHint" + "=" +  "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
-      }
+        factory = "WorkflowInstanceRemoverScheduler",
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = Runnable.class,
+        property = {
+                "scheduler.concurrent" + "=" + "false",
+                "webconsole.configurationFactory.nameHint" + "=" + "Runs at '{scheduler.expression}' on models [{workflow.models}] with status [{workflow.statuses}]"
+        }
 )
-@Designate(ocd=WorkflowInstanceRemoverScheduler.Config.class)
+@Designate(ocd = WorkflowInstanceRemoverScheduler.Config.class)
 public class WorkflowInstanceRemoverScheduler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceRemoverScheduler.class);
 
@@ -76,46 +76,50 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     }
 
     private List<String> statuses = new ArrayList<String>();
-    
-    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service")
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service")
     public @interface Config {
-       
+
+        String DEFAULT_SCHEDULER_EXPRESSION = "0 1 0 ? * *";
+        String STATUS_COMPLETED = "COMPLETED";
+        String STATUS_ABORTED = "ABORTED";
+
         @AttributeDefinition(
-                 name = "Cron expression defining when this Scheduled Service will run",
-                 description = "[12:01am daily = 0 1 0 ? * *]; see www.cronmaker.com",
-                 defaultValue = "0 1 0 ? * *"
-         )
-        String scheduler_expression();
-        
+                name = "Cron expression defining when this Scheduled Service will run",
+                description = "[12:01am daily = 0 1 0 ? * *]; see www.cronmaker.com",
+                defaultValue = DEFAULT_SCHEDULER_EXPRESSION
+        )
+        String scheduler_expression() default DEFAULT_SCHEDULER_EXPRESSION;
+
         @AttributeDefinition(name = "Workflow Status",
-                   description = "Only remove Workflow Instances that have one of these statuses.",
-                   defaultValue = { "COMPLETED", "ABORTED" })
-           String[] workflow_statuses();
+                description = "Only remove Workflow Instances that have one of these statuses.",
+                defaultValue = {STATUS_COMPLETED, STATUS_ABORTED})
+        String[] workflow_statuses() default {STATUS_COMPLETED, STATUS_ABORTED};
 
         @AttributeDefinition(name = "Workflow Models",
-                   description = "Only remove Workflow Instances that belong to one of these WF Models.",
-                   cardinality = Integer.MAX_VALUE)
-           String[] workflow_models();
-        
+                description = "Only remove Workflow Instances that belong to one of these WF Models.",
+                cardinality = Integer.MAX_VALUE)
+        String[] workflow_models();
+
         @AttributeDefinition(name = "Payload Patterns",
-                   description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
-                   cardinality = Integer.MAX_VALUE)
+                description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
+                cardinality = Integer.MAX_VALUE)
         String[] workflow_payloads();
 
         @AttributeDefinition(name = "Older Than UTC TS",
-                   description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis")
-           long workflow_older_than();
-        
+                description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis")
+        long workflow_older_than();
+
         @AttributeDefinition(name = "Batch Size",
-                   description = "Save removals to JCR in batches of this defined size.",
-                   defaultValue = ""+DEFAULT_BATCH_SIZE)
-           int batch_size();
+                description = "Save removals to JCR in batches of this defined size.",
+                defaultValue = "" + DEFAULT_BATCH_SIZE)
+        int batch_size() default DEFAULT_BATCH_SIZE;
 
         @AttributeDefinition(name = "Max duration (in minutes)",
-                   description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
-                           + "[ Default: 0 ]",
-                   defaultValue = "" + DEFAULT_MAX_DURATION)
-           int max_duration();
+                description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
+                        + "[ Default: 0 ]",
+                defaultValue = "" + DEFAULT_MAX_DURATION)
+        int max_duration() default DEFAULT_MAX_DURATION;
     }
 
     private List<String> models = new ArrayList<String>();
@@ -134,7 +138,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @SuppressWarnings("squid:S2142")
     public final void run() {
 
-        try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
+        try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
 
             final long start = System.currentTimeMillis();
 
@@ -143,7 +147,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
                     models,
                     statuses,
                     payloads,
-                    olderThan, 
+                    olderThan,
                     batchSize,
                     maxDuration);
 
@@ -183,7 +187,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
         models = arrayToList(config.workflow_models());
 
-        final String[] payloadsArray =config.workflow_payloads();
+        final String[] payloadsArray = config.workflow_payloads();
         for (final String payload : payloadsArray) {
             if (StringUtils.isNotBlank(payload)) {
                 final Pattern p = Pattern.compile(payload);
@@ -199,7 +203,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
         }
-        
+
         batchSize = config.batch_size();
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;
