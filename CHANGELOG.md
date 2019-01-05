@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 
 ### Fixed
+- #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils

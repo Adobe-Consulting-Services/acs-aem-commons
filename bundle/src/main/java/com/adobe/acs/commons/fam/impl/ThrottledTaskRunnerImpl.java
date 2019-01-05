@@ -24,8 +24,6 @@ import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -48,35 +46,45 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@Component(service = {ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class}, 
+@Component(service = {ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class},
        immediate = true,
        property = {
        "jmx.objectname" + "=" + "com.adobe.acs.commons.fam:type=Throttled Task Runner"
        })
-@Designate(ocd=ThrottledTaskRunnerImpl.Config.class)
+@Designate(ocd= ThrottledTaskRunnerImpl.Config.class)
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
 
     @ObjectClassDefinition(name = "ACS AEM Commons - Throttled Task Runner Service",
-               description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
-public @interface Config {
-    @AttributeDefinition(name = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",defaultValue = "4")
-        int max_threads() default 4;
-    @AttributeDefinition(name = "Max cpu %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.75")
-        double max_cpu();
-    @AttributeDefinition(name = "Max heap %", description = "Range is 0..1; -1 means disable this check", defaultValue = "0.85")
-        double max_heap();
-    @AttributeDefinition(name = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", defaultValue = "100")
-        int cooldown_wait_time();
-    @AttributeDefinition(name = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", defaultValue = "3600000")
-int task_timeout();
-}
+            description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
+    public @interface Config {
+
+        double DEFAULT_MAX_CPU = 0.75;
+        double DEFAULT_MAX_HEAP = 0.85;
+        int DEFAULT_MAX_THREADS = 4;
+        int DEFAULT_COOLDOWN_TIME = 100;
+        int DEFAULT_TASK_TIMEOUT = 3600000;
+
+        @AttributeDefinition(name = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores", defaultValue = "" + DEFAULT_MAX_THREADS)
+        int max_threads() default DEFAULT_MAX_THREADS;
+
+        @AttributeDefinition(name = "Max cpu %", description = "Range is 0..1; -1 means disable this check", defaultValue = ""+DEFAULT_MAX_CPU)
+        double max_cpu() default DEFAULT_MAX_CPU;
+
+        @AttributeDefinition(name = "Max heap %", description = "Range is 0..1; -1 means disable this check", defaultValue = "" + DEFAULT_MAX_HEAP)
+        double max_heap() default DEFAULT_MAX_HEAP;
+
+        @AttributeDefinition(name = "Cooldown time", description = "Time to wait for cpu/mem cooldown between checks", defaultValue = "" + DEFAULT_COOLDOWN_TIME)
+        int cooldown_wait_time() default DEFAULT_MAX_THREADS;
+
+        @AttributeDefinition(name = "Watchdog time", description = "Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", defaultValue = "" + DEFAULT_TASK_TIMEOUT)
+        int task_timeout() default DEFAULT_TASK_TIMEOUT;
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
     private int taskTimeout;
@@ -112,11 +120,11 @@ int task_timeout();
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, priority);
         workerPool.submit(r);
     }
-    
+
     public void scheduleWork(Runnable work, CancelHandler cancelHandler, int priority) {
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, priority);
         workerPool.submit(r);
-    }    
+    }
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -250,7 +258,7 @@ int task_timeout();
 
     @Override
     public final double getCpuLevel() throws InstanceNotFoundException, ReflectionException {
-        // This method will block until CPU usage is low enough            
+        // This method will block until CPU usage is low enough
         AttributeList list = mbs.getAttributes(osBeanName, new String[]{"ProcessCpuLoad"});
 
         if (list.isEmpty()) {
@@ -313,7 +321,7 @@ int task_timeout();
     }
 
     @Activate
-    protected void activate(ThrottledTaskRunnerImpl.Config config) {
+    protected void activate(Config config) {
         maxCpu = config.max_cpu();
         maxHeap = config.max_heap();
         maxThreads = config.max_threads();

@@ -49,9 +49,9 @@ import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 
 @Component(service = HealthCheck.class,
-     configurationPolicy = ConfigurationPolicy.REQUIRE, 
+     configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
-      HealthCheck.NAME + "=SMTP Mail Service", 
+      HealthCheck.NAME + "=SMTP Mail Service",
       HealthCheck.TAGS + "=[integrations, smtp, email]",
       HealthCheck.MBEAN_NAME + "=smtpMailService" })
 @Designate(ocd=SMTPMailServiceHealthCheck.Config.class)
@@ -68,11 +68,11 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
 
    @ObjectClassDefinition(name = "ACS AEM Commons - Health Check - SMTP E-Mail Service", description = "Checks if the AEM E-Mail Service can connect and send mail via the configured SMTP server.")
    public @interface Config {
-      @AttributeDefinition(name = "Test E-mail Address", description = "E-mail address to send test message to.", defaultValue = DEFAULT_EMAIL)
-      String email();
-   }
+      String DEFAULT_EMAIL = "healthcheck@example.com";
 
-   private static final String DEFAULT_EMAIL = "healthcheck@example.com";
+      @AttributeDefinition(name = "Test E-mail Address", description = "E-mail address to send test message to.", defaultValue = DEFAULT_EMAIL)
+      String email() default DEFAULT_EMAIL;
+   }
 
    private String toEmail;
 
@@ -81,7 +81,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
 
    @Activate
    protected void activate(SMTPMailServiceHealthCheck.Config config) {
-      this.toEmail = StringUtils.defaultIfEmpty(config.email(), DEFAULT_EMAIL);
+      this.toEmail = config.email();
    }
 
    @Override

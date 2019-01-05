@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -79,8 +79,8 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.search.QueryBuilder;
 
-@Component(service=ErrorPageHandlerService.class, immediate = false)
-@Designate(ocd=ErrorPageHandlerImpl.Config.class)
+@Component(service = ErrorPageHandlerService.class, immediate = false)
+@Designate(ocd = ErrorPageHandlerImpl.Config.class)
 public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorPageHandlerImpl.class);
@@ -91,44 +91,44 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private static final String REDIRECT_TO_LOGIN = "redirect-to-login";
     private static final String RESPOND_WITH_404 = "respond-with-404";
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - Error Page Handler",
-        description = "Error Page Handling module which facilitates the resolution of errors "
-                + "against author-able pages for discrete content trees.")
+            description = "Error Page Handling module which facilitates the resolution of errors "
+                    + "against author-able pages for discrete content trees.")
     public @interface Config {
-       
+
         @AttributeDefinition(name = "Enable", description = "Enables/Disables the error handler. [Required]",
-                defaultValue = {""+DEFAULT_ENABLED})
-        boolean enabled();
-        
+                defaultValue = {"" + DEFAULT_ENABLED})
+        boolean enabled() default DEFAULT_ENABLED;
+
         @AttributeDefinition(name = "Vanity Dispatch Check", description = "Enables/Disables Vanity Dispatch check, "
                 + "if this is enabled and current request URI is a valid vanity (after performing resource resolver mapping), "
                 + "request will be forwarded to it. [Optional... but recommended when using resource resolver based out-going mapping] [Default: false]",
                 defaultValue = "" + DEFAULT_VANITY_DISPATCH_ENABLED)
-        boolean vanity_dispatch_enabled();
+        boolean vanity_dispatch_enabled() default DEFAULT_VANITY_DISPATCH_ENABLED;
 
         @AttributeDefinition(name = "Error page extension",
                 description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
-                      defaultValue = DEFAULT_ERROR_PAGE_EXTENSION)
-        String errorpage_extension();
+                defaultValue = DEFAULT_ERROR_PAGE_EXTENSION)
+        String errorpage_extension() default DEFAULT_ERROR_PAGE_EXTENSION;
 
         @AttributeDefinition(
                 name = "Fallback error page name",
                 description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
                         + "retrieved from the Request. [Required] [Default: 500]",
-                        defaultValue = DEFAULT_FALLBACK_ERROR_NAME)
-        String errorpage_fallbackname();
-        
+                defaultValue = DEFAULT_FALLBACK_ERROR_NAME)
+        String errorpage_fallbackname() default DEFAULT_FALLBACK_ERROR_NAME;
+
         @AttributeDefinition(
                 name = "System error page",
                 description = "Absolute path to system Error page resource to serve if no other more appropriate "
                         + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
-                        defaultValue = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
+                defaultValue = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
         String errorpage_systempath();
 
-      
+
         @AttributeDefinition(
-              name = "Error page paths",
+                name = "Error page paths",
                 description = "List of inclusive content trees under which error pages may reside, "
                         + "along with the name of the the default error page for the content tree. This is a "
                         + "fallback/less powerful option to adding the ./errorPages property to CQ Page property dialogs."
@@ -144,7 +144,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         @Option(label = "Respond with 404", value = RESPOND_WITH_404)
                 },
                 defaultValue = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
-        String notfound_behavior();
+        String notfound_behavior() default DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
 
         @AttributeDefinition(
                 name = "Not Found Exclusions",
@@ -153,39 +153,39 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         + " to be defined via \"not-found.behavior\" with specific exclusions defined here. [Optional]",
                 cardinality = Integer.MAX_VALUE)
         String[] notfound_exclusionpathpatterns();
-        
+
         @AttributeDefinition(name = "Serve authenticated from cache",
                 description = "Serve authenticated requests from the error page cache. [ Default: false ]",
-                defaultValue = ""+DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-        boolean cache_serveauthenticated();
-        
+                defaultValue = "" + DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
+        boolean cache_serveauthenticated() default DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE;
+
         @AttributeDefinition(name = "TTL (in seconds)",
                 description = "TTL for each cache entry in seconds. [ Default: 300 ]",
                 defaultValue = "" + DEFAULT_TTL)
-        int cache_ttl();
-        
-        @AttributeDefinition(name = "Enable placeholder images", description = "Enable image error handling  [ Default: false ]",
-              defaultValue = ""+ DEFAULT_ERROR_IMAGES_ENABLED)
-        boolean errorimages_enabled();
+        int cache_ttl() default DEFAULT_TTL;
 
-        
+        @AttributeDefinition(name = "Enable placeholder images", description = "Enable image error handling  [ Default: false ]",
+                defaultValue = "" + DEFAULT_ERROR_IMAGES_ENABLED)
+        boolean errorimages_enabled() default DEFAULT_ERROR_IMAGES_ENABLED;
+
+
         @AttributeDefinition(name = "Error image path/selector",
                 description = "Accepts a selectors.extension (ex. `.img.png`) absolute, or relative path. "
                         + "If an extension or relative path, this value is applied to the resolved error page."
                         + " Note: This concatenated path must resolve to a nt:file else a 200 response will be sent."
                         + " [ Optional ] [ Default: .img.png ]",
                 defaultValue = DEFAULT_ERROR_IMAGE_PATH)
-        String errorimages_path();
-        
+        String errorimages_path() default DEFAULT_ERROR_IMAGE_PATH;
+
         @AttributeDefinition(
-              name = "Error image extensions",
+                name = "Error image extensions",
                 description = "List of valid image extensions (no proceeding .) to handle. "
                         + "Example: 'png' "
                         + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
                 cardinality = Integer.MAX_VALUE,
-                      defaultValue = { "png", "jpeg", "jpg", "gif" })
-       String[] errorimages_extensions();
-        
+                defaultValue = {"png", "jpeg", "jpg", "gif"})
+        String[] errorimages_extensions();
+
 
     }
 
@@ -194,7 +194,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     private boolean enabled = DEFAULT_ENABLED;
 
-   
+
     /* Enable/Disable Vanity Dispatch check*/
     private static final boolean DEFAULT_VANITY_DISPATCH_ENABLED = false;
 
@@ -260,7 +260,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ComponentHelper componentHelper;
-    
+
     @Reference
     private VanityURLService vanityUrlService;
 
@@ -515,7 +515,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     /**
      * Given the Request path, find the first Real Parent of the Request (even if the resource doesnt exist).
      *
-     * @param request the request object
+     * @param request       the request object
      * @param errorResource the error resource
      * @return
      */
@@ -624,7 +624,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      *
      * @param request
      * @param response
-     *
      * @return true if the request will be authenticated, false is the request could not trigger authentication
      */
     protected boolean authenticateRequest(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -641,6 +640,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
      * Determine is the request is a 404 and if so handles the request appropriately base on some CQ idiosyncrasies.
      * <p>
      * Mainly forces an authentication request in Authoring modes (!WCMMode.DISABLED)
+     *
      * @param request
      * @param response
      */
@@ -840,7 +840,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     @Activate
     protected void activate(ComponentContext componentContext, ErrorPageHandlerImpl.Config config) {
         this.enabled = config.enabled();
-       
+
         this.vanityDispatchCheckEnabled = config.vanity_dispatch_enabled();
 
         /** Error Pages **/
@@ -1018,7 +1018,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
     }
 
     @Override
-    public boolean isVanityDispatchCheckEnabled(){
+    public boolean isVanityDispatchCheckEnabled() {
         return this.vanityDispatchCheckEnabled;
     }
 

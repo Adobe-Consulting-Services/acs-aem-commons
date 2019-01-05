@@ -69,7 +69,7 @@ import com.day.cq.search.QueryBuilder;
 @Component(service=EventHandler.class,immediate = true,configurationPolicy=ConfigurationPolicy.REQUIRE,property= {
       EventConstants.EVENT_TOPIC + "=" + "com/adobe/granite/taskmanagement/event",
       EventConstants.EVENT_FILTER + "=" + "(&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))"
-      
+
 })
 @Designate(ocd=ReviewTaskAssetMoverHandler.Config.class)
 public class ReviewTaskAssetMoverHandler implements EventHandler {
@@ -99,7 +99,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
-    
+
     @ObjectClassDefinition(
     name = "ACS AEM Commons - Review Task Move Handler",
     description = "Create an OSGi configuration to enable this feature.")
@@ -114,12 +114,12 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                        @Option(label = CONFLICT_RESOLUTION_SKIP, value = "Skip (skip)")
                },
                defaultValue = DEFAULT_DEFAULT_CONFLICT_RESOLUTION)
-       String conflict_resolution_default();
-       
+       String conflict_resolution_default() default DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
+
        @AttributeDefinition(name = "Last Modified By",
                description = "For Conflict Resolution: Version, the review task event does not track the user that completed the event. Use this property to specify the static name of of the [dam:Asset]/jcr:content@jcr:lastModifiedBy. Default: Review Task",
                defaultValue = DEFAULT_LAST_MODIFIED_BY)
-        String conflict_resolution_version_last_modified_by();
+        String conflict_resolution_version_last_modified_by() default DEFAULT_LAST_MODIFIED_BY;
 
     }
 
@@ -140,8 +140,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     @Activate
     protected void activate(ReviewTaskAssetMoverHandler.Config config) {
-        lastModifiedBy = StringUtils.defaultIfEmpty(config.conflict_resolution_version_last_modified_by(), DEFAULT_LAST_MODIFIED_BY);
-        defaultConflictResolution = StringUtils.defaultIfEmpty(config.conflict_resolution_default(), DEFAULT_DEFAULT_CONFLICT_RESOLUTION);
+        lastModifiedBy = config.conflict_resolution_version_last_modified_by();
+        defaultConflictResolution = config.conflict_resolution_default();
     }
 
     @Override
