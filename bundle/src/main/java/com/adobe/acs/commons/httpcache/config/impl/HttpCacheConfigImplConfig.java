@@ -6,18 +6,10 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 
-/**
- * WHAT IS IT ???
- * <p>
- * WHAT PURPOSE THAT IT HAS ???
- * </p>
- *
- * @author niek.raaijkmakers@external.cybercon.de
- * @since 2019-01-07
- */
+
 @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Cache config",
-        description = "Config for request URI patterns that have to be cached.")
-public @interface Config {
+        description = "HttpCacheConfigImplConfig for request URI patterns that have to be cached.")
+public @interface HttpCacheConfigImplConfig {
 
     String PROP_ORDER = "httpcache.config.order";
 
@@ -140,7 +132,7 @@ public @interface Config {
             defaultValue = DEFAULT_KEY_FACTORY_TARGET)
     String cacheKeyFactory() default DEFAULT_KEY_FACTORY_TARGET;
 
-    @AttributeDefinition(name = "Config-specific HttpCacheHandlingRules",
+    @AttributeDefinition(name = "HttpCacheConfigImplConfig-specific HttpCacheHandlingRules",
             description = "List of Service pid of HttpCacheHandlingRule applicable for this cache config. Optional "
                     + "parameter")
     String[] httpcache_config_cache_handling_rules_pid();

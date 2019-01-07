@@ -31,6 +31,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -72,19 +73,19 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     public @interface Config {
         @AttributeDefinition(name = "Allowed paths",
                 description = "Regex of content paths that can be cached.")
-        String[] httpcache_config_extension_paths_allowed();
+        String[] httpcache_config_extension_paths_allowed() default {};
 
         @AttributeDefinition(name = "Allowed resource types",
                 description = "Regex of resource types that can be cached.")
-        String[] httpcache_config_extension_resourcetypes_allowed();
+        String[] httpcache_config_extension_resourcetypes_allowed() default {};
 
         @AttributeDefinition(name = "Check RT of ./jcr:content?",
                 description = "Should the resourceType check be applied to ./jcr:content ?",
                 defaultValue = "false")
-        boolean httpcacheconfig_extension_resourcetypes_page_content();
+        boolean httpcacheconfig_extension_resourcetypes_page_content() default false;
 
         @AttributeDefinition(name = "Config Name")
-        String configName();
+        String configName() default StringUtils.EMPTY;
     }
 
     // Custom cache config attributes
@@ -230,10 +231,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     //-------------------------<OSGi Component methods>
 
     @Activate
-    protected void activate(Map<String, Object> configs) {
-        resourceTypePatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESOURCE_TYPES), new String[]{}));
-        pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
-        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE),false);
+    protected void activate(Config config) {
+        resourceTypePatterns = ParameterUtil.toPatterns(config.httpcache_config_extension_resourcetypes_allowed());
+        pathPatterns = ParameterUtil.toPatterns(config.httpcache_config_extension_paths_allowed());
+        checkContentResourceType = config.httpcacheconfig_extension_resourcetypes_page_content();
 
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }

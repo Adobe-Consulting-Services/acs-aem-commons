@@ -63,12 +63,12 @@ property= {
                  + "Authentication: {httpcache.config.request.authentication}, "
                  + "Invalidation paths: {httpcache.config.invalidation.oak.paths}, "
                  + "Cache type: {httpcache.config.cachestore}"})
-@Designate(ocd= Config.class, factory=true)
+@Designate(ocd= HttpCacheConfigImplConfig.class, factory=true)
 public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
-    private int order = Config.DEFAULT_ORDER;
+    private int order = HttpCacheConfigImplConfig.DEFAULT_ORDER;
 
     // Request URIs - Whitelisted.
     private List<String> requestUriPatterns;
@@ -112,7 +112,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private long expiryOnUpdate;
 
     @Activate
-    protected void activate(Config config) {
+    protected void activate(HttpCacheConfigImplConfig config) {
 
         // Request URIs - Whitelisted.
         requestUriPatterns = Arrays.asList(config.httpcache_config_requesturi_patterns());
