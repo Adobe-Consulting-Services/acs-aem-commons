@@ -29,11 +29,14 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class ReflectionUtilTest {
@@ -41,6 +44,12 @@ public class ReflectionUtilTest {
     private ValueMap valueMap;
     public Number numberField;
     public List<Integer> integerList;
+
+    static class TestClazz{
+        public List<String> stringList;
+        public Set<Integer> integerSet;
+        public Collection<Long> longCollection;
+    }
 
     @Before
     public void setUp() {
@@ -91,6 +100,32 @@ public class ReflectionUtilTest {
         assertFalse(ReflectionUtil.isArray(integerList.getClass()));
         assertTrue(ReflectionUtil.isArray(integers.getClass()));
     }
+
+    @Test
+    public void testTestClazz(){
+
+        for(Field field :TestClazz.class.getDeclaredFields()){
+
+            switch(field.getName()){
+                case "stringList":
+                    assertTrue(ReflectionUtil.isListType(field.getGenericType()));
+                    break;
+                case "integerSet":
+                    assertTrue(ReflectionUtil.isSetType(field.getGenericType()));
+                    break;
+                case "longCollection":
+                    assertTrue(ReflectionUtil.isCollectionType(field.getGenericType()));
+                    assertSame(Long.class,ReflectionUtil.getClassOrGenericParam(field.getAnnotatedType().getType()));
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+
+    }
+
 
     @Test
     public void isAssignableFrom() {
