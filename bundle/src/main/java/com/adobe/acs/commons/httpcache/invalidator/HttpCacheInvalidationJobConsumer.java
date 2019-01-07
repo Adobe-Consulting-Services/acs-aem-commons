@@ -56,15 +56,15 @@ import java.util.Map;
 @Designate(ocd=HttpCacheInvalidationJobConsumer.Config.class)
 public class HttpCacheInvalidationJobConsumer implements JobConsumer {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheInvalidationJobConsumer.class);
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Cache invalidation job consumer",
            description = "Consumes job for invalidating the http cache")
     public @interface Config {
         @AttributeDefinition(name = "Invalidate references",
                 description = "Whether to search for references and invalidate them in the cache.",
                 defaultValue = ""+HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES)
-        boolean httpcache_config_invalidation_references();
-    
+        boolean httpcache_config_invalidation_references() default HttpCacheInvalidationJobConsumer.DEFAULT_REFERENCES;
+
     }
 
     private static final String PROP_REFERENCES = "httpcache.config.invalidation.references";
@@ -79,8 +79,8 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
     private ResourceResolverFactory resolverFactory;
 
     @Activate
-    protected void activate(Map<String, Object> configs) {
-        invalidateRefs = PropertiesUtil.toBoolean(configs.get(PROP_REFERENCES), DEFAULT_REFERENCES);
+    protected void activate(Config config) {
+        invalidateRefs = config.httpcache_config_invalidation_references();
     }
 
     @Override
