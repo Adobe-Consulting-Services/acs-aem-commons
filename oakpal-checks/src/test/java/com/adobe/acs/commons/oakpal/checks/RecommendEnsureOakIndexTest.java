@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.OrgJson.arr;
+import static net.adamcin.oakpal.core.OrgJson.key;
+import static net.adamcin.oakpal.core.OrgJson.obj;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -27,6 +30,7 @@ import java.net.URL;
 import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.InitStage;
 import net.adamcin.oakpal.core.ProgressCheck;
+import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -46,16 +50,15 @@ public class RecommendEnsureOakIndexTest extends CheckTestBase {
 
     @Test
     public void testCheckNone() throws Exception {
-        ProgressCheck check = new RecommendEnsureOakIndex().newInstance(
-                new JSONObject("{\"scopePaths\":[{\"type\":\"deny\",\"pattern\":\".*\"}]}"));
+        ProgressCheck check = new RecommendEnsureOakIndex()
+                .newInstance(key("scopePaths", arr(Rule.DEFAULT_DENY)).get());
         CheckReport reportValid = scanWithCheck(check, pack);
         assertEquals("No violations when deny all oak:index children.", 0, reportValid.getViolations().size());
     }
 
     @Test
     public void testCheckAll() throws Exception {
-        ProgressCheck check = new RecommendEnsureOakIndex().newInstance(
-                new JSONObject("{}"));
+        ProgressCheck check = new RecommendEnsureOakIndex().newInstance(obj().get());
         CheckReport reportValid = scanWithCheck(check, pack);
         assertEquals("3 violations when allow all oak:index children.", 3, reportValid.getViolations().size());
     }

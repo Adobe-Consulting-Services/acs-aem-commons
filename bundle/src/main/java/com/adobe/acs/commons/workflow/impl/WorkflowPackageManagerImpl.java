@@ -80,13 +80,17 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
-    
+
     @ObjectClassDefinition
     public @interface Config {
-       @AttributeDefinition(name = "Workflow Package Types",
+        String DEFAULTS_CQPAGE = "cq:Page";
+        String DEFAULTS_CQPAGECONTENT = "cq:PageContent";
+        String DEFAULTS_DAM_ASSET = "dam:Asset";
+
+        @AttributeDefinition(name = "Workflow Package Types",
                 description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
-                defaultValue = { "cq:Page", "cq:PageContent", "dam:Asset" })
-       String[] wf_package_types();
+                defaultValue = {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET})
+       String[] wf_package_types() default {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET};
     }
 
     @Reference

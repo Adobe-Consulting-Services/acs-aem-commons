@@ -35,9 +35,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -238,11 +241,15 @@ public class EndpointServiceImpl implements EndpointService {
       get.setHeader(AUTHORIZATION, BEARER + integrationService.getAccessToken());
       get.setHeader(CACHE_CONTRL, NO_CACHE);
       get.setHeader(X_API_KEY, integrationService.getApiKey());
-      get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       if ( headers == null || headers.length == 0) {
            addHeaders(get, specificServiceHeaders);
       } else {
         addHeaders(get, convertServiceSpecificHeaders(headers));
+      }
+      Header[] contentTypeHeaders = get.getHeaders(CONTENT_TYPE);
+      // If no content type is given, then default to application/json
+      if (ArrayUtils.isEmpty(contentTypeHeaders)) {
+         get.setHeader(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON);
       }
 
       try (CloseableHttpClient httpClient = helper.getHttpClient(integrationService.getTimeoutinMilliSeconds())) {

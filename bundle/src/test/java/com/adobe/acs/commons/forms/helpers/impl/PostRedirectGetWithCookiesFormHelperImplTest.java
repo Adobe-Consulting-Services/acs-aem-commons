@@ -91,7 +91,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldSerialiseFormInRedirectUrlParameter() throws Exception {
         request.setMethod("POST");
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", "world"));
@@ -122,7 +121,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
 
 
     @Test
-    @Ignore
     public void shouldInvalidateCookieOnGetRequest() throws Exception {
         final SlingHttpServletResponse redirectResponse = spy(slingContext.response());
         request.setMethod("GET");
@@ -137,7 +135,6 @@ public class PostRedirectGetWithCookiesFormHelperImplTest {
     }
 
     @Test
-    @Ignore
     public void shouldRemoveCookieDataOnGetRequest() throws Exception {
         final SlingHttpServletResponse redirectResponse = spy(slingContext.response());
         request.setMethod("GET");
