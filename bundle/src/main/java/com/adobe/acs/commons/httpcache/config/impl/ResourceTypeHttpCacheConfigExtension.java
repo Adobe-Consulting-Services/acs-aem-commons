@@ -89,13 +89,8 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     }
 
     // Custom cache config attributes
-    private static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
     private List<Pattern> pathPatterns;
-
-    private static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resourcetypes.allowed";
     private List<Pattern> resourceTypePatterns;
-
-    public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resourcetypes.page-content";
     private boolean checkContentResourceType;
 
     //-------------------------<HttpCacheConfigExtension methods>

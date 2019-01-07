@@ -162,7 +162,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         };
     }
 
-    private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cachehandling.rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
