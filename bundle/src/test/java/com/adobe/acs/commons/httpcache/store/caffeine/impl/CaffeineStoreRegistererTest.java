@@ -32,6 +32,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.lang.annotation.Annotation;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -55,6 +57,9 @@ public class CaffeineStoreRegistererTest {
     @Mock
     BundleContext bundleContext;
 
+    @Mock
+    Config config;
+
     @Captor
     ArgumentCaptor<Dictionary<String, ?>> argumentCaptor;
     private Map<String, Object> properties = new HashMap<>();
@@ -67,6 +72,8 @@ public class CaffeineStoreRegistererTest {
         MockitoAnnotations.initMocks(this);
         systemUnderTest = new CaffeineStoreRegisterer();
 
+        when(config.httpcache_cachestore_caffeinecache_maxsize()).thenReturn(valueMaxSize);
+        when(config.httpcache_cachestore_caffeinecache_ttl()).thenReturn(valueTtl);
         properties.put(Config.PROP_TTL, valueTtl);
         properties.put(Config.PROP_MAX_SIZE_IN_MB, valueMaxSize);
     }
@@ -74,7 +81,7 @@ public class CaffeineStoreRegistererTest {
     @Test
     public void test_register(){
 
-        systemUnderTest.activate(bundleContext, properties);
+        systemUnderTest.activate(bundleContext, config);
         verify(bundleContext, atLeastOnce()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
         assertEquals(HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,argumentCaptor.getValue().get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
     }
@@ -82,8 +89,8 @@ public class CaffeineStoreRegistererTest {
     @Test
     public void test_class_not_found() throws Exception {
 
-        PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withArguments(valueTtl, valueMaxSize).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
-        systemUnderTest.activate(bundleContext, properties);
+        PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withParameterTypes(Config.class).withArguments(config).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
+        systemUnderTest.activate(bundleContext, config);
         verify(bundleContext, never()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
     }
 
