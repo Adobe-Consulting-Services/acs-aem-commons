@@ -148,12 +148,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
         @AttributeDefinition(name = "Global HttpCacheHandlingRules",
                 description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-                defaultValue = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                defaultValue = {
+                        "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
                         "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
                         "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
                         "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
                 })
-      String[] httpcache_engine_cachehandling_rules_global();
+        String[] httpcache_engine_cachehandling_rules_global() default {
+                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
+                "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
+                "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
+        };
     }
 
     private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cachehandling.rules.global";
@@ -287,11 +293,10 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Activate
-    protected void activate(Map<String, Object> configs) {
+    protected void activate(Config config) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
-                PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(config.httpcache_engine_cachehandling_rules_global()));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
