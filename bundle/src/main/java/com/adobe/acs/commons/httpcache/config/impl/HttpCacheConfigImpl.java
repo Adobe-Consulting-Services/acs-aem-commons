@@ -63,11 +63,12 @@ property= {
                  + "Authentication: {httpcache.config.request.authentication}, "
                  + "Invalidation paths: {httpcache.config.invalidation.oak.paths}, "
                  + "Cache type: {httpcache.config.cachestore}"})
-@Designate(ocd=Config.class, factory=true)
+@Designate(ocd= HttpCacheConfigImplConfig.class, factory=true)
 public class HttpCacheConfigImpl implements HttpCacheConfig {
+
     private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
 
-    private int order = Config.DEFAULT_ORDER;
+    private int order = HttpCacheConfigImplConfig.DEFAULT_ORDER;
 
     // Request URIs - Whitelisted.
     private List<String> requestUriPatterns;
@@ -111,41 +112,35 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private long expiryOnUpdate;
 
     @Activate
-    protected void activate(Map<String,Object> configs) {
+    protected void activate(HttpCacheConfigImplConfig config) {
 
         // Request URIs - Whitelisted.
-        requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(Config.PROP_REQUEST_URI_PATTERNS), new
-                String[]{}));
+        requestUriPatterns = Arrays.asList(config.httpcache_config_requesturi_patterns());
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
 
         // Request URIs - Blacklisted.
-        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
-                .get(Config.PROP_BLACKLISTED_REQUEST_URI_PATTERNS), new String[]{}));
+        blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(config.httpcache_config_requesturi_patterns_blacklisted()));
         blacklistedRequestUriPatternsAsRegEx = compileToPatterns(blacklistedRequestUriPatterns);
 
         // Authentication requirement.
-        authenticationRequirement = PropertiesUtil.toString(configs.get(Config.PROP_AUTHENTICATION_REQUIREMENT),
-                Config.DEFAULT_AUTHENTICATION_REQUIREMENT);
+        authenticationRequirement = config.httpcache_config_request_authentication();
 
         // Cache store
-        cacheStore = PropertiesUtil.toString(configs.get(Config.PROP_CACHE_STORE), Config.DEFAULT_CACHE_STORE);
+        cacheStore = config.httpcache_config_cachestore();
 
         // Custom expiry
-        expiryOnCreate = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_CREATE), Config.DEFAULT_EXPIRY_ON_CREATE);
-        expiryOnAccess = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_ACCESS), Config.DEFAULT_EXPIRY_ON_ACCESS);
-        expiryOnUpdate = PropertiesUtil.toLong(configs.get(Config.PROP_EXPIRY_ON_UPDATE), Config.DEFAULT_EXPIRY_ON_UPDATE);
+        expiryOnCreate = config.httpcache_config_expiry_on_create();
+        expiryOnAccess = config.httpcache_config_expiry_on_access();
+        expiryOnUpdate = config.httpcache_config_expiry_on_update();
 
         // Cache invalidation paths.
-        cacheInvalidationPathPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
-                .get(Config.PROP_CACHE_INVALIDATION_PATH_PATTERNS), new String[]{}));
+        cacheInvalidationPathPatterns = Arrays.asList(config.httpcache_config_invalidation_oak_paths());
         cacheInvalidationPathPatternsAsRegEx = compileToPatterns(cacheInvalidationPathPatterns);
 
-        order = PropertiesUtil.toInteger(configs.get(Config.PROP_ORDER), Config.DEFAULT_ORDER);
-
-        filterScope = FilterScope.valueOf(PropertiesUtil.toString(configs.get(Config.PROP_FILTER_SCOPE), Config.DEFAULT_FILTER_SCOPE).toUpperCase());
+        order = config.httpcache_config_order();
+        filterScope = FilterScope.valueOf(config.httpcache_config_filter_scope());
         // PIDs of cache handling rules.
-        cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs
-                .get(Config.PROP_CACHE_HANDLING_RULES_PID), new String[]{})));
+        cacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(config.httpcache_config_cache_handling_rules_pid()));
         ListIterator<String> listIterator = cacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
