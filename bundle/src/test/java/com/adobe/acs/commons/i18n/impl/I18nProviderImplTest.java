@@ -22,10 +22,13 @@ package com.adobe.acs.commons.i18n.impl;
 import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
 import com.day.cq.i18n.I18n;
 import com.day.cq.wcm.api.Page;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.i18n.ResourceBundleProvider;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -63,6 +66,9 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class I18nProviderImplTest {
 
     @Mock
+    private Config config;
+
+    @Mock
     private ResourceBundleProvider resourceBundleProvider;
 
     @Mock
@@ -80,8 +86,7 @@ public class I18nProviderImplTest {
     private Page resourcePage;
 
     private final I18nProviderImpl i18nProvider = new I18nProviderImpl();
-
-    private Map<String,Object> properties = new HashMap<>();
+    private final HashMap<String, Object> props = new HashMap<>();
 
     public I18nProviderImplTest() throws NotCompliantMBeanException {
     }
@@ -89,7 +94,7 @@ public class I18nProviderImplTest {
     @Before
     public void setUp(){
 
-        HashMap<String,Object> props = new HashMap<>();
+        props.clear();
         props.put(Constants.SERVICE_ID, 11L);
         props.put(Constants.SERVICE_RANKING, 11);
         i18nProvider.bindResourceBundleProvider(resourceBundleProvider, props);
@@ -112,10 +117,27 @@ public class I18nProviderImplTest {
         when(InjectorUtils.getResourcePage(resource)).thenReturn(resourcePage);
         when(resourcePage.getLanguage(false)).thenReturn(Locale.US);
 
-        properties.put(Config.PN_MAX_SIZE_IN_MB, 10L);
-        properties.put(Config.PN_TTL, 10L);
+        when(config.getTtl()).thenReturn(10L);
+        when(config.maxSizeCount()).thenReturn(10L);
 
-        i18nProvider.activate(properties);
+        i18nProvider.activate(config);
+    }
+
+    @After
+    public void tearDown(){
+        i18nProvider.unbindResourceBundleProvider(resourceBundleProvider, props);
+    }
+
+    public void test_get_bytes_length(){
+        assertEquals(0L, i18nProvider.getBytesLength(null));
+    }
+
+    @Test
+    public void test_secondary_activate(){
+        when(config.getTtl()).thenReturn(Config.DEFAULT_TTL);
+        when(config.maxSizeCount()).thenReturn(Config.DEFAULT_MAX_SIZE_IN_MB);
+
+        i18nProvider.activate(config);
     }
 
     @Test
