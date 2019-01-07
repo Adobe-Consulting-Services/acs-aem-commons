@@ -34,8 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.adobe.acs.commons.util.ReflectionUtil.getGenericParameter;
-import static com.adobe.acs.commons.util.ReflectionUtil.isSetType;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.getGenericParameter;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isSetType;
 
 /**
  * Converts value map values to the value with the desired type.
