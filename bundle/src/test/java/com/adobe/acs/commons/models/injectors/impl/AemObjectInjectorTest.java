@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import javax.inject.Inject;
 import javax.jcr.Session;
 
+import com.day.cq.i18n.I18n;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -57,21 +58,21 @@ public class AemObjectInjectorTest {
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
-    
-    
-    
+
+
+
     @Before
     public final void setUp() throws Exception {
         AemObjectInjector aemObjectsInjector = new AemObjectInjector();
         context.registerService(aemObjectsInjector);
-        
+
         context.registerService(PageManager.class,pageManager);
         context.registerService(Designer.class,designer);
         context.addModelsForClasses(TestResourceModel.class);
 
         // create a resource to have something we can adapt
         context.create().resource("/content/resource");
-        
+
     }
 
     @Test

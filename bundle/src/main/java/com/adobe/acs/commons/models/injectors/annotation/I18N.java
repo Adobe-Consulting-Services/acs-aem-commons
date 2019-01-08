@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
@@ -32,45 +33,30 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- *
- * Sling Models Injector which injects the Adobe AEM objects defined in
- * <a href="http://bit.ly/1gmlmfE">&lt;cq:defineObjects/&gt;</a>.
- * <p>
- * the following objects can be injected:
- * <ul>
- * <li> resource the current resource
- * <li> resourceResolver the current resource resolver
- *
- * <li> componentContext component context of this request
- *
- * <li> pageManager page manager
- * <li> currentPage containing page addressed by the request
- * <li> resourcePage containing page of the addressed resource
- *
- * <li> designer the designer
- * <li> currentDesign design of the addressed resource
- * <li> resourceDesign design of the addressed resource
- *
- * <li> currentStyle style addressed by the request
- * <li> session the current session
- * <li> xssApi cross site scripting provider for the current request
- * </ul>
- *
- * Note: This can only be used together with Sling Models API bundle in version 1.2.0
+ * Injects I18n text into a field, based on the underlying resource in case of resource adaptation, or request.
+ * Note: not supported by the javax.Inject annotation because of performance reasons. Only direct annotation is supported.
  */
-@Target({ METHOD, FIELD, PARAMETER })
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source(AemObject.SOURCE)
-public @interface AemObject {
+@Source(I18N.SOURCE)
+public @interface I18N {
 
-    String SOURCE = "define-objects";
+    String SOURCE = "i18n";
+
+    /**
+     * Represents the i18nKey
+     *
+     * @return
+     */
+    String value() default StringUtils.EMPTY;
+
     /**
      * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT
      * the standard annotations ({@link org.apache.sling.models.annotations.Optional}, {@link org.apache.sling.models.annotations.Required}) are used.
      * If even those are not available the default injection strategy defined on the {@link org.apache.sling.models.annotations.Model} applies.
      * Default value = DEFAULT.
      */
-    public InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
+    InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
 
 }
