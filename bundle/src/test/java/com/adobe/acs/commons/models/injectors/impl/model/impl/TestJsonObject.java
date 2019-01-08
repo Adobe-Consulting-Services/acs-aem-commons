@@ -41,12 +41,16 @@ public class TestJsonObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
         TestJsonObject that = (TestJsonObject) o;
-        return property3 == that.property3 &&
-                Objects.equals(property1, that.property1) &&
-                Objects.equals(property2, that.property2);
+        return property3 == that.property3
+                && Objects.equals(property1, that.property1)
+                && Objects.equals(property2, that.property2);
     }
 
     @Override

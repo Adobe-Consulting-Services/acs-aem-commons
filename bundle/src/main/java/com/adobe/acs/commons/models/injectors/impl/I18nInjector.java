@@ -94,7 +94,7 @@ public class I18nInjector implements Injector {
     }
 
     private boolean canAdaptToString(Object adaptable, Type type) {
-        return getResource(adaptable) != null && type.getTypeName().equals(String.class.getName());
+        return getResource(adaptable) != null && ReflectionUtil.isAssignableFrom(type, String.class);
     }
 
     private boolean canAdaptToObject(Object adaptable, Type type) {

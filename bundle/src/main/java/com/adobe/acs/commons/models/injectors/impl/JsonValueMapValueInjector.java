@@ -77,31 +77,26 @@ public class JsonValueMapValueInjector implements Injector {
             Resource resource = getResource(adaptable);
             JsonValueMapValue annotation = element.getAnnotation(JsonValueMapValue.class);
             String key = defaultIfEmpty(annotation.name(), name);
-
-            if (isSetType(declaredType)) {
-                String[] jsonStringArray = resource.getValueMap().get(key, String[].class);
-                if (isNotEmpty(jsonStringArray)) {
-                    return createSet(jsonStringArray, getGenericParameter(declaredType));
-                }
-            } else if (isListType(declaredType) || isCollectionType(declaredType)) {
-                String[] jsonStringArray = resource.getValueMap().get(key, String[].class);
-                if (isNotEmpty(jsonStringArray)) {
-                    return createList(jsonStringArray, getGenericParameter(declaredType));
-                }
-            } else if (isArray(declaredType)) {
-                String[] jsonStringArray = resource.getValueMap().get(key, String[].class);
-                if (isNotEmpty(jsonStringArray)) {
-                    return createArray(jsonStringArray, getGenericParameter(declaredType));
-                }
-            } else {
-                String jsonString = resource.getValueMap().get(key, String.class);
-                if (StringUtils.isNotEmpty(jsonString)) {
-                    return GSON.fromJson(jsonString, getClassOrGenericParam(declaredType));
-                }
-            }
+            String[] jsonStringArray = resource.getValueMap().get(key, String[].class);
+            return parseValue(declaredType, jsonStringArray, key, resource);
         }
 
         return null;
+    }
+
+    private Object parseValue(Type declaredType,String[] jsonStringArray, String key, Resource resource){
+         if ((isSetType(declaredType)) && isNotEmpty(jsonStringArray)) {
+             return createSet(jsonStringArray, getGenericParameter(declaredType));
+         } else if ((isListType(declaredType) || isCollectionType(declaredType)) && isNotEmpty(jsonStringArray)) {
+             return createList(jsonStringArray, getGenericParameter(declaredType));
+         } else if (isArray(declaredType) && isNotEmpty(jsonStringArray)) {
+             return createArray(jsonStringArray, getGenericParameter(declaredType));
+         } else if (resource.getValueMap().containsKey(key)) {
+             String jsonString = resource.getValueMap().get(key, String.class);
+             return GSON.fromJson(jsonString, getClassOrGenericParam(declaredType));
+         } else {
+             return null;
+         }
     }
 
 

@@ -94,7 +94,7 @@ public final class AemObjectInjector implements Injector {
     private I18nProvider i18nProvider;
 
     @Reference
-    private XSSAPI genericXXSApi;
+    private XSSAPI genericXxsApi;
 
     @Override
     public String getName() {
@@ -152,7 +152,7 @@ public final class AemObjectInjector implements Injector {
         if(specificApi != null){
             return specificApi;
         }else{
-            return genericXXSApi;
+            return genericXxsApi;
         }
     }
 
