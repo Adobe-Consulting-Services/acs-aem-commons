@@ -47,11 +47,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,10 +76,65 @@ import java.util.concurrent.CopyOnWriteArrayList;
         HttpCacheStore.KEY_CACHE_STORE_TYPE + "=" + HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE,
         "jmx.objectname" + "=" + "com.adobe.acs.httpcache:type=JCR HTTP Cache Store",
         "scheduler.concurrent" + "=" + "false"
-
 })
-@Designate(ocd = Config.class)
+@Designate(ocd = JCRHttpCacheStoreImpl.Config.class)
 public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, CacheContent> implements HttpCacheStore, JcrCacheMBean, Runnable {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Http Cache - JCR Cache Store.",
+            description = "Cache data store implementation for JCR storage.")
+    public @interface Config {
+
+        //By default, we go for the maximum bucket depth. This uses the full hashcode of 10 digits.
+        int DEFAULT_BUCKETDEPTH = 10;
+
+        //Perform a save on a delta of 500 by default.
+        int DEFAULT_SAVEDELTA = 500;
+
+        // 1 week.
+        long DEFAULT_EXPIRETIMEINMILISECONDS = 604800;
+
+        String DEFAULT_ROOTPATH = "/var/acs-commons/httpcache";
+        String DEFAULT_CRON_EXPRESSION = "0 0 12 1/1 * ? *";
+
+        @AttributeDefinition(
+                name = "Cache clean-up schedule",
+                description = "[every minute = 0 * * * * ?] Visit www.cronmaker.com to generate cron expressions.",
+                defaultValue = DEFAULT_CRON_EXPRESSION
+        )
+        String scheduler_expression() default DEFAULT_CRON_EXPRESSION;
+
+        @AttributeDefinition(
+                name = "Cache bucketing tree depth",
+                description = "The depth the bucket tree goes. Minimum value is 1. "
+                        + "This value can be used for tweaking performance. "
+                        + "The more data cached, the higher this value should be. "
+                        + "Downside is that the higher the value, the longer the retrieval of cache entries takes if the buckets are relatively low on entries.",
+                defaultValue = "" + DEFAULT_BUCKETDEPTH
+        )
+        int httpcache_config_jcr_bucketdepth() default DEFAULT_BUCKETDEPTH;
+
+
+        @AttributeDefinition(
+                name = "Cache-root Parent Path location",
+                description = "Points to the location of the cache root parent node in the JCR repository",
+                defaultValue = DEFAULT_ROOTPATH
+        )
+        String httpcache_config_jcr_rootpath() default DEFAULT_ROOTPATH;
+
+        @AttributeDefinition(
+                name = "Save threshold",
+                description = "The threshold to add,remove and modify nodes when handling the cache",
+                defaultValue = "" + DEFAULT_SAVEDELTA
+        )
+        int httpcache_config_jcr_savedelta() default DEFAULT_SAVEDELTA;
+
+        @AttributeDefinition(
+                name = "Expire time in miliseconds",
+                description = "The time in miliseconds after which nodes will be removed by the scheduled cleanup service. ",
+                defaultValue = "" + DEFAULT_EXPIRETIMEINMILISECONDS
+        )
+        long httpcache_config_jcr_expiretimeinmiliseconds() default DEFAULT_EXPIRETIMEINMILISECONDS;
+    }
 
     private static final String SERVICE_NAME = "httpcache-jcr-storage-service";
 
@@ -90,12 +146,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     private static final Logger log = LoggerFactory.getLogger(JCRHttpCacheStoreImpl.class);
 
-    //fields
-    private String cacheRootPath;
-    private int bucketTreeDepth;
-    private int deltaSaveThreshold;
-    private long expireTimeInMilliSeconds;
-
+    private Config config;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -110,11 +161,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     @Activate
-    protected void activate(Map<String,Object> properties) {
-        cacheRootPath = PropertiesUtil.toString(properties.get(Config.PN_ROOTPATH), Config.DEFAULT_ROOTPATH) + "/" + JCRHttpCacheStoreConstants.ROOT_NODE_NAME;
-        bucketTreeDepth = PropertiesUtil.toInteger(properties.get(Config.PN_BUCKETDEPTH), Config.DEFAULT_BUCKETDEPTH);
-        deltaSaveThreshold = PropertiesUtil.toInteger(properties.get(Config.PN_SAVEDELTA), Config.DEFAULT_SAVEDELTA);
-        expireTimeInMilliSeconds = PropertiesUtil.toLong(properties.get(Config.PN_EXPIRETIMEINMILLISECONDS), Config.DEFAULT_EXPIRETIMEINMILISECONDS);
+    public void activate(Config config) {
+        this.config = config;
     }
 
     @Override
@@ -123,12 +171,12 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         incrementLoadCount();
 
         withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, key, config);
             final Node bucketNode = factory.getBucketNode();
 
-            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
+            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, config.httpcache_config_jcr_expiretimeinmiliseconds());
 
-            long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : expireTimeInMilliSeconds;
+            long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : config.httpcache_config_jcr_expiretimeinmiliseconds();
 
             new EntryNodeWriter(session, entryNode, key, content,expiryTime).write();
             session.save();
@@ -146,7 +194,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         incrementRequestCount();
 
         return withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, key, config);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
@@ -172,7 +220,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         incrementRequestCount();
 
         return withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, key, config);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
@@ -196,7 +244,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public long size() {
         return withSession((Session session) -> {
-            final Node rootNode = session.getNode(cacheRootPath);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
             final AllEntryNodesCountVisitor visitor = new AllEntryNodesCountVisitor(11);
             visitor.visit(rootNode);
             return visitor.getTotalEntryNodeCount();
@@ -206,7 +254,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public void invalidate(final CacheKey key) {
         withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = new BucketNodeFactory(session, key, config);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
@@ -223,8 +271,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public void invalidate(final HttpCacheConfig cacheConfig) {
         withSession((Session session) -> {
-            final InvalidateByCacheConfigVisitor visitor = new InvalidateByCacheConfigVisitor(11, deltaSaveThreshold, cacheConfig, dclm);
-            final Node rootNode = session.getNode(cacheRootPath);
+            final InvalidateByCacheConfigVisitor visitor = new InvalidateByCacheConfigVisitor(11, config.httpcache_config_jcr_savedelta(), cacheConfig, dclm);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());
@@ -234,8 +282,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public void invalidateAll() {
         withSession((Session session) -> {
-            final Node rootNode = session.getNode(cacheRootPath);
-            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, deltaSaveThreshold);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
+            final InvalidateAllNodesVisitor visitor = new InvalidateAllNodesVisitor(11, config.httpcache_config_jcr_savedelta());
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());
@@ -260,8 +308,8 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public void purgeExpiredEntries() {
         withSession((Session session) -> {
-            final Node rootNode = session.getNode(cacheRootPath);
-            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
+            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, config.httpcache_config_jcr_savedelta());
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());
@@ -270,7 +318,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public long getTtl() {
-        return expireTimeInMilliSeconds;
+        return config.httpcache_config_jcr_expiretimeinmiliseconds();
     }
 
     @Override
@@ -282,7 +330,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public String getCacheEntry(final String cacheKeyStr) throws CacheMBeanException {
         return withSession((Session session) -> {
             EntryNodeByStringKeyVisitor visitor = new EntryNodeByStringKeyVisitor(11, dclm, cacheKeyStr);
-            final Node rootNode = session.getNode(cacheRootPath);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
             visitor.visit(rootNode);
             CacheContent content = visitor.getCacheContentIfPresent();
 
@@ -307,7 +355,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     protected Map<CacheKey, CacheContent> getCacheAsMap() {
         return withSession((Session session) -> {
-            final Node rootNode = session.getNode(cacheRootPath);
+            final Node rootNode = session.getNode(config.httpcache_config_jcr_rootpath());
             final EntryNodeMapVisitor visitor = new EntryNodeMapVisitor(11, dclm);
             visitor.visit(rootNode);
             return visitor.getCache();
@@ -393,4 +441,6 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         }
         return null;
     }
+
+
 }

@@ -24,7 +24,6 @@ import com.adobe.acs.commons.functions.CheckedFunction;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.Config;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
@@ -40,6 +39,7 @@ import org.slf4j.Logger;
 import javax.jcr.Node;
 import javax.jcr.Session;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -110,10 +110,15 @@ public class JCRHttpCacheStoreMocks {
     }
 
     private void mockStore() throws Exception {
-        Whitebox.setInternalState(store, "cacheRootPath", Config.DEFAULT_ROOTPATH);
-        Whitebox.setInternalState(store, "bucketTreeDepth", Config.DEFAULT_BUCKETDEPTH);
-        Whitebox.setInternalState(store, "deltaSaveThreshold", Config.DEFAULT_SAVEDELTA);
-        Whitebox.setInternalState(store, "expireTimeInMilliSeconds", Config.DEFAULT_EXPIRETIMEINMILISECONDS);
+
+        JCRHttpCacheStoreImpl.Config mockedConfig = mock(JCRHttpCacheStoreImpl.Config.class);
+        when(mockedConfig.httpcache_config_jcr_bucketdepth()).thenReturn(JCRHttpCacheStoreImpl.Config.DEFAULT_BUCKETDEPTH);
+        when(mockedConfig.httpcache_config_jcr_expiretimeinmiliseconds()).thenReturn(JCRHttpCacheStoreImpl.Config.DEFAULT_EXPIRETIMEINMILISECONDS);
+        when(mockedConfig.httpcache_config_jcr_rootpath()).thenReturn(JCRHttpCacheStoreImpl.Config.DEFAULT_ROOTPATH);
+        when(mockedConfig.httpcache_config_jcr_savedelta()).thenReturn(JCRHttpCacheStoreImpl.Config.DEFAULT_SAVEDELTA);
+        when(mockedConfig.scheduler_expression()).thenReturn(JCRHttpCacheStoreImpl.Config.DEFAULT_CRON_EXPRESSION);
+        doCallRealMethod().when(store).activate(mockedConfig);
+        store.activate(mockedConfig);
 
         doCallRealMethod().when(store).put(cacheKey, cacheContent);
         doCallRealMethod().when(store).contains(cacheKey);
@@ -155,8 +160,8 @@ public class JCRHttpCacheStoreMocks {
     private void mockBucketNodeFactory() throws Exception {
         when(factory.getBucketNode()).thenReturn(bucketNode);
         whenNew(BucketNodeFactory.class)
-                .withParameterTypes(Session.class, String.class, CacheKey.class, Integer.class)
-                .withArguments(any(Session.class), any(String.class), any(CacheKey.class), any(Integer.class))
+                .withParameterTypes(Session.class, CacheKey.class, JCRHttpCacheStoreImpl.Config.class)
+                .withArguments(any(Session.class), any(CacheKey.class), any(JCRHttpCacheStoreImpl.Config.class))
                 .thenReturn(factory);
     }
 
@@ -180,11 +185,10 @@ public class JCRHttpCacheStoreMocks {
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
         Whitebox.setInternalState(store, "resourceResolverFactory", resourceResolverFactory);
         Whitebox.setInternalState(store, "dclm", dclm);
-        Whitebox.setInternalState(store, "cacheRootPath", Config.DEFAULT_ROOTPATH);
 
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
-        when(session.getNode(Config.DEFAULT_ROOTPATH)).thenReturn(rootNode);
-        when(session.nodeExists(Config.DEFAULT_ROOTPATH)).thenReturn(true);
+        when(session.getNode(JCRHttpCacheStoreImpl.Config.DEFAULT_ROOTPATH)).thenReturn(rootNode);
+        when(session.nodeExists(JCRHttpCacheStoreImpl.Config.DEFAULT_ROOTPATH)).thenReturn(true);
 
         return store;
     }

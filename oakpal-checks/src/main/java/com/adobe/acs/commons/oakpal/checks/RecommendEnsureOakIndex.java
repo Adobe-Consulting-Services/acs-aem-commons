@@ -26,7 +26,6 @@ import javax.jcr.RepositoryException;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
 import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.SimpleViolation;
 import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.vault.packaging.PackageId;
@@ -48,7 +47,7 @@ import org.json.JSONObject;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public class RecommendEnsureOakIndex implements ProgressCheckFactory {
+public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
     public static final String NN_OAK_INDEX = "oak:index";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -64,12 +63,12 @@ public class RecommendEnsureOakIndex implements ProgressCheckFactory {
         return new Check(severity, recommendation, scopePaths);
     }
 
-    class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheck {
         private final Violation.Severity severity;
         private final String recommendation;
         private final List<Rule> scopePaths;
 
-        public Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopePaths) {
+        Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopePaths) {
             this.severity = severity;
             this.recommendation = recommendation;
             this.scopePaths = scopePaths;
@@ -77,7 +76,7 @@ public class RecommendEnsureOakIndex implements ProgressCheckFactory {
 
         @Override
         public String getCheckName() {
-            return RecommendEnsureOakIndex.this.getClass().getSimpleName();
+            return RecommendEnsureOakIndex.class.getSimpleName();
         }
 
         @Override
@@ -85,23 +84,18 @@ public class RecommendEnsureOakIndex implements ProgressCheckFactory {
                 throws RepositoryException {
 
             // evaluate scope paths
-            Rule lastMatched = Rule.fuzzyDefaultAllow(scopePaths);
-            for (Rule rule : scopePaths) {
-                if (rule.matches(path)) {
-                    lastMatched = rule;
-                }
-            }
+            Rule lastMatched = Rule.lastMatch(scopePaths, path);
 
             // short circuit if out of scope
-            if (lastMatched.isDeny()) {
+            if (lastMatched.isExclude()) {
                 return;
             }
 
             // report for every immediate child of an oak:index node.
             if (NN_OAK_INDEX.equals(node.getParent().getName())) {
-                reportViolation(new SimpleViolation(severity,
+                reportViolation(severity,
                         String.format("%s: imported explicit oak:index. %s",
-                                path, recommendation), packageId));
+                                path, recommendation), packageId);
             }
         }
     }

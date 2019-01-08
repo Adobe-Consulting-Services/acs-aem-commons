@@ -82,10 +82,10 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
         super(CacheMBean.class);
     }
 
-    protected void activate(Map<String, Object> properties)
+    protected void activate(Config config)
     {
-        long size = PropertiesUtil.toLong(properties.get(Config.PN_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
-        long ttl = PropertiesUtil.toLong(properties.get(Config.PN_TTL), Config.DEFAULT_TTL);
+        long size = config.maxSizeCount();
+        long ttl = config.getTtl();
 
         if (ttl != Config.DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
