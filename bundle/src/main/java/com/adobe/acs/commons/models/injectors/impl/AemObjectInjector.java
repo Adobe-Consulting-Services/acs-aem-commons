@@ -209,6 +209,7 @@ public final class AemObjectInjector implements Injector {
 
             return null;
         }
+
         private static ObjectType resolveDesignFromName(String name) {
             if (name.equalsIgnoreCase(RESOURCE_DESIGN_STRING)) {
                 return ObjectType.RESOURCE_DESIGN;
