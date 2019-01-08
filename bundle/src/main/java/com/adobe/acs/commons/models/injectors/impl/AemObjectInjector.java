@@ -92,9 +92,6 @@ import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericPa
 public final class AemObjectInjector implements Injector {
 
     @Reference
-    private I18nProvider i18nProvider;
-
-    @Reference
     private XSSAPI genericXxsApi;
 
     @Override
