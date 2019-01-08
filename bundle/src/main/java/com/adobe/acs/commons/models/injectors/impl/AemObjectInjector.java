@@ -175,7 +175,6 @@ public final class AemObjectInjector implements Injector {
         RESOURCE_DESIGN,
         CURRENT_STYLE,
         SESSION,
-        I18N,
         XSS_API;
 
         private static final String RESOURCE_PAGE_STRING = "resourcePage";
@@ -201,8 +200,6 @@ public final class AemObjectInjector implements Injector {
                 return ObjectType.CURRENT_STYLE;
             } else if (classOrGenericParam.isAssignableFrom(Session.class)) {
                 return ObjectType.SESSION;
-            } else if (classOrGenericParam.isAssignableFrom(I18n.class)) {
-                return ObjectType.I18N;
             } else if (classOrGenericParam.isAssignableFrom(XSSAPI.class)) {
                 return ObjectType.XSS_API;
             }
