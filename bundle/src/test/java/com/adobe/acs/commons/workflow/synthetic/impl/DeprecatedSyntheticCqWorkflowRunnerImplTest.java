@@ -26,8 +26,8 @@ import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.RestartWork
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfDataWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
@@ -65,11 +65,11 @@ public class DeprecatedSyntheticCqWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testExecute_WFData() throws Exception {
+    public void testExecute_WfData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindCqWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindCqWorkflowProcesses(new WfDataWorkflowProcess(), map);
 
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();
 
@@ -123,7 +123,7 @@ public class DeprecatedSyntheticCqWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "wf-args");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs), map);
 
         /** WF Process Metadata */
         Map<String, Map<String, Object>> metadata = new HashMap<String, Map<String, Object>>();

@@ -24,7 +24,10 @@ import org.apache.sling.commons.json.JSONObject;
 import org.junit.Test;
 import org.osgi.service.event.Event;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -90,7 +93,7 @@ public class JsonEventLoggerTest {
         assertEquals("complex event, map value in props", "curl/7.25.0", jMapProps.getJSONObject("headers").getString("user-agent"));
 
         Map<String, Object> stringSetProps = new LinkedHashMap<String, Object>();
-        stringSetProps.put("resourceChangedAttributes", new LinkedHashSet<String>(Arrays.asList("first", "second")));
+        stringSetProps.put("resourceChangedAttributes", new LinkedHashSet<>(Arrays.asList("first", "second")));
         Event stringSetEvent = new Event("my/simple/topic", stringSetProps);
         JSONObject jStringSet = new JSONObject(JsonEventLogger.constructMessage(stringSetEvent));
 

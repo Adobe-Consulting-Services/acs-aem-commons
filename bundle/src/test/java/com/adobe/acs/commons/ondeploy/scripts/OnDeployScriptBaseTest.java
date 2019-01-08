@@ -171,8 +171,8 @@ public class OnDeployScriptBaseTest {
 
     @Test
     public void testRenameProperty() throws RepositoryException {
-        Resource resource = resourceResolver.getResource("/content/resource-type-update1");
-        Node node = resource.adaptTo(Node.class);
+        final Resource resource = resourceResolver.getResource("/content/resource-type-update1");
+        final Node node = resource.adaptTo(Node.class);
 
         assertTrue(resource.getValueMap().containsKey("text"));
         assertFalse(resource.getValueMap().containsKey("label"));
@@ -187,8 +187,8 @@ public class OnDeployScriptBaseTest {
 
     @Test
     public void testRenamePropertyWhenPropertyDoesNotExist() throws RepositoryException {
-        Resource resource = resourceResolver.getResource("/content/resource-type-update1");
-        Node node = resource.adaptTo(Node.class);
+        final Resource resource = resourceResolver.getResource("/content/resource-type-update1");
+        final Node node = resource.adaptTo(Node.class);
 
         onDeployScript.renameProperty(node, "bogus", "label");
 
@@ -197,7 +197,7 @@ public class OnDeployScriptBaseTest {
 
     @Test
     public void testRemoveResourceWhenDoesNotExist() throws RepositoryException {
-        Resource resourceToDelete = resourceResolver.getResource("/content/bogus");
+        final Resource resourceToDelete = resourceResolver.getResource("/content/bogus");
         assertNull(resourceToDelete);
 
         onDeployScript.removeResource("/content/bogus");

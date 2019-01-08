@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.util;
 
@@ -20,14 +24,12 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 
 public class AnnotatedFieldDeserializerTest {
 
@@ -60,8 +62,7 @@ public class AnnotatedFieldDeserializerTest {
     @Test
     public void testPrimitiveInputs() throws Exception {
 
-        System.out.println("processInput");
-        PrimitivesTest target = new PrimitivesTest();
+        final PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
         params.put("doubleValue", numberFormat.format(123.456));
@@ -93,8 +94,7 @@ public class AnnotatedFieldDeserializerTest {
      */
     @Test
     public void testPrimitiveArrayInputs() throws Exception {
-        System.out.println("processInput");
-        PrimitiveArrayTest target = new PrimitiveArrayTest();
+        final PrimitiveArrayTest target = new PrimitiveArrayTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", new String[]{"123", "456", "789"});
         params.put("doubleValue",  numberFormat.format(123.456));
@@ -121,9 +121,7 @@ public class AnnotatedFieldDeserializerTest {
      */
     @Test
     public void testBooleanFalseByDefault() throws Exception {
-
-        System.out.println("processInput");
-        PrimitivesTest target = new PrimitivesTest();
+        final PrimitivesTest target = new PrimitivesTest();
         Map<String, Object> params = new HashMap<>();
         params.put("intValue", "123");
         params.put("doubleValue", numberFormat.format(123.456));

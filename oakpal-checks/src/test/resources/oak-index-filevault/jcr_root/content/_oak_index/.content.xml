@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:oak="http://jackrabbit.apache.org/oak/ns/1.0" xmlns:dam="http://www.day.com/dam/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:rep="internal"
+    jcr:mixinTypes="[rep:AccessControllable]"
+    jcr:primaryType="nt:unstructured">
+    <damAssetLucene jcr:primaryType="oak:QueryIndexDefinition" type="lucene">
+        <indexRules jcr:primaryType="nt:unstructured">
+            <dam:Asset jcr:primaryType="nt:unstructured">
+                <properties jcr:primaryType="nt:unstructured">
+                    <dcLanguage
+                        jcr:primaryType="nt:unstructured"
+                        analyzed="{Boolean}true"
+                        name="jcr:content/metadata/dc:language"
+                        propertyIndex="{Boolean}true"/>
+                </properties>
+            </dam:Asset>
+        </indexRules>
+    </damAssetLucene>
+</jcr:root>

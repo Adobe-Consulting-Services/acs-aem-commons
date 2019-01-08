@@ -1,20 +1,38 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.oak.impl;
 
-import com.adobe.acs.commons.oak.EnsureOakIndexManager;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 
 /**
  * HTTP POST /system/console/ensure-oak-index
@@ -23,14 +41,11 @@ import java.io.IOException;
  * path = /abs/path/to/ensure/definition (optional; when blank indicates all)
  */
 //@formatter:off
-@Component(immediate = true)
-@Properties({
-        @Property(
-                name = "felix.webconsole.label",
-                value = "Ensure Oak Index"
-        )
+@Component(immediate = true, service=Servlet.class, property= {
+      "felix.webconsole.title=Ensure Oak Index",
+      "felix.webconsole.label=ensure-oak-index",
+      "felix.webconsole.category=Sling"
 })
-@Service(Servlet.class)
 //@formatter:on
 public class EnsureOakIndexServlet extends HttpServlet {
     //@formatter:off

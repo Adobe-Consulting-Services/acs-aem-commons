@@ -1,14 +1,22 @@
 /*
- * #%L ACS AEM Commons Bundle %% Copyright (C) 2015 Adobe %% Licensed under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License. #L%
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
-
 package com.adobe.acs.commons.users.impl;
 
 import java.util.ArrayList;
@@ -60,11 +68,13 @@ public abstract class AbstractAuthorizable {
                 PropertiesUtil.toStringArray(config.get(EnsureServiceUser.PROP_ACES), new String[0]);
         for (String entry : acesProperty) {
             if (StringUtils.isNotBlank(entry)) {
+                // issue #1552: trim entry to tolerate osgi config array elements separated by newlines
+                final String aceConfig = entry.trim();
                 try {
-                    aces.add(new Ace(entry));
+                    aces.add(new Ace(aceConfig));
                 } catch (EnsureAuthorizableException e) {
                     log.warn(
-                            "Malformed ACE config [ " + entry + " ] for Service User [ "
+                            "Malformed ACE config [ " + aceConfig + " ] for Service User [ "
                                     + StringUtils.defaultIfEmpty(this.principalName, "NOT PROVIDED") + " ]", e);
                 }
             }

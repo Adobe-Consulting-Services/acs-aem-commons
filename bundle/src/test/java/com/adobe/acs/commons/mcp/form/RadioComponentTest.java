@@ -61,11 +61,12 @@ public class RadioComponentTest {
         RadioComponent cmp = new RadioComponent() {
             @Override
             public Map<String, String> getOptions() {
-                return new HashMap<String, String>() {{
+                return new HashMap<String, String>() { {
                     put("v1", "t1");
                     put("v2", "t2");
                     put("v3", "t3");
-                }};
+                }
+            };
             }
         };
         cmp.setup("test", null, formField, sling);

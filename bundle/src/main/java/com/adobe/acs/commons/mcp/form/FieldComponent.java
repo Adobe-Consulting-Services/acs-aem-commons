@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +15,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.impl.AbstractResourceImpl;
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -37,6 +40,7 @@ public abstract class FieldComponent {
     private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
+    private String path = "/fake/path";
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
@@ -56,6 +60,14 @@ public abstract class FieldComponent {
     
     public SlingScriptHelper getHelper() {
         return sling;
+    }
+    
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
+    public String getPath() {
+        return path;
     }
     
     public Field getField() {
@@ -84,8 +96,10 @@ public abstract class FieldComponent {
      * @return 
      */
     public Resource buildComponentResource() {
-        AbstractResourceImpl res = new AbstractResourceImpl("/fake/path", resourceType, resourceSuperType, componentMetadata);
-        res.setResourceResolver(sling.getRequest().getResourceResolver());
+        AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
+        if (sling != null && sling.getRequest() != null) {
+            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        }
         return res;
     }
 

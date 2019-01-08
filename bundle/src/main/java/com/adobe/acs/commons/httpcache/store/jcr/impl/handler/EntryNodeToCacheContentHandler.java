@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.handler;
 
 import java.io.InputStream;
@@ -13,6 +32,7 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingConstants;
 
@@ -29,6 +49,7 @@ public class EntryNodeToCacheContentHandler
     private InputStream inputStream;
     private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
     private Binary binary;
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.OUTPUTSTREAM;
 
     private static final String SLING_NAMESPACE = SlingConstants.NAMESPACE_PREFIX + ":";
     private static final String JCR_NAMESPACE = "jcr:";
@@ -62,6 +83,9 @@ public class EntryNodeToCacheContentHandler
             else if(propName.equals(JCRHttpCacheStoreConstants.PN_STATUS)) {
                 status = (int) value.getLong();
             }
+            else if(propName.equals(JCRHttpCacheStoreConstants.PN_WRITEMETHOD)){
+                writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.valueOf(value.getString());
+            }
         }
     }
 
@@ -72,7 +96,8 @@ public class EntryNodeToCacheContentHandler
             charEncoding,
             contentType,
             headers,
-            inputStream
+            inputStream,
+            writeMethod
         );
     }
 

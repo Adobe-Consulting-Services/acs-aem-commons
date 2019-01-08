@@ -1,28 +1,26 @@
 /*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  * #%L
- *  * ACS AEM Commons Bundle
- *  * %%
- *  * Copyright (C) 2016 Adobe
- *  * %%
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  * #L%
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 class LineImpl<T> implements Line<T> {
@@ -71,7 +69,7 @@ class LineImpl<T> implements Line<T> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("left", left)
                 .add("right", right)
                 .toString();

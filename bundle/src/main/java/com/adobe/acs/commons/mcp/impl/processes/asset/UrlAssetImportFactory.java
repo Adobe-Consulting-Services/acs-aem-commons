@@ -19,20 +19,18 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
+import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Factory for asset import processes
  */
-@Component
-@Service(ProcessDefinitionFactory.class)
-public class UrlAssetImportFactory extends AdministratorsOnlyProcessDefinitionFactory<UrlAssetImport> {
+@Component(service=ProcessDefinitionFactory.class)
+public class UrlAssetImportFactory extends AuthorizedGroupProcessDefinitionFactory<UrlAssetImport> {
 
     @Reference
     private transient MimeTypeService mimeTypeService;
@@ -49,5 +47,9 @@ public class UrlAssetImportFactory extends AdministratorsOnlyProcessDefinitionFa
     public String getName() {
         return "URL Asset Import";
     }
-    
+
+    @Override
+    protected final String[] getAuthorizedGroups() {
+        return AssetIngestor.AUTHORIZED_GROUPS;
+    }    
 }

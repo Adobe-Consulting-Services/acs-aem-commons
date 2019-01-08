@@ -33,6 +33,7 @@ import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 import aQute.bnd.annotation.ProviderType;
+import com.adobe.acs.commons.util.ModeUtil;
 
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.adobe.acs.commons.wcm.impl.ComponentHelperImpl;
@@ -57,7 +58,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     // NOTE - not a service lookup because (right now) ComponentHelperImpl is
     // not configured.
     private transient ComponentHelper componentHelper = new ComponentHelperImpl();
-
+    
     private String classNames;
 
     private String ddType;
@@ -101,7 +102,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     @Override
     public int doStartTag() throws JspException {
         SlingHttpServletRequest request = TagUtil.getRequest(pageContext);
-        if (componentHelper.isEditMode(request)) {
+        if (ModeUtil.isEdit(request)) {
             return EVAL_BODY_BUFFERED;
         } else {
             return SKIP_BODY;
@@ -115,7 +116,7 @@ public final class PlaceholderTag extends BodyTagSupport {
     public int doEndTag() throws JspException {
         SlingHttpServletRequest request = TagUtil.getRequest(pageContext);
         Component component = WCMUtils.getComponent(request.getResource());
-        if (componentHelper.isEditMode(request)) {
+        if (ModeUtil.isEdit(request)) {
             JspWriter writer = pageContext.getOut();
             String placeholder;
 

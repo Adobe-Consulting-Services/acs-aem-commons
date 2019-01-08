@@ -34,7 +34,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,11 +49,11 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class NamedTransformImageServletTest {
 
-    final String NAMED_TRANSFORM_FEATURE = "feature";
-    final String NAMED_TRANSFORM_SMALL = "small";
+    static final String NAMED_TRANSFORM_FEATURE = "feature";
+    static final String NAMED_TRANSFORM_SMALL = "small";
 
-    final String IMAGE_TRANSFORM_RESIZE = "resize";
-    final String IMAGE_TRANSFORM_GREYSCALE = "greyscale";
+    static final String IMAGE_TRANSFORM_RESIZE = "resize";
+    static final String IMAGE_TRANSFORM_GREYSCALE = "greyscale";
 
     @Spy
     private FeaturedNamedImageTransformer featureImageTransformer = new FeaturedNamedImageTransformer();
@@ -58,7 +62,7 @@ public class NamedTransformImageServletTest {
     private SmallNamedImageTransformer smallImageTransformer = new SmallNamedImageTransformer();
 
     @Spy
-    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<String, NamedImageTransformer>();
+    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<>();
 
     @Spy
     private EmptyImageTransformer resizeImageTransformer = new EmptyImageTransformer();

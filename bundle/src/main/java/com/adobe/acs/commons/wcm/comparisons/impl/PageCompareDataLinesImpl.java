@@ -1,41 +1,38 @@
 /*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  * #%L
- *  * ACS AEM Commons Bundle
- *  * %%
- *  * Copyright (C) 2016 Adobe
- *  * %%
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  * #L%
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
-
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
-import com.adobe.acs.commons.wcm.comparisons.impl.lines.LinesGenerator;
-import com.adobe.acs.commons.wcm.comparisons.lines.Line;
-import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
-import com.google.common.base.Function;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
-@Component(metatype = false)
-@Service
+import javax.annotation.Nullable;
+
+import org.osgi.service.component.annotations.Component;
+
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLine;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLines;
+import com.adobe.acs.commons.wcm.comparisons.impl.lines.LinesGenerator;
+import com.adobe.acs.commons.wcm.comparisons.lines.Line;
+import com.google.common.base.Function;
+
+@Component(service=PageCompareDataLines.class)
 public class PageCompareDataLinesImpl implements PageCompareDataLines {
 
     @Override

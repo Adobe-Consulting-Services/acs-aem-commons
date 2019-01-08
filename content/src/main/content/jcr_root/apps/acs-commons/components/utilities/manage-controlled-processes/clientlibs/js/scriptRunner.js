@@ -90,9 +90,9 @@ var ScriptRunner = {
             url: url,
             dataType: "html",
             success: function (response) {
-                var inputForm = window.top.jQuery("#processDefinitionInput");
-                var $html, html = Granite.UI.Foundation.Utils.processHtml(response, "#processDefinitionInput", false, true);
-                $html = window.top.jQuery(html);
+                var inputForm = window.top.jQuery("#processDefinitionInput"),
+                    $html = jQuery(response);
+
                 $html.find("#processName").text(ScriptRunner.definitionName);
                 $html.find("#process").val(ScriptRunner.definition);
                 $html.find("coral-icon").each(function () {
@@ -100,8 +100,9 @@ var ScriptRunner = {
                         this.classList.add("coral-Icon--" + this.icon);
                     }
                 });
-                inputForm.html("").append($html);
-                $html.trigger("foundation-contentloaded");
+
+                inputForm.html($html).trigger("foundation-contentloaded");
+
             },
             data: {
                 processDefinition: definition

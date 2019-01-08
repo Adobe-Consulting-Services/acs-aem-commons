@@ -1,6 +1,9 @@
 /*
- * Copyright 2016 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +15,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,24 +46,45 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 import java.lang.management.ManagementFactory;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-@Component(metatype = true, immediate = true, label = "ACS AEM Commons - Throttled Task Runner Service")
-@Service({ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class})
-@Properties({
-    @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
-    @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
-    @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", value = "0.85"),
-    @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", value = "0.75"),
-    @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100"),
-    @Property(name = "task.timeout", label = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully.", value = "60000"),})
+@Component(service = {ThrottledTaskRunner.class, ThrottledTaskRunnerStats.class},
+       immediate = true,
+       property = {
+       "jmx.objectname" + "=" + "com.adobe.acs.commons.fam:type=Throttled Task Runner"
+       })
+@Designate(ocd= ThrottledTaskRunnerImpl.Config.class)
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Throttled Task Runner Service",
+            description = "WARNING: Setting a low 'Watchdog time' value that results in the interrupting of writing threads can lead to repository corruption. Ensure that this value is high enough to allow even outlier writing processes to complete.")
+    public @interface Config {
+
+        double DEFAULT_MAX_CPU = 0.75;
+        double DEFAULT_MAX_HEAP = 0.85;
+        int DEFAULT_MAX_THREADS = 4;
+        int DEFAULT_COOLDOWN_TIME = 100;
+        int DEFAULT_TASK_TIMEOUT = 3600000;
+
+        @AttributeDefinition(name = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores", defaultValue = "" + DEFAULT_MAX_THREADS)
+        int max_threads() default DEFAULT_MAX_THREADS;
+
+        @AttributeDefinition(name = "Max cpu %", description = "Range is 0..1; -1 means disable this check", defaultValue = ""+DEFAULT_MAX_CPU)
+        double max_cpu() default DEFAULT_MAX_CPU;
+
+        @AttributeDefinition(name = "Max heap %", description = "Range is 0..1; -1 means disable this check", defaultValue = "" + DEFAULT_MAX_HEAP)
+        double max_heap() default DEFAULT_MAX_HEAP;
+
+        @AttributeDefinition(name = "Cooldown time", description = "Time to wait for cpu/mem cooldown between checks", defaultValue = "" + DEFAULT_COOLDOWN_TIME)
+        int cooldown_wait_time() default DEFAULT_MAX_THREADS;
+
+        @AttributeDefinition(name = "Watchdog time", description = "Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", defaultValue = "" + DEFAULT_TASK_TIMEOUT)
+        int task_timeout() default DEFAULT_TASK_TIMEOUT;
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ThrottledTaskRunnerImpl.class);
     private int taskTimeout;
@@ -71,7 +96,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ObjectName osBeanName;
     private ObjectName memBeanName;
-    private ThreadPoolExecutor workerPool;
+    private PriorityThreadPoolExecutor workerPool;
     private BlockingQueue<Runnable> workQueue;
 
     public ThrottledTaskRunnerImpl() throws NotCompliantMBeanException {
@@ -80,14 +105,26 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     @Override
     public void scheduleWork(Runnable work) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
         workerPool.submit(r);
     }
-    
+
     public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
         workerPool.submit(r);
-    }    
+    }
+
+
+    @Override
+    public void scheduleWork(Runnable work, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, priority);
+        workerPool.submit(r);
+    }
+
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, priority);
+        workerPool.submit(r);
+    }
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -221,7 +258,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     @Override
     public final double getCpuLevel() throws InstanceNotFoundException, ReflectionException {
-        // This method will block until CPU usage is low enough            
+        // This method will block until CPU usage is low enough
         AttributeList list = mbs.getAttributes(osBeanName, new String[]{"ProcessCpuLoad"});
 
         if (list.isEmpty()) {
@@ -266,7 +303,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<>();
+            workQueue = new PriorityBlockingQueue<>();
         }
 
         // Terminate pool if the thread size has changed
@@ -279,19 +316,17 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
             workerPool = null;
         }
         if (!isRunning()) {
-            workerPool = new ThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
+            workerPool = new PriorityThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
         }
     }
 
-    protected void activate(ComponentContext componentContext) {
-        Dictionary<?, ?> properties = componentContext.getProperties();
-        int defaultThreadCount = Math.max(1, Runtime.getRuntime().availableProcessors()/2);
-
-        maxCpu = PropertiesUtil.toDouble(properties.get("max.cpu"), 0.85);
-        maxHeap = PropertiesUtil.toDouble(properties.get("max.heap"), 0.85);
-        maxThreads = PropertiesUtil.toInteger(properties.get("max.threads"), defaultThreadCount);
-        cooldownWaitTime = PropertiesUtil.toInteger(properties.get("cooldown.wait.time"), 100);
-        taskTimeout = PropertiesUtil.toInteger(properties.get("task.timeout"), 60000);
+    @Activate
+    protected void activate(Config config) {
+        maxCpu = config.max_cpu();
+        maxHeap = config.max_heap();
+        maxThreads = config.max_threads();
+        cooldownWaitTime = config.cooldown_wait_time();
+        taskTimeout = config.task_timeout();
 
         try {
             memBeanName = ObjectName.getInstance("java.lang:type=Memory");

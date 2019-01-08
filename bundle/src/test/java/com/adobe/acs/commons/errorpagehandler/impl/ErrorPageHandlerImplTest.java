@@ -37,15 +37,15 @@ public class ErrorPageHandlerImplTest {
 
     @Rule
     public final SlingContext context = new SlingContext();
-    
-	private MockSlingHttpServletRequest request;
-	private ResourceResolver resourceResolver;
+
+    private MockSlingHttpServletRequest request;
+    private ResourceResolver resourceResolver;
 
     @Before
     public void setup() {
-    	context.load().json(getClass().getResourceAsStream("ErrorPageHandlerImplTest.json"), "/content/project");
-    	resourceResolver = context.resourceResolver();
-    	request = context.request();
+        context.load().json(getClass().getResourceAsStream("ErrorPageHandlerImplTest.json"), "/content/project");
+        resourceResolver = context.resourceResolver();
+        request = context.request();
     }
     
     /**
@@ -63,7 +63,7 @@ public class ErrorPageHandlerImplTest {
      */
     @Test
     public void testFindErrorPage_withDirectConfig() {
-    	assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
+        assertEquals("/content/project/test/error-pages2.html", new ErrorPageHandlerImpl().findErrorPage(request, resourceResolver.getResource("/content/project/test/page-with-config")));
     }
     
     @Test
@@ -76,7 +76,6 @@ public class ErrorPageHandlerImplTest {
         assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page")));
     }
 
-    @Ignore // does not work at the moment because the mocked resourceResolver does not support NonExistingResource in the used version
     @Test
     public void testFindErrorPage_nonExistingPageSubResource() {
         assertEquals("/content/project/test/error-pages.html", new ErrorPageHandlerImpl().findErrorPage(request, new NonExistingResource(resourceResolver, "/content/project/test/non-existing-page/jcr:content/test1/test2")));

@@ -1,26 +1,38 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.util.datadefinitions.impl;
 
-
-import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
-import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
-@Properties({
-        @Property(
-                name = ResourceDefinitionBuilder.PROP_NAME,
-                value = TitleAndNodeNameDefinitionBuilderImpl.NAME,
-                propertyPrivate = true
-        )
+import org.apache.commons.lang3.StringUtils;
+import org.osgi.service.component.annotations.Component;
+
+import com.adobe.acs.commons.util.datadefinitions.ResourceDefinition;
+import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
+
+
+@Component(service=ResourceDefinitionBuilder.class,property= {
+ResourceDefinitionBuilder.PROP_NAME + "=" + TitleAndNodeNameDefinitionBuilderImpl.NAME
 })
-@Service
 public class TitleAndNodeNameDefinitionBuilderImpl implements ResourceDefinitionBuilder {
     public static final String NAME = "TITLE_AND_NODE_NAME";
 

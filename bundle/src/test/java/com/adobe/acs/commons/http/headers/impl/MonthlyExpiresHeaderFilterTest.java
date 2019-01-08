@@ -82,7 +82,7 @@ public class MonthlyExpiresHeaderFilterTest {
 
         actual.set(Calendar.DAY_OF_MONTH, 15);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -103,7 +103,7 @@ public class MonthlyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.MONTH, 1);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -124,7 +124,7 @@ public class MonthlyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -147,7 +147,7 @@ public class MonthlyExpiresHeaderFilterTest {
 
         actual.set(Calendar.DAY_OF_MONTH, 15);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, expected.get(Calendar.DAY_OF_MONTH));
 
         filter.doActivate(componentContext);
@@ -170,7 +170,7 @@ public class MonthlyExpiresHeaderFilterTest {
         expected.setTime(actual.getTime());
         expected.add(Calendar.MONTH, 1);
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, "LAST");
 
         filter.doActivate(componentContext);
@@ -192,7 +192,7 @@ public class MonthlyExpiresHeaderFilterTest {
         Calendar expected = Calendar.getInstance();
         expected.setTime(actual.getTime());
 
-        int month = expected.get(Calendar.MONTH);
+        final int month = expected.get(Calendar.MONTH);
         properties.put(MonthlyExpiresHeaderFilter.PROP_EXPIRES_DAY_OF_MONTH, "LAST");
 
         filter.doActivate(componentContext);

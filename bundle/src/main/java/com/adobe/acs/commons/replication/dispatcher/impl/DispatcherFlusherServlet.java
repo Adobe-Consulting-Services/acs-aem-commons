@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,22 @@
  */
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
-import com.day.cq.replication.Agent;
-import com.day.cq.replication.ReplicationActionType;
-import com.day.cq.replication.ReplicationException;
-import com.day.cq.replication.ReplicationResult;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+
+import static com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl.AUTH_INFO;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.LoginException;
@@ -39,24 +43,31 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl.AUTH_INFO;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.day.cq.replication.Agent;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationException;
+import com.day.cq.replication.ReplicationResult;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.google.gson.Gson;
 
 @SuppressWarnings("serial")
-@SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
-        selectors = "flush", methods = "POST")
+@Component(service = Servlet.class,
+        property =
+                {SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
+                        SLING_SERVLET_METHODS + "=POST",
+                        SLING_SERVLET_SELECTORS + "=flush"})
+@Designate(ocd = DispatcherFlusherServlet.Config.class)
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
@@ -70,12 +81,17 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
 
-    @Property(label = "Flush with Admin Resource Resolver",
-            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
-                    + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
-                    + "users JCR permissions. [ Default: true ]",
-            boolValue = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER)
-    public static final String PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = "flush-with-admin-resource-resolver";
+    @ObjectClassDefinition()
+    public @interface Config {
+        boolean DEFAULT_USE_ADMIN_RESOURCE_RESOLVER = true;
+
+        @AttributeDefinition(name = "Flush with Admin Resource Resolver",
+                description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
+                        + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
+                        + "users JCR permissions. [ Default: true ]",
+                defaultValue = "" + DEFAULT_USE_ADMIN_RESOURCE_RESOLVER)
+        boolean flush_with_admin_resource_resolver() default DEFAULT_USE_ADMIN_RESOURCE_RESOLVER;
+    }
 
     @Override
     @SuppressWarnings("squid:S3776")
@@ -136,17 +152,12 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
         if (request.getRequestPathInfo().getExtension().equals("json")) {
             response.setContentType("application/json");
-            JSONWriter writer = new JSONWriter(response.getWriter());
-            try {
-                writer.object();
-                for (final FlushResult result : overallResults) {
-                    writer.key(result.agentId);
-                    writer.value(result.success);
-                }
-                writer.endObject();
-            } catch (JSONException e) {
-                throw new ServletException("Unable to output JSON data", e);
+            Gson gson = new Gson();
+            Map<String, Object> resultMap = new LinkedHashMap<>();
+            for (final FlushResult result : overallResults) {
+                resultMap.put(result.agentId, result.success);
             }
+            gson.toJson(resultMap, response.getWriter());
         } else {
             String suffix;
             if (caughtException) {
@@ -177,9 +188,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     }
 
     @Activate
-    protected final void activate(final Map<String, String> config) {
-        this.flushWithAdminResourceResolver = PropertiesUtil.toBoolean(
-                config.get(PROP_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER),
-                DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER);
+    protected final void activate(DispatcherFlusherServlet.Config config) {
+        this.flushWithAdminResourceResolver = config.flush_with_admin_resource_resolver();
     }
 }

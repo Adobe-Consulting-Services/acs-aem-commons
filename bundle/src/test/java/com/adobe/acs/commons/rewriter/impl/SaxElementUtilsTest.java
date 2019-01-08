@@ -32,7 +32,7 @@ import org.xml.sax.helpers.AttributesImpl;
 public class SaxElementUtilsTest {
 
     @Test
-    public void testIsCSS() throws Exception {
+    public void testIsCss() throws Exception {
         assertTrue("CSS Happy Path", 
                 SaxElementUtils.isCss("link",
                         makeAtts(

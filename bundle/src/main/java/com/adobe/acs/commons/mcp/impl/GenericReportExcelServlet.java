@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +15,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.model.GenericReport;
-import com.day.cq.commons.jcr.JcrUtil;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -35,17 +47,20 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import java.io.IOException;
-import java.util.List;
+import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.day.cq.commons.jcr.JcrUtil;
 
 /**
  * Export a generic report as an excel spreadsheet
  */
-@SlingServlet(resourceTypes = GenericReport.GENERIC_REPORT_RESOURCE_TYPE, extensions = {"xlsx","xls"})
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_EXTENSIONS+"=xlsx,xls",
+SLING_SERVLET_RESOURCE_TYPES+"="+GenericReport.GENERIC_REPORT_RESOURCE_TYPE
+})
 public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
 
@@ -128,7 +143,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
 
     CellStyle createHeaderStyle(Workbook wb){
         XSSFCellStyle xstyle = (XSSFCellStyle)wb.createCellStyle();
-        XSSFColor header = new XSSFColor(new byte[]{(byte)79, (byte)129, (byte)189} );
+        XSSFColor header = new XSSFColor(new Color(79, 129, 189));
         xstyle.setFillForegroundColor(header);
         xstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         XSSFFont font = (XSSFFont)wb.createFont();

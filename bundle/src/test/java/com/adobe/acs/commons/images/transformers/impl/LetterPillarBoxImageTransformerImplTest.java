@@ -24,7 +24,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.sling.api.resource.ValueMap;
@@ -75,7 +76,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         map.put("height", height);
         map.put("color", color);
         map.put("alpha", alpha);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -107,7 +108,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -139,7 +140,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -169,7 +170,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -198,7 +199,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("width", width);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -226,7 +227,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -255,7 +256,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -287,7 +288,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -318,7 +319,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 

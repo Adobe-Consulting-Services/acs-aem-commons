@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.users.impl;
 
 import org.junit.Test;
@@ -89,6 +108,34 @@ public class AbstractAuthorizableTest {
         for (Ace ace : serviceUser.getAces()) {
             assertFalse(ace.hasRepGlob());
             assertEquals(null, ace.getRepGlob());
+        }
+    }
+
+    @Test
+    public void testServiceUser_AcesWithSpaces_1552() throws EnsureAuthorizableException {
+        String[] aces= new String[] {
+                "\ntype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/dam",
+                "\n  type=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content ",
+                "\n  \ttype=allow;privileges=jcr:versionManagement,jcr:read,crx:replicate,rep:write,jcr:lockManagement,jcr:modifyProperties;path=/content/projects \t",
+                "\n  \t\ttype=allow;privileges=jcr:all;path=/var/workflow \t \n",
+                "\n\n\n\n\ntype=allow;privileges=jcr:all;path=/etc/workflow\n    "
+        };
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "test-service-user");
+        config.put(EnsureServiceUser.PROP_ACES, aces);
+
+        FakeAuthorizable serviceUser = new FakeAuthorizable(config);
+
+        assertEquals("test-service-user", serviceUser.getPrincipalName());
+        assertEquals("/home/fake", serviceUser.getIntermediatePath());
+        assertEquals(5, serviceUser.getAces().size());
+
+        for (Ace ace : serviceUser.getAces()) {
+            assertTrue(ace.isAllow());
+            assertFalse(ace.getContentPath().contains("\n"));
+            assertFalse(ace.getContentPath().contains("\t"));
+            assertFalse(ace.getContentPath().contains(" "));
         }
     }
 

@@ -19,7 +19,7 @@
 	width: 75%;
 }
 
-.form-row label{
+.form-row > label {
 	display:inline;
 	float:left;
 	width:100px;
@@ -27,7 +27,7 @@
 	padding: 10px 0;
 }
 
-.form-row span{
+.form-row > span {
 	margin-left: 75px;
 }
 

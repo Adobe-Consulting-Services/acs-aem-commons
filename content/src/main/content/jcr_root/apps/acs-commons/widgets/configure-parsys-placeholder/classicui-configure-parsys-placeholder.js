@@ -90,7 +90,7 @@
 
             if (cellSearchPathInfo) {
                 for(var i = 0; i < parNames.length; i++) {
-                    var prop = parNames[i];
+                    var prop = parNames[i].replace(/_\d+$/, "");
                     if (_.has(cellSearchPathInfo, prop)) { 
                         cellSearchPathInfo = cellSearchPathInfo[prop];
                     } 
@@ -111,7 +111,7 @@
         var parsyses = {};
 
         _.each(CQ.WCM.getEditables(), function(e){
-            if (isParsysNew(e) && _.has(this, e.path)) {
+            if (isParsysNew(e)) {
                 this[e.path] = e;
             }
         }, parsyses);

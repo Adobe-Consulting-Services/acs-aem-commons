@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
@@ -33,7 +37,6 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
@@ -56,8 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -235,7 +236,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         }
     }
 
-    private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
+    public void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
         if (failures.isEmpty()) {
             return;
         }
@@ -286,24 +287,18 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         infoBean.setStatus("Aborted");
     }
 
-    private void asServiceUser(CheckedConsumer<ResourceResolver> action) {
-        ResourceResolver rr = null;
-        try {
-            rr = manager.getServiceResourceResolver();
+    public void asServiceUser(CheckedConsumer<ResourceResolver> action) {
+        try (ResourceResolver rr = manager.getServiceResourceResolver()){
             action.accept(rr);
             if (rr.hasChanges()) {
                 rr.commit();
             }
         } catch (Exception ex) {
             LOG.error("Error while performing JCR operations", ex);
-        } finally {
-            if (rr != null) {
-                rr.close();
-            }
         }
     }
 
-    private void persistStatus(ResourceResolver rr) throws PersistenceException {
+    public void persistStatus(ResourceResolver rr) throws PersistenceException {
         try {
             Map<String, Object> props = new HashMap<>();
             props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);

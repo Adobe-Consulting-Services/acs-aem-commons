@@ -85,9 +85,9 @@ public class StylesheetInlinerTransformerFactoryTest {
 
     private Attributes empty = new AttributesImpl();
     
-    private final String CLIENTLIB_PATH = "/etc/clientlibs/test";
-    private final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
-    private final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
+    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
+    private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
+    private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
     
     private static final String CSS_CONTENTS = "div {display:block;}";
     private static final String NEWLINE = "\n";
@@ -246,6 +246,7 @@ public class StylesheetInlinerTransformerFactoryTest {
         transformer.characters( TEST_DATA.toCharArray(), 0, TEST_DATA.length());
         transformer.endElement(null, "div", null);
     }
+
     private void verifyDiv() throws SAXException {
         verify(handler).startElement(isNull(String.class), eq("div"), isNull(String.class), eq(empty));
         verify(handler).characters(TEST_DATA.toCharArray(), 0, TEST_DATA.length());

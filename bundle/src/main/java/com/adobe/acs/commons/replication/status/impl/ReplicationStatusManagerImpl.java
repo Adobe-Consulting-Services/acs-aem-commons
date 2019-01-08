@@ -29,11 +29,10 @@ import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +47,7 @@ import java.util.Calendar;
  * ACS AEM Commons - Replication Status Manager
  * OSGi Service for changing the replication status of resources.
  */
-@Component
-@Service
+@Component(service=ReplicationStatusManager.class)
 public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
     private static final Logger log = LoggerFactory.getLogger(ReplicationStatusManagerImpl.class);
 
@@ -169,7 +167,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
                 JcrUtil.setProperty(node, ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, replicationStatus);
             }
 
-            log.info("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
+            log.debug("Updated replication status for resource [ {} ] to [ {} ].", resource.getPath(), status.name());
 
             if (count++ > SAVE_THRESHOLD) {
                 session.save();

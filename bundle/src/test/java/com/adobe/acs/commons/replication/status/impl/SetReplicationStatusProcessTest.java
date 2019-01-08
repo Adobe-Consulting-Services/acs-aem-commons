@@ -82,10 +82,10 @@ public class SetReplicationStatusProcessTest {
     String workflowPayload = "/content/workflow-payload";
 
     @Spy
-    SetReplicationStatusProcess setReplicationStatusProcess = new SetReplicationStatusProcess();;
+    SetReplicationStatusProcess setReplicationStatusProcess = new SetReplicationStatusProcess();
 
     @Before
-    public void setUp() throws Exception {		
+    public void setUp() throws Exception {
         when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(resourceResolver);
 
         when(workItem.getWorkflowData()).thenReturn(workflowData);
@@ -137,35 +137,37 @@ public class SetReplicationStatusProcessTest {
         verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
     }
 
-}
+    private static class CalendarMatcher extends ArgumentMatcher<Calendar> {
 
-class CalendarMatcher extends ArgumentMatcher<Calendar> {
+        private Calendar leftCal;
 
-    private Calendar leftCal;
-
-    public CalendarMatcher(String date) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(sdf.parse(date));
-        this.leftCal = cal;
-    }
-
-    public CalendarMatcher(Calendar cal) throws ParseException {
-        this.leftCal = cal;
-    }
-
-    @Override
-    public boolean matches(Object argument) {
-        if (argument instanceof Calendar) {
-            Calendar rightCal = (Calendar)argument;
-            return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR) &&
-                    leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH) &&
-                    leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE) &&
-                    leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR) &&
-                    leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
-        } else {
-            return false;
+        public CalendarMatcher(String date) throws ParseException {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(sdf.parse(date));
+            this.leftCal = cal;
         }
+
+        public CalendarMatcher(Calendar cal) throws ParseException {
+            this.leftCal = cal;
+        }
+
+        @Override
+        public boolean matches(Object argument) {
+            if (argument instanceof Calendar) {
+                Calendar rightCal = (Calendar)argument;
+                return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR)
+                        && leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH)
+                        && leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE)
+                        && leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR)
+                        && leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
+            } else {
+                return false;
+            }
+        }
+
     }
 
 }
+
+

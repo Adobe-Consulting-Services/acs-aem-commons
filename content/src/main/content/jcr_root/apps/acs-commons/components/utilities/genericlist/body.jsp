@@ -21,7 +21,7 @@
 
 <body>
 
-    <h1>Generic List - <%= currentPage.getTitle() %></h1>
+    <h1>Generic List - <%= xssAPI.encodeForHTML(currentPage.getTitle()) %></h1>
 
     <h2>List Items:</h2>
 

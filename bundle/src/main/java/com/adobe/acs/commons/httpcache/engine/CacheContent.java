@@ -47,6 +47,8 @@ public class CacheContent {
     /** Temp sink attached to this cache content */
     private TempSink tempSink;
 
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
+
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
      * method.
@@ -57,10 +59,26 @@ public class CacheContent {
      * @param dataInputStream
      */
     public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
-            dataInputStream) {
-
-        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream);
+            dataInputStream){
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
     }
+
+    /**
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     * @param writeMethod
+     */
+    public CacheContent(String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream,HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {
+
+        this(HttpServletResponse.SC_OK, charEncoding, contentType, headers, dataInputStream, writeMethod);
+    }
+
 
     /**
      * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
@@ -74,7 +92,29 @@ public class CacheContent {
      */
     public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
             dataInputStream) {
+        this.writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER;
+        this.status = status;
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.dataInputStream = dataInputStream;
+    }
 
+    /**
+     * Construct <code>CacheContent</code> using parameters. Prefer constructing an instance using <code>build</code>
+     * method.
+     *
+     * @param status
+     * @param charEncoding
+     * @param contentType
+     * @param headers
+     * @param dataInputStream
+     * @param writeMethod
+     */
+    public CacheContent(int status, String charEncoding, String contentType, Map<String, List<String>> headers, InputStream
+            dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) {
+
+        this.writeMethod = writeMethod;
         this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
@@ -103,8 +143,9 @@ public class CacheContent {
 
         // Extracting header K,V.
         List<String> headerNames = new ArrayList<String>();
+
         headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName : headerNames) {
+        for (String headerName: headerNames) {
             List<String> values = new ArrayList<String>();
             values.addAll(responseWrapper.getHeaders(headerName));
             headers.put(headerName, values);
@@ -115,6 +156,7 @@ public class CacheContent {
 
         // Get hold of the response content available in sink.
         this.dataInputStream = responseWrapper.getTempSink().createInputStream();
+        this.writeMethod = responseWrapper.getWriteMethod();
 
         return this;
     }
@@ -170,4 +212,7 @@ public class CacheContent {
         return this.tempSink;
     }
 
+    public HttpCacheServletResponseWrapper.ResponseWriteMethod getWriteMethod() {
+        return writeMethod;
+    }
 }

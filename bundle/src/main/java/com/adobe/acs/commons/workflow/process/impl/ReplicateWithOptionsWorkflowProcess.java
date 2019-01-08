@@ -20,6 +20,22 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.jcr.Session;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.replication.AgentIdsAgentFilter;
 import com.adobe.acs.commons.replication.BrandPortalAgentFilter;
@@ -36,39 +52,12 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-@Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Replicate with Options",
-        description = "Replicates the content based on the process arg replication configuration using FAM,"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Replicate with Options",
-                description = "Replicates the content based on the process arg replication configuration (serial execution)"
-        )
+@Component(service=WorkflowProcess.class, property= {
+        "process.label = ACS AEM Commons - Replicate with Options"
 })
-@Service
 public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
+
     private static final Logger log = LoggerFactory.getLogger(ReplicateWithOptionsWorkflowProcess.class);
 
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
@@ -144,14 +133,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));

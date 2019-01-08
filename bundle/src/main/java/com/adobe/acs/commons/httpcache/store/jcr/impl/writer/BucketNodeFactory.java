@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2018 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
@@ -7,6 +26,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 
@@ -34,6 +54,16 @@ public class BucketNodeFactory
             throw new BucketNodeFactoryException("Cache root path " + cacheRootPath + " not found!");
         }
         this.cacheRoot = session.getNode(cacheRootPath);
+    }
+
+    public BucketNodeFactory(Session session, CacheKey key, JCRHttpCacheStoreImpl.Config config) throws RepositoryException, BucketNodeFactoryException {
+        this.key = key;
+        this.cacheKeySplitDepth = config.httpcache_config_jcr_bucketdepth();
+
+        if(!session.nodeExists(config.httpcache_config_jcr_rootpath())) {
+            throw new BucketNodeFactoryException("Cache root path " + config.httpcache_config_jcr_rootpath() + " not found!");
+        }
+        this.cacheRoot = session.getNode(config.httpcache_config_jcr_rootpath());
     }
 
     public Node getBucketNode() throws RepositoryException

@@ -20,6 +20,17 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -33,37 +44,12 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-@Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Synthetic Workflow Wrapper Process",
-        description = "Executes an AEM Workflow model as a Synthetic Workflow using FAM"
-)
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Synthetic Workflow Wrapper",
-                description = "Executes an AEM Workflow model as a Synthetic Workflow (serial execution)"
-        )
+@Component(service=WorkflowProcess.class,property={
+        "process.label = ACS AEM Commons - Synthetic Workflow Wrapper"
 })
-@Service
 public class SyntheticWrapperWorkflowProcess implements WorkflowProcess {
+
     private static final Logger log = LoggerFactory.getLogger(SyntheticWrapperWorkflowProcess.class);
     private static final String ARG_TRAVERSE_TREE = "traverseTree";
     private static final String ARG_SAVE_INTERVAL = "saveInterval";

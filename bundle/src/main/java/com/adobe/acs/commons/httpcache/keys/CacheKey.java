@@ -42,6 +42,36 @@ public interface CacheKey extends Serializable
     String getHierarchyResourcePath();
 
     /**
+     * Gets the expiry time for the cache entry creation.
+     * If set, it will override the default TTL for entries to expire on cache creation.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForCreation(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry access / read.
+     * If set, it will refresh the expiry time when an entry is read with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForAccess(){
+        return -1L;
+    }
+
+    /**
+     * Gets the expiry time for the cache entry updated.
+     * If set, it will refresh the expiry time when an entry is updated with given value.
+     * Value is in miliseconds.
+     * @return the expiry time
+     */
+    default long getExpiryForUpdate(){
+        return -1L;
+    }
+
+    /**
      * Determines if the @{param cacheKey} will invalidate this cache key entry.
      *
      * @param cacheKey
@@ -67,6 +97,7 @@ public interface CacheKey extends Serializable
      * @return true if the objects represent the same cache item, false otherwise.
      */
     boolean equals(Object o);
+
 
 
 }

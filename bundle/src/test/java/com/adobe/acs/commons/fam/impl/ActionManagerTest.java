@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +15,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.fam.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -46,15 +52,25 @@ public class ActionManagerTest {
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
-        }).when(taskRunner).scheduleWork(any());
+        }).when(taskRunner).scheduleWork(any(Runnable.class));
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
-        }).when(taskRunner).scheduleWork(any(), any());
+        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
+        doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class), any(CancelHandler.class), anyInt());
+        doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class), anyInt());
+
         return taskRunner;
     }
 
     static ResourceResolver mockResolver;
+
     public static ResourceResolver getFreshMockResolver() throws LoginException {
         mockResolver = null;
         return getMockResolver();
@@ -77,7 +93,7 @@ public class ActionManagerTest {
     @Test
     public void nullStatsCounterTest() throws LoginException, Exception {
         // Counters don't do tabulate in-thread actions, only deferred actions
-        ResourceResolver rr = getMockResolver();
+        final ResourceResolver rr = getMockResolver();
         ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.withResolver(resolver -> {});
@@ -93,7 +109,7 @@ public class ActionManagerTest {
 
     @Test
     public void deferredStatsCounterTest() throws LoginException, Exception {
-        ResourceResolver rr = getMockResolver();
+        final ResourceResolver rr = getMockResolver();
         ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.deferredWithResolver(resolver -> {
@@ -112,7 +128,7 @@ public class ActionManagerTest {
     
     @Test
     public void deferredStatsCounterErrorTest() throws LoginException, Exception {
-        ResourceResolver rr = getMockResolver();
+        final ResourceResolver rr = getMockResolver();
         ActionManager manager = getActionManager();
         assertEquals(0, manager.getAddedCount());
         manager.deferredWithResolver(resolver -> {
@@ -148,7 +164,7 @@ public class ActionManagerTest {
 
     @Test
     public void closeAllResolversTest() throws LoginException, Exception {
-        ResourceResolver rr = getMockResolver();
+        final ResourceResolver rr = getMockResolver();
         ActionManager manager = getActionManager();
         manager.deferredWithResolver(resolver -> {
         });

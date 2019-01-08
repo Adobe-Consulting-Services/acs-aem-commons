@@ -19,16 +19,14 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.AdministratorsOnlyProcessDefinitionFactory;
+import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-@Component
-@Service(ProcessDefinitionFactory.class)
-public class FileAssetIngestorFactory extends AdministratorsOnlyProcessDefinitionFactory<FileAssetIngestor> {
+@Component(service=ProcessDefinitionFactory.class)
+public class FileAssetIngestorFactory extends AuthorizedGroupProcessDefinitionFactory<FileAssetIngestor> {
 
     @Reference
     MimeTypeService mimetypeService;
@@ -41,5 +39,10 @@ public class FileAssetIngestorFactory extends AdministratorsOnlyProcessDefinitio
     @Override
     public FileAssetIngestor createProcessDefinitionInstance() {
         return new FileAssetIngestor(mimetypeService);
+    }
+    
+    @Override
+    protected final String[] getAuthorizedGroups() {
+        return AssetIngestor.AUTHORIZED_GROUPS;
     }
 }

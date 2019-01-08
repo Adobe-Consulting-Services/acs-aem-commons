@@ -1,14 +1,22 @@
 /*
- * #%L ACS AEM Commons Bundle %% Copyright (C) 2015 Adobe %% Licensed under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License. #L%
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
-
 package com.adobe.acs.commons.users.impl;
 
 import java.util.ArrayList;
@@ -27,11 +35,7 @@ import javax.jcr.ValueFormatException;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 
-import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlManager;
@@ -40,15 +44,17 @@ import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.result.Hit;
 
-@Component
-@Service(EnsureAce.class)
+@Component(service=EnsureAce.class)
 public class EnsureAce {
 
     private static final Logger log = LoggerFactory.getLogger(EnsureAce.class);
@@ -258,6 +264,7 @@ public class EnsureAce {
                 final Resource contentResource = aceResource.getParent().getParent();
 
                 if (!paths.contains(contentResource.getPath())) {
+                    paths.add(contentResource.getPath());
                     for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
                         if (policy instanceof JackrabbitAccessControlList) {
                             acls.add((JackrabbitAccessControlList) policy);

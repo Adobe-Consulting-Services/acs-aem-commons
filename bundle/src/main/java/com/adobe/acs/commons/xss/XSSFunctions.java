@@ -20,10 +20,9 @@
 package com.adobe.acs.commons.xss;
 
 import aQute.bnd.annotation.ProviderType;
-import com.adobe.granite.xss.XSSAPI;
+import org.apache.sling.xss.XSSAPI;
 import tldgen.Function;
 
-import java.util.regex.Pattern;
 
 /**
  * XSSAPI JSP Function wrappers.

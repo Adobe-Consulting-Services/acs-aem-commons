@@ -35,31 +35,31 @@ import com.adobe.acs.commons.redirectmaps.models.RedirectMapModelTest;
 @RunWith(MockitoJUnitRunner.class)
 public class FakeSlingHttpSerlvetRequestTest {
 
-	private FakeSlingHttpServletRequest test;
+    private FakeSlingHttpServletRequest test;
 
-	@Mock
-	private ResourceResolver resolver;
+    @Mock
+    private ResourceResolver resolver;
 
-	private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
+    private static final Logger log = LoggerFactory.getLogger(RedirectMapModelTest.class);
 
-	@Before
-	public void init() {
-		log.info("init");
-		test = new FakeSlingHttpServletRequest(resolver, "http", "www.adobe.com", 80);
-	}
+    @Before
+    public void init() {
+        log.info("init");
+        test = new FakeSlingHttpServletRequest(resolver, "http", "www.adobe.com", 80);
+    }
 
-	@Test
-	public void getScheme() {
-		assertEquals("http", test.getScheme());
-	}
-	
-	@Test
-	public void testPort() {
-		assertEquals(80, test.getServerPort());
-	}
-	
-	@Test
-	public void testServerName() {
-		assertEquals("www.adobe.com", test.getServerName());
-	}
+    @Test
+    public void getScheme() {
+        assertEquals("http", test.getScheme());
+    }
+
+    @Test
+    public void testPort() {
+        assertEquals(80, test.getServerPort());
+    }
+
+    @Test
+    public void testServerName() {
+        assertEquals("www.adobe.com", test.getServerName());
+    }
 }
