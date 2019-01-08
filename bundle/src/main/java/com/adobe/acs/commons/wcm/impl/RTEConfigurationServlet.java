@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 
-
 import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
 
 /**
@@ -64,45 +63,45 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
  * <pre>
  * slingscriptinclude
  * </pre>
- *
+ * <p>
  * and set the script to
  *
  * <pre>
  * rte.CONFIGNAME.FIELDNAME.json.jsp
  * </pre>
- *
+ * <p>
  * . This will iterate through nodes under /etc/rteconfig to find a matching
  * site (by regex). Then, look for a node named CONFIGNAME and use that
  * configuration.
  */
-@SuppressWarnings({ "serial", "checkstyle:abbreviationaswordinname" })
-@Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=rte",
-SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
+@SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
+@Component(service = Servlet.class, property = {SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=rte",
+        SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"})
 @Designate(ocd = RTEConfigurationServlet.Config.class)
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
-@ObjectClassDefinition
-public @interface Config {
-@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
-String root_path();
-}
+    @ObjectClassDefinition
+    public @interface Config {
+        @AttributeDefinition(defaultValue = {DEFAULT_ROOT_PATH})
+        String root_path() default DEFAULT_ROOT_PATH;
+    }
 
-@Reference
-private XSSAPI xssApi;
+    @Reference
+    private XSSAPI xssApi;
 
-private static final int RTE_HEIGHT = 200;
+    private static final int RTE_HEIGHT = 200;
 
-private static final int RTE_WIDTH = 430;
+    private static final int RTE_WIDTH = 430;
 
-private static final String DEFAULT_CONFIG_NAME = "default";
+    private static final String DEFAULT_CONFIG_NAME = "default";
 
-private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
+    private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
 
-private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
+    private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
 
-private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
+    private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
 
-private String rootPath;
+    private String rootPath;
 
     @Override
     protected JsonObject createEmptyWidget(String rteName) {
@@ -127,7 +126,7 @@ private String rootPath;
     }
 
     private void writeConfigResource(Resource resource, String rteName,
-            SlingHttpServletRequest request, SlingHttpServletResponse response)
+                                     SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException {
         JsonObject widget = createEmptyWidget(rteName);
 
@@ -176,10 +175,10 @@ private String rootPath;
         gson.toJson(parent, response.getWriter());
     }
 
-@Activate
-protected void activate(RTEConfigurationServlet.Config config) {
-rootPath = config.root_path();
-}
+    @Activate
+    protected void activate(RTEConfigurationServlet.Config config) {
+        rootPath = config.root_path();
+    }
 
     @Override
     @SuppressWarnings("squid:S3776")

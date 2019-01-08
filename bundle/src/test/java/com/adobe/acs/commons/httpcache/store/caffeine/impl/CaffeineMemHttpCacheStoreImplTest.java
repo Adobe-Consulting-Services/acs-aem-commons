@@ -37,6 +37,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +58,23 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
     @Before
     public void setUp() throws Exception {
-        systemUnderTest = new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
+        systemUnderTest = new CaffeineMemHttpCacheStoreImpl(new Config(){
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return null;
+            }
+
+            @Override
+            public long httpcache_cachestore_caffeinecache_ttl() {
+                return ttl;
+            }
+
+            @Override
+            public long httpcache_cachestore_caffeinecache_maxsize() {
+                return maxSizeInMb;
+            }
+        });
     }
 
     @Test

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,11 +63,11 @@ import com.google.gson.Gson;
 
 @SuppressWarnings("serial")
 @Component(service = Servlet.class,
-property = 
-{ SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
-  SLING_SERVLET_METHODS + "=POST", 
-  SLING_SERVLET_SELECTORS + "=flush" })
-@Designate(ocd=DispatcherFlusherServlet.Config.class)
+        property =
+                {SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
+                        SLING_SERVLET_METHODS + "=POST",
+                        SLING_SERVLET_SELECTORS + "=flush"})
+@Designate(ocd = DispatcherFlusherServlet.Config.class)
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
@@ -80,15 +80,17 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
-    
+
     @ObjectClassDefinition()
     public @interface Config {
-       @AttributeDefinition(name = "Flush with Admin Resource Resolver",
-            description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
-                    + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
-                    + "users JCR permissions. [ Default: true ]",
-                    defaultValue="true")
-          boolean flush_with_admin_resource_resolver();
+        boolean DEFAULT_USE_ADMIN_RESOURCE_RESOLVER = true;
+
+        @AttributeDefinition(name = "Flush with Admin Resource Resolver",
+                description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
+                        + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
+                        + "users JCR permissions. [ Default: true ]",
+                defaultValue = "" + DEFAULT_USE_ADMIN_RESOURCE_RESOLVER)
+        boolean flush_with_admin_resource_resolver() default DEFAULT_USE_ADMIN_RESOURCE_RESOLVER;
     }
 
     @Override

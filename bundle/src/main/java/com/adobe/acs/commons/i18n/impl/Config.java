@@ -36,8 +36,8 @@ public @interface Config {
     long DEFAULT_TTL = -1L;
 
     @AttributeDefinition(name = "CacheSize (count)", description = "This determines the cache size of caching I18n maps to resources.")
-    String maxSizeCount();
+    long maxSizeCount() default DEFAULT_MAX_SIZE_IN_MB;
 
     @AttributeDefinition(name = "Cache expiry", description = "This determines the cache expiry time in seconds of caching I18n maps to resources.")
-    String getTtl();
+    long getTtl() default  DEFAULT_TTL;
 }

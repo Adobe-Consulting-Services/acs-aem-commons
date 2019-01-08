@@ -69,7 +69,9 @@ import com.day.cq.commons.jcr.JcrConstants;
  * If a Workflow Model Id can be resolved, via the content hierarchy (directly) or the the default workflow id param (fallback) but that Workflow Model cannot be resolved, then a WorkflowException is thrown.
  */
 
-@Component(service=WorkflowProcess.class,property= {"process.label=Workflow Delegation"})
+@Component(service=WorkflowProcess.class,property={
+        "process.label= ACS AEM Commons - Workflow Delegation"
+        })
 public class WorkflowDelegationStep implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(WorkflowDelegationStep.class);
 

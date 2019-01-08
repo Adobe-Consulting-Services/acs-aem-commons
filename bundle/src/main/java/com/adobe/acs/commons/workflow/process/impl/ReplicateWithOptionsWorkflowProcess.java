@@ -33,9 +33,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,17 +53,10 @@ import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class)
-@Designate(ocd=ReplicateWithOptionsWorkflowProcess.Config.class)
+@Component(service=WorkflowProcess.class, property= {
+        "process.label = ACS AEM Commons - Replicate with Options"
+})
 public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
-
-    @ObjectClassDefinition( name = "ACS AEM Commons - Workflow Process - Replicate with Options",
-            description = "Replicates the content based on the process arg replication configuration using FAM,")
-    public @interface Config {
-       @AttributeDefinition(defaultValue = {
-             "Replicate with Options" }, name = "Workflow Label", description = "Replicates the content based on the process arg replication configuration (serial execution)")
-       String process_label();
-    }
 
     private static final Logger log = LoggerFactory.getLogger(ReplicateWithOptionsWorkflowProcess.class);
 
@@ -143,14 +133,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));

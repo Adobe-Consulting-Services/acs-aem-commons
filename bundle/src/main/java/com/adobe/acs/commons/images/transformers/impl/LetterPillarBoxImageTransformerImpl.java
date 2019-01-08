@@ -72,13 +72,13 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
-    
+
     @ObjectClassDefinition
     public @interface Config {
       @AttributeDefinition(name = "Max dimension in px",
             description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
             defaultValue = ""+DEFAULT_MAX_DIMENSION)
-       int max_dimension();
+       int max_dimension() default DEFAULT_MAX_DIMENSION;
     }
 
     @Override

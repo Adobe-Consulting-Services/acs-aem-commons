@@ -55,6 +55,19 @@ public class ParameterUtilTest {
     }
 
     @Test
+    public void testToMap_WithWhitesapce() {
+        String[] values = {" key1   : value1 ", " key2 :value2", "  :   ", "key3  :    value3"};
+        String separator = ":";
+        Map<String, String> expResult = new HashMap<String, String>();
+        expResult.put("key1", "value1");
+        expResult.put("key2", "value2");
+        expResult.put("key3", "value3");
+
+        Map<String, String> result = ParameterUtil.toMap(values, separator);
+        assertEquals(expResult, result);
+    }
+
+    @Test
     public void testToMapWithMultipleSeparators() {
         String[] values = {"key1:value1", "key2:val:ue2", "key3:value3"};
         String separator = ":";

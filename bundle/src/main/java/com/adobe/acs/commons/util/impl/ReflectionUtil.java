@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.util;
+package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.util.impl.ValueMapTypeConverter;
 import com.day.cq.commons.inherit.InheritanceValueMap;
@@ -38,12 +38,12 @@ public class ReflectionUtil {
         // static methods only
     }
 
-    public static Object convertValueMapValue(ValueMap valueMap, String name, Type declaredType) {
-        return new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
+    public static <T> T convertValueMapValue(ValueMap valueMap, String name, Type declaredType) {
+        return (T) new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
     }
 
-    public static Object convertValueMapValue(InheritanceValueMap valueMap, String name, Type declaredType) {
-        return new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
+    public static <T> T convertValueMapValue(InheritanceValueMap valueMap, String name, Type declaredType) {
+        return (T) new ValueMapTypeConverter(valueMap, name, declaredType).getConvertedValue();
     }
 
     public static <T> T[] toArray(Collection<T> c, T[] a) {
@@ -126,21 +126,26 @@ public class ReflectionUtil {
             return getGenericParameter(parameterizedType, 0);
         } else {
             Class<?> clazz = (Class<?>) type;
-            return clazz;
+
+            if(clazz.isArray()){
+                return clazz.getComponentType();
+            }else{
+                return clazz;
+            }
         }
     }
 
-    public static boolean isAssignableFrom(Type type, Class<?> isAssignableFrom) {
+    public static boolean isAssignableFrom(Type assignableFromType, Class<?> clazz) {
 
-        if (type == null || isAssignableFrom == null) {
+        if (assignableFromType == null || clazz == null) {
             return false;
         }
-        if (type instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) type;
-            return clazz.isAssignableFrom(isAssignableFrom);
+        if (assignableFromType instanceof Class<?>) {
+            Class<?> assignAbleFromClazz = (Class<?>) assignableFromType;
+            return assignAbleFromClazz.isAssignableFrom(assignAbleFromClazz);
         } else {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            return parameterizedType.getRawType().getClass().isAssignableFrom(isAssignableFrom);
+            ParameterizedType parameterizedType = (ParameterizedType) assignableFromType;
+            return ((Class<?>) parameterizedType.getRawType()).isAssignableFrom(clazz);
         }
 
     }
