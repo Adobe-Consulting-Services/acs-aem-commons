@@ -28,12 +28,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericParam;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isArray;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isAssignableFrom;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isCollectionType;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isListType;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isSetType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -49,6 +59,8 @@ public class ReflectionUtilTest {
         public List<String> stringList;
         public Set<Integer> integerSet;
         public Collection<Long> longCollection;
+        public Float[] floatArray;
+        public AtomicInteger atomicInteger;
     }
 
     @Before
@@ -94,11 +106,11 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void isArray() {
+    public void test_isArray() {
         List<Integer> integerList = Arrays.asList(1, 2);
         Integer[] integers = ReflectionUtil.toArray(integerList);
-        assertFalse(ReflectionUtil.isArray(integerList.getClass()));
-        assertTrue(ReflectionUtil.isArray(integers.getClass()));
+        assertFalse(isArray(integerList.getClass()));
+        assertTrue(isArray(integers.getClass()));
     }
 
     @Test
@@ -106,17 +118,35 @@ public class ReflectionUtilTest {
 
         for(Field field :TestClazz.class.getDeclaredFields()){
 
+            Type type = field.getAnnotatedType().getType();
             switch(field.getName()){
                 case "stringList":
-                    assertTrue(ReflectionUtil.isListType(field.getGenericType()));
+                    assertTrue(isListType(type));
+                    assertSame(String.class, getClassOrGenericParam(type));
+                    assertTrue(isAssignableFrom(type, new ArrayList<String>().getClass()));
                     break;
                 case "integerSet":
-                    assertTrue(ReflectionUtil.isSetType(field.getGenericType()));
+                    assertTrue(isSetType(type));
+                    assertSame(Integer.class, getClassOrGenericParam(type));
+                    assertTrue(isAssignableFrom(type, new HashSet<String>().getClass()));
                     break;
                 case "longCollection":
-                    assertTrue(ReflectionUtil.isCollectionType(field.getGenericType()));
-                    assertSame(Long.class,ReflectionUtil.getClassOrGenericParam(field.getAnnotatedType().getType()));
+                    assertTrue(isCollectionType(type));
+                    assertSame(Long.class,getClassOrGenericParam(type));
+                    assertTrue(isAssignableFrom(type, new ArrayList<Long>().getClass()));
                     break;
+                case "floatArray":
+                    assertTrue(isArray(type));
+                    assertSame(Float.class, getClassOrGenericParam(type));
+                    assertTrue(isAssignableFrom(type, Float[].class));
+                    break;
+                case "atomicInteger":
+                    assertFalse(isListType(type));
+                    assertFalse(isSetType(type));
+                    assertFalse(isCollectionType(type));
+                    assertFalse(isArray(type));
+                    assertTrue(isAssignableFrom(type, Number.class));
+                    assertSame(AtomicInteger.class, getClassOrGenericParam(type));
 
                 default:
                     break;
@@ -128,10 +158,10 @@ public class ReflectionUtilTest {
 
 
     @Test
-    public void isAssignableFrom() {
+    public void test_isAssignableFrom() {
 
         Field numberField = FieldUtils.getDeclaredField(ReflectionUtilTest.class, "numberField");
-        boolean isAssignableFrom = ReflectionUtil.isAssignableFrom(numberField.getGenericType(), Integer.class);
+        boolean isAssignableFrom = isAssignableFrom(numberField.getGenericType(), Integer.class);
         assertTrue(isAssignableFrom);
     }
 
