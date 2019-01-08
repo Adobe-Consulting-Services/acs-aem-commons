@@ -25,8 +25,9 @@ import com.day.cq.i18n.I18n;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.ComponentContext;
-import com.day.cq.wcm.api.designer.Designer;
 import com.day.cq.wcm.api.designer.Style;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -141,13 +142,13 @@ public final class AemObjectInjector implements Injector {
         case SESSION:
             return getSession(adaptable);
         case XSS_API:
-            return resolveXXSApi(adaptable);
+            return resolveXssApi(adaptable);
         default:
             return null;
         }
     }
 
-    private Object resolveXXSApi(Object adaptable) {
+    private Object resolveXssApi(Object adaptable) {
         XSSAPI specificApi = getXssApi(adaptable);
         if(specificApi != null){
             return specificApi;
@@ -182,37 +183,46 @@ public final class AemObjectInjector implements Injector {
 
         public static ObjectType fromClassAndName(Class<?> classOrGenericParam, String name) {
 
-            if(classOrGenericParam.isAssignableFrom(Resource.class)){
+            if (classOrGenericParam.isAssignableFrom(Resource.class)) {
                 return ObjectType.RESOURCE;
-            }else if(classOrGenericParam.isAssignableFrom(ResourceResolver.class)){
+            } else if (classOrGenericParam.isAssignableFrom(ResourceResolver.class)) {
                 return ObjectType.RESOURCE_RESOLVER;
-            }else if(classOrGenericParam.isAssignableFrom(ComponentContext.class)){
+            } else if (classOrGenericParam.isAssignableFrom(ComponentContext.class)) {
                 return ObjectType.COMPONENT_CONTEXT;
-            }else if(classOrGenericParam.isAssignableFrom(PageManager.class)){
+            } else if (classOrGenericParam.isAssignableFrom(PageManager.class)) {
                 return ObjectType.PAGE_MANAGER;
-            }else if(classOrGenericParam.isAssignableFrom(Page.class)){
-                if(name.equalsIgnoreCase(RESOURCE_PAGE_STRING)){
-                    return ObjectType.RESOURCE_PAGE;
-                }else{
-                    return ObjectType.CURRENT_PAGE;
-                }
-            }else if(classOrGenericParam.isAssignableFrom(Designer.class)){
-                if(name.equalsIgnoreCase(RESOURCE_DESIGN_STRING)){
-                    return ObjectType.RESOURCE_DESIGN;
-                }else{
-                    return ObjectType.CURRENT_DESIGN;
-                }
-            }else if(classOrGenericParam.isAssignableFrom(Style.class)){
+            } else if (classOrGenericParam.isAssignableFrom(Page.class)) {
+                return resolvePageFromName(name);
+            } else if (classOrGenericParam.isAssignableFrom(Designer.class)) {
+                return ObjectType.DESIGNER;
+            } else if (classOrGenericParam.isAssignableFrom(Design.class)) {
+                return resolveDesignFromName(name);
+            } else if (classOrGenericParam.isAssignableFrom(Style.class)) {
                 return ObjectType.CURRENT_STYLE;
-            }else if(classOrGenericParam.isAssignableFrom(Session.class)){
+            } else if (classOrGenericParam.isAssignableFrom(Session.class)) {
                 return ObjectType.SESSION;
-            }else if(classOrGenericParam.isAssignableFrom(I18n.class)){
+            } else if (classOrGenericParam.isAssignableFrom(I18n.class)) {
                 return ObjectType.I18N;
-            }else if(classOrGenericParam.isAssignableFrom(XSSAPI.class)){
+            } else if (classOrGenericParam.isAssignableFrom(XSSAPI.class)) {
                 return ObjectType.XSS_API;
             }
 
             return null;
+        }
+        private static ObjectType resolveDesignFromName(String name) {
+            if (name.equalsIgnoreCase(RESOURCE_DESIGN_STRING)) {
+                return ObjectType.RESOURCE_DESIGN;
+            } else {
+                return ObjectType.CURRENT_DESIGN;
+            }
+        }
+
+        private static ObjectType resolvePageFromName(String name) {
+            if(name.equalsIgnoreCase(RESOURCE_PAGE_STRING)){
+                return ObjectType.RESOURCE_PAGE;
+            }else{
+                return ObjectType.CURRENT_PAGE;
+            }
         }
     }
 }
