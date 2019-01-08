@@ -44,6 +44,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(HierarchicalPageProperty.SOURCE)
 public @interface HierarchicalPageProperty {
 
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
     String SOURCE = "hierarchical-page-property";
 
     /**

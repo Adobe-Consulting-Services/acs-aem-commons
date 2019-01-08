@@ -42,6 +42,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(I18N.SOURCE)
 public @interface I18N {
 
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
     String SOURCE = "i18n";
 
     /**

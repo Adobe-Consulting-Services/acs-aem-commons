@@ -42,6 +42,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(SharedValueMapValue.SOURCE)
 public @interface SharedValueMapValue {
 
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
     String SOURCE = "shared-component-properties-valuemap";
 
     String name() default StringUtils.EMPTY;
