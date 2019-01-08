@@ -25,6 +25,7 @@ import com.adobe.acs.commons.models.injectors.annotation.I18N;
 import com.adobe.acs.commons.models.injectors.annotation.impl.I18NAnnotationProcessorFactory;
 import com.adobe.acs.commons.models.injectors.impl.model.TestModelI18nValue;
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestModelI18nValueImpl;
+import com.day.cq.i18n.I18n;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
@@ -41,6 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 
@@ -58,6 +60,9 @@ public class I18NInjectorTest {
 
     private SlingHttpServletRequest slingHttpServletRequest;
 
+    @Mock
+    private I18n i18n;
+
     @Before
     public void setUp() throws Exception {
 
@@ -74,6 +79,10 @@ public class I18NInjectorTest {
         when(i18nService.translate("com.acs.commmons.test", context.request())).thenReturn("Translated from english");
         when(i18nService.translate("anotherValidI18nField", context.request())).thenReturn("FromNameValue");
         when(i18nService.translate("injectField", context.request())).thenReturn("InjectFieldValue");
+
+        when(i18nService.i18n(context.request())).thenReturn(i18n);
+        when(i18nService.i18n(context.currentResource())).thenReturn(i18n);
+
     }
 
     @Test
@@ -93,6 +102,7 @@ public class I18NInjectorTest {
         testAdaptable(adaptable);
     }
 
+
     @Test
     public void createAnnotationProcessor() {
     }
@@ -103,6 +113,6 @@ public class I18NInjectorTest {
         assertEquals("Translated from english", adapted.getValidI18nField());
         assertEquals("FromNameValue", adapted.getAnotherValidI18nField());
         assertNull("we should skip javax.Inject", adapted.getInjectField());
-
+        assertSame(i18n, adapted.getI18n());
     }
 }

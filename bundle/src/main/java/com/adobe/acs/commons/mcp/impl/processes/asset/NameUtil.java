@@ -53,13 +53,16 @@ final class NameUtil {
     }
 
     static String createValidDamPath(String path) {
-        if (StringUtils.isEmpty(path)) {
-            return path;
+        if (StringUtils.isNotEmpty(path)) {
+            path = Arrays.asList(StringUtils.split(path, PATH_SEPARATOR))
+                    .stream()
+                    .map(name -> name.matches(VALID_NAME_REGEXP) ? name : NameUtil.createValidDamName(name))
+                    .collect(Collectors.joining(PATH_SEPARATOR));
+            if (!path.startsWith(PATH_SEPARATOR)) {
+                path = PATH_SEPARATOR + path;
+            }
         }
-        return Arrays.asList(StringUtils.split(path, PATH_SEPARATOR))
-                .stream()
-                .map(name -> name.matches(VALID_NAME_REGEXP) ? name : NameUtil.createValidDamName(name))
-                .collect(Collectors.joining(PATH_SEPARATOR));
+        return path;
     }
 
 }

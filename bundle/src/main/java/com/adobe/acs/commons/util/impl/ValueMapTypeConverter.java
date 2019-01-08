@@ -34,8 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.adobe.acs.commons.util.ReflectionUtil.getGenericParameter;
-import static com.adobe.acs.commons.util.ReflectionUtil.isSetType;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.getGenericParameter;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.isSetType;
 
 /**
  * Converts value map values to the value with the desired type.
@@ -67,14 +67,15 @@ public class ValueMapTypeConverter {
 
     private Object convertValue() {
         if (declaredType instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) declaredType;
+            Class<?> clazz;
             try {
-                return getValueFromMap(clazz);
-            } catch (ClassCastException e) {
-                // handle case of primitive/wrapper arrays
-                if (clazz.isArray()) {
+                clazz = (Class<?>) declaredType;
+                if(clazz.isArray()){
                     return handleArrayProperty(clazz);
+                }else{
+                    return getValueFromMap(clazz);
                 }
+            } catch (ClassCastException e) {
                 return null;
             }
         } else if (ParameterizedType.class.isInstance(declaredType)) {
@@ -129,6 +130,11 @@ public class ValueMapTypeConverter {
                 if (wrapperArray != null) {
                     return unwrapArray(wrapperArray, componentType);
                 }
+            }
+        }else{
+            Object wrapperArray = getValueFromMap(Array.newInstance(componentType, 0).getClass());
+            if (wrapperArray != null) {
+                return unwrapArray(wrapperArray, componentType);
             }
         }
         return null;

@@ -347,10 +347,11 @@ public class FileAssetIngestorTest {
     public void testPathSupportsSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException, RepositoryException {
         configureSftpFields();
         ingestor.preserveFileName = false;
-        ingestor.jcrBasePath = ingestor.jcrBasePath.concat("#");
+        String jcrBasePath = ingestor.jcrBasePath;
+        ingestor.jcrBasePath = jcrBasePath.concat("#");
         ingestor.init();
 
-        Assert.assertTrue(ingestor.jcrBasePath.endsWith("-"));
+        Assert.assertEquals(jcrBasePath + "-", ingestor.jcrBasePath);
 
         for (AssetIngestorPaths pathsToValidate : FILE_PATHS) {
             String expectedPath = pathsToValidate.getExpectedPath();
@@ -376,10 +377,11 @@ public class FileAssetIngestorTest {
     @Test
     public void testPreservePathWithSpecialCharacters() throws UnsupportedEncodingException, URISyntaxException, RepositoryException {
         configureSftpFields();
-        ingestor.jcrBasePath = ingestor.jcrBasePath.concat("#");
+        String jcrBasePath = ingestor.jcrBasePath;
+        ingestor.jcrBasePath = jcrBasePath.concat("#");
         ingestor.init();
 
-        Assert.assertTrue(ingestor.jcrBasePath.endsWith("#"));
+        Assert.assertEquals(jcrBasePath + "#", ingestor.jcrBasePath);
 
         for (AssetIngestorPaths pathsToValidate : FILE_PATHS) {
             String expectedPath = pathsToValidate.getExpectedPreservedPath();
