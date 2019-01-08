@@ -64,6 +64,10 @@ import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
 @Source(AemObject.SOURCE)
 public @interface AemObject {
 
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
     String SOURCE = "define-objects";
     /**
      * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT
@@ -71,6 +75,6 @@ public @interface AemObject {
      * If even those are not available the default injection strategy defined on the {@link org.apache.sling.models.annotations.Model} applies.
      * Default value = DEFAULT.
      */
-    public InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
+    InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
 
 }

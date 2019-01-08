@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.models.injectors.annotation;
 
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
@@ -38,11 +39,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD, FIELD, PARAMETER })
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source("shared-component-properties-valuemap")
+@Source(SharedValueMapValue.SOURCE)
 public @interface SharedValueMapValue {
-    String name() default "";
 
-    public InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
+    String SOURCE = "shared-component-properties-valuemap";
 
-    public SharedComponentProperties.ValueTypes type() default SharedComponentProperties.ValueTypes.MERGED;
+    String name() default StringUtils.EMPTY;
+
+    InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
+
+    SharedComponentProperties.ValueTypes type() default SharedComponentProperties.ValueTypes.MERGED;
 }
