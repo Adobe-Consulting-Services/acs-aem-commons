@@ -19,14 +19,26 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
+import com.adobe.acs.commons.i18n.I18nProvider;
 import com.adobe.acs.commons.models.injectors.annotation.AemObject;
+import com.day.cq.i18n.I18n;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.api.designer.Style;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
+import org.apache.sling.xss.XSSAPI;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Session;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
@@ -42,6 +54,7 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResourceResolver;
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getSession;
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getXssApi;
+import static com.adobe.acs.commons.util.impl.ReflectionUtil.getClassOrGenericParam;
 
 /**
  * Sling Models Injector which injects the Adobe AEM objects defined in
@@ -78,6 +91,11 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getXssAp
  */
 public final class AemObjectInjector implements Injector {
 
+    @Reference
+    private I18nProvider i18nProvider;
+
+    @Reference
+    private XSSAPI genericXxsApi;
 
     @Override
     public String getName() {
@@ -93,12 +111,14 @@ public final class AemObjectInjector implements Injector {
             return null;
         }
 
-        ObjectType nameEnum = ObjectType.fromString(name);
-        if (nameEnum == null) {
+
+        final Class<?> clazz = getClassOrGenericParam(declaredType);
+        final ObjectType typeEnum = ObjectType.fromClassAndName(clazz, name);
+        if (typeEnum == null) {
             return null;
         }
 
-        switch (nameEnum) {
+        switch (typeEnum) {
         case RESOURCE:
             return getResource(adaptable);
         case RESOURCE_RESOLVER:
@@ -122,9 +142,18 @@ public final class AemObjectInjector implements Injector {
         case SESSION:
             return getSession(adaptable);
         case XSS_API:
-            return getXssApi(adaptable);
+            return resolveXssApi(adaptable);
         default:
             return null;
+        }
+    }
+
+    private Object resolveXssApi(Object adaptable) {
+        XSSAPI specificApi = getXssApi(adaptable);
+        if(specificApi != null){
+            return specificApi;
+        }else{
+            return genericXxsApi;
         }
     }
 
@@ -135,35 +164,66 @@ public final class AemObjectInjector implements Injector {
      */
     private enum ObjectType {
 
-        RESOURCE("resource"),
-        RESOURCE_RESOLVER("resourceResolver"),
-        COMPONENT_CONTEXT("componentContext"),
-        PAGE_MANAGER("pageManager"),
-        CURRENT_PAGE("currentPage"),
-        RESOURCE_PAGE("resourcePage"),
-        DESIGNER("designer"),
-        CURRENT_DESIGN("currentDesign"),
-        RESOURCE_DESIGN("resourceDesign"),
-        CURRENT_STYLE("currentStyle"),
-        SESSION("session"),
-        XSS_API("xssApi");
+        RESOURCE,
+        RESOURCE_RESOLVER,
+        COMPONENT_CONTEXT,
+        PAGE_MANAGER,
+        CURRENT_PAGE,
+        RESOURCE_PAGE,
+        DESIGNER,
+        CURRENT_DESIGN,
+        RESOURCE_DESIGN,
+        CURRENT_STYLE,
+        SESSION,
+        I18N,
+        XSS_API;
 
-        private String text;
+        private static final String RESOURCE_PAGE_STRING = "resourcePage";
+        private static final String RESOURCE_DESIGN_STRING = "resourceDesign";
 
-        ObjectType(String text) {
-            this.text = text;
-        }
+        public static ObjectType fromClassAndName(Class<?> classOrGenericParam, String name) {
 
-        public static ObjectType fromString(String text) {
-            if (text != null) {
-                for (ObjectType b : ObjectType.values()) {
-                    if (text.equalsIgnoreCase(b.text)) {
-                        return b;
-                    }
-                }
+            if (classOrGenericParam.isAssignableFrom(Resource.class)) {
+                return ObjectType.RESOURCE;
+            } else if (classOrGenericParam.isAssignableFrom(ResourceResolver.class)) {
+                return ObjectType.RESOURCE_RESOLVER;
+            } else if (classOrGenericParam.isAssignableFrom(ComponentContext.class)) {
+                return ObjectType.COMPONENT_CONTEXT;
+            } else if (classOrGenericParam.isAssignableFrom(PageManager.class)) {
+                return ObjectType.PAGE_MANAGER;
+            } else if (classOrGenericParam.isAssignableFrom(Page.class)) {
+                return resolvePageFromName(name);
+            } else if (classOrGenericParam.isAssignableFrom(Designer.class)) {
+                return ObjectType.DESIGNER;
+            } else if (classOrGenericParam.isAssignableFrom(Design.class)) {
+                return resolveDesignFromName(name);
+            } else if (classOrGenericParam.isAssignableFrom(Style.class)) {
+                return ObjectType.CURRENT_STYLE;
+            } else if (classOrGenericParam.isAssignableFrom(Session.class)) {
+                return ObjectType.SESSION;
+            } else if (classOrGenericParam.isAssignableFrom(I18n.class)) {
+                return ObjectType.I18N;
+            } else if (classOrGenericParam.isAssignableFrom(XSSAPI.class)) {
+                return ObjectType.XSS_API;
             }
 
             return null;
+        }
+
+        private static ObjectType resolveDesignFromName(String name) {
+            if (name.equalsIgnoreCase(RESOURCE_DESIGN_STRING)) {
+                return ObjectType.RESOURCE_DESIGN;
+            } else {
+                return ObjectType.CURRENT_DESIGN;
+            }
+        }
+
+        private static ObjectType resolvePageFromName(String name) {
+            if(name.equalsIgnoreCase(RESOURCE_PAGE_STRING)){
+                return ObjectType.RESOURCE_PAGE;
+            }else{
+                return ObjectType.CURRENT_PAGE;
+            }
         }
     }
 }

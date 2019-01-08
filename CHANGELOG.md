@@ -13,9 +13,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
 - #1637 - Add support for bounce address setting in EmailService
-- #1654 - Added ReflectionUtils, InjectorUtils and I18nProvider service to support injectors
+- #1654 - Added I18nProvider service to support injectors
+- #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 
 ### Fixed
+- #1667 - Refactored the activate methods of all http cache services
+- #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils
@@ -36,13 +39,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
+- #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
+- #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
 - #1560 - Changing to osgi annotations
+- #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
+- #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
+- #1649 - Added support for custom Content-Type header.
+
+### Removed
+- #1635 - Removed WCM Inbox Web Console Plugin
 
 ## [3.19.0] - 2018-11-03
 

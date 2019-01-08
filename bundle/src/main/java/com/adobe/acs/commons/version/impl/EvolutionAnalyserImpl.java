@@ -33,14 +33,14 @@ import com.adobe.acs.commons.version.EvolutionContext;
 @Component(service=EvolutionAnalyser.class)
 @Designate(ocd=EvolutionAnalyserImpl.Config.class)
 public class EvolutionAnalyserImpl implements EvolutionAnalyser {
-   
+
    @ObjectClassDefinition(name = "ACS AEM Commons - Resource Evolution Analyser",
            description = "Have a look at the evolution of a resource on a property/resource level.")
    public @interface Config {
       @AttributeDefinition(name = "Ignored property names",
                 description = "Property names (regex possible) listed here will be excluded from the version compare feature.",
                 defaultValue = { "(.*/)?jcr:uuid", "(.*/)?(cq|jcr):lastModified", "(.*/)?(cq|jcr):lastModifiedBy", "(.*/)?jcr:frozenUuid", "(.*/)?jcr:primaryType", "(.*/)?jcr:frozenPrimaryType" }, cardinality = Integer.MAX_VALUE)
-      String[] properties_ignore();
+      String[] properties_ignore() default {"(.*/)?jcr:uuid", "(.*/)?(cq|jcr):lastModified", "(.*/)?(cq|jcr):lastModifiedBy", "(.*/)?jcr:frozenUuid", "(.*/)?jcr:primaryType", "(.*/)?jcr:frozenPrimaryType"};
       @AttributeDefinition(name = "Ignored resource names",
                 description = "Resource names (regex possible) listed here will be excluded from the version compare feature.",
                 cardinality = Integer.MAX_VALUE)

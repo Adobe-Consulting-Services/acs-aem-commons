@@ -57,37 +57,36 @@ import com.google.gson.JsonPrimitive;
  * <pre>
  * slingscriptinclude
  * </pre>
- *
+ * <p>
  * and set the script to
  *
  * <pre>
  * tagwidget.CONFIGNAME.FIELDNAME.json.jsp
  * </pre>
- *
+ * <p>
  * This will iterate through nodes under /etc/tagconfig to find a matching site
  * (by regex). Then, look for a node named CONFIGNAME and use that
  * configuration.
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = { SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=tagwidget",
-SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default" })
-@Designate(ocd=TagWidgetConfigurationServlet.Config.class)
+@Component(service = Servlet.class, property = {SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=tagwidget",
+        SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"})
+@Designate(ocd = TagWidgetConfigurationServlet.Config.class)
 public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
     private static final String DEFAULT_CONFIG_NAME = "default";
 
     @Reference
     private XSSAPI xssApi;
-    
-@ObjectClassDefinition
-public @interface Config {
-@AttributeDefinition(defaultValue = { DEFAULT_ROOT_PATH })
-String root_path();
-}
+
+    @ObjectClassDefinition
+    public @interface Config {
+        String DEFAULT_ROOT_PATH = "/etc/tagconfig";
+        @AttributeDefinition(defaultValue = DEFAULT_ROOT_PATH)
+        String root_path() default DEFAULT_ROOT_PATH;
+    }
 
     private static final String DEFAULT_CONFIG = "/libs/foundation/components/page/tab_basic/items/basic/items/tags";
-
-    private static final String DEFAULT_ROOT_PATH = "/etc/tagconfig";
 
     private String rootPath;
 
@@ -152,7 +151,7 @@ String root_path();
     }
 
     private void writeConfigResource(Resource resource, String propertyName,
-            SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException,
+                                     SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException,
             ServletException {
         JsonObject widget = createEmptyWidget(propertyName);
 

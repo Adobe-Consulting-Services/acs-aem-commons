@@ -19,68 +19,170 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.AemObject;
-import com.adobe.acs.commons.models.injectors.annotation.impl.AemObjectAnnotationProcessorFactory;
-import com.adobe.acs.commons.models.injectors.impl.model.TestResourceModel;
-import com.adobe.acs.commons.models.injectors.impl.model.impl.TestResourceModelImpl;
-import io.wcm.testing.mock.aem.junit.AemContext;
+import static org.junit.Assert.assertNotNull;
+
+import javax.inject.Inject;
+import javax.jcr.Session;
+
+import com.day.cq.i18n.I18n;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.models.spi.Injector;
-import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.xss.XSSAPI;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
+import com.day.cq.wcm.api.designer.Style;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AemObjectInjectorTest {
 
-    private static final String CURRENT_PAGE_PATH = "/content/we-retail/language-masters/en/experience";
-    private static final String RESOURCE_PAGE_PATH = "/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten";
-    @Rule
-    public final AemContext context = InjectorAEMContext.provide();
 
-    @InjectMocks
-    private AemObjectInjector injector;
-    private TestResourceModel adapted;
+    @Mock
+    private PageManager pageManager;
+    @Mock
+    private Designer designer;
+
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+
+
 
     @Before
-    public void setUp() throws Exception {
-        context.currentPage(CURRENT_PAGE_PATH);
-        context.currentResource(RESOURCE_PAGE_PATH + "/jcr:content/root");
+    public final void setUp() throws Exception {
+        AemObjectInjector aemObjectsInjector = new AemObjectInjector();
+        context.registerService(aemObjectsInjector);
 
-        context.registerService(Injector.class, injector);
-        context.registerService(StaticInjectAnnotationProcessorFactory.class, new AemObjectAnnotationProcessorFactory());
-        context.addModelsForClasses(TestResourceModelImpl.class);
+        context.registerService(PageManager.class,pageManager);
+        context.registerService(Designer.class,designer);
+        context.addModelsForClasses(TestResourceModel.class);
 
-        SlingHttpServletRequest adaptable = context.request();
-        adapted = adaptable.adaptTo(TestResourceModel.class);
+        // create a resource to have something we can adapt
+        context.create().resource("/content/resource");
+
     }
 
     @Test
-    public void test_name() {
-        assertEquals(AemObject.SOURCE, injector.getName());
+    public final void testResourceInjection() {
+
+        Resource r = context.resourceResolver().getResource("/content/resource");
+        TestResourceModel testResourceModel = r.adaptTo(TestResourceModel.class);
+
+        assertNotNull(testResourceModel);
+        assertNotNull(testResourceModel.getResource());
+        assertNotNull(testResourceModel.getResourceResolver());
+        assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getDesigner());
+        assertNotNull(testResourceModel.getSession());
+        // TODO: Tests for the remaining injectable objects
     }
 
     @Test
-    public void test() {
-        assertNotNull(adapted);
+    public final void testSlingHttpServiceRequestInjection() {
 
-        assertSame(context.pageManager(), adapted.getPageManager());
-        assertSame(context.resourceResolver(), adapted.getResourceResolver());
-        assertEquals(RESOURCE_PAGE_PATH, adapted.getResourcePage().getPath());
-        assertEquals(CURRENT_PAGE_PATH, adapted.getCurrentPage().getPath());
+        Resource r = context.resourceResolver().getResource("/content/resource");
+        TestResourceModel testResourceModel = r.adaptTo(TestResourceModel.class);
 
-        assertNotNull(adapted.getCurrentStyle());
-        assertNotNull(adapted.getDesigner());
-        assertNotNull(adapted.getComponentContext());
-        assertNotNull(adapted.getResourceDesign());
+        assertNotNull(testResourceModel);
+        assertNotNull(testResourceModel.getResource());
+        assertNotNull(testResourceModel.getResourceResolver());
+        assertNotNull(testResourceModel.getPageManager());
+        assertNotNull(testResourceModel.getDesigner());
+        assertNotNull(testResourceModel.getSession());
+        // TODO: Tests for the remaining injectable objects
     }
 
+    // --- inner classes ---
+
+    @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
+    public static class TestResourceModel {
+
+        @Inject
+        private Resource resource;
+        @Inject
+        private ResourceResolver resourceResolver;
+        @Inject @Optional
+        private ComponentContext componentContext;
+        @Inject
+        private PageManager pageManager;
+        @Inject @Optional
+        private Page currentPage;
+        @Inject @Optional
+        private Page resourcePage;
+        @Inject @Optional
+        private Designer designer;
+        @Inject @Optional
+        private Design currentDesign;
+        @Inject @Optional
+        private Design resourceDesign;
+        @Inject @Optional
+        private Style currentStyle;
+        @Inject @Optional
+        private Session session;
+        @Inject @Optional
+        private XSSAPI xssApi;
+        @Inject @Optional
+        private String namedSomethingElse;
+
+        public Resource getResource() {
+            return resource;
+        }
+
+        public ResourceResolver getResourceResolver() {
+            return resourceResolver;
+        }
+
+        public ComponentContext getComponentContext() {
+            return componentContext;
+        }
+
+        public PageManager getPageManager() {
+            return pageManager;
+        }
+
+        public Page getCurrentPage() {
+            return currentPage;
+        }
+
+        public Page getResourcePage() {
+            return resourcePage;
+        }
+
+        public Designer getDesigner() {
+            return designer;
+        }
+
+        public Design getCurrentDesign() {
+            return currentDesign;
+        }
+
+        public Design getResourceDesign() {
+            return resourceDesign;
+        }
+
+        public Style getCurrentStyle() {
+            return currentStyle;
+        }
+
+        public Session getSession() {
+            return session;
+        }
+
+        public XSSAPI getXssApi() {
+            return xssApi;
+        }
+    }
 }

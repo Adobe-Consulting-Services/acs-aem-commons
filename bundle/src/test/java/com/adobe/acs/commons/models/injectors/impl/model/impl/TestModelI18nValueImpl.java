@@ -21,6 +21,7 @@ package com.adobe.acs.commons.models.injectors.impl.model.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.I18N;
 import com.adobe.acs.commons.models.injectors.impl.model.TestModelI18nValue;
+import com.day.cq.i18n.I18n;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -44,6 +45,9 @@ public class TestModelI18nValueImpl implements TestModelI18nValue {
     private String anotherValidI18nField;
 
     @Inject
+    private I18n i18n;
+
+    @Inject
     private String injectField;
 
 
@@ -65,5 +69,10 @@ public class TestModelI18nValueImpl implements TestModelI18nValue {
     @Override
     public String getInjectField() {
         return injectField;
+    }
+
+    @Override
+    public I18n getI18n() {
+        return i18n;
     }
 }

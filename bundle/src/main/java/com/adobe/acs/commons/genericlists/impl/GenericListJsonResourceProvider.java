@@ -43,6 +43,7 @@ import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
+
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
@@ -57,10 +58,10 @@ import org.apache.sling.spi.resource.provider.ResourceProvider;
  * for use with the Touch UI Metadata Asset Editor.
  */
 
-@Component(service=ResourceProvider.class, property= {
-ResourceProvider.PROPERTY_ROOT + "=" + GenericListJsonResourceProvider.ROOT
+@Component(service = ResourceProvider.class, property = {
+        ResourceProvider.PROPERTY_ROOT + "=" + GenericListJsonResourceProvider.ROOT
 })
-@Designate(ocd=GenericListJsonResourceProvider.Config.class)
+@Designate(ocd = GenericListJsonResourceProvider.Config.class)
 public final class GenericListJsonResourceProvider extends ResourceProvider {
 
 
@@ -73,19 +74,19 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
     private static final String EXTENSION = ".json";
 
     private static final int EXTENSION_LENGTH = EXTENSION.length();
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - Generic List JSON Resource Provider",
-        description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
+            description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
     public @interface Config {
-       @AttributeDefinition(name = "Generic List Root", description = "Root path under which generic lists can be found", defaultValue = DEFAULT_LIST_ROOT)
-       String list_root();
+        @AttributeDefinition(name = "Generic List Root", description = "Root path under which generic lists can be found", defaultValue = DEFAULT_LIST_ROOT)
+        String list_root() default DEFAULT_LIST_ROOT;
     }
 
     private String listRoot;
 
     @Activate
     protected void activate(GenericListJsonResourceProvider.Config config) {
-        this.listRoot = StringUtils.defaultIfEmpty(config.list_root(), DEFAULT_LIST_ROOT);
+        this.listRoot = config.list_root();
     }
 
     @Override

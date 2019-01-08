@@ -83,27 +83,29 @@ public class WCMViewsFilter implements Filter {
     public static final String WCM_VIEW_DISABLED = "disabled";
 
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - WCM Views Filter" )
     public @interface Config {
-       
-       @AttributeDefinition(name = "Path Prefixes to Include",
+
+        String DEFAULT_PREFIX = "/content";
+
+        @AttributeDefinition(name = "Path Prefixes to Include",
                 description = "Include paths that begin with these path prefixes. Default: [ /content ]",
                 cardinality = Integer.MAX_VALUE,
-                defaultValue = {"/content"})
-       String[] path_prefixes_include();
-       
+                defaultValue = {DEFAULT_PREFIX})
+       String[] path_prefixes_include() default {DEFAULT_PREFIX};
+
        @AttributeDefinition(name = "Resource Types (Regex)",
             description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
             cardinality = Integer.MAX_VALUE)
        String[] resourcetypes_include();
-       
+
     }
 
     private String[] includePathPrefixes = new String[]{"/content"};
 
     private List<Pattern> resourceTypesIncludes = new ArrayList<Pattern>();
- 
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // do nothing

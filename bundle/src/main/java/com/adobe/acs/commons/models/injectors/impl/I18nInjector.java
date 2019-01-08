@@ -21,6 +21,8 @@ package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.i18n.I18nProvider;
 import com.adobe.acs.commons.models.injectors.annotation.I18N;
+import com.adobe.acs.commons.util.impl.ReflectionUtil;
+import com.day.cq.i18n.I18n;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -55,7 +57,7 @@ public class I18nInjector implements Injector {
     @Override
     public Object getValue(Object adaptable, String name, Type type, AnnotatedElement annotatedElement, DisposalCallbackRegistry disposal) {
 
-        if (annotatedElement.isAnnotationPresent(I18N.class) && canAdapt(adaptable, type)) {
+        if (annotatedElement.isAnnotationPresent(I18N.class) && canAdaptToString(adaptable, type)) {
             //skipping javax.Inject for performance reasons. Only supports direct injection.
             String key = getI18nKey(name, annotatedElement);
 
@@ -65,6 +67,14 @@ public class I18nInjector implements Injector {
             } else {
                 Resource resource = getResource(adaptable);
                 return i18nProvider.translate(key, resource);
+            }
+        }else if(canAdaptToObject(adaptable, type)){
+            if (adaptable instanceof HttpServletRequest) {
+                HttpServletRequest request = (HttpServletRequest) adaptable;
+                return i18nProvider.i18n(request);
+            } else {
+                Resource resource = getResource(adaptable);
+                return i18nProvider.i18n(resource);
             }
         }
 
@@ -83,8 +93,12 @@ public class I18nInjector implements Injector {
         return name;
     }
 
-    private boolean canAdapt(Object adaptable, Type type) {
-        return getResource(adaptable) != null && type.getTypeName().equals(String.class.getName());
+    private boolean canAdaptToString(Object adaptable, Type type) {
+        return getResource(adaptable) != null && ReflectionUtil.isAssignableFrom(type, String.class);
+    }
+
+    private boolean canAdaptToObject(Object adaptable, Type type) {
+        return getResource(adaptable) != null && ReflectionUtil.isAssignableFrom(type, I18n.class);
     }
 
 }

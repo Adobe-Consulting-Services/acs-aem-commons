@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.models.injectors.impl.model;
 
 
+import com.day.cq.i18n.I18n;
+
 public interface TestModelI18nValue {
     String getValidI18nField();
 
@@ -28,4 +30,6 @@ public interface TestModelI18nValue {
     String getAnotherValidI18nField();
 
     String getInjectField();
+
+    I18n getI18n();
 }

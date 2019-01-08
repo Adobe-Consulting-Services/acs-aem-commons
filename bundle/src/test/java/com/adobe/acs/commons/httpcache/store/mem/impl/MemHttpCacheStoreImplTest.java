@@ -37,6 +37,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,10 +60,23 @@ public class MemHttpCacheStoreImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
+        systemUnderTest.activate(new MemHttpCacheStoreImpl.Config(){
 
-        properties.put(Config.PROP_TTL, valueTtl);
-        properties.put(Config.PROP_MAX_SIZE_IN_MB, valueMaxSize);
-        systemUnderTest.activate(properties);
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return null;
+            }
+
+            @Override
+            public long httpcache_cachestore_memcache_ttl() {
+                return valueTtl;
+            }
+
+            @Override
+            public long httpcache_cachestore_memcache_maxsize() {
+                return valueMaxSize;
+            }
+        });
     }
 
     @Test

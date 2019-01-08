@@ -75,10 +75,10 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     public @interface Config {
         @AttributeDefinition(name = "Allowed user groups",
                 description = "Users groups that are used to accept and create cache keys.")
-        String[] httpcache_config_extension_user_groups_allowed();
+        String[] httpcache_config_extension_user_groups_allowed() default {};
 
         @AttributeDefinition(name = "Config Name")
-        String configName();
+        String configName() default StringUtils.EMPTY;
     }
     private List<String> userGroups;
 

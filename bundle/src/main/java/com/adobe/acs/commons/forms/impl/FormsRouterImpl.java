@@ -40,7 +40,7 @@ public class FormsRouterImpl implements FormsRouter {
     private static final String DEFAULT_SUFFIX = "/submit/form";
 
     private String suffix = DEFAULT_SUFFIX;
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - Forms Router",
         description = "Provides functionality for routing ACS AEM Commons FORM Requests through AEM.")
     public @interface Config {
@@ -48,7 +48,7 @@ public class FormsRouterImpl implements FormsRouter {
             description = "HTTP Request Suffix used to identify ACS AEM Commons Forms POST Requests and route them "
                     + "appropriately. [ Default: /submit/form ]",
             defaultValue = DEFAULT_SUFFIX)
-       String suffix();
+       String suffix() default DEFAULT_SUFFIX;
     }
 
     /**
@@ -92,7 +92,7 @@ public class FormsRouterImpl implements FormsRouter {
 
     @Activate
     protected final void activate(FormsRouterImpl.Config config) {
-        this.suffix = StringUtils.defaultIfEmpty(config.suffix(), DEFAULT_SUFFIX);
+        this.suffix = config.suffix();
         if (StringUtils.isBlank(this.suffix)) {
             // No whitespace please
             this.suffix = DEFAULT_SUFFIX;

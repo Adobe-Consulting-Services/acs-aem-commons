@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.HierarchicalPageProperty;
-import com.adobe.acs.commons.util.ReflectionUtil;
+import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.wcm.api.Page;
