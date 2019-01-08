@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,29 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.3.0")
-package com.adobe.acs.commons.models.injectors.annotation;
+package com.adobe.acs.commons.models.injectors.impl.model;
+
+import java.util.List;
+import java.util.Set;
 
 
+public interface TestHierarchicalPagePropertiesModel {
 
+    String getPropertyString();
+
+    String getUndefinedProperty();
+
+    boolean getPropertyBoolean();
+
+    int getPropertyInteger();
+
+    int[] getPropertyMultivaluePrimitiveInteger();
+
+    List<Integer> getPropertyMultivalueWrappedIntegerList();
+
+    String[] getPropertyMultivalueStringArray();
+
+    Set<Long> getPropertyUnsupportedType();
+
+    Double[] getPropertyMultivalueWrappedDoubleArray();
+}

@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2013 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,19 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.3.0")
-package com.adobe.acs.commons.models.injectors.annotation;
+package com.adobe.acs.commons.models.injectors.impl.model;
 
 
+import com.day.cq.i18n.I18n;
 
+public interface TestModelI18nValue {
+    String getValidI18nField();
+
+    String getInvalidI18nField();
+
+    String getAnotherValidI18nField();
+
+    String getInjectField();
+
+    I18n getI18n();
+}
