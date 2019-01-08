@@ -43,6 +43,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(JsonValueMapValue.SOURCE)
 public @interface JsonValueMapValue {
 
+    /**
+     * Source value used for this annotation.
+     * @see Source
+     */
     String SOURCE = "json-valuemap-value";
 
     /**
