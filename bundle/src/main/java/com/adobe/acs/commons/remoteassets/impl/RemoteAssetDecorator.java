@@ -22,10 +22,6 @@ package com.adobe.acs.commons.remoteassets.impl;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.dam.api.DamConstants;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
@@ -33,6 +29,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +44,15 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * ResourceDecorator that instruments remote assets to sync binaries as needed.
+ *
  * This "decorator" is used to detect the first time a "remote" asset is
  * referenced by the system and sync that asset from the remote server to
  * make it now a "true" asset.
  */
 @Component(
-        label = "ACS AEM Commons - Remote Assets - Asset Resource Decorator",
-        description = "Captures a request for a remote asset so that the binary can be sync'd to the current server making it a true local asset",
-        policy = ConfigurationPolicy.REQUIRE
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = ResourceDecorator.class
 )
-@Service
 public class RemoteAssetDecorator implements ResourceDecorator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);

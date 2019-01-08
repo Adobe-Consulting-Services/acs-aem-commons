@@ -37,9 +37,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
@@ -50,6 +47,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,14 +75,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Service to sync node tree from supplied felix configuration. Implements {@link RemoteAssetsNodeSync}.
+ * Remote Assets service to sync a node tree from a remote server.
  */
 @Component(
         immediate = true,
-        metatype = true,
-        label = "ACS AEM Commons - Remote Assets - Node Sync Service"
+        service = RemoteAssetsNodeSync.class
 )
-@Service
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);

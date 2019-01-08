@@ -20,42 +20,50 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Job that will sync asset nodes based on OSGi configuration. Implements {@link Runnable}.
+ * Scheduled Service that runs the Remote Assets node sync.
+ *
+ * This job will sync asset nodes based on OSGi configuration.
  */
 @Component(
-        label = "ACS AEM Commons - Remote Assets Sync Job",
-        description = "Scheduled Service that runs the Remote Assets node sync.",
-        configurationFactory = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        factory = "com.adobe.acs.commons.remoteassets.impl.RemoteAssetsNodeSyncJob",
+        service = RemoteAssetsNodeSyncJob.class
 )
-@Properties({
-        @Property(
-                label = "Cron expression defining when this Scheduled Service will run",
-                name = "scheduler.expression",
-                description = "Default value ('0 0,4,8,12,16,20 * * *') will run this job every 4 hours starting at 00:00.",
-                value = "0 0,4,8,12,16,20 * * *"
-        ),
-        @Property(
-                name = "scheduler.concurrent",
-                boolValue = false,
-                propertyPrivate = true
-        )
-})
-@Service
+@Designate(ocd=RemoteAssetsNodeSyncJob.Config.class, factory=true)
 public class RemoteAssetsNodeSyncJob implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncJob.class);
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Remote Assets Sync Job",
+            description = "Scheduled Service that runs the Remote Assets node sync.")
+    public @interface Config {
+        String DEFAULT_SCHEDULER_EXPRESSION = "0 0,4,8,12,16,20 * * *";
+
+        @AttributeDefinition(
+                name = "Cron expression defining when this Scheduled Service will run",
+                description = "Default value ('0 0,4,8,12,16,20 * * *') will run this job every 4 hours starting at 00:00.",
+                defaultValue = DEFAULT_SCHEDULER_EXPRESSION
+        )
+        String scheduler_expression() default DEFAULT_SCHEDULER_EXPRESSION;
+
+        @AttributeDefinition(
+                name = "Allow concurrent execution",
+                type = AttributeType.BOOLEAN,
+                defaultValue = "false"
+        )
+        boolean scheduler_concurrent() default false;
+    }
 
     @Reference
     private RemoteAssetsNodeSync remoteAssetsNodeSync;

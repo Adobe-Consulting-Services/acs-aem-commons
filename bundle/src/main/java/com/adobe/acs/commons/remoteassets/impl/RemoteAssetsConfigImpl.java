@@ -19,15 +19,11 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+import com.adobe.acs.commons.hc.impl.HealthCheckStatusEmailer;
+import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Executor;
 import org.apache.sling.api.resource.LoginException;
@@ -35,6 +31,14 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,80 +57,92 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Configuration service for Remote Asset feature. Implements {@link RemoteAssetsConfig}.
+ * Configuration service for Remote Asset feature.
  */
 @Component(
-        immediate = true,
-        metatype = true,
-        label = "ACS AEM Commons - Remote Assets - Config",
-        policy = ConfigurationPolicy.REQUIRE
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = RemoteAssetsConfig.class
 )
-@Service()
+@Designate(ocd=RemoteAssetsConfigImpl.Config.class)
 public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsConfigImpl.class);
-    private static final boolean DEFAULT_ALLOW_INSECURE = false;
 
-    @Property(label = "Server")
-    private static final String SERVER_PROP = "server.url";
+    @ObjectClassDefinition(name = "ACS AEM Commons - Remote Assets - Config")
+    public @interface Config {
+        boolean DEFAULT_ALLOW_INSECURE = false;
+        String DEFAULT_EVENT_USER_DATA = "changedByWorkflowProcess";
+        int DEFAULT_RETRY_DELAY = 1;
+        int DEFAULT_SAVE_INTERVAL = 100;
 
-    @Property(label = "Username")
-    private static final String USERNAME_PROP = "server.user";
+        @AttributeDefinition(
+                name = "Server",
+                description = "URL to remote server from which to fetch assets"
+        )
+        String server_url() default StringUtils.EMPTY;
 
-    @Property(label = "Password")
-    private static final String PASSWORD_PROP = "server.pass";
+        @AttributeDefinition(
+                name = "Username",
+                description = "User to log into the remote server"
+        )
+        String server_user() default StringUtils.EMPTY;
 
-    @Property(label = "Allow Insecure Connection", description = "Allow non-https connection to remote assets server, "
-            + "allowing potential compromize of conenction credentials", boolValue = DEFAULT_ALLOW_INSECURE)
-    private static final String ALLOW_INSECURE_PROP = "server.insecure";
+        @AttributeDefinition(
+                name = "Password",
+                description = "Password to log into the remote server"
+        )
+        String server_pass() default StringUtils.EMPTY;
 
-    @Property(
-            label = "Tag Sync Paths",
-            description = "Paths to sync tags from the remote server (e.g. /etc/tags/asset)",
-            cardinality = Integer.MAX_VALUE,
-            value = {}
-    )
-    private static final String TAG_SYNC_PATHS_PROP = "tag.paths";
+        @AttributeDefinition(
+                name = "Allow Insecure Connection",
+                description = "Allow non-https connection to remote assets server, "
+                        + "allowing potential compromize of conenction credentials"
+        )
+        boolean server_insecure() default DEFAULT_ALLOW_INSECURE;
 
-    @Property(
-            label = "Asset Sync Paths",
-            description = "Paths to sync assets from the remote server (e.g. /content/dam)",
-            cardinality = Integer.MAX_VALUE,
-            value = {}
-    )
-    private static final String DAM_SYNC_PATHS_PROP = "dam.paths";
+        @AttributeDefinition(
+                name = "Tag Sync Paths",
+                description = "Paths to sync tags from the remote server (e.g. /etc/tags/asset)",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] tag_paths() default {};
 
-    @Property(
-            label = "Failure Retry Delay (in minutes)",
-            description = "Number of minutes the server will wait to attempt to sync a remote asset that failed "
-                    + "a sync attempt (minimum 1)",
-            intValue = 15
-    )
-    private static final String RETRY_DELAY_PROP = "retry.delay";
+        @AttributeDefinition(
+                name = "Asset Sync Paths",
+                description = "Paths to sync assets from the remote server (e.g. /content/dam)",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] dam_paths() default {};
 
-    @Property(
-            label = "Number of Assets to Sync Before Saving",
-            description = "Number of asset nodes to sync before saving and refreshing the session during a node "
-                    + "sync. The lower the number, the longer the sync will take (default 100)",
-            intValue = 100
-    )
-    private static final String SAVE_INTERVAL_PROP = "save.interval";
+        @AttributeDefinition(
+                name = "Failure Retry Delay (in minutes)",
+                description = "Number of minutes the server will wait to attempt to sync a remote"
+                        + "asset that failed a sync attempt (minimum 1)"
+        )
+        int retry_delay() default DEFAULT_RETRY_DELAY;
 
-    @Property(
-            label = "Event User Data",
-            description = "The event user data that will be set during all JCR manipulations performed by "
-                    + "remote assets. This can be used in workflow launchers that listen to DAM paths (such as "
-                    + "for DAM Update Assets) to exclude unnecessary processing such as rendition generation.",
-            value = "changedByWorkflowProcess")
-    private static final String EVENT_USER_DATA_PROP = "event.user.data";
+        @AttributeDefinition(
+                name = "Number of Assets to Sync Before Saving",
+                description = "Number of asset nodes to sync before saving and refreshing the session during a node "
+                        + "sync. The lower the number, the longer the sync will take (default 100)"
+        )
+        int save_interval() default DEFAULT_SAVE_INTERVAL;
 
-    @Property(
-            label = "Whitelisted Service Users",
-            description = "Service users that are allowed to trigger remote asset binary syncs. By default, service "
-                    + "user activity never triggers an asset binary sync.",
-            cardinality = Integer.MAX_VALUE,
-            value = {}
-    )
-    private static final String WHITELISTED_SERVICE_USERS_PROP = "whitelisted.service.users";
+        @AttributeDefinition(
+                name = "Event User Data",
+                description = "The event user data that will be set during all JCR manipulations performed by "
+                        + "remote assets. This can be used in workflow launchers that listen to DAM paths (such as "
+                        + "for DAM Update Assets) to exclude unnecessary processing such as rendition generation."
+        )
+        String event_user_data() default DEFAULT_EVENT_USER_DATA;
+
+        @AttributeDefinition(
+                name = "Whitelisted Service Users",
+                description = "Service users that are allowed to trigger remote asset binary syncs. By default, service "
+                        + "user activity never triggers an asset binary sync.",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] whitelisted_service_users() default {};
+    }
 
     private String server = StringUtils.EMPTY;
     private String username = StringUtils.EMPTY;
@@ -149,33 +165,30 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
      * @param componentContext ComponentContext
      */
     @Activate
-    @Modified
-    private void activate(final ComponentContext componentContext) {
-        final Dictionary<String, Object> properties = componentContext.getProperties();
-
-        this.server = PropertiesUtil.toString(properties.get(SERVER_PROP), StringUtils.EMPTY);
+    protected final void activate(RemoteAssetsConfigImpl.Config config) {
+        this.server = config.server_url();
         if (StringUtils.isBlank(this.server)) {
             throw new IllegalArgumentException("Remote server must be specified");
         }
-        this.username = PropertiesUtil.toString(properties.get(USERNAME_PROP), StringUtils.EMPTY);
+        this.username = config.server_user();
         if (StringUtils.isBlank(this.username)) {
             throw new IllegalArgumentException("Remote server username must be specified");
         }
-        this.password = PropertiesUtil.toString(properties.get(PASSWORD_PROP), StringUtils.EMPTY);
+        this.password = config.server_pass();
         if (StringUtils.isBlank(this.password)) {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
-        this.allowInsecureRemote = PropertiesUtil.toBoolean(properties.get(ALLOW_INSECURE_PROP), DEFAULT_ALLOW_INSECURE);
-        this.tagSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(TAG_SYNC_PATHS_PROP), new String[0]))
+        this.allowInsecureRemote = config.server_insecure();
+        this.tagSyncPaths = Stream.of(config.tag_paths())
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
-        this.damSyncPaths = Stream.of(PropertiesUtil.toStringArray(properties.get(DAM_SYNC_PATHS_PROP), new String[0]))
+        this.damSyncPaths = Stream.of(config.dam_paths())
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
-        this.retryDelay = PropertiesUtil.toInteger(properties.get(RETRY_DELAY_PROP), 1);
-        this.saveInterval = PropertiesUtil.toInteger(properties.get(SAVE_INTERVAL_PROP), 100);
-        this.eventUserData = PropertiesUtil.toString(properties.get(EVENT_USER_DATA_PROP), StringUtils.EMPTY);
-        this.whitelistedServiceUsers = Stream.of(PropertiesUtil.toStringArray(properties.get(WHITELISTED_SERVICE_USERS_PROP), new String[0]))
+        this.retryDelay = config.retry_delay();
+        this.saveInterval = config.save_interval();
+        this.eventUserData = config.event_user_data();
+        this.whitelistedServiceUsers = Stream.of(config.whitelisted_service_users())
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toSet());
 

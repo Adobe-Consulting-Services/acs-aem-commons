@@ -21,18 +21,18 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSyncTriggerMBean;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Manages the Remote Asset Node Sync's syncAsset JMX trigger.
  */
-@Component( immediate = true )
-@Service
-@Properties({ @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Remote Asset Node Sync") })
+@Component(
+        service = RemoteAssetsNodeSyncTriggerMBean.class,
+        property= {
+                "jmx.objectname=com.adobe.acs.commons:type=Remote Asset Node Sync"
+        }
+)
 public class RemoteAssetsNodeSyncTrigger implements RemoteAssetsNodeSyncTriggerMBean {
 
     @Reference
