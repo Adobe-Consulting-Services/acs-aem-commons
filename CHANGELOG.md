@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
+- #1294 - New Remote Assets feature
 - #1564 - Added SFTP support for asset ingest utilities
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
@@ -204,10 +205,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1335 - MCP Error handling and user experience are overhauled and the overall experience is improved
-
-### Added
-
-- #1294 - New Remote Assets feature
 
 ## [3.15.0] - 2018-04-13
 
