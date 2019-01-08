@@ -147,7 +147,7 @@ public class ReflectionUtilTest {
                     assertFalse(isArray(type));
                     assertTrue(isAssignableFrom(type, Number.class));
                     assertSame(AtomicInteger.class, getClassOrGenericParam(type));
-
+                    break;
                 default:
                     break;
             }
