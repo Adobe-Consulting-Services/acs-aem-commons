@@ -36,7 +36,7 @@ import org.apache.sling.api.resource.Resource;
 
 /**
  * Provide convenience methods to help use GSON JsonObjects similar to the
- * deprecated JSONObject in Sling JsonValueMapValue.
+ * deprecated JSONObject in Sling Json.
  */
 public class JsonObjectUtil {
 
