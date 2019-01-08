@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
-import com.adobe.acs.commons.util.ReflectionUtil;
+import com.adobe.acs.commons.util.impl.ReflectionUtil;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.commons.jcr.JcrConstants;
