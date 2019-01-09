@@ -177,7 +177,6 @@ public class JsonEventLogger implements EventHandler {
      *
      * @param event the event to be serialized as
      * @return a serialized JSON object
-     * @throws org.apache.sling.commons.json.JSONException
      */
     protected static String constructMessage(Event event) {
         Map<String, Object> eventProperties = new LinkedHashMap<>();
