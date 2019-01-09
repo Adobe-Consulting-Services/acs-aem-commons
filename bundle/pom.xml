@@ -61,7 +61,10 @@
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
                             com.github.benmanes.caffeine*;resolution:=optional,
+                            !com.google.errorprone.annotations,
+                            !com.google.errorprone.annotations.concurrent,
                             !org.bouncycastle.jce.*,
+                            !org.checkerframework.checker.nullness.qual,
                             !android.util.*,
                             *
                         </Import-Package>
