@@ -21,8 +21,11 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSyncTriggerMBean;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+
+import javax.management.NotCompliantMBeanException;
 
 /**
  * Manages the Remote Asset Node Sync's syncAsset JMX trigger.
@@ -33,10 +36,14 @@ import org.osgi.service.component.annotations.Reference;
                 "jmx.objectname=com.adobe.acs.commons:type=Remote Asset Node Sync"
         }
 )
-public class RemoteAssetsNodeSyncTrigger implements RemoteAssetsNodeSyncTriggerMBean {
+public class RemoteAssetsNodeSyncTrigger extends AnnotatedStandardMBean implements RemoteAssetsNodeSyncTriggerMBean {
 
     @Reference
     private RemoteAssetsNodeSync assetNodeSyncService;
+
+    public RemoteAssetsNodeSyncTrigger() throws NotCompliantMBeanException {
+        super(RemoteAssetsNodeSyncTriggerMBean.class);
+    }
 
     /**
      * @see RemoteAssetsNodeSyncTriggerMBean#syncAssetNodes().

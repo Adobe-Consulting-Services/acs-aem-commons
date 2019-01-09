@@ -37,10 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE,
-        factory = "com.adobe.acs.commons.remoteassets.impl.RemoteAssetsNodeSyncJob",
-        service = RemoteAssetsNodeSyncJob.class
+        service = Runnable.class
 )
-@Designate(ocd=RemoteAssetsNodeSyncJob.Config.class, factory=true)
+@Designate(ocd=RemoteAssetsNodeSyncJob.Config.class)
 public class RemoteAssetsNodeSyncJob implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncJob.class);
