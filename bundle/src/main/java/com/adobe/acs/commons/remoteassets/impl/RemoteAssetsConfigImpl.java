@@ -23,6 +23,7 @@ import com.adobe.acs.commons.hc.impl.HealthCheckStatusEmailer;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Executor;
@@ -71,7 +72,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     public @interface Config {
         boolean DEFAULT_ALLOW_INSECURE = false;
         String DEFAULT_EVENT_USER_DATA = "changedByWorkflowProcess";
-        int DEFAULT_RETRY_DELAY = 1;
+        int DEFAULT_RETRY_DELAY = 15;
         int DEFAULT_SAVE_INTERVAL = 100;
 
         @AttributeDefinition(
@@ -179,16 +180,16 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
             throw new IllegalArgumentException("Remote server password must be specified");
         }
         this.allowInsecureRemote = config.server_insecure();
-        this.tagSyncPaths = Stream.of(config.tag_paths())
+        this.tagSyncPaths = Stream.of(ObjectUtils.defaultIfNull(config.tag_paths(), new String[]{}))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
-        this.damSyncPaths = Stream.of(config.dam_paths())
+        this.damSyncPaths = Stream.of(ObjectUtils.defaultIfNull(config.dam_paths(), new String[]{}))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toList());
         this.retryDelay = config.retry_delay();
         this.saveInterval = config.save_interval();
         this.eventUserData = config.event_user_data();
-        this.whitelistedServiceUsers = Stream.of(config.whitelisted_service_users())
+        this.whitelistedServiceUsers = Stream.of(ObjectUtils.defaultIfNull(config.whitelisted_service_users(), new String[]{}))
                 .filter(item -> StringUtils.isNotBlank(item))
                 .collect(Collectors.toSet());
 
