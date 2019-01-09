@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -185,7 +184,6 @@ public class JsonEventLogger implements EventHandler {
      *
      * @param event the event to be serialized as
      * @return a serialized JSON object
-     * @throws org.apache.sling.commons.json.JSONException
      */
     protected static String constructMessage(Event event) {
         Map<String, Object> eventProperties = new LinkedHashMap<>();

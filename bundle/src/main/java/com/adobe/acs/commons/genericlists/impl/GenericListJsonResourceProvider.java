@@ -21,15 +21,19 @@ package com.adobe.acs.commons.genericlists.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
-
-import org.apache.sling.commons.json.io.JSONWriter;
+import org.apache.sling.spi.resource.provider.ResolveContext;
+import org.apache.sling.spi.resource.provider.ResourceContext;
+import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -43,15 +47,6 @@ import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.sling.spi.resource.provider.ResolveContext;
-import org.apache.sling.spi.resource.provider.ResourceContext;
-import org.apache.sling.spi.resource.provider.ResourceProvider;
 
 /**
  * Resource provider which makes Generic Lists available as JSON String resources
