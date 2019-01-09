@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2013 - 2014 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation;
 
-import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -34,23 +33,33 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Sling Models Injector annotation for Shared Component Properties.
+ * Parses a value map property that contains a JSON string over to a POJO using gson.
+ * Supports a list, collection, set or a single value.
+ * Note: not supported by the javax.Inject annotation because of performance reasons. Only direct annotation is supported.
  */
-@Target({ METHOD, FIELD, PARAMETER })
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @InjectAnnotation
-@Source(SharedValueMapValue.SOURCE)
-public @interface SharedValueMapValue {
+@Source(JsonValueMapValue.SOURCE)
+public @interface JsonValueMapValue {
 
     /**
      * Source value used for this annotation.
      * @see Source
      */
-    String SOURCE = "shared-component-properties-valuemap";
+    String SOURCE = "json-valuemap-value";
 
+    /**
+     * Specifies the name of the value from the value map to take.
+     * If empty, then the name is derived from the method or field.
+     */
     String name() default StringUtils.EMPTY;
 
+    /**
+     * if set to REQUIRED injection is mandatory, if set to OPTIONAL injection is optional, in case of DEFAULT
+     * the standard annotations ({@link org.apache.sling.models.annotations.Optional}, {@link org.apache.sling.models.annotations.Required}) are used.
+     * If even those are not available the default injection strategy defined on the {@link org.apache.sling.models.annotations.Model} applies.
+     * Default value = DEFAULT.
+     */
     InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
-
-    SharedComponentProperties.ValueTypes type() default SharedComponentProperties.ValueTypes.MERGED;
 }

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.impl.SharedValueMapValueAnnotationProcessorFactory;
+import com.adobe.acs.commons.models.injectors.impl.model.impl.SharedValueMapValueTestModel;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderConfig;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderMultiImpl;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
@@ -38,7 +39,6 @@ import org.junit.Test;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-
 import java.util.Arrays;
 import java.util.Collections;
 
