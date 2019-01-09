@@ -25,13 +25,8 @@ import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVL
 import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -39,6 +34,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -66,6 +62,8 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(service = Servlet.class,
 factory = "com.adobe.acs.commons.wcm.impl.SiteMapServlet", 
@@ -95,66 +93,42 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @ObjectClassDefinition(name = "ACS AEM Commons - Site Map Servlet", description = "Page and Asset Site Map Servlet")
     public @interface Config {
     
-    @AttributeDefinition( name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
-    String[] sling_servlet_resourceType();
+        @AttributeDefinition( name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
+        String[] sling_servlet_resourceType();
     
-    @AttributeDefinition(defaultValue = DEFAULT_EXTERNALIZER_DOMAIN, name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
+        @AttributeDefinition(defaultValue = DEFAULT_EXTERNALIZER_DOMAIN, name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
         String externalizer_domain();
 
-    @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_LAST_MODIFIED, name = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
+        @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_LAST_MODIFIED, name = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
         boolean include_lastmod();
 
-    @AttributeDefinition(name = "Change Frequency Properties", description = "The set of JCR property names which will contain the change frequency value.")
+        @AttributeDefinition(name = "Change Frequency Properties", description = "The set of JCR property names which will contain the change frequency value.")
         String[] changefreq_properties();
 
-    @AttributeDefinition(name = "Priority Properties", description = "The set of JCR property names which will contain the priority value.")
-    String[] priority_properties();
+        @AttributeDefinition(name = "Priority Properties", description = "The set of JCR property names which will contain the priority value.")
+        String[] priority_properties();
 
-    @AttributeDefinition(name = "DAM Folder Property", description = "The JCR property name which will contain DAM folders to include in the sitemap.")
+        @AttributeDefinition(name = "DAM Folder Property", description = "The JCR property name which will contain DAM folders to include in the sitemap.")
         String damassets_property();
 
-    @AttributeDefinition(name = "DAM Asset MIME Types", description = "MIME types allowed for DAM assets.")
-    String[] damassets_types();
+        @AttributeDefinition(name = "DAM Asset MIME Types", description = "MIME types allowed for DAM assets.")
+        String[] damassets_types();
 
-    @AttributeDefinition(name = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
-        boolean exclude_property();
+        @AttributeDefinition(defaultValue = NameConstants.PN_HIDE_IN_NAV, name = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+        String exclude_property();
 
-    @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_INHERITANCE_VALUE, name = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
-    boolean include_inherit();
+        @AttributeDefinition(defaultValue = ""+DEFAULT_INCLUDE_INHERITANCE_VALUE, name = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
+        boolean include_inherit();
 
-    @AttributeDefinition(defaultValue = ""+DEFAULT_EXTENSIONLESS_URLS, name = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
-    boolean extensionless_urls();
+        @AttributeDefinition(defaultValue = ""+DEFAULT_EXTENSIONLESS_URLS, name = "Extensionless URLs", description = "If true, page links included in sitemap are generated without .html extension and the path is included with a trailing slash, e.g. /content/geometrixx/en/.")
+        boolean extensionless_urls();
 
-    @AttributeDefinition(defaultValue = ""+DEFAULT_REMOVE_TRAILING_SLASH, name = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
-    boolean remove_slash();
+        @AttributeDefinition(defaultValue = ""+DEFAULT_REMOVE_TRAILING_SLASH, name = "Remove Trailing Slash from Extensionless URLs", description = "Only relevant if Extensionless URLs is selected.  If true, the trailing slash is removed from extensionless page links, e.g. /content/geometrixx/en.")
+        boolean remove_slash();
 
-    @AttributeDefinition(name = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
+        @AttributeDefinition(name = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
         String character_encoding();
-
-    
     }
-
-    private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
-
-    private static final String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
-
-    private static final String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
-
-    private static final String PROP_PRIORITY_PROPERTIES = "priority.properties";
-
-    private static final String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
-
-    private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
-
-    private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
-
-    private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
-
-    private static final String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
-
-    private static final String PROP_REMOVE_TRAILING_SLASH = "remove.slash";
-
-    private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -184,26 +158,22 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private boolean removeTrailingSlash;
 
     @Activate
-    protected void activate(Map<String, Object> properties) {
-        this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
-                DEFAULT_EXTERNALIZER_DOMAIN);
-        this.includeLastModified = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_LAST_MODIFIED),
-                DEFAULT_INCLUDE_LAST_MODIFIED);
-        this.includeInheritValue = PropertiesUtil.toBoolean(properties.get(PROP_INCLUDE_INHERITANCE_VALUE),
-                DEFAULT_INCLUDE_INHERITANCE_VALUE);
-        this.changefreqProperties = PropertiesUtil.toStringArray(properties.get(PROP_CHANGE_FREQUENCY_PROPERTIES),
-                new String[0]);
-        this.priorityProperties = PropertiesUtil.toStringArray(properties.get(PROP_PRIORITY_PROPERTIES), new String[0]);
-        this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
-        this.damAssetTypes = Arrays
-                .asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
-        this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
-                NameConstants.PN_HIDE_IN_NAV);
-        this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
-        this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
-                DEFAULT_EXTENSIONLESS_URLS);
-        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH), 
-                DEFAULT_REMOVE_TRAILING_SLASH);
+    protected void activate(Config config) {
+        this.externalizerDomain = config.externalizer_domain();
+        this.includeLastModified = config.include_lastmod();
+        this.includeInheritValue = config.include_inherit();
+        this.changefreqProperties = config.changefreq_properties() == null ?
+                ArrayUtils.EMPTY_STRING_ARRAY : config.changefreq_properties();
+        this.priorityProperties = config.priority_properties() == null ?
+                ArrayUtils.EMPTY_STRING_ARRAY : config.priority_properties();
+        this.damAssetProperty = config.damassets_property() == null ?
+                StringUtils.EMPTY : config.damassets_property();
+        this.damAssetTypes = config.damassets_types() == null ?
+                Collections.EMPTY_LIST : Arrays.asList(config.damassets_types());
+        this.excludeFromSiteMapProperty = config.exclude_property();
+        this.characterEncoding = config.character_encoding();
+        this.extensionlessUrls = config.extensionless_urls();
+        this.removeTrailingSlash = config.remove_slash();
     }
 
     @Override
@@ -227,7 +197,6 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
             // first do the current page
             write(page, stream, resourceResolver);
-
             for (Iterator<Page> children = page.listChildren(new PageFilter(false, true), true); children.hasNext();) {
                 write(children.next(), stream, resourceResolver);
             }

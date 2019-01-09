@@ -59,6 +59,8 @@ public class SiteMapServletTest {
 
     private MockSlingHttpServletResponse response;
 
+    private Map<String, Object> properties;
+
     @Before
     public void setup() {
         context.load().json(getClass().getResourceAsStream("SiteMapServlet.json"), "/content/geometrixx");
@@ -69,7 +71,7 @@ public class SiteMapServletTest {
                 return "text/xml";
             }
         };
-
+        properties = new HashMap<>();
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
 
         when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
@@ -77,10 +79,9 @@ public class SiteMapServletTest {
 
     @Test
     public void testDefaultPageSetup() throws Exception {
-        servlet.activate(new HashMap<String, Object>() {{
-                put("externalizer.domain", "external");
-            }
-        });
+        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
+        when(config.externalizer_domain()).thenReturn("external");
+        servlet.activate(config);
 
         servlet.doGet(request, response);
 
@@ -93,11 +94,10 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessPages() throws Exception {
-        servlet.activate(new HashMap<String, Object>() {{
-                put("externalizer.domain", "external");
-                put("extensionless.urls", true);
-            }
-        });
+        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
+        when(config.externalizer_domain()).thenReturn("external");
+        when(config.extensionless_urls()).thenReturn(true);
+        servlet.activate(config);
 
         servlet.doGet(request, response);
 
@@ -110,12 +110,11 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessAndSlashlessPages() throws Exception {
-        servlet.activate(new HashMap<String, Object>() {{
-                put("externalizer.domain", "external");
-                put("extensionless.urls", true);
-                put("remove.slash", true);
-            }
-        });
+        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
+        when(config.externalizer_domain()).thenReturn("external");
+        when(config.extensionless_urls()).thenReturn(true);
+        when(config.remove_slash()).thenReturn(true);
+        servlet.activate(config);
 
         servlet.doGet(request, response);
 
