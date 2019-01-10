@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
+@ProviderType
 public class MapEntry {
     private int id;
     private final String origin;

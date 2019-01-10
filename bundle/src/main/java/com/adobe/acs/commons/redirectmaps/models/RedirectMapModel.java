@@ -42,6 +42,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.Source;
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,7 @@ import com.day.cq.commons.jcr.JcrConstants;
  * A Sling Model for serializing a RedirectMap configuration to a consolidated
  * RedirectMap text file
  */
+@ProviderType
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
