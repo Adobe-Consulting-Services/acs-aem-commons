@@ -23,21 +23,15 @@ package com.adobe.acs.commons.logging.impl;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -52,7 +46,7 @@ import com.google.gson.Gson;
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
  * objects.
  */
-@Component( configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+@Component( configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
       "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
 })
 @SuppressWarnings("PMD.MoreThanOneLogger")
@@ -95,11 +89,11 @@ public class JsonEventLogger implements EventHandler {
                 description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
         String[] event_topics();
 
-        @AttributeDefinition(name = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
+        @AttributeDefinition(name = "Event Filter", defaultValue = "(event.topics=*)", description = "LDAP-style event filter query. Leave the default to log all events to the configured topic or topics.")
         String event_filter();
 
         @AttributeDefinition(name = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
-        String event_logger_category();
+        String event_logger_category() default "";
 
         @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
                 @Option(value = "TRACE", label = "Trace"),
@@ -107,22 +101,13 @@ public class JsonEventLogger implements EventHandler {
                 @Option(value = "INFO", label = "Information"),
                 @Option(value = "WARN", label = "Warnings"),
                 @Option(value = "ERROR", label = "Error")})
-        String event_logger_level();
+        String event_logger_level() default DEFAULT_LEVEL;
     }
-
-    private static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
-
-    private static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
-
-    private static final String OSGI_CATEGORY = "event.logger.category";
-
-    private static final String OSGI_LEVEL = "event.logger.level";
 
     private String[] topics;
     private String filter;
     private String category;
     private String level;
-    private boolean valid;
 
     /**
      * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to
@@ -132,8 +117,6 @@ public class JsonEventLogger implements EventHandler {
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private Logger eventLogger;
     private LogLevel logLevel;
-
-    private ServiceRegistration registration;
 
     /**
      * Writes an event to the configured logger using the configured log level
@@ -204,7 +187,6 @@ public class JsonEventLogger implements EventHandler {
      * @param val an untyped Java object to try to convert
      * @return {@code val} if not handled, or return a converted JSONObject,
      * JSONArray, or String
-     * @throws JSONException
      */
     @SuppressWarnings({"unchecked", "squid:S3776"})
     protected static Object convertValue(Object val) {
@@ -245,40 +227,27 @@ public class JsonEventLogger implements EventHandler {
     //
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(ComponentContext ctx) {
+    protected void activate(final Config config) {
         log.trace("[activate] entered activate method.");
-        Dictionary<?, ?> props = ctx.getProperties();
-        this.topics = PropertiesUtil.toStringArray(props.get(OSGI_TOPICS));
-        this.filter = PropertiesUtil.toString(props.get(OSGI_FILTER), "").trim();
-        this.category = PropertiesUtil.toString(props.get(OSGI_CATEGORY), "").trim();
-        this.level = PropertiesUtil.toString(props.get(OSGI_LEVEL), DEFAULT_LEVEL);
+        this.topics = config.event_topics();
+        this.filter = config.event_filter();
+        this.category = config.event_logger_category().trim();
+        this.level = config.event_logger_level();
 
         this.logLevel = LogLevel.fromProperty(this.level);
 
-        this.valid = (this.topics != null && this.topics.length > 0 && !this.category.isEmpty());
-
-        if (this.valid) {
+        if (!this.category.isEmpty()) {
             this.eventLogger = LoggerFactory.getLogger(this.category);
-            Dictionary<String, Object> registrationProps = new Hashtable<String, Object>();
-            registrationProps.put(EventConstants.EVENT_TOPIC, this.topics);
-            if (!this.filter.isEmpty()) {
-                registrationProps.put(EventConstants.EVENT_FILTER, this.filter);
-            }
-            this.registration = ctx.getBundleContext().registerService(EventHandler.class.getName(), this, registrationProps);
         } else {
-            log.warn("Not registering invalid event handler. Check configuration.");
+            log.warn("No event.logger.category specified. No events will be logged.");
         }
 
-        log.debug("[activate] logger state: {}", this);
+        log.trace("[activate] logger state: {}", this);
     }
 
     @Deactivate
     protected void deactivate() {
         log.trace("[deactivate] entered deactivate method.");
-        if (this.registration != null) {
-            this.registration.unregister();
-            this.registration = null;
-        }
         this.eventLogger = null;
         this.logLevel = null;
     }
@@ -288,9 +257,8 @@ public class JsonEventLogger implements EventHandler {
     //
     @Override
     public String toString() {
-        return "EventLogger{"
-                + "valid=" + valid
-                + ", topics=" + Arrays.toString(topics)
+        return "JsonEventLogger{"
+                + "topics=" + Arrays.toString(topics)
                 + ", filter='" + filter + '\''
                 + ", category='" + category + '\''
                 + ", level='" + level + '\''
