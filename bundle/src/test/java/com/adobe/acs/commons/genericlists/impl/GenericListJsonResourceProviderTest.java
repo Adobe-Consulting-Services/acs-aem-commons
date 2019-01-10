@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
+import static com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider.DEFAULT_LIST_ROOT;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
@@ -52,7 +53,7 @@ public class GenericListJsonResourceProviderTest {
 
     @Mock
     private Page invalidPage;
-    
+
     @Mock
     private GenericListJsonResourceProvider.Config config;
 
@@ -61,19 +62,21 @@ public class GenericListJsonResourceProviderTest {
 
     private String goodMntPath = GenericListJsonResourceProvider.ROOT + "/good";
 
-    private String goodPagePath = GenericListJsonResourceProvider.DEFAULT_LIST_ROOT + "/good";
+    private String goodPagePath = DEFAULT_LIST_ROOT + "/good";
 
     private String badMntPath = GenericListJsonResourceProvider.ROOT + "/bad";
 
-    private String badPagePath = GenericListJsonResourceProvider.DEFAULT_LIST_ROOT + "/bad";
+    private String badPagePath = DEFAULT_LIST_ROOT + "/bad";
 
     private String nonExisting = GenericListJsonResourceProvider.ROOT + "/non-existing";
 
     @Mock
     private ResolveContext resolveContext;
-    
+
     @Before
     public void setup() {
+
+        when(config.list_root()).thenReturn(DEFAULT_LIST_ROOT);
         provider.activate(config);
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(pageManager.getPage(goodPagePath)).thenReturn(validPage);

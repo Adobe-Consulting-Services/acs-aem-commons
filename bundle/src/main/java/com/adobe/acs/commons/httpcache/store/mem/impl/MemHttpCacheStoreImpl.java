@@ -35,7 +35,6 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -66,24 +65,42 @@ import java.util.concurrent.TimeUnit;
       "webconsole.configurationFactory.nameHint" + "=" +  "TTL: {httpcache.cachestore.memcache.ttl}, "
                 + "Max size in MB: {httpcache.cachestore.memcache.maxsize}"
 })
-@Designate(ocd=Config.class)
+@Designate(ocd= MemHttpCacheStoreImpl.Config.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
+            description = "Cache data store implementation for in-memory storage.")
+    public static @interface Config {
+
+        long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+
+        long DEFAULT_MAX_SIZE_IN_MB = 10L;
+
+        @AttributeDefinition(name = "TTL",
+                description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
+                defaultValue = ""+DEFAULT_TTL)
+        long httpcache_cachestore_memcache_ttl() default DEFAULT_TTL;
+
+        @AttributeDefinition(name = "Maximum size of this store in MB",
+                description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
+                        + "from the cache",
+                defaultValue = ""+ DEFAULT_MAX_SIZE_IN_MB)
+        long httpcache_cachestore_memcache_maxsize() default DEFAULT_MAX_SIZE_IN_MB;
+    }
+
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
 
-    private long ttl;
-    private long maxSizeInMb;
+    private Config config;
 
     /** Cache - Uses Google Guava's cache */
     private Cache<CacheKey, MemCachePersistenceObject> cache;
 
     @Activate
-    protected void activate(Map<String,Object> properties) {
-        // Read config and populate values.
-        ttl = PropertiesUtil.toLong(properties.get(Config.PROP_TTL), Config.DEFAULT_TTL);
-        maxSizeInMb = PropertiesUtil.toLong(properties.get(Config.PROP_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
+    protected void activate(Config config) {
+        this.config = config;
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitailize the cache.
@@ -92,19 +109,19 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
             cache.invalidateAll();
             log.info("Mem cache already present. Invalidating the cache and re-initializing it.");
         }
-        if (ttl != Config.DEFAULT_TTL) {
+        if (this.config.httpcache_cachestore_memcache_ttl() != Config.DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
             cache = CacheBuilder.newBuilder()
-                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .maximumWeight(this.config.httpcache_cachestore_memcache_maxsize() * MEGABYTE)
                     .weigher(new MemCacheEntryWeigher())
-                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
+                    .expireAfterWrite(this.config.httpcache_cachestore_memcache_ttl(), TimeUnit.SECONDS)
                     .removalListener(new MemCacheEntryRemovalListener())
                     .recordStats()
                     .build();
         } else {
             // If ttl is absent, go only with the maximum weight condition.
             cache = CacheBuilder.newBuilder()
-                    .maximumWeight(maxSizeInMb * MEGABYTE)
+                    .maximumWeight(this.config.httpcache_cachestore_memcache_maxsize() * MEGABYTE)
                     .weigher(new MemCacheEntryWeigher())
                     .removalListener(new MemCacheEntryRemovalListener())
                     .recordStats()
@@ -115,7 +132,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     }
 
     @Deactivate
-    protected void deactivate(Map<String, Object> configs) {
+    protected void deactivate() {
         cache.invalidateAll();
         log.info("MemHttpCacheStoreImpl deactivated.");
     }
@@ -231,7 +248,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
     @Override
     public long getTtl() {
-        return this.ttl;
+        return this.config.httpcache_cachestore_memcache_ttl();
     }
 
     @Override
@@ -278,5 +295,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
                 new OpenType[] { SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING });
 
     }
+
 
 }

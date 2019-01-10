@@ -110,6 +110,15 @@ public class ContentVisitorTest {
     }
 
     @Test
+    public void accept_ContentCqTag() throws Exception {
+        properties.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Tag");
+
+        ContentVisitor visitor = new ContentVisitor(runnable);
+        visitor.accept(resource);
+        verify(runnable, times(1)).run(resource);
+    }
+
+    @Test
     public void accept_ContentInvalid() throws Exception {
         properties.put(JcrConstants.JCR_PRIMARYTYPE, "oak:Unstructured");
 

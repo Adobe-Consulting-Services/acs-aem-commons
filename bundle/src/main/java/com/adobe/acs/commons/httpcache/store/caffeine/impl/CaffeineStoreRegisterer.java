@@ -45,22 +45,19 @@ public class CaffeineStoreRegisterer {
 
     private ServiceRegistration<CaffeineMemHttpCacheStoreImpl> storeRegistration;
     private CaffeineMemHttpCacheStoreImpl httpCacheStore;
-    private long maxSizeInMb;
-    private long ttl;
+
 
 
     @Activate
-    protected void activate(BundleContext bundleContext, Map<String, Object> properties) {
+    protected void activate(BundleContext bundleContext, Config config) {
         try {
-            this.maxSizeInMb = PropertiesUtil.toLong(properties.get(Config.PROP_MAX_SIZE_IN_MB), Config.DEFAULT_MAX_SIZE_IN_MB);
-            this.ttl         = PropertiesUtil.toLong(properties.get(Config.PROP_TTL), Config.DEFAULT_TTL);
 
-            this.httpCacheStore = new CaffeineMemHttpCacheStoreImpl(ttl, maxSizeInMb);
+            this.httpCacheStore = new CaffeineMemHttpCacheStoreImpl(config);
 
             @SuppressWarnings("squid:S1149")
             Dictionary<String, Object> serviceProps = new Hashtable<>();
-            serviceProps.put("httpcache.cachestore.caffeinecache.maxsize", maxSizeInMb);
-            serviceProps.put("httpcache.cachestore.caffeinecache.ttl", ttl);
+            serviceProps.put("httpcache.cachestore.caffeinecache.maxsize", config.httpcache_cachestore_caffeinecache_maxsize());
+            serviceProps.put("httpcache.cachestore.caffeinecache.ttl", config.httpcache_cachestore_caffeinecache_ttl());
 
             serviceProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, httpCacheStore.getStoreType());
             serviceProps.put("jmx.objectname", "com.adobe.acs.httpcache:type=" + JMX_NAME);

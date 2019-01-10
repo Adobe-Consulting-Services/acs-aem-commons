@@ -46,7 +46,10 @@ public final class XMLParserGenerator implements Generator {
     private ContentHandler contentHandler;
 
     public XMLParserGenerator() throws ParserConfigurationException, SAXException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
+        this(SAXParserFactory.newInstance());
+    }
+
+    public XMLParserGenerator(final SAXParserFactory factory) throws ParserConfigurationException, SAXException {
         factory.setNamespaceAware(true);
 
         saxParser = factory.newSAXParser();
