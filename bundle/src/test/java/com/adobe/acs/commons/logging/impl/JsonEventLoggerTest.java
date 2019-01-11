@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,21 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.junit.Test;
-import org.osgi.service.event.Event;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.junit.Test;
+import org.osgi.service.event.Event;
 
 public class JsonEventLoggerTest {
 
@@ -100,6 +104,49 @@ public class JsonEventLoggerTest {
         assertNotNull("complex event, string set not null", jStringSet.optJSONArray("resourceChangedAttributes"));
         assertEquals("complex event, string set props", "first", jStringSet.getJSONArray("resourceChangedAttributes").getString(0));
         assertEquals("complex event, string set props", "second", jStringSet.getJSONArray("resourceChangedAttributes").getString(1));
+    }
+
+    JsonEventLogger.Config constructConfig(final String category, final String level, final String filter, final String... eventTopics) {
+        return new JsonEventLogger.Config() {
+            @Override
+            public String[] event_topics() {
+                return eventTopics;
+            }
+
+            @Override
+            public String event_filter() {
+                return filter;
+            }
+
+            @Override
+            public String event_logger_category() {
+                return category;
+            }
+
+            @Override
+            public String event_logger_level() {
+                return level;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return JsonEventLogger.Config.class;
+            }
+        };
+    }
+
+    @Test
+    public void testActivate() {
+        for (String logLevel : Arrays.asList("ERROR", "WARN", "INFO", "DEBUG", "TRACE", null)) {
+            JsonEventLogger eventLogger = new JsonEventLogger();
+            eventLogger.activate(constructConfig("test", logLevel, null, "some/topic"));
+            Event stringSetEvent = new Event("my/simple/topic", Collections.emptyMap());
+            eventLogger.deactivate();
+        }
+
+        JsonEventLogger eventLogger = new JsonEventLogger();
+        eventLogger.activate(constructConfig(null, "INFO", null, "some/topic"));
+        eventLogger.deactivate();
 
     }
 }

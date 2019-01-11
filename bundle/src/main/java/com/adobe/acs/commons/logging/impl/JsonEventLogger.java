@@ -25,7 +25,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.util.ISO8601;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -39,8 +43,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
 
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
@@ -116,49 +118,46 @@ public class JsonEventLogger implements EventHandler {
      */
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private Logger eventLogger;
-    private LogLevel logLevel;
+    private Consumer<String> logMapper = logMapperForLevel(null, null);
+    private Supplier<Boolean> logEnabler = logEnablerForLevel(null, null);
 
     /**
-     * Writes an event to the configured logger using the configured log level
+     * Return a logging function appropriate for the specified loglevel.
      *
-     * @param event an OSGi Event
+     * @param logLevel the specified loglegel
+     * @param logger the logger to map to
+     * @return a string comsuming logger function
      */
-    private void logEvent(Event event) {
-        log.trace("[logEvent] event={}", event);
-        String message = constructMessage(event);
-        if (logLevel == LogLevel.ERROR) {
-            this.eventLogger.error(message);
-        } else if (logLevel == LogLevel.WARN) {
-            this.eventLogger.warn(message);
-        } else if (logLevel == LogLevel.INFO) {
-            this.eventLogger.info(message);
-        } else if (logLevel == LogLevel.DEBUG) {
-            this.eventLogger.debug(message);
-        } else if (logLevel == LogLevel.TRACE) {
-            this.eventLogger.trace(message);
+    static Consumer<String> logMapperForLevel(final LogLevel logLevel, final Logger logger) {
+        if (logLevel != null && logger != null) {
+            switch (logLevel) {
+                case ERROR: return logger::error;
+                case WARN: return logger::warn;
+                case INFO: return logger::info;
+                case DEBUG: return logger::debug;
+                case TRACE: return logger::trace;
+            }
         }
+        return (message) -> {};
     }
 
     /**
-     * Determines if the logger category is enabled at the configured level
+     * Return a logging function appropriate for the specified log level.
      *
-     * @return true if the logger is enabled at the configured log level
+     * @param logLevel the specified log level
+     * @return a boolean-supplying function
      */
-    private boolean isLoggerEnabled() {
-        if (this.eventLogger != null && this.logLevel != null) {
-            if (logLevel == LogLevel.ERROR) {
-                return this.eventLogger.isErrorEnabled();
-            } else if (logLevel == LogLevel.WARN) {
-                return this.eventLogger.isWarnEnabled();
-            } else if (logLevel == LogLevel.INFO) {
-                return this.eventLogger.isInfoEnabled();
-            } else if (logLevel == LogLevel.DEBUG) {
-                return this.eventLogger.isDebugEnabled();
-            } else if (logLevel == LogLevel.TRACE) {
-                return this.eventLogger.isTraceEnabled();
+    static Supplier<Boolean> logEnablerForLevel(final LogLevel logLevel, final Logger logger) {
+        if (logLevel != null && logger != null) {
+            switch (logLevel) {
+                case ERROR: return logger::isErrorEnabled;
+                case WARN: return logger::isWarnEnabled;
+                case INFO: return logger::isInfoEnabled;
+                case DEBUG: return logger::isDebugEnabled;
+                case TRACE: return logger::isTraceEnabled;
             }
         }
-        return false;
+        return () -> false;
     }
 
     /**
@@ -217,8 +216,8 @@ public class JsonEventLogger implements EventHandler {
      */
     @Override
     public void handleEvent(Event event) {
-        if (event.getProperty("event.application") == null && this.isLoggerEnabled()) {
-            logEvent(event);
+        if (event.getProperty("event.application") == null && this.logEnabler.get()) {
+            logMapper.accept(constructMessage(event));
         }
     }
 
@@ -231,25 +230,28 @@ public class JsonEventLogger implements EventHandler {
         log.trace("[activate] entered activate method.");
         this.topics = config.event_topics();
         this.filter = config.event_filter();
-        this.category = config.event_logger_category().trim();
+        this.category = config.event_logger_category();
         this.level = config.event_logger_level();
 
-        this.logLevel = LogLevel.fromProperty(this.level);
 
-        if (!this.category.isEmpty()) {
+        if (StringUtils.isNotEmpty(this.category)) {
             this.eventLogger = LoggerFactory.getLogger(this.category);
         } else {
             log.warn("No event.logger.category specified. No events will be logged.");
         }
 
-        log.trace("[activate] logger state: {}", this);
+        final LogLevel logLevel = LogLevel.fromProperty(this.level);
+        this.logEnabler = logEnablerForLevel(logLevel, this.eventLogger);
+        this.logMapper = logMapperForLevel(logLevel, this.eventLogger);
+        log.trace("[activate] logger state: {}", toString());
     }
 
     @Deactivate
     protected void deactivate() {
         log.trace("[deactivate] entered deactivate method.");
+        this.logEnabler = logEnablerForLevel(null, this.eventLogger);
+        this.logMapper = logMapperForLevel(null, this.eventLogger);
         this.eventLogger = null;
-        this.logLevel = null;
     }
 
     //
@@ -262,7 +264,7 @@ public class JsonEventLogger implements EventHandler {
                 + ", filter='" + filter + '\''
                 + ", category='" + category + '\''
                 + ", level='" + level + '\''
-                + ", enabled=" + isLoggerEnabled()
+                + ", enabled=" + logEnabler.get()
                 + '}';
     }
 
