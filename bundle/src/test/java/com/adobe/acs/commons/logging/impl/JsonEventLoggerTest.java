@@ -169,7 +169,7 @@ public class JsonEventLoggerTest {
         final Calendar curDateAsCalendar = Calendar.getInstance();
         curDateAsCalendar.setTime(curDate);
         assertEquals("date should convert to ISO8601", ISO8601.format(curDateAsCalendar),
-                JsonEventLogger.convertValue(curDateAsCalendar));
+                JsonEventLogger.convertValue(curDate));
 
     }
 }
