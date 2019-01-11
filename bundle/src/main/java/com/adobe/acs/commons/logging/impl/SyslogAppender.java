@@ -38,7 +38,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import ch.qos.logback.core.Appender;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, immediate = true, property= {
       "webconsole.configurationFactory.nameHint" + "=" + "Host: {host}, for loggers [{loggers}]"
 })
 @Designate(ocd=SyslogAppender.Config.class, factory=true)
