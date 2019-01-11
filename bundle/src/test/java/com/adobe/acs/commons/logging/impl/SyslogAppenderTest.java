@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.logging.impl;
 
 import static org.junit.Assert.assertEquals;
@@ -59,21 +78,45 @@ public class SyslogAppenderTest {
                                                      final String stackTracePattern,
                                                      final boolean throwableExcluded, final String... loggers) {
         return new SyslogAppender.Config() {
-            @Override public String host() { return host; }
+            @Override
+            public String host() {
+                return host;
+            }
 
-            @Override public String[] loggers() { return loggers; }
+            @Override
+            public String[] loggers() {
+                return loggers;
+            }
 
-            @Override public int port() { return port; }
+            @Override
+            public int port() {
+                return port;
+            }
 
-            @Override public String suffix_pattern() { return suffixPattern; }
+            @Override
+            public String suffix_pattern() {
+                return suffixPattern;
+            }
 
-            @Override public String facility() { return facility; }
+            @Override
+            public String facility() {
+                return facility;
+            }
 
-            @Override public String stack_trace_pattern() { return stackTracePattern; }
+            @Override
+            public String stack_trace_pattern() {
+                return stackTracePattern;
+            }
 
-            @Override public boolean throwable_excluded() { return throwableExcluded; }
+            @Override
+            public boolean throwable_excluded() {
+                return throwableExcluded;
+            }
 
-            @Override public Class<? extends Annotation> annotationType() { return SyslogAppender.Config.class; }
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return SyslogAppender.Config.class;
+            }
         };
     }
 
