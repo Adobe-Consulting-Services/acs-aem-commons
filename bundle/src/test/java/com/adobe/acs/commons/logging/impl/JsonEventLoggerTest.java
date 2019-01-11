@@ -140,12 +140,15 @@ public class JsonEventLoggerTest {
         for (String logLevel : Arrays.asList("ERROR", "WARN", "INFO", "DEBUG", "TRACE", null)) {
             JsonEventLogger eventLogger = new JsonEventLogger();
             eventLogger.activate(constructConfig("test", logLevel, null, "some/topic"));
-            Event stringSetEvent = new Event("my/simple/topic", Collections.emptyMap());
+            Event event = new Event("my/simple/topic", Collections.emptyMap());
+            eventLogger.handleEvent(event);
             eventLogger.deactivate();
         }
 
         JsonEventLogger eventLogger = new JsonEventLogger();
         eventLogger.activate(constructConfig(null, "INFO", null, "some/topic"));
+        Event event = new Event("my/simple/topic", Collections.emptyMap());
+        eventLogger.handleEvent(event);
         eventLogger.deactivate();
 
     }
