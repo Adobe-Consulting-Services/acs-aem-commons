@@ -21,15 +21,19 @@ package com.adobe.acs.commons.logging.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.junit.Test;
@@ -150,6 +154,22 @@ public class JsonEventLoggerTest {
         Event event = new Event("my/simple/topic", Collections.emptyMap());
         eventLogger.handleEvent(event);
         eventLogger.deactivate();
+
+    }
+
+    @Test
+    public void testConvertValue() {
+        assertNull("null should convert to null", JsonEventLogger.convertValue(null));
+        assertEquals("string should convert to string", "foo", JsonEventLogger.convertValue("foo"));
+        final Calendar curCalendar = Calendar.getInstance();
+        assertEquals("calendar should convert to ISO8601", ISO8601.format(curCalendar),
+                JsonEventLogger.convertValue(curCalendar));
+
+        final Date curDate = new Date();
+        final Calendar curDateAsCalendar = Calendar.getInstance();
+        curDateAsCalendar.setTime(curDate);
+        assertEquals("date should convert to ISO8601", ISO8601.format(curDateAsCalendar),
+                JsonEventLogger.convertValue(curDateAsCalendar));
 
     }
 }

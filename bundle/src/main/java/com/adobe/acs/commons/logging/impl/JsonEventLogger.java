@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,11 +48,11 @@ import org.slf4j.LoggerFactory;
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
  * objects.
  */
-@Component( configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
-      "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
 })
 @SuppressWarnings("PMD.MoreThanOneLogger")
-@Designate(ocd=JsonEventLogger.Config.class, factory=true)
+@Designate(ocd = JsonEventLogger.Config.class, factory = true)
 public class JsonEventLogger implements EventHandler {
 
     /**
@@ -71,7 +71,7 @@ public class JsonEventLogger implements EventHandler {
      * A simple enum for Slf4j logging levels.
      */
     private enum LogLevel {
-        TRACE, DEBUG, INFO, WARN, ERROR;
+        TRACE, DEBUG, INFO, WARN, ERROR, NONE;
 
         public static LogLevel fromProperty(String prop) {
             if (prop != null) {
@@ -81,10 +81,10 @@ public class JsonEventLogger implements EventHandler {
                     }
                 }
             }
-            return null;
+            return NONE;
         }
     }
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
     public @interface Config {
         @AttributeDefinition(name = "Event Topics",
@@ -98,6 +98,7 @@ public class JsonEventLogger implements EventHandler {
         String event_logger_category() default "";
 
         @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
+                @Option(value = "NONE", label = "None (disabled)"),
                 @Option(value = "TRACE", label = "Trace"),
                 @Option(value = "DEBUG", label = "Debug"),
                 @Option(value = "INFO", label = "Information"),
@@ -125,21 +126,27 @@ public class JsonEventLogger implements EventHandler {
      * Return a logging function appropriate for the specified loglevel.
      *
      * @param logLevel the specified loglegel
-     * @param logger the logger to map to
+     * @param logger   the logger to map to
      * @return a string comsuming logger function
      */
     static Consumer<String> logMapperForLevel(final LogLevel logLevel, final Logger logger) {
-        if (logLevel != null && logger != null) {
-            switch (logLevel) {
-                case ERROR: return logger::error;
-                case WARN: return logger::warn;
-                case INFO: return logger::info;
-                case DEBUG: return logger::debug;
-                case TRACE: return logger::trace;
-                default: return (message) -> { /* do nothing */ };
-            }
+        if (logger == null) {
+            return (message) -> { /* do nothing */ };
         }
-        return (message) -> { /* do nothing */ };
+        switch (logLevel) {
+            case ERROR:
+                return logger::error;
+            case WARN:
+                return logger::warn;
+            case INFO:
+                return logger::info;
+            case DEBUG:
+                return logger::debug;
+            case TRACE:
+                return logger::trace;
+            default:
+                return (message) -> { /* do nothing */ };
+        }
     }
 
     /**
@@ -149,17 +156,23 @@ public class JsonEventLogger implements EventHandler {
      * @return a boolean-supplying function
      */
     static Supplier<Boolean> logEnablerForLevel(final LogLevel logLevel, final Logger logger) {
-        if (logLevel != null && logger != null) {
-            switch (logLevel) {
-                case ERROR: return logger::isErrorEnabled;
-                case WARN: return logger::isWarnEnabled;
-                case INFO: return logger::isInfoEnabled;
-                case DEBUG: return logger::isDebugEnabled;
-                case TRACE: return logger::isTraceEnabled;
-                default: return () -> false;
-            }
+        if (logger == null) {
+            return () -> false;
         }
-        return () -> false;
+        switch (logLevel) {
+            case ERROR:
+                return logger::isErrorEnabled;
+            case WARN:
+                return logger::isWarnEnabled;
+            case INFO:
+                return logger::isInfoEnabled;
+            case DEBUG:
+                return logger::isDebugEnabled;
+            case TRACE:
+                return logger::isTraceEnabled;
+            default:
+                return () -> false;
+        }
     }
 
     /**
@@ -192,19 +205,11 @@ public class JsonEventLogger implements EventHandler {
     @SuppressWarnings({"unchecked", "squid:S3776"})
     protected static Object convertValue(Object val) {
         if (val instanceof Calendar) {
-            try {
-                return ISO8601.format((Calendar) val);
-            } catch (IllegalArgumentException e) {
-                log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
-            }
+            return ISO8601.format((Calendar) val);
         } else if (val instanceof Date) {
-            try {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime((Date) val);
-                return ISO8601.format(calendar);
-            } catch (IllegalArgumentException e) {
-                log.debug("[constructMessage] failed to convert Date to ISO8601 String: {}, {}", e.getMessage(), val);
-            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime((Date) val);
+            return ISO8601.format(calendar);
         }
 
         return val;
@@ -213,6 +218,7 @@ public class JsonEventLogger implements EventHandler {
     //
     // ---------------------------------------------------------< EventHandler methods >-----
     //
+
     /**
      * {@inheritDoc}
      */
@@ -251,8 +257,8 @@ public class JsonEventLogger implements EventHandler {
     @Deactivate
     protected void deactivate() {
         log.trace("[deactivate] entered deactivate method.");
-        this.logEnabler = logEnablerForLevel(null, this.eventLogger);
-        this.logMapper = logMapperForLevel(null, this.eventLogger);
+        this.logEnabler = logEnablerForLevel(LogLevel.NONE, this.eventLogger);
+        this.logMapper = logMapperForLevel(LogLevel.NONE, this.eventLogger);
         this.eventLogger = null;
     }
 
