@@ -27,7 +27,6 @@ import ch.qos.logback.core.net.SyslogAppenderBase;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -94,8 +93,16 @@ public final class SyslogAppender {
 
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(final ComponentContext ctx, final Config config) {
+    protected void activate(final BundleContext ctx, final Config config) {
+        this.appender = constructAppender(config);
+
         final String[] loggers = config.loggers();
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put("loggers", loggers);
+        appenderRegistration = ctx.registerService(Appender.class.getName(), appender, props);
+    }
+
+    static ch.qos.logback.classic.net.SyslogAppender constructAppender(final Config config) {
         final String suffixPattern = config.suffix_pattern();
         final int port = config.port();
         final String host = config.host();
@@ -111,9 +118,7 @@ public final class SyslogAppender {
         // throws a descriptive IllegalArgumentException if facility is not valid.
         SyslogAppenderBase.facilityStringToint(facility);
 
-        final BundleContext bundleContext = ctx.getBundleContext();
-
-        appender = new ch.qos.logback.classic.net.SyslogAppender();
+        final ch.qos.logback.classic.net.SyslogAppender appender = new ch.qos.logback.classic.net.SyslogAppender();
 
         appender.setSyslogHost(host);
         appender.setPort(port);
@@ -126,16 +131,16 @@ public final class SyslogAppender {
         }
 
         appender.setThrowableExcluded(throwableExcluded);
-
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put("loggers", loggers);
-        appenderRegistration = bundleContext.registerService(Appender.class.getName(), appender, props);
+        return appender;
     }
+
 
     @Deactivate
     protected void deactivate() {
         if (appender != null) {
-            appender.stop();
+            if (appender.isStarted()) {
+                appender.stop();
+            }
             appender = null;
         }
 
