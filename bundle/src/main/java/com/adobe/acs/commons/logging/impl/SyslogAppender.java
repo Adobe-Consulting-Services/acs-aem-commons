@@ -25,10 +25,8 @@ import java.util.Hashtable;
 
 import ch.qos.logback.core.net.SyslogAppenderBase;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -39,7 +37,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import ch.qos.logback.core.Appender;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
+@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, immediate = true, property= {
       "webconsole.configurationFactory.nameHint" + "=" + "Host: {host}, for loggers [{loggers}]"
 })
 @Designate(ocd=SyslogAppender.Config.class, factory=true)
@@ -60,25 +58,25 @@ public final class SyslogAppender {
     public @interface Config {
        
         @AttributeDefinition(name = "Host", description = "Host of Syslog server")
-        String host();
+        String host() default "";
 
         @AttributeDefinition(name = "Logger Names", description = "List of logger categories (ROOT for all)",
                  defaultValue = ROOT)
-        String[] loggers();
+        String[] loggers() default {ROOT};
 
-        @AttributeDefinition(name = "Port", description = "Port of Syslog server", defaultValue = "-1")
-        int port();
+        @AttributeDefinition(name = "Port", description = "Port of Syslog server", defaultValue = ""+DEFAULT_PORT)
+        int port() default DEFAULT_PORT;
 
         @AttributeDefinition(name = "Suffix Pattern", description = "Logback Pattern defining the message format.",
                 defaultValue = DEFAULT_SUFFIX_PATTERN)
-        String suffix_pattern();
+        String suffix_pattern() default DEFAULT_SUFFIX_PATTERN;
 
         @AttributeDefinition(name = "Syslog Facility", defaultValue = DEFAULT_FACILITY,
                 description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
                 + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
                 + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
                 + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
-        String facility();
+        String facility() default DEFAULT_FACILITY;
 
         @AttributeDefinition(name = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
                  + "trace line. The default value for this property is a single tab character.")
@@ -86,22 +84,8 @@ public final class SyslogAppender {
 
         @AttributeDefinition(name = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
                 + "By default, this is set to false so that stack trace data is sent to the syslog server.", defaultValue = ""+DEFAULT_THROWABLE_EXCLUDED)
-        boolean throwable_excluded();
+        boolean throwable_excluded() default DEFAULT_THROWABLE_EXCLUDED;
     }
-
-    private static final String PROP_HOST = "host";
-
-    private static final String PROP_LOGGERS = "loggers";
-
-    private static final String PROP_PORT = "port";
-
-    private static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
-
-    private static final String PROP_FACILITY = "facility";
-
-    private static final String PROP_STACK_TRACE_PATTERN = "stack.trace.pattern";
-
-    private static final String PROP_THROWABLE_EXCLUDED = "throwable.excluded";
 
     private ch.qos.logback.classic.net.SyslogAppender appender;
 
@@ -109,18 +93,24 @@ public final class SyslogAppender {
 
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(ComponentContext ctx) {
-        final Dictionary<?, ?> properties = ctx.getProperties();
-        final String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
-        final String suffixPattern = PropertiesUtil
-                .toString(properties.get(PROP_SUFFIX_PATTERN), DEFAULT_SUFFIX_PATTERN);
-        final int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);
-        final String host = PropertiesUtil.toString(properties.get(PROP_HOST), null);
-        final String facility = PropertiesUtil.toString(properties.get(PROP_FACILITY), DEFAULT_FACILITY);
-        final String stackTracePattern = PropertiesUtil.toString(properties.get(PROP_STACK_TRACE_PATTERN), null);
-        final boolean throwableExcluded = PropertiesUtil.toBoolean(properties.get(PROP_THROWABLE_EXCLUDED), DEFAULT_THROWABLE_EXCLUDED);
+    protected void activate(final BundleContext ctx, final Config config) {
+        this.appender = constructAppender(config);
 
-        if (host == null || port == -1) {
+        final String[] loggers = config.loggers();
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put("loggers", loggers);
+        appenderRegistration = ctx.registerService(Appender.class.getName(), appender, props);
+    }
+
+    static ch.qos.logback.classic.net.SyslogAppender constructAppender(final Config config) {
+        final String suffixPattern = config.suffix_pattern();
+        final int port = config.port();
+        final String host = config.host();
+        final String facility = config.facility();
+        final String stackTracePattern = config.stack_trace_pattern();
+        final boolean throwableExcluded = config.throwable_excluded();
+
+        if (StringUtils.isEmpty(host) || port == -1) {
             throw new IllegalArgumentException(
                     "Syslog Appender not configured correctly. Both host and port need to be provided.");
         }
@@ -128,9 +118,7 @@ public final class SyslogAppender {
         // throws a descriptive IllegalArgumentException if facility is not valid.
         SyslogAppenderBase.facilityStringToint(facility);
 
-        final BundleContext bundleContext = ctx.getBundleContext();
-
-        appender = new ch.qos.logback.classic.net.SyslogAppender();
+        final ch.qos.logback.classic.net.SyslogAppender appender = new ch.qos.logback.classic.net.SyslogAppender();
 
         appender.setSyslogHost(host);
         appender.setPort(port);
@@ -143,16 +131,16 @@ public final class SyslogAppender {
         }
 
         appender.setThrowableExcluded(throwableExcluded);
-
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put("loggers", loggers);
-        appenderRegistration = bundleContext.registerService(Appender.class.getName(), appender, props);
+        return appender;
     }
+
 
     @Deactivate
     protected void deactivate() {
         if (appender != null) {
-            appender.stop();
+            if (appender.isStarted()) {
+                appender.stop();
+            }
             appender = null;
         }
 
