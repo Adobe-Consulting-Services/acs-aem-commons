@@ -136,9 +136,10 @@ public class JsonEventLogger implements EventHandler {
                 case INFO: return logger::info;
                 case DEBUG: return logger::debug;
                 case TRACE: return logger::trace;
+                default: return (message) -> { /* do nothing */ };
             }
         }
-        return (message) -> {};
+        return (message) -> { /* do nothing */ };
     }
 
     /**
@@ -155,6 +156,7 @@ public class JsonEventLogger implements EventHandler {
                 case INFO: return logger::isInfoEnabled;
                 case DEBUG: return logger::isDebugEnabled;
                 case TRACE: return logger::isTraceEnabled;
+                default: return () -> false;
             }
         }
         return () -> false;
