@@ -3,76 +3,37 @@ package com.adobe.acs.commons.remoteassets.impl;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.http.client.fluent.Executor;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.serviceusermapping.ServiceUserMapper;
 import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
-import org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl;
-import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
 
-import javax.jcr.Session;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class RemoteAssetsConfigImplTest {
-    private static final String TEST_SERVER_URL = "https://remote-aem-server:4502/";
-    private static final String TEST_SERVER_USERNAME = "admin";
-    private static final String TEST_SERVER_PASSWORD = "passwd";
-    private static final String TEST_TAGS_PATH_A = "/content/cq:tags/a";
-    private static final String TEST_TAGS_PATH_B = "/content/cq:tags/b";
-    private static final String TEST_DAM_PATH_A = "/content/dam/a";
-    private static final String TEST_DAM_PATH_B = "/content/dam/b";
-    private static final int TEST_RETRY_DELAY = 30;
-    private static final int TEST_SAVE_INTERVAL = 500;
-    private static final String TEST_WHITELISTED_SVC_USER_A = "user_a";
-    private static final String TEST_WHITELISTED_SVC_USER_B = "user_b";
 
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Before
     public final void setup() {
-        Map<String, Object> serviceUserMapperConfig = new HashMap<>();
-        serviceUserMapperConfig.put("user.mapping", context.bundleContext().getBundle().getSymbolicName() + ":remote-assets=acs-commons-remote-assets-service");
-        context.registerInjectActivateService(new MappingConfigAmendment(), serviceUserMapperConfig);
-    }
-
-    private Map<String, Object> getValidRemoteAssetsConfigs() {
-        Map<String, Object> remoteAssetsConfigs = new HashMap<>();
-        remoteAssetsConfigs.put("server.url", TEST_SERVER_URL);
-        remoteAssetsConfigs.put("server.user", TEST_SERVER_USERNAME);
-        remoteAssetsConfigs.put("server.pass", TEST_SERVER_PASSWORD);
-        remoteAssetsConfigs.put("server.insecure", false);
-        remoteAssetsConfigs.put("tag.paths", new String[]{TEST_TAGS_PATH_A, "", TEST_TAGS_PATH_B});
-        remoteAssetsConfigs.put("dam.paths", new String[]{TEST_DAM_PATH_A, "", TEST_DAM_PATH_B});
-        remoteAssetsConfigs.put("retry.delay", TEST_RETRY_DELAY);
-        remoteAssetsConfigs.put("save.interval", TEST_SAVE_INTERVAL);
-        remoteAssetsConfigs.put("whitelisted.service.users", new String[]{TEST_WHITELISTED_SVC_USER_A, "", TEST_WHITELISTED_SVC_USER_B});
-
-        return remoteAssetsConfigs;
+        setupRemoteAssetsServiceUser(context);
     }
 
     @Test
     public void testBadConfigServerInvalidURL() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.put("server.url", "somethingbogus");
 
         try {
@@ -86,7 +47,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testBadConfigServerNotSpecified() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.remove("server.url");
 
         try {
@@ -100,7 +61,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testBadConfigServerProtocolNotSecure() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.put("server.url", TEST_SERVER_URL.replace("https://", "http://"));
 
         try {
@@ -114,7 +75,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testBadConfigUsernameNotSpecified() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.remove("server.user");
 
         try {
@@ -128,7 +89,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testBadConfigPasswordNotSpecified() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.remove("server.pass");
 
         try {
@@ -142,7 +103,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testGetResourceResolver() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
 
         RemoteAssetsConfig config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
 
@@ -153,7 +114,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testValidConfigs() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
 
         RemoteAssetsConfig config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
 
@@ -171,7 +132,7 @@ public class RemoteAssetsConfigImplTest {
 
     @Test
     public void testValidConfigsOverrideHttps() {
-        Map<String, Object> remoteAssetsConfigs = getValidRemoteAssetsConfigs();
+        Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
         remoteAssetsConfigs.put("server.url", TEST_SERVER_URL.replace("https://", "http://"));
         remoteAssetsConfigs.put("server.insecure", true);
 

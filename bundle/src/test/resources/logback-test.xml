@@ -30,6 +30,9 @@
     </appender>
 
     <appender name="LogTester" class="com.adobe.acs.commons.testutil.LogTester">
+        <filter class="com.adobe.acs.commons.remoteassets.impl.RemoteAssetDecorator">
+            <level>DEBUG</level>
+        </filter>
     </appender>
 
     <root level="debug">
