@@ -17,10 +17,11 @@
  * limitations under the License.
  * #L%
  */
-    package com.adobe.acs.commons.httpcache.config.impl;
+package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
+import com.adobe.acs.commons.httpcache.config.impl.keys.GroupCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
@@ -127,13 +128,13 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-        return new GroupCacheKey(slingHttpServletRequest, cacheConfig);
+        return new GroupCacheKey(slingHttpServletRequest, cacheConfig, userGroups);
     }
 
     @Override
     public CacheKey build(final String resourcePath, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-        return new GroupCacheKey(resourcePath, cacheConfig);
+        return new GroupCacheKey(resourcePath, cacheConfig, userGroups);
     }
 
     @Override
@@ -144,82 +145,10 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
             return false;
         }
         // Validate if key request uri can be constructed out of uri patterns in cache config.
-        return new GroupCacheKey(key.getUri(), cacheConfig).equals(key);
+        return new GroupCacheKey(key.getUri(), cacheConfig, userGroups).equals(key);
     }
 
-    /**
-     * The GroupCacheKey is a custom CacheKey bound to this particular factory.
-     */
-    class GroupCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
 
-        /* This key is composed of uri, list of user groups and authentication requirement details */
-        private List<String> cacheKeyUserGroups;
-
-        public GroupCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
-                HttpCacheKeyCreationException {
-
-            super(request, cacheConfig);
-            this.cacheKeyUserGroups = userGroups;
-        }
-
-        public GroupCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-            super(uri, cacheConfig);
-            this.cacheKeyUserGroups = userGroups;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!super.equals(o)) {
-                return false;
-            }
-
-            if (o == null) {
-                return false;
-            }
-
-            GroupCacheKey that = (GroupCacheKey) o;
-
-            return new EqualsBuilder()
-                    .append(getUri(), that.getUri())
-                    .append(cacheKeyUserGroups, that.cacheKeyUserGroups)
-                    .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
-                    .isEquals();
-        }
-
-        @Override
-        public int hashCode() {
-            return new HashCodeBuilder(17, 37)
-                    .append(getUri())
-                    .append(cacheKeyUserGroups)
-                    .append(getAuthenticationRequirement()).toHashCode();
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder formattedString = new StringBuilder(this.uri).append(" [GROUPS:");
-            formattedString.append(StringUtils.join(cacheKeyUserGroups, "|"));
-            formattedString.append("] [AUTH_REQ:" + getAuthenticationRequirement() + "]");
-            return formattedString.toString();
-        }
-
-        /** For Serialization **/
-        private void writeObject(ObjectOutputStream o) throws IOException
-        {
-            parentWriteObject(o);
-            final Object[] userGroupArray = cacheKeyUserGroups.toArray();
-            o.writeObject(StringUtils.join(userGroupArray, ","));
-        }
-
-        /** For De serialization **/
-        private void readObject(ObjectInputStream o)
-                throws IOException, ClassNotFoundException {
-
-            parentReadObject(o);
-            final String userGroupsStr = (String) o.readObject();
-            final String[] userGroupStrArray = userGroupsStr.split(",");
-            cacheKeyUserGroups = Arrays.asList(userGroupStrArray);
-        }
-    }
 
     //-------------------------<OSGi Component methods>
 

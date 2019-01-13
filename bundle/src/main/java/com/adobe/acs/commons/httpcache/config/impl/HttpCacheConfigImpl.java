@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Concrete implementation of cache config for http cache. Modelled as OSGi config factory.
  */
@@ -110,9 +112,14 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private long expiryOnCreate;
     private long expiryOnAccess;
     private long expiryOnUpdate;
+    private String cacheConfigExtensionTarget;
+    private String cacheKeyFactoryTarget;
 
     @Activate
     protected void activate(HttpCacheConfigImplConfig config) {
+
+        cacheConfigExtensionTarget = config.cacheConfigExtension_target();
+        cacheKeyFactoryTarget = config.cacheKeyFactory_target();
 
         // Request URIs - Whitelisted.
         requestUriPatterns = Arrays.asList(config.httpcache_config_requesturi_patterns());
@@ -217,6 +224,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         // Passing on the control to the extension point.
         if (null != cacheConfigExtension) {
             return cacheConfigExtension.accepts(request, this);
+        }else if(isNotBlank(cacheConfigExtensionTarget)){
+            log.error("Cache Config not found! Extension target: {} Factory target: {} ", cacheConfigExtensionTarget, cacheKeyFactoryTarget);
         }
 
         return true;
