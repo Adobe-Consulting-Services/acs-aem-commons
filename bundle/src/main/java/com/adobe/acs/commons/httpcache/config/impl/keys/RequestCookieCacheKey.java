@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.sling.api.SlingHttpServletRequest;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -67,7 +68,7 @@ public class RequestCookieCacheKey extends AbstractCacheKey implements CacheKey 
             return false;
         }
 
-        RequestCookieCacheKey that = (RequestCookieCacheKey) o;
+        @Nonnull RequestCookieCacheKey that = (RequestCookieCacheKey) o;
 
         return new EqualsBuilder()
                 .append(getUri(), that.getUri())
