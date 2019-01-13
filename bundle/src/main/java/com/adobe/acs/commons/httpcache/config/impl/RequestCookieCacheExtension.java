@@ -55,8 +55,6 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
  * This so we can present a different header based on cookie values, which tell us if a user is logged in and what type of user it is.
  * </p>
  *
- * @author niek.raaijkmakers@external.cybercon.de
- * @since 2018-04-05
  */
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE, service = {HttpCacheConfigExtension.class, CacheKeyFactory.class})
 @Designate(ocd = RequestCookieCacheExtension.Config.class, factory = true)
