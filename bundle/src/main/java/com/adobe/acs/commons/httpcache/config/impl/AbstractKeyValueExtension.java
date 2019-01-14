@@ -40,10 +40,10 @@ import java.util.Set;
 @Component
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
-    private boolean emptyAllowed;
-    private Set<String> valueMapKeys;
-    private Map<String, String> allowedValues;
-    private String configName;
+    protected boolean emptyAllowed;
+    protected Set<String> valueMapKeys;
+    protected Map<String, String> allowedValues;
+    protected String configName;
 
     @Override
     public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException {
