@@ -23,14 +23,17 @@ package com.adobe.acs.commons.quickly.impl;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
 
 import java.io.IOException;
 
@@ -39,7 +42,9 @@ import java.io.IOException;
  *
  */
 @SuppressWarnings("serial")
-@SlingServlet(paths = "/bin/quickly.json")
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_PATHS+"=/bin/quickly.json"})
 public class QuicklyServlet extends SlingSafeMethodsServlet {
 
     @Reference
@@ -54,7 +59,7 @@ public class QuicklyServlet extends SlingSafeMethodsServlet {
 
         try {
             response.getWriter().append(quicklyEngine.execute(request, response, cmd).toString());
-        } catch (JSONException e) {
+        } catch (Exception e) {
             response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().print("{\"status:\": \"error\"}");
         }

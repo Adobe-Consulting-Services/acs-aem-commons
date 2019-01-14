@@ -68,19 +68,6 @@ public class ParameterUtil {
      *
      * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
      * @param separator separator between the values
-     * @return Returns a SimpleEntry representing the key/value pair. It may be {@code null} in case no separator is found.
-     * @deprecated Rather use {@link #toMapEntry(String, String)}.
-     */
-    @Deprecated
-    public static AbstractMap.SimpleEntry<String, String> toSimpleEntry(final String value, final String separator) {
-        return toSimpleEntry(value, separator, false);
-    }
-    
-    /**
-     * Util for parsing Service properties in the form {@code <value><separator><value>}
-     *
-     * @param value     must be in the format => {@code x<separator>y}  ... ex. {@code foo:bar}
-     * @param separator separator between the values
      * @param isValueOptional if {@code false} returns {@code null} in case there is not at least one separator found (not at the last position) 
      * @return Returns a SimpleEntry representing the key/value pair. The value may be {@null} in case no separator is found and {@code isValueOptional} is {@code true}.
      */
@@ -168,9 +155,12 @@ public class ParameterUtil {
                     continue;
                 }
 
-                map.put(tmp[0], defaultValue);
-            } else if (tmp.length == 2) {
-                map.put(tmp[0], tmp[1]);
+                if (StringUtils.stripToNull(tmp[0]) != null) {
+                    map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(defaultValue));
+                }
+            } else if (tmp.length == 2
+                    && StringUtils.stripToNull(tmp[0]) != null) {
+                map.put(StringUtils.trim(tmp[0]), StringUtils.trimToEmpty(tmp[1]));
             }
         }
 

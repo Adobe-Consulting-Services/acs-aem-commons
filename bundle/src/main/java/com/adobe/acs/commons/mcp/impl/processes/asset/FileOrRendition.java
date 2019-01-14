@@ -29,13 +29,13 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -43,6 +43,9 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
+import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.encodeUriParts;
 
 /**
  * Abstraction of a file which might be an asset or a rendition of another asset
@@ -114,7 +117,14 @@ public class FileOrRendition implements HierarchicalElement {
 
     @Override
     public String getItemName() {
-        return getName();
+        try {
+            URI uri = new URI(encodeUriParts(url));
+            String filePath = decodeUriParts(uri.getRawPath());
+            return decodeUriParts(filePath);
+        } catch (URISyntaxException | UnsupportedEncodingException ex) {
+            Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return url;
     }
 
     @Override
@@ -155,7 +165,7 @@ public class FileOrRendition implements HierarchicalElement {
         throw new UnsupportedOperationException("FileOrRendition doesn't support child navigation");
     }
 
-    private class UrlConnectionSource implements Source {
+    public class UrlConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private Long size = null;
@@ -215,7 +225,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    private class HttpConnectionSource implements Source {
+    public class HttpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private HttpGet lastRequest;
@@ -278,7 +288,7 @@ public class FileOrRendition implements HierarchicalElement {
         }
     }
 
-    private class SftpConnectionSource implements Source {
+    public class SftpConnectionSource implements Source {
 
         final FileOrRendition thizz;
         private final JSch jsch = new JSch();
@@ -290,8 +300,7 @@ public class FileOrRendition implements HierarchicalElement {
             this.thizz = thizz;
         }
 
-        @SuppressWarnings("squid:S1149")
-        private Session getSessionForHost(URI uri) throws IOException {
+        public Session getSessionForHost(URI uri) throws IOException {
             if (session != null && !session.getHost().equals(uri.getHost())) {
                 close();
             }
@@ -299,9 +308,7 @@ public class FileOrRendition implements HierarchicalElement {
                 try {
                     int port = uri.getPort() <= 0 ? 22 : uri.getPort();
                     session = jsch.getSession(clientProvider.getUsername(), uri.getHost(), port);
-                    Hashtable props = new Hashtable();
-                    props.put("StrictHostKeyChecking", "no");
-                    session.setConfig(props);
+                    session.setConfig("StrictHostKeyChecking", "no");
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
                 } catch (JSchException ex) {
@@ -320,7 +327,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public InputStream getStream() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -328,7 +335,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                currentStream = sftpChannel.get(uri.getPath());
+                currentStream = sftpChannel.get(decodeUriParts(uri.getRawPath()));
 
                 return currentStream;
 
@@ -347,7 +354,7 @@ public class FileOrRendition implements HierarchicalElement {
         @Override
         public long getLength() throws IOException {
             try {
-                URI uri = new URI(getSourcePath());
+                URI uri = new URI(encodeUriParts(getSourcePath()));
 
                 if (channel == null || channel.isClosed()) {
                     channel = getSessionForHost(uri).openChannel("sftp");
@@ -355,7 +362,7 @@ public class FileOrRendition implements HierarchicalElement {
                 }
 
                 ChannelSftp sftpChannel = (ChannelSftp) channel;
-                SftpATTRS stats = sftpChannel.lstat(uri.getPath());
+                SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
                 Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);

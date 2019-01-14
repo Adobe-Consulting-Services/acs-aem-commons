@@ -19,29 +19,36 @@
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet for updating a line in the redirect map text file
  */
-@SlingServlet(methods = { "POST" }, resourceTypes = {
-        "acs-commons/components/utilities/redirectmappage" }, selectors = {
-                "updateentry" }, extensions = { "json" }, metatype = false)
+@Component(service = Servlet.class, property = { SLING_SERVLET_METHODS + "=POST",
+        SLING_SERVLET_SELECTORS + "=updateentry", SLING_SERVLET_EXTENSIONS + "=json",
+        SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/redirectmappage" })
 public class UpdateEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -1704915461516132101L;
     private static final Logger log = LoggerFactory.getLogger(UpdateEntryServlet.class);
 
+    @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doPost");
@@ -56,6 +63,7 @@ public class UpdateEntryServlet extends SlingAllMethodsServlet {
         lines.set(idx, source + " " + target);
         log.debug("Updated entry...");
 
+        log.trace("Saving lines {}", lines);
         RedirectEntriesUtils.updateRedirectMap(request, lines);
         RedirectEntriesUtils.writeEntriesToResponse(request, response,
                 "Updated entry " + idx + " to " + source + " " + target);

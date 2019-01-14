@@ -29,15 +29,17 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,12 +70,22 @@ import java.util.Map;
  *      ...
  *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
-@Component(metatype = true, label = "ACS AEM Commons - Email Service", description = "ACS AEM Commons - Email Service")
-@Service
-public final class EmailServiceImpl implements EmailService {
+@Component(configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Designate(ocd=EmailServiceImpl.Config.class)
+public class EmailServiceImpl implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String MSG_INVALID_RECIPIENTS = "Invalid Recipients";
+    
+    @ObjectClassDefinition(name="ACS AEM COmmons - EMail Service", description="ACS AEM Commons - Email Service")
+    public @interface Config {
+        @AttributeDefinition(name="Connect Timeout", description="Connection timeout in miliseconds")
+        int conn_timeout() default DEFAULT_CONNECT_TIMEOUT;
+        
+        @AttributeDefinition(name="Socket Timeout", description="Socket timeout in miliseconds")
+        int so_timeout() default DEFAULT_SOCKET_TIMEOUT;
+    }
+    
 
     @Reference
     private MessageGatewayService messageGatewayService;
@@ -85,11 +97,6 @@ public final class EmailServiceImpl implements EmailService {
 
     public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 
-    @Property(label = "Socket Timeout", description = "Socket timeout in milliseconds", intValue = DEFAULT_SOCKET_TIMEOUT)
-    private static final String PROP_SO_TIMEOUT = "so.timeout";
-
-    @Property(label = "Connect Timeout", description = "Connect timeout in milliseconds", intValue = DEFAULT_CONNECT_TIMEOUT)
-    private static final String PROP_CONNECT_TIMEOUT = "conn.timeout";
 
     private static String SERVICE_NAME = "email-service";
 
@@ -97,9 +104,9 @@ public final class EmailServiceImpl implements EmailService {
     private int soTimeout;
 
     @Activate
-    protected void activate(Map<String, Object> config) {
-        connectTimeout = PropertiesUtil.toInteger(config.get(PROP_CONNECT_TIMEOUT), DEFAULT_CONNECT_TIMEOUT);
-        soTimeout = PropertiesUtil.toInteger(config.get(PROP_SO_TIMEOUT), DEFAULT_SOCKET_TIMEOUT);
+    protected void activate(Config conf) {
+        connectTimeout = conf.conn_timeout();
+        soTimeout = conf.so_timeout();
     }
 
     @Override
@@ -253,6 +260,10 @@ public final class EmailServiceImpl implements EmailService {
         // #1008 setting the subject via the setSubject(..) parameter.
         if (params.containsKey(EmailServiceConstants.SUBJECT)) {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));
+        }
+
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
         }
 
         return email;

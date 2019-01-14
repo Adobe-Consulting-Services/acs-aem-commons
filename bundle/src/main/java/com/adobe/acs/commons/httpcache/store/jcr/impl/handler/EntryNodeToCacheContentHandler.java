@@ -32,6 +32,7 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingConstants;
 
@@ -48,6 +49,7 @@ public class EntryNodeToCacheContentHandler
     private InputStream inputStream;
     private final Map<String, List<String>> headers = new HashMap<String, List<String>>();
     private Binary binary;
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.OUTPUTSTREAM;
 
     private static final String SLING_NAMESPACE = SlingConstants.NAMESPACE_PREFIX + ":";
     private static final String JCR_NAMESPACE = "jcr:";
@@ -81,6 +83,9 @@ public class EntryNodeToCacheContentHandler
             else if(propName.equals(JCRHttpCacheStoreConstants.PN_STATUS)) {
                 status = (int) value.getLong();
             }
+            else if(propName.equals(JCRHttpCacheStoreConstants.PN_WRITEMETHOD)){
+                writeMethod = HttpCacheServletResponseWrapper.ResponseWriteMethod.valueOf(value.getString());
+            }
         }
     }
 
@@ -91,7 +96,8 @@ public class EntryNodeToCacheContentHandler
             charEncoding,
             contentType,
             headers,
-            inputStream
+            inputStream,
+            writeMethod
         );
     }
 

@@ -126,7 +126,7 @@ public class S3AssetIngestor extends AssetIngestor {
     private void createFolders(ActionManager manager, ObjectListing listing) {
         listing.getObjectSummaries().stream().filter(sum -> !sum.getKey().equals(s3BasePath)).map(S3HierarchicalElement::new)
                 .filter(S3HierarchicalElement::isFolder).filter(this::canImportFolder).forEach(el -> {
-            manager.deferredWithResolver(Actions.retry(10, 100, rr -> {
+            manager.deferredWithResolver(Actions.retry(retries, retryPause, rr -> {
                 manager.setCurrentItem(el.getItemName());
                 createFolderNode(el, rr);
             }));
@@ -151,7 +151,7 @@ public class S3AssetIngestor extends AssetIngestor {
                 .map(S3HierarchicalElement::getSource).forEach(ss -> {
             try {
                 if (canImportFile(ss)) {
-                    manager.deferredWithResolver(Actions.retry(5, 25, importAsset(ss, manager)));
+                    manager.deferredWithResolver(Actions.retry(retries, retryPause, importAsset(ss, manager)));
                 } else {
                     incrementCount(skippedFiles, 1);
                     trackDetailedActivity(ss.getName(), "Skip", "Skipping file", 0L);
@@ -159,7 +159,7 @@ public class S3AssetIngestor extends AssetIngestor {
             } catch (IOException ex) {
                 Failure failure = new Failure();
                 failure.setException(ex);
-                failure.setNodePath(ss.getElement().getNodePath());
+                failure.setNodePath(ss.getElement().getNodePath(preserveFileName));
                 manager.getFailureList().add(failure);
             } finally {
                 try {
@@ -167,7 +167,7 @@ public class S3AssetIngestor extends AssetIngestor {
                 } catch (IOException ex) {
                     Failure failure = new Failure();
                     failure.setException(ex);
-                    failure.setNodePath(ss.getElement().getNodePath());
+                    failure.setNodePath(ss.getElement().getNodePath(preserveFileName));
                     manager.getFailureList().add(failure);
                 }
             }

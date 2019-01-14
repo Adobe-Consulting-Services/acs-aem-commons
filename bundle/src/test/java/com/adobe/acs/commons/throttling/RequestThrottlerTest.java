@@ -96,7 +96,6 @@ public class RequestThrottlerTest {
     }
 
     @Test
-    @Ignore("Will run into exceptions unless you use javax.servlet-api:3.1.0")
     public void doFilter_withMatchingPath() throws Exception {
         context.request().setResource(context.resourceResolver().getResource("/content/foobar"));
 

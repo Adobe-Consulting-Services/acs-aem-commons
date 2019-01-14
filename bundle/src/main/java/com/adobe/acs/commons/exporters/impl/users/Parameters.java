@@ -38,6 +38,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
+
 public class Parameters {
     private String[] customProperties;
     private String[] groups;
@@ -56,7 +58,7 @@ public class Parameters {
         final List<String> tmpCustomProperties = new ArrayList<String>();
         final List<String> tmpGroups = new ArrayList<String>();
 
-        groupFilter = json.getAsJsonPrimitive(GROUP_FILTER).getAsString();
+        groupFilter = getString(json, GROUP_FILTER);
 
         JsonArray groupsJSON = json.getAsJsonArray(GROUPS);
         for (int i = 0; i < groupsJSON.size(); i++) {
@@ -70,7 +72,7 @@ public class Parameters {
             JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
 
             if (tmp.has(RELATIVE_PROPERTY_PATH)) {
-                String relativePropertyPath = tmp.get(RELATIVE_PROPERTY_PATH).getAsString();
+                String relativePropertyPath = getString(tmp, RELATIVE_PROPERTY_PATH);
                 tmpCustomProperties.add(relativePropertyPath);
             }
         }

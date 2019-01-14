@@ -19,45 +19,36 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-
 import java.util.Calendar;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 //@formatter:off
-@Component(
-    label = "ACS AEM Commons - Dispatcher Expires Header - Daily",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.",
-    metatype = true,
-    configurationFactory = true,
-    policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-  @Property(label = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE,
-      name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
-      propertyPrivate = false,
-      value = { }),
-  @Property(label = "Expires Time",
-      description = "Time each day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.",
-      name = AbstractExpiresHeaderFilter.PROP_EXPIRES_TIME,
-      propertyPrivate = false),
-  @Property(
-        name = "webconsole.configurationFactory.nameHint",
-        value = "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]",
-        propertyPrivate = true)
-})
-//@formatter:on
+@Component(property = { "webconsole.configurationFactory.nameHint" + "="
+      + "Expires Daily at: {expires.time} for Patterns: [{filter.pattern}]", }, factory = "com.adobe.acs.commons.http.headers.impl.DailyExpiresHeaderFilter", configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Designate(ocd = DailyExpiresHeaderFilter.Config.class, factory=true)
+// @formatter:on
 public class DailyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
+   
+   @ObjectClassDefinition(name = "ACS AEM Commons - Dispatcher Expires Header - Daily", description = "Adds an Expires header to content to enable Dispatcher TTL support.")
+   public @interface Config {
 
-    @Override
-    protected void adjustExpires(Calendar next) {
-        if (next.before(Calendar.getInstance())) {
-            next.add(Calendar.DAY_OF_MONTH, 1);
-        }
-    }
+      @AttributeDefinition(name = "Filter Patterns", description = "Patterns on which to apply this Expires rule.", cardinality = Integer.MAX_VALUE)
+      String[] filter_pattern();
+
+      @AttributeDefinition(name = "Expires Time", description = "Time each day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.")
+      String expires_time();
+
+   }
+
+   @Override
+   protected void adjustExpires(Calendar next) {
+      if (next.before(Calendar.getInstance())) {
+         next.add(Calendar.DAY_OF_MONTH, 1);
+      }
+   }
 }

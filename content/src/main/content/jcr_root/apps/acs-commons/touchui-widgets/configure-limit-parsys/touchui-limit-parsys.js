@@ -124,7 +124,9 @@
         }
         var limit = parseInt(currentLimit);
         var children = getChildEditables(parsysEditable);
-        isWithin = children.length <= limit;
+        //Take into account also the number of components in the clipboard in case this is a "paste"
+        var itemsToAdd = Granite.author.clipboard.length < 1 ? 1 : Granite.author.clipboard.length;
+        isWithin = children.length - 1 + itemsToAdd <= limit;
 
         if(!isWithin){
             showErrorAlert("Limit of paragraphs within this paragraph system exceeded, allowed only up to " + currentLimit + " paragraphs.");

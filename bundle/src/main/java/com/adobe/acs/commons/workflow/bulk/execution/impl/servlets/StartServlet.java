@@ -17,48 +17,59 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
-import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
-import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.getBoolean;
+import static com.adobe.acs.commons.json.JsonObjectUtil.getInteger;
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
+import java.io.IOException;
+
+import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.servlet.ServletException;
-import java.io.IOException;
+import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
+import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Start Servlet
  */
 @SuppressWarnings("serial")
-@SlingServlet(
-        methods = {"POST"},
-        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
-        selectors = {"start"},
-        extensions = {"json"}
-)
+@Component(service = Servlet.class, property = {
+SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
+SLING_SERVLET_SELECTORS + "=start",
+SLING_SERVLET_METHODS + "=POST",
+SLING_SERVLET_EXTENSIONS + "=json" })
 public class StartServlet extends SlingAllMethodsServlet {
+
     private static final Logger log = LoggerFactory.getLogger(StartServlet.class);
 
     @Reference
     private BulkWorkflowEngine bulkWorkflowEngine;
-
+    
     @Override
     @SuppressWarnings("squid:S1192")
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -68,27 +79,26 @@ public class StartServlet extends SlingAllMethodsServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            final JSONObject params = new JSONObject(request.getParameter("params"));
+            final JsonObject params = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
             final ModifiableValueMap properties = request.getResource().adaptTo(ModifiableValueMap.class);
 
-            properties.put("runnerType", params.getString("runnerType"));
-            properties.put("queryType", params.getString("queryType"));
-            properties.put("queryStatement", params.getString("queryStatement"));
-            properties.put("relativePath", StringUtils.removeStart(params.optString("relativePath", ""), "/"));
-            properties.put("workflowModel", params.getString("workflowModelId"));
-            properties.put("interval", params.optInt("interval", 10));
-            properties.put("timeout", params.optInt("timeout", 30));
-            properties.put("throttle", params.optInt("throttle", 10));
-            properties.put("retryCount", params.optInt("retryCount", 0));
-            properties.put("batchSize", params.optInt("batchSize", 10));
-            String userEventData = params.optString("userEventData", null);
+            properties.put("runnerType", getString(params, "runnerType"));
+            properties.put("queryType", getString(params, "queryType"));
+            properties.put("queryStatement", getString(params, "queryStatement"));
+            properties.put("relativePath", StringUtils.removeStart(getString(params, "relativePath", ""), "/"));
+            properties.put("workflowModel", getString(params, "workflowModelId"));
+            properties.put("interval", getInteger(params, "interval", 10));
+            properties.put("timeout", getInteger(params, "timeout", 30));
+            properties.put("throttle", getInteger(params, "throttle", 10));
+            properties.put("retryCount", getInteger(params,"retryCount", 0));
+            properties.put("batchSize", getInteger(params,"batchSize", 10));
+            String userEventData = getString(params, "userEventData");
             if (userEventData != null && !userEventData.isEmpty()) {
                 properties.put("userEventData", userEventData);
             }
 
-            properties.put("purgeWorkflow", params.optBoolean("purgeWorkflow", false));
-            properties.put("autoThrottle", params.optBoolean("autoThrottle", true));
-
+            properties.put("purgeWorkflow", getBoolean(params, "purgeWorkflow", false));
+            properties.put("autoThrottle", getBoolean(params, "autoThrottle", true));
 
             if (AEMWorkflowRunnerImpl.class.getName().equals(properties.get("runnerType", String.class))
                     && isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {
@@ -110,13 +120,6 @@ public class StartServlet extends SlingAllMethodsServlet {
 
             response.sendRedirect(request.getResourceResolver().map(request, request.getResource().getPath()) + ".status.json");
 
-        } catch (JSONException e) {
-            log.error("Could not parse HTTP Request params: {}", e);
-
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not initialize Bulk Workflow due to invalid parameters."
-                            + " Please review the form and try again.",
-                    e.getMessage());
         } catch (RepositoryException e) {
             log.error("Could not initialize Bulk Workflow: {}", e);
 

@@ -21,6 +21,7 @@ package com.adobe.acs.commons.redirectmaps.models;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,9 +38,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.Source;
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +53,7 @@ import com.day.cq.commons.jcr.JcrConstants;
  * A Sling Model for serializing a RedirectMap configuration to a consolidated
  * RedirectMap text file
  */
+@ProviderType
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
@@ -75,19 +79,24 @@ public class RedirectMapModel {
     private ResourceResolver resourceResolver;
 
     private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, String suffix) {
-        List<MapEntry> entries = new ArrayList<MapEntry>();
+        List<MapEntry> entries = new ArrayList<>();
         while (items.hasNext()) {
             Resource item = items.next();
             String path = item.getPath();
-            ValueMap properties = item.getChild(JcrConstants.JCR_CONTENT).getValueMap();
+            ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+            Resource child = item.getChild(JcrConstants.JCR_CONTENT);
+            if (child != null) {
+                properties = child.getValueMap();
+            }
             FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
                     config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
             String pageUrl = config.getProtocol() + "://" + config.getDomain()
                     + resourceResolver.map(mockRequest, item.getPath() + suffix);
 
             String[] sources = properties.get(config.getProperty(), String[].class);
+            int i = 0;
             for (String source : sources) {
-                MapEntry entry = new MapEntry(source, pageUrl, item.getPath());
+                MapEntry entry = new MapEntry(i++, source, pageUrl, item.getPath());
                 if (source.matches(".*\\s+.*")) {
                     String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
                     log.warn(msg);
@@ -105,7 +114,7 @@ public class RedirectMapModel {
 
         log.debug("Getting all of the entries for {}", config.getResource());
 
-        List<MapEntry> entries = new ArrayList<MapEntry>();
+        List<MapEntry> entries = new ArrayList<>();
 
         String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
                 + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
@@ -123,11 +132,12 @@ public class RedirectMapModel {
     public List<MapEntry> getEntries() throws IOException {
         log.trace("getEntries");
 
-        List<MapEntry> entries = new ArrayList<MapEntry>();
+        List<MapEntry> entries = new ArrayList<>();
         if (redirectMap != null) {
             InputStream is = redirectMap.adaptTo(InputStream.class);
-            for (String line : IOUtils.readLines(is)) {
-                MapEntry entry = toEntry(line);
+            int i = 0;
+            for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
+                MapEntry entry = toEntry(i++, line);
                 if (entry != null) {
                     entries.add(entry);
                 }
@@ -140,7 +150,7 @@ public class RedirectMapModel {
             log.debug("No redirect configurations specified");
         }
 
-        Map<String, Integer> sources = new HashMap<String, Integer>();
+        Map<String, Integer> sources = new HashMap<>();
 
         for (MapEntry entry : entries) {
             if (!sources.containsKey(entry.getSource())) {
@@ -170,7 +180,7 @@ public class RedirectMapModel {
      */
     public List<MapEntry> getInvalidEntries() throws IOException {
         log.trace("getInvalidEntries");
-        List<MapEntry> invalidEntries = new ArrayList<MapEntry>();
+        List<MapEntry> invalidEntries = new ArrayList<>();
         if (redirects != null) {
             List<MapEntry> entries = getEntries();
 
@@ -195,7 +205,7 @@ public class RedirectMapModel {
             log.debug("Loading RedirectMap file from {}", redirectMap);
             sb.append("# Redirect Map File\n");
             InputStream is = redirectMap.adaptTo(InputStream.class);
-            sb.append(IOUtils.toString(is));
+            sb.append(IOUtils.toString(is, StandardCharsets.UTF_8));
         } else {
             log.debug("No redirect map specified");
         }
@@ -210,20 +220,20 @@ public class RedirectMapModel {
         return sb.toString();
     }
 
-    private MapEntry toEntry(String l) {
+    private MapEntry toEntry(int id, String l) {
         String[] seg = l.split("\\s+");
 
         MapEntry entry = null;
         if (StringUtils.isBlank(l) || l.startsWith("#")) {
             // Skip as the line is empty or a comment
         } else if (seg.length == 2) {
-            entry = new MapEntry(seg[0], seg[1], "File");
+            entry = new MapEntry(id, seg[0], seg[1], "File");
         } else if (seg.length > 2) {
-            entry = new MapEntry(seg[0], seg[1], "File");
+            entry = new MapEntry(id, seg[0], seg[1], "File");
             entry.setValid(false);
             entry.setStatus(String.format(WHITESPACE_MSG, l));
         } else {
-            entry = new MapEntry(seg[0], "", "File");
+            entry = new MapEntry(id, seg[0], "", "File");
             entry.setValid(false);
             entry.setStatus(String.format(NO_TARGET_MSG, l));
         }

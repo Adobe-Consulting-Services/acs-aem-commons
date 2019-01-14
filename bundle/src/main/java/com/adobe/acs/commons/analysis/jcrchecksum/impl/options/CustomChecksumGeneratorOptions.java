@@ -23,6 +23,11 @@ package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 import java.util.Collection;
 
 public class CustomChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {
+    
+    /**
+     * TODO: Please clarifiy the purpose of this class ... we should make the AbstractChecksumGeneratorOptions
+     * a non-abstract class and use it.
+     */
 
     @Override
     public void addIncludedNodeTypes(String[] arr) {
@@ -68,4 +73,25 @@ public class CustomChecksumGeneratorOptions extends AbstractChecksumGeneratorOpt
         }
     }
 
+    @Override
+    public void addExcludedNodeNames(String[] arr) {
+        super.addExcludedNodeNames(arr);
+    }
+
+    public void addExcludedNodeNames(Collection<String> col) {
+        if (col != null) {
+            super.addExcludedNodeNames(col.toArray(new String[col.size()]));
+        }
+    }
+
+    @Override
+    public void addExcludedSubTrees(String[] arr) {
+        super.addExcludedSubTrees(arr);
+    }
+
+    public void addExcludedSubTrees(Collection<String> col) {
+        if (col != null) {
+            super.addExcludedSubTrees(col.toArray(new String[col.size()]));
+        }
+    }
 }

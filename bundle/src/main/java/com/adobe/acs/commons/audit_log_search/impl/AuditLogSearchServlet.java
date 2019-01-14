@@ -25,13 +25,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +43,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,11 +53,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet",
-        methods = {"GET"},
-        resourceTypes = {"acs-commons/components/utilities/audit-log-search"},
-        selectors = {"auditlogsearch"},
-        extensions = {"json"}, metatype = false)
+
+
+@Component(service=Servlet.class)
+@SlingServletResourceTypes(
+        resourceTypes="acs-commons/components/utilities/audit-log-search", 
+        methods= "GET",
+        extensions="json",
+        selectors="auditlogsearch"
+        )
+
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 

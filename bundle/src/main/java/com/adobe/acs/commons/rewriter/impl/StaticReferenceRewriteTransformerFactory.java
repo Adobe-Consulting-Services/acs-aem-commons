@@ -28,17 +28,16 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -53,21 +52,40 @@ import com.adobe.acs.commons.util.ParameterUtil;
  *
  */
 @Component(
-        label = "ACS AEM Commons - Static Reference Rewriter",
-        description = "Rewriter pipeline component which rewrites host name on static references "
-                + "for cookie-less domain support",
-        metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-    @Property(
-            name = "pipeline.type", label = "Rewriter Pipeline Type",
-            description = "Type identifier to be referenced in rewriter pipeline configuration."),
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Pipeline: {pipeline.type}")
-})
+      configurationPolicy = ConfigurationPolicy.REQUIRE, service=TransformerFactory.class,property= {
+      "webconsole.configurationFactory.nameHint" + "=" + "Pipeline: {pipeline.type}"
+      })
 
+@Designate(ocd=StaticReferenceRewriteTransformerFactory.Config.class,factory=true)
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
+
+@ObjectClassDefinition(name= "ACS AEM Commons - Static Reference Rewriter",
+        description = "Rewriter pipeline component which rewrites host name on static references "
+                + "for cookie-less domain support")
+public @interface Config {
+@AttributeDefinition(name = "Rewriter Pipeline Type",
+            description = "Type identifier to be referenced in rewriter pipeline configuration.")
+String pipeline_type();
+
+@AttributeDefinition(name = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", defaultValue = {
+            "img:src", "link:href", "script:src" })
+    String[] attributes();
+
+@AttributeDefinition(name = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
+    String[] matchingPatterns();
+
+@AttributeDefinition(defaultValue = ""+DEFAULT_HOST_COUNT, name = "Static Host Count",
+            description = "Number of static hosts available.")
+    int host_count();
+
+@AttributeDefinition(name = "Static Host Pattern", description = "Pattern for generating static host domain names. "
+            + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.")
+    String[] host_pattern();
+
+@AttributeDefinition(name = "Path Prefixes",
+            description = "Path prefixes to rewrite.")
+    String[] prefixes();
+}
 
     public final class StaticReferenceRewriteTransformer extends AbstractTransformer {
 
@@ -87,23 +105,14 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
-    @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
-            "img:src", "link:href", "script:src" })
     private static final String PROP_ATTRIBUTES = "attributes";
 
-    @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
     private static final String PROP_MATCHING_PATTERNS = "matchingPatterns";
 
-    @Property(intValue = DEFAULT_HOST_COUNT, label = "Static Host Count",
-            description = "Number of static hosts available.")
     private static final String PROP_HOST_COUNT = "host.count";
 
-    @Property(label = "Static Host Pattern", description = "Pattern for generating static host domain names. "
-            + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.", unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
 
-    @Property(unbounded = PropertyUnbounded.ARRAY, label = "Path Prefixes",
-            description = "Path prefixes to rewrite.")
     private static final String PROP_PREFIXES = "prefixes";
 
     private Map<String, String[]> attributes;

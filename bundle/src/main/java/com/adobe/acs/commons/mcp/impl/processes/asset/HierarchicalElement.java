@@ -22,7 +22,11 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.commons.jcr.JcrUtil;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,17 +60,32 @@ public interface HierarchicalElement {
 
     String getJcrBasePath();
 
-    default String getNodePath() {
+    default String getNodePath(boolean preserveName) {
         HierarchicalElement parent = getParent();
         if (excludeBaseFolder()) {
-            return parent == null ? getJcrBasePath() : parent.getNodePath() + "/" + getNodeName();
+            return parent == null ? getJcrBasePath() : parent.getNodePath(preserveName) + "/" + getNodeName(preserveName);
         } else {
-            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
+            return (parent == null ? getJcrBasePath() : parent.getNodePath(preserveName)) + "/" + getNodeName(preserveName);
         }
     }
 
-    default String getNodeName() {
+    default String getNodeName(boolean preserveName) {
         String name = getName();
+        if (name == null) {
+            return null;
+        }
+        if (preserveName) {
+            return getNodeName(name);
+        }
+        if (isFile() && name.contains(".")) {
+            String baseName = org.apache.commons.lang3.StringUtils.substringBeforeLast(name, ".");
+            String extension = org.apache.commons.lang3.StringUtils.substringAfterLast(name, ".");
+            return NameUtil.createValidDamName(baseName) + "." + NameUtil.createValidDamName(extension);
+        }
+        return name.matches(NameUtil.VALID_NAME_REGEXP) ? name : NameUtil.createValidDamName(name);
+    }
+
+    default String getNodeName(String name) {
         if (isFile() && name.contains(".")) {
             return name;
         } else if (JcrUtil.isValidName(name)) {
@@ -119,5 +138,28 @@ public interface HierarchicalElement {
     @SuppressWarnings("squid:S00112")
     default void visitAllFiles(CheckedConsumer<HierarchicalElement> visitor) throws Exception {
         visitAllFiles(visitor, HierarchicalElement::getFolderChildren, HierarchicalElement::getFileChildren);
+    }
+
+
+    class UriHelper {
+        private static String SFTP_URL_ENCODING = "utf-8";
+        private static int FIRST_SUB_PATH_INDEX = 3;
+
+        private UriHelper(){}
+
+        static String encodeUriParts(final String uri) throws UnsupportedEncodingException {
+            String[] uriParts = uri.split("/");
+
+            //path parts started from index 3
+            for (int i = FIRST_SUB_PATH_INDEX; i < uriParts.length; i++) {
+                uriParts[i] = URLEncoder.encode(uriParts[i], SFTP_URL_ENCODING);
+            }
+
+            return StringUtils.join(uriParts, "/");
+        }
+
+        static String decodeUriParts(final String uri) throws UnsupportedEncodingException {
+            return URLDecoder.decode(uri, SFTP_URL_ENCODING);
+        }
     }
 }

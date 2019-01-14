@@ -30,7 +30,6 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.data.CompositeVariant;
 import com.adobe.acs.commons.data.Spreadsheet;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -58,7 +57,6 @@ public class DataImporter extends ProcessDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataImporter.class);
     private static final String PATH = "path";
-    private boolean enableHeaderNameConversion = false;
 
     public enum MergeMode {
         CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
@@ -101,6 +99,13 @@ public class DataImporter extends ProcessDefinition {
             options = {"default=sling:Folder"}
     )
     private String defaultNodeType = "sling:Folder";
+    
+    @FormField(
+            name = "Convert header names",
+            description = "If checked, property names in the header are converted to lower-case and non-compatible characters are converted to underscores",
+            component = CheckboxComponent.class
+    )
+    private boolean enableHeaderNameConversion = false;    
 
     @FormField(
             name = "Dry run",

@@ -22,37 +22,37 @@ package com.adobe.acs.commons.quickly.results.impl.serializers;
 
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.Action;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public abstract class AbstractResultSerializer {
 
-    public JSONObject toJSON(final Result result) throws JSONException {
-        final JSONObject json = new JSONObject();
+    public JsonObject toJSON(final Result result) {
+        final JsonObject json = new JsonObject();
 
-        json.put("title", result.getTitle());
-        json.put("type", result.getResultType());
-        json.put("description", result.getDescription());
-        json.put("path", result.getPath());
+        json.addProperty("title", result.getTitle());
+        json.addProperty("type", result.getResultType());
+        json.addProperty("description", result.getDescription());
+        json.addProperty("path", result.getPath());
 
-        json.put("action", this.toJSON(result.getAction()));
-        json.put("secondaryAction", this.toJSON(result.getSecondaryAction()));
+        json.add("action", this.toJSON(result.getAction()));
+        json.add("secondaryAction", this.toJSON(result.getSecondaryAction()));
 
         return json;
     }
 
-    public JSONObject toJSON(final Action action) throws JSONException {
+    public JsonObject toJSON(final Action action) {
 
-        final JSONObject json = new JSONObject();
+        final JsonObject json = new JsonObject();
 
         if (action != null) {
-            json.put("uri", action.getUri());
-            json.put("method", action.getMethod());
-            json.put("target", action.getTarget());
-            json.put("xhr", false);
-            json.put("script", action.getScript());
-            json.put("params", new JSONObject(action.getParams()));
+            Gson gson = new Gson();
+            json.addProperty("uri", action.getUri());
+            json.addProperty("method", action.getMethod().name());
+            json.addProperty("target", action.getTarget().name());
+            json.addProperty("xhr", false);
+            json.addProperty("script", action.getScript());
+            json.add("params", gson.toJsonTree(action.getParams()));
         }
 
         return json;

@@ -20,19 +20,17 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.ImageTransformer;
-import com.day.image.Layer;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import com.adobe.acs.commons.images.ImageTransformer;
+import com.day.image.Layer;
 
 /**
  * ACS AEM Commons - Image Transformer - Resize
@@ -40,14 +38,10 @@ import java.util.Map;
  * If either is left blank the missing dimension will be computed based on the original layer's
  * aspect ratio
  */
-@Component
-@Properties({
-        @Property(
-                name = ImageTransformer.PROP_TYPE,
-                value = ResizeImageTransformerImpl.TYPE
-        )
-})
-@Service
+
+@Component(service=ImageTransformer.class, property = {
+      ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE})
+@Designate(ocd=ResizeImageTransformerImpl.Config.class)
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
@@ -61,10 +55,15 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
-    @Property(label = "Max dimension in px",
-            description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-            intValue = DEFAULT_MAX_DIMENSION)
-    public static final String PROP_MAX_DIMENSION = "max-dimension";
+
+    @ObjectClassDefinition
+    public @interface Config {
+        @AttributeDefinition(name = "Max dimension in px",
+                description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
+                defaultValue = ""+ DEFAULT_MAX_DIMENSION)
+        int max_dimension() default DEFAULT_MAX_DIMENSION;
+
+    }
 
     @Override
     public final Layer transform(final Layer layer, final ValueMap properties) {
@@ -104,7 +103,7 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
 
     @Activate
-    protected final void activate(final Map<String, String> config) {
-        maxDimension = PropertiesUtil.toInteger(config.get(PROP_MAX_DIMENSION), DEFAULT_MAX_DIMENSION);
+    protected final void activate(ResizeImageTransformerImpl.Config config) {
+        maxDimension = config.max_dimension();
     }
 }

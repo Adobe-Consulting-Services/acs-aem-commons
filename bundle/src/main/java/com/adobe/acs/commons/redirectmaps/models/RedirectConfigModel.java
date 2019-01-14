@@ -24,10 +24,12 @@ import javax.inject.Inject;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Sling Model interface for each instance of the redirect config.
  */
+@ProviderType
 @Model(adaptables = Resource.class)
 public interface RedirectConfigModel {
 
