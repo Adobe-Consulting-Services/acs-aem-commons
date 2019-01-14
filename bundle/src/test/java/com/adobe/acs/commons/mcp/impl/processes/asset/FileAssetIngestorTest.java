@@ -72,7 +72,7 @@ public class FileAssetIngestorTest {
     private static final String SFTP_USER_TEST_PASSWORD = "password";
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
     private ActionManager actionManager;

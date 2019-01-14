@@ -44,7 +44,7 @@ public class PermissionSensitiveCacheServletTest {
     public static final String TEST_PAGE = "/content/test.html";
 
     @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @InjectMocks
     private PermissionSensitiveCacheServlet servlet = new PermissionSensitiveCacheServlet();
