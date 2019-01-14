@@ -20,11 +20,22 @@
 package com.adobe.acs.commons.wrap.cqsearch;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.annotation.Nonnull;
 
+import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
+import com.day.cq.search.eval.PredicateEvaluator;
+import com.day.cq.search.facets.Bucket;
 import com.day.cq.search.result.SearchResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,20 +50,58 @@ public class QueryIWrapTest {
     Query query;
 
     @Mock
+    Query refinedQuery;
+
+    @Mock
     SearchResult searchResult;
 
-    long start = 10L;
+    PredicateGroup predicates = new PredicateGroup();
 
     @Before
     public void setUp() throws Exception {
+        when(query.getStart()).thenReturn(10L);
+        when(query.getHitsPerPage()).thenReturn(42L);
+        when(query.getExcerpt()).thenReturn(true);
+        when(query.getPredicates()).thenReturn(predicates);
+        when(query.refine(any(Bucket.class))).thenReturn(refinedQuery);
         when(query.getResult()).thenReturn(searchResult);
-        when(query.getStart()).then((invocation) -> start);
     }
 
     @Test
     public void testQueryWrapper() {
         WrapQuery wrapQuery = new WrapQuery(query);
+
         assertEquals("getStart() should return 10L", 10L, wrapQuery.getStart());
+        assertEquals("getHitsPerPage() should return 42L", 42L, wrapQuery.getHitsPerPage());
+        assertTrue("getExcerpt() should return true", wrapQuery.getExcerpt());
+        assertSame("getPredicates() should return mocked predicates", predicates, wrapQuery.getPredicates());
+        assertSame("getResult() should return mocked SearchResult", searchResult, wrapQuery.getResult());
+
+        assertSame("wrapQuery.wrapQuery(refinedQuery) should return refinedQuery",
+                refinedQuery, wrapQuery.wrapQuery(refinedQuery));
+
+        wrapQuery.setStart(0L);
+        verify(query, times(1)).setStart(0L);
+        wrapQuery.setHitsPerPage(10L);
+        verify(query, times(1)).setHitsPerPage(10L);
+        wrapQuery.setExcerpt(false);
+        verify(query, times(1)).setExcerpt(false);
+
+        final String predType = "testPredicate";
+        final PredicateEvaluator mockPredEval = mock(PredicateEvaluator.class);
+
+        doAnswer((invocation) -> {
+            String predTypeArg = invocation.getArgumentAt(0, String.class);
+            PredicateEvaluator predEvalArg = invocation.getArgumentAt(1, PredicateEvaluator.class);
+            assertEquals("expect same predicate type arg", predType, predTypeArg);
+            assertSame("expect same PredicateEvaluator instance arg", mockPredEval, predEvalArg);
+            return null;
+        }).when(query).registerPredicateEvaluator(anyString(), any(PredicateEvaluator.class));
+
+        wrapQuery.registerPredicateEvaluator(predType, mockPredEval);
+
+        verify(query, times(1))
+                .registerPredicateEvaluator(anyString(), any(PredicateEvaluator.class));
     }
 
     static class WrapQuery implements QueryIWrap {
