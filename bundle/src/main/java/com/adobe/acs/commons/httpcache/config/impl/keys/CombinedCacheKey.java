@@ -24,6 +24,7 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -44,8 +47,7 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKey.class);
 
-    private List<CacheKey> cacheKeys;
-
+    private LinkedList<CacheKey> cacheKeys;
 
     public CombinedCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, List<CacheKeyFactory>  cacheKeyFactories) {
         super(request, cacheConfig);
@@ -54,7 +56,7 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
                 .stream()
                 .map((factory) -> createCacheKey(request, cacheConfig, factory))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public CombinedCacheKey(String uri, HttpCacheConfig cacheConfig, List<CacheKeyFactory> cacheKeyFactories) {
@@ -64,7 +66,7 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
                 .stream()
                 .map((factory) -> createCacheKey(uri, cacheConfig, factory))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -78,6 +80,10 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
         CombinedCacheKey other = (CombinedCacheKey) o;
 
+        if(other == null){
+            return false;
+        }
+
         for(int i= 0; i<cacheKeys.size();i++){
             CacheKey otherDelegate = other.getDelegate(i);
             CacheKey ownDelegate = this.getDelegate(i);
@@ -88,6 +94,13 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(getUri())
+                .append(getAuthenticationRequirement()).toHashCode();
     }
 
     private CacheKey createCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, CacheKeyFactory factory) {
@@ -129,6 +142,6 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
             throws IOException, ClassNotFoundException {
 
         parentReadObject(o);
-        cacheKeys = (List<CacheKey>) o.readObject();
+        cacheKeys = (LinkedList<CacheKey>) o.readObject();
     }
 }
