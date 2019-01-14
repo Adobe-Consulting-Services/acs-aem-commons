@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
-- Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
+- #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 
 ### Fixed

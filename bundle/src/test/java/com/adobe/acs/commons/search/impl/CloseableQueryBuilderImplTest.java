@@ -29,7 +29,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,10 +38,12 @@ import java.util.Collections;
 import javax.jcr.Session;
 
 import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.wrap.cqsearch.QueryIWrap;
 import com.adobe.acs.commons.wrap.jcr.BaseSessionIWrap;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.facets.Bucket;
 import com.day.cq.search.result.SearchResult;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.sling.api.resource.Resource;
@@ -222,5 +223,38 @@ public class CloseableQueryBuilderImplTest {
         closeableQueryBuilder.clearFacetCache();
         verify(mockQueryBuilder, times(1)).clearFacetCache();
 
+    }
+
+    @Test
+    public void testRefineQuery() {
+        final Query mockQuery = mock(Query.class);
+        final Bucket bucket = mock(Bucket.class);
+        final Query mockRefinedQuery = mock(Query.class);
+
+        when(mockQuery.refine(bucket)).thenReturn(mockRefinedQuery);
+        when(mockQueryBuilder.createQuery(any(Session.class))).thenReturn(mockQuery);
+
+        Query refinedQuery = closeableQueryBuilder.createQuery(contextResolver).refine(bucket);
+        assertNotSame("refined query should not be same as mock", refinedQuery, mockRefinedQuery);
+        assertTrue("refined query should also be wrapper: " + refinedQuery.getClass().getName(),
+                refinedQuery instanceof QueryIWrap);
+    }
+
+    @Test
+    public void testCloseableQueryImpl_wrapQuery() {
+        final Query mockQuery = mock(Query.class);
+        final CloseableQueryBuilderImpl.CloseableQueryImpl closeableQuery =
+                new CloseableQueryBuilderImpl.CloseableQueryImpl(mockQuery);
+
+        final Query mockOtherQuery = mock(Query.class);
+        final CloseableQueryBuilderImpl.CloseableQueryImpl closeableOtherQuery =
+                new CloseableQueryBuilderImpl.CloseableQueryImpl(mockOtherQuery);
+
+        final Query wrappedOther = closeableQuery.wrapQuery(mockOtherQuery);
+        assertNotSame("wrapped other should not be same as mock other", mockOtherQuery, wrappedOther);
+
+        final Query wrappedCloseableOther = closeableQuery.wrapQuery(closeableOtherQuery);
+        assertSame("wrapped closeable other should be same as closable other", closeableOtherQuery,
+                wrappedCloseableOther);
     }
 }
