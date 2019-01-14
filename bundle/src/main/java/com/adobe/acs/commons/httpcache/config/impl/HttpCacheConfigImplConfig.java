@@ -149,7 +149,7 @@ public @interface HttpCacheConfigImplConfig {
                     + "(service.pid=" + DEFAULT_KEY_FACTORY_TARGET + ")."
                     + " Mandatory parameter.",
             defaultValue = DEFAULT_KEY_FACTORY_TARGET)
-    String cacheKeyFactory() default DEFAULT_KEY_FACTORY_TARGET;
+    String cacheKeyFactory_target() default DEFAULT_KEY_FACTORY_TARGET;
 
     @AttributeDefinition(name = "HttpCacheConfigImplConfig-specific HttpCacheHandlingRules",
             description = "List of Service pid of HttpCacheHandlingRule applicable for this cache config. Optional "

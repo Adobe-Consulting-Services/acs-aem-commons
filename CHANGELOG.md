@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
+- #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 
 ### Fixed
 - #1667 - Refactored the activate methods of all http cache services
