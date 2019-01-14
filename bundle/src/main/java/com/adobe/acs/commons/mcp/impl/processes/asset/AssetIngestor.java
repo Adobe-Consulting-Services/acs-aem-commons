@@ -296,11 +296,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
 
                 if (asset == null) {
-                    AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
-                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                    throw ex;
+                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath));
+                } else {
+                    saveMigrationInfo(source, asset);
                 }
-                saveMigrationInfo(source, asset);
 
                 r.commit();
                 r.refresh();
