@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RemoteAssetsTestUtil {
-    public static final String TEST_SERVER_URL = "https://remote-aem-server:4502/";
+    public static final String TEST_SERVER_URL = "https://remote-aem-server:4502";
     public static final String TEST_SERVER_USERNAME = "admin";
     public static final String TEST_SERVER_PASSWORD = "passwd";
     public static final String TEST_TAGS_PATH_A = "/content/cq:tags/a";

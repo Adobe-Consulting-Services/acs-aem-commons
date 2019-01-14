@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,9 +130,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         LOG.debug("Syncing from remote asset url {}", remoteUrl);
         Executor executor = this.remoteAssetsConfig.getRemoteAssetsHttpExecutor();
         try (InputStream inputStream = executor.execute(Request.Get(remoteUrl)).returnContent().asStream()) {
-            Map<String, Object> props = new HashMap<>();
-            props.put(RenditionHandler.PROPERTY_RENDITION_MIME_TYPE, assetRendition.getMimeType());
-            asset.addRendition(renditionName, inputStream, props);
+            asset.addRendition(renditionName, inputStream, assetRendition.getMimeType());
         } catch (HttpResponseException fne) {
             if (DamConstants.ORIGINAL_FILE.equals(renditionName) || fne.getStatusCode() != HTTP_NOT_FOUND) {
                 throw fne;
@@ -150,7 +149,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         try {
             Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
             ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
-            localResProps.put(RemoteAssets.REMOTE_SYNC_FAILED, new DateValue(new GregorianCalendar()));
+            localResProps.put(RemoteAssets.REMOTE_SYNC_FAILED, Calendar.getInstance());
             remoteAssetsResolver.commit();
         } catch (Exception e) {
             LOG.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);

@@ -87,7 +87,7 @@ public class RemoteAssetDecoratorTest {
         Node nodeAssetRenditions = nodeAssetContent.addNode(DamConstants.RENDITIONS_FOLDER, JcrConstants.NT_FOLDER);
         Node nodeRenditionOrig = nodeAssetRenditions.addNode(DamConstants.ORIGINAL_FILE, JcrConstants.NT_FILE);
         Node nodeRenditionOrigContent = nodeRenditionOrig.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
-        nodeRenditionOrigContent.setProperty(JcrConstants.JCR_DATA, valueFactory.createBinary(ClassLoader.getSystemResourceAsStream("img/remote_asset.png")));
+        nodeRenditionOrigContent.setProperty(JcrConstants.JCR_DATA, valueFactory.createBinary(ClassLoader.getSystemResourceAsStream("remoteassets/remote_asset.png")));
     }
 
     private void setupFinish() {
@@ -290,7 +290,7 @@ public class RemoteAssetDecoratorTest {
     @Test
     public void testGetResourceWaitsForSyncInProgress() {
         Resource assetContent = context.resourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-        when(remoteAssetDecorator.isAlreadySyncing(TEST_REMOTE_ASSET_CONTENT_PATH)).thenReturn(true).thenReturn(true).thenReturn(true).thenReturn(true)
+        when(remoteAssetDecorator.isAlreadySyncing(TEST_REMOTE_ASSET_CONTENT_PATH)).thenReturn(true).thenReturn(true).thenReturn(true)
                 .then(new Answer<Boolean>() {
                     @Override
                     public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
