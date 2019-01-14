@@ -25,8 +25,10 @@ import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestCookieKeyV
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.google.common.collect.ImmutableSet;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 
 import javax.servlet.http.Cookie;
@@ -56,6 +58,12 @@ public class RequestCookieHttpCacheConfigExtension extends AbstractKeyValueExten
     protected KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String, String> allowedValues) {
         ImmutableSet<Cookie> presentCookies = ImmutableSet.copyOf(request.getCookies());
         return new RequestCookieKeyValueWrapperBuilder(allowedKeys, allowedValues, presentCookies);
+    }
+
+    @Activate
+    @Modified
+    protected void activate(KeyValueConfig config){
+        this.init(config);
     }
 
 }

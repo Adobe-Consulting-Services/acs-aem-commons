@@ -26,19 +26,18 @@ import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueConfigHelper;
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapperBuilder;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.ValueMapKeyValueWrapperBuilder;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.google.common.collect.ImmutableSet;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ValueMap;
-import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.Map;
 import java.util.Set;
 
+@Component
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
     private boolean emptyAllowed;
@@ -86,8 +85,7 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
 
     protected abstract KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String,String> allowedValues);
 
-    @Activate
-    protected void activate(KeyValueConfig config){
+    protected void init(KeyValueConfig config){
         this.emptyAllowed = config.emptyAllowed();
         this.valueMapKeys = ImmutableSet.copyOf(config.allowedKeys());
         this.configName = config.configName();
