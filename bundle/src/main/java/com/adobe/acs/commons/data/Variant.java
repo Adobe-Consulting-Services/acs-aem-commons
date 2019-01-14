@@ -34,8 +34,9 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 /**
- * Used to represent values that might be provided as one type but used as another. Avoids glue code and switch
- * statements in other parts of the code expecially dealing with data from spreadsheets.
+ * Used to represent values that might be provided as one type but used as
+ * another. Avoids glue code and switch statements in other parts of the code
+ * especially dealing with data from spreadsheets.
  */
 @ProviderType
 public final class Variant {
@@ -244,7 +245,8 @@ public final class Variant {
     }
 
     /**
-     * Truthiness is any non-empty string that looks like a non-zero number or looks like it is True, Yes, or X
+     * Truthiness is any non-empty string that looks like a non-zero number or
+     * looks like it is True, Yes, or X
      *
      * @param s String to evaluate
      * @return True if it is truthy, otherwise false

@@ -21,7 +21,6 @@ package com.adobe.acs.commons.fam.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -55,12 +54,9 @@ import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.Failure;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
-import com.adobe.acs.commons.functions.BiConsumer;
-import com.adobe.acs.commons.functions.BiFunction;
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedBiFunction;
 import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.functions.Consumer;
 
 /**
  * Manages a pool of reusable resource resolvers and injects them into tasks
@@ -148,11 +144,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
-    public void deferredWithResolver(final Consumer<ResourceResolver> action) {
-        this.deferredWithResolver((CheckedConsumer<ResourceResolver>) action);
-    }
-
-    @Override
     public void deferredWithResolver(final CheckedConsumer<ResourceResolver> action) {
         deferredWithResolver(action, false);
     }
@@ -200,11 +191,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
     }
 
     @Override
-    public void withResolver(Consumer<ResourceResolver> action) throws Exception {
-        withResolver((CheckedConsumer<ResourceResolver>) action);
-    }
-
-    @Override
     @SuppressWarnings({"squid:S1181", "squid:S1163", "squid:S1143"})
     public void withResolver(CheckedConsumer<ResourceResolver> action) throws Exception {
         Actions.setCurrentActionManager(this);
@@ -223,18 +209,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
             }
             Actions.setCurrentActionManager(null);
         }
-    }
-
-    @Override
-    public int withQueryResults(
-            final String queryStatement,
-            final String language,
-            final BiConsumer<ResourceResolver, String> callback,
-            final BiFunction<ResourceResolver, String, Boolean>... filters
-    )
-            throws RepositoryException, PersistenceException, Exception {
-        return withQueryResults(queryStatement, language, (CheckedBiConsumer<ResourceResolver, String>) callback,
-                Arrays.copyOf(filters, filters.length, CheckedBiFunction[].class));
     }
 
     @Override
@@ -282,11 +256,6 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
         if (getErrorCount() > 0) {
             processErrorHandlers();
         }
-    }
-
-    @Override
-    public void addCleanupTask() {
-        // This is deprecated, only included for backwards-compatibility.
     }
 
     @Override

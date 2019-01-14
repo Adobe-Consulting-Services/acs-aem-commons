@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- since we install rep:policy nodes whose rep:privileges properties reference the crx:replicate privilege,
+     we should include it within the package -->
+<privileges xmlns:crx="http://www.day.com/crx/1.0">
+    <privilege abstract="false" name="crx:replicate"/>
+</privileges>

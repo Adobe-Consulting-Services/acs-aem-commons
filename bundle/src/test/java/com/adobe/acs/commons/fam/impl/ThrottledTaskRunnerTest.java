@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
+import java.util.Collections;
 
 public class ThrottledTaskRunnerTest {
 
@@ -46,7 +47,7 @@ public class ThrottledTaskRunnerTest {
     public void testExecutionOrderOverflow() throws NotCompliantMBeanException, InterruptedException {
         ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
 
-        List<Long> executions = new ArrayList<>();
+        List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
         for(int i=0;i<10;i++) {
             int finalI = i;

@@ -152,7 +152,7 @@ public class SystemNotificationsImplTest {
         aemContext.registerInjectActivateService(notifications);
 
         aemContext.request().setResource(aemContext.resourceResolver().getResource("/"));
-        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.shaHex("/etc/acs-commons/notifications/enabled0")));
+        aemContext.request().addCookie(new Cookie("acs-commons-system-notifications", "uid-" + DigestUtils.sha1Hex("/etc/acs-commons/notifications/enabled0")));
 
         notifications.doFilter(aemContext.request(), aemContext.response(), outputChain);
         String output = aemContext.response().getOutputAsString();

@@ -20,59 +20,79 @@
 package com.adobe.acs.commons.auth.saml.impl;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.auth.core.spi.AuthenticationHandler;
 import org.apache.sling.auth.core.spi.AuthenticationInfo;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * When using the SAML 2.0 Template from Okta, traditional Single Log Out (SLO) support
  * is not available. Logout is instead supported through a special URL.
- * 
+ *
  * Details are here: https://community.okta.com/community/okta/blog/2014/01/31/logout-and-redirect-to-an-url
  */
-@Component(label = "ACS AEM Commons - Okta Logout Handler",
-        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout",
-        metatype = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "ACS AEM Commons Okta Logout Handler", propertyPrivate = true),
-    @Property(name = Constants.SERVICE_RANKING, intValue = 5003, propertyPrivate = false),
-    @Property(name = AuthenticationHandler.PATH_PROPERTY, value = "/", propertyPrivate = false)
+
+
+/**
+ *
+ * TODO:
+ * - improve the descriptions
+ * - add a configuration policy to only work with a provided configuration
+ *
+ */
+@Component(service=AuthenticationHandler.class,
+configurationPolicy=ConfigurationPolicy.REQUIRE,
+        property= {
+      Constants.SERVICE_DESCRIPTION + "=" + "ACS AEM Commons Okta Logout Handler",
 })
+@Designate(ocd=OktaLogoutHandler.Config.class)
 public class OktaLogoutHandler implements AuthenticationHandler {
 
-    @Property
-    private static final String PROP_OKTA_HOST_NAME = "okta.host.name";
+   @ObjectClassDefinition(name = "ACS AEM Commons - Okta Logout Handler",
+        description = "Specific Authentication Handler to handle logout to Okta SSO Provider which, in some configurations, does not support traditional Single Logout")
+   public @interface Config {
 
-    @Property
-    private static final String PROP_FROM_URI = "from.uri";
+       int DEFAULT_SERVICE_RANKING = 5003;
+       String DEFAULT_PATH = "/";
+
+       @AttributeDefinition(defaultValue = ""+ DEFAULT_SERVICE_RANKING)
+       int service_ranking() default DEFAULT_SERVICE_RANKING;
+
+       @AttributeDefinition(defaultValue = DEFAULT_PATH)
+       String path() default DEFAULT_PATH;
+
+       @AttributeDefinition
+       String okta_host_name();
+
+       @AttributeDefinition
+       String from_uri();
+    }
 
     private String redirectLocation;
 
     @Activate
-    protected void activate(Map<String, Object> props) {
-        String oktaHostName = PropertiesUtil.toString(props.get(PROP_OKTA_HOST_NAME), null);
+    protected void activate(OktaLogoutHandler.Config config) {
+        String oktaHostName = config.okta_host_name();
         if (oktaHostName == null) {
             throw new IllegalArgumentException("Okta Host Name must be provided");
         }
-        String fromUri = PropertiesUtil.toString(props.get(PROP_FROM_URI), null);
+
         StringBuilder builder = new StringBuilder("https://");
-        builder.append(oktaHostName);
+        builder.append(config.okta_host_name());
         builder.append("/login/signout");
-        if (fromUri != null) {
-            builder.append("?fromURI=").append(fromUri);
+        if (config.from_uri() != null) {
+            builder.append("?fromURI=").append(config.from_uri());
         }
         this.redirectLocation = builder.toString();
     }

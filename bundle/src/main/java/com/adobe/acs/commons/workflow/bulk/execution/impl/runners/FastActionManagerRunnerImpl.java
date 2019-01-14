@@ -22,7 +22,6 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.runners;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.DeferredActions;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.util.QueryHelper;
@@ -35,14 +34,13 @@ import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
 import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 import com.day.cq.workflow.WorkflowException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +50,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.sling.api.resource.LoginException;
 
-@Component
-@Service
+@Component(service=BulkWorkflowRunner.class)
 public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implements BulkWorkflowRunner {
     private static final Logger log = LoggerFactory.getLogger(FastActionManagerRunnerImpl.class);
 
@@ -72,15 +69,12 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
     @Reference
     private SyntheticWorkflowRunner syntheticWorkflowRunnerRef;
 
-    @Reference
-    private DeferredActions actionsRef;
-
     /**
      * {@inheritDoc}
      */
     @Override
     public final Runnable getRunnable(final Config config) {
-        return new FastActionManagerRunnable(config, resourceResolverFactoryRef, queryHelperRef, actionManagerFactoryRef, actionsRef, syntheticWorkflowRunnerRef);
+        return new FastActionManagerRunnable(config, resourceResolverFactoryRef, queryHelperRef, actionManagerFactoryRef, syntheticWorkflowRunnerRef);
     }
 
     @Override
@@ -169,21 +163,18 @@ public class FastActionManagerRunnerImpl extends AbstractWorkflowRunner implemen
         private final ResourceResolverFactory resourceResolverFactory;
         private final QueryHelper queryHelper;
         private final ActionManagerFactory actionManagerFactory;
-        private final DeferredActions actions;
         private final SyntheticWorkflowRunner syntheticWorkflowRunner;
 
         public FastActionManagerRunnable(Config config,
                                          ResourceResolverFactory resourceResolverFactory,
                                          QueryHelper queryHelper,
                                          ActionManagerFactory actionManagerFactory,
-                                         DeferredActions actions,
                                          SyntheticWorkflowRunner syntheticWorkflowRunner) {
 
             this.configPath = config.getPath();
             this.resourceResolverFactory = resourceResolverFactory;
             this.queryHelper = queryHelper;
             this.actionManagerFactory = actionManagerFactory;
-            this.actions = actions;
             this.syntheticWorkflowRunner = syntheticWorkflowRunner;
         }
 

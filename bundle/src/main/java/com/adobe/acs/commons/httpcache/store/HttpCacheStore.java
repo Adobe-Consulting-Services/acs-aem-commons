@@ -38,10 +38,14 @@ public interface HttpCacheStore {
     String VALUE_DISK_CACHE_STORE_TYPE = "DISK";
     /** Value representing JCR type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
     String VALUE_JCR_CACHE_STORE_TYPE = "JCR";
+    /** Value representing EHCache type of cache store for the key {@link #KEY_CACHE_STORE_TYPE} */
+    String VALUE_CAFFEINE_MEMORY_STORE_TYPE = "CAFFEINE";
 
+    String PN_TTL = "httpcache.cachestore.ttl";
+    String PN_MAXSIZE = "httpcache.cachestore.maxsize";
     /**
      * Put an item into the cache.
-     *
+     *oh.
      * @param key     Object holding the key attributes.
      * @param content Object holding the content which needs to be cached.
      * @throws HttpCacheDataStreamException Failure when reading the input stream.
@@ -96,4 +100,10 @@ public interface HttpCacheStore {
      * @return
      */
     TempSink createTempSink();
+
+    /**
+     * Returns the store type of this store.
+     * @return
+     */
+    String getStoreType();
 }

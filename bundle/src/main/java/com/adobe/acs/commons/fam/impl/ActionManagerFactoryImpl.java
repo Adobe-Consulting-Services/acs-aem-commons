@@ -19,31 +19,32 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularDataSupport;
+
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularDataSupport;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
 
-@Component
-@Service(ActionManagerFactory.class)
-@Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Action Manager")
+@Component(service=ActionManagerFactory.class, property= {
+"jmx.objectname=com.adobe.acs.commons:type=Action Manager"
+})
 public class ActionManagerFactoryImpl extends AnnotatedStandardMBean implements ActionManagerFactory {
 
 

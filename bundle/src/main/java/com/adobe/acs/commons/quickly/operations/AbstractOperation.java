@@ -25,7 +25,6 @@ import com.adobe.acs.commons.quickly.results.Result;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +42,7 @@ public abstract class AbstractOperation implements Operation {
     @Override
     public Collection<Result> getResults(final SlingHttpServletRequest request,
                                          final SlingHttpServletResponse response,
-                                         final Command cmd) throws JSONException {
+                                         final Command cmd) {
 
         if (StringUtils.isBlank(cmd.getParam())) {
             return this.withoutParams(request, response, cmd);

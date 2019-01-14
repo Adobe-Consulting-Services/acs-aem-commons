@@ -33,14 +33,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.sling.SlingFilter;
-import org.apache.felix.scr.annotations.sling.SlingFilterScope;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +50,13 @@ import com.day.cq.wcm.api.components.ComponentManager;
  * Allowed selector, extensions, and suffix patterns are defined on the component resource using the property names
  * defined in the constants in this class.
  */
-@org.apache.felix.scr.annotations.Component(policy = ConfigurationPolicy.REQUIRE)
-@SlingFilter(scope = SlingFilterScope.REQUEST, order = Integer.MIN_VALUE, generateComponent = false)
 @SuppressWarnings("squid:S3776")
+@org.osgi.service.component.annotations.Component(
+    configurationPolicy=ConfigurationPolicy.REQUIRE,
+    service=Filter.class, 
+    property= {
+      "sling.filter.scope=REQUEST"
+})
 public class UrlFilter implements Filter {
 
     /**

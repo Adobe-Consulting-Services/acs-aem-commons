@@ -20,5 +20,5 @@
 /**
  * Http Injectors.
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@aQute.bnd.annotation.Version("2.0.0")
 package com.adobe.acs.commons.http;

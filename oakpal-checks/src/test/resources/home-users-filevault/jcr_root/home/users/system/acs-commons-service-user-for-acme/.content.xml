@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:SystemUser"
+          jcr:uuid="4dde0d8e-2ffe-3d52-a1aa-8f98893582af"
+          rep:authorizableId="acs-commons-service-user-for-acme"
+          rep:principalName="acs-commons-service-user-for-acme"
+/>

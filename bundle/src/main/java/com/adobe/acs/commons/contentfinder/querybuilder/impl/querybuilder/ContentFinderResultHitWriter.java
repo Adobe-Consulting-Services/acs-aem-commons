@@ -19,26 +19,37 @@
  */
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.querybuilder;
 
+import java.util.Map;
+
+import javax.jcr.RepositoryException;
+
+import org.osgi.service.component.annotations.Component;
+
 import com.adobe.acs.commons.contentfinder.querybuilder.impl.ContentFinderHitBuilder;
 import com.day.cq.search.Query;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.writer.ResultHitWriter;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 
-import javax.jcr.RepositoryException;
-import java.util.Map;
 
 /**
  * ACS AEM Commons - ContentFinder Result Hit Writer
  * QueryBuilder Hit Writer used for creating ContentFinder compatible results
+ * 
+ * @deprecated this class is not part of the API and internally not used
+ * 
+ * TODO:
+ * - is this class actually used? Haven't found anyone referencing it. 
+ * - deprecating it for the moment, and leaving the scr annotations in place
+ * 
  */
 @Component(factory = "com.day.cq.search.result.ResultHitWriter/cf")
+@Deprecated
 public final class ContentFinderResultHitWriter implements ResultHitWriter {
 
     @Override
-    public void write(Hit hit, JSONWriter jsonWriter, Query query) throws RepositoryException, JSONException {
+    @SuppressWarnings( "deprecation" )
+    public void write(Hit hit, org.apache.sling.commons.json.io.JSONWriter jsonWriter, Query query) 
+            throws RepositoryException, org.apache.sling.commons.json.JSONException {
         Map<String, Object> map = ContentFinderHitBuilder.buildGenericResult(hit);
 
         jsonWriter.object();

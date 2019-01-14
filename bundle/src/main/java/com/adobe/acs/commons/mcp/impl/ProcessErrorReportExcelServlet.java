@@ -19,20 +19,28 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.model.ManagedProcess;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
-import com.day.cq.commons.jcr.JcrUtil;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+
 import java.awt.Color;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -41,19 +49,24 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import org.apache.poi.ss.usermodel.CreationHelper;
+import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+import com.day.cq.commons.jcr.JcrUtil;
 
 /**
  * Export a generic report as an excel spreadsheet
  */
-@SlingServlet(resourceTypes = ProcessInstance.RESOURCE_TYPE, selectors = "errors", extensions = {"xlsx", "xls"})
+@Component(service=Servlet.class,
+property= {
+SLING_SERVLET_EXTENSIONS+"=xlsx,xls",
+SLING_SERVLET_SELECTORS+"=errors",
+SLING_SERVLET_RESOURCE_TYPES+"="+ProcessInstance.RESOURCE_TYPE
+})
+
 public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ProcessErrorReportExcelServlet.class);

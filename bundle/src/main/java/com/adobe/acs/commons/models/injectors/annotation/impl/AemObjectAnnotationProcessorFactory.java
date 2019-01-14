@@ -19,24 +19,21 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
-import java.lang.reflect.AnnotatedElement;
-
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import com.adobe.acs.commons.models.injectors.annotation.AemObject;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
+import org.osgi.service.component.annotations.Component;
 
-import com.adobe.acs.commons.models.injectors.annotation.AemObject;
+import java.lang.reflect.AnnotatedElement;
 
 /**
  * The annotation processor for the {@link AemObject} annotation
  *
  * Note: This can only be used together with Sling Models API bundle in version 1.2.0 (due to the dependency on InjectionStrategy)
  */
-@Component
-@Service
+@Component(service=StaticInjectAnnotationProcessorFactory.class)
 public class AemObjectAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory{
 
     @Override
