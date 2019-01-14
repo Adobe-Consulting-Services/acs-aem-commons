@@ -122,7 +122,7 @@ public class DynamicSelectDataSourceTest {
 
         servlet.doGet(context.request(),context.response());
         verify(dataSourceBuilder,times(1)).addDataSource(eq(context.request()),dsCaptor.capture());
-        assertEquals (1,dsCaptor.getValue().size());
+        assertEquals(1,dsCaptor.getValue().size());
     }
     
     @Test
@@ -136,7 +136,7 @@ public class DynamicSelectDataSourceTest {
         
         servlet.doGet(context.request(),context.response());
         verify(dataSourceBuilder,times(1)).addDataSource(eq(context.request()),dsCaptor.capture());
-        assertEquals (0,dsCaptor.getValue().size());
+        assertEquals(0,dsCaptor.getValue().size());
     }
     
 }
