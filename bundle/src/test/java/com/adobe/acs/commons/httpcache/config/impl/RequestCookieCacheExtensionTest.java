@@ -20,9 +20,9 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.keys.RequestCookieCacheKey;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestCookieKeyValueMap;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestCookieKeyValueMapBuilder;
+import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
+import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
+import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestCookieKeyValueWrapperBuilder;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.google.common.collect.ImmutableSet;
@@ -64,7 +64,7 @@ public class RequestCookieCacheExtensionTest {
     private Cookie[] cookies;
     private Cookie[] emptyCookies;
 
-    RequestCookieCacheExtension.Config configA = new RequestCookieCacheExtension.Config(){
+    KeyValueConfig configA = new KeyValueConfig(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -76,12 +76,12 @@ public class RequestCookieCacheExtensionTest {
         }
 
         @Override
-        public String[] allowedCookieKeys() {
+        public String[] allowedKeys() {
             return new String[]{"present-cookie-key", "non-present-cookie"};
         }
 
         @Override
-        public String[] allowedCookieKeyValues() {
+        public String[] allowedValues() {
             return new String[0];
         }
 
@@ -91,7 +91,7 @@ public class RequestCookieCacheExtensionTest {
         }
     };
 
-    RequestCookieCacheExtension.Config configB = new RequestCookieCacheExtension.Config(){
+    KeyValueConfig configB = new KeyValueConfig(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -103,12 +103,12 @@ public class RequestCookieCacheExtensionTest {
         }
 
         @Override
-        public String[] allowedCookieKeys() {
+        public String[] allowedKeys() {
             return new String[]{"present-cookie-key"};
         }
 
         @Override
-        public String[] allowedCookieKeyValues() {
+        public String[] allowedValues() {
             return new String[]{"present-cookie-key=present-cookie-value|value2"};
         }
 
@@ -124,7 +124,7 @@ public class RequestCookieCacheExtensionTest {
     @Mock
     private Resource requestResource;
 
-    private final RequestCookieCacheExtension systemUnderTest = new RequestCookieCacheExtension();
+    private final RequestCookieHttpCacheConfigExtension systemUnderTest = new RequestCookieHttpCacheConfigExtension();
 
 
     @Before
@@ -153,8 +153,8 @@ public class RequestCookieCacheExtensionTest {
         assertTrue(systemUnderTest.accepts(request, null));
         assertFalse(systemUnderTest.accepts(emptyRequest, null));
 
-        RequestCookieCacheKey cacheKey = (RequestCookieCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        RequestCookieKeyValueMap map = cacheKey.getKeyValueMap();
+        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
+        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
 
         assertTrue(map.containsKey("present-cookie-key"));
         assertEquals("present-cookie-value", map.get("present-cookie-key"));
@@ -171,8 +171,8 @@ public class RequestCookieCacheExtensionTest {
         systemUnderTest.activate(configB);
         assertTrue(systemUnderTest.accepts(request, null));
 
-        RequestCookieCacheKey cacheKey = (RequestCookieCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        RequestCookieKeyValueMap map = cacheKey.getKeyValueMap();
+        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
+        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
 
         assertTrue(map.containsKey("present-cookie-key"));
         assertEquals("present-cookie-value", map.get("present-cookie-key"));
@@ -193,9 +193,9 @@ public class RequestCookieCacheExtensionTest {
         ImmutableSet<Cookie> presentValues = ImmutableSet.of(presentCookie);
 
         Map<String, String> cookieKeyValues = new HashMap<>();
-        RequestCookieKeyValueMap requestCookieKeyValueMap = new RequestCookieKeyValueMapBuilder(allowedKeys, cookieKeyValues, presentValues).build();
+        KeyValueMapWrapper requestCookieKeyValueMap = new RequestCookieKeyValueWrapperBuilder(allowedKeys, cookieKeyValues, presentValues).build();
 
-        RequestCookieCacheKey cookieCacheKey = new RequestCookieCacheKey(REQUEST_URI, validCacheKeyConfig, requestCookieKeyValueMap);
+        KeyValueHttpCacheKey cookieCacheKey = new KeyValueHttpCacheKey(REQUEST_URI, validCacheKeyConfig, requestCookieKeyValueMap);
 
         assertTrue(systemUnderTest.doesKeyMatchConfig(cookieCacheKey, validCacheKeyConfig));
     }
