@@ -22,18 +22,29 @@ package com.adobe.acs.commons.search.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import javax.jcr.Session;
 
 import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.wrap.jcr.BaseSessionIWrap;
+import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
+import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -50,12 +61,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloseableQueryBuilderImplTest {
 
     @Rule
-    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     private ResourceResolver contextResolver;
 
     @Mock
     QueryBuilder mockQueryBuilder;
+
+    CloseableQueryBuilderImpl closeableQueryBuilder = new CloseableQueryBuilderImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -63,10 +76,12 @@ public class CloseableQueryBuilderImplTest {
         context.registerService(QueryBuilder.class, mockQueryBuilder);
         contextResolver = context.create().resource("/test").getResourceResolver();
         contextResolver.commit();
+        context.registerInjectActivateService(closeableQueryBuilder);
     }
 
     @Test
     public void testTryWithResources() throws Exception {
+
         ResourceResolver hitResolver = context.resourceResolver().clone(null);
         Resource hitResource = hitResolver.getResource("/test");
         assertNotNull("hitResource getResourceResolver() should not be null",
@@ -82,12 +97,9 @@ public class CloseableQueryBuilderImplTest {
         when(mockQuery.getResult()).thenReturn(mockSearchResult);
         when(mockQueryBuilder.createQuery(any(Session.class))).thenReturn(mockQuery);
 
-        CloseableQueryBuilderImpl cqb = new CloseableQueryBuilderImpl();
-        context.registerInjectActivateService(cqb);
-
         assertTrue("hitResolver should be live", hitResolver.isLive());
 
-        try (CloseableQuery closeableQuery = cqb.createQuery(mockSession)) {
+        try (CloseableQuery closeableQuery = closeableQueryBuilder.createQuery(mockSession)) {
             /* should not throw exceptions */
 
             assertTrue("resource resolver from first hit should be live",
@@ -95,5 +107,120 @@ public class CloseableQueryBuilderImplTest {
         }
 
         assertFalse("hitResolver should not be live", hitResolver.isLive());
+    }
+
+    @Test
+    public void testCreateQuery() {
+        final JackrabbitSession mockJackrabbitSession = mock(JackrabbitSession.class);
+        final Session mockJcrSession = mock(Session.class);
+        final Query mockQuery = mock(Query.class);
+
+        when(mockQueryBuilder.createQuery(any(Session.class))).then((invocation) -> {
+            Session sessionArg = invocation.getArgumentAt(0, Session.class);
+            assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
+                    sessionArg instanceof BaseSessionIWrap);
+            return mockQuery;
+        });
+
+        assertNotNull("returned query should not be null with resourceResolver",
+                closeableQueryBuilder.createQuery(contextResolver));
+
+        assertNotNull("returned query should not be null with mocked JCR session",
+                closeableQueryBuilder.createQuery(mockJcrSession));
+
+        assertNotNull("returned query should not be null with mocked Jackrabbit session",
+                closeableQueryBuilder.createQuery(mockJackrabbitSession));
+
+        final PredicateGroup predicates = new PredicateGroup();
+        when(mockQuery.getPredicates()).thenReturn(predicates);
+
+        when(mockQueryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then((invocation) -> {
+            PredicateGroup predicatesArg = invocation.getArgumentAt(0, PredicateGroup.class);
+            assertSame("Same predicate group should be passed through", predicates, predicatesArg);
+            Session sessionArg = invocation.getArgumentAt(1, Session.class);
+            assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
+                    sessionArg instanceof BaseSessionIWrap);
+            return mockQuery;
+        });
+
+        assertNotNull("returned query w/resolver and preds should not be null",
+                closeableQueryBuilder.createQuery(predicates, contextResolver));
+        assertSame("returned query w/resolver should have same preds", predicates,
+                closeableQueryBuilder.createQuery(predicates, contextResolver).getPredicates());
+        assertNotNull("returned query w/jcr and preds should not be null",
+                closeableQueryBuilder.createQuery(predicates, mockJcrSession));
+        assertSame("returned query w/jcr should have same preds", predicates,
+                closeableQueryBuilder.createQuery(predicates, mockJcrSession).getPredicates());
+        assertNotNull("returned query w/jackrabbit and preds should not be null",
+                closeableQueryBuilder.createQuery(predicates, mockJackrabbitSession));
+        assertSame("returned query w/jackrabbit should have same preds", predicates,
+                closeableQueryBuilder.createQuery(predicates, mockJackrabbitSession).getPredicates());
+
+    }
+
+    @Test
+    public void testLoadQuery() throws Exception {
+        final JackrabbitSession mockJackrabbitSession = mock(JackrabbitSession.class);
+        final Session mockJcrSession = mock(Session.class);
+        final Query mockQuery = mock(Query.class);
+
+        when(mockQueryBuilder.loadQuery(any(String.class), any(Session.class))).then((invocation) -> {
+            String pathArg = invocation.getArgumentAt(0, String.class);
+            Session sessionArg = invocation.getArgumentAt(1, Session.class);
+            assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
+                    sessionArg instanceof BaseSessionIWrap);
+            if ("".equals(pathArg)) {
+                return null;
+            }
+            return mockQuery;
+        });
+
+        assertNotNull("load query should not be null with resourceResolver and path",
+                closeableQueryBuilder.loadQuery("/somepath", contextResolver));
+
+        assertNotNull("load query should not be null with mocked JCR session and path",
+                closeableQueryBuilder.loadQuery("/somepath", mockJcrSession));
+
+        assertNotNull("load query should not be null with mocked Jackrabbit session and path",
+                closeableQueryBuilder.loadQuery("/somepath", mockJackrabbitSession));
+
+        assertNull("load query should be null with resourceResolver and empty path",
+                closeableQueryBuilder.loadQuery("", contextResolver));
+
+        assertNull("load query should be null with mocked JCR session and empty path",
+                closeableQueryBuilder.loadQuery("", mockJcrSession));
+
+        assertNull("load query should be null with mocked Jackrabbit session and empty path",
+                closeableQueryBuilder.loadQuery("", mockJackrabbitSession));
+
+    }
+
+    @Test
+    public void testStoreQuery() throws Exception {
+        final JackrabbitSession mockJackrabbitSession = mock(JackrabbitSession.class);
+        final Session mockJcrSession = mock(Session.class);
+        final Query mockQuery = mock(Query.class);
+
+        doAnswer((invocation) -> {
+            Session sessionArg = invocation.getArgumentAt(3, Session.class);
+            assertTrue("query session should NOT be a session wrapper: " + sessionArg.getClass().getName(),
+                    !(sessionArg instanceof BaseSessionIWrap));
+            return null;
+        }).when(mockQueryBuilder).storeQuery(isA(Query.class), isA(String.class), anyBoolean(), any(Session.class));
+
+        closeableQueryBuilder.storeQuery(mockQuery, "/somepath", true, contextResolver);
+        closeableQueryBuilder.storeQuery(mockQuery, "/somepath", true, mockJcrSession);
+        closeableQueryBuilder.storeQuery(mockQuery, "/somepath", true, mockJackrabbitSession);
+
+        verify(mockQueryBuilder, times(3))
+                .storeQuery(isA(Query.class), isA(String.class), anyBoolean(), any(Session.class));
+    }
+
+    @Test
+    public void testClearFacetCache() {
+
+        closeableQueryBuilder.clearFacetCache();
+        verify(mockQueryBuilder, times(1)).clearFacetCache();
+
     }
 }
