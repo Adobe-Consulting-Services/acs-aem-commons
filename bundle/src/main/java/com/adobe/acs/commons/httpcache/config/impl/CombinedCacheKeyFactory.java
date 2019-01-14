@@ -52,7 +52,7 @@ import java.util.Map;
  * It will use existing cache key factories to create a key for each one, and put them in a list.
  */
 @Component(
-        service = {CacheKeyFactory.class, HttpCacheConfigExtension.class},
+        service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE

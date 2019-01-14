@@ -55,7 +55,7 @@ import static org.apache.commons.lang.StringUtils.*;
  * Instead of duplicating and merging the 2 extensions / factories into 1 class, you can leverage this class.
  */
 @Component(
-        service = {CacheKeyFactory.class, HttpCacheConfigExtension.class},
+        service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE
