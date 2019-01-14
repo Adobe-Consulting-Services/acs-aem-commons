@@ -47,6 +47,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 /**
  * Aggregates multiple cache config extensions into 1.
  * This is useful when you need functionality of 2 extensions together.
@@ -76,18 +78,14 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
             description = "Aggregates multiple extensions into 1")
     public @interface Config {
 
-        String DEFAULT_EXTENSION_TARGET = "(|(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)(configName=unique-confg-name-of-extension)(((service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(configName=unique-confg-name-of-extension))";
-
         @AttributeDefinition(name = "Config Name")
-        String configName() default StringUtils.EMPTY;
+        String configName() default EMPTY;
 
         @AttributeDefinition(
                 name = "HttpCacheConfigExtension service pids",
-                description = "Service pid of target implementation of HttpCacheConfigExtension to be used. Example - "
-                        + "(service.pid=" + DEFAULT_EXTENSION_TARGET + ")."
-                        + " Optional parameter.",
-                defaultValue = DEFAULT_EXTENSION_TARGET)
-        String cacheConfigExtension_target() default DEFAULT_EXTENSION_TARGET;
+                description = "Service pids of target implementation of HttpCacheConfigExtensions to be combined and used. "
+                        + " Optional parameter.")
+        String cacheConfigExtension_target() default EMPTY;
 
     }
 
