@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
+- #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 
 ### Fixed
 - #1667 - Refactored the activate methods of all http cache services
@@ -40,6 +41,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 
 ### Changed

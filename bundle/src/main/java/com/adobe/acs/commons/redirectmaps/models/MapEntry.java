@@ -19,21 +19,30 @@
  */
 package com.adobe.acs.commons.redirectmaps.models;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Simple POJO for map entry items based on Vanity paths for Redirect Maps.
  */
+@ProviderType
 public class MapEntry {
+    private int id;
     private final String origin;
     private final String source;
     private String status;
     private final String target;
     private boolean valid = true;
 
-    public MapEntry(String source, String target, String origin) {
+    public MapEntry(int id, String source, String target, String origin) {
         source = source.trim();
         this.source = source;
         this.target = target;
         this.origin = origin;
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getOrigin() {
@@ -54,6 +63,10 @@ public class MapEntry {
 
     public boolean isValid() {
         return valid;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setStatus(String status) {
