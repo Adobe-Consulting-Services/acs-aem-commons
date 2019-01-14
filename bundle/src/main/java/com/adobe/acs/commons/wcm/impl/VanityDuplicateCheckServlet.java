@@ -36,8 +36,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 
-
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.osgi.service.component.annotations.Component;
 
 import org.slf4j.Logger;
