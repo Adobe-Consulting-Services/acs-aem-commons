@@ -58,17 +58,17 @@ import java.util.Map;
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE
         },
         reference = {
-            @Reference(
-                    name = "cacheKeyFactory",
-                    bind = "bindCacheKeyFactory",
-                    unbind = "unbindCacheKeyFactory",
-                    service = CacheKeyFactory.class,
-                    policy = ReferencePolicy.DYNAMIC,
-                    cardinality = ReferenceCardinality.MULTIPLE)
+                @Reference(
+                        name = "cacheKeyFactory",
+                        bind = "bindCacheKeyFactory",
+                        unbind = "unbindCacheKeyFactory",
+                        service = CacheKeyFactory.class,
+                        policy = ReferencePolicy.DYNAMIC,
+                        cardinality = ReferenceCardinality.MULTIPLE)
         }
 
 )
-@Designate(ocd=CombinedCacheConfigExtension.Config.class,factory=true)
+@Designate(ocd = CombinedCacheConfigExtension.Config.class, factory = true)
 public class CombinedCacheKeyFactory implements CacheKeyFactory {
 
 
@@ -76,19 +76,16 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
             description = "Aggregates multiple extensions into 1")
     public @interface Config {
 
-        String DEFAULT_KEY_FACTORY_TARGET = "(|(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)(configName=unique-confg-name-of-extension)(((service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(configName=unique-confg-name-of-extension))";
-
         @AttributeDefinition(name = "Config Name")
         String configName() default StringUtils.EMPTY;
 
         @AttributeDefinition(name = "CacheKeyFactory service pids",
-                description = "Service pid of target implementation of CacheKeyFactory to be used. Example - "
-                        + "(service.pid=" + DEFAULT_KEY_FACTORY_TARGET + ")."
-                        + " Mandatory parameter.",
-                defaultValue = DEFAULT_KEY_FACTORY_TARGET)
-        String cacheKeyFactory_target() default DEFAULT_KEY_FACTORY_TARGET;
+                description = "Service pid(s) of target implementation of CacheKeyFactory to be used."
+        )
+        String cacheKeyFactory_target();
 
     }
+
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);
 
     private String configName;
@@ -108,23 +105,23 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
 
     @Override
     public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-        if(!(key instanceof CombinedCacheKey)){
+        if (!(key instanceof CombinedCacheKey)) {
             return false;
         }
 
         return new CombinedCacheKey(key.getUri(), cacheConfig, cacheKeyFactories.getList()).equals(key);
     }
 
-    protected void bindCacheKeyFactory(CacheKeyFactory factory, Map<String,Object> properties){
-        if(factory != this) {
+    protected void bindCacheKeyFactory(CacheKeyFactory factory, Map<String, Object> properties) {
+        if (factory != this) {
             cacheKeyFactories.bind(factory, properties);
-        }else{
+        } else {
             log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Target: {}", this.cacheKeyFactoriesTarget);
         }
     }
 
-    protected void unbindCacheKeyFactory(CacheKeyFactory factory, Map<String,Object> properties){
-        if(factory != this){
+    protected void unbindCacheKeyFactory(CacheKeyFactory factory, Map<String, Object> properties) {
+        if (factory != this) {
             cacheKeyFactories.unbind(factory, properties);
         }
     }
