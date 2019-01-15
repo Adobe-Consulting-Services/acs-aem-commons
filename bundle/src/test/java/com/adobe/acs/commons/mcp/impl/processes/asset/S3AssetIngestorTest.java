@@ -68,7 +68,7 @@ public class S3AssetIngestorTest {
     private S3Mock s3Mock;
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
     private ActionManager actionManager;
