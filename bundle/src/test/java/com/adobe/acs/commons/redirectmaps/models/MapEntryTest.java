@@ -55,7 +55,7 @@ public class MapEntryTest {
 
         log.info("testInvalidMapEntry");
         String source = "/vanity 2";
-        MapEntry invalid = new MapEntry(source, mockResource.getPath(), "File");
+        MapEntry invalid = new MapEntry(0,source, mockResource.getPath(), "File");
 
         invalid.setValid(false);
         invalid.setStatus("Invalid!");
@@ -78,7 +78,7 @@ public class MapEntryTest {
 
         log.info("testValidMapEntry");
         String source = "/vanity-2";
-        MapEntry valid = new MapEntry(source, mockResource.getPath(), mockResource.getPath());
+        MapEntry valid = new MapEntry(0,source, mockResource.getPath(), mockResource.getPath());
 
         log.info("Asserting that entry is valid");
         assertTrue(valid.isValid());
@@ -91,4 +91,5 @@ public class MapEntryTest {
 
         log.info("Test successful!");
     }
+    
 }

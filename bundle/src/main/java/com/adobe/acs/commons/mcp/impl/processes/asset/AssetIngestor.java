@@ -52,6 +52,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
@@ -293,9 +295,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 }
                 Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
 
-                if (asset != null) {
-                    saveMigrationInfo(source, asset);
+                if (asset == null) {
+                    AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
+                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                    throw ex;
                 }
+                saveMigrationInfo(source, asset);
 
                 r.commit();
                 r.refresh();

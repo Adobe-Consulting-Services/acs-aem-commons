@@ -137,18 +137,9 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             logger.debug("No on-deploy scripts found.");
             return;
         }
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = logIn();
+        
+        try (ResourceResolver resourceResolver = logIn()) {
             runScripts(resourceResolver, scripts);
-        } finally {
-            if (resourceResolver != null) {
-                try {
-                    resourceResolver.close();
-                } catch (Exception e) {
-                    logger.warn("Failed resourceResolver.close()", e);
-                }
-            }
         }
     }
 
