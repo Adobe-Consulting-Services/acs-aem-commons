@@ -19,6 +19,27 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.mime.MimeTypeService;
+
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -33,29 +54,10 @@ import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.mime.MimeTypeService;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AssetIngestor extends ProcessDefinition {
+
 
     private static final String ALL_ASSETS = "All Assets";
     private static final int DEFAULT_TIMEOUT = 200;
@@ -297,7 +299,6 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
                 if (asset == null) {
                     AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
-                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                     throw ex;
                 }
                 saveMigrationInfo(source, asset);

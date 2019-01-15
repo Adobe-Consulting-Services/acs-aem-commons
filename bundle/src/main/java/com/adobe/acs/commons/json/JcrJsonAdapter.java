@@ -23,8 +23,6 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
@@ -63,7 +61,6 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                 }
                 writer.endObject();
             } catch (RepositoryException ex) {
-                Logger.getLogger(JcrJsonAdapter.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException(ex);
             }
         }

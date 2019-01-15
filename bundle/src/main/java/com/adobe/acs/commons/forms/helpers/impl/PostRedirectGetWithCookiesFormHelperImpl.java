@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.logging.Level;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET-With-Cookies Form Helper
@@ -125,7 +124,8 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         try {
             return StringUtils.isBlank(unencoded) ? "" : URLEncoder.encode(unencoded, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            java.util.logging.Logger.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class.getName()).log(Level.SEVERE, null, ex);
+         // don't log the complete stacktrace, but only the message
+            log.info("Cannot encode string '{}' to UTF-8", unencoded, ex.getMessage());
             return unencoded;
         }
     }
@@ -141,7 +141,8 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         try {
             return StringUtils.isBlank(encoded) ? "" : URLDecoder.decode(encoded, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            java.util.logging.Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            // don't log the complete stacktrace, but only the message
+            log.info("Cannot decode string: {} is not UTF-8: {}", encoded,ex.getMessage());
             return encoded;
         }
     }

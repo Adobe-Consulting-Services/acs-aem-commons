@@ -36,6 +36,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -48,8 +50,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
@@ -60,6 +60,8 @@ import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement
  * into AEM.
  */
 public class FileAssetIngestor extends AssetIngestor {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(FileAssetIngestor.class);
 
     public FileAssetIngestor(MimeTypeService mimeTypeService) {
         super(mimeTypeService);
@@ -113,11 +115,9 @@ public class FileAssetIngestor extends AssetIngestor {
                 // Forces a login
                 ((SftpHierarchicalElement) baseHierarchicalElement).retrieveDetails();
             } catch (URISyntaxException | UnsupportedEncodingException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException("Unable to process URL!");
+                throw new RepositoryException("Unable to process URL!",ex);
             } catch (JSchException | SftpException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException(ex.getMessage());
+                throw new RepositoryException(ex.getMessage(),ex);
             }
         } else {
             File base = new File(url);
@@ -377,7 +377,7 @@ public class FileAssetIngestor extends AssetIngestor {
             try {
                 retrieveDetails();
             } catch (JSchException | SftpException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error("Cannot retrieve details",ex); // really no error handling here?
             }
             return isFile;
         }
@@ -388,7 +388,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 try {
                     parent = new SftpHierarchicalElement(StringUtils.substringBeforeLast(getSourcePath(), "/"));
                 } catch (URISyntaxException | UnsupportedEncodingException  ex) {
-                    Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.error("Cannot determine parent",ex);
                 }
             }
             return parent;
@@ -405,7 +405,7 @@ public class FileAssetIngestor extends AssetIngestor {
                         .map(this::getChildFromEntry)
                         .filter(Objects::nonNull);
             } catch (JSchException | SftpException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error("Cannot get children of {}",path,ex);
                 return Stream.empty();
             } finally {
                 if (!keepChannelOpen) {
@@ -425,7 +425,7 @@ public class FileAssetIngestor extends AssetIngestor {
                 child.processAttrs(entry.getAttrs());
                 return child;
             } catch (URISyntaxException | UnsupportedEncodingException ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error("Cannot get children from entry", ex);
                 return null;
             }
         }
@@ -447,7 +447,7 @@ public class FileAssetIngestor extends AssetIngestor {
                     retrieveDetails();
                     source = new SftpSource(size, this::openChannel, this);
                 } catch (JSchException | SftpException ex) {
-                    Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.error("Cannot open source", ex);
                 }
             }
             return source;
@@ -484,7 +484,6 @@ public class FileAssetIngestor extends AssetIngestor {
                 lastChannel = channel.get();
                 lastStream = lastChannel.get(element.getItemName());
             } catch (Exception ex) {
-                Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
                 close();
                 throw new IOException("Error in retrieving file " + element.getItemName(), ex);
             }

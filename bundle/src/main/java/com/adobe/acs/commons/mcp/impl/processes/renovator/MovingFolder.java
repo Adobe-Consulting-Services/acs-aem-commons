@@ -27,11 +27,11 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.resourceExists;
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilResourceFound;
@@ -40,6 +40,9 @@ import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.waitUntilR
  * Represents a folder being moved
  */
 public class MovingFolder extends MovingNode {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(MovingFolder.class);
+    
     protected static final String DEFAULT_FOLDER_TYPE = "sling:Folder";
 
     @Override
@@ -94,7 +97,7 @@ public class MovingFolder extends MovingNode {
                 waitUntilResourceFound(rr, targetParentPath);
             }
             Resource destParent = rr.getResource(targetParentPath);
-            Logger.getLogger(MovingFolder.class.getName()).log(Level.INFO, "Creating target for {0}", getSourcePath());
+            LOG.info("Creating target for {}", getSourcePath());
             rr.create(destParent, targetName, getClonedProperties(source));
             rr.commit();
             rr.refresh();
