@@ -21,10 +21,14 @@ package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.RequestParameterHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper.SEPERATOR;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * Builds a KeyValueMapWrapperBuilder wrapper based on request parameters
@@ -51,22 +55,22 @@ public class RequestParameterKeyValueWrapperBuilder implements KeyValueMapWrappe
             String key = entry.getKey();
             String[] value = entry.getValue();
 
-            if (allowedValues.containsKey(key)) {
+            if (allowedValues.containsKey(key) && parameterMap.containsKey(key)) {
                 putKeyAndValue(key, value);
             } else if(allowedKeys.contains(key)){
-                putKeyOnly(key, value);
+                putKeyOnly(key);
             }
         }
 
         return keyValueMapWrapper;
     }
 
-    private void putKeyOnly(String key, String[] value) {
-        keyValueMapWrapper.put(key, value);
+    private void putKeyOnly(String key) {
+        keyValueMapWrapper.put(key + "[0]", EMPTY);
     }
 
     private void putKeyAndValue(String key, String[] value) {
-        String[] specificAllowedValues  = allowedValues.get(key).split("\\|");
+        String[] specificAllowedValues  = allowedValues.get(key).split(SEPERATOR);
 
         for (String allowedValue : specificAllowedValues) {
             Object castedValue = ReflectionUtil.castStringValue(allowedValue);

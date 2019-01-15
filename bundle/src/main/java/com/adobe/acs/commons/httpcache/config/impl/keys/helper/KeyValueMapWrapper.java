@@ -34,7 +34,9 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class KeyValueMapWrapper extends HashMap<String,Object> {
 
     public static final String NULL = "NULL";
+    public static final String SEPERATOR = "\\|";
     private final String toStringKey;
+
 
     public KeyValueMapWrapper(String toStringKey) {
         super();
