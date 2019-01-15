@@ -21,6 +21,7 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
@@ -40,6 +41,7 @@ public class PlainXMLSerializer implements Serializer {
 
     public PlainXMLSerializer() throws TransformerConfigurationException {
         TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         if (factory.getFeature(SAXTransformerFactory.FEATURE)) {
             SAXTransformerFactory saxFactory = (SAXTransformerFactory) factory;
             this.handler = saxFactory.newTransformerHandler();
