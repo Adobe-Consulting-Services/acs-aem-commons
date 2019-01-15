@@ -21,6 +21,7 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
@@ -79,6 +80,9 @@ public class FileAssetIngestorTest {
 
     @Mock
     private AssetManager assetManager;
+
+    @Mock
+    private Asset createdAsset;
 
     @Captor
     private ArgumentCaptor<String> currentItemCaptor;
@@ -203,6 +207,7 @@ public class FileAssetIngestorTest {
         final File folder2 = mkdir(tempDirectory, "folder2");
         final File folder3 = mkdir(folder2, "folder3");
         final File folder3Image = addFile(folder3, "image.png", "/img/test.png");
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
@@ -219,12 +224,21 @@ public class FileAssetIngestorTest {
                 containsInAnyOrder(tempDirectory.getAbsolutePath(), folder1Image.getAbsolutePath(), folder3Image.getAbsolutePath(), rootImage.getAbsolutePath()));
     }
 
+    @Test(expected = AssetIngestorException.class)
+    public void testImportAssetsWithException() throws Exception {
+        ingestor.jcrBasePath = "/content/dam/test";
+        ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
+        final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+
+        ingestor.importAssets(actionManager);
+    }
 
     @Test
     public void testImportAssetsToNewRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
         ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
@@ -249,6 +263,7 @@ public class FileAssetIngestorTest {
         ingestor.baseFolder = ingestor.getBaseFolder(ingestor.fileBasePath);
         context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
         final File rootImage = addFile(tempDirectory, "image.png", "/img/test.png");
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
