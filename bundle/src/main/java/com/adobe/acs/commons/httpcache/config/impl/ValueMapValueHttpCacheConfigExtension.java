@@ -25,6 +25,7 @@ import com.adobe.acs.commons.httpcache.config.impl.keys.helper.ValueMapKeyValueW
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.Designate;
@@ -55,6 +56,11 @@ public class ValueMapValueHttpCacheConfigExtension extends AbstractKeyValueExten
     protected KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String, String> allowedValues) {
         ValueMap valueMap = request.getResource().getValueMap();
         return new ValueMapKeyValueWrapperBuilder(allowedKeys, allowedValues, valueMap);
+    }
+
+    @Activate
+    public void activate(KeyValueConfig config){
+        this.init(config);
     }
 
 }

@@ -20,10 +20,15 @@
 package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.RequestCookieHttpCacheConfigExtension;
+import com.adobe.acs.commons.util.impl.ReflectionUtil;
 
 import javax.servlet.http.Cookie;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper.SEPERATOR;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  /**
@@ -34,7 +39,7 @@ public class RequestCookieKeyValueWrapperBuilder implements KeyValueMapWrapperBu
     private final Set<String> allowedKeys;
     private final Map<String, String> cookieKeyValues;
     private final Set<Cookie> presentCookies;
-    private final KeyValueMapWrapper keyValueMap = new KeyValueMapWrapper(RequestCookieHttpCacheConfigExtension.KEY_STRING_REPRENSENTATION);
+    private final KeyValueMapWrapper keyValueMapWrapper = new KeyValueMapWrapper(RequestCookieHttpCacheConfigExtension.KEY_STRING_REPRENSENTATION);
 
     public RequestCookieKeyValueWrapperBuilder(Set<String> allowedKeys, Map<String, String> cookieKeyValues, Set<Cookie> presentCookies) {
 
@@ -47,25 +52,33 @@ public class RequestCookieKeyValueWrapperBuilder implements KeyValueMapWrapperBu
     @Override
     public KeyValueMapWrapper build() {
 
-        presentCookies.stream()
-                .filter(cookie -> {
-                    final String key = cookie.getName();
+        for(Iterator<Cookie> iterator = presentCookies.iterator(); iterator.hasNext();){
+            Cookie cookie = iterator.next();
+            String key = cookie.getName();
+            String value = cookie.getValue();
 
-                    if (cookieKeyValues.containsKey(key)) {
-                        String[] values = cookieKeyValues.get(key).split("\\|");
-                        for (String value : values) {
-                            if (value.equalsIgnoreCase(cookie.getValue())) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    } else {
-                        return allowedKeys.contains(key);
-                    }
-                })
-                .forEach(cookie -> keyValueMap.put(cookie.getName(), cookie.getValue()));
+            if (allowedKeys.contains(key) && cookieKeyValues.containsKey(key)) {
+                putKeyAndValue(key, value);
+            } else if(allowedKeys.contains(key)){
+                putKeyOnly(key);
+            }
+        }
 
-        return keyValueMap;
+        return keyValueMapWrapper;
+    }
+
+    private void putKeyOnly(String key) {
+        keyValueMapWrapper.put(key, EMPTY);
+    }
+
+    private void putKeyAndValue(String key, String value) {
+        String[] specificAllowedValues  = cookieKeyValues.get(key).split(SEPERATOR);
+        for (String allowedValue : specificAllowedValues) {
+            Object castedValue = ReflectionUtil.castStringValue(allowedValue);
+            if (castedValue.equals(value)) {
+                keyValueMapWrapper.put(key, value);
+            }
+        }
     }
 
 }

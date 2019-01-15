@@ -197,7 +197,11 @@ public class ReflectionUtil {
                 case "Float":
                     return new Float(value);
                 case "Boolean":
-                    return new Boolean(value);
+                    if(value.equalsIgnoreCase("true")){
+                        return Boolean.TRUE;
+                    }else{
+                        return Boolean.FALSE;
+                    }
                 case "Double":
                     return new Double(value);
                 case "String":

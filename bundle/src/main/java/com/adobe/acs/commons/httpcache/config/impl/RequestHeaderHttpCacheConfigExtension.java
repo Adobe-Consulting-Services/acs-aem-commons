@@ -24,6 +24,7 @@ import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrappe
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestHeaderKeyValueWrapperBuilder;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.Designate;
@@ -52,5 +53,10 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
     @Override
     protected KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String, String> allowedValues) {
         return new RequestHeaderKeyValueWrapperBuilder(allowedKeys, allowedValues, request);
+    }
+
+    @Activate
+    public void activate(KeyValueConfig config){
+        this.init(config);
     }
 }

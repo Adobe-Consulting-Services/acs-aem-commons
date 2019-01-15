@@ -21,11 +21,15 @@ package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.ValueMapValueHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ValueMap;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper.SEPERATOR;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * Builds a KeyValueMapWrapperBuilder wrapper based on value map values
@@ -52,19 +56,18 @@ public class ValueMapKeyValueWrapperBuilder implements KeyValueMapWrapperBuilder
             String key = entry.getKey();
             Object value = entry.getValue();
 
-            if (allowedValues.containsKey(key)) {
-                String[] specificAllowedValues = allowedValues.get(key).split("\\|");
+            if (allowedValues.containsKey(key) && valueMap.containsKey(key)) {
+                String[] specificAllowedValues = allowedValues.get(key).split(SEPERATOR);
                 for (String allowedValue : specificAllowedValues) {
                     Object castedValue = ReflectionUtil.castStringValue(allowedValue);
                     if (castedValue.equals(value)) {
                         keyValueMapWrapper.put(key, value);
                     }
                 }
-            } else {
-                if(allowedKeys.contains(key)){
-                    keyValueMapWrapper.put(key, value);
-                }
+            } else if(allowedKeys.contains(key)){
+                keyValueMapWrapper.put(key, EMPTY);
             }
+
         }
         return keyValueMapWrapper;
     }

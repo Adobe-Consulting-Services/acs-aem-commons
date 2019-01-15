@@ -21,11 +21,15 @@ package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.RequestCookieHttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.RequestHeaderHttpCacheConfigExtension;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
+
+import static com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper.SEPERATOR;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * Builds a KeyValueMapWrapperBuilder wrapper based on request headers
@@ -52,18 +56,17 @@ public class RequestHeaderKeyValueWrapperBuilder implements KeyValueMapWrapperBu
             String key = headerNames.nextElement();
             String value = request.getHeader(key);
 
-            if (allowedValues.containsKey(key)) {
-                String[] specificAllowedValues = allowedValues.get(key).split("\\|");
+            if (allowedValues.containsKey(key) && StringUtils.isNotBlank(value)) {
+                String[] specificAllowedValues = allowedValues.get(key).split(SEPERATOR);
                 for (String allowedValue : specificAllowedValues) {
                     if (allowedValue.equals(value)) {
                         keyValueMapWrapper.put(key, value);
                     }
                 }
-            } else {
-                if(allowedKeys.contains(key)){
-                    keyValueMapWrapper.put(key, value);
-                }
+            } else if(allowedKeys.contains(key)){
+                keyValueMapWrapper.put(key, EMPTY);
             }
+
         }
         return keyValueMapWrapper;
     }
