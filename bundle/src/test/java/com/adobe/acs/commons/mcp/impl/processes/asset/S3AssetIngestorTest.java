@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestor;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.ReportColumns;
@@ -28,6 +27,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
 import io.findify.s3mock.S3Mock;
@@ -75,6 +75,9 @@ public class S3AssetIngestorTest {
 
     @Mock
     private AssetManager assetManager;
+
+    @Mock
+    private Asset createdAsset;
 
     @Captor
     private ArgumentCaptor<String> currentItemCaptor;
@@ -188,6 +191,7 @@ public class S3AssetIngestorTest {
         s3Client.putObject(TEST_BUCKET, "folder2/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
@@ -202,11 +206,20 @@ public class S3AssetIngestorTest {
         assertEquals(Arrays.asList("testbucket", "testbucket:folder1/image.png", "testbucket:folder2/folder3/image.png", "testbucket:image.png"), currentItemCaptor.getAllValues());
     }
 
+    @Test(expected = AssetIngestorException.class)
+    public void testImportAssetsWithException() throws Exception {
+        ingestor.init();
+        s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+
+        ingestor.importAssets(actionManager);
+    }
+
     @Test
     public void testImportAssetsToNewRootFolder() throws Exception {
         ingestor.jcrBasePath = "/content/dam/test";
         ingestor.init();
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
@@ -230,6 +243,7 @@ public class S3AssetIngestorTest {
         ingestor.init();
         context.create().resource("/content/dam/test", "jcr:primaryType", "sling:Folder", "jcr:title", "testTitle");
         s3Client.putObject(TEST_BUCKET, "image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
@@ -257,6 +271,7 @@ public class S3AssetIngestorTest {
         s3Client.putObject(TEST_BUCKET, "folder2/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
         s3Client.putObject(TEST_BUCKET, "folder2/folder3/image.png", getClass().getResourceAsStream("/img/test.png"), new ObjectMetadata());
+        when(assetManager.createAsset(anyString(), any(), anyString(), any(Boolean.class))).thenReturn(createdAsset);
 
         ingestor.importAssets(actionManager);
 
