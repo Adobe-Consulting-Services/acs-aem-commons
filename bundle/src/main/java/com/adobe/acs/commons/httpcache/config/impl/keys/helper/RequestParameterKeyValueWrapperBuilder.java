@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
-import com.adobe.acs.commons.httpcache.config.impl.RequestCookieHttpCacheConfigExtension;
+import com.adobe.acs.commons.httpcache.config.impl.RequestParameterHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
+import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.Cookie;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -31,33 +31,31 @@ import static com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMa
 import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
- /**
- * Builds a KeyValueMapWrapperBuilder wrapper based on request cookies
+ * Builds a KeyValueMapWrapperBuilder wrapper based on request parameters
  */
-public class RequestCookieKeyValueWrapperBuilder implements KeyValueMapWrapperBuilder {
+public class RequestParameterKeyValueWrapperBuilder implements KeyValueMapWrapperBuilder {
 
     private final Set<String> allowedKeys;
-    private final Map<String, String> cookieKeyValues;
-    private final Set<Cookie> presentCookies;
-    private final KeyValueMapWrapper keyValueMapWrapper = new KeyValueMapWrapper(RequestCookieHttpCacheConfigExtension.KEY_STRING_REPRENSENTATION);
+    private final Map<String, String> allowedValues;
+    private final Map<String, String[]> parameterMap;
+    private final KeyValueMapWrapper keyValueMapWrapper = new KeyValueMapWrapper(RequestParameterHttpCacheConfigExtension.KEY_TOSTRING_REPRESENTATION);
 
-    public RequestCookieKeyValueWrapperBuilder(Set<String> allowedKeys, Map<String, String> cookieKeyValues, Set<Cookie> presentCookies) {
+    public RequestParameterKeyValueWrapperBuilder(Set<String> allowedKeys, Map<String, String> allowedValues, Map<String, String[]> parameterMap){
 
         this.allowedKeys = allowedKeys;
-        this.cookieKeyValues = cookieKeyValues;
-        this.presentCookies = presentCookies;
+        this.allowedValues = allowedValues;
+        this.parameterMap = parameterMap;
     }
 
 
     @Override
     public KeyValueMapWrapper build() {
+        for(Iterator<Map.Entry<String,String[]>> iterator = parameterMap.entrySet().iterator(); iterator.hasNext();){
+            Map.Entry<String,String[]> entry = iterator.next();
+            String key = entry.getKey();
+            String[] value = entry.getValue();
 
-        for(Iterator<Cookie> iterator = presentCookies.iterator(); iterator.hasNext();){
-            Cookie cookie = iterator.next();
-            String key = cookie.getName();
-            String value = cookie.getValue();
-
-            if (allowedKeys.contains(key) && cookieKeyValues.containsKey(key)) {
+            if (allowedValues.containsKey(key) && parameterMap.containsKey(key)) {
                 putKeyAndValue(key, value);
             } else if(allowedKeys.contains(key)){
                 putKeyOnly(key);
@@ -68,17 +66,20 @@ public class RequestCookieKeyValueWrapperBuilder implements KeyValueMapWrapperBu
     }
 
     private void putKeyOnly(String key) {
-        keyValueMapWrapper.put(key, EMPTY);
+        keyValueMapWrapper.put(key + "[0]", EMPTY);
     }
 
-    private void putKeyAndValue(String key, String value) {
-        String[] specificAllowedValues  = cookieKeyValues.get(key).split(SEPERATOR);
+    private void putKeyAndValue(String key, String[] value) {
+        String[] specificAllowedValues  = allowedValues.get(key).split(SEPERATOR);
+
         for (String allowedValue : specificAllowedValues) {
             Object castedValue = ReflectionUtil.castStringValue(allowedValue);
-            if (castedValue.equals(value)) {
-                keyValueMapWrapper.put(key, value);
+            for(int i = 0;i<value.length;i++){
+                if (castedValue.equals(value[i])) {
+                    keyValueMapWrapper.put(key+ "[" + i+ "]", value[i]);
+                }
             }
+
         }
     }
-
 }

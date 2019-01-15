@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 - #1685 - HttpCache: Added OOTB config extension:: combined extension
+- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
 
 ### Fixed
 - #1607 - HttpCache: improved the write to response mechanism.
