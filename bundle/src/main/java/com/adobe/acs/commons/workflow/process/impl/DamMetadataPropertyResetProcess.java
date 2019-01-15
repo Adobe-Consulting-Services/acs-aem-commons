@@ -77,11 +77,9 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        ResourceResolver resourceResolver = null;
         String wfPayload = null;
 
-        try {
-            resourceResolver = this.getResourceResolver(workflowSession.getSession());
+        try ( ResourceResolver resourceResolver = this.getResourceResolver(workflowSession.getSession()) ){
             wfPayload = (String) workItem.getWorkflowData().getPayload();
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, wfPayload);
@@ -130,10 +128,6 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
             throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession", e);
         } catch (RepositoryException e) {
             throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 
