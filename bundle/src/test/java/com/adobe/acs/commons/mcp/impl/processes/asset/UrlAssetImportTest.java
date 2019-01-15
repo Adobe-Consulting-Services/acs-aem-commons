@@ -60,7 +60,7 @@ import static org.mockito.Mockito.mock;
 public class UrlAssetImportTest {
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
 
     @Mock
     private ActionManager actionManager;

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
@@ -16,8 +17,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
+- #1683 - HttpCache: Added OOTB config extension:: request cookie extension
+- #1685 - HttpCache: Added OOTB config extension:: combined extension
 
 ### Fixed
+- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
 - #1667 - Refactored the activate methods of all http cache services
 - #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
@@ -42,6 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
 - #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
+- #1682 - Enable secure XML processing
 - #1684 - Useing Autocloseable when closing resourceresolvers
 
 ### Changed
