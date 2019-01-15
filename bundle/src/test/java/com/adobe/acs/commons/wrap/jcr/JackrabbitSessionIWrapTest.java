@@ -19,11 +19,20 @@
  */
 package com.adobe.acs.commons.wrap.jcr;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
 
 import com.adobe.acs.commons.wrap.jackrabbit.JackrabbitSessionIWrap;
 import org.apache.jackrabbit.api.JackrabbitSession;
+import org.apache.jackrabbit.api.security.principal.PrincipalManager;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,16 +49,56 @@ public class JackrabbitSessionIWrapTest {
     @Mock
     UserManager userManager;
 
+    @Mock
+    PrincipalManager principalManager;
+
+    @Mock
+    Node mockNode;
+
+    @Mock
+    Property mockProperty;
+
     @Before
     public void setUp() throws Exception {
+        when(session.getPrincipalManager()).thenReturn(principalManager);
         when(session.getUserManager()).thenReturn(userManager);
+        when(session.hasPermission(anyString(), anyString(), anyString())).thenReturn(true);
+        when(session.getItemOrNull("/item/null")).thenReturn(null);
+        when(session.getItemOrNull("/item/node")).thenReturn(mockNode);
+        when(session.getItemOrNull("/item/property")).thenReturn(mockProperty);
+        when(session.getNodeOrNull("/item/null")).thenReturn(null);
+        when(session.getNodeOrNull("/item/node")).thenReturn(mockNode);
+        when(session.getPropertyOrNull("/item/null")).thenReturn(null);
+        when(session.getPropertyOrNull("/item/property")).thenReturn(mockProperty);
     }
 
     @Test
-    public void testGetUserManager() throws Exception {
+    public void testWrapper() throws Exception {
         JackrabbitSession wrapper = new JackrabbitSessionWrapper(session);
-        UserManager mockUserMan = wrapper.getUserManager();
-        assertSame("user manager should be same as mocked", userManager, mockUserMan);
+        assertSame("UserManager should be same as mocked", userManager, wrapper.getUserManager());
+        assertSame("PrincipalManager should be same as mocked", principalManager, wrapper.getPrincipalManager());
+        assertTrue("hasPermission should return true and be counted.",
+                wrapper.hasPermission("/path", "perm1", "perm2"));
+
+        assertNull("getItemOrNull(/item/null) should return null", wrapper.getItemOrNull("/item/null"));
+        assertNull("getNodeOrNull(/item/null) should return null", wrapper.getNodeOrNull("/item/null"));
+        assertNull("getPropertyOrNull(/item/null) should return null", wrapper.getPropertyOrNull("/item/null"));
+
+        verify(session, times(1)).getItemOrNull("/item/null");
+        verify(session, times(1)).getNodeOrNull("/item/null");
+        verify(session, times(1)).getPropertyOrNull("/item/null");
+
+        assertSame("getItemOrNull(/item/node) should return mockNode", mockNode, wrapper.getItemOrNull("/item/node"));
+        assertSame("getItemOrNull(/item/property) should return mockProperty", mockProperty, wrapper.getItemOrNull("/item/property"));
+
+        verify(session, times(1)).getItemOrNull("/item/node");
+        verify(session, times(1)).getItemOrNull("/item/property");
+
+        assertSame("getNodeOrNull(/item/node) should return mockNode", mockNode, wrapper.getNodeOrNull("/item/node"));
+        assertSame("getPropertyOrNull(/item/property) should return mockProperty", mockProperty, wrapper.getPropertyOrNull("/item/property"));
+
+        verify(session, times(1)).getNodeOrNull("/item/node");
+        verify(session, times(1)).getPropertyOrNull("/item/property");
     }
 
     static class JackrabbitSessionWrapper implements JackrabbitSessionIWrap {
