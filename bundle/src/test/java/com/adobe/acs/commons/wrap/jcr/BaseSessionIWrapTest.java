@@ -23,7 +23,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -105,6 +107,7 @@ public class BaseSessionIWrapTest {
         when(session.hasPendingChanges()).thenReturn(true);
         when(session.getValueFactory()).thenReturn(valueFactory);
         when(session.hasPermission(anyString(), anyString())).thenReturn(true);
+        when(session.hasCapability(anyString(), anyObject(), any(Object[].class))).thenReturn(true);
         when(session.getImportContentHandler(anyString(), anyInt())).thenReturn(contentHandler);
         when(session.getNamespacePrefixes()).thenReturn(namespacePrefixes);
         when(session.getNamespaceURI(anyString())).thenReturn("http://someuri/");
@@ -139,6 +142,7 @@ public class BaseSessionIWrapTest {
         assertTrue("hasPendingChanges", wrapper.hasPendingChanges());
         assertSame("getValueFactory", valueFactory, wrapper.getValueFactory());
         assertTrue("hasPermission", wrapper.hasPermission("path", "action"));
+        assertTrue("hasCapability", wrapper.hasCapability("path", "action", new Object[0]));
         assertSame("getImportContentHandler", contentHandler, wrapper.getImportContentHandler("path", 0));
         assertArrayEquals("expect correct namespacePrefixes", namespacePrefixes, wrapper.getNamespacePrefixes());
         assertEquals("getNamespaceURI", "http://someuri/", wrapper.getNamespaceURI("someprefix"));
