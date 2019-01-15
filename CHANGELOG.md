@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
 
 ### Fixed
+- #1692 - HttpCache: Refactored resource / group config extensions 
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils

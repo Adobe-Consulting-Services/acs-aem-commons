@@ -55,6 +55,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Concrete implementation of cache config for http cache. Modelled as OSGi config factory.
  */
@@ -177,24 +179,25 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
 
     // Making the cache config extension configurable.
-    @Property(name = "cacheConfigExtension.target",
-              label = "HttpCacheConfigExtension service pid",
+    @Property(label = "HttpCacheConfigExtension service pid",
               description = "Service pid of target implementation of HttpCacheConfigExtension to be used. Example - "
                       + "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)."
                       + " Optional parameter.",
               value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
+    private static final String PROP_CACHE_CONFIG_EXTENSION_TARGET = "cacheConfigExtension.target";
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
                policy = ReferencePolicy.DYNAMIC,
                name = "cacheConfigExtension")
     private volatile HttpCacheConfigExtension cacheConfigExtension;
 
     // Making the cache key factory configurable.
-    @Property(name = "cacheKeyFactory.target",
-              label = "CacheKeyFactory service pid",
+    @Property(label = "CacheKeyFactory service pid",
               description = "Service pid of target implementation of CacheKeyFactory to be used. Example - "
                       + "(service.pid=com.adobe.acs.commons.httpcac`he.config.impl.GroupHttpCacheConfigExtension)."
                       + " Mandatory parameter.",
               value = "(service.pid=com.adobe.acs.commons.httpcache.config.impl.GroupHttpCacheConfigExtension)")
+    private static final String PROP_CACHE_CONFIG_FACTORY_TARGET = "cacheKeyFactory.target";
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY,
                policy = ReferencePolicy.DYNAMIC,
@@ -228,9 +231,14 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     static final String PROP_EXPIRY_ON_UPDATE = "httpcache.config.expiry.on.update";
     static final long DEFAULT_EXPIRY_ON_UPDATE = 0L;
     private long expiryOnUpdate;
+    private String cacheConfigExtensionTarget;
+    private String cacheKeyFactoryTarget;
 
     @Activate
     protected void activate(Map<String, Object> configs) {
+
+        cacheConfigExtensionTarget = PropertiesUtil.toString(configs.get(PROP_CACHE_CONFIG_EXTENSION_TARGET), null);
+        cacheKeyFactoryTarget = PropertiesUtil.toString(configs.get(PROP_CACHE_CONFIG_FACTORY_TARGET), null);
 
         // Request URIs - Whitelisted.
         requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new
@@ -341,6 +349,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         // Passing on the control to the extension point.
         if (null != cacheConfigExtension) {
             return cacheConfigExtension.accepts(request, this);
+        }else if(isNotBlank(cacheConfigExtensionTarget)){
+            log.error("Cache Config not found! Extension target: {} Factory target: {} ", cacheConfigExtensionTarget, cacheKeyFactoryTarget);
         }
 
         return true;
