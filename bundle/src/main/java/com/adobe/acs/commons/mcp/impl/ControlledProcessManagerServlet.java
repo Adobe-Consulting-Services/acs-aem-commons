@@ -52,6 +52,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -61,14 +62,13 @@ import org.slf4j.LoggerFactory;
  * Servlet for interacting with MCP.
  */
 
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=GET,POST",
-SLING_SERVLET_SELECTORS+"=start,list,status,halt,haltAll,purge",
-SLING_SERVLET_EXTENSIONS+"=json",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/manage-controlled-processes"
-
-})
+@Component(service=Servlet.class)
+@SlingServletResourceTypes(
+        resourceTypes = "acs-commons/components/utilities/manage-controlled-processes",
+        selectors = {"start", "list", "status", "halt", "haltAll", "purge"},
+        methods = {"GET", "POST"},
+        extensions = {"json"}
+)
 public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ControlledProcessManagerServlet.class);
