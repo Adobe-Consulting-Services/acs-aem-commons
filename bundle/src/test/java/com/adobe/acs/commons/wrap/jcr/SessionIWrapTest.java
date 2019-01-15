@@ -166,7 +166,7 @@ public class SessionIWrapTest {
         verify(session, times(1)).checkPermission("/path", "actions");
         wrapper.importXML("/path", null, 42);
 
-        OutputStream mockOs = mock(OutputStream.class);
+        final OutputStream mockOs = mock(OutputStream.class);
         verify(session, times(1)).importXML("/path", null, 42);
         wrapper.exportSystemView("/path", contentHandler, true, false);
         verify(session, times(1)).exportSystemView("/path", contentHandler, true, false);
