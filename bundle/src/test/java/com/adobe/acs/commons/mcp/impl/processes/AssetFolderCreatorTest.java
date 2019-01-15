@@ -66,7 +66,8 @@ import static org.mockito.Mockito.doAnswer;
 public class AssetFolderCreatorTest {
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext();
+    
 
     @Mock
     private ActionManager actionManager;
