@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.wrap.jcr;
+package com.adobe.acs.commons.wrap.jackrabbit;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
