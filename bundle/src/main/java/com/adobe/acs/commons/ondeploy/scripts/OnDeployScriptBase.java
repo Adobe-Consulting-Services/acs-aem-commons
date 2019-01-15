@@ -41,6 +41,7 @@ import javax.jcr.Workspace;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Base on-deploy script implementation.
@@ -196,14 +197,23 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
         Query query = resourceResolver.adaptTo(QueryBuilder.class).createQuery(PredicateGroup.create(map), session);
         SearchResult result = query.getResult();
-        Iterator<Node> nodeItr = result.getNodes();
-        if (nodeItr.hasNext()) {
-            while (nodeItr.hasNext()) {
-                Node node = nodeItr.next();
-                updateResourceType(node, newResourceType);
+        try {
+            Iterator<Node> nodeItr = result.getNodes();
+            if (nodeItr.hasNext()) {
+                while (nodeItr.hasNext()) {
+                    Node node = nodeItr.next();
+                    updateResourceType(node, newResourceType);
+                }
+            } else {
+                logger.info("No nodes found with resource type: {}", oldResourceType);
             }
-        } else {
-            logger.info("No nodes found with resource type: {}", oldResourceType);
+        } finally {
+            Optional.ofNullable(result)
+                    .map(SearchResult::getResources)
+                    .filter(Iterator::hasNext)
+                    .map(Iterator::next)
+                    .map(Resource::getResourceResolver)
+                    .ifPresent(ResourceResolver::close);
         }
     }
 

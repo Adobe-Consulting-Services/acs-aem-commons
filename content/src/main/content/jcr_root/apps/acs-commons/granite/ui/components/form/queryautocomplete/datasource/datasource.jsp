@@ -1,4 +1,4 @@
-<%@ page import="com.adobe.granite.ui.components.ds.DataSource" %>
+<%@ page import="java.util.HashMap" %>
 <%--
   #%L
   ACS AEM Commons Package
@@ -37,21 +37,23 @@
 
   ==============================================================================
 
---%><%@ page import="com.adobe.granite.ui.components.ds.SimpleDataSource" %>
+--%><%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="com.adobe.acs.commons.search.CloseableQuery" %>
+<%@ page import="com.adobe.acs.commons.search.CloseableQueryBuilder" %>
+<%@ page import="com.adobe.granite.ui.components.ds.DataSource" %>
+<%@ page import="com.adobe.granite.ui.components.ds.SimpleDataSource" %>
 <%@ page import="com.adobe.granite.ui.components.ds.ValueMapResource" %>
 <%@ page import="com.day.cq.search.PredicateGroup" %>
-<%@ page import="com.day.cq.search.Query" %>
-<%@ page import="com.day.cq.search.QueryBuilder" %>
 <%@ page import="com.day.cq.search.result.SearchResult" %>
-<%@ page import="org.apache.commons.collections.IteratorUtils" %>
 <%@ page import="org.apache.commons.collections.Transformer" %>
 <%@ page import="org.apache.commons.collections.iterators.TransformIterator" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.apache.sling.api.resource.ResourceResolver" %>
 <%@ page import="org.apache.sling.api.wrappers.ValueMapDecorator" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="com.day.cq.search.result.Hit" %>
+<%@ page import="javax.jcr.RepositoryException" %>
 <%@include file="/libs/foundation/global.jsp"%><%
 
     final ResourceResolver resolver = resourceResolver;
@@ -76,16 +78,22 @@
                 }
             }
 
-            QueryBuilder queryBuilder = sling.getService( QueryBuilder.class );
-            Session session = resourceResolver.adaptTo( Session.class );
-            Query query = queryBuilder.createQuery( PredicateGroup.create(predicateMap), session );
+            CloseableQueryBuilder queryBuilder = sling.getService(CloseableQueryBuilder.class);
+            try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), resourceResolver)) {
+                SearchResult result = query.getResult();
 
-            SearchResult result = query.getResult();
-
-            if( result != null ){
-                resultList = IteratorUtils.toList(result.getResources());
+                if (result != null) {
+                    resultList = new ArrayList<>();
+                    for (Hit hit : result.getHits()) {
+                        try {
+                            final String hitPath = hit.getPath();
+                            resultList.add(resourceResolver.getResource(hitPath));
+                        } catch (RepositoryException e) {
+                            log.error("failed to get path from hit", e);
+                        }
+                    }
+                }
             }
-
         }
 
         if( resultList != null ){
