@@ -72,7 +72,7 @@ public class FileAssetIngestorTest {
     private static final String SFTP_USER_TEST_NAME = "user";
     private static final String SFTP_USER_TEST_PASSWORD = "password";
 
-    @Rule
+    @Rule // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock

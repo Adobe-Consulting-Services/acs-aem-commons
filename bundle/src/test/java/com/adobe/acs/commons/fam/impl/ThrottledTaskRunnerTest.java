@@ -92,7 +92,7 @@ public class ThrottledTaskRunnerTest {
     public void testExecutionOrder() throws NotCompliantMBeanException, InterruptedException {
         ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
 
-        List<Long> executions = new ArrayList<>();
+        final List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
         for(int i=0;i<10;i++) {
             int finalI = i;

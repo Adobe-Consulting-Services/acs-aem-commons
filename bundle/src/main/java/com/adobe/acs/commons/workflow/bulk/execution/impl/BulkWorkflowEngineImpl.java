@@ -130,9 +130,7 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
 
     @Deactivate
     protected final void deactivate(final Map<String, String> args) {
-        ResourceResolver adminResourceResolver = null;
-        try {
-            adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver adminResourceResolver =  resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             final Resource root = adminResourceResolver.getResource(BULK_WORKFLOW_MANAGER_PAGE_FOLDER_PATH);
 
             if (root == null) {
@@ -159,10 +157,6 @@ public class BulkWorkflowEngineImpl implements BulkWorkflowEngine {
             log.error("Could not obtain resource resolver for finding stopped Bulk Workflow jobs", e);
         } catch (PersistenceException e) {
             log.error("Could not resume bulk workflow manager configuration", e);
-        } finally {
-            if (adminResourceResolver != null) {
-                adminResourceResolver.close();
-            }
         }
     }
 }
