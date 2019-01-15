@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
+- #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 - #1685 - HttpCache: Added OOTB config extension:: combined extension
 - #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
@@ -50,6 +51,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
 - #1682 - Enable secure XML processing
 - #1684 - Useing Autocloseable when closing resourceresolvers
+- #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
