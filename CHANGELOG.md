@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
+- #1685 - HttpCache: Added OOTB config extension:: combined extension
 
 ### Fixed
 - #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
