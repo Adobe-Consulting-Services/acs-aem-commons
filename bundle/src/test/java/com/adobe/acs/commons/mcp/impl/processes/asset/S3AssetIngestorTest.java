@@ -67,8 +67,8 @@ public class S3AssetIngestorTest {
 
     private S3Mock s3Mock;
 
-    @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+    @Rule // Use JCR_OAK instead of JCR_MOCK so long as JCR_MOCK's MockSession.refresh() throws UnsupportedOperationException
+    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     @Mock
     private ActionManager actionManager;
