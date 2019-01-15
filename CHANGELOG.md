@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
 
 ### Fixed
+- #1692 - HttpCache: Refactored resource / group config extensions 
 - #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
 - #1667 - Refactored the activate methods of all http cache services
 - #1664 - OSGI annotations : fixed default values for various activate methods
