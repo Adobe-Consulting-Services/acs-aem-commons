@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 
 ### Fixed
+- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
 - #1667 - Refactored the activate methods of all http cache services
 - #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
