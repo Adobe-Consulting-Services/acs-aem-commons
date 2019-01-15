@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
-import com.adobe.acs.commons.httpcache.config.impl.RequestCookieHttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.RequestParameterHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
 
@@ -53,23 +52,30 @@ public class RequestParameterKeyValueWrapperBuilder implements KeyValueMapWrappe
             String[] value = entry.getValue();
 
             if (allowedValues.containsKey(key)) {
-                String[] specificAllowedValues  = allowedValues.get(key).split("\\|");
-
-                for (String allowedValue : specificAllowedValues) {
-                    Object castedValue = ReflectionUtil.castStringValue(allowedValue);
-                    for(int i = 0;i<value.length;i++){
-                        if (castedValue.equals(value[i])) {
-                            keyValueMapWrapper.put(key+ "[" + i+ "]", value[i]);
-                        }
-                    }
-
-                }
-            } else {
-                if(allowedKeys.contains(key)){
-                    keyValueMapWrapper.put(key, value);
-                }
+                putKeyAndValue(key, value);
+            } else if(allowedKeys.contains(key)){
+                putKeyOnly(key, value);
             }
         }
+
         return keyValueMapWrapper;
+    }
+
+    private void putKeyOnly(String key, String[] value) {
+        keyValueMapWrapper.put(key, value);
+    }
+
+    private void putKeyAndValue(String key, String[] value) {
+        String[] specificAllowedValues  = allowedValues.get(key).split("\\|");
+
+        for (String allowedValue : specificAllowedValues) {
+            Object castedValue = ReflectionUtil.castStringValue(allowedValue);
+            for(int i = 0;i<value.length;i++){
+                if (castedValue.equals(value[i])) {
+                    keyValueMapWrapper.put(key+ "[" + i+ "]", value[i]);
+                }
+            }
+
+        }
     }
 }
