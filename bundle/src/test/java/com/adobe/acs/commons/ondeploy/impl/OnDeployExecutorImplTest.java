@@ -107,7 +107,7 @@ public class OnDeployExecutorImplTest {
         doNothing().when(impl).runScripts(same(resourceResolver), anyList());
         
         if (resourceResolver.isLive()) {
-            doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();        	
+            doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();           
         }
 
 
