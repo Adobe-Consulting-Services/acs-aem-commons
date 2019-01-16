@@ -61,6 +61,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class EnsureAceTest {
     private static final Logger LOG = LoggerFactory.getLogger(EnsureAceTest.class);
+    private static final String USER_HOME = "/rep:security/rep:authorizables/rep:users";
+    private static final String GROUP_HOME = "/rep:security/rep:authorizables/rep:groups";
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -93,12 +95,14 @@ public class EnsureAceTest {
         JackrabbitSession session = (JackrabbitSession) context.resourceResolver().adaptTo(Session.class);
 
         UserManager userManager = session.getUserManager();
-        User testUser = userManager.createSystemUser("testuser", "/rep:security/rep:authorizables/rep:users/system");
-        User testUser2 = userManager.createSystemUser("testuser2", "/rep:security/rep:authorizables/rep:users/system");
+
+        final User testUser = userManager.createSystemUser("testuser", USER_HOME + "/system");
+        final User testUser2 = userManager.createSystemUser("testuser2", USER_HOME + "/system");
+        final org.apache.jackrabbit.api.security.user.Group testGroup = userManager.createGroup("testgroup");
 
         Map<String, Object> initConfig = new HashMap<>();
         initConfig.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser");
-        initConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=;"});
+        initConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:ntNames=nt:unstructured"});
         ServiceUser initServiceUser = new ServiceUser(initConfig);
         assertEquals("no failures on init", 0, ensureAce.ensureAces(context.resourceResolver(), testUser, initServiceUser));
 
@@ -116,13 +120,15 @@ public class EnsureAceTest {
 
         Map<String, Object> init2Config = new HashMap<>();
         init2Config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser2");
-        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/nocontent;rep:glob=;"});
+        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/nocontent;"});
         ServiceUser init2ServiceUser = new ServiceUser(init2Config);
-        assertEquals("no failures on init", 1, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
-        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=;"});
-        assertEquals("no failures on init", 0, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
+        assertEquals("no failures on init, but trigger exceptions", 1, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
 
         doReturn(newAce.getPath()).when(mockHit).getPath();
+        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=*;"});
+        init2ServiceUser = new ServiceUser(init2Config);
+        assertEquals("no failures on init", 0, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
+
 
         Iterator<Resource> nextAces = repPolicy.hasChildren() ? repPolicy.listChildren() : Collections.emptyIterator();
         assertTrue("new allow nodes should exist", nextAces.hasNext());
@@ -139,9 +145,17 @@ public class EnsureAceTest {
 
         Map<String, Object> nextConfig = new HashMap<>();
         nextConfig.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser");
-        nextConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:all;path=/content;rep:glob=;"});
+        nextConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:all;path=/content;rep:itemNames=config;rep:prefixes=foo;"});
         ServiceUser nextServiceUser = new ServiceUser(nextConfig);
         assertEquals("no failures on next",
                 0, ensureAce.ensureAces(context.resourceResolver(), testUser, nextServiceUser));
+
+        Map<String, Object> groupConfig = new HashMap<>();
+        groupConfig.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testgroup");
+        groupConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=;"});
+        Group ensureGroup = new Group(groupConfig);
+        assertEquals("no failures on group",
+                0, ensureAce.ensureAces(context.resourceResolver(), testGroup, ensureGroup));
+
     }
 }
