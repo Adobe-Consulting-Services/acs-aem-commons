@@ -125,12 +125,7 @@ public abstract class FieldComponent {
     }
 
     public void addClientLibrary(String category) {
-        addClientLibrary(category, ClientLibraryType.ALL);
-    }
-
-    public void addClientLibrary(String category, ClientLibraryType type) {
-        Set<String> categories = clientLibraries.getOrDefault(type, new LinkedHashSet<>());
-        categories.add(category);
+        addClientLibraries(ClientLibraryType.ALL, category);
     }
 
     public void addClientLibraries(ClientLibraryType type, String... categories) {
