@@ -1,0 +1,151 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.adobe.acs.commons.users.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.result.Hit;
+import com.day.cq.search.result.SearchResult;
+import org.apache.jackrabbit.api.JackrabbitSession;
+import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@RunWith(MockitoJUnitRunner.class)
+public class EnsureAceTest {
+    private static final Logger LOG = LoggerFactory.getLogger(EnsureAceTest.class);
+
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+
+    @Mock
+    CloseableQueryBuilder queryBuilder;
+
+    @Mock
+    CloseableQuery query;
+
+    @Mock
+    SearchResult result;
+
+    @Before
+    public void setUp() throws Exception {
+        context.registerService(CloseableQueryBuilder.class, queryBuilder);
+
+        when(result.getHits()).thenReturn(Collections.emptyList());
+        when(query.getResult()).thenReturn(result);
+        doNothing().when(query).close();
+
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).then(invoked -> {
+            PredicateGroup predicates = invoked.getArgumentAt(0, PredicateGroup.class);
+            return query;
+        });
+    }
+
+    @Test
+    public void testEnsureAces() throws Exception {
+        final EnsureAce ensureAce = context.registerInjectActivateService(new EnsureAce());
+
+        context.build().resource("/content", "jcr:primaryType", "nt:unstructured").commit();
+
+        JackrabbitSession session = (JackrabbitSession) context.resourceResolver().adaptTo(Session.class);
+
+        UserManager userManager = session.getUserManager();
+        User testUser = userManager.createSystemUser("testuser", "/rep:security/rep:authorizables/rep:users/system");
+        User testUser2 = userManager.createSystemUser("testuser2", "/rep:security/rep:authorizables/rep:users/system");
+
+        Map<String, Object> initConfig = new HashMap<>();
+        initConfig.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser");
+        initConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=;"});
+        ServiceUser initServiceUser = new ServiceUser(initConfig);
+        assertEquals("no failures on init", 0, ensureAce.ensureAces(context.resourceResolver(), testUser, initServiceUser));
+
+        Resource repPolicy = context.resourceResolver().getResource("/content/rep:policy");
+        assertNotNull("new rep:policy node should exist", repPolicy);
+        Resource newAce = repPolicy.hasChildren() ? repPolicy.listChildren().next() : null;
+        assertNotNull("new allow node should exist", newAce);
+
+        Hit mockHit = mock(Hit.class);
+        when(mockHit.getResource()).thenReturn(newAce);
+        when(mockHit.getPath()).thenThrow(new RepositoryException("no more storage on cloud!"));
+
+        final List<Hit> hits = Collections.singletonList(mockHit);
+        when(result.getHits()).thenReturn(hits);
+
+        Map<String, Object> init2Config = new HashMap<>();
+        init2Config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser2");
+        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/nocontent;rep:glob=;"});
+        ServiceUser init2ServiceUser = new ServiceUser(init2Config);
+        assertEquals("no failures on init", 1, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
+        init2Config.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:read;path=/content;rep:glob=;"});
+        assertEquals("no failures on init", 0, ensureAce.ensureAces(context.resourceResolver(), testUser2, init2ServiceUser));
+
+        doReturn(newAce.getPath()).when(mockHit).getPath();
+
+        Iterator<Resource> nextAces = repPolicy.hasChildren() ? repPolicy.listChildren() : Collections.emptyIterator();
+        assertTrue("new allow nodes should exist", nextAces.hasNext());
+
+        List<Hit> nextHits = new ArrayList<>();
+        while (nextAces.hasNext()) {
+            Hit nextHit = mock(Hit.class);
+            Resource nextAce = nextAces.next();
+            when(nextHit.getResource()).thenReturn(nextAce);
+            when(nextHit.getPath()).thenReturn(nextAce.getPath());
+        }
+
+        when(result.getHits()).thenReturn(nextHits);
+
+        Map<String, Object> nextConfig = new HashMap<>();
+        nextConfig.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser");
+        nextConfig.put(EnsureServiceUser.PROP_ACES, new String[]{"type=allow;privileges=jcr:all;path=/content;rep:glob=;"});
+        ServiceUser nextServiceUser = new ServiceUser(nextConfig);
+        assertEquals("no failures on next",
+                0, ensureAce.ensureAces(context.resourceResolver(), testUser, nextServiceUser));
+    }
+}
