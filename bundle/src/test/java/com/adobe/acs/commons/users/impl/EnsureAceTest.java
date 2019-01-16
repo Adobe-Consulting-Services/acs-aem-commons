@@ -81,11 +81,7 @@ public class EnsureAceTest {
         when(result.getHits()).thenReturn(Collections.emptyList());
         when(query.getResult()).thenReturn(result);
         doNothing().when(query).close();
-
-        when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).then(invoked -> {
-            PredicateGroup predicates = invoked.getArgumentAt(0, PredicateGroup.class);
-            return query;
-        });
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).thenReturn(query);
     }
 
     @Test
