@@ -142,7 +142,7 @@ public abstract class FieldComponent {
         }
     }
 
-    public void mergeClientLibraries(FieldComponent component) {
+    public void addClientLibraries(FieldComponent component) {
         component.getClientLibraryCategories().forEach((type, categories) -> {
             if (categories != null) {
                 addClientLibraries(type, categories);

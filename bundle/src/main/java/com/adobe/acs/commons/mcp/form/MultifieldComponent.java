@@ -99,6 +99,6 @@ public class MultifieldComponent extends FieldComponent {
             fieldComponents.putAll(AnnotatedFieldDeserializer.getFormFields(clazz, sling));
             isComposite = true;
         }
-        fieldComponents.values().forEach(this::mergeClientLibraries);
+        fieldComponents.values().forEach(this::addClientLibraries);
     }
 }
