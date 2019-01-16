@@ -142,6 +142,9 @@ public class OnDeployScriptBaseTest {
         Node base = grandParent.getParent();
         assertEquals("/content", base.getPath());
         assertEquals("nt:resource", base.getPrimaryNodeType().getName());
+
+        Node nodeAgain = onDeployScript.getOrCreateNode("/content/test2/folder/page", "nt:folder", "cq:Page");
+        assertNotNull(nodeAgain);
     }
 
     @Test
@@ -284,6 +287,14 @@ public class OnDeployScriptBaseTest {
         onDeployScript.updateResourceType(resourceToUpdate.adaptTo(Node.class), "test/component/comp2");
 
         assertLogText("Node at /content/resource-type-update2 is already resource type: test/component/comp2");
+    }
+
+    @Test
+    public void testGetters() {
+        assertNotNull("getResourceResolver()", onDeployScript.getResourceResolver());
+        assertNotNull("getPageManager()", onDeployScript.getPageManager());
+        assertNotNull("getSession()", onDeployScript.getSession());
+        assertNotNull("getWorkspace()", onDeployScript.getWorkspace());
     }
 
     protected class OnDeployScriptBaseExt extends OnDeployScriptBase {
