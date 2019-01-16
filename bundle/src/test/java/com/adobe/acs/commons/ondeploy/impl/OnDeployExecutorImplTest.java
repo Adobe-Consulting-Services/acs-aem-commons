@@ -19,36 +19,9 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
-import com.adobe.acs.commons.testutil.LogTester;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.jcr.RepositoryException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import static java.util.Arrays.asList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -65,6 +38,29 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
+
+import java.util.Calendar;
+import java.util.Collections;
+import javax.jcr.RepositoryException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
+import com.adobe.acs.commons.testutil.LogTester;
+import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 public class OnDeployExecutorImplTest {
     @Rule
@@ -88,7 +84,7 @@ public class OnDeployExecutorImplTest {
         context.registerService(OnDeployScriptProvider.class,
                 () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
         context.registerInjectActivateService(impl);
-        
+
         verify(resourceResolver).close();
     }
 
@@ -99,9 +95,9 @@ public class OnDeployExecutorImplTest {
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();
         doNothing().when(impl).runScripts(same(resourceResolver), anyList());
-        
+
         if (resourceResolver.isLive()) {
-            doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();           
+            doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
         }
 
 
@@ -110,7 +106,7 @@ public class OnDeployExecutorImplTest {
         context.registerInjectActivateService(impl);
 
         if (resourceResolver.isLive()) {
-           assertLogText("Failed resourceResolver.close()");
+            assertLogText("Failed resourceResolver.close()");
         }
     }
 
@@ -377,11 +373,11 @@ public class OnDeployExecutorImplTest {
 
         TabularData scriptsData = onDeployExecutor.getScripts();
         assertEquals("wrong number of scripts registered in JXM data", 4, scriptsData.size());
-        for(Object o : scriptsData.values()) {
-            CompositeData row = (CompositeData)o;
+        for (Object o : scriptsData.values()) {
+            CompositeData row = (CompositeData) o;
             String status = (String) row.get("status");
             String script = (String) row.get("_script");
-            if(script.contains("Success")) {
+            if (script.contains("Success")) {
                 assertEquals("fail", "success", status);
             }
         }
