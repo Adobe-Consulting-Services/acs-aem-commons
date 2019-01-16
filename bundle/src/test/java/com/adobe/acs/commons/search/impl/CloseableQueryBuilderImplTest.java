@@ -38,6 +38,7 @@ import java.util.Collections;
 import javax.jcr.Session;
 
 import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.acs.commons.wrap.cqsearch.QueryIWrap;
 import com.adobe.acs.commons.wrap.jcr.BaseSessionIWrap;
 import com.day.cq.search.PredicateGroup;
@@ -256,5 +257,15 @@ public class CloseableQueryBuilderImplTest {
         final Query wrappedCloseableOther = closeableQuery.wrapQuery(closeableOtherQuery);
         assertSame("wrapped closeable other should be same as closable other", closeableOtherQuery,
                 wrappedCloseableOther);
+    }
+
+    @Test
+    public void testGetAdapter() {
+        assertSame("getAdapter should return same instance with ResourceResolver and correct adapterType.",
+                closeableQueryBuilder, closeableQueryBuilder.getAdapter(contextResolver, CloseableQueryBuilder.class));
+        assertNull("getAdapter should return null for non-ResourceResolver adapter",
+                closeableQueryBuilder.getAdapter(context.request(), CloseableQueryBuilder.class));
+        assertNull("getAdapter should return null for incorrect adapterType",
+                closeableQueryBuilder.getAdapter(contextResolver, QueryBuilder.class));
     }
 }
