@@ -123,6 +123,10 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
             result = "Exception occurred " + ex.getMessage();
             LOG.error(ex.getMessage() + " -- End of line.", ex);
         }
+        getGson().toJson(result, response.getWriter());
+    }
+
+    Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.addSerializationExclusionStrategy(new ExclusionStrategy() {
             @Override
@@ -139,7 +143,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         });
         gsonBuilder.disableInnerClassSerialization();
         Gson gson = gsonBuilder.create();
-        gson.toJson(result, response.getWriter());
+        return gson;
     }
 
     private ProcessInstance doStartProcess(SlingHttpServletRequest request) throws RepositoryException, ReflectiveOperationException, DeserializeException {
@@ -203,7 +207,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private Map<String, Object> convertRequestMap(RequestParameterMap requestParameterMap) {
+    Map<String, Object> convertRequestMap(RequestParameterMap requestParameterMap) {
         return requestParameterMap.entrySet().stream()
                 .filter(entry -> !IGNORED_SERVLET_INPUTS.contains(entry.getKey()))
                 .collect(Collectors.toMap(
@@ -218,7 +222,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
                                     return values[0].getString();
                                 }
                             } else {
-                                return Arrays.stream(values).collect(Collectors.toList());
+                                return Arrays.stream(values).map(RequestParameter::getString).collect(Collectors.toList());
                             }
                         }
                 ));
