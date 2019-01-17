@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -417,4 +418,91 @@ public class GQLToQueryBuilderConverterTest {
         assertThat(map, hasEntry("10002_group.p.or", "true"));
     }
 
+    @Test
+    public void testIsValidProperty() {
+        assertFalse("identify blacklist property as invalid",
+                GQLToQueryBuilderConverter.isValidProperty(ContentFinderConstants.PROPERTY_BLACKLIST[0]));
+        assertTrue("identify non-blacklist property as valid",
+                GQLToQueryBuilderConverter.isValidProperty("text"));
+    }
+
+    @Test
+    public void testHasMany() {
+        MockSlingHttpServletRequest request = context.request();
+        request.setParameterMap(Collections.emptyMap());
+        assertFalse("missing key hasMany() returns false",
+                GQLToQueryBuilderConverter.hasMany(request, "nonexistent"));
+    }
+
+    @Test
+    public void testGetAllEmpty() {
+        MockSlingHttpServletRequest request = context.request();
+        request.setParameterMap(Collections.emptyMap());
+        assertArrayEquals("missing key getAll() returns empty array", new String[0],
+                GQLToQueryBuilderConverter.getAll(request, "nonexistent"));
+    }
+
+    @Test
+    public void testGetLimit() {
+        final String key = ContentFinderConstants.CF_LIMIT;
+        final int defaultLimit = ContentFinderConstants.DEFAULT_LIMIT;
+        MockSlingHttpServletRequest request = context.request();
+        Map<String, Object> params = new HashMap<>();
+        request.setParameterMap(params);
+
+        assertEquals("no limit should return default limit",
+                defaultLimit, GQLToQueryBuilderConverter.getLimit(request));
+
+        params.put(key, "invalid");
+        request.setParameterMap(params);
+        assertEquals("invalid limit return default limit",
+                defaultLimit, GQLToQueryBuilderConverter.getLimit(request));
+
+        params.put(key, "15..");
+        request.setParameterMap(params);
+        assertEquals("only start should return default limit",
+                defaultLimit, GQLToQueryBuilderConverter.getLimit(request));
+
+        params.put(key, "..25");
+        request.setParameterMap(params);
+        assertEquals("only limit should return parsed limit",
+                25, GQLToQueryBuilderConverter.getLimit(request));
+
+        params.put(key, "15..25");
+        request.setParameterMap(params);
+        assertEquals("start and limit should return difference",
+                10, GQLToQueryBuilderConverter.getLimit(request));
+    }
+
+    @Test
+    public void testGetOffset() {
+        final String key = ContentFinderConstants.CF_LIMIT;
+        final int defaultOffset = ContentFinderConstants.DEFAULT_OFFSET;
+        MockSlingHttpServletRequest request = context.request();
+        Map<String, Object> params = new HashMap<>();
+        request.setParameterMap(params);
+
+        assertEquals("no limit should return default offset",
+                defaultOffset, GQLToQueryBuilderConverter.getOffset(request));
+
+        params.put(key, "invalid");
+        request.setParameterMap(params);
+        assertEquals("invalid offset should return default offset",
+                defaultOffset, GQLToQueryBuilderConverter.getOffset(request));
+
+        params.put(key, "15..");
+        request.setParameterMap(params);
+        assertEquals("only start should return start",
+                15, GQLToQueryBuilderConverter.getOffset(request));
+
+        params.put(key, "..25");
+        request.setParameterMap(params);
+        assertEquals("only end should return end",
+                25, GQLToQueryBuilderConverter.getOffset(request));
+
+        params.put(key, "15..25");
+        request.setParameterMap(params);
+        assertEquals("start and end should return start",
+                15, GQLToQueryBuilderConverter.getOffset(request));
+    }
 }

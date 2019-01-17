@@ -28,6 +28,8 @@ import java.util.Map;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -54,8 +56,6 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -69,6 +69,9 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
     @Reference
     private Replicator replicator;
+
+    @Reference
+    private CloseableQueryBuilder queryBuilder;
 
     @Property(value = "acs-commons/components/content/twitter-feed", unbounded = PropertyUnbounded.ARRAY,
             label = "Twitter Feed component paths", description = "Component paths for Twitter Feed components.")
@@ -159,16 +162,15 @@ public final class TwitterFeedUpdaterImpl implements TwitterFeedUpdater {
 
         predicateMap.put("p.limit", "-1");
 
-        QueryBuilder queryBuilder = resourceResolver.adaptTo(QueryBuilder.class);
-        Session session = resourceResolver.adaptTo(Session.class);
-        Query query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), session);
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(predicateMap), resourceResolver)) {
 
-        SearchResult result = query.getResult();
-        Iterator<Resource> resources = result.getResources();
-        while (resources.hasNext()) {
-            twitterResources.add(resources.next());
+            SearchResult result = query.getResult();
+            Iterator<Resource> resources = result.getResources();
+            while (resources.hasNext()) {
+                twitterResources.add(resourceResolver.getResource(resources.next().getPath()));
+            }
+            return twitterResources;
         }
-        return twitterResources;
     }
 
     private String processTweet(Status status) {

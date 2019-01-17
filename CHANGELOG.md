@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #1692 - HttpCache: Refactored resource / group config extensions 
 - #1607 - HttpCache: improved the write to response mechanism.
+- #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils
 - #1583 - Asset Ingestor may try to create asset folders when they already exist
