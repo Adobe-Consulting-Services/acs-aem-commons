@@ -21,13 +21,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 - #1685 - HttpCache: Added OOTB config extension:: combined extension
 - #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
+- #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
 - #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
 - #1667 - Refactored the activate methods of all http cache services
 - #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
+- #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils
 - #1583 - Asset Ingestor may try to create asset folders when they already exist

@@ -27,11 +27,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
+import java.util.Optional;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.granite.asset.api.Asset;
+import com.adobe.granite.asset.api.AssetManager;
+import com.adobe.granite.asset.api.AssetVersionManager;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.search.PredicateGroup;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -54,16 +63,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.granite.asset.api.Asset;
-import com.adobe.granite.asset.api.AssetManager;
-import com.adobe.granite.asset.api.AssetVersionManager;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
 
 
 @Component(service=EventHandler.class,immediate = true,configurationPolicy=ConfigurationPolicy.REQUIRE,property= {
@@ -130,7 +129,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
     private Scheduler scheduler;
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
 
     private static final String DEFAULT_DEFAULT_CONFLICT_RESOLUTION = CONFLICT_RESOLUTION_NEW_VERSION;
     private String defaultConflictResolution = DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
@@ -194,13 +193,18 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                     String contentPath = taskProperties.get(PN_CONTENT_PATH, String.class);
 
                     if (StringUtils.startsWith(contentPath, PATH_CONTENT_DAM)) {
-                        final Iterator<Resource> assets = findAssets(resourceResolver, contentPath);
+                        try (CloseableQuery query = findAssets(resourceResolver, contentPath)) {
+                            log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
+                                    query.getResult().getHits().size(),
+                                    contentPath);
 
-                        resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
+                            final Iterator<Resource> assets = query.getResult().getResources();
+                            resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(USER_EVENT_TYPE);
 
-                        while (assets.hasNext()) {
-                            final Asset asset = assets.next().adaptTo(Asset.class);
-                            moveAsset(resourceResolver, assetManager, asset, taskProperties);
+                            while (assets.hasNext()) {
+                                final Asset asset = assetManager.getAsset(assets.next().getPath());
+                                moveAsset(resourceResolver, assetManager, asset, taskProperties);
+                            }
                         }
                     }
                 }
@@ -214,9 +218,9 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
          *
          * @param resourceResolver the resource resolver used to find the Assets to move.
          * @param contentPath      the DAM contentPath which the task covers.
-         * @return the resources representing dam:Assets for which dam:status is set to approved or rejected
+         * @return the CloseableQuery whose result represents dam:Assets for which dam:status is set to approved or rejected
          */
-        private Iterator<Resource> findAssets(ResourceResolver resourceResolver, String contentPath) {
+        private CloseableQuery findAssets(ResourceResolver resourceResolver, String contentPath) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("type", DamConstants.NT_DAM_ASSET);
             params.put("path", contentPath);
@@ -226,16 +230,7 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
             params.put("p.offset", "0");
             params.put("p.limit", "-1");
 
-            Query query = queryBuilder.createQuery(PredicateGroup.create(params),
-                    resourceResolver.adaptTo(Session.class));
-
-            if (log.isDebugEnabled()) {
-                log.debug("Found [ {} ] assets under [ {} ] that were reviewed and require processing.",
-                        query.getResult().getHits().size(),
-                        contentPath);
-            }
-
-            return query.getResult().getResources();
+            return queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver);
         }
 
 
