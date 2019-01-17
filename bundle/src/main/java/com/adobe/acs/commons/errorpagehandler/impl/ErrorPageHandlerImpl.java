@@ -40,6 +40,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingConstants;
@@ -77,7 +78,6 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
 
 @Component(service = ErrorPageHandlerService.class, immediate = false)
 @Designate(ocd = ErrorPageHandlerImpl.Config.class)
@@ -251,9 +251,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private QueryBuilder queryBuilder;
 
     @Reference
     private Authenticator authenticator;
