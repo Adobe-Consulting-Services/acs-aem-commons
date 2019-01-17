@@ -21,6 +21,7 @@ package com.adobe.acs.commons.mcp.form;
 
 import aQute.bnd.annotation.ProviderType;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -125,22 +126,16 @@ public abstract class FieldComponent {
     }
 
     public void addClientLibrary(String category) {
-        addClientLibraries(ClientLibraryType.ALL, category);
+        addClientLibraries(ClientLibraryType.ALL, Arrays.asList(category));
     }
 
     public void addClientLibraries(ClientLibraryType type, String... categories) {
-        Set<String> categoriesSet = clientLibraries.getOrDefault(type, new LinkedHashSet<>());
-        for (String category : categories) {
-            categoriesSet.add(category);
-        }
-        clientLibraries.put(type, categoriesSet);
+        addClientLibraries(type, Arrays.asList(categories));
     }
 
     public void addClientLibraries(ClientLibraryType type, Collection<String> categories) {
         Set<String> categoriesSet = clientLibraries.getOrDefault(type, new LinkedHashSet<>());
-        for (String category : categories) {
-            categoriesSet.add(category);
-        }
+        categoriesSet.addAll(categories);
         clientLibraries.put(type, categoriesSet);
     }
 
@@ -201,5 +196,5 @@ public abstract class FieldComponent {
 
     public static enum ClientLibraryType {
         JS, CSS, ALL
-    };
+    }
 }

@@ -20,9 +20,10 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.List;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Assert the generation behavior of synthetic dialogs from a java bean -- which

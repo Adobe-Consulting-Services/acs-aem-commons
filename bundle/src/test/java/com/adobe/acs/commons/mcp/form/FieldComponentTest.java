@@ -23,8 +23,9 @@ import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Optional;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class FieldComponentTest {
     @Test
