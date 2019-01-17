@@ -48,7 +48,7 @@ public abstract class FieldComponent {
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
     private String path = "/fake/path";
-    private EnumMap<ClientLibraryType, Set<String>> clientLibraries;
+    private final EnumMap<ClientLibraryType, Set<String>> clientLibraries = new EnumMap<>(ClientLibraryType.class);
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
@@ -133,6 +133,7 @@ public abstract class FieldComponent {
         for (String category : categories) {
             categoriesSet.add(category);
         }
+        clientLibraries.put(type, categoriesSet);
     }
 
     public void addClientLibraries(ClientLibraryType type, Collection<String> categories) {
@@ -140,6 +141,7 @@ public abstract class FieldComponent {
         for (String category : categories) {
             categoriesSet.add(category);
         }
+        clientLibraries.put(type, categoriesSet);
     }
 
     public void addClientLibraries(FieldComponent component) {
