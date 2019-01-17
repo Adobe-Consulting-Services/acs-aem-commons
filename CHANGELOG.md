@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
