@@ -19,10 +19,11 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.junit.Test;
-
+import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Optional;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -42,6 +43,26 @@ public class FieldComponentTest {
         assertEquals("b", testComponent.getOption("a").get());
         assertEquals(Optional.empty(), testComponent.getOption("c"));
         assertEquals(Optional.empty(), testComponent.getOption("z"));
+    }
+
+    @Test
+    public void testClientLibraryTracking() {
+        TestFieldComponent componentA = new TestFieldComponent(null);
+        TestFieldComponent componentB = new TestFieldComponent(null);
+
+        assertNotNull(componentA.getClientLibraryCategories());
+        assertEquals(0, componentA.getClientLibraryCategories().size());
+
+        componentB.addClientLibrary("All-Test1");
+        componentB.addClientLibraries(FieldComponent.ClientLibraryType.JS, "JS-Test1", "JS-Test2");
+        componentB.addClientLibraries(FieldComponent.ClientLibraryType.CSS, Arrays.asList("CSS-Test1", "CSS-Test2"));
+
+        assertArrayEquals(new String[]{"JS-Test1", "JS-Test2"}, componentB.getClientLibraryCategories().get(ClientLibraryType.JS).toArray());
+        assertArrayEquals(new String[]{"CSS-Test1", "CSS-Test2"}, componentB.getClientLibraryCategories().get(ClientLibraryType.CSS).toArray());
+
+        componentA.addClientLibrary("All-Test2");
+        componentA.addClientLibraries(componentB);
+        assertArrayEquals(new String[]{"All-Test2", "All-Test1"}, componentA.getClientLibraryCategories().get(ClientLibraryType.ALL).toArray());
     }
 
     public class TestFieldComponent extends FieldComponent {

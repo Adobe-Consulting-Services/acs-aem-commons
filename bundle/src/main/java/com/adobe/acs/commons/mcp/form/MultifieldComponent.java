@@ -27,9 +27,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
 /**
- * Represent multifield with sub-fields based on referenced class.
- * Depending on where this is used, some javascript should be included by the front-end
- * to process the resulting form correctly.
+ * Represent multifield with sub-fields based on referenced class. Depending on
+ * where this is used, some javascript should be included by the front-end to
+ * process the resulting form correctly.
  */
 public class MultifieldComponent extends FieldComponent {
 
@@ -69,7 +69,7 @@ public class MultifieldComponent extends FieldComponent {
                 component.setPath(getPath() + "/field/items/" + component.getName());
                 items.addChild(component.buildComponentResource());
             }
-        } else {            
+        } else {
             for (FieldComponent component : fieldComponents.values()) {
                 component.setPath(getPath() + "/field");
                 Resource comp = component.buildComponentResource();
@@ -89,7 +89,7 @@ public class MultifieldComponent extends FieldComponent {
         fieldComponents = new LinkedHashMap<>();
         if (clazz == String.class) {
             FieldComponent comp = new TextfieldComponent();
-            FormField fieldDef = FormField.Factory.create(getName(), "", null, false, comp.getClass(), null);            
+            FormField fieldDef = FormField.Factory.create(getName(), "", null, false, comp.getClass(), null);
             comp.setup(getName(), null, fieldDef, sling);
             comp.getComponentMetadata().put("title", getName());
             // TODO: Provide a proper mechanism for setting path when creating components
@@ -99,5 +99,6 @@ public class MultifieldComponent extends FieldComponent {
             fieldComponents.putAll(AnnotatedFieldDeserializer.getFormFields(clazz, sling));
             isComposite = true;
         }
+        fieldComponents.values().forEach(this::addClientLibraries);
     }
 }
