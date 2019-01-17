@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
 - #1685 - HttpCache: Added OOTB config extension:: combined extension
 - #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
+- #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
 - #1692 - HttpCache: Refactored resource / group config extensions 
