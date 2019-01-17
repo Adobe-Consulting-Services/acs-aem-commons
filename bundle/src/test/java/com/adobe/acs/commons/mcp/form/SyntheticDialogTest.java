@@ -20,10 +20,9 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.List;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Assert the generation behavior of synthetic dialogs from a java bean -- which
@@ -64,6 +63,7 @@ public class SyntheticDialogTest {
         assertNotNull(component.getFieldComponents().get("subField3"));
         assertNotNull(component.getFieldComponents().get("subField4"));
         assertNotNull(component.getFieldComponents().get("subField5"));
+        assertNotNull(component.getFieldComponents().get("subField6"));
         assertTrue(component.isComposite);
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
@@ -75,6 +75,7 @@ public class SyntheticDialogTest {
         assertNotNull("Should include subfield3 component", res.getChild("field/items/subField3"));
         assertNotNull("Should include subfield4 component", res.getChild("field/items/subField4"));
         assertNotNull("Should include subfield5 component", res.getChild("field/items/subField5"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField6"));
     }
 
     @Test
@@ -88,8 +89,26 @@ public class SyntheticDialogTest {
         assertNotNull("Multifield node check", res.getChild("field"));
     }
 
-    public class TestPojo extends GeneratedDialog {
+    @Test
+    public void testClientLibraryHandling() {
+        assertEquals(1, testPojo.getAllClientLibraries().size());
+        assertEquals(1, testPojo.getJsClientLibraries().size());
+        assertEquals(1, testPojo.getCssClientLibraries().size());
+        assert(testPojo.getAllClientLibraries().contains("component-all"));
+        assert(testPojo.getJsClientLibraries().contains("component-js"));
+        assert(testPojo.getCssClientLibraries().contains("component-css"));
+    }
 
+    public static class ComponentWithClientLibraries extends FieldComponent {
+        @Override
+        public void init() {
+            addClientLibraries(FieldComponent.ClientLibraryType.JS, "component-js");
+            addClientLibraries(FieldComponent.ClientLibraryType.CSS, "component-css");
+            addClientLibrary("component-all");
+        }
+    }
+
+    public static class TestPojo extends GeneratedDialog {
         @FormField(component = TextfieldComponent.class, name = "Text Field")
         String textField;
 
@@ -109,7 +128,7 @@ public class SyntheticDialogTest {
         String textArea;
     }
 
-    public class TestSubtype {
+    public static class TestSubtype {
 
         @FormField(component = TextfieldComponent.class, name = "Text Field")
         String subField1;
@@ -125,5 +144,8 @@ public class SyntheticDialogTest {
 
         @FormField(component = TextareaComponent.class, name = "Text Area")
         String subField5;
+
+        @FormField(component = ComponentWithClientLibraries.class, name = "Component with client libs")
+        String subField6;
     }
 }
