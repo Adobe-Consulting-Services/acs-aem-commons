@@ -206,6 +206,7 @@ public class FileOrRendition implements HierarchicalElement {
                     size = getConnection().getContentLengthLong();
                 } catch (IOException ex) {
                     size = -1L; 
+                    LOG.error("Exception while getting length for url connection {}",getConnection().getURL().toExternalForm(),ex);
                     throw ex;
                 }
             }
@@ -249,8 +250,10 @@ public class FileOrRendition implements HierarchicalElement {
                     connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest);
                     size = connection.getEntity().getContentLength();
                 } catch (IOException | IllegalArgumentException ex) {
+                    String msg = String.format("Error with URL {}", url);
+                    LOG.error(msg,ex);
                     size = -1L;
-                    throw new IOException("Error with URL " + url + ": " + ex.getMessage(), ex);
+                    throw new IOException(msg, ex);
                 }
             }
             return connection;
@@ -312,7 +315,9 @@ public class FileOrRendition implements HierarchicalElement {
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
                 } catch (JSchException ex) {
-                    throw new IOException("Unable to connect to server", ex);
+                    String msg = String.format("Unable to connect to host {}", uri.toString());
+                    LOG.error(msg,ex);
+                    throw new IOException(msg, ex);
                 }
             }
             return session;
@@ -339,10 +344,14 @@ public class FileOrRendition implements HierarchicalElement {
                 return currentStream;
 
             } catch (URISyntaxException ex) {
-                throw new IOException("Bad URI format", ex);
+                String msg = String.format("Bad URI format for %s", getSourcePath());
+                LOG.error(msg,ex);
+                throw new IOException(msg,ex);
             } catch (JSchException ex) {
+                LOG.error("Error with connection",ex);
                 throw new IOException("Error with connection", ex);
             } catch (SftpException ex) {
+                LOG.error("Error while retrieving file",ex);
                 throw new IOException("Error retrieving file", ex);
             }
         }
@@ -361,11 +370,15 @@ public class FileOrRendition implements HierarchicalElement {
                 SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
-                throw new IOException("Error parsing URL", ex);
+                String msg = String.format("Bad URI format for %s", getSourcePath());
+                LOG.error(msg,ex);
+                throw new IOException(msg,ex);
             } catch (SftpException ex) {
-                throw new IOException("Error getting file stats", ex);
+                LOG.error("Error with connection",ex);
+                throw new IOException("Error with connection", ex);
             } catch (JSchException ex) {
-                throw new IOException("Error opening SFTP channel", ex);
+                LOG.error("Error while retrieving file",ex);
+                throw new IOException("Error retrieving file", ex);
             }
         }
 

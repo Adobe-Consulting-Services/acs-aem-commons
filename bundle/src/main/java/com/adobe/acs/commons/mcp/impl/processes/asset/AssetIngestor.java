@@ -39,6 +39,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedConsumer;
@@ -58,6 +60,7 @@ import com.day.cq.dam.api.AssetManager;
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AssetIngestor.class);
 
     private static final String ALL_ASSETS = "All Assets";
     private static final int DEFAULT_TIMEOUT = 200;
@@ -298,8 +301,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
                 Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
 
                 if (asset == null) {
-                    AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
-                    throw ex;
+                    String msg = String.format("Cannot create asset 'null' on path %s (type=%s)", assetPath, type);
+                    LOG.error(msg);
+                    throw new AssetIngestorException(msg);
                 }
                 saveMigrationInfo(source, asset);
 

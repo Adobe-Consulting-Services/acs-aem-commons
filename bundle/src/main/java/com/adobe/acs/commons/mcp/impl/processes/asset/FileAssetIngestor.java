@@ -115,8 +115,11 @@ public class FileAssetIngestor extends AssetIngestor {
                 // Forces a login
                 ((SftpHierarchicalElement) baseHierarchicalElement).retrieveDetails();
             } catch (URISyntaxException | UnsupportedEncodingException ex) {
-                throw new RepositoryException("Unable to process URL!",ex);
+                String msg = String.format("Unable to process URL %s", url);
+                LOG.error(msg, ex);
+                throw new RepositoryException(msg,ex);
             } catch (JSchException | SftpException ex) {
+                LOG.error(ex.getMessage(),ex);
                 throw new RepositoryException(ex.getMessage(),ex);
             }
         } else {
