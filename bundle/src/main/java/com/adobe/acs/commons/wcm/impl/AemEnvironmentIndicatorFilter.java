@@ -221,7 +221,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     @SuppressWarnings("squid:S3923")
-    private boolean accepts(final HttpServletRequest request) {
+    protected boolean accepts(final HttpServletRequest request) {
         if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
             // Only accept is properly configured
             log.warn("AEM Environment Indicator is not properly configured; If this feature is unwanted, "
