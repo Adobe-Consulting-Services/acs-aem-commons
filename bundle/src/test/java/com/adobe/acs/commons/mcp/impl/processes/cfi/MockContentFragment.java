@@ -40,7 +40,7 @@ import org.apache.sling.api.resource.Resource;
  * Incomplete mock that provides just enough for basic testing
  */
 public class MockContentFragment implements ContentFragment {
-    
+
     String name;
     String title;
     String path;
@@ -154,5 +154,9 @@ public class MockContentFragment implements ContentFragment {
     public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
         return null;
     }
-    
+
+    @Override
+    public void removeVariation(String string) throws ContentFragmentException {
+        return;
+    }
 }

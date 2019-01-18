@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,16 @@
  */
 package com.adobe.acs.commons.adobeio.service.impl;
 
+import com.adobe.acs.commons.adobeio.service.EndpointService;
+import com.adobe.acs.commons.adobeio.service.IntegrationService;
+import com.google.gson.JsonObject;
 import java.util.Collection;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.util.FormattingResultLog;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import com.adobe.acs.commons.adobeio.service.EndpointService;
-import com.adobe.acs.commons.adobeio.service.IntegrationService;
-import com.google.gson.JsonObject;
 
 @Component(service = HealthCheck.class,
         property = {HealthCheck.NAME + "=ACS AEM Commons - Adobe I/O configuration",
@@ -41,7 +39,7 @@ public class AdobeioHealthcheck implements HealthCheck {
     @Reference
     private IntegrationService integrationService;
 
-    @Reference 
+    @Reference
     private volatile Collection<EndpointService> endpoints;
 
     @Override

@@ -20,26 +20,6 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -50,13 +30,30 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(service=WorkflowProcess.class, property = {
-        "process.label= ACS AEM Commons - DAM Metadata Property Reset"  
+        "process.label= ACS AEM Commons - DAM Metadata Property Reset"
 })
 public class DamMetadataPropertyResetProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
-    
+    private static final Logger LOG = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
+
     @Reference
     private WorkflowPackageManager workflowPackageManager;
 
@@ -78,7 +75,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                 final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(payload));
 
                 if (asset == null) {
-                    log.debug("Payload path [ {} ] does not resolve to an asset", payload);
+                    LOG.debug("Payload path [ {} ] does not resolve to an asset", payload);
                     continue;
                 }
 
@@ -86,7 +83,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                 Resource metadataResource = resourceResolver.getResource(metadataPath);
 
                 if (metadataResource == null) {
-                    log.error("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
+                    LOG.error("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
                     throw new WorkflowException("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
                 }
 
@@ -105,7 +102,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                     } else if (mvm.containsKey(srcProperty)) {
                         // Else if the src value IS null, AND the src property exists on the node, remove the dest property
                         mvm.remove(destProperty);
-                    } 
+                    }
                     // Else leave the dest property alone since there is no source defined to overwrite it with
 
                     // Remove the source
@@ -120,7 +117,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     }
 
     private Map<String, String> getProcessArgsMap(MetaDataMap metaDataMap) {
-        final Map<String, String> map = new LinkedHashMap<String, String>();
+        final Map<String, String> map = new LinkedHashMap<>();
         final String processArgs = metaDataMap.get("PROCESS_ARGS", "");
         final String[] lines = StringUtils.split(processArgs, ",");
 
@@ -136,7 +133,7 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
     }
 
     private ResourceResolver getResourceResolver(Session session) throws LoginException {
-        final Map<String, Object> authInfo = new HashMap<String, Object>();
+        final Map<String, Object> authInfo = new HashMap<>();
         authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, session);
         return resourceResolverFactory.getResourceResolver(authInfo);
     }

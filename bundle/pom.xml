@@ -29,17 +29,7 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>generate-scr-metadata-for-unittests</id>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                    </execution>
-                </executions>
                 <configuration>
-                    <exportScr>true</exportScr>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
@@ -78,16 +68,8 @@
                         <_dsannotations>*</_dsannotations>
                         <_dsannotations-options>inherit</_dsannotations-options>
                         <_metatypeannotations>*</_metatypeannotations>
-                        <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>org.apache.felix.scr.bnd</artifactId>
-                        <version>1.9.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -583,8 +565,8 @@
         <!--  Build Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation</artifactId>
-            <version>6.0.0</version>
+            <artifactId>osgi.annotation</artifactId>
+            <version>7.0.0</version>
             <scope>provided</scope>
         </dependency>
 

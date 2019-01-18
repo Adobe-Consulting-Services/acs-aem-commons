@@ -19,27 +19,21 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import com.day.cq.wcm.api.PageInfoProvider;
 import java.util.Iterator;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.day.cq.wcm.api.PageInfoProvider;
 
 /**
  * PageInfoProvider which filters the Workflow models available for a
  * page based on a regular expression in the "applyTo" property on a workflow
  * model's jcr:content node.
- * 
+ *
  * Must run <b>after</b> <code>com.day.cq.wcm.core.impl.DefaultPageStatusProvider</code>
  */
 
@@ -55,7 +49,7 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
 
     private static final String PN_ALLOWED_PATHS = "allowedPaths";
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkflowModelFilterPageInfoProvider.class);
 
     @Override
     @SuppressWarnings( "deprecation" )
@@ -71,12 +65,12 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
                 filter(typeObject, resourcePath, resourceResolver);
             }
         } else {
-            log.warn("No workflows found in existing page info. Check order of cq:infoProviders.");
+            LOG.warn("No workflows found in existing page info. Check order of cq:infoProviders.");
         }
     }
 
     @SuppressWarnings("squid:S3776")
-    private void filter(org.apache.sling.commons.json.JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver) 
+    private void filter(org.apache.sling.commons.json.JSONObject typeObject, String resourcePath, ResourceResolver resourceResolver)
             throws org.apache.sling.commons.json.JSONException {
         final org.apache.sling.commons.json.JSONArray models = typeObject.getJSONArray(KEY_MODELS);
         final org.apache.sling.commons.json.JSONArray newModels = new org.apache.sling.commons.json.JSONArray();
@@ -101,7 +95,7 @@ public class WorkflowModelFilterPageInfoProvider implements PageInfoProvider {
                 }
             }
         }
-        
+
         typeObject.put(KEY_MODELS, newModels);
     }
 

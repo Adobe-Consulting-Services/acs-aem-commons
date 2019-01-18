@@ -44,34 +44,15 @@
         <license.licenseName>apache_v2</license.licenseName>
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
-        <scr.plugin.version>1.26.0</scr.plugin.version>
         <oakpal.version>1.1.13</oakpal.version>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
-                <!-- TODO: Remove this plugin-->
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${scr.plugin.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-simple</artifactId>
-                            <version>${sl4fj.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <!-- There are issues when trying to use other maven bundle plugin versions:
-                        4.x : Baseline fails to work properly, ignores the package-version class version numbers
-                        3.5.1: Manifest XML files are generated but are completely empty
-                        3.5.0: Produces 57 test failures
-                    -->
                     <version>4.1.0</version>
                     <extensions>true</extensions>
                     <executions>
@@ -247,19 +228,13 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
-                <version>6.0.0</version>
+                <version>7.0.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.cmpn</artifactId>
-                <version>6.0.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.9.8</version>
+                <version>7.0.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -301,7 +276,7 @@
             <dependency>
                 <groupId>com.adobe.aem</groupId>
                 <artifactId>uber-jar</artifactId>
-                <version>6.3.0</version>
+                <version>6.4.0</version>
                 <classifier>apis</classifier>
                 <scope>provided</scope>
             </dependency>
@@ -555,24 +530,6 @@
                 </plugins>
                 <pluginManagement>
                     <plugins>
-                        <plugin>
-                            <groupId>org.apache.felix</groupId>
-                            <artifactId>maven-scr-plugin</artifactId>
-                            <version>${scr.plugin.version}</version>
-                            <dependencies>
-                                <dependency>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-simple</artifactId>
-                                    <version>1.6.4</version>
-                                </dependency>
-                                <dependency>
-                                    <groupId>org.jacoco</groupId>
-                                    <artifactId>org.jacoco.agent</artifactId>
-                                    <version>${jacoco.version}</version>
-                                    <classifier>runtime</classifier>
-                                </dependency>
-                            </dependencies>
-                        </plugin>
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>animal-sniffer-maven-plugin</artifactId>

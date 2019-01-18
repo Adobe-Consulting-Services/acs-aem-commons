@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,20 @@
  */
 package com.adobe.acs.commons.designer.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
+import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
+import com.adobe.acs.commons.designer.PageRegion;
+import com.adobe.granite.ui.clientlibs.ClientLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.day.cq.wcm.api.designer.Design;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.jcr.RepositoryException;
 import junitx.util.PrivateAccessor;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -44,13 +46,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.designer.DesignHtmlLibraryManager;
-import com.adobe.acs.commons.designer.PageRegion;
-import com.day.cq.wcm.api.designer.Design;
-import com.adobe.granite.ui.clientlibs.ClientLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DesignHtmlLibraryManagerImplTest {
@@ -217,6 +215,12 @@ public class DesignHtmlLibraryManagerImplTest {
         public Map<String, ClientLibrary> getLibraries() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void invalidateOutputCache() throws RepositoryException {
+            // TODO Auto-generated method stub
+            return;
         }
     }
 

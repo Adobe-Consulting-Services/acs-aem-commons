@@ -20,24 +20,6 @@
 
 package com.adobe.acs.commons.util.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.mime.MimeTypeService;
-
-import org.apache.sling.jcr.resource.JcrResourceConstants;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.commons.util.DamUtil;
@@ -47,10 +29,25 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.mime.MimeTypeService;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(service=WorkflowHelper.class)
 public class WorkflowHelperImpl implements WorkflowHelper {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowHelperImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkflowHelperImpl.class);
 
     private static final int MAX_GENERIC_QUALITY = 100;
 
@@ -88,7 +85,7 @@ public class WorkflowHelperImpl implements WorkflowHelper {
             try {
                 resourceResolver = getResourceResolver(workflowSession);
             } catch (LoginException e) {
-                log.warn("Unable to create ResourceResolver from workflow session", e);
+                LOG.warn("Unable to create ResourceResolver from workflow session", e);
                 return null;
             }
             final Resource resource = resourceResolver.getResource(path);
@@ -98,7 +95,7 @@ public class WorkflowHelperImpl implements WorkflowHelper {
                     return new AssetResourceResolverPair(asset, resourceResolver);
                 }
             } else {
-                log.error("getAssetFromPaylod: asset [{}] in payload of workflow [{}] does not exist.", path,
+                LOG.error("getAssetFromPaylod: asset [{}] in payload of workflow [{}] does not exist.", path,
                         item.getWorkflow().getId());
             }
         }
@@ -124,7 +121,7 @@ public class WorkflowHelperImpl implements WorkflowHelper {
     public List<String> getValuesFromArgs(String name, String[] args) {
         final String prefix = name + ":";
         final int prefixLength = prefix.length();
-        final List<String> values = new ArrayList<String>();
+        final List<String> values = new ArrayList<>();
         for (String arg : args) {
             if (arg.startsWith(prefix)) {
                 final String value = arg.substring(prefixLength).trim();
