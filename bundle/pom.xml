@@ -65,9 +65,6 @@
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models
                         </Sling-Model-Packages>
-                        <_dsannotations>*</_dsannotations>
-                        <_dsannotations-options>inherit</_dsannotations-options>
-                        <_metatypeannotations>*</_metatypeannotations>
                     </instructions>
                 </configuration>
             </plugin>
@@ -161,8 +158,13 @@
             <artifactId>osgi.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>biz.aQute</groupId>
-            <artifactId>bndlib</artifactId>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -294,7 +296,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>4.6.1</version>
+            <version>5.6.10</version>
             <scope>provided</scope>
         </dependency>
         <!-- Http Cache Dependencies -->
