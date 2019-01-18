@@ -25,6 +25,9 @@ import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.junit.After;
@@ -35,10 +38,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -70,7 +69,6 @@ public class DispatcherFlushRulesImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(mock(ResourceResolver.class));
     }
 
     @After
