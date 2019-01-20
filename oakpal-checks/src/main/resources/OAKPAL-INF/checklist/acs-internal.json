@@ -61,6 +61,21 @@
   ],
   "forcedRoots": [
     {
+      "path": "/home/users",
+      "primaryType": "rep:AuthorizableFolder",
+      "mixinTypes": ["rep:AccessControllable"]
+    },
+    {
+      "path": "/home/users/system",
+      "primaryType": "rep:AuthorizableFolder",
+      "mixinTypes": ["rep:AccessControllable"]
+    },
+    {
+      "path": "/home/groups",
+      "primaryType": "rep:AuthorizableFolder",
+      "mixinTypes": ["rep:AccessControllable"]
+    },
+    {
       "path": "/libs/screens/player",
       "mixinTypes": [
         "granite:InternalArea"
