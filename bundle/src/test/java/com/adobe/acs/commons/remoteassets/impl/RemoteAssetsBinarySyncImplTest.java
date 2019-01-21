@@ -150,7 +150,7 @@ public class RemoteAssetsBinarySyncImplTest {
 
             String renditionUrlPath = TEST_ASSET_CONTENT_PATH.replace(JcrConstants.JCR_CONTENT, "_jcr_content") + "/renditions/" + renditionName;
             String testImageName = renditionName.endsWith(".png") ? renditionName : (renditionName + ".png");
-            byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassets/" + testImageName));
+            byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
 
             HttpRequest request = request().withMethod("GET").withPath(renditionUrlPath);
             if (renditionResponseStatus.intValue() == HttpServletResponse.SC_OK) {
@@ -170,7 +170,7 @@ public class RemoteAssetsBinarySyncImplTest {
         assertNotNull(rendition);
 
         String testImageName = renditionName.endsWith(".png") ? renditionName : (renditionName + ".png");
-        byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassets/" + testImageName));
+        byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
         assertEquals(testImageBytes.length, IOUtils.toByteArray(rendition.getStream()).length);
     }
 

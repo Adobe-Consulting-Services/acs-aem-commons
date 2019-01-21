@@ -128,7 +128,7 @@ public class RemoteAssetsNodeSyncImplTest {
     }
 
     private void setupMockRequest(String path, String filename) throws IOException {
-        String responseJson = IOUtils.toString(ClassLoader.getSystemResourceAsStream("remoteassets/nodesync/" + filename), "UTF-8");
+        String responseJson = IOUtils.toString(ClassLoader.getSystemResourceAsStream("remoteassetstest/nodesync/" + filename), "UTF-8");
         HttpRequest request = request().withMethod("GET").withPath(path);
         HttpResponse response = response().withStatusCode(HttpServletResponse.SC_OK).withBody(responseJson);
         mockServerClient.when(request).respond(response);
