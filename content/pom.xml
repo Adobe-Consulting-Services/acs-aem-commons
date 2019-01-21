@@ -59,6 +59,7 @@
                 <artifactId>content-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                    <allowIndexDefinitions>true</allowIndexDefinitions>
                     <group>adobe/consulting</group>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                     <properties>
