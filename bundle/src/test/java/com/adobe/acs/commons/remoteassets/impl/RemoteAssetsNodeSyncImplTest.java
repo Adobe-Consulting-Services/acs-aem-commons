@@ -59,6 +59,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -101,22 +102,24 @@ public class RemoteAssetsNodeSyncImplTest {
                 // to modify them prior to delegating the call to callRealMethod().
                 Invocation invocation = (Invocation) invocationOnMock;
 
-                JsonArray mixins = (JsonArray) invocation.getRawArguments()[0];
-                Resource resourceSpy = spy((Resource) invocation.getRawArguments()[2]);
+                JsonArray argMixins = (JsonArray) invocation.getRawArguments()[0];
+                Resource argResource = (Resource) invocation.getRawArguments()[2];
+                Resource mockResource = mock(Resource.class);
+                when(mockResource.getPath()).thenReturn(argResource.getPath());
 
                 Node mockResourceNode = mock(Node.class);
                 doNothing().when(mockResourceNode).addMixin(anyString());
-                doReturn(mockResourceNode).when(resourceSpy).adaptTo(Node.class);
+                doReturn(mockResourceNode).when(mockResource).adaptTo(Node.class);
 
-                invocation.getRawArguments()[2] = resourceSpy;
+                invocation.getRawArguments()[2] = mockResource;
                 invocation.callRealMethod();
 
-                Iterator<JsonElement> mixinIter = mixins.iterator();
+                Iterator<JsonElement> mixinIter = argMixins.iterator();
                 while (mixinIter.hasNext()) {
-                    List<String> nodeMixins = nodeMixinsTracker.get(resourceSpy.getPath());
+                    List<String> nodeMixins = nodeMixinsTracker.get(argResource.getPath());
                     if (nodeMixins == null) {
                         nodeMixins = new ArrayList<>();
-                        nodeMixinsTracker.put(resourceSpy.getPath(), nodeMixins);
+                        nodeMixinsTracker.put(argResource.getPath(), nodeMixins);
                     }
                     nodeMixins.add(mixinIter.next().getAsString());
                 }
@@ -185,36 +188,6 @@ public class RemoteAssetsNodeSyncImplTest {
 
         setupMockRequest(TEST_DAM_PATH_B + ".1.json", "dam.b.json");
         setupMockRequest(TEST_DAM_PATH_B + "/jcr:content.1.json", "dam.b.content.json");
-    }
-
-    public void verifyPlaceholder(String extension, String mimeType) throws Exception {
-        ResourceResolver resourceResolver = context.resourceResolver();
-        Session session = resourceResolver.adaptTo(Session.class);
-
-        // Create the asset complete with original and alternate renditions
-        Node nodeDamFolder = session.getNode("/content/dam/test");
-        Node nodeAsset = nodeDamFolder.addNode("test_asset." + extension, DamConstants.NT_DAM_ASSET);
-        Node nodeAssetContent = nodeAsset.addNode(JcrConstants.JCR_CONTENT, DamConstants.NT_DAM_ASSETCONTENT);
-        Node nodeAssetRenditions = nodeAssetContent.addNode(DamConstants.RENDITIONS_FOLDER, JcrConstants.NT_FOLDER);
-        Node nodeRenditionOriginal = nodeAssetRenditions.addNode("original", JcrConstants.NT_FILE);
-        Node nodeRenditionOriginalContent = nodeRenditionOriginal.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
-        nodeRenditionOriginalContent.setProperty(JcrConstants.JCR_MIMETYPE, mimeType);
-        Node nodeRenditionAlt = nodeAssetRenditions.addNode("alt." + extension, JcrConstants.NT_FILE);
-        Node nodeRenditionAltContent = nodeRenditionAlt.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
-        nodeRenditionAltContent.setProperty(JcrConstants.JCR_MIMETYPE, mimeType);
-
-
-        byte[] expectedPlaceholder = getPlaceholderAsset(extension);
-
-        // Test that the original renditon (no extension) gets the expected placeholder
-        Resource originalRenditionContent = resourceResolver.getResource(nodeRenditionOriginalContent.getPath());
-        byte[] originalRenditionPlaceholder = getBytes(remoteAssetsNodeSync.getRemoteAssetPlaceholder(originalRenditionContent));
-        assertEquals(expectedPlaceholder.length, originalRenditionPlaceholder.length);
-
-        // Test that the alternate rendition (with extension) gets the expected placeholder
-        Resource altRenditionContent = resourceResolver.getResource(nodeRenditionAltContent.getPath());
-        byte[] altRenditionPlaceholder = getBytes(remoteAssetsNodeSync.getRemoteAssetPlaceholder(altRenditionContent));
-        assertEquals(expectedPlaceholder.length, altRenditionPlaceholder.length);
     }
 
     @Test
@@ -437,5 +410,35 @@ public class RemoteAssetsNodeSyncImplTest {
         verifyPlaceholder("xml", FileExtensionMimeTypeConstants.EXT_XML);
         verifyPlaceholder("zip", FileExtensionMimeTypeConstants.EXT_ZIP);
         verifyPlaceholder("jpeg", "unknown");
+    }
+
+    private void verifyPlaceholder(String extension, String mimeType) throws Exception {
+        ResourceResolver resourceResolver = context.resourceResolver();
+        Session session = resourceResolver.adaptTo(Session.class);
+
+        // Create the asset complete with original and alternate renditions
+        Node nodeDamFolder = session.getNode("/content/dam/test");
+        Node nodeAsset = nodeDamFolder.addNode("test_asset." + extension, DamConstants.NT_DAM_ASSET);
+        Node nodeAssetContent = nodeAsset.addNode(JcrConstants.JCR_CONTENT, DamConstants.NT_DAM_ASSETCONTENT);
+        Node nodeAssetRenditions = nodeAssetContent.addNode(DamConstants.RENDITIONS_FOLDER, JcrConstants.NT_FOLDER);
+        Node nodeRenditionOriginal = nodeAssetRenditions.addNode("original", JcrConstants.NT_FILE);
+        Node nodeRenditionOriginalContent = nodeRenditionOriginal.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
+        nodeRenditionOriginalContent.setProperty(JcrConstants.JCR_MIMETYPE, mimeType);
+        Node nodeRenditionAlt = nodeAssetRenditions.addNode("alt." + extension, JcrConstants.NT_FILE);
+        Node nodeRenditionAltContent = nodeRenditionAlt.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
+        nodeRenditionAltContent.setProperty(JcrConstants.JCR_MIMETYPE, mimeType);
+
+
+        byte[] expectedPlaceholder = getPlaceholderAsset(extension);
+
+        // Test that the original renditon (no extension) gets the expected placeholder
+        Resource originalRenditionContent = resourceResolver.getResource(nodeRenditionOriginalContent.getPath());
+        byte[] originalRenditionPlaceholder = getBytes(remoteAssetsNodeSync.getRemoteAssetPlaceholder(originalRenditionContent));
+        assertEquals(expectedPlaceholder.length, originalRenditionPlaceholder.length);
+
+        // Test that the alternate rendition (with extension) gets the expected placeholder
+        Resource altRenditionContent = resourceResolver.getResource(nodeRenditionAltContent.getPath());
+        byte[] altRenditionPlaceholder = getBytes(remoteAssetsNodeSync.getRemoteAssetPlaceholder(altRenditionContent));
+        assertEquals(expectedPlaceholder.length, altRenditionPlaceholder.length);
     }
 }
