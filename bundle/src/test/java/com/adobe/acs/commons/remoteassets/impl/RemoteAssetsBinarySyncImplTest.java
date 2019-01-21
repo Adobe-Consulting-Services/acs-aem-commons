@@ -20,25 +20,7 @@
 
 package com.adobe.acs.commons.remoteassets.impl;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.imageio.ImageIO;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.ValueFactory;
-import javax.servlet.http.HttpServletResponse;
-
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -47,31 +29,37 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.handler.StandardImageHandler;
 import com.day.cq.dam.commons.util.DamUtil;
-import org.apache.commons.io.IOUtils;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.Body;
-
-import io.wcm.testing.mock.aem.junit.AemContext;
 import org.mockserver.model.HttpRequest;
+
+import javax.jcr.Node;
+import javax.jcr.Session;
+import javax.jcr.ValueFactory;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.REMOTE_SYNC_FAILED;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getBytes;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getRemoteAssetsConfigs;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.setupRemoteAssetsServiceUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -150,7 +138,7 @@ public class RemoteAssetsBinarySyncImplTest {
 
             String renditionUrlPath = TEST_ASSET_CONTENT_PATH.replace(JcrConstants.JCR_CONTENT, "_jcr_content") + "/renditions/" + renditionName;
             String testImageName = renditionName.endsWith(".png") ? renditionName : (renditionName + ".png");
-            byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
+            byte[] testImageBytes = getBytes(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
 
             HttpRequest request = request().withMethod("GET").withPath(renditionUrlPath);
             if (renditionResponseStatus.intValue() == HttpServletResponse.SC_OK) {
@@ -170,16 +158,16 @@ public class RemoteAssetsBinarySyncImplTest {
         assertNotNull(rendition);
 
         String testImageName = renditionName.endsWith(".png") ? renditionName : (renditionName + ".png");
-        byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
-        assertEquals(testImageBytes.length, IOUtils.toByteArray(rendition.getStream()).length);
+        byte[] testImageBytes = getBytes(ClassLoader.getSystemResourceAsStream("remoteassetstest/" + testImageName));
+        assertEquals(testImageBytes.length, getBytes(rendition.getStream()).length);
     }
 
     private void assertRenditionNotSynced(Asset asset, String renditionName) throws IOException {
         Rendition rendition = asset.getRendition(renditionName);
         assertNotNull(rendition);
 
-        byte[] testImageBytes = IOUtils.toByteArray(ClassLoader.getSystemResourceAsStream("remoteassets/remote_asset.png"));
-        assertEquals(testImageBytes.length, IOUtils.toByteArray(rendition.getStream()).length);
+        byte[] testImageBytes = getBytes(ClassLoader.getSystemResourceAsStream("remoteassets/remote_asset.png"));
+        assertEquals(testImageBytes.length, getBytes(rendition.getStream()).length);
     }
 
     @Test

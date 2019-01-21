@@ -2,7 +2,6 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -12,7 +11,6 @@ import com.day.cq.tagging.TagConstants;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -28,12 +26,11 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 
 import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -44,12 +41,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_A;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_B;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_TAGS_PATH_A;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_TAGS_PATH_B;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getBytes;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getPlaceholderAsset;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getRemoteAssetsConfigs;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -57,8 +59,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -128,7 +128,7 @@ public class RemoteAssetsNodeSyncImplTest {
     }
 
     private void setupMockRequest(String path, String filename) throws IOException {
-        String responseJson = IOUtils.toString(ClassLoader.getSystemResourceAsStream("remoteassetstest/nodesync/" + filename), "UTF-8");
+        String responseJson = new String(getBytes(ClassLoader.getSystemResourceAsStream("remoteassetstest/nodesync/" + filename)), StandardCharsets.UTF_8);
         HttpRequest request = request().withMethod("GET").withPath(path);
         HttpResponse response = response().withStatusCode(HttpServletResponse.SC_OK).withBody(responseJson);
         mockServerClient.when(request).respond(response);
