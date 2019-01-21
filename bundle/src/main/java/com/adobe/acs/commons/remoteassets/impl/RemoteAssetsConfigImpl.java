@@ -77,7 +77,7 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
         @AttributeDefinition(
                 name = "Server",
-                description = "URL to remote server from which to fetch assets"
+                description = "URL to remote server from which to fetch assets (e.g. https://dev-aem-author.client.com:4502)"
         )
         String server_url() default StringUtils.EMPTY;
 

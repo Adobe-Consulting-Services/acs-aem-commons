@@ -12,6 +12,7 @@
         <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?" />
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
+    <filter root="/content/cq:tags/rep:policy"/>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/dam/video/mp3hq"/>
