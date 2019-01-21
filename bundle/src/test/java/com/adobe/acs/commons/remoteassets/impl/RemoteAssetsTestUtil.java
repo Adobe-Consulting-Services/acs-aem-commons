@@ -1,8 +1,11 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.commons.io.IOUtils;
 import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,14 +13,28 @@ public class RemoteAssetsTestUtil {
     public static final String TEST_SERVER_URL = "https://remote-aem-server:4502";
     public static final String TEST_SERVER_USERNAME = "admin";
     public static final String TEST_SERVER_PASSWORD = "passwd";
-    public static final String TEST_TAGS_PATH_A = "/content/cq:tags/a";
-    public static final String TEST_TAGS_PATH_B = "/content/cq:tags/b";
+    public static final String TEST_TAGS_PATH_A = "/etc/tags/a";
+    public static final String TEST_TAGS_PATH_B = "/etc/tags/b";
     public static final String TEST_DAM_PATH_A = "/content/dam/a";
     public static final String TEST_DAM_PATH_B = "/content/dam/b";
     public static final int TEST_RETRY_DELAY = 30;
     public static final int TEST_SAVE_INTERVAL = 500;
     public static final String TEST_WHITELISTED_SVC_USER_A = "user_a";
     public static final String TEST_WHITELISTED_SVC_USER_B = "user_b";
+
+    public static byte[] getBytes(InputStream inputStream) throws IOException {
+        byte[] fileBytes = null;
+        try {
+            fileBytes = IOUtils.toByteArray(inputStream);
+        } finally {
+            inputStream.close();
+        }
+        return fileBytes;
+    }
+
+    public static byte[] getPlaceholderAsset(String fileExt) throws IOException {
+        return getBytes(ClassLoader.getSystemResourceAsStream("remoteassets/remote_asset." + fileExt));
+    }
 
     public static Map<String, Object> getRemoteAssetsConfigs() {
         Map<String, Object> remoteAssetsConfigs = new HashMap<>();
