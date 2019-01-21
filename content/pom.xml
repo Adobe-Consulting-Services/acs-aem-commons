@@ -59,8 +59,9 @@
                 <artifactId>filevault-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <acHandling>merge_preserve</acHandling>
-                    <filterSource>${basedir}/META-INF/vault/filter.xml</filterSource>
+                    <acHandling>merge</acHandling>
+                    <allowIndexDefinitions>true</allowIndexDefinitions>
+                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                 </configuration>
             </plugin>
             <plugin>
@@ -85,7 +86,7 @@
                         <dependency>
                             <group>day/cq60/product</group>
                             <name>cq-content</name>
-                            <version>[6.2.136,)</version>
+                            <version>[6.3.64,)</version>
                         </dependency>
                     </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
