@@ -21,20 +21,17 @@ package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
+import com.adobe.acs.commons.httpcache.config.impl.keys.ResourcePathCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.commons.jcr.JcrConstants;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -44,12 +41,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -139,88 +131,24 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     @Override
     public CacheKey build(final SlingHttpServletRequest slingHttpServletRequest, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-        return new ResourceTypeCacheKey(slingHttpServletRequest, cacheConfig);
+        return new ResourcePathCacheKey(slingHttpServletRequest, cacheConfig);
     }
 
     @Override
     public CacheKey build(final String resourcePath, final HttpCacheConfig cacheConfig)
             throws HttpCacheKeyCreationException {
-        return new ResourceTypeCacheKey(resourcePath, cacheConfig);
+        return new ResourcePathCacheKey(resourcePath, cacheConfig);
     }
 
     @Override
     public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
 
-        // Check if key is instance of ResourceTypeCacheKey.
-        if (!(key instanceof ResourceTypeCacheKey)) {
+        // Check if key is instance of ResourcePathCacheKey.
+        if (!(key instanceof ResourcePathCacheKey)) {
             return false;
         }
         // Validate if key request uri can be constructed out of uri patterns in cache config.
-        return new ResourceTypeCacheKey(key.getUri(), cacheConfig).equals(key);
-    }
-
-    /**
-     * The ResourceTypeCacheKey is a custom CacheKey bound to this particular factory.
-     */
-    static class ResourceTypeCacheKey extends AbstractCacheKey implements CacheKey, Serializable
-    {
-        public ResourceTypeCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
-                HttpCacheKeyCreationException {
-            super(request, cacheConfig);
-        }
-
-        public ResourceTypeCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-            super(uri, cacheConfig);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!super.equals(o)) {
-                return false;
-            }
-
-            if (o == null) {
-                return false;
-            }
-
-            ResourceTypeCacheKey that = (ResourceTypeCacheKey) o;
-            return new EqualsBuilder()
-                    .append(getUri(), that.getUri())
-                    .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
-                    .isEquals();
-        }
-
-        @Override
-        public int hashCode() {
-            return new HashCodeBuilder(17, 37)
-                    .append(getUri())
-                    .append(getAuthenticationRequirement()).toHashCode();
-        }
-
-        @Override
-        public String toString() {
-            return this.resourcePath + " [AUTH_REQ:" + getAuthenticationRequirement() + "]";
-
-        }
-
-        @Override
-        public String getUri() {
-            return this.resourcePath;
-        }
-
-        /** For Serialization **/
-        private void writeObject(ObjectOutputStream o) throws IOException
-        {
-            parentWriteObject(o);
-        }
-
-
-        /** For De serialization **/
-        private void readObject(ObjectInputStream o)
-                throws IOException, ClassNotFoundException {
-
-            parentReadObject(o);
-        }
+        return new ResourcePathCacheKey(key.getUri(), cacheConfig).equals(key);
     }
 
     //-------------------------<OSGi Component methods>

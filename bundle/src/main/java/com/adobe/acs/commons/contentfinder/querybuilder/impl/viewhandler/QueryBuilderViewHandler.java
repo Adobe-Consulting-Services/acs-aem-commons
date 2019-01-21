@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,17 @@
  */
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.wcm.core.contentfinder.ViewHandler;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +51,12 @@ import java.util.Set;
 public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
+    @Reference
+    private CloseableQueryBuilder queryBuilder;
+
     @Override
     protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session,
             String queryString) throws Exception {
-        final ResourceResolver resolver = slingRequest.getResourceResolver();
-        final QueryBuilder qb = resolver.adaptTo(QueryBuilder.class);
         Map<String, String> map;
 
         if (GQLToQueryBuilderConverter.convertToQueryBuilder(slingRequest)) {
@@ -66,7 +67,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
             log.debug("Converted QueryBuilder Parameter Map: {}", map);
         }
 
-        final Query query = qb.createQuery(PredicateGroup.create(map), session);
+        final CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), session);
         return new QueryBuilderViewQuery(query);
     }
 

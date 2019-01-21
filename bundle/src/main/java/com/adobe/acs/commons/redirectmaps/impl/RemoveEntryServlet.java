@@ -52,6 +52,7 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = -5963945855717054678L;
     private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
 
+    @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doPost");

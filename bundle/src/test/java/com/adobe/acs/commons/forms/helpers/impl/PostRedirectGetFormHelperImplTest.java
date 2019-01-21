@@ -19,33 +19,12 @@
  */
 package com.adobe.acs.commons.forms.helpers.impl;
 
-import com.adobe.acs.commons.forms.Form;
-import com.adobe.acs.commons.forms.FormsRouter;
-import com.adobe.acs.commons.forms.helpers.FormHelper;
-import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.xss.XSSAPI;
-import com.day.cq.commons.PathInfo;
-import com.google.common.collect.ImmutableMap;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -54,10 +33,31 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
+import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.apache.sling.xss.XSSAPI;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.forms.Form;
+import com.adobe.acs.commons.forms.FormsRouter;
+import com.adobe.acs.commons.forms.helpers.FormHelper;
+import com.adobe.acs.commons.forms.impl.FormsRouterImpl;
+import com.day.cq.commons.PathInfo;
+import com.google.common.collect.ImmutableMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostRedirectGetFormHelperImplTest {
@@ -123,7 +123,7 @@ public class PostRedirectGetFormHelperImplTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void shouldRedirectForRenderForm() throws Exception {
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x"));
         final SlingHttpServletResponse spiedResponse = spy(response);
@@ -142,7 +142,7 @@ public class PostRedirectGetFormHelperImplTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void shouldSerialiseFormInRedirectUrlParameter() throws Exception {
         request.setParameterMap(ImmutableMap.<String, Object>of(":form", "x", "hello", "world"));
         final SlingHttpServletResponse spiedResponse = spy(response);

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,21 +23,19 @@ package com.adobe.acs.commons.logging.impl;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.util.ISO8601;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -46,17 +44,15 @@ import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
  * objects.
  */
-@Component( configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-      "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
 })
 @SuppressWarnings("PMD.MoreThanOneLogger")
-@Designate(ocd=JsonEventLogger.Config.class, factory=true)
+@Designate(ocd = JsonEventLogger.Config.class, factory = true)
 public class JsonEventLogger implements EventHandler {
 
     /**
@@ -75,7 +71,7 @@ public class JsonEventLogger implements EventHandler {
      * A simple enum for Slf4j logging levels.
      */
     private enum LogLevel {
-        TRACE, DEBUG, INFO, WARN, ERROR;
+        TRACE, DEBUG, INFO, WARN, ERROR, NONE;
 
         public static LogLevel fromProperty(String prop) {
             if (prop != null) {
@@ -85,44 +81,36 @@ public class JsonEventLogger implements EventHandler {
                     }
                 }
             }
-            return null;
+            return NONE;
         }
     }
-    
+
     @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
     public @interface Config {
         @AttributeDefinition(name = "Event Topics",
                 description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
         String[] event_topics();
 
-        @AttributeDefinition(name = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
+        @AttributeDefinition(name = "Event Filter", defaultValue = "(event.topics=*)", description = "LDAP-style event filter query. Leave the default to log all events to the configured topic or topics.")
         String event_filter();
 
         @AttributeDefinition(name = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
-        String event_logger_category();
+        String event_logger_category() default "";
 
         @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
+                @Option(value = "NONE", label = "None (disabled)"),
                 @Option(value = "TRACE", label = "Trace"),
                 @Option(value = "DEBUG", label = "Debug"),
                 @Option(value = "INFO", label = "Information"),
                 @Option(value = "WARN", label = "Warnings"),
                 @Option(value = "ERROR", label = "Error")})
-        String event_logger_level();
+        String event_logger_level() default DEFAULT_LEVEL;
     }
-
-    private static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
-
-    private static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
-
-    private static final String OSGI_CATEGORY = "event.logger.category";
-
-    private static final String OSGI_LEVEL = "event.logger.level";
 
     private String[] topics;
     private String filter;
     private String category;
     private String level;
-    private boolean valid;
 
     /**
      * Suppress the PMD.LoggerIsNotStaticFinal check because the point is to
@@ -131,51 +119,60 @@ public class JsonEventLogger implements EventHandler {
      */
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private Logger eventLogger;
-    private LogLevel logLevel;
-
-    private ServiceRegistration registration;
+    private Consumer<String> logMapper = logMapperForLevel(null, null);
+    private Supplier<Boolean> logEnabler = logEnablerForLevel(null, null);
 
     /**
-     * Writes an event to the configured logger using the configured log level
+     * Return a logging function appropriate for the specified loglevel.
      *
-     * @param event an OSGi Event
+     * @param logLevel the specified loglegel
+     * @param logger   the logger to map to
+     * @return a string comsuming logger function
      */
-    private void logEvent(Event event) {
-        log.trace("[logEvent] event={}", event);
-        String message = constructMessage(event);
-        if (logLevel == LogLevel.ERROR) {
-            this.eventLogger.error(message);
-        } else if (logLevel == LogLevel.WARN) {
-            this.eventLogger.warn(message);
-        } else if (logLevel == LogLevel.INFO) {
-            this.eventLogger.info(message);
-        } else if (logLevel == LogLevel.DEBUG) {
-            this.eventLogger.debug(message);
-        } else if (logLevel == LogLevel.TRACE) {
-            this.eventLogger.trace(message);
+    static Consumer<String> logMapperForLevel(final LogLevel logLevel, final Logger logger) {
+        if (logger == null) {
+            return (message) -> { /* do nothing */ };
+        }
+        switch (logLevel) {
+            case ERROR:
+                return logger::error;
+            case WARN:
+                return logger::warn;
+            case INFO:
+                return logger::info;
+            case DEBUG:
+                return logger::debug;
+            case TRACE:
+                return logger::trace;
+            default:
+                return (message) -> { /* do nothing */ };
         }
     }
 
     /**
-     * Determines if the logger category is enabled at the configured level
+     * Return a logging function appropriate for the specified log level.
      *
-     * @return true if the logger is enabled at the configured log level
+     * @param logLevel the specified log level
+     * @return a boolean-supplying function
      */
-    private boolean isLoggerEnabled() {
-        if (this.eventLogger != null && this.logLevel != null) {
-            if (logLevel == LogLevel.ERROR) {
-                return this.eventLogger.isErrorEnabled();
-            } else if (logLevel == LogLevel.WARN) {
-                return this.eventLogger.isWarnEnabled();
-            } else if (logLevel == LogLevel.INFO) {
-                return this.eventLogger.isInfoEnabled();
-            } else if (logLevel == LogLevel.DEBUG) {
-                return this.eventLogger.isDebugEnabled();
-            } else if (logLevel == LogLevel.TRACE) {
-                return this.eventLogger.isTraceEnabled();
-            }
+    static Supplier<Boolean> logEnablerForLevel(final LogLevel logLevel, final Logger logger) {
+        if (logger == null) {
+            return () -> false;
         }
-        return false;
+        switch (logLevel) {
+            case ERROR:
+                return logger::isErrorEnabled;
+            case WARN:
+                return logger::isWarnEnabled;
+            case INFO:
+                return logger::isInfoEnabled;
+            case DEBUG:
+                return logger::isDebugEnabled;
+            case TRACE:
+                return logger::isTraceEnabled;
+            default:
+                return () -> false;
+        }
     }
 
     /**
@@ -204,24 +201,15 @@ public class JsonEventLogger implements EventHandler {
      * @param val an untyped Java object to try to convert
      * @return {@code val} if not handled, or return a converted JSONObject,
      * JSONArray, or String
-     * @throws JSONException
      */
     @SuppressWarnings({"unchecked", "squid:S3776"})
     protected static Object convertValue(Object val) {
         if (val instanceof Calendar) {
-            try {
-                return ISO8601.format((Calendar) val);
-            } catch (IllegalArgumentException e) {
-                log.debug("[constructMessage] failed to convert Calendar to ISO8601 String: {}, {}", e.getMessage(), val);
-            }
+            return ISO8601.format((Calendar) val);
         } else if (val instanceof Date) {
-            try {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime((Date) val);
-                return ISO8601.format(calendar);
-            } catch (IllegalArgumentException e) {
-                log.debug("[constructMessage] failed to convert Date to ISO8601 String: {}, {}", e.getMessage(), val);
-            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime((Date) val);
+            return ISO8601.format(calendar);
         }
 
         return val;
@@ -230,13 +218,14 @@ public class JsonEventLogger implements EventHandler {
     //
     // ---------------------------------------------------------< EventHandler methods >-----
     //
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void handleEvent(Event event) {
-        if (event.getProperty("event.application") == null && this.isLoggerEnabled()) {
-            logEvent(event);
+        if (event.getProperty("event.application") == null && this.logEnabler.get()) {
+            logMapper.accept(constructMessage(event));
         }
     }
 
@@ -245,42 +234,32 @@ public class JsonEventLogger implements EventHandler {
     //
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(ComponentContext ctx) {
+    protected void activate(final Config config) {
         log.trace("[activate] entered activate method.");
-        Dictionary<?, ?> props = ctx.getProperties();
-        this.topics = PropertiesUtil.toStringArray(props.get(OSGI_TOPICS));
-        this.filter = PropertiesUtil.toString(props.get(OSGI_FILTER), "").trim();
-        this.category = PropertiesUtil.toString(props.get(OSGI_CATEGORY), "").trim();
-        this.level = PropertiesUtil.toString(props.get(OSGI_LEVEL), DEFAULT_LEVEL);
+        this.topics = config.event_topics();
+        this.filter = config.event_filter();
+        this.category = config.event_logger_category();
+        this.level = config.event_logger_level();
 
-        this.logLevel = LogLevel.fromProperty(this.level);
 
-        this.valid = (this.topics != null && this.topics.length > 0 && !this.category.isEmpty());
-
-        if (this.valid) {
+        if (StringUtils.isNotEmpty(this.category)) {
             this.eventLogger = LoggerFactory.getLogger(this.category);
-            Dictionary<String, Object> registrationProps = new Hashtable<String, Object>();
-            registrationProps.put(EventConstants.EVENT_TOPIC, this.topics);
-            if (!this.filter.isEmpty()) {
-                registrationProps.put(EventConstants.EVENT_FILTER, this.filter);
-            }
-            this.registration = ctx.getBundleContext().registerService(EventHandler.class.getName(), this, registrationProps);
         } else {
-            log.warn("Not registering invalid event handler. Check configuration.");
+            log.warn("No event.logger.category specified. No events will be logged.");
         }
 
-        log.debug("[activate] logger state: {}", this);
+        final LogLevel logLevel = LogLevel.fromProperty(this.level);
+        this.logEnabler = logEnablerForLevel(logLevel, this.eventLogger);
+        this.logMapper = logMapperForLevel(logLevel, this.eventLogger);
+        log.trace("[activate] logger state: {}", toString());
     }
 
     @Deactivate
     protected void deactivate() {
         log.trace("[deactivate] entered deactivate method.");
-        if (this.registration != null) {
-            this.registration.unregister();
-            this.registration = null;
-        }
+        this.logEnabler = logEnablerForLevel(LogLevel.NONE, this.eventLogger);
+        this.logMapper = logMapperForLevel(LogLevel.NONE, this.eventLogger);
         this.eventLogger = null;
-        this.logLevel = null;
     }
 
     //
@@ -288,13 +267,12 @@ public class JsonEventLogger implements EventHandler {
     //
     @Override
     public String toString() {
-        return "EventLogger{"
-                + "valid=" + valid
-                + ", topics=" + Arrays.toString(topics)
+        return "JsonEventLogger{"
+                + "topics=" + Arrays.toString(topics)
                 + ", filter='" + filter + '\''
                 + ", category='" + category + '\''
                 + ", level='" + level + '\''
-                + ", enabled=" + isLoggerEnabled()
+                + ", enabled=" + logEnabler.get()
                 + '}';
     }
 

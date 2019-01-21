@@ -63,7 +63,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
             name = "com.adobe.acs.commons.oak.impl.AppliableEnsureOakIndex",
                 cardinality = ReferenceCardinality.MULTIPLE,
                 service = AppliableEnsureOakIndex.class,
-                policy = ReferencePolicy.DYNAMIC
+                policy = ReferencePolicy.DYNAMIC,
+                bind = "bindAppliableEnsureOakIndex",
+                unbind = "unbindAppliableEnsureOakIndex"
         )},
         property= {
         "webconsole.configurationFactory.nameHint" +"="+"Additional Ignore properties: {properties.ignore}",

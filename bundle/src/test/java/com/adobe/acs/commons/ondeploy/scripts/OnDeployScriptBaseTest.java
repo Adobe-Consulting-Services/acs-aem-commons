@@ -19,30 +19,6 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptBase;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptException;
-import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.SearchResult;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.Arrays;
-import java.util.Collections;
-
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,12 +33,32 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collections;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.adobe.acs.commons.testutil.LogTester;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.result.SearchResult;
+import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
 public class OnDeployScriptBaseTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private ResourceResolver resourceResolver;
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
     private OnDeployScriptBase onDeployScript;
 
     @Before
@@ -81,8 +77,8 @@ public class OnDeployScriptBaseTest {
 
         // Create the test class instance
         onDeployScript = new OnDeployScriptBaseExt();
-        queryBuilder = mock(QueryBuilder.class);
-        doReturn(queryBuilder).when(resourceResolver).adaptTo(QueryBuilder.class);
+        queryBuilder = mock(CloseableQueryBuilder.class);
+        doReturn(queryBuilder).when(resourceResolver).adaptTo(CloseableQueryBuilder.class);
         onDeployScript.execute(resourceResolver);
 
         // Reset the LogTester
@@ -146,6 +142,9 @@ public class OnDeployScriptBaseTest {
         Node base = grandParent.getParent();
         assertEquals("/content", base.getPath());
         assertEquals("nt:resource", base.getPrimaryNodeType().getName());
+
+        Node nodeAgain = onDeployScript.getOrCreateNode("/content/test2/folder/page", "nt:folder", "cq:Page");
+        assertNotNull(nodeAgain);
     }
 
     @Test
@@ -224,22 +223,19 @@ public class OnDeployScriptBaseTest {
         Node node2 = contentRoot.addNode("search-and-update-node2");
         node2.setProperty("sling:resourceType", "mysite/type/old");
 
-        final Query query = mock(Query.class);
+        final CloseableQuery query = mock(CloseableQuery.class);
         SearchResult result = mock(SearchResult.class);
         when(result.getNodes()).thenReturn(Arrays.asList(node1, node2).iterator());
         when(query.getResult()).thenReturn(result);
-        when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(new Answer<Query>() {
-            @Override
-            public Query answer(InvocationOnMock invocationOnMock) throws Throwable {
-                PredicateGroup pg = invocationOnMock.getArgumentAt(0, PredicateGroup.class);
-                assertEquals("-1", pg.getParameters().get("limit"));
-                assertEquals("path", pg.get(0).getType());
-                assertEquals("/content", pg.get(0).getParameters().get("path"));
-                assertEquals("property", pg.get(1).getType());
-                assertEquals("sling:resourceType", pg.get(1).getParameters().get("property"));
-                assertEquals("mysite/type/old", pg.get(1).getParameters().get("value"));
-                return query;
-            }
+        when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {
+            PredicateGroup pg = invocation.getArgumentAt(0, PredicateGroup.class);
+            assertEquals("-1", pg.getParameters().get("limit"));
+            assertEquals("path", pg.get(0).getType());
+            assertEquals("/content", pg.get(0).getParameters().get("path"));
+            assertEquals("property", pg.get(1).getType());
+            assertEquals("sling:resourceType", pg.get(1).getParameters().get("property"));
+            assertEquals("mysite/type/old", pg.get(1).getParameters().get("value"));
+            return query;
         });
 
         onDeployScript.searchAndUpdateResourceType("mysite/type/old", "mysite/type/new");
@@ -250,7 +246,7 @@ public class OnDeployScriptBaseTest {
 
     @Test
     public void testSearchAndUpdateResourceTypeWhenNoNodesFound() throws RepositoryException {
-        Query query = mock(Query.class);
+        CloseableQuery query = mock(CloseableQuery.class);
         SearchResult result = mock(SearchResult.class);
         when(result.getNodes()).thenReturn(Collections.EMPTY_LIST.iterator());
         when(query.getResult()).thenReturn(result);
@@ -291,6 +287,14 @@ public class OnDeployScriptBaseTest {
         onDeployScript.updateResourceType(resourceToUpdate.adaptTo(Node.class), "test/component/comp2");
 
         assertLogText("Node at /content/resource-type-update2 is already resource type: test/component/comp2");
+    }
+
+    @Test
+    public void testGetters() {
+        assertNotNull("getResourceResolver()", onDeployScript.getResourceResolver());
+        assertNotNull("getPageManager()", onDeployScript.getPageManager());
+        assertNotNull("getSession()", onDeployScript.getSession());
+        assertNotNull("getWorkspace()", onDeployScript.getWorkspace());
     }
 
     protected class OnDeployScriptBaseExt extends OnDeployScriptBase {
