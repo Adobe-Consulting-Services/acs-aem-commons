@@ -147,26 +147,42 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             }
         }
 
-        if (matchesSyncPath) {
-            ResourceResolver resourceResolver = resource.getResourceResolver();
-            String userId = resourceResolver.getUserID();
-            if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
-                if (this.config.getWhitelistedServiceUsers().contains(userId)) {
-                    return true;
-                }
+        return matchesSyncPath && isAllowedUser(resource);
+    }
 
-                Session session = resourceResolver.adaptTo(Session.class);
-                User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
-                if (currentUser != null && !currentUser.isSystemUser()) {
-                    return true;
-                } else {
-                    LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
-                }
-            } else {
-                LOG.debug("Avoiding binary sync for admin user");
+    /**
+     * Check if the user is allowed to sync binaries.
+     *
+     * Service users, as well as the admin user, are prevented from sync'ing
+     * binaries to ensure that some back end procress traversing the DAM doesn't
+     * trigger a sync of the entire DAM, thus subverting the benefits of
+     * remote assets.
+     *
+     * Service users can be whitelisted via remote aseets configuration if it
+     * is desired for a particular service user to be able to sync binaries.
+     *
+     * @param resource The asset content Resource to sync binaries for.
+     * @return True if user is allowed to sync binaries, else false.
+     * @throws RepositoryException
+     */
+    private boolean isAllowedUser(Resource resource) throws RepositoryException {
+        ResourceResolver resourceResolver = resource.getResourceResolver();
+        String userId = resourceResolver.getUserID();
+        if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+            if (this.config.getWhitelistedServiceUsers().contains(userId)) {
+                return true;
             }
-        }
 
+            Session session = resourceResolver.adaptTo(Session.class);
+            User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+            if (currentUser != null && !currentUser.isSystemUser()) {
+                return true;
+            } else {
+                LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+            }
+        } else {
+            LOG.debug("Avoiding binary sync for admin user");
+        }
         return false;
     }
 
