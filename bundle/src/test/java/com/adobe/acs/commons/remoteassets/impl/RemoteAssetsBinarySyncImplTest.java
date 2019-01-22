@@ -118,6 +118,10 @@ public class RemoteAssetsBinarySyncImplTest {
         context.registerInjectActivateService(remoteAssetsConfig, remoteAssetsConfigs);
         remoteAssetsBinarySync = context.registerInjectActivateService(new RemoteAssetsBinarySyncImpl());
 
+        ResourceResolver remoteAssetsResourceResolver = spy(remoteAssetsConfig.getResourceResolver());
+        doNothing().when(remoteAssetsResourceResolver).revert();
+        doReturn(remoteAssetsResourceResolver).when(remoteAssetsConfig).getResourceResolver();
+
         LogTester.reset();
     }
 
@@ -212,10 +216,6 @@ public class RemoteAssetsBinarySyncImplTest {
         renditionResponseStatusMap.put(TEST_RENDITION_140, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         setupFinish();
 
-        ResourceResolver remoteAssetsResourceResolver = spy(remoteAssetsConfig.getResourceResolver());
-        doNothing().when(remoteAssetsResourceResolver).revert();
-        doReturn(remoteAssetsResourceResolver).when(remoteAssetsConfig).getResourceResolver();
-
         Resource resource = context.resourceResolver().getResource(TEST_ASSET_CONTENT_PATH);
         assertFalse(remoteAssetsBinarySync.syncAsset(resource));
 
@@ -228,7 +228,7 @@ public class RemoteAssetsBinarySyncImplTest {
         Asset asset = DamUtil.resolveToAsset(resourceUpdated);
         assertRenditionNotSynced(asset, TEST_RENDITION_140);
         assertRenditionNotSynced(asset, TEST_RENDITION_48);
-        verify(remoteAssetsResourceResolver).revert();
+        verify(remoteAssetsConfig.getResourceResolver()).revert();
     }
 
     @Test
@@ -256,7 +256,7 @@ public class RemoteAssetsBinarySyncImplTest {
     public void testSycnAssetFailureLogsErrorIfAssetCannotBeFlaggedAsFailed() throws Exception {
         setupFinish();
 
-        ResourceResolver remoteAssetsResourceResolver = spy(remoteAssetsConfig.getResourceResolver());
+        ResourceResolver remoteAssetsResourceResolver = remoteAssetsConfig.getResourceResolver();
         doThrow(new RuntimeException("test unable to fetch")).when(remoteAssetsResourceResolver).getResource(TEST_ASSET_CONTENT_PATH);
         doReturn(remoteAssetsResourceResolver).when(remoteAssetsConfig).getResourceResolver();
 

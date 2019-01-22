@@ -30,10 +30,14 @@
     </appender>
 
     <appender name="LogTester" class="com.adobe.acs.commons.testutil.LogTester">
-        <filter class="com.adobe.acs.commons.remoteassets.impl.RemoteAssetDecorator">
-            <level>DEBUG</level>
-        </filter>
     </appender>
+
+    <logger name="org.mockserver.mockserver.MockServerHandler">
+        <level value="WARN"/>
+    </logger>
+    <logger name="org.mockserver.matchers.HttpRequestMatcher">
+        <level value="WARN"/>
+    </logger>
 
     <root level="debug">
         <appender-ref ref="STDOUT" />
