@@ -48,7 +48,7 @@ import com.adobe.acs.commons.forms.FormsRouter;
  *
  */
 @Component(service=javax.servlet.Filter.class,
-property = {SERVICE_RANKING + ":Integerr=0", SLING_FILTER_SCOPE + "=include"})
+property = {SERVICE_RANKING + ":Integer=0", SLING_FILTER_SCOPE + "=include"})
 public class FormsPostRedirectGetFilterImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostRedirectGetFilterImpl.class);
 
