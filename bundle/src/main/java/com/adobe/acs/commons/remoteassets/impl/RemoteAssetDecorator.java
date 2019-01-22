@@ -98,7 +98,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             syncSuccessful = syncAssetBinaries(resource);
         }
         if (syncSuccessful) {
-            LOG.debug("Refreshing resource after binary sync of {}");
+            LOG.debug("Refreshing resource after binary sync of {}", resource.getPath());
             resource.getResourceResolver().refresh();
             return resource.getResourceResolver().getResource(resource.getPath());
         } else {
@@ -182,9 +182,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             // Wait for asset already sync'ing
             long originalTime = System.currentTimeMillis();
             while (isAlreadySyncing(resourcePath) && (System.currentTimeMillis() - originalTime) < (1000 * SYNC_WAIT_SECONDS)) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {}
+                Thread.sleep(100);
             }
             if (isAlreadySyncing(resourcePath)) {
                 LOG.warn("Waited {} seconds for parallel binary sync to complete for: {} - giving up", SYNC_WAIT_SECONDS, resourcePath);

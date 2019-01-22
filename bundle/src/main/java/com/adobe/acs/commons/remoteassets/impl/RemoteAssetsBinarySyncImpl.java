@@ -105,7 +105,9 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
         } catch (Exception e) {
             LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
             try {
-                remoteAssetsResolver.revert();
+                if (remoteAssetsResolver != null) {
+                    remoteAssetsResolver.revert();
+                }
             } catch (Exception re) {
                 LOG.error("Failed to rollback asset changes", re);
             }

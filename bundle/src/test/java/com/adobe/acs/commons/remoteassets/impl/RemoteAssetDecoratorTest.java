@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.testutil.LogTester;
@@ -116,14 +135,14 @@ public class RemoteAssetDecoratorTest {
 
     private ResourceResolver getUserResourceResolver(String username, boolean isServiceUser) {
         try {
-            Map<String, Object> creds = new HashMap<>();
-            creds.put("user.name", username);
-            ResourceResolver resourceResolver = context.getService(ResourceResolverFactory.class).getResourceResolver(creds);
-
             User mockUser = mock(User.class);
             when(mockUser.isSystemUser()).thenReturn(isServiceUser);
             UserManager mockUserManager = mock(UserManager.class);
             when(mockUserManager.getAuthorizable(username)).thenReturn(mockUser);
+
+            Map<String, Object> creds = new HashMap<>();
+            creds.put("user.name", username);
+            ResourceResolver resourceResolver = context.getService(ResourceResolverFactory.class).getResourceResolver(creds);
 
             PowerMockito.mockStatic(AccessControlUtil.class);
             when(AccessControlUtil.getUserManager(resourceResolver.adaptTo(Session.class))).thenReturn(mockUserManager);
@@ -306,12 +325,12 @@ public class RemoteAssetDecoratorTest {
         // Fetch the resource, triggering the sync
         Resource resource = getUserResourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
 
-        LogTester.assertLogText("Already sync'ing " + TEST_REMOTE_ASSET_CONTENT_PATH + " - waiting for parallel sync to complete");
-        LogTester.assertLogText("Parallel sync of " + TEST_REMOTE_ASSET_CONTENT_PATH + " complete");
-
         // Validate that the sync is not attempted (it was already in progress)
         LogTester.assertNotLogText("Sync'ing remote asset binaries: " + TEST_REMOTE_ASSET_CONTENT_PATH);
         // But the sync does succeed because it waited for the sync in progress
         assertTrue(resource.getValueMap().get(TEST_MOCK_SYNC, false));
+
+        LogTester.assertLogText("Already sync'ing " + TEST_REMOTE_ASSET_CONTENT_PATH + " - waiting for parallel sync to complete");
+        LogTester.assertLogText("Parallel sync of " + TEST_REMOTE_ASSET_CONTENT_PATH + " complete");
     }
 }

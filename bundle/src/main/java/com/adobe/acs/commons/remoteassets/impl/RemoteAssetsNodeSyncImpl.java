@@ -54,7 +54,6 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.ValueFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -291,9 +290,9 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             } else if (JcrConstants.JCR_MIXINTYPES.equals(key)) {
                 setNodeMixinsProperty(jsonArray, key, resource);
             } else if (NameConstants.PN_TAGS.equals(key)) {
-                setNodeTagsProperty(remoteAssetsResolver, jsonArray, key, resource);
+                setNodeTagsProperty(remoteAssetsResolver, jsonArray, resource);
             } else {
-                setNodeArrayProperty(remoteAssetsResolver, jsonArray, key, resource);
+                setNodeSimpleArrayProperty(jsonArray, key, resource);
             }
         } catch (RepositoryException re) {
             LOG.warn("Repository exception thrown. Skipping {} array property for resource '{}'.", key, resource.getPath());
@@ -324,7 +323,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeTagsProperty(final ResourceResolver remoteAssetsResolver, final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
+    private void setNodeTagsProperty(final ResourceResolver remoteAssetsResolver, final JsonArray jsonArray, final Resource resource) throws RepositoryException {
         TagManager tagManager = remoteAssetsResolver.adaptTo(TagManager.class);
         ArrayList<Tag> tagList = new ArrayList<>();
 
@@ -352,7 +351,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @param resource Resource
      * @throws RepositoryException exception
      */
-    private void setNodeArrayProperty(final ResourceResolver remoteAssetsResolver, final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
+    private void setNodeSimpleArrayProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
         JsonPrimitive firstVal = jsonArray.get(0).getAsJsonPrimitive();
 
         try {
@@ -470,7 +469,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     protected InputStream getRemoteAssetPlaceholder(Resource renditionContentResource) throws RepositoryException {
         String mimeType = (String) renditionContentResource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
-        InputStream inputStream = new ByteArrayInputStream(StringUtils.EMPTY.getBytes());
+        InputStream inputStream;
 
         if (FileExtensionMimeTypeConstants.EXT_3G2.equals(mimeType)) {
             inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".3g2");
