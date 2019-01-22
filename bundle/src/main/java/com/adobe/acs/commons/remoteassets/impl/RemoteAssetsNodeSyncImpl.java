@@ -471,99 +471,193 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         String mimeType = (String) renditionContentResource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
         InputStream inputStream;
 
-        if (FileExtensionMimeTypeConstants.EXT_3G2.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".3g2");
-        } else if (FileExtensionMimeTypeConstants.EXT_3GP.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".3gp");
-        } else if (FileExtensionMimeTypeConstants.EXT_AAC.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".aac");
-        } else if (FileExtensionMimeTypeConstants.EXT_AIFF.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".aiff");
-        } else if (FileExtensionMimeTypeConstants.EXT_AVI.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".avi");
-        } else if (FileExtensionMimeTypeConstants.EXT_BMP.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".bmp");
-        } else if (FileExtensionMimeTypeConstants.EXT_CSS.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".css");
-        } else if (FileExtensionMimeTypeConstants.EXT_DOC.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".doc");
-        } else if (FileExtensionMimeTypeConstants.EXT_DOCX.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".docx");
-        } else if (FileExtensionMimeTypeConstants.EXT_AI_EPS_PS.equals(mimeType)) {
-            inputStream = getCorrectBinaryTypeStream(renditionContentResource, "ai", "eps", "ps");
-        } else if (FileExtensionMimeTypeConstants.EXT_EPUB.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".epub");
-        } else if (FileExtensionMimeTypeConstants.EXT_F4V.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".f4v");
-        } else if (FileExtensionMimeTypeConstants.EXT_FLA_SWF.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".swf");
-        } else if (FileExtensionMimeTypeConstants.EXT_GIF.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".gif");
-        } else if (FileExtensionMimeTypeConstants.EXT_HTML.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".html");
-        } else if (FileExtensionMimeTypeConstants.EXT_INDD.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".indd");
-        } else if (FileExtensionMimeTypeConstants.EXT_JAR.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jar");
-        } else if (FileExtensionMimeTypeConstants.EXT_JPEG_JPG.equals(mimeType)) {
-            inputStream = getCorrectBinaryTypeStream(renditionContentResource, "jpeg", "jpg");
-        } else if (FileExtensionMimeTypeConstants.EXT_M4V.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".m4v");
-        } else if (FileExtensionMimeTypeConstants.EXT_MIDI.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".midi");
-        } else if (FileExtensionMimeTypeConstants.EXT_MOV.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mov");
-        } else if (FileExtensionMimeTypeConstants.EXT_MP3.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mp3");
-        } else if (FileExtensionMimeTypeConstants.EXT_MP4.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mp4");
-        } else if (FileExtensionMimeTypeConstants.EXT_M2V_MPEG_MPG.equals(mimeType)) {
-            inputStream = getCorrectBinaryTypeStream(renditionContentResource, "m2v", "mpeg", "mpg");
-        } else if (FileExtensionMimeTypeConstants.EXT_OGG.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ogg");
-        } else if (FileExtensionMimeTypeConstants.EXT_OGV.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ogv");
-        } else if (FileExtensionMimeTypeConstants.EXT_PDF.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".pdf");
-        } else if (FileExtensionMimeTypeConstants.EXT_PNG.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".png");
-        } else if (FileExtensionMimeTypeConstants.EXT_PPT.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ppt");
-        } else if (FileExtensionMimeTypeConstants.EXT_PPTX.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".pptx");
-        } else if (FileExtensionMimeTypeConstants.EXT_PSD.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".psd");
-        } else if (FileExtensionMimeTypeConstants.EXT_RAR.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".rar");
-        } else if (FileExtensionMimeTypeConstants.EXT_RTF.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".rtf");
-        } else if (FileExtensionMimeTypeConstants.EXT_SVG.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".svg");
-        } else if (FileExtensionMimeTypeConstants.EXT_TAR.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".tar");
-        } else if (FileExtensionMimeTypeConstants.EXT_TIF_TIFF.equals(mimeType)) {
-            inputStream = getCorrectBinaryTypeStream(renditionContentResource, "tif", "tiff");
-        } else if (FileExtensionMimeTypeConstants.EXT_TXT.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".txt");
-        } else if (FileExtensionMimeTypeConstants.EXT_WAV.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wav");
-        } else if (FileExtensionMimeTypeConstants.EXT_WEBM.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".webm");
-        } else if (FileExtensionMimeTypeConstants.EXT_WMA.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wma");
-        } else if (FileExtensionMimeTypeConstants.EXT_WMV.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wmv");
-        } else if (FileExtensionMimeTypeConstants.EXT_XLS.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xls");
-        } else if (FileExtensionMimeTypeConstants.EXT_XLSX.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xlsx");
-        } else if (FileExtensionMimeTypeConstants.EXT_XML.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xml");
-        } else if (FileExtensionMimeTypeConstants.EXT_ZIP.equals(mimeType)) {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".zip");
-        } else {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jpeg");
+        switch (mimeType) {
+            case FileExtensionMimeTypeConstants.EXT_3G2: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".3g2");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_3GP: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".3gp");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_AAC: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".aac");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_AIFF: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".aiff");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_AVI: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".avi");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_BMP: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".bmp");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_CSS: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".css");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_DOC: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".doc");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_DOCX: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".docx");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_AI_EPS_PS: {
+                inputStream = getCorrectBinaryTypeStream(renditionContentResource, "ai", "eps", "ps");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_EPUB: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".epub");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_F4V: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".f4v");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_FLA_SWF: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".swf");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_GIF: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".gif");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_HTML: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".html");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_INDD: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".indd");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_JAR: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jar");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_JPEG_JPG: {
+                inputStream = getCorrectBinaryTypeStream(renditionContentResource, "jpeg", "jpg");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_M4V: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".m4v");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_MIDI: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".midi");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_MOV: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mov");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_MP3: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mp3");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_MP4: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".mp4");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_M2V_MPEG_MPG: {
+                inputStream = getCorrectBinaryTypeStream(renditionContentResource, "m2v", "mpeg", "mpg");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_OGG: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ogg");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_OGV: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ogv");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_PDF: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".pdf");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_PNG: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".png");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_PPT: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".ppt");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_PPTX: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".pptx");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_PSD: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".psd");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_RAR: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".rar");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_RTF: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".rtf");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_SVG: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".svg");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_TAR: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".tar");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_TIF_TIFF: {
+                inputStream = getCorrectBinaryTypeStream(renditionContentResource, "tif", "tiff");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_TXT: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".txt");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_WAV: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wav");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_WEBM: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".webm");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_WMA: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wma");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_WMV: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".wmv");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_XLS: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xls");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_XLSX: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xlsx");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_XML: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".xml");
+                break;
+            }
+            case FileExtensionMimeTypeConstants.EXT_ZIP: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".zip");
+                break;
+            }
+            default: {
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(ASSET_FILE_PREFIX + ".jpeg");
+                break;
+            }
         }
+
 
         return inputStream;
     }
