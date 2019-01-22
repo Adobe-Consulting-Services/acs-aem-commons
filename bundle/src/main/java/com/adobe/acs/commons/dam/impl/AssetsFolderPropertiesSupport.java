@@ -20,6 +20,24 @@
 
 package com.adobe.acs.commons.dam.impl;
 
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_PATTERN;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -40,23 +58,12 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,properties= {
-        "service.ranking:Integer=-2000",
-        "sling.filter.scope=REQUEST",
-        "sling.filter.pattern=/content/dam/.*",
-        "sling.servlet.methods=GET",
-        "sling.servlet.resourceTypes=acs-commons/touchui-widgets/asset-folder-properties-support"
+        SERVICE_RANKING + ":Integer=-2000",
+        SLING_FILTER_SCOPE + "=REQUEST",
+        SLING_FILTER_PATTERN + "=/content/dam/.*",
+        SLING_SERVLET_METHODS + "=GET",
+        SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/touchui-widgets/asset-folder-properties-support"
 })
 
 public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet implements Filter, SlingPostProcessor {

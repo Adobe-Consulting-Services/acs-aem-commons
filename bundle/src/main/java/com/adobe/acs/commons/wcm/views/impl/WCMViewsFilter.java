@@ -20,12 +20,28 @@
 
 package com.adobe.acs.commons.wcm.views.impl;
 
-import com.adobe.acs.commons.util.CookieUtil;
-import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.api.WCMMode;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.commons.WCMUtils;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,30 +58,19 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.util.CookieUtil;
+import com.day.cq.wcm.api.NameConstants;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.WCMMode;
+import com.day.cq.wcm.api.components.Component;
+import com.day.cq.wcm.commons.WCMUtils;
 
 @org.osgi.service.component.annotations.Component(
         configurationPolicy=ConfigurationPolicy.REQUIRE,
         service=Filter.class,
         property= {
-              "sling.filter.scope=component",
-              "filter.order" + ":Integer=" + WCMViewsFilter.FILTER_ORDER
+             SLING_FILTER_SCOPE + "=component",
+             SERVICE_RANKING + ":Integer=" + WCMViewsFilter.FILTER_ORDER
         }
 )
 @Designate(ocd=WCMViewsFilter.Config.class)

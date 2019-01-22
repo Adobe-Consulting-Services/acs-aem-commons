@@ -19,6 +19,9 @@
  */
 package com.adobe.acs.commons.forms.impl;
 
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -45,7 +48,7 @@ import com.adobe.acs.commons.forms.FormsRouter;
  *
  */
 @Component(service=javax.servlet.Filter.class,
-property = {"filter.order=0", "sling.filter.scope=include"})
+property = {SERVICE_RANKING + ":Integerr=0", SLING_FILTER_SCOPE + "=include"})
 public class FormsPostRedirectGetFilterImpl implements Filter {
     private static final Logger log = LoggerFactory.getLogger(FormsPostRedirectGetFilterImpl.class);
 

@@ -33,6 +33,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import static org.osgi.framework.Constants.*;
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
+import static org.apache.sling.auth.core.AuthConstants.*;
+import static org.apache.sling.engine.EngineConstants.*;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.osgi.service.component.annotations.Activate;
@@ -121,8 +126,7 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-
-@Component(property = { "sling.filter.scope=REQUEST" })
+@Component(property = {SLING_FILTER_SCOPE + "=REQUEST" })
 @Designate(ocd = RequestThrottler.Config.class, factory = true)
 public class RequestThrottler implements Filter {
 

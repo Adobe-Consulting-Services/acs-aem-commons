@@ -19,9 +19,18 @@
  */
 package com.adobe.acs.commons.reports.internal.datasources;
 
-import com.adobe.acs.commons.util.QueryHelper;
-import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
-import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
+import static javax.jcr.query.Query.JCR_SQL2;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -36,20 +45,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static javax.jcr.query.Query.JCR_SQL2;
+import com.adobe.acs.commons.util.QueryHelper;
+import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;
+import com.adobe.acs.commons.wcm.datasources.DataSourceOption;
 
 @Component(
         service = Servlet.class,
         property = {
-                "sling.servlet.resourceTypes=acs-commons/components/utilities/report-builder/data-sources/dynamic-select",
-                "sling.servlet.methods=" + HttpConstants.METHOD_GET,
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/report-builder/data-sources/dynamic-select",
+                SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
         }
 )
 public class DynamicSelectDataSource extends SlingSafeMethodsServlet {

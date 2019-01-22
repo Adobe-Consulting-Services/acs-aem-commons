@@ -19,15 +19,10 @@
  */
 package com.adobe.acs.commons.httpcache.filter.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
 
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -35,7 +30,15 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import java.io.IOException;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 
 /**
  * ACS AEM Commons - Http Cache - Intercepting request filter for dealing with cache. Intercepting sling request filter
@@ -43,8 +46,8 @@ import java.io.IOException;
  * caching aspects.
  */
 @Component(service=Filter.class,
-property= {"sling.filter.scope=REQUEST",
-Constants.SERVICE_RANKING +":Integer=4999"})
+property= {SLING_FILTER_SCOPE + "=REQUEST",
+SERVICE_RANKING +":Integer=4999"})
 public class HttpCacheRequestFilter extends AbstractHttpCacheFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheRequestFilter.class);
 
