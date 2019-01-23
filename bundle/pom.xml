@@ -536,6 +536,13 @@
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
         </dependency>
+        <!-- bnd annotations are a transitive dependency of some uber-jar classes although they are not used directly! -->
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>4.1.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
