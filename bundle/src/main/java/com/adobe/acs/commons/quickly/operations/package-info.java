@@ -20,7 +20,7 @@
 /**
  * Quickly Operations
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.quickly.operations;
 
 import org.osgi.annotation.versioning.Version;

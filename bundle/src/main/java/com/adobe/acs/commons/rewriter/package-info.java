@@ -20,7 +20,7 @@
 /**
  * Rewriter Utilities.
  */
-@Version("1.2.1")
+@Version("1.2.2")
 package com.adobe.acs.commons.rewriter;
 
 import org.osgi.annotation.versioning.Version;

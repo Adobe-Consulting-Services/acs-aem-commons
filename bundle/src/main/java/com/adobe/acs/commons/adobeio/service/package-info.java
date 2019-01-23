@@ -20,7 +20,7 @@
 /**
  * Adobe I/O services.
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.adobeio.service;
 
 import org.osgi.annotation.versioning.Version;

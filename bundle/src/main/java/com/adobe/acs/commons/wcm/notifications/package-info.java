@@ -18,7 +18,7 @@
  * #L%
  */
 
-@Version("2.1.2")
+@Version("2.1.3")
 package com.adobe.acs.commons.wcm.notifications;
 
 import org.osgi.annotation.versioning.Version;

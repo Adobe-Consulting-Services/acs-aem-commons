@@ -20,7 +20,7 @@
 /**
  * Client Library Designer API.
  */
-@Version("1.1.1")
+@Version("1.1.2")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/dhlm", descriptorFile = "dhlm.tld")
 package com.adobe.acs.commons.designer;
 

@@ -20,7 +20,7 @@
 /**
  * Long Form Text Component
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.components.longformtext;
 
 import org.osgi.annotation.versioning.Version;

@@ -20,7 +20,7 @@
 /**
  * Vanity WCM Utilities.
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.wcm.vanity;
 
 import org.osgi.annotation.versioning.Version;

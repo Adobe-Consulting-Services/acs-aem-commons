@@ -20,6 +20,6 @@
 /**
  * Replication utilities.
  */
-@Version("1.1.0") package com.adobe.acs.commons.replication.status;
+@Version("1.1.1") package com.adobe.acs.commons.replication.status;
 
 import org.osgi.annotation.versioning.Version;

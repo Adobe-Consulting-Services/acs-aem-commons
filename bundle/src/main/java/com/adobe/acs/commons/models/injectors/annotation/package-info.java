@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@Version("3.2.0")
+@Version("3.3.0")
 package com.adobe.acs.commons.models.injectors.annotation;
 
 import org.osgi.annotation.versioning.Version;
