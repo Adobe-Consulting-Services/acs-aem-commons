@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ConsumerType;
 import org.apache.jackrabbit.api.security.user.User;
+import org.osgi.annotation.versioning.ConsumerType;
 
 
 /**

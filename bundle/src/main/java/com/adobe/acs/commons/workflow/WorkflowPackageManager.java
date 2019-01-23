@@ -19,16 +19,15 @@
  */
 package com.adobe.acs.commons.workflow;
 
-import aQute.bnd.annotation.ProviderType;
-
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.WCMException;
-
-import org.apache.sling.api.resource.ResourceResolver;
+import java.util.List;
 
 import javax.jcr.RepositoryException;
 
-import java.util.List;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.WCMException;
 
 @ProviderType
 public interface WorkflowPackageManager {

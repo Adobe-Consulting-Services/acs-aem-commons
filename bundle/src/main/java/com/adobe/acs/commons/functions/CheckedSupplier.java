@@ -19,8 +19,9 @@
  */
 package com.adobe.acs.commons.functions;
 
-import aQute.bnd.annotation.ConsumerType;
 import java.util.function.Supplier;
+
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Supplier function which allows throwing exceptions

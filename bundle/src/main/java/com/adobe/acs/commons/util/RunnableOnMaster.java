@@ -19,10 +19,9 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ConsumerType;
 import org.apache.sling.discovery.TopologyEvent;
-
 import org.apache.sling.discovery.TopologyEventListener;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Abstact base class for scheduled job to be run only on the cluster master.

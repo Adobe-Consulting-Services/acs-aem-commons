@@ -20,5 +20,7 @@
 /**
  * Twitter Client.
  */
-@aQute.bnd.annotation.Version("1.0.1")
+@Version("1.0.1")
 package com.adobe.acs.commons.twitter;
+
+import org.osgi.annotation.versioning.Version;

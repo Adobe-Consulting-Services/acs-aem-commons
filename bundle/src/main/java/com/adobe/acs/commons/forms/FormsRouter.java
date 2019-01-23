@@ -19,11 +19,10 @@
  */
 package com.adobe.acs.commons.forms;
 
-import aQute.bnd.annotation.ProviderType;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.helpers.FormHelper;
-
-import org.apache.sling.api.SlingHttpServletRequest;
 
 /**
  * Internal routing used for internal routing of POST form submissions in the Filters.

@@ -19,11 +19,13 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.mcp.util.DeserializeException;
-import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import javax.jcr.RepositoryException;
+
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
 
 /**
  * Handles a particular form of input data and deserializes the form into a bean defined with @FormField annotated fields.

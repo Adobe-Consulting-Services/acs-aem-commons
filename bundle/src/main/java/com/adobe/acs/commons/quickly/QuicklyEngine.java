@@ -22,8 +22,8 @@ package com.adobe.acs.commons.quickly;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.osgi.annotation.versioning.ProviderType;
 
-import aQute.bnd.annotation.ProviderType;
 import com.google.gson.JsonObject;
 
 @ProviderType
@@ -37,7 +37,6 @@ public interface QuicklyEngine {
      * @param slingResponse the Response object
      * @param cmd the Command
      * @return
-     * @throws JSONException
      */
     JsonObject execute(SlingHttpServletRequest slingRequest,
                        SlingHttpServletResponse slingResponse,

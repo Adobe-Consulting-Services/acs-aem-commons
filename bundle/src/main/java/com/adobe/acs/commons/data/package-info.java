@@ -20,7 +20,7 @@
 /**
  * Data handling functions
  */
-@Version("1.0.0")
+@Version("1.0.1")
 package com.adobe.acs.commons.data;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

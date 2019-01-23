@@ -17,5 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("3.1.0")
+@Version("3.1.1")
 package com.adobe.acs.commons.notifications;
+
+import org.osgi.annotation.versioning.Version;

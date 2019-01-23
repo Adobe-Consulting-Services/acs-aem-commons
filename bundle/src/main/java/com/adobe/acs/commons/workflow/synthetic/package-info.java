@@ -21,5 +21,7 @@
 /**
  * Synthetic AEM Workflow APIs.
  */
-@aQute.bnd.annotation.Version("3.0.0")
+@Version("3.0.0")
 package com.adobe.acs.commons.workflow.synthetic;
+
+import org.osgi.annotation.versioning.Version;

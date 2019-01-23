@@ -20,5 +20,7 @@
 /**
  * WCM Datasources.
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@Version("1.0.0")
 package com.adobe.acs.commons.wcm.datasources;
+
+import org.osgi.annotation.versioning.Version;

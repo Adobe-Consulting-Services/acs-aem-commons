@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.email.process.impl;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines additional keys that are available for templates when using the

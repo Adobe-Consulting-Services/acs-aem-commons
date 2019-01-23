@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.components.longformtext;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.sling.api.resource.Resource;
-
 import javax.jcr.RepositoryException;
+
+import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
