@@ -24,4 +24,4 @@
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/dam", descriptorFile = "dam.tld")
 package com.adobe.acs.commons.dam;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

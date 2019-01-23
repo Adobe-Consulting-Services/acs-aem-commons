@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.version;
 
-import aQute.bnd.annotation.ProviderType;
-
 import java.util.List;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Stored context for a version history.

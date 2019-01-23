@@ -19,11 +19,11 @@
  */
 package com.adobe.acs.commons.fam;
 
-import aQute.bnd.annotation.ProviderType;
 import java.io.Serializable;
-
 import java.util.Calendar;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a failure on a specific node

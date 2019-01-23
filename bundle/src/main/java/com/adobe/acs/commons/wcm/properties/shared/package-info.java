@@ -20,5 +20,7 @@
 /**
  * Shared Component Properties.
  */
-@aQute.bnd.annotation.Version("1.2.0")
+@Version("1.2.0")
 package com.adobe.acs.commons.wcm.properties.shared;
+
+import org.osgi.annotation.versioning.Version;

@@ -19,10 +19,11 @@
  */
 package com.adobe.acs.commons.fam;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 
 /*
  * In addition to the mbean methods, the implementation factory object also provides a method to create a new ActionManager

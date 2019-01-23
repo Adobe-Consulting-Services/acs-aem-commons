@@ -23,4 +23,4 @@
 @Version("1.0.1")
 package com.adobe.acs.commons.social.linkedin;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

@@ -20,5 +20,7 @@
 /**
  * Workflow processes
  */
-@aQute.bnd.annotation.Version("1.10.4")
+@Version("1.10.4")
 package com.adobe.acs.commons.workflow.process;
+
+import org.osgi.annotation.versioning.Version;

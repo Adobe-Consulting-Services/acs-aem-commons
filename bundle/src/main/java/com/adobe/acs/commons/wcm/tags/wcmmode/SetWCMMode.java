@@ -23,12 +23,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.day.cq.wcm.api.WCMMode;
+
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
-import aQute.bnd.annotation.ProviderType;
-
-import com.day.cq.wcm.api.WCMMode;
 
 /**
  * Implementation of the &lt;wcmmode:setMode&gt; tag, this sets the <code>WCMMode</code> to

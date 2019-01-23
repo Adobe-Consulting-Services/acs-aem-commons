@@ -20,6 +20,8 @@
 /**
  * JSP Functions for working with custom widgets.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@Version("1.1.0")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/widgets", descriptorFile = "widgets.tld")
 package com.adobe.acs.commons.widgets;
+
+import org.osgi.annotation.versioning.Version;

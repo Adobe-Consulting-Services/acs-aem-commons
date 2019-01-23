@@ -26,18 +26,13 @@ import java.io.OutputStream;
 
 import javax.imageio.IIOException;
 
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.workflow.exec.WorkflowProcess;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.mime.MimeTypeService;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.ConsumerType;
-
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.commons.util.PrefixRenditionPicker;

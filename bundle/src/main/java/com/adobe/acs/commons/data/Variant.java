@@ -19,19 +19,20 @@
  */
 package com.adobe.acs.commons.data;
 
-import aQute.bnd.annotation.ProviderType;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
-import java.text.ParseException;
 import java.util.function.Function;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Used to represent values that might be provided as one type but used as

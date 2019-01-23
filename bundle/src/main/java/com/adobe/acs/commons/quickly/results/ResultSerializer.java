@@ -20,9 +20,10 @@
 
 package com.adobe.acs.commons.quickly.results;
 
-import aQute.bnd.annotation.ProviderType;
-import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.google.gson.JsonObject;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
@@ -35,7 +36,6 @@ public interface ResultSerializer {
      * @param result the Result
      * @param config configuration used by ResultSerializer implementations
      * @return the JSON representation of the result
-     * @throws JSONException
      */
     JsonObject toJSON(Result result, ValueMap config);
 

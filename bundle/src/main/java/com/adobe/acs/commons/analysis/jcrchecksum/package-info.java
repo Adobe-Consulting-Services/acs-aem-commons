@@ -21,4 +21,4 @@
 @Version("2.1.2")
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

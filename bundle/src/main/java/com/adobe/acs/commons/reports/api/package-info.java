@@ -17,8 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@Version("1.0.0")
 package com.adobe.acs.commons.reports.api;
 
-
-
+import org.osgi.annotation.versioning.Version;

@@ -20,4 +20,4 @@
 @Version("3.7.0")
 package com.adobe.acs.commons.audit_log_search;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

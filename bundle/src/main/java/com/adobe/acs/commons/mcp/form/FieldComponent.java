@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,9 +29,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes a component in a manner which supports auto-generated forms

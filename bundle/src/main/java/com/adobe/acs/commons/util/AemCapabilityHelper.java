@@ -21,7 +21,7 @@ package com.adobe.acs.commons.util;
 
 import javax.jcr.RepositoryException;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public interface AemCapabilityHelper {

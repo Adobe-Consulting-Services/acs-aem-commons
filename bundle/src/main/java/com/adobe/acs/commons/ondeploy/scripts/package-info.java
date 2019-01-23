@@ -20,5 +20,7 @@
 /**
  * On-Deploy Scripts Framework.
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@Version("1.0.0")
 package com.adobe.acs.commons.ondeploy.scripts;
+
+import org.osgi.annotation.versioning.Version;

@@ -20,14 +20,13 @@
 
 package com.adobe.acs.commons.replication.dispatcher;
 
-import aQute.bnd.annotation.ProviderType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.ValueMap;
 
 /**
  * Replication Agent Filter used to identify Flush agents.

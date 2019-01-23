@@ -20,5 +20,7 @@
 /**
  * AEM Workflow APIs
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@Version("1.1.0")
 package com.adobe.acs.commons.workflow;
+
+import org.osgi.annotation.versioning.Version;
