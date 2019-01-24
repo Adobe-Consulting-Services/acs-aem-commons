@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
+import static org.apache.sling.settings.SlingSettingsService.SLING_HOME;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,7 +64,7 @@ public class AudioHelperImpl implements AudioHelper {
     private File workingDir;
 
     protected final void activate(ComponentContext ctx, Config conf) {
-        String slingHome = ctx.getBundleContext().getProperty("sling.home");
+        String slingHome = ctx.getBundleContext().getProperty(SLING_HOME);
         workingDir = FFMpegAudioUtils.resolveWorkingDir(slingHome, conf.ffmpeg_workingdir());
         if (!workingDir.exists() && !workingDir.mkdirs()) {
             throw new IllegalStateException("Could not create " + workingDir.getPath());

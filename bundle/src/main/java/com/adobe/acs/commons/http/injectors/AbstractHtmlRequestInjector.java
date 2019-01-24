@@ -20,14 +20,14 @@
 
 package com.adobe.acs.commons.http.injectors;
 
-import com.adobe.acs.commons.util.BufferingResponse;
-import org.apache.commons.lang.StringUtils;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_PATTERN;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -37,10 +37,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
+
+import org.apache.commons.lang.StringUtils;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.BufferingResponse;
 
 public abstract class AbstractHtmlRequestInjector implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractHtmlRequestInjector.class);
@@ -148,7 +154,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
     protected final void registerAsFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
-        filterProps.put("service.ranking", String.valueOf(ranking));
+        filterProps.put(SERVICE_RANKING, String.valueOf(ranking));
         filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, StringUtils.defaultIfEmpty(pattern, ".*"));
         filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
@@ -158,9 +164,9 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
     protected final void registerAsSlingFilter(ComponentContext ctx, int ranking, String pattern) {
         Dictionary<String, String> filterProps = new Hashtable<String, String>();
 
-        filterProps.put("service.ranking", String.valueOf(ranking));
-        filterProps.put("sling.filter.scope", "REQUEST");
-        filterProps.put("sling.filter.pattern", StringUtils.defaultIfEmpty(pattern, ".*"));
+        filterProps.put(SERVICE_RANKING, String.valueOf(ranking));
+        filterProps.put(SLING_FILTER_SCOPE, "REQUEST");
+        filterProps.put(SLING_FILTER_PATTERN, StringUtils.defaultIfEmpty(pattern, ".*"));
         filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
     }
 
