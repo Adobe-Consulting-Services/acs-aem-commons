@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.util.impl;
 
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,7 +57,7 @@ import com.day.cq.wcm.api.components.ComponentManager;
     configurationPolicy=ConfigurationPolicy.REQUIRE,
     service=Filter.class, 
     property= {
-      "sling.filter.scope=REQUEST"
+      SLING_FILTER_SCOPE + "=REQUEST"
 })
 public class UrlFilter implements Filter {
 

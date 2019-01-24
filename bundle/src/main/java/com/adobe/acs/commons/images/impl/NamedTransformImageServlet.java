@@ -19,19 +19,22 @@
  */
 package com.adobe.acs.commons.images.impl;
 
-import com.adobe.acs.commons.dam.RenditionPatternPicker;
-import com.adobe.acs.commons.images.ImageTransformer;
-import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.adobe.acs.commons.util.PathInfoUtil;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.Rendition;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.foundation.Image;
-import com.day.image.Layer;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
+import javax.jcr.RepositoryException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -56,19 +59,19 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import javax.jcr.RepositoryException;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.dam.RenditionPatternPicker;
+import com.adobe.acs.commons.images.ImageTransformer;
+import com.adobe.acs.commons.images.NamedImageTransformer;
+import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.Rendition;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.NameConstants;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.foundation.Image;
+import com.day.image.Layer;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class,reference={
@@ -85,10 +88,9 @@ import java.util.regex.Pattern;
                 cardinality = ReferenceCardinality.MULTIPLE
         )
 }, property= {
-      "sling.servlet.extensions" + "=" + "transform",
-      "sling.servlet.methods"  + "=" + "GET"
-}
-)
+      SLING_SERVLET_EXTENSIONS + "=" + "transform",
+      SLING_SERVLET_METHODS  + "=" + "GET"
+})
 @Designate(ocd=NamedTransformImageServlet.Config.class)
 public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 

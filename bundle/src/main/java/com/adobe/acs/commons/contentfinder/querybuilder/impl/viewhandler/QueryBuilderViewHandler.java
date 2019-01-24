@@ -19,11 +19,13 @@
  */
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
-import com.adobe.acs.commons.search.CloseableQuery;
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.wcm.core.contentfinder.ViewHandler;
-import com.day.cq.wcm.core.contentfinder.ViewQuery;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jcr.Session;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,11 +35,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.wcm.core.contentfinder.ViewHandler;
+import com.day.cq.wcm.core.contentfinder.ViewQuery;
 
 /**
  * ACS AEM Commons - GQL to Querybuilder View Handler
@@ -45,9 +47,8 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 @Component(properties= {
-        "sling.servlet.paths=/bin/wcm/contentfinder/qb/view"
+        SLING_SERVLET_PATHS + "=/bin/wcm/contentfinder/qb/view"
 })
-
 public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 

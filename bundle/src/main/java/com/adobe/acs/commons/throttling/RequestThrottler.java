@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.throttling;
 
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Arrays;
@@ -37,7 +39,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -121,8 +122,7 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-
-@Component(property = { "sling.filter.scope=REQUEST" })
+@Component(property = { SLING_FILTER_SCOPE + "=REQUEST" })
 @Designate(ocd = RequestThrottler.Config.class, factory = true)
 public class RequestThrottler implements Filter {
 

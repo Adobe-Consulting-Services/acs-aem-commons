@@ -20,10 +20,19 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.servlets;
 
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
+import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_PATHS;
+import static org.apache.sling.auth.core.AuthConstants.AUTH_REQUIREMENTS;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -32,19 +41,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.ChecksumGeneratorOptionsFactory;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.RequestChecksumGeneratorOptions;
 
 @SuppressWarnings("serial")
 @Component(service=Servlet.class, property= {
-"sling.servlet.paths="+ChecksumGeneratorServlet.SERVLET_PATH,
-"sling.auth.requirements=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
+SLING_SERVLET_PATHS + "="+ChecksumGeneratorServlet.SERVLET_PATH,
+AUTH_REQUIREMENTS + "=" + "-" + ChecksumGeneratorServlet.SERVLET_PATH
 })
 public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);

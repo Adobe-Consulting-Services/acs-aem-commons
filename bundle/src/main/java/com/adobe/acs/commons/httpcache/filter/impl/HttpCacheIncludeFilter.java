@@ -19,8 +19,16 @@
  */
 package com.adobe.acs.commons.httpcache.filter.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
@@ -29,13 +37,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import java.io.IOException;
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 
 /**
  * ACS AEM Commons - Http Cache - Intercepting include filter for dealing with cache. Intercepting sling request filter
@@ -43,7 +46,7 @@ import java.io.IOException;
  * caching aspects.
  */
 @Component(service=Filter.class,
-property= {"sling.filter.scope=INCLUDE",
+property= { SLING_FILTER_SCOPE + "=INCLUDE",
 Constants.SERVICE_RANKING +":Integer=0"})
 public class HttpCacheIncludeFilter extends AbstractHttpCacheFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(HttpCacheIncludeFilter.class);

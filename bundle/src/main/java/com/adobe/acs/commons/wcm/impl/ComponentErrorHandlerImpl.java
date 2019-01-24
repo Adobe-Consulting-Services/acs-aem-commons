@@ -22,6 +22,7 @@ package com.adobe.acs.commons.wcm.impl;
 
 import static org.apache.sling.engine.EngineConstants.FILTER_SCOPE_COMPONENT;
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ import com.day.cq.wcm.commons.WCMUtils;
 @Component( configurationPolicy = ConfigurationPolicy.REQUIRE,
         service= {ComponentErrorHandler.class, Filter.class},
         property= {SLING_FILTER_SCOPE + "=" + FILTER_SCOPE_COMPONENT,
-              "filter.order" + ":Integer=" + ComponentErrorHandlerImpl.FILTER_ORDER
+              SERVICE_RANKING + ":Integer=" + ComponentErrorHandlerImpl.FILTER_ORDER
               }
 )
 @Designate(ocd=ComponentErrorHandlerImpl.Config.class)

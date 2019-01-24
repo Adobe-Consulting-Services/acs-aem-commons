@@ -20,6 +20,9 @@
 
 package com.adobe.acs.commons.wcm.views.impl;
 
+import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+
 import com.adobe.acs.commons.util.CookieUtil;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManager;
@@ -64,8 +67,8 @@ import java.util.regex.Pattern;
         configurationPolicy=ConfigurationPolicy.REQUIRE,
         service=Filter.class,
         property= {
-              "sling.filter.scope=component",
-              "filter.order" + ":Integer=" + WCMViewsFilter.FILTER_ORDER
+              SLING_FILTER_SCOPE + "=component",
+              SERVICE_RANKING + ":Integer=" + WCMViewsFilter.FILTER_ORDER
         }
 )
 @Designate(ocd=WCMViewsFilter.Config.class)

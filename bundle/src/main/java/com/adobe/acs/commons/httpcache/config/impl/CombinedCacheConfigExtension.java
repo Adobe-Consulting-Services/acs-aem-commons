@@ -19,19 +19,14 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
-import com.adobe.acs.commons.httpcache.config.impl.keys.CombinedCacheKey;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
-import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.EMPTY;
+
+import java.util.Map;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -45,9 +40,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
-import static org.apache.commons.lang.StringUtils.*;
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 
 /**
  * Aggregates multiple cache config extensions into 1.
