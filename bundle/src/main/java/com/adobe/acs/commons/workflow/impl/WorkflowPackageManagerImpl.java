@@ -56,8 +56,10 @@ import java.util.List;
  * Manager for creating and working with Workflow Packages.
  *
  */
-@Component(service=WorkflowPackageManager.class)
-@Designate(ocd=WorkflowPackageManagerImpl.Config.class)
+@Component(
+        service = WorkflowPackageManager.class
+)
+@Designate(ocd = WorkflowPackageManagerImpl.Config.class)
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
@@ -81,7 +83,9 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Workflow Package Manager"
+    )
     public @interface Config {
         String DEFAULTS_CQPAGE = "cq:Page";
         String DEFAULTS_CQPAGECONTENT = "cq:PageContent";

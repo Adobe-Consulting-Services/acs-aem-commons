@@ -45,9 +45,13 @@ import com.day.image.Layer;
  * original dimensions, this will create a background layer
  */
 //@formatter:off
-@Component(service=ImageTransformer.class, property = {
-      ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE})
-@Designate(ocd=LetterPillarBoxImageTransformerImpl.Config.class)
+@Component(
+        service = ImageTransformer.class,
+        property = {
+                ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE
+        }
+)
+@Designate(ocd = LetterPillarBoxImageTransformerImpl.Config.class)
 //@formatter:on
 public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(LetterPillarBoxImageTransformerImpl.class);
@@ -73,7 +77,9 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Named Image Transform - Letter Pillar Box"
+    )
     public @interface Config {
       @AttributeDefinition(name = "Max dimension in px",
             description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",

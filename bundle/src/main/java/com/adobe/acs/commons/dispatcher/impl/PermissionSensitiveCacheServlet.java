@@ -34,18 +34,25 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, configurationPolicy=ConfigurationPolicy.REQUIRE)
+@Component(
+        immediate = true,
+        configurationPolicy=ConfigurationPolicy.REQUIRE
+)
 @Designate(ocd=PermissionSensitiveCacheServlet.Config.class)
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
     
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Permission Sensitive Cache Servlet"
+    )
     public @interface Config {
-        @AttributeDefinition(name="Sling Servlet Paths",description="Paths that this servlet will resolve to")
+        @AttributeDefinition(
+                name="Sling Servlet Paths",
+                description="Paths that this servlet will resolve to"
+        )
         String[] sling_servlet_paths();
     }
-
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try{
