@@ -386,9 +386,7 @@ public class FileAssetIngestorTest {
 
         int count = 0;
         for (HierarchicalElement e : spy.getChildren().collect(Collectors.toList())) {
-            if (e.getItemName().equals("/test/path/internal/internal2/file4.png")) {
-
-            }
+            count++;
         }
 
         assertEquals(6, count);
@@ -457,15 +455,14 @@ public class FileAssetIngestorTest {
         FileAssetIngestor.SftpHierarchicalElement sftpHierarchicalElement = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         FileAssetIngestor.SftpHierarchicalElement spy = spy(sftpHierarchicalElement);
 
+        boolean isExceptionCaught = false;
         try {
             spy.retrieveDetails();
         } catch (SftpException e) {
-
+            verify(spy, times(1)).openChannel();
+            verify(spy, timeout(1)).closeChannel();
+            assertNull(spy.channel);
         }
-
-        verify(spy, times(1)).openChannel();
-        verify(spy, timeout(1)).closeChannel();
-        assertNull(spy.channel);
     }
 
     @Test
