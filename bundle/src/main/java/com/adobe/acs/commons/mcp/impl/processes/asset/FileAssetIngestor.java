@@ -457,11 +457,7 @@ public class FileAssetIngestor extends AssetIngestor {
                     source = new SftpSource(size, this::openChannel, this);
                 } catch (JSchException | SftpException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    if (!keepChannelOpen) {
-                        closeChannel();
-                    }
-                }
+                } 
             }
             return source;
         }
