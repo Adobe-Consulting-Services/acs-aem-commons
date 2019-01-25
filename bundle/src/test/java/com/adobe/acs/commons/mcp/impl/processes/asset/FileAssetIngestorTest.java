@@ -28,6 +28,7 @@ import com.google.common.io.Files;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -310,9 +311,7 @@ public class FileAssetIngestorTest {
     @Test
     public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException, UnsupportedEncodingException {
         configureSftpFields();
-        ChannelSftp channel = mock(ChannelSftp.class);
-        when(channel.isConnected()).thenReturn(true);
-        when(channel.getSession()).thenReturn(mock(Session.class));
+        ChannelSftp channel = getSftpChannelMock();
 
         Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
                 .addDirectory(".")
@@ -330,6 +329,143 @@ public class FileAssetIngestorTest {
             assertTrue("Expected isFile for " + e.getName(), e.isFile());
         }
         assertEquals("Expected only two files", 2, count);
+    }
+
+    @Test
+    public void testSftpRecursionHasOneSessionAndClosesIt() throws UnsupportedEncodingException, URISyntaxException, SftpException, JSchException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+
+        Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
+                .addDirectory(".")
+                .addDirectory("..")
+                .addDirectory("internal")
+                .addFile("internal/file3.png", 1234L)
+                .addDirectory("internal/internal2")
+                .addFile("internal/internal2/file4.png", 1234L)
+                .addFile("file1.png", 1234L)
+                .addFile("file2.png", 4567L)
+                .asVector();
+        when(channel.ls(anyObject())).thenReturn(entries);
+
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(elem1);
+
+        int count = 0;
+        for (HierarchicalElement e : spy.getChildren().collect(Collectors.toList())) {
+            count++;
+        }
+
+        assertEquals(6, count);
+        verify(spy, times(1)).openChannel();
+        verify(channel, times(1)).disconnect();
+        verify(channel.getSession(), times(1)).disconnect();
+
+        assertNull(spy.channel);
+    }
+
+    @Test
+    public void testSftpRecursionHasOneSessionAndClosesItWhenExceptionOccurs() throws UnsupportedEncodingException, URISyntaxException, SftpException, JSchException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+
+        Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
+                .addDirectory(".")
+                .addDirectory("..")
+                .addDirectory("internal")
+                .addFile("internal/file3.png", 1234L)
+                .addDirectory("internal/internal2")
+                .addFile("internal/internal2/file4.png", 1234L)
+                .addFile("file1.png", 1234L)
+                .addFile("file2.png", 4567L)
+                .asVector();
+        when(channel.ls(anyObject())).thenReturn(entries);
+
+        FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(elem1);
+
+        int count = 0;
+        for (HierarchicalElement e : spy.getChildren().collect(Collectors.toList())) {
+            if (e.getItemName().equals("/test/path/internal/internal2/file4.png")) {
+
+            }
+        }
+
+        assertEquals(6, count);
+        verify(spy, times(1)).openChannel();
+        verify(channel, times(1)).disconnect();
+        verify(channel.getSession(), times(1)).disconnect();
+
+        assertNull(spy.channel);
+    }
+
+    @Test
+    public void testSftpGetChildrenClosesSftSession() throws JSchException, UnsupportedEncodingException, URISyntaxException, SftpException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+        when(channel.ls(any())).thenReturn(new Vector<ChannelSftp.LsEntry>());
+
+        FileAssetIngestor.SftpHierarchicalElement sftpHierarchicalElement = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(sftpHierarchicalElement);
+
+        spy.getChildren();
+
+        verify(spy, times(1)).openChannel();
+        verify(spy, times(1)).closeChannel();
+        assertNull(spy.channel);
+    }
+
+    @Test
+    public void testSftpGetChildrenClosesSftSessionWhenSftpExceptionOccurs() throws JSchException, UnsupportedEncodingException, URISyntaxException, SftpException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+        when(channel.ls(any())).thenThrow(new SftpException(0, "Test exception"));
+
+        FileAssetIngestor.SftpHierarchicalElement sftpHierarchicalElement = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(sftpHierarchicalElement);
+
+        spy.getChildren();
+
+        verify(spy, times(1)).openChannel();
+        verify(spy, times(1)).closeChannel();
+        assertNull(spy.channel);
+    }
+
+
+
+    @Test
+    public void testSftpRetrieveDetailsCloseSftpSession() throws JSchException, UnsupportedEncodingException, URISyntaxException, SftpException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+        when(channel.lstat(any())).thenReturn(mock(SftpATTRS.class));
+
+        FileAssetIngestor.SftpHierarchicalElement sftpHierarchicalElement = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(sftpHierarchicalElement);
+        spy.retrieveDetails();
+
+        verify(spy, times(1)).openChannel();
+        verify(spy, times(1)).closeChannel();
+        assertNull(spy.channel);
+    }
+
+    @Test
+    public void testSftpRetrieveDetailsCloseSftpSessionWhenSftpExceptionOccurs() throws JSchException, UnsupportedEncodingException, URISyntaxException, SftpException {
+        configureSftpFields();
+        ChannelSftp channel = getSftpChannelMock();
+        when(channel.lstat(any())).thenThrow(new SftpException(0, "Test exception"));
+
+        FileAssetIngestor.SftpHierarchicalElement sftpHierarchicalElement = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
+        FileAssetIngestor.SftpHierarchicalElement spy = spy(sftpHierarchicalElement);
+
+        try {
+            spy.retrieveDetails();
+        } catch (SftpException e) {
+
+        }
+
+        verify(spy, times(1)).openChannel();
+        verify(spy, timeout(1)).closeChannel();
+        assertNull(spy.channel);
     }
 
     @Test
@@ -387,6 +523,14 @@ public class FileAssetIngestorTest {
             Assert.assertEquals(validPath, expectedPath.equals(actualPath));
             Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(false));
         }
+    }
+
+    private ChannelSftp getSftpChannelMock() throws JSchException {
+        ChannelSftp channel = mock(ChannelSftp.class);
+        when(channel.isConnected()).thenReturn(true);
+        when(channel.getSession()).thenReturn(mock(Session.class));
+
+        return channel;
     }
 
     @Test
