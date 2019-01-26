@@ -28,7 +28,6 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.commons.jcr.JcrConstants;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;

@@ -64,7 +64,7 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
     @Mock
     private Resource requestResource;
 
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configA = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -91,7 +91,7 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
         }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configB = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;

@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
-import com.adobe.acs.commons.httpcache.config.impl.RequestCookieHttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.RequestHeaderHttpCacheConfigExtension;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;

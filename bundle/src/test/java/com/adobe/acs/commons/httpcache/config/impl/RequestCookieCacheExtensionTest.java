@@ -65,7 +65,7 @@ public class RequestCookieCacheExtensionTest {
     private Cookie[] cookies;
     private Cookie[] emptyCookies;
 
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestCookieHttpCacheConfigExtension.Config configA = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -92,7 +92,7 @@ public class RequestCookieCacheExtensionTest {
         }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestCookieHttpCacheConfigExtension.Config configB = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;

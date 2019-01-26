@@ -24,14 +24,11 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.GroupCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.service.component.annotations.Activate;
@@ -45,10 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,11 +53,7 @@ import java.util.ListIterator;
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
 @Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
-           factory = "GroupHttpCacheConfigExtension",
-           property= {
-           "webconsole.configurationFactory.nameHint" + "="
-           + "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
-           }
+           factory = "GroupHttpCacheConfigExtension"
 )
 @Designate(ocd=GroupHttpCacheConfigExtension.Config.class,factory=true)
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
