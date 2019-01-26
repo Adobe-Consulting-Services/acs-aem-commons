@@ -68,6 +68,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
+- #1719 - Added missing OSGi metatype names for 10 OSGi components.
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
