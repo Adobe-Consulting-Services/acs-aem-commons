@@ -58,7 +58,7 @@ public class RequestParameterHttpCacheConfigExtension extends AbstractKeyValueEx
         String[] allowedKeys() default {};
 
         @AttributeDefinition(
-                name = "AllowedValues",
+                name = "Allowed values",
                 description = "If set, narrows down specified keys to specified values only."
         )
         String[] allowedValues() default {};
