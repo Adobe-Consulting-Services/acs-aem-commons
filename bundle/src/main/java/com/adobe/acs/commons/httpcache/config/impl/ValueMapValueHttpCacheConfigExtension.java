@@ -50,7 +50,7 @@ import java.util.Set;
 @Designate(ocd = ValueMapValueHttpCacheConfigExtension.Config.class, factory = true)
 public class ValueMapValueHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - ValueMapValueHttpCacheConfigExtension - Key / Value extension",
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - ValueMapValueHttpCacheConfigExtension",
             description = "Defined key / values that will be allowed for this extension.")
     public @interface Config{
         @AttributeDefinition(
