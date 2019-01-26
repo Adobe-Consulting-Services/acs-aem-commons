@@ -51,7 +51,7 @@ import java.util.Set;
 @Designate(ocd = RequestHeaderHttpCacheConfigExtension.Config.class, factory = true)
 public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - RequestHeaderHttpCacheConfigExtension - Key / Value extension",
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - RequestHeaderHttpCacheConfigExtension",
             description = "Defined key / values that will be allowed for this extension.")
     public @interface Config{
         @AttributeDefinition(
