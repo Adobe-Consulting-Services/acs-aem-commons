@@ -69,6 +69,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
 - #1719 - Added missing OSGi metatype names for 10 OSGi components.
+- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
