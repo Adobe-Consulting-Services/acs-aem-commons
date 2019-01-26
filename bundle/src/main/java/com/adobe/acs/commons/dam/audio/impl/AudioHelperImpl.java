@@ -45,7 +45,10 @@ import com.day.cq.dam.handler.ffmpeg.FfmpegNotFoundException;
 @Designate(ocd=AudioHelperImpl.Config.class)
 public class AudioHelperImpl implements AudioHelper {
     
-    @ObjectClassDefinition(name = "ACS AEM Commons - Audio Processor", description="ACS Commons - Audio Processor")
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Audio Processor",
+            description="ACS Commons - Audio Processor"
+    )
     public @interface Config {
         @AttributeDefinition(name="log path",
                 description="FFmpeg working directory. If relative, relative to ${sling.home}.",defaultValue=DEFAULT_FFMPEG_WORKINGDIR)

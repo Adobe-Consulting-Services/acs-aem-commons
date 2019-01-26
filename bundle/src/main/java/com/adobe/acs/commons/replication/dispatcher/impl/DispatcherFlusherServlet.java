@@ -63,10 +63,12 @@ import com.google.gson.Gson;
 
 @SuppressWarnings("serial")
 @Component(service = Servlet.class,
-        property =
-                {SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
-                        SLING_SERVLET_METHODS + "=POST",
-                        SLING_SERVLET_SELECTORS + "=flush"})
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
+                SLING_SERVLET_METHODS + "=POST",
+                SLING_SERVLET_SELECTORS + "=flush"
+        }
+)
 @Designate(ocd = DispatcherFlusherServlet.Config.class)
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
@@ -81,7 +83,9 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
 
-    @ObjectClassDefinition()
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Dispatcher Flusher Servlet"
+    )
     public @interface Config {
         boolean DEFAULT_USE_ADMIN_RESOURCE_RESOLVER = true;
 
