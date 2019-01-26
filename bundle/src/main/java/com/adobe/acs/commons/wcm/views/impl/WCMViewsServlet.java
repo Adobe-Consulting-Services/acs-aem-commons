@@ -70,15 +70,16 @@ import com.google.gson.JsonObject;
 @SuppressWarnings("serial")
 @org.osgi.service.component.annotations.Component(
         service = Servlet.class,
-        property =
-                {
+        property = {
                         SLING_SERVLET_RESOURCE_TYPES + "=cq/Page",
                         SLING_SERVLET_METHODS + "=GET",
                         SLING_SERVLET_EXTENSIONS + "=json",
                         SLING_SERVLET_SELECTORS + "=wcm-views"
                 }
 )
-@Designate(ocd = WCMViewsServlet.Config.class)
+@Designate(
+        ocd = WCMViewsServlet.Config.class
+)
 public class WCMViewsServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsServlet.class);
 
@@ -88,9 +89,11 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
             name = "ACS AEM Commons - WCM Views Servlet"
     )
     public @interface Config {
-        @AttributeDefinition(name = "WCM Views by Path",
-                description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]")
-        String[] wcm_views();
+        @AttributeDefinition(
+                name = "WCM Views by Path",
+                description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]"
+        )
+        String[] wcm$_$views();
     }
 
     @Override
@@ -172,7 +175,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
     @Activate
     protected final void activate(WCMViewsServlet.Config config) {
-        final String[] tmp = config.wcm_views();
+        final String[] tmp = config.wcm$_$views();
         this.defaultViews = ParameterUtil.toMap(tmp, "=", ";");
     }
 }

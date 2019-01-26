@@ -59,7 +59,9 @@ import java.util.List;
 @Component(
         service = WorkflowPackageManager.class
 )
-@Designate(ocd = WorkflowPackageManagerImpl.Config.class)
+@Designate(
+        ocd = WorkflowPackageManagerImpl.Config.class
+)
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
@@ -91,10 +93,16 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         String DEFAULTS_CQPAGECONTENT = "cq:PageContent";
         String DEFAULTS_DAM_ASSET = "dam:Asset";
 
-        @AttributeDefinition(name = "Workflow Package Types",
+        @AttributeDefinition(
+                name = "Workflow Package Types",
                 description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
-                defaultValue = {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET})
-       String[] wf_package_types() default {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET};
+                defaultValue = {
+                        DEFAULTS_CQPAGE,
+                        DEFAULTS_CQPAGECONTENT,
+                        DEFAULTS_DAM_ASSET
+                }
+        )
+        String[] wf$_$package_types() default {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET};
     }
 
     @Reference
@@ -265,6 +273,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Activate
     protected final void activate(WorkflowPackageManagerImpl.Config config) {
-        workflowPackageTypes = config.wf_package_types();
+        workflowPackageTypes = config.wf$_$package_types();
     }
 }

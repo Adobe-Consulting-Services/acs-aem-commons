@@ -43,36 +43,59 @@ import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(service = { EnsureServiceUser.class, EnsureAuthorizable.class }, configurationPolicy = ConfigurationPolicy.REQUIRE,
-        immediate = true, factory="com.adobe.acs.commons.users.impl.EnsureServiceUser", property= {
-        "webconsole.configurationFactory.nameHint" + "=" + "Ensure Service User: {operation} {principalName}"})
-@Designate(ocd=EnsureServiceUser.Config.class)
+@Component(
+        service = {
+                EnsureServiceUser.class,
+                EnsureAuthorizable.class
+        },
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true,
+        factory = "com.adobe.acs.commons.users.impl.EnsureServiceUser",
+        property = {
+                "webconsole.configurationFactory.nameHint=Ensure Service User: {operation} {principalName}"
+        }
+)
+@Designate(
+        ocd = EnsureServiceUser.Config.class
+)
 public final class EnsureServiceUser implements EnsureAuthorizable {
 
-@ObjectClassDefinition(name= "ACS AEM Commons - Ensure Service User")
-public @interface Config {
-    @AttributeDefinition(name = "Ensure immediately", defaultValue = "true",
-            description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean.")
-    boolean ensure_immediately();
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Service User"
+    )
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Ensure immediately",
+                defaultValue = "true",
+                description = "Ensure on activation. When set to false, this must be ensured via the JMX MBean."
+        )
+        boolean ensure$_$immediately();
 
-    @AttributeDefinition(
-            name = "Operation",
-            description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
-            options = { @Option(value = "add", label = "Ensure existence (add)"),
-                    @Option(value = "remove", label = "Ensure extinction (remove)") })
-    String operation();
-    
-    @AttributeDefinition(name = "Principal Name", description = "The service user's principal name")
-    String principalName();
-    
-    @AttributeDefinition(name = "ACEs",
-            description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
-            cardinality = Integer.MAX_VALUE)
-    String[] aces();
-    
-}
+        @AttributeDefinition(
+                name = "Operation",
+                description = "Defines if the service user (principal name) should be adjusted to align with this config or removed completely",
+                options = {
+                        @Option(value = "add", label = "Ensure existence (add)"),
+                        @Option(value = "remove", label = "Ensure extinction (remove)")
+                }
+        )
+        String operation();
 
-    public static final String PROP_ENSURE_IMMEDIATELY = "ensure.immediately";
+        @AttributeDefinition(
+                name = "Principal Name",
+                description = "The service user's principal name"
+        )
+        String principalName();
+
+        @AttributeDefinition(
+                name = "ACEs",
+                description = "This field is ignored if the Operation is set to 'Ensure extinction' (remove)",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] aces();
+    }
+
+    public static final String PROP_ENSURE_IMMEDIATELY = "ensure-immediately";
     public static final String DEFAULT_OPERATION = "add";
 
     public static final String PROP_OPERATION = "operation";

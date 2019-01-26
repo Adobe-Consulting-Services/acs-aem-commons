@@ -40,7 +40,7 @@ import com.day.image.Layer;
  */
 
 @Component(
-        service=ImageTransformer.class,
+        service = ImageTransformer.class,
         property = {
                 ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE
         }
@@ -64,10 +64,12 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
             name = "ACS AEM Commons - Named Image Transform - Resize"
     )
     public @interface Config {
-        @AttributeDefinition(name = "Max dimension in px",
+        @AttributeDefinition(
+                name = "Max dimension in px",
                 description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-                defaultValue = ""+ DEFAULT_MAX_DIMENSION)
-        int max_dimension() default DEFAULT_MAX_DIMENSION;
+                defaultValue = "" + DEFAULT_MAX_DIMENSION
+        )
+        int max$_$dimension() default DEFAULT_MAX_DIMENSION;
 
     }
 
@@ -110,6 +112,6 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     @Activate
     protected final void activate(ResizeImageTransformerImpl.Config config) {
-        maxDimension = config.max_dimension();
+        maxDimension = config.max$_$dimension();
     }
 }

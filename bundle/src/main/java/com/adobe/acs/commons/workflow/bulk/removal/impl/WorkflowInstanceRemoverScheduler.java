@@ -77,7 +77,9 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
 
     private List<String> statuses = new ArrayList<String>();
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service")
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Workflow Instance Remover - Scheduled Service"
+    )
     public @interface Config {
 
         String DEFAULT_SCHEDULER_EXPRESSION = "0 1 0 ? * *";
@@ -91,35 +93,47 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
         )
         String scheduler_expression() default DEFAULT_SCHEDULER_EXPRESSION;
 
-        @AttributeDefinition(name = "Workflow Status",
+        @AttributeDefinition(
+                name = "Workflow Status",
                 description = "Only remove Workflow Instances that have one of these statuses.",
-                defaultValue = {STATUS_COMPLETED, STATUS_ABORTED})
+                defaultValue = {STATUS_COMPLETED, STATUS_ABORTED}
+        )
         String[] workflow_statuses() default {STATUS_COMPLETED, STATUS_ABORTED};
 
-        @AttributeDefinition(name = "Workflow Models",
+        @AttributeDefinition(
+                name = "Workflow Models",
                 description = "Only remove Workflow Instances that belong to one of these WF Models.",
-                cardinality = Integer.MAX_VALUE)
+                cardinality = Integer.MAX_VALUE
+        )
         String[] workflow_models();
 
-        @AttributeDefinition(name = "Payload Patterns",
+        @AttributeDefinition(
+                name = "Payload Patterns",
                 description = "Only remove Workflow Instances whose payloads match one of these regex patterns",
-                cardinality = Integer.MAX_VALUE)
+                cardinality = Integer.MAX_VALUE
+        )
         String[] workflow_payloads();
 
-        @AttributeDefinition(name = "Older Than UTC TS",
-                description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Millis")
-        long workflow_older_than();
+        @AttributeDefinition(
+                name = "Older Than UTC Timestamp",
+                description = "Only remove Workflow Instances whose payloads are older than this UTC Time in Milliseconds"
+        )
+        long workflow_older$_$than();
 
-        @AttributeDefinition(name = "Batch Size",
+        @AttributeDefinition(
+                name = "Batch Size",
                 description = "Save removals to JCR in batches of this defined size.",
-                defaultValue = "" + DEFAULT_BATCH_SIZE)
-        int batch_size() default DEFAULT_BATCH_SIZE;
+                defaultValue = "" + DEFAULT_BATCH_SIZE
+        )
+        int batch$_$size() default DEFAULT_BATCH_SIZE;
 
-        @AttributeDefinition(name = "Max duration (in minutes)",
+        @AttributeDefinition(
+                name = "Max duration (in minutes)",
                 description = "Max number of minutes this workflow removal process can execute. 0 for no limit. "
                         + "[ Default: 0 ]",
-                defaultValue = "" + DEFAULT_MAX_DURATION)
-        int max_duration() default DEFAULT_MAX_DURATION;
+                defaultValue = "" + DEFAULT_MAX_DURATION
+        )
+        int max$_$duration() default DEFAULT_MAX_DURATION;
     }
 
     private List<String> models = new ArrayList<String>();
@@ -197,19 +211,19 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             }
         }
 
-        final Long olderThanTs = config.workflow_older_than();
+        final Long olderThanTs = config.workflow_older$_$than();
 
         if (olderThanTs > 0) {
             olderThan = Calendar.getInstance();
             olderThan.setTimeInMillis(olderThanTs);
         }
 
-        batchSize = config.batch_size();
+        batchSize = config.batch$_$size();
         if (batchSize < 1) {
             batchSize = DEFAULT_BATCH_SIZE;
         }
 
-        maxDuration = config.max_duration();
+        maxDuration = config.max$_$duration();
 
         final InfoWriter iw = new InfoWriter();
         iw.title("Workflow Instance Removal Configuration");
