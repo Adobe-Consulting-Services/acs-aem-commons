@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +39,7 @@ public class SyntheticDialogTest {
     public void init() {
         testPojo = new TestPojo();
         testPojo.init();
+        testPojo.getFieldComponents();
     }
 
     @Test
@@ -65,7 +67,7 @@ public class SyntheticDialogTest {
         assertNotNull(component.getFieldComponents().get("subField4"));
         assertNotNull(component.getFieldComponents().get("subField5"));
         assertNotNull(component.getFieldComponents().get("subField6"));
-        assertTrue(component.isComposite);
+        assertTrue(component.isComposite());
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
@@ -80,10 +82,31 @@ public class SyntheticDialogTest {
     }
 
     @Test
+    public void testGroupingBehavior() {
+        AbstractResourceImpl res = (AbstractResourceImpl) testPojo.getFormResource();
+        dumpResource(res, 0);
+    }
+
+    private void dumpResource(AbstractResourceImpl res, int indent) {
+        if (res == null) {
+            return;
+        }
+        String indentStr = StringUtils.repeat(' ', indent * 4);
+        System.out.println(indentStr + res.getPath());
+        res.getResourceMetadata().forEach((name, val) -> {
+            System.out.println(indentStr +" @"+name+":="+String.valueOf(val));
+        });
+        res.getChildren().forEach(c -> {
+            dumpResource((AbstractResourceImpl) c, indent+1);
+        });
+        System.out.println(indentStr + "----");
+    }
+
+    @Test
     public void testSimpleMultifieldComponentGeneration() {
         MultifieldComponent component = (MultifieldComponent) testPojo.getFieldComponents().get("simpleMultiField");
         component.setPath("/test/path");
-        assertFalse(component.isComposite);
+        assertFalse(component.isComposite());
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
@@ -110,22 +133,25 @@ public class SyntheticDialogTest {
     }
 
     public static class TestPojo extends GeneratedDialog {
-        @FormField(component = TextfieldComponent.class, name = "Text Field")
+        @FormField(component = TextfieldComponent.class, name = "Text Field", category="1")
         String textField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield (composite)")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (composite)", category="1")
         List<TestSubtype> multiField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2")
         List<String> simpleMultiField;
 
-        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2")
+        String[] simpleArrayMultiField;
+
+        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only", category="3")
         String readOnly;
 
-        @FormField(component = TagPickerComponent.class, name = "tags")
+        @FormField(component = TagPickerComponent.class, name = "tags", category="3")
         List<String> tags;
 
-        @FormField(component = TextareaComponent.class, name = "Text Area")
+        @FormField(component = TextareaComponent.class, name = "Text Area", category="4")
         String textArea;
     }
 

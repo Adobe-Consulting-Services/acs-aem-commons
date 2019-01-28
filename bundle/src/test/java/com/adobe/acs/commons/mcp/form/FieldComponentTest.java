@@ -104,6 +104,11 @@ public class FieldComponentTest {
                 }
 
                 @Override
+                public String category() {
+                    return null;
+                }
+
+                @Override
                 public boolean required() {
                     return false;
                 }

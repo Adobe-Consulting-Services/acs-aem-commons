@@ -19,20 +19,23 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.data.Variant;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes a component in a manner which supports auto-generated forms
@@ -50,16 +53,24 @@ public abstract class FieldComponent {
     private Resource resource;
     private String path = "/fake/path";
     private final EnumMap<ClientLibraryType, Set<String>> clientLibraries = new EnumMap<>(ClientLibraryType.class);
+    private String category;
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
         this.formField = field;
         this.sling = sling;
         this.javaField = javaField;
-        componentMetadata.put("name", name);
+        this.setCategory(field.category());
+        if (!componentMetadata.containsKey("name")) {
+            componentMetadata.put("name", name);
+        }
         componentMetadata.put("fieldLabel", formField.name());
-        componentMetadata.put("fieldDescription", formField.description());
-        componentMetadata.put("required", formField.required());
+        if (!StringUtils.isEmpty(formField.description())) {
+            componentMetadata.put("fieldDescription", formField.description());
+        }
+        if (formField.required()) {
+            componentMetadata.put("required", formField.required());
+        }
         componentMetadata.put("emptyText", formField.hint());
         getOption("default").ifPresent(val -> componentMetadata.put("value", val));
         init();
@@ -94,7 +105,11 @@ public abstract class FieldComponent {
 
     private Resource getComponentResource() {
         if (resource == null) {
+            purgeEmptyMetadata();
             resource = buildComponentResource();
+            if (resource instanceof AbstractResourceImpl && sling != null) {
+                ((AbstractResourceImpl) resource).setResourceResolver(sling.getRequest().getResourceResolver());
+            }
         }
         return resource;
     }
@@ -107,8 +122,9 @@ public abstract class FieldComponent {
      * @return
      */
     public Resource buildComponentResource() {
+        purgeEmptyMetadata();
         AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
-        if (sling != null && sling.getRequest() != null) {
+        if (sling != null) {
             res.setResourceResolver(sling.getRequest().getResourceResolver());
         }
         return res;
@@ -175,6 +191,20 @@ public abstract class FieldComponent {
         this.resourceSuperType = resourceSuperType;
     }
 
+    public void purgeEmptyMetadata() {
+        Set<String> emptyKeys = new HashSet<>();
+        componentMetadata.forEach((key, value) -> {
+            if (value == null || "".equals(value)) {
+                emptyKeys.add(key);
+            }
+        });
+        componentMetadata.keySet().removeAll(emptyKeys);
+    }
+
+    public void setSlingHelper(SlingScriptHelper helper) {
+        this.sling = helper;
+    }
+
     /**
      * @return the name
      */
@@ -183,18 +213,44 @@ public abstract class FieldComponent {
     }
 
     public boolean hasOption(String optionName) {
-        return Stream.of(formField.options())
-                .filter(s -> s.equalsIgnoreCase(optionName) || s.startsWith(optionName + "="))
-                .findFirst().isPresent();
+        if (formField == null || formField.options() == null) {
+            return false;
+        } else {
+            return Stream.of(formField.options())
+                    .filter(s -> s.equalsIgnoreCase(optionName) || s.startsWith(optionName + "="))
+                    .findFirst().isPresent();
+        }
     }
 
     public Optional<String> getOption(String option) {
-        return Stream.of(formField.options())
-                .filter(s -> s.startsWith(option + "="))
-                .findFirst().map(o -> o.split("=")[1]);
+        if (formField == null || formField.options() == null) {
+            return Optional.empty();
+        } else {
+            return Stream.of(formField.options())
+                    .filter(s -> s.startsWith(option + "="))
+                    .findFirst().map(o -> o.split("=")[1]);
+        }
+    }
+
+    public Optional<Boolean> getBooleanOption(String option) {
+        return getOption(option).map(s -> Variant.convert(s, Boolean.class));
     }
 
     public static enum ClientLibraryType {
         JS, CSS, ALL
+    }
+
+    /**
+     * @return the category
+     */
+    public String getCategory() {
+        return category;
+    }
+
+    /**
+     * @param category the category to set
+     */
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
