@@ -43,34 +43,45 @@ import org.slf4j.LoggerFactory;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 
 //@formatter:off
-@Component(service=AppliableEnsureOakIndex.class,
-configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-      "webconsole.configurationFactory.nameHint" + "=" + "Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}"
-}
+@Component(
+        service = AppliableEnsureOakIndex.class,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                "webconsole.configurationFactory.nameHint=Definitions: {ensure-definitions.path}, Indexes: {oak-indexes.path}"
+        }
 )
-@Designate(ocd=EnsureOakIndex.Config.class,factory=true)
+@Designate(
+        ocd=EnsureOakIndex.Config.class,
+        factory=true
+)
 //@formatter:on
 public class EnsureOakIndex implements AppliableEnsureOakIndex {
     static final Logger log = LoggerFactory.getLogger(EnsureOakIndex.class);
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Ensure Oak Index", description = "Component Factory to manage Oak indexes.")
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Ensure Oak Index",
+            description = "Component Factory to manage Oak indexes."
+    )
     public @interface Config {
-        @AttributeDefinition(name = "Ensure Definitions Path",
+        @AttributeDefinition(
+                name = "Ensure Definitions Path",
                 description = "The absolute path to the resource containing the "
                         + "ACS AEM Commons ensure definitions",
                 defaultValue = DEFAULT_ENSURE_DEFINITIONS_PATH)
-        String ensure_definitions_path();
+        String ensure$_$definitions_path();
 
-
-       @AttributeDefinition(name = "Oak Indexes Path",
-                description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
-                defaultValue = DEFAULT_OAK_INDEXES_PATH)
-        String oak_indexes_path();
 
         @AttributeDefinition(
-              name = "Immediate",
+                name = "Oak Indexes Path",
+                description = "The absolute path to the oak:index to update; Defaults to [ /oak:index ]",
+                defaultValue = DEFAULT_OAK_INDEXES_PATH
+        )
+        String oak$_$indexes_path();
+
+        @AttributeDefinition(
+                name = "Immediate",
                 description = "Apply the indexes on startup of service. Defaults to [ true ]",
-                defaultValue = ""+DEFAULT_IMMEDIATE
+                defaultValue = "" + DEFAULT_IMMEDIATE
         )
         boolean immediate();
     }
@@ -78,12 +89,11 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     //@formatter:off
     private static final String DEFAULT_ENSURE_DEFINITIONS_PATH = StringUtils.EMPTY;
 
-    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure.definitions.path";
-
+    public static final String PROP_ENSURE_DEFINITIONS_PATH = "ensure-definitions.path";
 
     private static final String DEFAULT_OAK_INDEXES_PATH = "/oak:index";
 
-    public static final String PROP_OAK_INDEXES_PATH = "oak.indexes.path";
+    public static final String PROP_OAK_INDEXES_PATH = "oak-indexes.path";
 
     private static final boolean DEFAULT_IMMEDIATE = true;
 

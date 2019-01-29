@@ -46,25 +46,29 @@ service=Filter.class,
 public class MonthlyExpiresHeaderFilter extends AbstractExpiresHeaderFilter {
 
     private static final String LAST = "LAST";
-    
-@ObjectClassDefinition( name = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
-    description = "Adds an Expires header to content to enable Dispatcher TTL support.")
-public @interface Config {
 
- @AttributeDefinition(name = "Filter Patterns",
-      description = "Patterns on which to apply this Expires rule.",
-      cardinality = Integer.MAX_VALUE)
- String[] filter_pattern();
- 
- @AttributeDefinition(name = "Expires Time",
-      description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.")
-  String expires_time();
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Dispatcher Expires Header - Monthly",
+            description = "Adds an Expires header to content to enable Dispatcher TTL support."
+    )
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Filter Patterns",
+                description = "Patterns on which to apply this Expires rule.",
+                cardinality = Integer.MAX_VALUE)
+        String[] filter_pattern();
 
-    @AttributeDefinition(name = "Expires Day", description = "Day of month on which content expires. "
-            + "Use keyword 'LAST' to enable last day of month, as setting to 31 will generate errors in February.")
-         String expires_dayofmonth();
+        @AttributeDefinition(
+                name = "Expires Time",
+                description = "Time of day at which resources will expire. Must match SimpleDateFormat of 'HH:mm'.")
+        String expires_time();
 
-}
+        @AttributeDefinition(
+                name = "Expires Day",
+                description = "Day of month on which content expires. "
+                        + "Use keyword 'LAST' to enable last day of month, as setting to 31 will generate errors in February.")
+        String expires_day$_$of$_$month();
+    }
 
     static final String PROP_EXPIRES_DAY_OF_MONTH = "expires.day-of-month";
 

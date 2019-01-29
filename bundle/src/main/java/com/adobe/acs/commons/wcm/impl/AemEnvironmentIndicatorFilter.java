@@ -54,8 +54,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
-@Component(service=Filter.class)
-@Designate(ocd=AemEnvironmentIndicatorFilter.Config.class)
+@Component(
+        service=Filter.class
+)
+@Designate(
+        ocd=AemEnvironmentIndicatorFilter.Config.class
+)
 public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 
@@ -79,41 +83,49 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Reference
     private XSSAPI xss;
-    
-    @ObjectClassDefinition( name= "ACS AEM Commons - AEM Environment Indicator",
-        description = "Adds a visual cue to the AEM WebUI indicating which environment is being access "
-                + "(localdev, dev, qa, staging)")
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - AEM Environment Indicator",
+            description = "Adds a visual cue to the AEM WebUI indicating which environment is being access (localdev, dev, qa, staging)"
+    )
     public @interface Config {
-       
-        @AttributeDefinition(name = "Color",
+
+        @AttributeDefinition(
+                name = "Color",
                 description = "The color of the indicator bar; takes any valid value"
                         + " for CSS's 'background-color' attribute."
                         + " This is ignored if a Style Override is provided.",
-                defaultValue = "")
-        String css_color();
-        
-        @AttributeDefinition(name = "CSS Override",
+                defaultValue = ""
+        )
+        String css$_$color();
+
+        @AttributeDefinition(
+                name = "CSS Override",
                 description = "Accepts any valid CSS to style the AEM indicator div. All CSS rules must only be "
                         + "scoped to #" + DIV_ID + " { .. }",
-                        defaultValue = "")
-        String css_override();
+                defaultValue = ""
+        )
+        String css$_$override();
 
-        
-        @AttributeDefinition(name = "Inner HTML",
+        @AttributeDefinition(
+                name = "Inner HTML",
                 description = "Any additional HTML required; Will be injected into a div with"
                         + " id='" + DIV_ID + "'",
                 defaultValue = "")
-        String inner_html();
+        String inner$_$html();
 
         @AttributeDefinition(name = "Browser Title",
                 description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
-                defaultValue = DEFAULT_TITLE_PREFIX)
-        String browser_title_prefix();
-        
-        @AttributeDefinition(name = "Excluded WCM modes",
+                defaultValue = DEFAULT_TITLE_PREFIX
+        )
+        String browser$_$title$_$prefix();
+
+        @AttributeDefinition(
+                name = "Excluded WCM modes",
                 description = "Do not display the indicator when these WCM modes",
-                cardinality = Integer.MAX_VALUE)
-        String[] excluded_wcmmodes();
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] excluded$_$wcm$_$modes();
     }
 
     /* Property: Default Color */
@@ -121,19 +133,19 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     private String color = "";
 
-    public static final String PROP_COLOR = "css.color";
+    public static final String PROP_COLOR = "css-color";
 
      /* Property: CSS Override */
 
     private String cssOverride = "";
 
-    public static final String PROP_CSS_OVERRIDE = "css.override";
+    public static final String PROP_CSS_OVERRIDE = "css-override";
 
      /* Property: Inner HTML */
 
     private String innerHTML = "";
 
-    public static final String PROP_INNER_HTML = "inner.html";
+    public static final String PROP_INNER_HTML = "inner-html";
 
 
     /* Property: Browser Title Prefix */
@@ -142,11 +154,11 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     private String titlePrefix = DEFAULT_TITLE_PREFIX;
 
-    public static final String PROP_TITLE_PREFIX = "browser.title.prefix";
+    public static final String PROP_TITLE_PREFIX = "browser-title-prefix";
 
     private static final String[] DEFAULT_EXCLUDED_WCMMODES = {"DISABLED"};
 
-    public static final String PROP_EXCLUDED_WCMMODES = "excluded.wcmmodes";
+    public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
     private static final String[] REJECT_PATH_PREFIXES = new String[]{};

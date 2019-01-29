@@ -40,7 +40,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 
-import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingConstants;
@@ -110,21 +109,21 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
         @AttributeDefinition(name = "Error page extension",
                 description = "Examples: html, htm, xml, json. [Optional] [Default: html]",
                 defaultValue = DEFAULT_ERROR_PAGE_EXTENSION)
-        String errorpage_extension() default DEFAULT_ERROR_PAGE_EXTENSION;
+        String error$_$page_extension() default DEFAULT_ERROR_PAGE_EXTENSION;
 
         @AttributeDefinition(
                 name = "Fallback error page name",
                 description = "Error page name (not path) to use if a valid Error Code/Error Servlet Name cannot be "
                         + "retrieved from the Request. [Required] [Default: 500]",
                 defaultValue = DEFAULT_FALLBACK_ERROR_NAME)
-        String errorpage_fallbackname() default DEFAULT_FALLBACK_ERROR_NAME;
+        String error$_$page_fallback$_$name() default DEFAULT_FALLBACK_ERROR_NAME;
 
         @AttributeDefinition(
                 name = "System error page",
                 description = "Absolute path to system Error page resource to serve if no other more appropriate "
                         + "error pages can be found. Does not include extension. [Optional... but highly recommended]",
                 defaultValue = DEFAULT_SYSTEM_ERROR_PAGE_PATH_DEFAULT)
-        String errorpage_systempath();
+        String error$_$page_system$_$path();
 
 
         @AttributeDefinition(
@@ -144,7 +143,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         @Option(label = "Respond with 404", value = RESPOND_WITH_404)
                 },
                 defaultValue = DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR)
-        String notfound_behavior() default DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
+        String not$_$found_behavior() default DEFAULT_NOT_FOUND_DEFAULT_BEHAVIOR;
 
         @AttributeDefinition(
                 name = "Not Found Exclusions",
@@ -152,12 +151,12 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         + " respond-with-404) way to the \"Not Found Behavior\". This allows the usual Not Found behavior"
                         + " to be defined via \"not-found.behavior\" with specific exclusions defined here. [Optional]",
                 cardinality = Integer.MAX_VALUE)
-        String[] notfound_exclusionpathpatterns();
+        String[] not$_$found_exclusion$_$path$_$patterns();
 
         @AttributeDefinition(name = "Serve authenticated from cache",
                 description = "Serve authenticated requests from the error page cache. [ Default: false ]",
                 defaultValue = "" + DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE)
-        boolean cache_serveauthenticated() default DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE;
+        boolean cache_serve$_$authenticated() default DEFAULT_SERVE_AUTHENTICATED_FROM_CACHE;
 
         @AttributeDefinition(name = "TTL (in seconds)",
                 description = "TTL for each cache entry in seconds. [ Default: 300 ]",
@@ -166,7 +165,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         @AttributeDefinition(name = "Enable placeholder images", description = "Enable image error handling  [ Default: false ]",
                 defaultValue = "" + DEFAULT_ERROR_IMAGES_ENABLED)
-        boolean errorimages_enabled() default DEFAULT_ERROR_IMAGES_ENABLED;
+        boolean error$_$images_enabled() default DEFAULT_ERROR_IMAGES_ENABLED;
 
 
         @AttributeDefinition(name = "Error image path/selector",
@@ -175,7 +174,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         + " Note: This concatenated path must resolve to a nt:file else a 200 response will be sent."
                         + " [ Optional ] [ Default: .img.png ]",
                 defaultValue = DEFAULT_ERROR_IMAGE_PATH)
-        String errorimages_path() default DEFAULT_ERROR_IMAGE_PATH;
+        String error$_$images_path() default DEFAULT_ERROR_IMAGE_PATH;
 
         @AttributeDefinition(
                 name = "Error image extensions",
@@ -184,9 +183,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                         + "[ Optional ] [ Default: png, jpeg, jpeg, gif ]",
                 cardinality = Integer.MAX_VALUE,
                 defaultValue = {"png", "jpeg", "jpg", "gif"})
-        String[] errorimages_extensions();
-
-
+        String[] error$_$images_extensions();
     }
 
     /* Enable/Disable */
@@ -842,17 +839,17 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         /** Error Pages **/
 
-        this.systemErrorPagePath = config.errorpage_systempath();
+        this.systemErrorPagePath = config.error$_$page_system$_$path();
 
-        this.errorPageExtension = config.errorpage_extension();
+        this.errorPageExtension = config.error$_$page_extension();
 
-        this.fallbackErrorName = config.errorpage_fallbackname();
+        this.fallbackErrorName = config.error$_$page_fallback$_$name();
         this.pathMap = configurePathMap(config.paths());
 
         /** Not Found Handling **/
-        this.notFoundBehavior = config.notfound_behavior();
+        this.notFoundBehavior = config.not$_$found_behavior();
 
-        String[] tmpNotFoundExclusionPatterns = config.notfound_exclusionpathpatterns();
+        String[] tmpNotFoundExclusionPatterns = config.not$_$found_exclusion$_$path$_$patterns();
 
         this.notFoundExclusionPatterns = new ArrayList<Pattern>();
         for (final String tmpPattern : tmpNotFoundExclusionPatterns) {
@@ -864,7 +861,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         int ttl = config.cache_ttl();
 
-        boolean serveAuthenticatedFromCache = config.cache_serveauthenticated();
+        boolean serveAuthenticatedFromCache = config.cache_serve$_$authenticated();
         try {
             cache = new ErrorPageCacheImpl(ttl, serveAuthenticatedFromCache);
 
@@ -879,9 +876,9 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         /** Error Images **/
 
-        this.errorImagesEnabled = config.errorimages_enabled();
+        this.errorImagesEnabled = config.error$_$images_enabled();
 
-        this.errorImagePath = config.errorimages_path();
+        this.errorImagePath = config.error$_$images_path();
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
@@ -904,7 +901,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             }
         }
 
-        this.errorImageExtensions = config.errorimages_extensions();
+        this.errorImageExtensions = config.error$_$images_extensions();
 
         for (int i = 0; i < errorImageExtensions.length; i++) {
             this.errorImageExtensions[i] = StringUtils.lowerCase(errorImageExtensions[i], Locale.ENGLISH);
