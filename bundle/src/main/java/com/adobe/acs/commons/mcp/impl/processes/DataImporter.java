@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.data.Spreadsheet;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
@@ -28,7 +29,7 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.data.CompositeVariant;
-import com.adobe.acs.commons.data.Spreadsheet;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -175,7 +176,7 @@ public class DataImporter extends ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
-            data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH);
+            data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH).buildSpreadsheet();
             if (presortData) {
                 Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
             }
