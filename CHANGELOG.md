@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
 - #1612 - Retries count and retry pause is configurable for all Asset Ingestors
 - #1637 - Add support for bounce address setting in EmailService
-- #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
+- #1654 - Added I18nProvider service to support injectors
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
@@ -24,51 +24,53 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
-- #1720 - Fixed HTTP cache extension factory names
-- #1699 - MCP UI doesn't work because of StackOverflowError exception
-- #1692 - HttpCache: Refactored resource / group config extensions 
-- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
-- #1667 - Refactored the activate methods of all http cache services
-- #1664 - OSGI annotations : fixed default values for various activate methods
-- #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
-- #1590 - Multifield component doesn't render non-composite at all (NPE error)
-- #1588 - Updated error handler JSP to use ModeUtils
-- #1583 - Asset Ingestor may try to create asset folders when they already exist
+- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
+- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
+- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
+- #1563 - Limiting the parsys does not work when pasting multiple paragraphs
+- #1572 - Update JSCH version used for SFTP support
 - #1578 - Added user/password handling as well as timeout specification in SFTP import
 - #1576 - SFTP import folder handling bugs
-- #1572 - Update JSCH version used for SFTP support
-- #1561 - Corrected header conversion behavior in spreadsheet and made it optional in data importer tool
-- #1552 - Ensure Authorizable - trim OSGi config array element whitespace for EnsureServiceUser aces property
-- #1551 - ThrottledTaskRunner avoid overflow errors when comparing priority with large absolute (negative or positive) values
-- #1563 - Limiting the parsys does not work when pasting multiple paragraphs
+- #1583 - Asset Ingestor may try to create asset folders when they already exist
+- #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
+- #1588 - Updated error handler JSP to use ModeUtils
+- #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1593 - Sftp Asset Injector throws URISyntaxException if item contains special characters
-- #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
 - #1597 - If 'Preserve Filename' unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1598 - Asset Ingestor | If user provides invalid info, nothing is happens. Erorr in report is expected
 - #1604 - File asset import and url asset imports saves source path as migratedFrom property into assets jcr:content node. If asset is skipped the message in the format "source -> destination" is written into report
 - #1606 - Url Asset Import saves correct path into migratedFrom property of assets's jcr:content node
+- #1607 - HttpCache: improved the write to response mechanism.
 - #1610 - Bulk Workflow Manager doing nothing
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
-- #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
+- #1664 - OSGI annotations : fixed default values for various activate methods
+- #1667 - Refactored the activate methods of all http cache services
 - #1682 - Enable secure XML processing
 - #1684 - Useing Autocloseable when closing resourceresolvers
+- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
+- #1692 - HttpCache: Refactored resource / group config extensions 
 - #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
+- #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
+- #1720 - Fixed HTTP cache extension factory names
+- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 
 ### Changed
+- #1560 - Changing to osgi annotations
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
-- #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
-- #1560 - Changing to osgi annotations
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
+- #1719 - Added missing OSGi metatype names for 10 OSGi components.
+- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin

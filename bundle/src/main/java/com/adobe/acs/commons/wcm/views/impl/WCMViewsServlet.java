@@ -68,23 +68,32 @@ import com.google.gson.JsonObject;
 
 
 @SuppressWarnings("serial")
-@org.osgi.service.component.annotations.Component(service = Servlet.class,
-property = 
-{ SLING_SERVLET_RESOURCE_TYPES + "=cq/Page",
-  SLING_SERVLET_METHODS + "=GET", 
-  SLING_SERVLET_EXTENSIONS + "=json", 
-  SLING_SERVLET_SELECTORS + "=wcm-views" })
-@Designate(ocd=WCMViewsServlet.Config.class)
+@org.osgi.service.component.annotations.Component(
+        service = Servlet.class,
+        property = {
+                        SLING_SERVLET_RESOURCE_TYPES + "=cq/Page",
+                        SLING_SERVLET_METHODS + "=GET",
+                        SLING_SERVLET_EXTENSIONS + "=json",
+                        SLING_SERVLET_SELECTORS + "=wcm-views"
+                }
+)
+@Designate(
+        ocd = WCMViewsServlet.Config.class
+)
 public class WCMViewsServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsServlet.class);
 
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
-    
-    @ObjectClassDefinition
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - WCM Views Servlet"
+    )
     public @interface Config {
-       @AttributeDefinition(name = "WCM Views by Path",
-            description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]")
-       String[] wcm_views();
+        @AttributeDefinition(
+                name = "WCM Views by Path",
+                description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]"
+        )
+        String[] wcm$_$views();
     }
 
     @Override
@@ -99,7 +108,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
             response.getWriter().write("");
             return;
         }
-        
+
         /* Valid WCMMode */
 
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
@@ -111,18 +120,18 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         final Set<String> viewSet = new HashSet<String>(visitor.getWCMViews());
 
         // Get the Views provided by the Servlet
-        for(final Map.Entry<String, String[]> entry : this.defaultViews.entrySet()) {
-            if(StringUtils.startsWith(page.getPath(), entry.getKey())) {
+        for (final Map.Entry<String, String[]> entry : this.defaultViews.entrySet()) {
+            if (StringUtils.startsWith(page.getPath(), entry.getKey())) {
                 viewSet.addAll(Arrays.asList(entry.getValue()));
             }
         }
-        
+
         final List<String> views = new ArrayList<String>(viewSet);
-        
+
         Collections.sort(views);
 
         log.debug("Collected WCM Views {} for Page [ {} ]", views, page.getPath());
-        
+
         final JsonArray jsonArray = new JsonArray();
 
         for (final String view : views) {
@@ -166,7 +175,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
 
     @Activate
     protected final void activate(WCMViewsServlet.Config config) {
-        final String[] tmp = config.wcm_views();
+        final String[] tmp = config.wcm$_$views();
         this.defaultViews = ParameterUtil.toMap(tmp, "=", ";");
     }
 }
