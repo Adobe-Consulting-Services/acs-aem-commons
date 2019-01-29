@@ -269,12 +269,6 @@ public class Spreadsheet {
                 || caseInsensitiveHeaders.stream().anyMatch(s -> s.equalsIgnoreCase(name));
     }
 
-    private boolean shouldConvert(final String name, final boolean enableHeaderNameConversion) {
-        return enableHeaderNameConversion &&
-                (CollectionUtils.isNotEmpty(caseInsensitiveHeaders) && caseInsensitiveHeaders.contains(name))
-                || CollectionUtils.isEmpty(caseInsensitiveHeaders);
-    }
-
     /**
      * Look for type hints in the name of a column to extract a usable type.
      * Also look for array hints as well. <br>
