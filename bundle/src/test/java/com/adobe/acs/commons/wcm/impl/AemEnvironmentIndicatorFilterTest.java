@@ -138,7 +138,7 @@ public class AemEnvironmentIndicatorFilterTest {
         }).when(chain).doFilter(anyObject(),anyObject());
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
-        assertEquals("<html><body>somebody</body></html>\n",response);
+        assertEquals(String.format("%s%n", "<html><body>somebody</body></html>"),response);
     }
     
     @Test
