@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
 - #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
