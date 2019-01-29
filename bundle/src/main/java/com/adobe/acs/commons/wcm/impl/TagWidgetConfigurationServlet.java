@@ -69,8 +69,12 @@ import com.google.gson.JsonPrimitive;
  * configuration.
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = {SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=tagwidget",
-        SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"})
+@Component(service = Servlet.class,
+        property = {
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=tagwidget",
+                SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"
+        })
 @Designate(ocd = TagWidgetConfigurationServlet.Config.class)
 public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
@@ -79,9 +83,12 @@ public class TagWidgetConfigurationServlet extends AbstractWidgetConfigurationSe
     @Reference
     private XSSAPI xssApi;
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Tag Configuration Servlet"
+    )
     public @interface Config {
         String DEFAULT_ROOT_PATH = "/etc/tagconfig";
+
         @AttributeDefinition(defaultValue = DEFAULT_ROOT_PATH)
         String root_path() default DEFAULT_ROOT_PATH;
     }

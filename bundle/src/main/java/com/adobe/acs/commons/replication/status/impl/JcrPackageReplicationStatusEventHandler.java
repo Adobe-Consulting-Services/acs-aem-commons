@@ -72,15 +72,18 @@ import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
 
-@Component( immediate = true,
-        configurationPolicy = ConfigurationPolicy.REQUIRE, property= {
-              EventConstants.EVENT_TOPIC + "=[" + ReplicationAction.EVENT_TOPIC + "," + ReplicationEvent.EVENT_TOPIC +"]",
-              EventConstants.EVENT_FILTER + "=" + "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
-              JobConsumer.PROPERTY_TOPICS + "=" +  JcrPackageReplicationStatusEventHandler.JOB_TOPIC
+@Component(
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                EventConstants.EVENT_TOPIC + "=[" + ReplicationAction.EVENT_TOPIC + "," + ReplicationEvent.EVENT_TOPIC + "]",
+                EventConstants.EVENT_FILTER + "=" + "(" + ReplicationAction.PROPERTY_TYPE + "=ACTIVATE)",
+                JobConsumer.PROPERTY_TOPICS + "=" + JcrPackageReplicationStatusEventHandler.JOB_TOPIC
         }
 )
-
-@Designate(ocd=JcrPackageReplicationStatusEventHandler.Config.class)
+@Designate(
+        ocd = JcrPackageReplicationStatusEventHandler.Config.class
+)
 public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, TopologyEventListener {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
@@ -104,13 +107,15 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
         "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
     };
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Package Replication Status Updater",
-        description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
-                + "its content accordingly.")
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Package Replication Status Updater",
+            description = "Event handler that listens for Jcr Package replications and updates the Replication Status of "
+                    + "its content accordingly.")
     public @interface Config {
-        @AttributeDefinition(name = "Replication Status Node Type and Path Restrictions",
-                description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate nodetypes will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome." ,
+        @AttributeDefinition(
+                name = "Replication Status Node Type and Path Restrictions",
+                description = "Node types that are candidates to update Replication Status on. Each item has the format '<nodetype-restriction> (<path-restriction>)'. The <path-restriction> is optional. The <nodetype-restriction> may be composed out of several node types separated by '/'. Make sure that one (composed)nodetype value appears only once in the list (because duplicate node$_$types will overwrite each other)! Also the order is important as the first nodetype hit (from the top of the list) determines the outcome.",
                 defaultValue = {
                         "cq:Page/cq:PageContent (?!/conf/.*/settings/wcm/templates/[^/]*/initial).*", // make sure to not cover initial content below editable templates
                         "dam:AssetContent",
@@ -121,30 +126,36 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                         "cq:Page/nt:unstructured /conf/.*/settings/wcm/templates/.*/policies/.*", // this is for editable template's policy mappings
                         "nt:unstructured /conf/.*/settings/wcm/policies/.*" // cover policies below editable templates
                 })
-        String[] nodetypes();
-        
+        String[] node$_$types();
+
         @AttributeDefinition(name = "'Replicated By' Override",
                 description = "The 'user name' to set the 'replicated by' property to. If left blank the ACTUAL user that issued the package replication will be used. Defaults to blank.",
                 defaultValue = DEFAULT_REPLICATED_BY_OVERRIDE)
-        String replicatedby_override();
-        
-        @AttributeDefinition(name = "Replicated At",
+        String replicated$_$by_override();
+
+        @AttributeDefinition(
+                name = "Replicated At",
                 description = "The 'value' used to set the 'replicated at' property. [ Default: Package Last Modified ]",
                 options = {
                         @Option(
-                            value = "PACKAGE_LAST_MODIFIED",
-                            label = "Package Last Modified"
+                                value = "PACKAGE_LAST_MODIFIED",
+                                label = "Package Last Modified"
                         ),
                         @Option(
-                            value = "CURRENT_TIME",
-                            label = "Current Time"
+                                value = "CURRENT_TIME",
+                                label = "Current Time"
                         )
                 })
-        String replicatedat();
+        String replicated$_$at();
     }
 
-    public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "nodetypes";
-    
+    public static final String PROP_REPLICATION_STATUS_NODE_TYPES = "node-types";
+
+    public static final String PROP_REPLICATED_BY_OVERRIDE = "replicated-by.override";
+    public static final String LEGACY_PROP_REPLICATED_BY_OVERRIDE = "replicated-by";
+
+    public static final String PROP_REPLICATED_AT = "replicated-at";
+
     /**
      * key = allowed node type (hierarchy), value = optional path restriction (may be null).
      */
@@ -169,17 +180,11 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
     private boolean isLeader = false;
 
-    // Previously "Package Replication"
     private static final String DEFAULT_REPLICATED_BY_OVERRIDE = "";
     private String replicatedByOverride = DEFAULT_REPLICATED_BY_OVERRIDE;
 
-    public static final String PROP_REPLICATED_BY_OVERRIDE = "replicatedby.override";
-    public static final String LEGACY_PROP_REPLICATED_BY_OVERRIDE = "replicated-by";
-
-
     private static final ReplicatedAt DEFAULT_REPLICATED_AT = ReplicatedAt.PACKAGE_LAST_MODIFIED;
     private ReplicatedAt replicatedAt = DEFAULT_REPLICATED_AT;
-    public static final String PROP_REPLICATED_AT = "replicatedat";
 
     private static final String SERVICE_NAME = "package-replication-status-event-listener";
     private static final Map<String, Object> AUTH_INFO;

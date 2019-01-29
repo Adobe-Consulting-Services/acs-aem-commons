@@ -43,24 +43,33 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Component(factory="com.adobe.acs.commons.util.impl.DelegatingServletFactoryImpl",
+@Component(
+        factory="com.adobe.acs.commons.util.impl.DelegatingServletFactoryImpl",
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         service=Servlet.class,
         immediate = false, 
         property= {
-              "webconsole.configurationFactory.nameHint" + "=" + "Target type: {prop.target-resource-type}"})
-@Designate(ocd=DelegatingServletFactoryImpl.Config.class,factory=true)
+              "webconsole.configurationFactory.nameHint=Target type: {prop.target-resource-type}"
+        }
+        )
+@Designate(
+        ocd=DelegatingServletFactoryImpl.Config.class,
+        factory=true
+)
 public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
     protected static final Logger log = LoggerFactory.getLogger(DelegatingServletFactoryImpl.class);
     private static final String REQUEST_ATTR_DELEGATION_HISTORY = DelegatingServletFactoryImpl.class.getName() + "_History";
     
-    @ObjectClassDefinition(name   = "ACS AEM Commons - Delegating Servlet",
-            description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types.")
+    @ObjectClassDefinition(
+            name   = "ACS AEM Commons - Delegating Servlet",
+            description = "Delegating Servlet enabling the unobtrusive delegate of Resource Types."
+    )
     public @interface Config {
         @AttributeDefinition(
               name = "Source Resource Types",
                 description = "Requests matching the \"Source resource types, selectors, extensions and methods\" will be overlayed using the \"Target Resource Type\"",
-                cardinality = Integer.MAX_VALUE)
+                cardinality = Integer.MAX_VALUE
+        )
         String[] sling_servlet_resourceTypes();
         
         @AttributeDefinition(
@@ -84,17 +93,17 @@ public final class DelegatingServletFactoryImpl extends SlingAllMethodsServlet {
         )
         String[] sling_servlet_methods();
 
-        @AttributeDefinition(name = "Target Resource Type",
+        @AttributeDefinition(
+                name = "Target Resource Type",
                 description = "The resource type to proxy requests to.",
-                defaultValue = DEFAULT_TARGET_RESOURCE_TYPE)
-        String prop_target_resourcetype();
-
+                defaultValue = DEFAULT_TARGET_RESOURCE_TYPE
+        )
+        String prop_target$_$resource$_$type();
     }
-
 
     private static final String DEFAULT_TARGET_RESOURCE_TYPE = "";
     private String targetResourceType = DEFAULT_TARGET_RESOURCE_TYPE;
-    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target.resourcetype";
+    public static final String PROP_TARGET_RESOURCE_TYPE = "prop.target-resource-type";
 
     /** Safe HTTP Methods **/
 

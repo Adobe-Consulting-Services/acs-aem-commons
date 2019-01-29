@@ -56,11 +56,17 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 
-@Component(service=Preprocessor.class,
-configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-"webconsole.configurationFactory.nameHint" + "=" + "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]"
-})
-@Designate(ocd=DispatcherFlushRulesImpl.Config.class,factory=true)
+@Component(
+        service = Preprocessor.class,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                "webconsole.configurationFactory.nameHint=Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]"
+        }
+)
+@Designate(
+        ocd = DispatcherFlushRulesImpl.Config.class,
+        factory = true
+)
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
@@ -68,22 +74,24 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final String OPTION_ACTIVATE = "ACTIVATE";
     private static final String OPTION_DELETE = "DELETE";
 
-
     private static final DispatcherFlushFilter HIERARCHICAL_FILTER =
             new DispatcherFlushRulesFilter(FlushType.Hierarchical);
     private static final DispatcherFlushFilter RESOURCE_ONLY_FILTER =
             new DispatcherFlushRulesFilter(FlushType.ResourceOnly);
-    
-    @ObjectClassDefinition(name  = "ACS AEM Commons - Dispatcher Flush Rules",
-        description = "Facilitates the flushing of associated paths based on resources being replicated. "
-                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
-                + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
-                + "'CQ-Action-Scope: ResourceOnly'."
-                + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
-                + "due to dangerous cyclic conditions.")
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Dispatcher Flush Rules",
+            description = "Facilitates the flushing of associated paths based on resources being replicated. "
+                    + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
+                    + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
+                    + "'CQ-Action-Scope: ResourceOnly'."
+                    + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
+                    + "due to dangerous cyclic conditions."
+    )
     public @interface Config {
-    
-    @AttributeDefinition(name = "Replication Action Type",
+
+        @AttributeDefinition(
+                name = "Replication Action Type",
                 description = "The Replication Action Type to use when issuing the flush cmd to the associated paths. "
                         + "If 'Inherit' is selected, the Replication Action Type of the observed Replication Action "
                         + "will be used.",
@@ -92,27 +100,28 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                         @Option(value = OPTION_ACTIVATE, label = "Invalidate Cache"),
                         @Option(value = OPTION_DELETE, label = "Delete Cache")
                 })
-        String prop_replicationactiontype();
-    
-    @AttributeDefinition(name = "Flush Rules (Hierarchical)",
+        String prop_replication$_$action$_$type();
+
+        @AttributeDefinition(
+                name = "Flush Rules (Hierarchical)",
                 description = "Pattern to Path associations for flush rules."
-                        + "Format: <pattern-of-trigger-content>=<path-to-flush>")
+                        + "Format: <pattern-of-trigger-content>=<path-to-flush>"
+        )
         String[] prop_rules_hierarchical();
-        
-    @AttributeDefinition(name = "Flush Rules (ResourceOnly)",
+
+        @AttributeDefinition(
+                name = "Flush Rules (ResourceOnly)",
                 description = "Pattern to Path associations for flush rules. "
-                        + "Format: <pattern-of-trigger-content>=<path-to-flush>")
-        String[] prop_rules_resourceonly();
-
-
-
+                        + "Format: <pattern-of-trigger-content>=<path-to-flush>"
+        )
+        String[] prop_rules_resource$_$only();
     }
 
     /* Replication Action Type Property */
 
     private static final String DEFAULT_REPLICATION_ACTION_TYPE_NAME = OPTION_INHERIT;
 
-    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replicationactiontype";
+    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replication-action-type";
 
 
     /* Flush Rules */
@@ -124,7 +133,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
     /* Flush Rules */
     private static final String[] DEFAULT_RESOURCE_ONLY_FLUSH_RULES = {};
 
-    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resourceonly";
+    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resource-only";
 
     private static final String SERVICE_NAME = "dispatcher-flush";
     protected static final Map<String, Object> AUTH_INFO;

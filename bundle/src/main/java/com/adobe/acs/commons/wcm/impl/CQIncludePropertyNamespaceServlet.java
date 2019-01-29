@@ -67,12 +67,19 @@ import com.google.gson.JsonObject;
  */
 //@formatter:off
 @SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
-@Component(service = Servlet.class,
-property = 
-{ SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default",
-  SLING_SERVLET_EXTENSIONS + "=json", 
-  SLING_SERVLET_SELECTORS + "=overlay.cqinclude.namespace" })
-@Designate(ocd=CQIncludePropertyNamespaceServlet.Config.class)
+@Component(
+        service = Servlet.class,
+        property =
+                {
+                        SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default",
+                        SLING_SERVLET_EXTENSIONS + "=json",
+                        SLING_SERVLET_SELECTORS + "=overlay.cqinclude.namespace"
+                }
+
+)
+@Designate(
+        ocd = CQIncludePropertyNamespaceServlet.Config.class
+)
 //@formatter:on
 public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsServlet {
     //@formatter:off
@@ -108,10 +115,12 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
     };
 
     private String[] namespaceablePropertyNames = null;
-    
-    @ObjectClassDefinition(name="ACS AEM Commons - CQInclude Property Namespace")
+
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - CQInclude Property Namespace"
+    )
     public @interface Config {
-    
+
         @AttributeDefinition(name = "Property Names",
                 description = "Namespace properties defined in this list. Leave empty for on 'name'. "
                         + " Defaults to [ name, cropParameter, fileNameParameter, fileReferenceParameter, "
@@ -127,35 +136,33 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
                         "heightParameter"
                 }
         )
-        String[] namespace_propertynames();
-        
+        String[] namespace_property$_$names();
+
         @AttributeDefinition(name = "Property Value Patterns",
                 description = "Namespace properties whose values match a regex in this list. "
                         + "Defaults to [ \"^\\\\./.*\" ]",
                 defaultValue = {"^\\./.*"})
-        String namespace_propertyvaluepatterns();
+        String namespace_property$_$value$_$patterns();
 
         @AttributeDefinition(name = "Support Multi-level",
                 description = "When set to true, cqinclude servlet will support multi-level path-ing if nested cqinclude namespaces. Defaults to false",
                 defaultValue = "false")
-        boolean namespace_multilevel();
-
-
+        boolean namespace_multi$_$level();
     }
 
-    public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.propertynames";
+    public static final String PROP_NAMESPACEABLE_PROPERTY_NAMES = "namespace.property-names";
 
     private static final String[] DEFAULT_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = new String[]{"^\\./.*"};
     private List<Pattern> namespaceablePropertyValuePatterns = new ArrayList<Pattern>();
 
 
-    public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.propertyvaluepatterns";
+    public static final String PROP_NAMESPACEABLE_PROPERTY_VALUE_PATTERNS = "namespace.property-value-patterns";
 
 
     private static final boolean DEFAULT_SUPPORT_MULTI_LEVEL = false;
     private boolean supportMultiLevel = DEFAULT_SUPPORT_MULTI_LEVEL;
 
-    public static final String PROP_SUPPORT_MULTI_LEVEL = "namespace.multilevel";
+    public static final String PROP_SUPPORT_MULTI_LEVEL = "namespace.multi-level";
     //@formatter:on
 
     @Override

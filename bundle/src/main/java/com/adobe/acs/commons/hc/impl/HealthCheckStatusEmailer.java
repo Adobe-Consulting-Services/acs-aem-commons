@@ -92,13 +92,13 @@ public class HealthCheckStatusEmailer implements Runnable {
 
         @AttributeDefinition(name = "Send e-mail only on failure",
                 description = "If true, an e-mail is ONLY sent if at least 1 Health Check failure occurs. [ Default: true ]",
-                   defaultValue = ""+DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE)
-        boolean email_sendonlyonfailure() default DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE;
+                   defaultValue = "" + DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE)
+        boolean email_send$_$only$_$on$_$failure() default DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE;
 
         @AttributeDefinition(name = "Recipient E-mail Addresses",
                 description = "A list of e-mail addresses to send this e-mail to.",
                 cardinality = Integer.MAX_VALUE)
-        String[] recipients_emailaddresses();
+        String[] recipients_email$_$addresses();
 
         @AttributeDefinition(name = "Health Check Tags",
                 description = "The AEM Health Check Tag names to execute. [ Default: system ]",
@@ -108,12 +108,12 @@ public class HealthCheckStatusEmailer implements Runnable {
 
         @AttributeDefinition(name = "Health Check Timeout Override",
                 description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
-                defaultValue = ""+DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
+                defaultValue = "" + DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
         int hc_timeout_override() default DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
 
         @AttributeDefinition(name = "'OR' Health Check Tags",
                 description = "When set to true, all Health Checks that are in any of the Health Check Tags (hc.tags) are executed. If false, then the Health Check must be in ALL of the Health Check tags (hc.tags). [ Default: true ]",
-                   defaultValue = ""+ DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
+                   defaultValue = "" + DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
         boolean hc_tags_options_or() default DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
 
         @AttributeDefinition(name = "Hostname Fallback",
@@ -123,7 +123,7 @@ public class HealthCheckStatusEmailer implements Runnable {
 
         @AttributeDefinition(name = "Quiet Period in Minutes",
                 description = "Defines a time span that prevents this service from sending more than 1 e-mail per quiet period. This prevents e-mail spamming for frequent checks that only e-mail on failure. Default: [ 15 mins ]",
-                   defaultValue = ""+DEFAULT_THROTTLE_IN_MINS)
+                   defaultValue = "" + DEFAULT_THROTTLE_IN_MINS)
         int quiet_minutes() default DEFAULT_THROTTLE_IN_MINS;
     }
 
@@ -295,10 +295,10 @@ public class HealthCheckStatusEmailer implements Runnable {
         emailTemplatePath = config.email_template_path();
         emailSubject = config.email_subject();
         fallbackHostname = config.hostname_fallback();
-        recipientEmailAddresses = config.recipients_emailaddresses();
+        recipientEmailAddresses = config.recipients_email$_$addresses();
         healthCheckTags = config.hc_tags();
         healthCheckTagsOptionsOr = config.hc_tags_options_or();
-        sendEmailOnlyOnFailure = config.email_sendonlyonfailure();
+        sendEmailOnlyOnFailure = config.email_send$_$only$_$on$_$failure();
         throttleInMins = config.quiet_minutes();
         if (throttleInMins < 0) {
             throttleInMins = DEFAULT_THROTTLE_IN_MINS;

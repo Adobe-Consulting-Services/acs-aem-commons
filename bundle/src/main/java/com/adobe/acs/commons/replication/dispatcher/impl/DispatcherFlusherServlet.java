@@ -62,12 +62,17 @@ import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
 
 @SuppressWarnings("serial")
-@Component(service = Servlet.class,
-        property =
-                {SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
-                        SLING_SERVLET_METHODS + "=POST",
-                        SLING_SERVLET_SELECTORS + "=flush"})
-@Designate(ocd = DispatcherFlusherServlet.Config.class)
+@Component(
+        service = Servlet.class,
+        property = {
+                SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/dispatcher-flush/configuration",
+                SLING_SERVLET_METHODS + "=POST",
+                SLING_SERVLET_SELECTORS + "=flush"
+        }
+)
+@Designate(
+        ocd = DispatcherFlusherServlet.Config.class
+)
 public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
@@ -81,16 +86,19 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
     private boolean flushWithAdminResourceResolver = DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER;
 
-    @ObjectClassDefinition()
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Dispatcher Flusher Servlet"
+    )
     public @interface Config {
         boolean DEFAULT_USE_ADMIN_RESOURCE_RESOLVER = true;
 
-        @AttributeDefinition(name = "Flush with Admin Resource Resolver",
+        @AttributeDefinition(
+                name = "Flush with Admin Resource Resolver",
                 description = "This allows the user of any Dispatcher Flush UI Web UI to invalidate/delete the cache of "
                         + "any content tree. Note; this is only pertains to the dispatcher cache and does not effect the "
                         + "users JCR permissions. [ Default: true ]",
                 defaultValue = "" + DEFAULT_USE_ADMIN_RESOURCE_RESOLVER)
-        boolean flush_with_admin_resource_resolver() default DEFAULT_USE_ADMIN_RESOURCE_RESOLVER;
+        boolean flush$_$with$_$admin$_$resource$_$resolver() default DEFAULT_USE_ADMIN_RESOURCE_RESOLVER;
     }
 
     @Override
@@ -189,6 +197,6 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
     @Activate
     protected final void activate(DispatcherFlusherServlet.Config config) {
-        this.flushWithAdminResourceResolver = config.flush_with_admin_resource_resolver();
+        this.flushWithAdminResourceResolver = config.flush$_$with$_$admin$_$resource$_$resolver();
     }
 }

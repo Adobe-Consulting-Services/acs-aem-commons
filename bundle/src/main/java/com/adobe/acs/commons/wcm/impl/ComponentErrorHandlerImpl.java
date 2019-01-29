@@ -59,14 +59,20 @@ import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.commons.WCMUtils;
 
-@Component( configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service= {ComponentErrorHandler.class, Filter.class},
-        property= {SLING_FILTER_SCOPE + "=" + FILTER_SCOPE_COMPONENT,
-              "filter.order" + ":Integer=" + ComponentErrorHandlerImpl.FILTER_ORDER
-              }
+@Component(
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {
+                ComponentErrorHandler.class,
+                Filter.class},
+        property = {
+                SLING_FILTER_SCOPE + "=" + FILTER_SCOPE_COMPONENT,
+                "filter.order" + ":Integer=" + ComponentErrorHandlerImpl.FILTER_ORDER
+        }
 )
-@Designate(ocd=ComponentErrorHandlerImpl.Config.class)
-public class ComponentErrorHandlerImpl implements  ComponentErrorHandler, Filter{
+@Designate(
+        ocd = ComponentErrorHandlerImpl.Config.class
+)
+public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter{
     private static final Logger log = LoggerFactory.getLogger(ComponentErrorHandlerImpl.class.getName());
 
     // Magic number pushes filter lower in the chain so it executes after the OOTB WCM Debug Filter
@@ -106,42 +112,53 @@ public class ComponentErrorHandlerImpl implements  ComponentErrorHandler, Filter
     private boolean editModeEnabled = DEFAULT_EDIT_ENABLED;
 
     @ObjectClassDefinition(
-        name = "ACS AEM Commons - Component-Level Error Handler",
-        description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
-                + "components based on WCM Mode collections (Edit, Preview, Publish).")
+            name = "ACS AEM Commons - Component-Level Error Handler",
+            description = "Handles errors at the component level. Allows different HTML renditions to display for erring "
+                    + "components based on WCM Mode collections (Edit, Preview, Publish)."
+    )
     public @interface Config {
-       
-        @AttributeDefinition(name = "Edit Error Handling",
+
+        @AttributeDefinition(
+                name = "Edit Error Handling",
                 description = "Enable handling of Edit-mode errors (EDIT, DESIGN, ANALYTICS)",
-                defaultValue = ""+DEFAULT_EDIT_ENABLED)
+                defaultValue = "" + DEFAULT_EDIT_ENABLED
+        )
         boolean edit_enabled();
 
-        @AttributeDefinition(name = "Edit HTML Error Path",
+        @AttributeDefinition(
+                name = "Edit HTML Error Path",
                 description = "Path to html file in JCR use to display an erring component in EDIT or DESIGN modes.",
-                defaultValue = DEFAULT_EDIT_ERROR_HTML_PATH)
+                defaultValue = DEFAULT_EDIT_ERROR_HTML_PATH
+        )
         String edit_html();
 
-        @AttributeDefinition(name = "Preview Error Handling",
+        @AttributeDefinition(
+                name = "Preview Error Handling",
                 description = "Enable handling of Edit-mode errors (PREVIEW and READ_ONLY)",
-                defaultValue = ""+DEFAULT_PREVIEW_ENABLED)
+                defaultValue = "" + DEFAULT_PREVIEW_ENABLED
+        )
         boolean preview_enabled();
-        
-        @AttributeDefinition(name = "Preview HTML Error Path",
+
+        @AttributeDefinition(
+                name = "Preview HTML Error Path",
                 description = "Path to html file in JCR use to display an erring component in PREVIEW or READONLY modes.",
-                defaultValue = DEFAULT_PREVIEW_ERROR_HTML_PATH)
+                defaultValue = DEFAULT_PREVIEW_ERROR_HTML_PATH
+        )
         String preview_html();
-        
-        @AttributeDefinition(name = "Publish Error Handling",
+
+        @AttributeDefinition(
+                name = "Publish Error Handling",
                 description = "Enable handling of Edit-mode errors (PREVIEW and READONLY)",
-                defaultValue = ""+DEFAULT_PUBLISH_ENABLED)
+                defaultValue = "" + DEFAULT_PUBLISH_ENABLED
+        )
         boolean publish_enabled();
-        
-        @AttributeDefinition(name = "Suppressed Resource Types",
+
+        @AttributeDefinition(
+                name = "Suppressed Resource Types",
                 description = "Resource types this Filter will ignore during Sling Includes.",
-                cardinality = Integer.MAX_VALUE)
-        String[] suppress_resourcetypes();
-
-
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] suppress$_$resource$_$types();
     }
     
     public static final String PROP_EDIT_ENABLED = "edit.enabled";
@@ -188,7 +205,7 @@ public class ComponentErrorHandlerImpl implements  ComponentErrorHandler, Filter
 
     private String[] suppressedResourceTypes = DEFAULT_SUPPRESSED_RESOURCE_TYPES;
 
-    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress.resourcetypes";
+    public static final String PROP_SUPPRESSED_RESOURCE_TYPES = "suppress-resource-types";
 
 
     @Override
