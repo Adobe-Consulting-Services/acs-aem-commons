@@ -197,8 +197,11 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 }
             }
 
+        } catch (ReplicationException e) {
+            // ReplicationException must be caught here, as otherwise this will prevent the replication at all
+            log.error("Error issuing dispatcher flush rules, some downstream replication exception occurred: {}", e.getMessage(), e);
         } catch (LoginException e) {
-            log.error("Error issuing  dispatcher flush rules do to repository login exception: {}", e.getMessage());
+            log.error("Error issuing dispatcher flush rules due to a repository login exception: {}", e.getMessage(), e);
         }
     }
 
