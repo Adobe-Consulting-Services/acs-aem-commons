@@ -33,10 +33,6 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
-
-import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
-import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
-
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -47,7 +43,6 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -64,12 +59,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.request.RequestParameter;
@@ -77,7 +70,11 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * Relocate Pages and/or Sites using a parallelized move process
@@ -180,31 +177,32 @@ public class Renovator extends ProcessDefinition {
     private boolean detailedReport = false;
 
     private final transient String[] requiredMovePrivilegeNames = {
-            Privilege.JCR_READ,
-            Privilege.JCR_WRITE,
-            Privilege.JCR_REMOVE_CHILD_NODES,
-            Privilege.JCR_REMOVE_NODE,
-            Replicator.REPLICATE_PRIVILEGE
+        Privilege.JCR_READ,
+        Privilege.JCR_WRITE,
+        Privilege.JCR_REMOVE_CHILD_NODES,
+        Privilege.JCR_REMOVE_NODE,
+        Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredMovePrivileges;
 
     private final transient String[] requiredPublishPrivilegeNames = {
-            Privilege.JCR_READ,
-            Privilege.JCR_WRITE,
-            Replicator.REPLICATE_PRIVILEGE
+        Privilege.JCR_READ,
+        Privilege.JCR_WRITE,
+        Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredPublishPrivileges;
 
     private final transient String[] requiredUpdatePrivilegeNames = {
-            Privilege.JCR_READ,
-            Privilege.JCR_WRITE
+        Privilege.JCR_READ,
+        Privilege.JCR_WRITE
     };
     Privilege[] requiredUpdatePrivileges;
 
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
     private final Set<MovingNode> moves = Collections.synchronizedSet(new HashSet<>());
-    private final Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
+    private final Set<String> additionalTargetFolders = Collections.synchronizedSet(new TreeSet<>());
+    final Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public void init() throws RepositoryException {
@@ -332,6 +330,12 @@ public class Renovator extends ProcessDefinition {
                     if (rootNode.isPresent()) {
                         MovingNode root = rootNode.get();
                         root.setDestinationPath(dest);
+                        if (root instanceof MovingAsset) {
+                            String destFolder = StringUtils.substringBeforeLast(dest, "/");
+                            if (!additionalTargetFolders.contains(destFolder) && rr2.getResource(destFolder) == null) {
+                                additionalTargetFolders.add(destFolder);
+                            }
+                        }
                         moves.add(root);
                         note(source, Report.misc, "Root path");
                         note(source, Report.target, dest);
@@ -499,9 +503,18 @@ public class Renovator extends ProcessDefinition {
                     }, null, MovingNode::isCopiedBeforeMove);
                 });
             });
+            additionalTargetFolders.forEach(path -> {
+                manager.deferredWithResolver(rr2 -> {
+                    Actions.setCurrentItem("Building structure for " + path);
+                    performNecessaryReplicationOnAncestors(rr2, path);
+                    ResourceUtil.getOrCreateResource(rr2, path, Collections.EMPTY_MAP, "sling:Folder", false);
+                    if (detailedReport) {
+                        note(path, Report.misc, "Created additional destination folder");
+                    }
+                });
+            });
         });
     }
-
     // Move assets and pages, and in some cases folders that were not already moved in the previous step
     protected void moveTree(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
@@ -705,4 +718,16 @@ public class Renovator extends ProcessDefinition {
         }
     }
 
+    private void performNecessaryReplicationOnAncestors(ResourceResolver rr, String path) throws ReplicationException {
+        String checkPath  = "";
+        for (String part : path.split(Pattern.quote("/"))) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            checkPath += "/" + part;
+            if (rr.getResource(checkPath) == null) {
+                performNecessaryReplication(rr, checkPath);
+            }
+        }
+    }
 }

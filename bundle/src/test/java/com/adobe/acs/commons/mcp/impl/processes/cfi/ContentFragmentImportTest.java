@@ -106,7 +106,7 @@ public class ContentFragmentImportTest {
         assertTrue("Should have created fragment1 folder", createdNodePaths.contains("/test/path/fragment1"));
         assertTrue("Should have created fragment1 metadata", createdNodePaths.contains("/test/path/fragment1/jcr:content"));
     }
-    
+
     //------------------------------------------------------------------------------------------------------------------
     private void addImportRow(String path, String title, String... values) {
         Map<String, CompositeVariant> row = new HashMap<>();
@@ -121,7 +121,7 @@ public class ContentFragmentImportTest {
         importer.spreadsheet.getDataRowsAsCompositeVariants().add(row);
     }
 
-    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {
         rr = getFreshMockResolver();
         Session ses = mock(Session.class);
         Node node = mock(Node.class);

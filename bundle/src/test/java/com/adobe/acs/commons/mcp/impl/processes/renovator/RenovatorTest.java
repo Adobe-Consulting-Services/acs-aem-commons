@@ -27,6 +27,20 @@ import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.day.cq.dam.api.DamConstants;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.observation.ObservationManager;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -39,21 +53,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Workspace;
-import javax.jcr.observation.ObservationManager;
-import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.Privilege;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
 import static org.junit.Assert.*;
@@ -94,8 +93,8 @@ public class RenovatorTest {
     public void barebonesRun() throws DeserializeException, RepositoryException, PersistenceException {
         assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
-        values.put("sourceJcrPath", "/content/folderA");
-        values.put("destinationJcrPath", "/content/folderB");
+        values.put("sourceJcrPath", "/content/dam/folderA");
+        values.put("destinationJcrPath", "/content/dam/folderB");
         instance.init(rr, values);
         assertEquals(0.0, instance.updateProgress(), 0.00001);
         instance.run(rr);
@@ -107,22 +106,22 @@ public class RenovatorTest {
     public void noPublishTest() throws Exception {
         assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
-        values.put("sourceJcrPath", "/content/folderA");
-        values.put("destinationJcrPath", "/content/republishA");
+        values.put("sourceJcrPath", "/content/dam/folderA");
+        values.put("destinationJcrPath", "/content/dam/republishA");
         values.put("dryRun", "false");
 
         instance.init(rr, values);
         instance.run(rr);
-        assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/folderA"));
-        assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/republishA"));
+        assertTrue("Should unpublish the source folder", queue.getDeactivateOperations().containsKey("/content/dam/folderA"));
+        assertTrue("Should publish the moved source folder", queue.getActivateOperations().containsKey("/content/dam/republishA"));
     }
 
     @Test
     public void testHaltingScenario() throws DeserializeException, LoginException, RepositoryException, InterruptedException, ExecutionException, PersistenceException {
         assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();
-        values.put("sourceJcrPath", "/content/folderA");
-        values.put("destinationJcrPath", "/content/folderB");
+        values.put("sourceJcrPath", "/content/dam/folderA");
+        values.put("destinationJcrPath", "/content/dam/folderB");
         instance.init(rr, values);
 
         CompletableFuture<Boolean> f = new CompletableFuture<>();
@@ -156,19 +155,42 @@ public class RenovatorTest {
         assertEquals("/target", test2.get("attr2"));
     }
 
+    @Test
+    public void testMoveManyAssets() throws DeserializeException, RepositoryException {
+        Map<String, Object> values = new HashMap<>();
+        values.put("dryRun", "false");
+        // Provide input so that the init() method doesn't error out, but this should be ignored later
+        values.put("sourceJcrPath", "/content/dam/folderB");
+        values.put("destinationJcrPath", "/content/dam/ignoreFolderB");
+        // Inject some move paths
+        tool.movePaths.put("/content/dam/folderA/asset1", "/content/dam/folderC/subfolder/asset1-renamed");
+        tool.movePaths.put("/content/dam/folderA/asset2", "/content/dam/folderC/subfolder/asset2-renamed");
+
+        instance.init(rr, values);
+
+        instance.run(rr);
+        assertEquals(1.0, instance.updateProgress(), 0.00001);
+        // Make sure that target folders were created
+        assertNotNull(rr.getResource("/content/dam/folderC"));
+        assertNotNull(rr.getResource("/content/dam/folderC/subfolder"));
+        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC"));
+        assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC/subfolder"));
+    }
+
     Map<String, String> testNodes = new TreeMap<String, String>() {
         {
-            put("/content/folderA", JcrResourceConstants.NT_SLING_FOLDER);
-            put("/content/folderB", JcrResourceConstants.NT_SLING_FOLDER);
             put("/content", JcrResourceConstants.NT_SLING_FOLDER);
-            put("/content/folderA/asset1", DamConstants.NT_DAM_ASSET);
-            put("/content/folderA/asset2", DamConstants.NT_DAM_ASSET);
+            put("/content/dam", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content/dam/folderA", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content/dam/folderB", JcrResourceConstants.NT_SLING_FOLDER);
+            put("/content/dam/folderA/asset1", DamConstants.NT_DAM_ASSET);
+            put("/content/dam/folderA/asset2", DamConstants.NT_DAM_ASSET);
             put("/test", "NT:UNSTRUCTURED");
             put("/test/child1", "NT:UNSTRUCTURED");
         }
     };
 
-    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {
         rr = getFreshMockResolver();
 
         for (Map.Entry<String, String> entry : testNodes.entrySet()) {
