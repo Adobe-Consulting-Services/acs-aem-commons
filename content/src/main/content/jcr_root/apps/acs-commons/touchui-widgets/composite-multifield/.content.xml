@@ -2,6 +2,7 @@
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="cq:ClientLibraryFolder"
           jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
           categories="[acs-commons.authoring.composite-multifield,acs-commons.granite.ui.coral2.foundation]"
           dependencies="[underscore]"/>
 <!--
@@ -12,6 +13,7 @@ Proxy Client Library definition:
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
           jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
           categories="[granite.ui.coral2.foundation]"
           embed="[acs-commons.authoring.composite-multifield]"/>
 -->

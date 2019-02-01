@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:primaryType="cq:ClientLibraryFolder"
-    jsProcessor="[default:none,min:gcc]"
-    categories="[acs-commons.authoring.audio-asset-finder]"
-    dependencies="[cq.authoring.editor]"/>
+          jcr:primaryType="cq:ClientLibraryFolder"
+          jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
+          categories="[acs-commons.authoring.audio-asset-finder]"
+          dependencies="[cq.authoring.editor]"/>
 <!--
 TODO Is this OK?
 
@@ -13,6 +14,7 @@ Proxy Client Library definition:
 <jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
     jcr:primaryType="cq:ClientLibraryFolder"
           jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
           categories="[cq.authoring.editor.hook.assetfinder]"
           embed="[acs-commons.authoring.audio-asset-finder]"/>
 -->
