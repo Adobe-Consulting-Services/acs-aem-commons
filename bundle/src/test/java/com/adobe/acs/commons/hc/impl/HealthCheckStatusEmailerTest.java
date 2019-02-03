@@ -87,8 +87,9 @@ Map<String,Object> configuration = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
-        configuration.put("recipients.emailaddresses", "test@example.com");
-        configuration.put("email.sendonlyonfailure", Boolean.TRUE);
+                          
+        configuration.put("recipients.email-addresses", "test@example.com");
+        configuration.put("email.send-only-on-failure", Boolean.TRUE);
         context.registerService(EmailService.class, emailService);
         context.registerService(HealthCheckExecutor.class, healthCheckExecutor);
         context.registerService(ProductInfoService.class, productInfoService);
@@ -131,7 +132,7 @@ Map<String,Object> configuration = new HashMap<>();
     public void run_WithoutFailuresSendEmail() throws Exception {
         results.add(successExecutionResult);
      
-        configuration.put("email.sendonlyonfailure", "false");
+        configuration.put("email.send-only-on-failure", "false");
         context.registerInjectActivateService(healthCheckStatusEmailer, configuration);
 
         healthCheckStatusEmailer.run();

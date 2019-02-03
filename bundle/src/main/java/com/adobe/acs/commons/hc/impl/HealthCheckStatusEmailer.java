@@ -25,6 +25,8 @@ import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.commons.osgi.OsgiUtil;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
 import org.apache.sling.hc.api.execution.HealthCheckExecutor;
@@ -288,17 +290,22 @@ public class HealthCheckStatusEmailer implements Runnable {
     /**
      * OSGi Activate method.
      *
+     * See https://issues.apache.org/jira/browse/SLING-8263 for the reasons why this so complicated ...
+     *
      * @param config the OSGi config params
+     * @param param the map of configuration parameter
      */
     @Activate
-    protected final void activate(HealthCheckStatusEmailer.Config config) {
+    protected final void activate(HealthCheckStatusEmailer.Config config, Map<String,Object> params) {
         emailTemplatePath = config.email_template_path();
         emailSubject = config.email_subject();
         fallbackHostname = config.hostname_fallback();
-        recipientEmailAddresses = config.recipients_email$_$addresses();
+//      recipientEmailAddresses = config.recipients_email$_$addresses();
+//      sendEmailOnlyOnFailure = config.email_send$_$only$_$on$_$failure();
+        recipientEmailAddresses = PropertiesUtil.toStringArray(params.get("recipients.email-addresses"),new String[] {});
+        sendEmailOnlyOnFailure = PropertiesUtil.toBoolean(params.get("email.send-only-on-failure"), DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE);
         healthCheckTags = config.hc_tags();
         healthCheckTagsOptionsOr = config.hc_tags_options_or();
-        sendEmailOnlyOnFailure = config.email_send$_$only$_$on$_$failure();
         throttleInMins = config.quiet_minutes();
         if (throttleInMins < 0) {
             throttleInMins = DEFAULT_THROTTLE_IN_MINS;

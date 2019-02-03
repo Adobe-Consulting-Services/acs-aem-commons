@@ -573,6 +573,16 @@
             <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!--  We need to have this package on the build-path to avoid bnd complaining about
+              missing annotations (in the uber.jar these annotations are referenced)     
+         -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <version>1.9.8</version>
+            <scope>provided</scope>
+        </dependency>
 
 
         <!--  Build Dependencies -->
