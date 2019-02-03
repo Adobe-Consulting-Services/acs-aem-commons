@@ -290,7 +290,10 @@ public class HealthCheckStatusEmailer implements Runnable {
     /**
      * OSGi Activate method.
      *
-     * See https://issues.apache.org/jira/browse/SLING-8263 for the reasons why this so complicated ...
+     * See https://issues.apache.org/jira/browse/SLING-8263
+     * We use this special signature because OsgiMocks has problems injecting properties
+     * with "$_$" into the Config class.
+     * Thus we have to mix both approaches right now
      *
      * @param config the OSGi config params
      * @param param the map of configuration parameter
@@ -300,8 +303,6 @@ public class HealthCheckStatusEmailer implements Runnable {
         emailTemplatePath = config.email_template_path();
         emailSubject = config.email_subject();
         fallbackHostname = config.hostname_fallback();
-//      recipientEmailAddresses = config.recipients_email$_$addresses();
-//      sendEmailOnlyOnFailure = config.email_send$_$only$_$on$_$failure();
         recipientEmailAddresses = PropertiesUtil.toStringArray(params.get("recipients.email-addresses"),new String[] {});
         sendEmailOnlyOnFailure = PropertiesUtil.toBoolean(params.get("email.send-only-on-failure"), DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE);
         healthCheckTags = config.hc_tags();
