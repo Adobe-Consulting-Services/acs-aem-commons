@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.forms;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.sling.api.resource.ValueMap;
-
 import java.util.Map;
+
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public interface Form {

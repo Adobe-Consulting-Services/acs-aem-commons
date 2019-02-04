@@ -20,14 +20,15 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.util.InfoWriter;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.util.InfoWriter;
 
 /**
  * Provides options to configure how to generate checksums using {@link ChecksumGenerator}.

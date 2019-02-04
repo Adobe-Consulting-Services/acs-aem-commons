@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root

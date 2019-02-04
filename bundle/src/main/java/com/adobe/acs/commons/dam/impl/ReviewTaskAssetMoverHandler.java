@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -113,12 +112,12 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
                        @Option(label = CONFLICT_RESOLUTION_SKIP, value = "Skip (skip)")
                },
                defaultValue = DEFAULT_DEFAULT_CONFLICT_RESOLUTION)
-       String conflict_resolution_default() default DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
+       String conflict$_$resolution_default() default DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
 
        @AttributeDefinition(name = "Last Modified By",
                description = "For Conflict Resolution: Version, the review task event does not track the user that completed the event. Use this property to specify the static name of of the [dam:Asset]/jcr:content@jcr:lastModifiedBy. Default: Review Task",
                defaultValue = DEFAULT_LAST_MODIFIED_BY)
-        String conflict_resolution_version_last_modified_by() default DEFAULT_LAST_MODIFIED_BY;
+        String conflict$_$resolution_version_last$_$modified$_$by() default DEFAULT_LAST_MODIFIED_BY;
 
     }
 
@@ -139,8 +138,8 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     @Activate
     protected void activate(ReviewTaskAssetMoverHandler.Config config) {
-        lastModifiedBy = config.conflict_resolution_version_last_modified_by();
-        defaultConflictResolution = config.conflict_resolution_default();
+        lastModifiedBy = config.conflict$_$resolution_version_last$_$modified$_$by();
+        defaultConflictResolution = config.conflict$_$resolution_default();
     }
 
     @Override

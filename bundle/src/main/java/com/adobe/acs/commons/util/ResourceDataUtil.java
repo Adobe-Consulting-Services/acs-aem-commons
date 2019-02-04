@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
+import java.io.IOException;
+import java.io.InputStream;
 
-import com.day.cq.commons.jcr.JcrConstants;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.servlet.RequestDispatcher;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,15 +32,11 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.servlet.RequestDispatcher;
-
-import java.io.IOException;
-import java.io.InputStream;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @ProviderType
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1118"})

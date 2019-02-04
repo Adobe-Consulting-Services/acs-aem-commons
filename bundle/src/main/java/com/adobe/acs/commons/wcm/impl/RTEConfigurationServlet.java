@@ -75,12 +75,19 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
  * configuration.
  */
 @SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
-@Component(service = Servlet.class, property = {SLING_SERVLET_EXTENSIONS + "=json", SLING_SERVLET_SELECTORS + "=rte",
-        SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"})
+@Component(
+        service = Servlet.class,
+        property = {
+                SLING_SERVLET_EXTENSIONS + "=json",
+                SLING_SERVLET_SELECTORS + "=rte",
+                SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"
+        })
 @Designate(ocd = RTEConfigurationServlet.Config.class)
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - RTE Configuration Servlet"
+    )
     public @interface Config {
         @AttributeDefinition(defaultValue = {DEFAULT_ROOT_PATH})
         String root_path() default DEFAULT_ROOT_PATH;

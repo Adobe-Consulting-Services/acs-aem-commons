@@ -39,9 +39,13 @@ import com.day.image.Layer;
  * aspect ratio
  */
 
-@Component(service=ImageTransformer.class, property = {
-      ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE})
-@Designate(ocd=ResizeImageTransformerImpl.Config.class)
+@Component(
+        service = ImageTransformer.class,
+        property = {
+                ImageTransformer.PROP_TYPE + "=" + ResizeImageTransformerImpl.TYPE
+        }
+)
+@Designate(ocd = ResizeImageTransformerImpl.Config.class)
 public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(ResizeImageTransformerImpl.class);
 
@@ -56,12 +60,16 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Named Image Transform - Resize"
+    )
     public @interface Config {
-        @AttributeDefinition(name = "Max dimension in px",
+        @AttributeDefinition(
+                name = "Max dimension in px",
                 description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-                defaultValue = ""+ DEFAULT_MAX_DIMENSION)
-        int max_dimension() default DEFAULT_MAX_DIMENSION;
+                defaultValue = "" + DEFAULT_MAX_DIMENSION
+        )
+        int max$_$dimension() default DEFAULT_MAX_DIMENSION;
 
     }
 
@@ -104,6 +112,6 @@ public class ResizeImageTransformerImpl implements ImageTransformer {
 
     @Activate
     protected final void activate(ResizeImageTransformerImpl.Config config) {
-        maxDimension = config.max_dimension();
+        maxDimension = config.max$_$dimension();
     }
 }

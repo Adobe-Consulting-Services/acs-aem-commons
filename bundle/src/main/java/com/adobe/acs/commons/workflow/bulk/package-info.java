@@ -20,4 +20,6 @@
 /**
  * Bulk Workflow Management.
  */
-@aQute.bnd.annotation.Version("1.0.1") package com.adobe.acs.commons.workflow.bulk;
+@Version("1.0.1") package com.adobe.acs.commons.workflow.bulk;
+
+import org.osgi.annotation.versioning.Version;

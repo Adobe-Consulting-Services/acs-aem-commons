@@ -78,16 +78,8 @@
                         <_dsannotations>*</_dsannotations>
                         <_dsannotations-options>inherit</_dsannotations-options>
                         <_metatypeannotations>*</_metatypeannotations>
-                        <_plugin>org.apache.felix.scrplugin.bnd.SCRDescriptorBndPlugin;destdir=${project.build.outputDirectory}</_plugin>
                     </instructions>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>org.apache.felix.scr.bnd</artifactId>
-                        <version>1.9.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
@@ -177,10 +169,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>biz.aQute</groupId>
-            <artifactId>bndlib</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -547,6 +535,13 @@
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
+        </dependency>
+        <!-- bnd annotations are a transitive dependency of some uber-jar classes although they are not used directly! -->
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>4.1.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

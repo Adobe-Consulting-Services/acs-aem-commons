@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * ProcessDefinitionFactory which limits availability of a process to the admin users and members of the administrators group.

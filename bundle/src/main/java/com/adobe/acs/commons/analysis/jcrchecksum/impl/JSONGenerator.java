@@ -20,15 +20,12 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
-import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
-import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
-import com.google.gson.stream.JsonWriter;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
@@ -41,12 +38,16 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
+import com.adobe.acs.commons.analysis.jcrchecksum.impl.options.DefaultChecksumGeneratorOptions;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * Utility that generates checksums for JCR paths.
@@ -166,7 +167,6 @@ public final class JSONGenerator {
      * @param opts
      * @param out
      * @throws RepositoryException
-     * @throws JSONException
      * @throws ValueFormatException
      * @throws IOException 
      */
@@ -250,7 +250,6 @@ public final class JSONGenerator {
      * @param out
      * @throws RepositoryException
      * @throws IOException 
-     * @throws JSONException
      */
     private static void outputChildNodes(Node node, ChecksumGeneratorOptions opts, JsonWriter out)
             throws RepositoryException, IOException {

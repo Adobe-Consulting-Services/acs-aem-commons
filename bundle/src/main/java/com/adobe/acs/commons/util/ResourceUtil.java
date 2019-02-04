@@ -19,16 +19,16 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.Resource;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Utils for JCR resources.

@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
 - #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
@@ -69,6 +70,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
+- #1719 - Added missing OSGi metatype names for 10 OSGi components.
+- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin

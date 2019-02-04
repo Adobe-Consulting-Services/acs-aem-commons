@@ -22,12 +22,12 @@ package com.adobe.acs.commons.util;
 import javax.annotation.CheckForNull;
 
 import org.apache.sling.api.resource.ValueMap;
-
-import tldgen.Function;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
+
+import tldgen.Function;
 
 /**
  * Utility functions for working with CQ Templates.

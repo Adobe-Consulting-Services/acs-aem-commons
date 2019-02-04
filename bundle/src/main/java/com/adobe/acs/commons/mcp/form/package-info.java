@@ -20,5 +20,7 @@
 /**
  * Form components for MCP
  */
-@aQute.bnd.annotation.Version("3.12.0")
+@Version("3.13.0")
 package com.adobe.acs.commons.mcp.form;
+
+import org.osgi.annotation.versioning.Version;

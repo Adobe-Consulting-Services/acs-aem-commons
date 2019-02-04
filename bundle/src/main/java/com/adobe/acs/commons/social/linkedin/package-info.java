@@ -20,7 +20,7 @@
 /**
  * This package provides Linked In integration
  */
-@Version("1.0.1")
+@Version("1.0.2")
 package com.adobe.acs.commons.social.linkedin;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

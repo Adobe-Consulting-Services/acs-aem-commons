@@ -21,8 +21,8 @@ package com.adobe.acs.commons.notifications;
 
 import java.util.List;
 
-import aQute.bnd.annotation.ProviderType;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.granite.taskmanagement.TaskManagerException;
 

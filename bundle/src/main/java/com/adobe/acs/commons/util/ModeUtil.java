@@ -22,17 +22,15 @@ package com.adobe.acs.commons.util;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.settings.SlingSettingsService;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.annotations.Component;
 
 import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.WCMMode;
-
-import aQute.bnd.annotation.ProviderType;
 
 
 @ProviderType

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@Version("3.10.0")
+@Version("3.10.1")
 package com.adobe.acs.commons.mcp.mbean;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

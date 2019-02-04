@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.email;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines special keys for the replacement variable map
