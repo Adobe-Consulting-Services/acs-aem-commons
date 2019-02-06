@@ -59,6 +59,8 @@ public class ScrMetadataIT {
 
     private static final Set<String> COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE;
 
+    private static final Set<String> ALLOWED_SCR_NS_URIS;
+
     static {
         PROPERTIES_TO_IGNORE = new HashSet<>();
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_PID);
@@ -71,6 +73,12 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");
+
+        ALLOWED_SCR_NS_URIS = new HashSet<>();
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.0.0");
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.2.0");
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.3.0");
     }
 
     private JsonObjectResponseHandler responseHandler = new JsonObjectResponseHandler();
@@ -152,7 +160,7 @@ public class ScrMetadataIT {
 
             IOUtils.copy(content, new FileOutputStream(cachedFile));
         }
-        return parseJar(new FileInputStream(cachedFile));
+        return parseJar(new FileInputStream(cachedFile), false);
     }
 
 
@@ -163,10 +171,10 @@ public class ScrMetadataIT {
             return null;
         }
 
-        return parseJar(new FileInputStream(artifactPath));
+        return parseJar(new FileInputStream(artifactPath), true);
     }
 
-    private DescriptorList parseJar(InputStream is) throws Exception {
+    private DescriptorList parseJar(InputStream is, boolean checkNs) throws Exception {
         DescriptorList result = new DescriptorList();
 
         try (ZipInputStream zis = new ZipInputStream(is)) {
@@ -176,7 +184,7 @@ public class ScrMetadataIT {
                     if (entry.getName().startsWith("OSGI-INF/metatype")) {
                         result.merge(parseMetatype(new InputStreamFacade(zis), entry.getName()));
                     } else if (entry.getName().startsWith("OSGI-INF/")) {
-                        result.merge(parseScr(new InputStreamFacade(zis)));
+                        result.merge(parseScr(new InputStreamFacade(zis), entry.getName(), checkNs));
                     }
                 }
 
@@ -188,7 +196,7 @@ public class ScrMetadataIT {
         return result;
     }
 
-    private Descriptor parseScr(InputStream is) throws Exception {
+    private Descriptor parseScr(InputStream is, String name, boolean checkNs) throws Exception {
         Descriptor result = new Descriptor();
 
         XMLEventReader reader = xmlInputFactory.createXMLEventReader(is);
@@ -199,6 +207,12 @@ public class ScrMetadataIT {
                 String elementName = start.getName().getLocalPart();
                 if (elementName.equals("component")) {
                     result.name = start.getAttributeByName(new QName("name")).getValue();
+                    if (checkNs) {
+                        String scrUri = start.getName().getNamespaceURI();
+                        if (!ALLOWED_SCR_NS_URIS.contains(scrUri)) {
+                            throw new Exception(String.format("Banned Namespace URI %s found for %s", scrUri, name));
+                        }
+                    }
                 } else if (elementName.equals("property")) {
                     String propName = start.getAttributeByName(new QName("name")).getValue();
                     Attribute value = start.getAttributeByName(new QName("value"));
