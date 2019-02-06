@@ -81,29 +81,52 @@
             run the scr plugin, and then merge the two directories.
             -->
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.5</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>backup-scr-files</id>
                         <phase>process-classes</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
                         <configuration>
-                            <source>${pom.basedir}/src/main/script/BackupScrFiles.groovy</source>
+                            <target>
+                                <move todir="${project.build.outputDirectory}/OSGI-INF.bak">
+                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF"/>
+                                </move>
+                            </target>
                         </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>merge-scr-files</id>
                         <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
                         <configuration>
-                            <source>${pom.basedir}/src/main/script/MergeScrFiles.groovy</source>
+                            <target>
+                                <move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
+                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF.bak"/>
+                                </move>
+                            </target>
                         </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>force-l10n-into-bundle</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <jar update="true" destfile="${project.build.directory}/${project.build.finalName}.jar">
+                                    <fileset dir="${project.build.outputDirectory}"
+                                             includes="OSGI-INF/l10n/**"/>
+                                </jar>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
