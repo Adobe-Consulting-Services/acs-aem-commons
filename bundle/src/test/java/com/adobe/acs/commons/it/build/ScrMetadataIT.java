@@ -54,6 +54,8 @@ public class ScrMetadataIT {
 
     private static final Set<String> COMPONENT_PROPERTIES_TO_IGNORE;
 
+    private static final Set<String> COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE;
+
     static {
         PROPERTIES_TO_IGNORE = new HashSet<>();
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_PID);
@@ -62,6 +64,10 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider:provider.roots");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider:provider.ownsRoots");
+
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
+        COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");
     }
 
     private JsonObjectResponseHandler responseHandler = new JsonObjectResponseHandler();
@@ -104,6 +110,11 @@ public class ScrMetadataIT {
                 Property lp = fromLatest.get();
                 if (!StringUtils.equals(cp.value, lp.value)) {
                     problems.add(String.format("Property %s on component %s has different values (was: {%s}, is: {%s})", cp.name, current.name, lp.value, cp.value));
+                }
+                if (!COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.contains(current.name + ":" + cp.name)) {
+                    if (!StringUtils.equals(cp.type, lp.type)) {
+                        problems.add(String.format("Property %s on component %s has different types (was: {%s}, is: {%s})", cp.name, current.name, lp.type, cp.type));
+                    }
                 }
             } else {
                 System.out.printf("Property %s on component %s is only in current. Assuming OK.\n", cp.name, current.name);
@@ -181,10 +192,12 @@ public class ScrMetadataIT {
                 } else if (elementName.equals("property")) {
                     String propName = start.getAttributeByName(new QName("name")).getValue();
                     Attribute value = start.getAttributeByName(new QName("value"));
+                    Attribute typeAttr = start.getAttributeByName(new QName("type"));
+                    String type = typeAttr == null ? "String" : typeAttr.getValue();
                     if (value != null) {
-                        result.properties.add(new Property(propName, value.getValue()));
+                        result.properties.add(new Property(propName, value.getValue(), type));
                     } else {
-                        result.properties.add(new Property(propName, cleanText(reader.getElementText())));
+                        result.properties.add(new Property(propName, cleanText(reader.getElementText()), type));
                     }
                 }
             }
@@ -215,10 +228,12 @@ public class ScrMetadataIT {
                 } else if (elementName.equals("AD")) {
                     String propName = start.getAttributeByName(new QName("id")).getValue();
                     Attribute value = start.getAttributeByName(new QName("default"));
+                    Attribute typeAttr = start.getAttributeByName(new QName("type"));
+                    String type = typeAttr == null ? "String" : typeAttr.getValue();
                     if (value == null) {
-                        result.properties.add(new Property(propName, ""));
+                        result.properties.add(new Property(propName, "", type));
                     } else {
-                        result.properties.add(new Property(propName, value.getValue()));
+                        result.properties.add(new Property(propName, value.getValue(), type));
                     }
                 }
             }
@@ -276,12 +291,14 @@ public class ScrMetadataIT {
     }
 
     private class Property {
-        private String name;
+        private final String name;
         private String value;
+        private final String type;
 
-        Property(String name, String value) {
+        Property(String name, String value, String type) {
             this.name = name;
             this.value = value;
+            this.type = type;
         }
 
     }
