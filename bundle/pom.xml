@@ -107,6 +107,7 @@
                                 <move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
                                     <fileset dir="${project.build.outputDirectory}/OSGI-INF.bak"/>
                                 </move>
+                                <delete dir="${project.build.outputDirectory}/OSGI-INF.bak"/>
                             </target>
                         </configuration>
                         <goals>
