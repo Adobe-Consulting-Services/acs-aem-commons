@@ -44,20 +44,15 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>                        
+                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
                         <Import-Package>
                             com.adobe.cq.dialogconversion;resolution:=optional,
                             sun.misc.*;resolution:=optional,
-                            org.apache.sling.models.annotations.*;resolution:=optional, <!-- the used class InjectionStrategy is only since Sling Models API 1.2 -->
-                            org.apache.sling.models.spi.injectorspecific.*;resolution:=optional, <!-- that package was added with Sling Models API 1.1 -->
                             com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 Ingestor -->
                             com.github.jknack.handlebars;resolution:=optional, <!-- only required for Report Builder -->
-                            com.day.cq.wcm.workflow.process;version="[6.0,8)", <!-- using a wider version range for forward compatibility -->
                             com.day.cq.replication;version="[6.4,7)", <!-- using a wider version range for forward compatibility -->
-                            com.day.cq.mailer;version="[5.9,7)", <!-- using a wider version range for forward compatibility -->
-                            com.adobe.cq.sightly;version="[2.5,4)",
-                            org.apache.poi.ss.usermodel;version="[2.0,6)",  <!-- using a wider version range for forward compatibility -->
-                            org.apache.poi.ss.util;version="[2.0,6)",
+                            org.apache.poi.ss.usermodel;version="[3.0,6)",  <!-- using a wider version range for forward compatibility -->
+                            org.apache.poi.ss.util;version="[3.0,6)",
                             org.apache.poi.xssf.usermodel;version="[2.0,6)",
                             twitter4j*;version="[3.0.5,4)";resolution:=optional,
                             com.github.benmanes.caffeine*;resolution:=optional,
