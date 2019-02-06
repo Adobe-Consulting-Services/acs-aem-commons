@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.NameConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
@@ -36,9 +37,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.adobe.acs.commons.wcm.impl.SiteMapServlet.Config.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 import static org.xmlunit.matchers.EvaluateXPathMatcher.hasXPath;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,6 +66,7 @@ public class SiteMapServletTest {
     @Before
     public void setup() {
         context.load().json(getClass().getResourceAsStream("SiteMapServlet.json"), "/content/geometrixx");
+        context.registerService(Externalizer.class, externalizer);
         response = context.response();
         request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext()) {
             @Override
@@ -77,12 +80,22 @@ public class SiteMapServletTest {
         when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
     }
 
+    private void activateWithDefaultValues(Map<String,Object> specifiedProps){
+        properties.put(PROP_EXTERNALIZER_DOMAIN, "publish" );
+        properties.put(PROP_INCLUDE_LAST_MODIFIED,false);
+        properties.put(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY,NameConstants.PN_HIDE_IN_NAV);
+        properties.put(PROP_INCLUDE_INHERITANCE_VALUE,false);
+        properties.put(PROP_EXTENSIONLESS_URLS,false);
+        properties.put(PROP_REMOVE_TRAILING_SLASH,false);
+
+        properties.putAll(specifiedProps);
+        context.registerInjectActivateService(servlet, properties);
+    }
+
     @Test
     public void testDefaultPageSetup() throws Exception {
-        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
-        when(config.externalizer_domain()).thenReturn("external");
-        servlet.activate(config);
-
+        properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
+        activateWithDefaultValues(properties);
         servlet.doGet(request, response);
 
         String output = response.getOutputAsString();
@@ -94,11 +107,9 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessPages() throws Exception {
-        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
-        when(config.externalizer_domain()).thenReturn("external");
-        when(config.extensionless_urls()).thenReturn(true);
-        servlet.activate(config);
-
+        properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
+        properties.put(PROP_EXTENSIONLESS_URLS, true);
+        activateWithDefaultValues(properties);
         servlet.doGet(request, response);
 
         String output = response.getOutputAsString();
@@ -110,12 +121,10 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessAndSlashlessPages() throws Exception {
-        SiteMapServlet.Config config = mock(SiteMapServlet.Config.class);
-        when(config.externalizer_domain()).thenReturn("external");
-        when(config.extensionless_urls()).thenReturn(true);
-        when(config.remove_slash()).thenReturn(true);
-        servlet.activate(config);
-
+        properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
+        properties.put(PROP_EXTENSIONLESS_URLS, true);
+        properties.put(PROP_REMOVE_TRAILING_SLASH, true);
+        activateWithDefaultValues(properties);
         servlet.doGet(request, response);
 
         String output = response.getOutputAsString();

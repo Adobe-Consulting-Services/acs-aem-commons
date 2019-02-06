@@ -92,6 +92,27 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     
     @ObjectClassDefinition(name = "ACS AEM Commons - Site Map Servlet", description = "Page and Asset Site Map Servlet")
     public @interface Config {
+        String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
+
+        String PROP_INCLUDE_LAST_MODIFIED = "include.lastmod";
+
+        String PROP_CHANGE_FREQUENCY_PROPERTIES = "changefreq.properties";
+
+        String PROP_PRIORITY_PROPERTIES = "priority.properties";
+
+        String PROP_DAM_ASSETS_PROPERTY = "damassets.property";
+
+        String PROP_DAM_ASSETS_TYPES = "damassets.types";
+
+        String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
+
+        String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
+
+        String PROP_EXTENSIONLESS_URLS = "extensionless.urls";
+
+        String PROP_REMOVE_TRAILING_SLASH = "remove.slash";
+
+        String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
     
         @AttributeDefinition( name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
         String[] sling_servlet_resourceType();
