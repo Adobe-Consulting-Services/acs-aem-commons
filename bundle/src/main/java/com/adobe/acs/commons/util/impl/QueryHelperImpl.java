@@ -34,6 +34,8 @@ import javax.jcr.query.QueryResult;
 import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -43,14 +45,13 @@ import org.osgi.service.component.annotations.Reference;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 
 @Component(service=QueryHelper.class)
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
 
     private static final String QUERY_BUILDER = "queryBuilder";
 
@@ -127,10 +128,11 @@ public class QueryHelperImpl implements QueryHelper {
             params.put("p.limit", "-1");
         }
 
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-        final List<Hit> hits = query.getResult().getHits();
-        for (final Hit hit : hits) {
-            resources.add(hit.getResource());
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
+            final List<Hit> hits = query.getResult().getHits();
+            for (final Hit hit : hits) {
+                resources.add(resourceResolver.getResource(hit.getPath()));
+            }
         }
 
         return resources;
@@ -153,8 +155,9 @@ public class QueryHelperImpl implements QueryHelper {
     @Override
     @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
-        return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver)) {
+            return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
+        }
     }
 
     /**

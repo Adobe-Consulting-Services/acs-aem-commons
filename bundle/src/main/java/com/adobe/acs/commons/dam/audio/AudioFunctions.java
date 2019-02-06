@@ -19,11 +19,12 @@
  */
 package com.adobe.acs.commons.dam.audio;
 
-import tldgen.Function;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.video.VideoProfile;
+
+import tldgen.Function;
 
 /**
  * Audio JSP functions.

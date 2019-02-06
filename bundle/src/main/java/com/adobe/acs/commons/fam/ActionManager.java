@@ -19,14 +19,16 @@
  */
 package com.adobe.acs.commons.fam;
 
-import aQute.bnd.annotation.ProviderType;
 import java.util.List;
+
 import javax.jcr.RepositoryException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
+
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedBiFunction;
 import com.adobe.acs.commons.functions.CheckedConsumer;

@@ -29,11 +29,16 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Contains reflection utility methods
  */
 public class ReflectionUtil {
+
+    private static final Pattern CASTED_VALUE = Pattern.compile("\\{(Long|Integer|String|Boolean|Float|Double)}(.+)");
+
     private ReflectionUtil() {
         // static methods only
     }
@@ -169,5 +174,43 @@ public class ReflectionUtil {
             return (Class<?>) parameterizedType.getActualTypeArguments()[index];
         }
         return null;
+    }
+
+
+
+
+
+    public static Object castStringValue(String allowedValue) {
+        final Matcher matcher = CASTED_VALUE.matcher(allowedValue);
+        boolean match = matcher.matches();
+
+        if(match){
+
+            String type = matcher.group(1);
+            String value = matcher.group(2);
+
+            switch (type){
+                case "Long":
+                    return new Long(value);
+                case "Integer":
+                    return new Integer(value);
+                case "Float":
+                    return new Float(value);
+                case "Boolean":
+                    if(value.equalsIgnoreCase("true")){
+                        return Boolean.TRUE;
+                    }else{
+                        return Boolean.FALSE;
+                    }
+                case "Double":
+                    return new Double(value);
+                case "String":
+                default:
+                    return allowedValue;
+            }
+
+        }else{
+            return allowedValue;
+        }
     }
 }

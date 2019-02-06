@@ -19,17 +19,18 @@
  */
 package com.adobe.acs.commons.fam.actions;
 
-import aQute.bnd.annotation.ProviderType;
-import com.adobe.acs.commons.fam.ActionManager;
-import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
-import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
+import javax.jcr.Session;
+
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
+import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowModel;
+import com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowRunner;
 
 /**
  * Various deferred actions to be used with the ActionManager

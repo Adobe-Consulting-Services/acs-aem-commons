@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * An exception representing a failed on-deploy script.

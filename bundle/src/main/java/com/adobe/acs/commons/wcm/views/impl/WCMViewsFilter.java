@@ -61,14 +61,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @org.osgi.service.component.annotations.Component(
-        configurationPolicy=ConfigurationPolicy.REQUIRE,
-        service=Filter.class,
-        property= {
-              "sling.filter.scope=component",
-              "filter.order" + ":Integer=" + WCMViewsFilter.FILTER_ORDER
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = Filter.class,
+        property = {
+                "sling.filter.scope=component",
+                "filter.order" + ":Integer=" + WCMViewsFilter.FILTER_ORDER
         }
 )
-@Designate(ocd=WCMViewsFilter.Config.class)
+@Designate(
+        ocd = WCMViewsFilter.Config.class
+)
 public class WCMViewsFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsFilter.class);
 
@@ -84,22 +86,27 @@ public class WCMViewsFilter implements Filter {
 
     private static final String ATTR_FILTER = WCMViewsFilter.class.getName() + ".first-wcmmode";
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - WCM Views Filter" )
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - WCM Views Filter"
+    )
     public @interface Config {
 
         String DEFAULT_PREFIX = "/content";
 
-        @AttributeDefinition(name = "Path Prefixes to Include",
+        @AttributeDefinition(
+                name = "Path Prefixes to Include",
                 description = "Include paths that begin with these path prefixes. Default: [ /content ]",
                 cardinality = Integer.MAX_VALUE,
-                defaultValue = {DEFAULT_PREFIX})
-       String[] path_prefixes_include() default {DEFAULT_PREFIX};
+                defaultValue = {DEFAULT_PREFIX}
+        )
+        String[] path$_$prefixes_include() default {DEFAULT_PREFIX};
 
-       @AttributeDefinition(name = "Resource Types (Regex)",
-            description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
-            cardinality = Integer.MAX_VALUE)
-       String[] resourcetypes_include();
-
+        @AttributeDefinition(
+                name = "Resource Types (Regex)",
+                description = "Resource types to apply WCM Views rules to. Leave blank for all. Default: [ <Blank> ]",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] resource$_$types_include();
     }
 
     private String[] includePathPrefixes = new String[]{"/content"};
@@ -321,7 +328,7 @@ public class WCMViewsFilter implements Filter {
 
     @Activate
     protected final void activate(WCMViewsFilter.Config config) throws Exception {
-        String[] includes = config.resourcetypes_include();
+        String[] includes = config.resource$_$types_include();
         this.resourceTypesIncludes = new ArrayList<Pattern>();
 
         for (final String include : includes) {
@@ -330,6 +337,6 @@ public class WCMViewsFilter implements Filter {
             }
         }
 
-        this.includePathPrefixes = config.path_prefixes_include();
+        this.includePathPrefixes = config.path$_$prefixes_include();
     }
 }

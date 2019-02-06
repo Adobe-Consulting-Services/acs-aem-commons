@@ -22,10 +22,8 @@ package com.adobe.acs.commons.images.transformers.impl;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.Map;
 
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -45,9 +43,13 @@ import com.day.image.Layer;
  * original dimensions, this will create a background layer
  */
 //@formatter:off
-@Component(service=ImageTransformer.class, property = {
-      ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE})
-@Designate(ocd=LetterPillarBoxImageTransformerImpl.Config.class)
+@Component(
+        service = ImageTransformer.class,
+        property = {
+                ImageTransformer.PROP_TYPE + "=" + LetterPillarBoxImageTransformerImpl.TYPE
+        }
+)
+@Designate(ocd = LetterPillarBoxImageTransformerImpl.Config.class)
 //@formatter:on
 public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final Logger log = LoggerFactory.getLogger(LetterPillarBoxImageTransformerImpl.class);
@@ -73,12 +75,16 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
     private static final int DEFAULT_MAX_DIMENSION = 50000;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
 
-    @ObjectClassDefinition
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Named Image Transform - Letter Pillar Box"
+    )
     public @interface Config {
-      @AttributeDefinition(name = "Max dimension in px",
-            description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
-            defaultValue = ""+DEFAULT_MAX_DIMENSION)
-       int max_dimension() default DEFAULT_MAX_DIMENSION;
+        @AttributeDefinition(
+                name = "Max dimension in px",
+                description = "Maximum size height and width can be re-sized to. [ Default: 50000 ]",
+                defaultValue = "" + DEFAULT_MAX_DIMENSION
+        )
+        int max$_$dimension() default DEFAULT_MAX_DIMENSION;
     }
 
     @Override
@@ -236,7 +242,7 @@ public class LetterPillarBoxImageTransformerImpl implements ImageTransformer {
 
     @Activate
     protected final void activate(LetterPillarBoxImageTransformerImpl.Config config) {
-        maxDimension = config.max_dimension();
+        maxDimension = config.max$_$dimension();
     }
 
 }

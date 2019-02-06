@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.designer;
 
-import aQute.bnd.annotation.ProviderType;
-
-import com.day.cq.wcm.api.designer.Design;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-
 import java.io.IOException;
 import java.io.Writer;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.day.cq.wcm.api.designer.Design;
 
 /**
  * A service interface for looking up client libraries based on a Design.

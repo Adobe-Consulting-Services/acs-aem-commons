@@ -20,15 +20,14 @@
 
 package com.adobe.acs.commons.replication.status;
 
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-
-import aQute.bnd.annotation.ProviderType;
+import java.util.Calendar;
 
 import javax.jcr.RepositoryException;
 
-import java.util.Calendar;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public interface ReplicationStatusManager {

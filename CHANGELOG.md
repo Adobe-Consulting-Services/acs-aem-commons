@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
 - #1611 - HttpCache: Added custom expiry time per cache configuration (not supported by standard mem-store), caffeine cache store
@@ -16,11 +17,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1654 - Added I18nProvider service to support injectors
 - #1648 - Add Smart Tags to XMP Metadata Node Workflow Process
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
+- #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
+- #1683 - HttpCache: Added OOTB config extension:: request cookie extension
+- #1685 - HttpCache: Added OOTB config extension:: combined extension
+- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
+- #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
+- #1699 - MCP UI doesn't work because of StackOverflowError exception
+- #1692 - HttpCache: Refactored resource / group config extensions 
+- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
 - #1667 - Refactored the activate methods of all http cache services
 - #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
+- #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
 - #1588 - Updated error handler JSP to use ModeUtils
 - #1583 - Asset Ingestor may try to create asset folders when they already exist
@@ -40,7 +51,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1613 - Potential NPE in JcrPackageReplicationStatusEventHandler
 - #1623 - Fix timing-related test failures in HealthCheckStatusEmailerTest
 - #1627 - Asset Ingestor and Valid Folder Name: if Preserve File name unchecked, asset and folder names will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens
+- #1585 - Fixed editing of redirect map entries if the file contains comments or whitespace
 - #1651 - Fix target path issue for Asset Ingestor, if Preserve File name unchecked
+- #1682 - Enable secure XML processing
+- #1684 - Useing Autocloseable when closing resourceresolvers
+- #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
+- #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
@@ -53,6 +69,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
+- #1719 - Added missing OSGi metatype names for 10 OSGi components.
+- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin

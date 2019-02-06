@@ -19,18 +19,17 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
-import aQute.bnd.annotation.ProviderType;
+import java.io.IOException;
 
-import com.adobe.acs.commons.forms.Form;
-import com.day.cq.wcm.api.Page;
+import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
-import javax.servlet.ServletException;
-
-import java.io.IOException;
+import com.adobe.acs.commons.forms.Form;
+import com.day.cq.wcm.api.Page;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
@@ -161,7 +160,6 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderForm(Form form, String path, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException;
@@ -178,7 +176,6 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderForm(Form form, Page page, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException;
@@ -194,7 +191,6 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderForm(Form form, Resource resource, SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException;
@@ -211,7 +207,6 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderOtherForm(Form form, String path, String selectors, SlingHttpServletRequest request,
                          SlingHttpServletResponse response)
@@ -229,7 +224,6 @@ public interface FormHelper {
      * @param response
      * @throws IOException
      * @throws ServletException
-     * @throws JSONException
      */
     void renderOtherForm(Form form, Page page, String selectors, SlingHttpServletRequest request,
                          SlingHttpServletResponse response)

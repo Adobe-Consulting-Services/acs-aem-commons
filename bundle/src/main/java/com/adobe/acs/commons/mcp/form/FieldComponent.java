@@ -19,19 +19,28 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes a component in a manner which supports auto-generated forms
  */
 @ProviderType
 public abstract class FieldComponent {
+
     private String name;
     protected FormField formField;
     protected Field javaField;
@@ -41,6 +50,7 @@ public abstract class FieldComponent {
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
     private Resource resource;
     private String path = "/fake/path";
+    private final EnumMap<ClientLibraryType, Set<String>> clientLibraries = new EnumMap<>(ClientLibraryType.class);
 
     public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
         this.name = name;
@@ -52,32 +62,32 @@ public abstract class FieldComponent {
         componentMetadata.put("fieldDescription", formField.description());
         componentMetadata.put("required", formField.required());
         componentMetadata.put("emptyText", formField.hint());
-        getOption("default").ifPresent(val->componentMetadata.put("value", val));
+        getOption("default").ifPresent(val -> componentMetadata.put("value", val));
         init();
     }
-    
+
     public abstract void init();
-    
+
     public SlingScriptHelper getHelper() {
         return sling;
     }
-    
+
     public void setPath(String path) {
         this.path = path;
     }
-    
+
     public String getPath() {
         return path;
     }
-    
+
     public Field getField() {
         return javaField;
     }
-    
+
     public FormField getFieldDefinition() {
         return formField;
     }
-    
+
     public String getHtml() {
         sling.include(getComponentResource());
         return "";
@@ -91,9 +101,11 @@ public abstract class FieldComponent {
     }
 
     /**
-     * If your component needs child nodes then override this method, call the superclass implementation, and then use addChildren
-     * to add additional nodes to it.
-     * @return 
+     * If your component needs child nodes then override this method, call the
+     * superclass implementation, and then use addChildren to add additional
+     * nodes to it.
+     *
+     * @return
      */
     public Resource buildComponentResource() {
         AbstractResourceImpl res = new AbstractResourceImpl(path, resourceType, resourceSuperType, componentMetadata);
@@ -108,6 +120,32 @@ public abstract class FieldComponent {
      */
     public ResourceMetadata getComponentMetadata() {
         return componentMetadata;
+    }
+
+    public Map<ClientLibraryType, Set<String>> getClientLibraryCategories() {
+        return Collections.unmodifiableMap(clientLibraries);
+    }
+
+    public void addClientLibrary(String category) {
+        addClientLibraries(ClientLibraryType.ALL, Arrays.asList(category));
+    }
+
+    public void addClientLibraries(ClientLibraryType type, String... categories) {
+        addClientLibraries(type, Arrays.asList(categories));
+    }
+
+    public void addClientLibraries(ClientLibraryType type, Collection<String> categories) {
+        Set<String> categoriesSet = clientLibraries.getOrDefault(type, new LinkedHashSet<>());
+        categoriesSet.addAll(categories);
+        clientLibraries.put(type, categoriesSet);
+    }
+
+    public void addClientLibraries(FieldComponent component) {
+        component.getClientLibraryCategories().forEach((type, categories) -> {
+            if (categories != null) {
+                addClientLibraries(type, categories);
+            }
+        });
     }
 
     /**
@@ -150,10 +188,14 @@ public abstract class FieldComponent {
                 .filter(s -> s.equalsIgnoreCase(optionName) || s.startsWith(optionName + "="))
                 .findFirst().isPresent();
     }
-    
+
     public Optional<String> getOption(String option) {
         return Stream.of(formField.options())
-                .filter(s -> s.startsWith(option+"="))
+                .filter(s -> s.startsWith(option + "="))
                 .findFirst().map(o -> o.split("=")[1]);
+    }
+
+    public static enum ClientLibraryType {
+        JS, CSS, ALL
     }
 }

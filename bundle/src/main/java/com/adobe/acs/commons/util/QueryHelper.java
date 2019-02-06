@@ -20,13 +20,14 @@
 
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-
-import javax.jcr.RepositoryException;
 import java.util.List;
 import java.util.Map;
+
+import javax.jcr.RepositoryException;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public interface QueryHelper {

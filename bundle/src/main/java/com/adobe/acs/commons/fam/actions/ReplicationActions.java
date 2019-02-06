@@ -21,18 +21,21 @@ package com.adobe.acs.commons.fam.actions;
 
 import static com.adobe.acs.commons.fam.actions.Actions.nameThread;
 
-import aQute.bnd.annotation.ProviderType;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.jcr.Session;
+
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
+
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.RoundRobin;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import javax.jcr.Session;
-import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Replication utility functions.

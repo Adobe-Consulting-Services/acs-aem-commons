@@ -19,12 +19,14 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ConsumerType;
-import com.adobe.acs.commons.mcp.form.FormProcessor;
 import javax.jcr.RepositoryException;
+
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ConsumerType;
+
+import com.adobe.acs.commons.mcp.form.FormProcessor;
 
 /**
  * Describes a process and provides a builder which creates the process

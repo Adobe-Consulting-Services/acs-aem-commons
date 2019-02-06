@@ -33,22 +33,27 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 
-@Component(service = Servlet.class, property = {
-        SLING_SERVLET_PATHS + "=/bin/acs-commons/dynamic-classicui-clientlibs.json" })
+@Component(service = Servlet.class,
+        property = {
+                SLING_SERVLET_PATHS + "=/bin/acs-commons/dynamic-classicui-clientlibs.json"
+        })
 @Designate(ocd = DynamicClassicUiClientLibraryServlet.Config.class)
 public class DynamicClassicUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
     static final String CATEGORY_LIMIT = "acs-commons.cq-widgets.add-ons.classicui-limit-parsys";
     static final String CATEGORY_PLACEHOLDER = "acs-commons.cq-widgets.add-ons.classicui-parsys-placeholder";
 
-    @ObjectClassDefinition(description = "Allows for dynamic loading of optional Classic UI Client Libraries")
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - Dynamic Classic UI Client Library Loader",
+            description = "Allows for dynamic loading of optional Classic UI Client Libraries"
+    )
     public @interface Config {
 
         @AttributeDefinition(description = "Exclude all client library categories")
         boolean exclude_all();
 
-        @AttributeDefinition(description = "Client Library Categories", defaultValue = { CATEGORY_LIMIT,
-                CATEGORY_PLACEHOLDER })
+        @AttributeDefinition(description = "Client Library Categories", defaultValue = {CATEGORY_LIMIT,
+                CATEGORY_PLACEHOLDER})
         String[] categories();
 
     }
@@ -59,8 +64,8 @@ public class DynamicClassicUiClientLibraryServlet extends AbstractDynamicClientL
     @Activate
     protected void activate(DynamicClassicUiClientLibraryServlet.Config config) {
         String[] categories = config.categories();
-        if(ArrayUtils.isEmpty(config.categories())) {
-            categories = new String [] {CATEGORY_LIMIT,CATEGORY_PLACEHOLDER };
+        if (ArrayUtils.isEmpty(config.categories())) {
+            categories = new String[]{CATEGORY_LIMIT, CATEGORY_PLACEHOLDER};
         }
         super.activate(categories, config.exclude_all(), htmlLibraryManager);
     }

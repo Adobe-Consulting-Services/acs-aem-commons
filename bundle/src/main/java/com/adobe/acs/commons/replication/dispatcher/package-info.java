@@ -20,5 +20,7 @@
 /**
  * Dispatcher utilities.
  */
-@aQute.bnd.annotation.Version("1.0.1")
+@Version("1.0.2")
 package com.adobe.acs.commons.replication.dispatcher;
+
+import org.osgi.annotation.versioning.Version;

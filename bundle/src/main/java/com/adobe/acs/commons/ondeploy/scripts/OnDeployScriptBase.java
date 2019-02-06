@@ -19,28 +19,30 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import aQute.bnd.annotation.ConsumerType;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
-import com.day.cq.search.result.SearchResult;
-import com.day.cq.wcm.api.PageManager;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ConsumerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.search.PredicateGroup;
+import com.day.cq.search.result.SearchResult;
+import com.day.cq.wcm.api.PageManager;
 
 /**
  * Base on-deploy script implementation.
@@ -194,16 +196,20 @@ public abstract class OnDeployScriptBase implements OnDeployScript {
 
         logger.info("Finding all nodes under /content with resource type: {}", oldResourceType);
 
-        Query query = resourceResolver.adaptTo(QueryBuilder.class).createQuery(PredicateGroup.create(map), session);
-        SearchResult result = query.getResult();
-        Iterator<Node> nodeItr = result.getNodes();
-        if (nodeItr.hasNext()) {
-            while (nodeItr.hasNext()) {
-                Node node = nodeItr.next();
-                updateResourceType(node, newResourceType);
+        final CloseableQueryBuilder queryBuilder = resourceResolver.adaptTo(CloseableQueryBuilder.class);
+        if (queryBuilder != null) {
+            try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), session)) {
+                SearchResult result = query.getResult();
+                Iterator<Node> nodeItr = result.getNodes();
+                if (nodeItr.hasNext()) {
+                    while (nodeItr.hasNext()) {
+                        Node node = nodeItr.next();
+                        updateResourceType(node, newResourceType);
+                    }
+                } else {
+                    logger.info("No nodes found with resource type: {}", oldResourceType);
+                }
             }
-        } else {
-            logger.info("No nodes found with resource type: {}", oldResourceType);
         }
     }
 

@@ -19,8 +19,9 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -60,6 +61,27 @@ public class GeneratedDialog {
 
     public Map<String, FieldComponent> getFieldComponents() {
         return fieldComponents;
+    }
+
+    public Collection<String> getAllClientLibraries() {
+        return getClientLibraries(FieldComponent.ClientLibraryType.ALL);
+    }
+
+    public Collection<String> getCssClientLibraries() {
+        return getClientLibraries(FieldComponent.ClientLibraryType.CSS);
+    }
+
+    public Collection<String> getJsClientLibraries() {
+        return getClientLibraries(FieldComponent.ClientLibraryType.JS);
+    }
+
+    private Collection<String> getClientLibraries(FieldComponent.ClientLibraryType type) {
+        LinkedHashSet<String> allLibraries = new LinkedHashSet<>();
+        fieldComponents.values().stream()
+                .map(c -> c.getClientLibraryCategories().get(type))
+                .filter(v -> v != null)
+                .forEach(v -> allLibraries.addAll(v));
+        return allLibraries;
     }
 
     /**

@@ -20,10 +20,11 @@
 
 package com.adobe.acs.commons.quickly.results;
 
-import aQute.bnd.annotation.ProviderType;
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.annotation.versioning.ProviderType;
+
 import com.adobe.acs.commons.quickly.Command;
 import com.google.gson.JsonObject;
-import org.apache.sling.api.resource.ValueMap;
 
 @ProviderType
 public interface ResultBuilder {
@@ -35,7 +36,6 @@ public interface ResultBuilder {
      * @param result the Result
      * @param config configuration used by ResultSerializer implementations
      * @return the JSON representation of the result
-     * @throws JSONException
      */
     JsonObject toJSON(Command cmd, Result result, ValueMap config);
 }

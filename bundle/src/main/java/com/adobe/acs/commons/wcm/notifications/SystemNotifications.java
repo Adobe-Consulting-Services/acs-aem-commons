@@ -20,12 +20,13 @@
 
 package com.adobe.acs.commons.wcm.notifications;
 
-import aQute.bnd.annotation.ProviderType;
-import com.day.cq.wcm.api.Page;
+import java.util.List;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
-import java.util.List;
+import com.day.cq.wcm.api.Page;
 
 @ProviderType
 public interface SystemNotifications {
