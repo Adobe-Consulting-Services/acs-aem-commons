@@ -22,6 +22,7 @@ package com.adobe.acs.commons.it.build;
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
 import com.google.gson.JsonObject;
 import junit.framework.TestCase;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Request;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -136,13 +139,20 @@ public class ScrMetadataIT {
         JsonObject packageDetails = (JsonObject) Request.Get("https://api.bintray.com/packages/acs/releases/acs-aem-commons").execute().handleResponse(responseHandler);
         String latestVersion = packageDetails.get("latest_version").getAsString();
 
-        String url = String.format("https://dl.bintray.com/acs/releases/com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        File cachedFile = new File(tempDir, String.format("acs-aem-commons-bundle-%s.jar", latestVersion));
+        if (cachedFile.exists()) {
+            System.out.printf("Using cached file %s\n", cachedFile);
+        } else {
+            String url = String.format("https://dl.bintray.com/acs/releases/com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
 
-        System.out.println("Fetching " + url);
+            System.out.printf("Fetching %s\n", url);
 
-        InputStream content = Request.Get(url).execute().returnContent().asStream();
+            InputStream content = Request.Get(url).execute().returnContent().asStream();
 
-        return parseJar(content);
+            IOUtils.copy(content, new FileOutputStream(cachedFile));
+        }
+        return parseJar(new FileInputStream(cachedFile));
     }
 
 
