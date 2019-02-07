@@ -61,8 +61,6 @@ public class SiteMapServletTest {
 
     private MockSlingHttpServletResponse response;
 
-    private Map<String, Object> properties;
-
     @Before
     public void setup() {
         context.load().json(getClass().getResourceAsStream("SiteMapServlet.json"), "/content/geometrixx");
@@ -74,13 +72,13 @@ public class SiteMapServletTest {
                 return "text/xml";
             }
         };
-        properties = new HashMap<>();
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
 
         when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
     }
 
     private void activateWithDefaultValues(Map<String,Object> specifiedProps){
+        Map<String, Object> properties = new HashMap<>();
         properties.put(PROP_EXTERNALIZER_DOMAIN, "publish" );
         properties.put(PROP_INCLUDE_LAST_MODIFIED,false);
         properties.put(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY,NameConstants.PN_HIDE_IN_NAV);
@@ -94,6 +92,7 @@ public class SiteMapServletTest {
 
     @Test
     public void testDefaultPageSetup() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
         properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
         activateWithDefaultValues(properties);
         servlet.doGet(request, response);
@@ -107,6 +106,7 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessPages() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
         properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
         properties.put(PROP_EXTENSIONLESS_URLS, true);
         activateWithDefaultValues(properties);
@@ -121,6 +121,7 @@ public class SiteMapServletTest {
 
     @Test
     public void testExtensionlessAndSlashlessPages() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
         properties.put(PROP_EXTERNALIZER_DOMAIN, "external" );
         properties.put(PROP_EXTENSIONLESS_URLS, true);
         properties.put(PROP_REMOVE_TRAILING_SLASH, true);
