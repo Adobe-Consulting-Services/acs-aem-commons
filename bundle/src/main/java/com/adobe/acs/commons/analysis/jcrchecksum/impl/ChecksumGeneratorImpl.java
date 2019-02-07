@@ -164,6 +164,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @throws RepositoryException
      * @throws IOException
      */
+    @SuppressWarnings("squid:S3776")
     protected String generatedNodeChecksum(final String aggregateNodePath,
                                                   final Node node,
                                                   final ChecksumGeneratorOptions options)

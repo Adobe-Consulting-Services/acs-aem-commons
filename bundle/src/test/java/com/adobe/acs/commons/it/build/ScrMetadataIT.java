@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public class ScrMetadataIT {
 
     private static final Set<String> PROPERTIES_TO_IGNORE;
@@ -114,26 +115,24 @@ public class ScrMetadataIT {
     private List<String> compareDescriptors(Descriptor current, Descriptor latestRelease) {
         List<String> problems = new ArrayList<>();
 
-        current.properties.stream().filter(cp -> !PROPERTIES_TO_IGNORE.contains(cp.name)).
-            filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
+        current.properties.stream().filter(cp -> !PROPERTIES_TO_IGNORE.contains(cp.name))
+            .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
             Optional<Property> fromLatest = latestRelease.properties.stream().filter(p -> p.name.equals(cp.name)).findFirst();
             if (fromLatest.isPresent()) {
                 Property lp = fromLatest.get();
                 if (!StringUtils.equals(cp.value, lp.value)) {
                     problems.add(String.format("Property %s on component %s has different values (was: {%s}, is: {%s})", cp.name, current.name, lp.value, cp.value));
                 }
-                if (!COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.contains(current.name + ":" + cp.name)) {
-                    if (!StringUtils.equals(cp.type, lp.type)) {
-                        problems.add(String.format("Property %s on component %s has different types (was: {%s}, is: {%s})", cp.name, current.name, lp.type, cp.type));
-                    }
+                if (!COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.contains(current.name + ":" + cp.name) && !StringUtils.equals(cp.type, lp.type)) {
+                    problems.add(String.format("Property %s on component %s has different types (was: {%s}, is: {%s})", cp.name, current.name, lp.type, cp.type));
                 }
             } else {
                 System.out.printf("Property %s on component %s is only in current. Assuming OK.\n", cp.name, current.name);
             }
         });
 
-        latestRelease.properties.stream().filter(lp -> !PROPERTIES_TO_IGNORE.contains(lp.name)).
-            filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
+        latestRelease.properties.stream().filter(lp -> !PROPERTIES_TO_IGNORE.contains(lp.name))
+            .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
             Optional<Property> fromCurrent = current.properties.stream().filter(p -> p.name.equals(lp.name)).findFirst();
             if (!fromCurrent.isPresent()) {
                 problems.add(String.format("Property %s on component %s has been removed.", lp.name, latestRelease.name));
@@ -335,6 +334,11 @@ public class ScrMetadataIT {
         }
 
         @Override
+        public int read() throws IOException {
+            return zis.read();
+        }
+
+        @Override
         public int read(@NotNull byte[] b) throws IOException {
             return zis.read(b);
         }
@@ -374,10 +378,6 @@ public class ScrMetadataIT {
             return zis.markSupported();
         }
 
-        @Override
-        public int read() throws IOException {
-            return zis.read();
-        }
     }
 
 

@@ -61,6 +61,7 @@ import java.util.function.Supplier;
             name = "webconsole.configurationFactory.nameHint",
             value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
 })
+@SuppressWarnings("PMD.MoreThanOneLogger")
 public class JsonEventLogger implements EventHandler {
 
     /**

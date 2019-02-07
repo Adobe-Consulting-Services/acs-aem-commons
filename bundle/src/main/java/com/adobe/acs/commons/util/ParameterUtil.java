@@ -136,6 +136,7 @@ public class ParameterUtil {
      *                                If false, entries with multiple separators are considered invalid
      * @return
      */
+    @SuppressWarnings("squid:S3776")
     public static Map<String, String> toMap(final String[] values, final String separator,
                                             final boolean allowValuelessKeys, final String defaultValue,
                                             final boolean allowMultipleSeparators) {
