@@ -19,39 +19,6 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.*;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
 import com.day.cq.commons.Externalizer;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
@@ -62,8 +29,32 @@ import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.util.*;
+
+import static org.apache.sling.api.servlets.ServletResolverConstants.*;
 
 @Component(service = Servlet.class,
 factory = "com.adobe.acs.commons.wcm.impl.SiteMapServlet", 
@@ -183,14 +174,14 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.externalizerDomain = config.externalizer_domain();
         this.includeLastModified = config.include_lastmod();
         this.includeInheritValue = config.include_inherit();
-        this.changefreqProperties = config.changefreq_properties() == null ?
-                ArrayUtils.EMPTY_STRING_ARRAY : config.changefreq_properties();
-        this.priorityProperties = config.priority_properties() == null ?
-                ArrayUtils.EMPTY_STRING_ARRAY : config.priority_properties();
-        this.damAssetProperty = config.damassets_property() == null ?
-                StringUtils.EMPTY : config.damassets_property();
-        this.damAssetTypes = config.damassets_types() == null ?
-                Collections.EMPTY_LIST : Arrays.asList(config.damassets_types());
+        this.changefreqProperties = config.changefreq_properties() == null
+                ? ArrayUtils.EMPTY_STRING_ARRAY : config.changefreq_properties();
+        this.priorityProperties = config.priority_properties() == null
+                ? ArrayUtils.EMPTY_STRING_ARRAY : config.priority_properties();
+        this.damAssetProperty = config.damassets_property() == null
+                ? StringUtils.EMPTY : config.damassets_property();
+        this.damAssetTypes = config.damassets_types() == null
+                ? Collections.EMPTY_LIST : Arrays.asList(config.damassets_types());
         this.excludeFromSiteMapProperty = config.exclude_property();
         this.characterEncoding = config.character_encoding();
         this.extensionlessUrls = config.extensionless_urls();
