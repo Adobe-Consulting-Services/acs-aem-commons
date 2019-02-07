@@ -64,7 +64,7 @@ public class CaffeineStoreRegisterer {
             serviceProps.put("webconsole.configurationFactory.nameHint", "TTL: {httpcache.cachestore.ttl}, "
                     + "Max size in MB: {httpcache.cachestore.maxsize}");
 
-            storeRegistration = (ServiceRegistration<CaffeineMemHttpCacheStoreImpl>) bundleContext.registerService(new String[]{HttpCacheStore.class.getName(), DynamicMBean.class.getName()}, httpCacheStore, serviceProps);
+            storeRegistration = (ServiceRegistration<CaffeineMemHttpCacheStoreImpl>) bundleContext.registerService(HttpCacheStore.class.getName(), httpCacheStore, serviceProps);
 
             log.info("{} activated.", JMX_NAME);
         } catch (NoClassDefFoundError e) {

@@ -75,7 +75,7 @@ import java.util.concurrent.TimeUnit;
                             + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
                     propertyPrivate = true)
 })
-@Service(value = {DynamicMBean.class, HttpCacheStore.class})
+@Service(HttpCacheStore.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
