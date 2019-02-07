@@ -23,4 +23,4 @@
 @Version("2.1.0")
 package com.adobe.acs.commons.util.visitors;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

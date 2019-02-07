@@ -21,4 +21,4 @@
 
 package com.adobe.acs.commons.synth.children;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

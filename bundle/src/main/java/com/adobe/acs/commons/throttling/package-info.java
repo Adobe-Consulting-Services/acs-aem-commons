@@ -20,5 +20,5 @@
 /**
  * HTTP Request Throttling
  */
-@aQute.bnd.annotation.Version("3.19.0")
+@org.osgi.annotation.versioning.Version("3.19.0")
 package com.adobe.acs.commons.throttling;

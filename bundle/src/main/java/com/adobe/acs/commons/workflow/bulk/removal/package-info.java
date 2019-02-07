@@ -20,5 +20,5 @@
 /**
  * Bulk Workflow Removal.
  */
-@aQute.bnd.annotation.Version("3.0.0")
+@org.osgi.annotation.versioning.Version("3.0.0")
 package com.adobe.acs.commons.workflow.bulk.removal;
