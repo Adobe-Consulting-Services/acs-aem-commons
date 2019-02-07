@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
