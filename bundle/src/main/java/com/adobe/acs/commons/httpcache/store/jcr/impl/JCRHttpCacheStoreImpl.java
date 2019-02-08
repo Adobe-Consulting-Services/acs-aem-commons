@@ -76,7 +76,7 @@ import com.adobe.acs.commons.util.impl.JcrCacheMBean;
 /**
  * ACS AEM Commons - HTTP Cache - JCR based cache store implementation.
  */
-@Component(label = "ACS AEM Commons - Http Cache - JCR Cache Store.",
+@Component(label = "ACS AEM Commons - HTTP Cache - JCR Cache Store",
         description = "Cache data store implementation for JCR storage.",
         metatype = true)
 @Service(value = {HttpCacheStore.class, JcrCacheMBean.class, Runnable.class})

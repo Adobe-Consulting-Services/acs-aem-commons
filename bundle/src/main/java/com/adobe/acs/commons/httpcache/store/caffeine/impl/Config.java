@@ -26,7 +26,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_MAXSIZE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.PN_TTL;
 
-@ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Caffeine In Mem cache store.",
+@ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Caffeine In Mem cache store",
         description = "Caffeine Cache data store implementation for in-memory storage. Supports custom TTL per cache config.")
 public @interface Config {
 

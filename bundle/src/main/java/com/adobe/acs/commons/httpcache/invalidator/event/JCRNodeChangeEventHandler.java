@@ -46,7 +46,7 @@ import java.util.Map;
  * invalidated. </p>
  */
 // @formatter:off
-@Component(label = "ACS AEM Commons - HTTP Cache - JCR node change invalidator.",
+@Component(label = "ACS AEM Commons - HTTP Cache - JCR node change invalidator",
            description = "Watches for the configured JCR paths and triggers cache invalidation job.",
            metatype = true,
            immediate = true,

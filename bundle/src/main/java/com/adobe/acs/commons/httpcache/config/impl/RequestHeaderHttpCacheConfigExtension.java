@@ -20,14 +20,19 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
+import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueConfigHelper;
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapperBuilder;
 import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestHeaderKeyValueWrapperBuilder;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,9 +44,40 @@ import java.util.Set;
   * </p>
  *
  */
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, service = {HttpCacheConfigExtension.class, CacheKeyFactory.class})
-@Designate(ocd = KeyValueConfig.class, factory = true)
+@Component(
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {HttpCacheConfigExtension.class, CacheKeyFactory.class}
+)
+@Designate(ocd = RequestHeaderHttpCacheConfigExtension.Config.class, factory = true)
 public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Request header based extension for HttpCacheConfig and CacheKeyFactory",
+            description = "Defined key / values that will be allowed for this extension.")
+    public @interface Config{
+        @AttributeDefinition(
+                name = "Allowed keys",
+                description = "ValueMap keys that will used to generate a cache key."
+        )
+        String[] allowedKeys() default {};
+
+        @AttributeDefinition(
+                name = "Allowed values",
+                description = "If set, narrows down specified keys to specified values only."
+        )
+        String[] allowedValues() default {};
+
+        @AttributeDefinition(
+                name = "Empty is allowed",
+                description = "Allows no value match to be a cache entry."
+        )
+        boolean emptyAllowed() default false;
+
+        @AttributeDefinition(name = "Config Name")
+        String configName() default StringUtils.EMPTY;
+
+        @AttributeDefinition
+        String webconsole_configurationFactory_nameHint() default "Configuration: Keys ({allowedKeys}), Values ({allowedValues})";
+    }
 
     public static final String KEY_TOSTRING_REPRESENTATION = "RequestHeaders";
 
@@ -56,7 +92,10 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
     }
 
     @Activate
-    public void activate(KeyValueConfig config){
-        this.init(config);
+    public void activate(Config config){
+        this.emptyAllowed = config.emptyAllowed();
+        this.valueMapKeys = ImmutableSet.copyOf(config.allowedKeys());
+        this.configName = config.configName();
+        this.allowedValues = KeyValueConfigHelper.convertAllowedValues(config.allowedValues());
     }
 }

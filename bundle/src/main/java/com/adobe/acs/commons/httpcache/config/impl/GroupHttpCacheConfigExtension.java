@@ -47,10 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +58,7 @@ import java.util.Map;
  * config extension accepts the http request only if at least one of the configured groups is present in the request
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
+@Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory",
            description = "HttpCacheConfig custom extension for group based configuration and associated cache key "
                    + "creation.",
            metatype = true,
@@ -71,8 +67,7 @@ import java.util.Map;
 )
 @Properties({
         @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Allowed user groups: {httpcache.config.extension.user-groups.allowed}",
-                propertyPrivate = true)
+                  value = "Allowed user groups: {httpcache.config.extension.user-groups.allowed}")
 })
 @Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {

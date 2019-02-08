@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * In-memory cache store implementation. Uses Google Guava Cache.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
+@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store",
            description = "Cache data store implementation for in-memory storage.",
            metatype = true)
 @Properties({

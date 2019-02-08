@@ -64,7 +64,7 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
     @Mock
     private Resource requestResource;
 
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configA = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -89,9 +89,14 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
         public boolean emptyAllowed() {
             return false;
         }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
+        }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configB = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -115,6 +120,11 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
         @Override
         public boolean emptyAllowed() {
             return true;
+        }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 

@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
-import com.adobe.acs.commons.httpcache.config.impl.KeyValueConfig;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
@@ -42,12 +41,12 @@ public class KeyValueConfigHelper {
 
     /**
      * Converts the OCD allowedValues to a Map using a string delimiter, for easier usage
-     * @param config
+     * @param allowedValues
      * @return
      */
-    public static Map<String,String> convertAllowedValues(KeyValueConfig config){
-        HashMap<String,String> map = new HashMap<>(config.allowedValues().length);
-        for(String allowedValue: config.allowedValues()){
+    public static Map<String,String> convertAllowedValues(String[] allowedValues){
+        HashMap<String,String> map = new HashMap<>(allowedValues.length);
+        for(String allowedValue: allowedValues){
             if(allowedValue.contains(SEPARATOR)){
                 String key = substringBefore(allowedValue, SEPARATOR);
                 String value = substringAfter(allowedValue, SEPARATOR);

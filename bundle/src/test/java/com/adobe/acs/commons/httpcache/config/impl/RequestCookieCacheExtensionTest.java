@@ -65,7 +65,7 @@ public class RequestCookieCacheExtensionTest {
     private Cookie[] cookies;
     private Cookie[] emptyCookies;
 
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestCookieHttpCacheConfigExtension.Config configA = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -90,9 +90,14 @@ public class RequestCookieCacheExtensionTest {
         public boolean emptyAllowed() {
             return false;
         }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
+        }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestCookieHttpCacheConfigExtension.Config configB = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -116,6 +121,11 @@ public class RequestCookieCacheExtensionTest {
         @Override
         public boolean emptyAllowed() {
             return true;
+        }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 

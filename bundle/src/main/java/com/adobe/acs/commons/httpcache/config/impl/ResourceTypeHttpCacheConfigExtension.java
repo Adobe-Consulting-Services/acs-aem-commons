@@ -52,15 +52,14 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory.",
+@Component(label = "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory",
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Allowed resource types: {httpcache.config.extension.resource-types.allowed}",
-                propertyPrivate = true)
+                value = "Allowed resource types: {httpcache.config.extension.resource-types.allowed}")
 })
 @Service
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
