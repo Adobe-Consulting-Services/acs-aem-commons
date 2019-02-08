@@ -65,6 +65,7 @@ public class ScrMetadataIT {
     static {
         PROPERTIES_TO_IGNORE = new HashSet<>();
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_PID);
+        PROPERTIES_TO_IGNORE.add("webconsole.configurationFactory.nameHint");
         //PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
 
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
