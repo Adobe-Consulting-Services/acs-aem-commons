@@ -23,7 +23,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import tldgen.TagAttribute;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
@@ -62,7 +61,6 @@ abstract class AbstractMode extends TagSupport {
         reset();
     }
 
-    @TagAttribute(runtimeValueAllowed = true, required = false)
     public final void setNot(final boolean not) {
         this.not = not;
     }

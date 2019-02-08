@@ -652,24 +652,6 @@
             <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
-            
-        <dependency>
-            <groupId>com.google.code.tld-generator</groupId>
-            <artifactId>tld-generator</artifactId>
-            <version>1.1</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javax.servlet.jsp-api</artifactId>
-                    <groupId>javax.servlet.jsp</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         
     </dependencies>
 </project>

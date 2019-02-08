@@ -29,9 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.scripting.jsp.util.TagUtil;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
 import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.util.ModeUtil;
 
@@ -48,7 +45,6 @@ import com.day.cq.wcm.foundation.Placeholder;
  *
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
 public final class PlaceholderTag extends BodyTagSupport {
 
     private static final long serialVersionUID = -2497240151981056169L;
@@ -86,12 +82,10 @@ public final class PlaceholderTag extends BodyTagSupport {
         }
     }
 
-    @TagAttribute(required = false)
     public void setClassNames(String classNames) {
         this.classNames = classNames;
     }
 
-    @TagAttribute(required = false)
     public void setDdType(String type) {
         this.ddType = type;
     }

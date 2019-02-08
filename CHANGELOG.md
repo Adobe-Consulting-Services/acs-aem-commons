@@ -55,6 +55,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1684 - Useing Autocloseable when closing resourceresolvers
 - #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
+- #1716 - Added short-name to all TLD files.
 
 ### Changed
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
@@ -71,6 +72,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
+- #1716 - TLD files are no longer automatically generated
 
 ## [3.19.0] - 2018-11-03
 
