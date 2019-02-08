@@ -21,7 +21,6 @@ package com.adobe.acs.commons.util;
 
 import javax.annotation.CheckForNull;
 
-import jdk.nashorn.internal.objects.annotations.Function;
 import org.apache.sling.api.resource.ValueMap;
 
 import org.osgi.annotation.versioning.ProviderType;
