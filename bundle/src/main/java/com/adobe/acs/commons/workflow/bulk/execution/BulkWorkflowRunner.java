@@ -20,17 +20,16 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution;
 
-import javax.jcr.RepositoryException;
-
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.acs.commons.util.QueryHelper;
+import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Payload;
-import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Workspace;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.commons.scheduler.ScheduleOptions;
+
+import javax.jcr.RepositoryException;
 
 @ProviderType
 public interface BulkWorkflowRunner {

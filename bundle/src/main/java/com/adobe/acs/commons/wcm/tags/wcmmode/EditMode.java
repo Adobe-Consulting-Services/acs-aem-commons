@@ -19,12 +19,11 @@
  */
 package com.adobe.acs.commons.wcm.tags.wcmmode;
 
+import tldgen.BodyContentType;
+import tldgen.Tag;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
-
-import tldgen.BodyContentType;
-import tldgen.Tag;
 
 /**
  * Implementation of the &lt;wcmmode:edit&gt; tag, everything inside this tag

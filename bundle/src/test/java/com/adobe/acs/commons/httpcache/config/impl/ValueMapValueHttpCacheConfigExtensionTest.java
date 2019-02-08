@@ -65,7 +65,7 @@ public class ValueMapValueHttpCacheConfigExtensionTest {
     @Mock
     private Resource emptyResource;
 
-    KeyValueConfig configA = new KeyValueConfig(){
+    ValueMapValueHttpCacheConfigExtension.Config configA = new ValueMapValueHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -90,9 +90,14 @@ public class ValueMapValueHttpCacheConfigExtensionTest {
         public boolean emptyAllowed() {
             return false;
         }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
+        }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    ValueMapValueHttpCacheConfigExtension.Config configB = new ValueMapValueHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -116,6 +121,11 @@ public class ValueMapValueHttpCacheConfigExtensionTest {
         @Override
         public boolean emptyAllowed() {
             return true;
+        }
+
+        @Override
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 

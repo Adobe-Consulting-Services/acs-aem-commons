@@ -20,15 +20,6 @@
 
 package com.adobe.acs.commons.quickly.operations.impl;
 
-import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
-
-import java.text.Format;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.jcr.RepositoryException;
-
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
@@ -43,23 +34,42 @@ import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
  */
-@Component(service=Operation.class, property= {
-    Operation.PROP_CMD + "=" + LastModifiedOperationImpl.CMD
+@Component
+@Properties({
+        @Property(
+                name = Operation.PROP_CMD,
+                value = LastModifiedOperationImpl.CMD
+        )
 })
+@Service
 public class LastModifiedOperationImpl extends AbstractOperation {
     private static final Logger log = LoggerFactory.getLogger(LastModifiedOperationImpl.class);
 

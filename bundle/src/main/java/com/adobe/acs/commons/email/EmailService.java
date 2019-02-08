@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.email;
 
-import java.util.List;
-import java.util.Map;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.activation.DataSource;
 import javax.mail.internet.InternetAddress;
-
-import org.osgi.annotation.versioning.ProviderType;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A service interface for sending a generic template based Email Notification.

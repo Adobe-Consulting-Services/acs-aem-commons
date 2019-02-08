@@ -29,19 +29,21 @@ import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.commons.jcr.JcrConstants;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,40 +52,41 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service= {HttpCacheConfigExtension.class,CacheKeyFactory.class},
-        property= {
-              "webconsole.configurationFactory.nameHint" + "=" + "Allowed resource types: {httpcache.config.extension.resource-types.allowed}"
-        }
+@Component(label = "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory",
+        metatype = true,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=ResourceTypeHttpCacheConfigExtension.Config.class, factory=true)
+@Properties({
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Allowed resource types: {httpcache.config.extension.resource-types.allowed}")
+})
+@Service
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeHttpCacheConfigExtension.class);
 
-    @ObjectClassDefinition(name= "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory.")
-    public @interface Config {
-        @AttributeDefinition(name = "Allowed paths",
-                description = "Regex of content paths that can be cached.")
-        String[] httpcache_config_extension_paths_allowed() default {};
-
-        @AttributeDefinition(name = "Allowed resource types",
-                description = "Regex of resource types that can be cached.")
-        String[] httpcache_config_extension_resourcetypes_allowed() default {};
-
-        @AttributeDefinition(name = "Check RT of ./jcr:content?",
-                description = "Should the resourceType check be applied to ./jcr:content ?",
-                defaultValue = "false")
-        boolean httpcacheconfig_extension_resourcetypes_page_content() default false;
-
-        @AttributeDefinition(name = "Config Name")
-        String configName() default StringUtils.EMPTY;
-    }
-
     // Custom cache config attributes
+    @Property(label = "Allowed paths",
+            description = "Regex of content paths that can be cached.",
+            unbounded = PropertyUnbounded.ARRAY)
+    private static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
     private List<Pattern> pathPatterns;
+
+    @Property(label = "Allowed resource types",
+            description = "Regex of resource types that can be cached.",
+            unbounded = PropertyUnbounded.ARRAY)
+    private static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
     private List<Pattern> resourceTypePatterns;
+
+    @Property(label = "Check RT of ./jcr:content?",
+            description = "Should the resourceType check be applied to ./jcr:content ?",
+            boolValue = false)
+    public static final String PROP_CHECK_CONTENT_RESOURCE_TYPE = "httpcache.config.extension.resource-types.page-content";
     private boolean checkContentResourceType;
+
+    @Property(label = "Config Name",
+        description = "")
+    private static final String PROP_CONFIG_NAME = "config.name";
 
     //-------------------------<HttpCacheConfigExtension methods>
 
@@ -154,10 +157,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     //-------------------------<OSGi Component methods>
 
     @Activate
-    protected void activate(Config config) {
-        resourceTypePatterns = ParameterUtil.toPatterns(config.httpcache_config_extension_resourcetypes_allowed());
-        pathPatterns = ParameterUtil.toPatterns(config.httpcache_config_extension_paths_allowed());
-        checkContentResourceType = config.httpcacheconfig_extension_resourcetypes_page_content();
+    protected void activate(Map<String, Object> configs) {
+        resourceTypePatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESOURCE_TYPES), new String[]{}));
+        pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
+        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE),false);
 
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }

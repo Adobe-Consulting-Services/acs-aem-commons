@@ -22,11 +22,10 @@ package com.adobe.acs.commons.wcm.tags.wcmmode;
 import javax.servlet.ServletRequest;
 import javax.servlet.jsp.PageContext;
 
+import tldgen.Function;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
-
-import tldgen.Function;
 
 /**
  * JSP function classes from the wcmmode tag namespace.

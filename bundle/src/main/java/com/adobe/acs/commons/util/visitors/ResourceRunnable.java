@@ -20,8 +20,8 @@
 
 package com.adobe.acs.commons.util.visitors;
 
-import org.apache.sling.api.resource.Resource;
 import org.osgi.annotation.versioning.ConsumerType;
+import org.apache.sling.api.resource.Resource;
 
 @ConsumerType
 public interface ResourceRunnable {

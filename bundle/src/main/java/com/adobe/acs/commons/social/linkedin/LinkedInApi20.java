@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.social.linkedin;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.util.impl.SecureRandomStringUtils;
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.extractors.AccessTokenExtractor;
 import org.scribe.extractors.JsonTokenExtractor;
@@ -35,7 +35,7 @@ import org.scribe.oauth.OAuthService;
 import org.scribe.utils.OAuthEncoder;
 import org.scribe.utils.Preconditions;
 
-import com.adobe.acs.commons.util.impl.SecureRandomStringUtils;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Scribe API class for the LinkedIn OAuth 2.0 endpoint.

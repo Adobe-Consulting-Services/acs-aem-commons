@@ -279,12 +279,12 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
-    public HttpSession getSession() {
+    public String changeSessionId() {
         return null;
     }
 
     @Override
-    public String changeSessionId() {
+    public HttpSession getSession() {
         return null;
     }
 

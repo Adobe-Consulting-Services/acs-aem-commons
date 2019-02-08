@@ -82,7 +82,7 @@ public class CaffeineStoreRegistererTest {
     public void test_register(){
 
         systemUnderTest.activate(bundleContext, config);
-        verify(bundleContext, atLeastOnce()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
+        verify(bundleContext, atLeastOnce()).registerService(any(String.class), any(Object.class), argumentCaptor.capture());
         assertEquals(HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,argumentCaptor.getValue().get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
     }
 
@@ -91,7 +91,7 @@ public class CaffeineStoreRegistererTest {
 
         PowerMockito.whenNew(CaffeineMemHttpCacheStoreImpl.class).withParameterTypes(Config.class).withArguments(config).thenThrow(new NoClassDefFoundError("Caffeine lib not loaded!"));
         systemUnderTest.activate(bundleContext, config);
-        verify(bundleContext, never()).registerService(any(String[].class), any(Object.class), argumentCaptor.capture());
+        verify(bundleContext, never()).registerService(any(String.class), any(Object.class), argumentCaptor.capture());
     }
 
 }

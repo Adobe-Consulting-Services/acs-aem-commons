@@ -20,8 +20,6 @@
 /**
  * XSS JSP Functions.
  */
-@Version("4.0.0")
+@org.osgi.annotation.versioning.Version("4.0.0")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/xss", descriptorFile = "xss.tld")
 package com.adobe.acs.commons.xss;
-
-import org.osgi.annotation.versioning.Version;

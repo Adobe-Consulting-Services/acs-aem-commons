@@ -25,23 +25,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,13 +45,12 @@ import java.util.List;
  * Servlet end-point used to initiate replication of resource versions.
  */
 @SuppressWarnings("serial")
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_METHODS+"=POST",
-SLING_SERVLET_SELECTORS+"=replicateversion",
-SLING_SERVLET_EXTENSIONS+"=json",
-SLING_SERVLET_RESOURCE_TYPES+"=acs-commons/components/utilities/version-replicator"
-})
+@SlingServlet(
+        resourceTypes = "acs-commons/components/utilities/version-replicator",
+        selectors = "replicateversion",
+        extensions = "json",
+        methods = "POST",
+        generateComponent = true)
 public class ReplicateVersionServlet extends SlingAllMethodsServlet {
 
     private static final Logger log = LoggerFactory

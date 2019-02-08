@@ -25,17 +25,18 @@ import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionOptions;
 import org.apache.sling.hc.api.execution.HealthCheckExecutionResult;
 import org.apache.sling.hc.api.execution.HealthCheckExecutor;
 import org.apache.sling.settings.SlingSettingsService;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,16 +49,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
-        service= Runnable.class,
-        factory = "com.adobe.acs.commons.hc.impl.HealthCheckStatusEmailer",
-        property = {
-              "scheduler.concurrent=false",
-              "scheduler.runOn=LEADER",
-              "webconsole.configurationFactory.nameHint" + "=" + "Health Check Status E-mailer running every [ {scheduler.expression} ] using Health Check Tags [ {hc.tags} ] to [ {recipients.email-addresses} ]"
-        }
+@Component(
+        label = "ACS AEM Commons - Health Check Status E-mailer",
+        description = "Scheduled Service that runs specified Health Checks and e-mails the results",
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true
 )
-@Designate(ocd=HealthCheckStatusEmailer.Config.class, factory=true)
+@Properties({
+        @Property(
+                label = "Cron expression defining when this Scheduled Service will run",
+                name = "scheduler.expression",
+                description = "Every weekday @ 8am = [ 0 0 8 ? * MON-FRI * ] Visit www.cronmaker.com to generate cron expressions.",
+                value = "0 0 8 ? * MON-FRI *"
+        ),
+        @Property(
+                name = "scheduler.concurrent",
+                boolValue = false,
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "scheduler.runOn",
+                value = "LEADER",
+                propertyPrivate = true
+        )
+})
+@Service(value = Runnable.class)
 public class HealthCheckStatusEmailer implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HealthCheckStatusEmailer.class);
 
@@ -67,93 +84,76 @@ public class HealthCheckStatusEmailer implements Runnable {
     private volatile Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */
-    @ObjectClassDefinition(name = "ACS AEM Commons - Health Check Status E-mailer",
-            description = "Scheduled Service that runs specified Health Checks and e-mails the results")
-    public @interface Config {
-
-        String DEFAULT_SCHEDULER_EXPRESSION = "0 0 8 ? * MON-FRI *";
-        String DEFAULT_HC_TAG = "system";
-        @AttributeDefinition(
-                name = "Cron expression defining when this Scheduled Service will run",
-                description = "Every weekday @ 8am = [ 0 0 8 ? * MON-FRI * ] Visit www.cronmaker.com to generate cron expressions.",
-                defaultValue = DEFAULT_SCHEDULER_EXPRESSION
-        )
-        String scheduler_expression() default DEFAULT_SCHEDULER_EXPRESSION;
-
-        @AttributeDefinition(name = "E-mail Template Path",
-                description = "The absolute JCR path to the e-mail template",
-                defaultValue = DEFAULT_EMAIL_TEMPLATE_PATH)
-        String email_template_path() default DEFAULT_EMAIL_TEMPLATE_PATH;
-
-        @AttributeDefinition(name = "E-mail Subject Prefix",
-                description = "The e-mail subject prefix. E-mail subject format is: <E-mail Subject Prefix> [ # Failures ] [ # Success ] [ <AEM Instance Name> ]",
-                defaultValue = DEFAULT_EMAIL_SUBJECT_PREFIX)
-        String email_subject() default DEFAULT_EMAIL_SUBJECT_PREFIX;
-
-        @AttributeDefinition(name = "Send e-mail only on failure",
-                description = "If true, an e-mail is ONLY sent if at least 1 Health Check failure occurs. [ Default: true ]",
-                   defaultValue = "" + DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE)
-        boolean email_send$_$only$_$on$_$failure() default DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE;
-
-        @AttributeDefinition(name = "Recipient E-mail Addresses",
-                description = "A list of e-mail addresses to send this e-mail to.",
-                cardinality = Integer.MAX_VALUE)
-        String[] recipients_email$_$addresses();
-
-        @AttributeDefinition(name = "Health Check Tags",
-                description = "The AEM Health Check Tag names to execute. [ Default: system ]",
-                cardinality = Integer.MAX_VALUE,
-                defaultValue = {DEFAULT_HC_TAG})
-        String[] hc_tags() default {DEFAULT_HC_TAG};
-
-        @AttributeDefinition(name = "Health Check Timeout Override",
-                description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
-                defaultValue = "" + DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
-        int hc_timeout_override() default DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
-
-        @AttributeDefinition(name = "'OR' Health Check Tags",
-                description = "When set to true, all Health Checks that are in any of the Health Check Tags (hc.tags) are executed. If false, then the Health Check must be in ALL of the Health Check tags (hc.tags). [ Default: true ]",
-                   defaultValue = "" + DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
-        boolean hc_tags_options_or() default DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
-
-        @AttributeDefinition(name = "Hostname Fallback",
-                description = "The value used to identify this AEM instance if the programmatic hostname look-up fails to produce results..",
-                   defaultValue = DEFAULT_FALLBACK_HOSTNAME)
-        String hostname_fallback() default DEFAULT_FALLBACK_HOSTNAME;
-
-        @AttributeDefinition(name = "Quiet Period in Minutes",
-                description = "Defines a time span that prevents this service from sending more than 1 e-mail per quiet period. This prevents e-mail spamming for frequent checks that only e-mail on failure. Default: [ 15 mins ]",
-                   defaultValue = "" + DEFAULT_THROTTLE_IN_MINS)
-        int quiet_minutes() default DEFAULT_THROTTLE_IN_MINS;
-    }
 
     private static final String DEFAULT_EMAIL_TEMPLATE_PATH = "/etc/notification/email/acs-commons/health-check-status-email.txt";
     private String emailTemplatePath = DEFAULT_EMAIL_TEMPLATE_PATH;
+    @Property(label = "E-mail Template Path",
+            description = "The absolute JCR path to the e-mail template",
+            value = DEFAULT_EMAIL_TEMPLATE_PATH)
+    public static final String PROP_TEMPLATE_PATH = "email.template.path";
 
     private static final String DEFAULT_EMAIL_SUBJECT_PREFIX = "AEM Health Check report";
     private String emailSubject = DEFAULT_EMAIL_SUBJECT_PREFIX;
+    @Property(label = "E-mail Subject Prefix",
+            description = "The e-mail subject prefix. E-mail subject format is: <E-mail Subject Prefix> [ # Failures ] [ # Success ] [ <AEM Instance Name> ]",
+            value = DEFAULT_EMAIL_SUBJECT_PREFIX)
+    public static final String PROP_EMAIL_SUBJECT = "email.subject";
 
     private static final boolean DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE = true;
     private boolean sendEmailOnlyOnFailure = DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE;
+    @Property(label = "Send e-mail only on failure",
+            description = "If true, an e-mail is ONLY sent if at least 1 Health Check failure occurs. [ Default: true ]",
+            boolValue = DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE)
+    public static final String PROP_SEND_EMAIL_ONLY_ON_FAILURE = "email.send-only-on-failure";
 
     private static final String[] DEFAULT_RECIPIENT_EMAIL_ADDRESSES = new String[]{};
     private String[] recipientEmailAddresses = DEFAULT_RECIPIENT_EMAIL_ADDRESSES;
+    @Property(label = "Recipient E-mail Addresses",
+            description = "A list of e-mail addresses to send this e-mail to.",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_RECIPIENTS_EMAIL_ADDRESSES = "recipients.email-addresses";
 
     private static final String[] DEFAULT_HEALTH_CHECK_TAGS = new String[]{"system"};
     private String[] healthCheckTags = DEFAULT_HEALTH_CHECK_TAGS;
+    @Property(label = "Health Check Tags",
+            description = "The AEM Health Check Tag names to execute. [ Default: system ]",
+            cardinality = Integer.MAX_VALUE,
+            value = {"system"})
+    public static final String PROP_HEALTH_CHECK_TAGS = "hc.tags";
 
     private static final int DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE = -1;
     private int healthCheckTimeoutOverride = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE;
+    @Property(label = "Health Check Timeout Override",
+            description = "The AEM Health Check timeout override in milliseconds. Set < 1 to disable. [ Default: -1 ]",
+            intValue = DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE)
+    public static final String PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE = "hc.timeout.override";
 
     private static final boolean DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR = true;
     private boolean healthCheckTagsOptionsOr = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR;
+    @Property(label = "'OR' Health Check Tags",
+            description = "When set to true, all Health Checks that are in any of the Health Check Tags (hc.tags) are executed. If false, then the Health Check must be in ALL of the Health Check tags (hc.tags). [ Default: true ]",
+            boolValue = DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR)
+    public static final String PROP_HEALTH_CHECK_TAGS_OPTIONS_OR = "hc.tags.options.or";
 
     private static final String DEFAULT_FALLBACK_HOSTNAME = "Unknown AEM Instance";
     private String fallbackHostname = DEFAULT_FALLBACK_HOSTNAME;
+    @Property(label = "Hostname Fallback",
+            description = "The value used to identify this AEM instance if the programmatic hostname look-up fails to produce results..",
+            value = DEFAULT_FALLBACK_HOSTNAME)
+    public static final String PROP_FALLBACK_HOSTNAME = "hostname.fallback";
 
     private static final int DEFAULT_THROTTLE_IN_MINS = 15;
     private int throttleInMins = DEFAULT_THROTTLE_IN_MINS;
+    @Property(label = "Quiet Period in Minutes",
+            description = "Defines a time span that prevents this service from sending more than 1 e-mail per quiet period. This prevents e-mail spamming for frequent checks that only e-mail on failure. Default: [ 15 mins ]",
+            intValue = DEFAULT_THROTTLE_IN_MINS)
+    public static final String PROP_THROTTLE = "quiet.minutes";
 
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Health Check Status E-mailer running every [ {scheduler.expression} ] using Health Check Tags [ {hc.tags} ] to [ {recipients.email-addresses} ]"
+    )
 
     @Reference
     private ProductInfoService productInfoService;
@@ -291,19 +291,19 @@ public class HealthCheckStatusEmailer implements Runnable {
      * @param config the OSGi config params
      */
     @Activate
-    protected final void activate(HealthCheckStatusEmailer.Config config) {
-        emailTemplatePath = config.email_template_path();
-        emailSubject = config.email_subject();
-        fallbackHostname = config.hostname_fallback();
-        recipientEmailAddresses = config.recipients_email$_$addresses();
-        healthCheckTags = config.hc_tags();
-        healthCheckTagsOptionsOr = config.hc_tags_options_or();
-        sendEmailOnlyOnFailure = config.email_send$_$only$_$on$_$failure();
-        throttleInMins = config.quiet_minutes();
+    protected final void activate(final Map<String, Object> config) {
+        emailTemplatePath = PropertiesUtil.toString(config.get(PROP_TEMPLATE_PATH), DEFAULT_EMAIL_TEMPLATE_PATH);
+        emailSubject = PropertiesUtil.toString(config.get(PROP_EMAIL_SUBJECT), DEFAULT_EMAIL_SUBJECT_PREFIX);
+        fallbackHostname = PropertiesUtil.toString(config.get(PROP_FALLBACK_HOSTNAME), DEFAULT_FALLBACK_HOSTNAME);
+        recipientEmailAddresses = PropertiesUtil.toStringArray(config.get(PROP_RECIPIENTS_EMAIL_ADDRESSES), DEFAULT_RECIPIENT_EMAIL_ADDRESSES);
+        healthCheckTags = PropertiesUtil.toStringArray(config.get(PROP_HEALTH_CHECK_TAGS), DEFAULT_HEALTH_CHECK_TAGS);
+        healthCheckTagsOptionsOr = PropertiesUtil.toBoolean(config.get(PROP_HEALTH_CHECK_TAGS_OPTIONS_OR), DEFAULT_HEALTH_CHECK_TAGS_OPTIONS_OR);
+        sendEmailOnlyOnFailure = PropertiesUtil.toBoolean(config.get(PROP_SEND_EMAIL_ONLY_ON_FAILURE), DEFAULT_SEND_EMAIL_ONLY_ON_FAILURE);
+        throttleInMins = PropertiesUtil.toInteger(config.get(PROP_THROTTLE), DEFAULT_THROTTLE_IN_MINS);
         if (throttleInMins < 0) {
             throttleInMins = DEFAULT_THROTTLE_IN_MINS;
         }
-        healthCheckTimeoutOverride = config.hc_timeout_override();
+        healthCheckTimeoutOverride = PropertiesUtil.toInteger(config.get(PROP_HEALTH_CHECK_TIMEOUT_OVERRIDE), DEFAULT_HEALTH_CHECK_TIMEOUT_OVERRIDE);
     }
 
     /**

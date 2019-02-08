@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,16 +51,13 @@ public class DispatcherMaxAgeHeaderFilterTest {
 
     Dictionary<String, Object> properties = null;
 
-    private int maxage = 2000;
+    private long maxage = 2000;
 
     Set<String> agents = null;
     Set<String> cachecontrol = null;
 
     @SuppressWarnings("rawtypes")
     Map params = null;
-    
-    @Mock
-    private DispatcherMaxAgeHeaderFilter.Config config;
 
     @Mock
     ComponentContext componentContext;
@@ -69,8 +66,9 @@ public class DispatcherMaxAgeHeaderFilterTest {
     HttpServletRequest request;
 
     @Before
-    public void setup() throws Exception {       
-        when(config.max_age()).thenReturn(maxage);
+    public void setup() throws Exception {
+        properties = new Hashtable<String, Object>();
+        properties.put(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE, maxage);
 
         agents = new HashSet<String>();
         cachecontrol = new HashSet<String>();
@@ -105,24 +103,23 @@ public class DispatcherMaxAgeHeaderFilterTest {
 
         when(componentContext.getProperties()).thenReturn(properties);
 
-        filter.activate(config);
+        filter.doActivate(componentContext);
         assertEquals("max-age=" + maxage, filter.getHeaderValue());
     }
 
     @Test(expected = ConfigurationException.class)
     public void testActivateNoMaxAge() throws Exception {
-        when(config.max_age()).thenReturn(-1);
+        properties.remove(DispatcherMaxAgeHeaderFilter.PROP_MAX_AGE);
         when(componentContext.getProperties()).thenReturn(properties);
-        filter.activate(config);
+        filter.activate(componentContext);
     }
 
     @Test
-    @Ignore
     public void testDoActivateSuccess() throws Exception {
 
         when(componentContext.getProperties()).thenReturn(properties);
 
-        filter.activate(config);
+        filter.doActivate(componentContext);
         assertEquals("max-age=" + maxage, filter.getHeaderValue());
         verify(componentContext).getProperties();
         verifyNoMoreInteractions(componentContext);

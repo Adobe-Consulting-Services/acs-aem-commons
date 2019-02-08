@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.wcm.vanity;
 
-import java.io.IOException;
+import org.osgi.annotation.versioning.ProviderType;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.osgi.annotation.versioning.ProviderType;
+import java.io.IOException;
 
 @ProviderType
 @SuppressWarnings("checkstyle:abbreviationaswordinname")

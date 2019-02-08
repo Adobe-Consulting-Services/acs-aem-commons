@@ -19,16 +19,15 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.mcp.util.StringUtil;
+import com.day.cq.commons.jcr.JcrUtil;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.osgi.annotation.versioning.ProviderType;
-
-import com.adobe.acs.commons.mcp.util.StringUtil;
-import com.day.cq.commons.jcr.JcrUtil;
 
 /**
  * Select (drop-down) selector component

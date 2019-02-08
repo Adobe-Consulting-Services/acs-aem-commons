@@ -23,11 +23,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import tldgen.TagAttribute;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
-
-import tldgen.TagAttribute;
 
 /**
  * Abstract class used to implement the other tags for the WcmMode.

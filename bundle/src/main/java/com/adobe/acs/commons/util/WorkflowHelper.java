@@ -20,18 +20,17 @@
 
 package com.adobe.acs.commons.util;
 
-import java.util.List;
-
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.day.cq.dam.api.Asset;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
+import com.day.cq.workflow.exec.WorkflowData;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import java.util.List;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

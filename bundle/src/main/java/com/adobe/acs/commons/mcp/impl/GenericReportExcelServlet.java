@@ -19,25 +19,18 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-
+import com.adobe.acs.commons.mcp.model.GenericReport;
+import com.day.cq.commons.jcr.JcrUtil;
 import java.awt.Color;
-import java.io.IOException;
-import java.util.List;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -47,20 +40,17 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.mcp.model.GenericReport;
-import com.day.cq.commons.jcr.JcrUtil;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Export a generic report as an excel spreadsheet
  */
-@Component(service=Servlet.class,
-property= {
-SLING_SERVLET_EXTENSIONS+"=xlsx,xls",
-SLING_SERVLET_RESOURCE_TYPES+"="+GenericReport.GENERIC_REPORT_RESOURCE_TYPE
-})
+@SlingServlet(resourceTypes = GenericReport.GENERIC_REPORT_RESOURCE_TYPE, extensions = {"xlsx","xls"})
 public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenericReportExcelServlet.class);
 

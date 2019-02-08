@@ -17,7 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@Version("3.1.0")
+@org.osgi.annotation.versioning.Version("3.1.0")
 package com.adobe.acs.commons.redirectmaps;
-
-import org.osgi.annotation.versioning.Version;

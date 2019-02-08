@@ -20,14 +20,13 @@
 
 package com.adobe.acs.commons.quickly.operations;
 
-import java.util.Collection;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+
+import java.util.Collection;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
@@ -52,6 +51,7 @@ public interface Operation {
      * @param response the Response object
      * @param cmd the Command
      * @return list of Results
+     * @throws JSONException
      */
     Collection<Result> getResults(SlingHttpServletRequest request, SlingHttpServletResponse response,
                                   Command cmd);

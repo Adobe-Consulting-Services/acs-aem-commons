@@ -19,9 +19,8 @@
  */
 package com.adobe.acs.commons.xss;
 
-import org.apache.sling.xss.XSSAPI;
 import org.osgi.annotation.versioning.ProviderType;
-
+import org.apache.sling.xss.XSSAPI;
 import tldgen.Function;
 
 

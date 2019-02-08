@@ -19,17 +19,18 @@
  */
 package com.adobe.acs.commons.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.osgi.annotation.versioning.ProviderType;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.osgi.annotation.versioning.ProviderType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ProviderType
 public class ParameterUtil {
@@ -135,6 +136,7 @@ public class ParameterUtil {
      *                                If false, entries with multiple separators are considered invalid
      * @return
      */
+    @SuppressWarnings("squid:S3776")
     public static Map<String, String> toMap(final String[] values, final String separator,
                                             final boolean allowValuelessKeys, final String defaultValue,
                                             final boolean allowMultipleSeparators) {

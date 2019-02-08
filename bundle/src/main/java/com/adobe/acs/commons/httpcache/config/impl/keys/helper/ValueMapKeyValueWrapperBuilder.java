@@ -21,7 +21,6 @@ package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.ValueMapValueHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.ValueMap;
 
 import java.util.Iterator;

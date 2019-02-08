@@ -25,13 +25,12 @@ import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.annotation.versioning.ProviderType;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
-
 import tldgen.Function;
 
 /**

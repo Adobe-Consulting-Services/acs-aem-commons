@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
@@ -27,9 +28,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
-- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
-- #1667 - Refactored the activate methods of all http cache services
-- #1664 - OSGI annotations : fixed default values for various activate methods
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -69,8 +67,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
-- #1719 - Added missing OSGi metatype names for 10 OSGi components.
-- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
+- #1720 - Adjusted metatype for HTTP Cache components.
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin

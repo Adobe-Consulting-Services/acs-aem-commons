@@ -20,8 +20,6 @@
 /**
  * Audio JSP Functions.
  */
-@Version("1.0.2")
+@org.osgi.annotation.versioning.Version("1.0.2")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/audio", descriptorFile = "audio.tld")
 package com.adobe.acs.commons.dam.audio;
-
-import org.osgi.annotation.versioning.Version;

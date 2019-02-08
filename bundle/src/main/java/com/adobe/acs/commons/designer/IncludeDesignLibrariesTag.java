@@ -27,13 +27,13 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.jsp.util.TagUtil;
-import org.osgi.annotation.versioning.ProviderType;
-
-import com.day.cq.wcm.api.designer.Design;
 
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
+import org.osgi.annotation.versioning.ProviderType;
+
+import com.day.cq.wcm.api.designer.Design;
 
 /**
  * JSP Tag which includes client libraries based on the design.

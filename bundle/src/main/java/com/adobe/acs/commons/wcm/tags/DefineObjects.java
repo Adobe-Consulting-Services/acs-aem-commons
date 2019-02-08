@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.wcm.tags;
 
-import javax.servlet.jsp.tagext.BodyTagSupport;
-
-import org.apache.sling.api.scripting.SlingBindings;
 import org.osgi.annotation.versioning.ProviderType;
-
+import org.apache.sling.api.scripting.SlingBindings;
 import tldgen.BodyContentType;
 import tldgen.Tag;
+
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 /**
  * This tag is similar to the OOTB cq:defineObjects tag that adds

@@ -20,37 +20,30 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
 
-import java.io.IOException;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalStatus;
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * ACS AEM Commons - Workflow Instance Remover - Force Quit Servlet
  */
 @SuppressWarnings("serial")
-
-@Component(service = Servlet.class, property = {
-SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
-SLING_SERVLET_SELECTORS + "=force-quit",
-SLING_SERVLET_METHODS + "=POST",
-SLING_SERVLET_EXTENSIONS + "=json" })
+@SlingServlet(
+        methods = { "POST" },
+        resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
+        selectors = { "force-quit" },
+        extensions = { "json" }
+)
 public class ForceQuitServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(ForceQuitServlet.class);
 

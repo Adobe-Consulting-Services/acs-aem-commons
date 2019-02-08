@@ -32,54 +32,57 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * Implementation for custom cache config extension and associated cache key creation based on aem groups. This cache
  * config extension accepts the http request only if at least one of the configured groups is present in the request
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE,
-           factory = "GroupHttpCacheConfigExtension",
-           property= {
-           "webconsole.configurationFactory.nameHint" + "="
-           + "Allowed user groups: {httpcache.config.extension.user-groups.allowed}"
-           }
+@Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory",
+           description = "HttpCacheConfig custom extension for group based configuration and associated cache key "
+                   + "creation.",
+           metatype = true,
+           configurationFactory = true,
+           policy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd=GroupHttpCacheConfigExtension.Config.class,factory=true)
+@Properties({
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                  value = "Allowed user groups: {httpcache.config.extension.user-groups.allowed}")
+})
+@Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(GroupHttpCacheConfigExtension.class);
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory.",
-           description = "HttpCacheConfig custom extension for group based configuration and associated cache key "+ "creation.")
-    public @interface Config {
-        @AttributeDefinition(name = "Allowed user groups",
-                description = "Users groups that are used to accept and create cache keys.")
-        String[] httpcache_config_extension_user_groups_allowed() default {};
+    // Custom cache config attributes
+    @Property(label = "Allowed user groups",
+              description = "Users groups that are used to accept and create cache keys.",
+              unbounded = PropertyUnbounded.ARRAY)
+    private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups.allowed";
 
-        @AttributeDefinition(name = "Config Name")
-        String configName() default StringUtils.EMPTY;
-    }
+    @Property(label = "Config Name",
+        description = "")
+    private static final String PROP_CONFIG_NAME = "config.name";
+
     private List<String> userGroups;
 
     //-------------------------<HttpCacheConfigExtension methods>
@@ -153,10 +156,11 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
 
     @Activate
     @Modified
-    protected void activate(GroupHttpCacheConfigExtension.Config config) {
+    protected void activate(Map<String, Object> configs) {
 
         // User groups after removing empty strings.
-        userGroups = new ArrayList(Arrays.asList(config.httpcache_config_extension_user_groups_allowed()));
+        userGroups = new ArrayList(Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_USER_GROUPS), new
+                String[]{})));
         ListIterator<String> listIterator = userGroups.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();

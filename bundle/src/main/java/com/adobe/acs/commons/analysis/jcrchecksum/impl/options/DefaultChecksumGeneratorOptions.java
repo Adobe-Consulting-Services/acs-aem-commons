@@ -20,8 +20,8 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.annotation.versioning.ProviderType;
+import org.apache.sling.api.SlingHttpServletRequest;
 
 @ProviderType
 public class DefaultChecksumGeneratorOptions extends AbstractChecksumGeneratorOptions {

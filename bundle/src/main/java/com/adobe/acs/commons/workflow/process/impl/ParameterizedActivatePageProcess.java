@@ -20,7 +20,10 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.osgi.service.component.annotations.Component;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
@@ -29,12 +32,24 @@ import com.day.cq.wcm.workflow.process.ActivatePageProcess;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class, property= {
-        "process.label = ACS AEM Commons - Parameterized Activate Resource Process"
+//@formatter:off
+@Component(
+      metatype = true,
+      label = "ACS AEM Commons - Workflow Process - Parameterized Activate Resource",
+      description = "Triggers an activation replication event, but only to specifically configured agents."
+)
+@Properties({
+      @Property(
+              label = "Workflow Label",
+              name = "process.label", 
+              value = "Parameterized Activate Resource Process",
+              description = "Triggers an activation replication event, but only to specifically configured agents."
+      )
 })
+@Service
+//@formatter:on
 public class ParameterizedActivatePageProcess extends ActivatePageProcess {
 
     private static final String AGENT_ARG = "replicationAgent";

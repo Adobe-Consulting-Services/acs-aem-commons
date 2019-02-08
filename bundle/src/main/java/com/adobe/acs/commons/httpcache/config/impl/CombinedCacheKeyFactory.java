@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.CombinedCacheKey;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
@@ -68,11 +67,10 @@ import java.util.Map;
         }
 
 )
-@Designate(ocd = CombinedCacheConfigExtension.Config.class, factory = true)
+@Designate(ocd = CombinedCacheKeyFactory.Config.class, factory = true)
 public class CombinedCacheKeyFactory implements CacheKeyFactory {
 
-
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Combined extension for HttpCacheConfig and CacheKeyFactory.",
+    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - CacheKeyFactory Combiner",
             description = "Aggregates multiple extensions into 1")
     public @interface Config {
 
@@ -83,7 +81,6 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
                 description = "Service pid(s) of target implementation of CacheKeyFactory to be used."
         )
         String cacheKeyFactory_target();
-
     }
 
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);

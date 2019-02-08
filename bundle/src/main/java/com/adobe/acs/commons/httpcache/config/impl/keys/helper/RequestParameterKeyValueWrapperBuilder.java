@@ -21,7 +21,6 @@ package com.adobe.acs.commons.httpcache.config.impl.keys.helper;
 
 import com.adobe.acs.commons.httpcache.config.impl.RequestParameterHttpCacheConfigExtension;
 import com.adobe.acs.commons.util.impl.ReflectionUtil;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Iterator;
 import java.util.Map;

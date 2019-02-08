@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ConsumerType;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * An on-deploy script that can be run via the OnDeployExecutor.

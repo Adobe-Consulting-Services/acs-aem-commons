@@ -20,7 +20,5 @@
 /**
  * HTTP Request Throttling
  */
-@Version("3.19.0")
+@org.osgi.annotation.versioning.Version("3.19.0")
 package com.adobe.acs.commons.throttling;
-
-import org.osgi.annotation.versioning.Version;

@@ -19,12 +19,11 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import org.osgi.annotation.versioning.ConsumerType;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Annotation used to hint what format to apply to report fields
