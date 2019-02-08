@@ -23,9 +23,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
@@ -46,7 +43,6 @@ import com.day.cq.wcm.api.WCMMode;
  * @see <a href="http://dev.day.com/docs/en/cq/current/javadoc/com/day/cq/wcm/api/WCMMode.html">WCMMode</a>
  */
 @ProviderType
-@Tag(value = "setMode", bodyContentType = BodyContentType.JSP)
 public final class SetWCMMode extends TagSupport {
 
     private static final long serialVersionUID = 1247938294323013878L;
@@ -85,12 +81,10 @@ public final class SetWCMMode extends TagSupport {
         return EVAL_PAGE;
     }
 
-    @TagAttribute(required = true, runtimeValueAllowed = true)
     public void setMode(final String mode) {
         this.mode = mode.toUpperCase();
     }
 
-    @TagAttribute(required = false, runtimeValueAllowed = true)
     public void setRestore(final boolean restore) {
         this.restore = restore;
     }
