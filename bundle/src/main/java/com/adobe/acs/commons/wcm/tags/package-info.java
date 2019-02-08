@@ -20,6 +20,6 @@
 /**
  * JSP Functions for working with custom widgets.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
+@org.osgi.annotation.versioning.Version("1.1.1")
 @tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/wcm", descriptorFile = "wcm.tld", functionClasses = { com.adobe.acs.commons.util.TemplateUtil.class })
 package com.adobe.acs.commons.wcm.tags;

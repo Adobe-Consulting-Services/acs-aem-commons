@@ -23,7 +23,7 @@ package com.adobe.acs.commons.quickly;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.google.gson.JsonObject;
 
 @ProviderType

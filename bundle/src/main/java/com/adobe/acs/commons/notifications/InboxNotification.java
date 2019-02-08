@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.notifications;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 import java.io.Serializable;
 

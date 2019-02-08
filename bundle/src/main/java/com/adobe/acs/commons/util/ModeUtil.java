@@ -31,7 +31,7 @@ import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.WCMMode;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 
 @ProviderType

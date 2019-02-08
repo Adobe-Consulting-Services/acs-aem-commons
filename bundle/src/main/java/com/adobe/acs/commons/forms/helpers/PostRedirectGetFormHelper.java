@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;

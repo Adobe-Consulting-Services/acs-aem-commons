@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.quickly.operations;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import com.adobe.acs.commons.quickly.results.Result;
 import org.apache.sling.api.SlingHttpServletRequest;

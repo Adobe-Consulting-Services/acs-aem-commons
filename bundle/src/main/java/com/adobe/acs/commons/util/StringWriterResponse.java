@@ -22,7 +22,7 @@ package com.adobe.acs.commons.util;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

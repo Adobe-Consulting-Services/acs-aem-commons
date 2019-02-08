@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import com.adobe.acs.commons.mcp.form.FormProcessor;
 import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.LoginException;

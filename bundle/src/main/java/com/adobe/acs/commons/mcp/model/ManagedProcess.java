@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import java.io.Serializable;
 import java.text.DateFormat;

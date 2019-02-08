@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.fam.mbean;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.granite.jmx.annotation.Description;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;

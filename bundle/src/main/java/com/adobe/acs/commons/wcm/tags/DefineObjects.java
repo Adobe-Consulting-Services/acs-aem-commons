@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.wcm.tags;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.apache.sling.api.scripting.SlingBindings;
 import tldgen.BodyContentType;
 import tldgen.Tag;

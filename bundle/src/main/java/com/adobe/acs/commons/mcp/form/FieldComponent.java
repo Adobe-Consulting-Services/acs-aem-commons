@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;

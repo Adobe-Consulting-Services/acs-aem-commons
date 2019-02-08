@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.wcm;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import com.day.cq.wcm.api.Page;
 import org.apache.sling.api.resource.Resource;
 

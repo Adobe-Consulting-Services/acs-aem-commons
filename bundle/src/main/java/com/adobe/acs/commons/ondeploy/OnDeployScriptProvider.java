@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 
 import java.util.List;

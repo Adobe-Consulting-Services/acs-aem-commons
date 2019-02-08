@@ -21,7 +21,7 @@ package com.adobe.acs.commons.fam.actions;
 
 import static com.adobe.acs.commons.fam.actions.Actions.nameThread;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.functions.CheckedBiConsumer;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.RoundRobin;

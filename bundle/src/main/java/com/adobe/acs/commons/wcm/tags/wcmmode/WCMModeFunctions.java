@@ -23,7 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import tldgen.Function;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 

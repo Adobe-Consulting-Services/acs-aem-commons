@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.synthetic;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.Map;
 

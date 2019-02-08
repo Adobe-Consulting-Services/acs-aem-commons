@@ -19,7 +19,8 @@
  */
 package com.adobe.acs.commons.functions;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
+
 import java.util.function.BiConsumer;
 
 /**

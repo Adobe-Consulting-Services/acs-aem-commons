@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.data;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;

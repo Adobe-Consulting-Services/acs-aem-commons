@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.fam;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;

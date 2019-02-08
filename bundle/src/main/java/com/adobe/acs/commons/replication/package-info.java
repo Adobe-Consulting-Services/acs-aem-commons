@@ -20,5 +20,5 @@
 /**
  * Replication utilities.
  */
-@org.osgi.annotation.versioning.Version("1.2.0")
+@org.osgi.annotation.versioning.Version("1.2.1")
 package com.adobe.acs.commons.replication;

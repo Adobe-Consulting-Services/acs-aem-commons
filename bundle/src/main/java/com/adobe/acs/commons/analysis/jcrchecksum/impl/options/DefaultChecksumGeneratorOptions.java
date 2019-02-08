@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.apache.sling.api.SlingHttpServletRequest;
 
 @ProviderType

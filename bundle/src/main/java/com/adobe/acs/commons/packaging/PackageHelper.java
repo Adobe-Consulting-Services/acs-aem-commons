@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.packaging;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;

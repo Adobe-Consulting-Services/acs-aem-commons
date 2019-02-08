@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**

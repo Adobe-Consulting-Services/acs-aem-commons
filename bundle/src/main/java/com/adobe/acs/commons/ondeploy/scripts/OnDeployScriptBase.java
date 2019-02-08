@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.ondeploy.scripts;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import com.adobe.acs.commons.search.CloseableQuery;
 import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.commons.jcr.JcrConstants;

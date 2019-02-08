@@ -36,7 +36,7 @@ import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;

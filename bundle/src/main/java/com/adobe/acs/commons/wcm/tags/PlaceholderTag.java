@@ -32,7 +32,7 @@ import org.apache.sling.scripting.jsp.util.TagUtil;
 import tldgen.BodyContentType;
 import tldgen.Tag;
 import tldgen.TagAttribute;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.util.ModeUtil;
 
 import com.adobe.acs.commons.wcm.ComponentHelper;

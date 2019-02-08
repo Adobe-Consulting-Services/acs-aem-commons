@@ -22,7 +22,7 @@ package com.adobe.acs.commons.wcm;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

@@ -22,8 +22,7 @@ package com.adobe.acs.commons.adobeio.service;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
-
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This is the interface for the EndpointService.<br/>

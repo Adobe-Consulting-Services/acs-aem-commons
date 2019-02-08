@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.day.cq.commons.jcr.JcrUtil;
 import java.util.ArrayList;

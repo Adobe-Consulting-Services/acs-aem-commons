@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.quickly.results;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.quickly.Command;
 import com.google.gson.JsonObject;
 import org.apache.sling.api.resource.ValueMap;
