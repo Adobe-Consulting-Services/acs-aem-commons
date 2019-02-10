@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
                     value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
+                    value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - In-Memory Cache Store",
                     propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
                     value = "TTL: {httpcache.cachestore.memcache.ttl}, "
@@ -95,6 +95,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
@@ -248,7 +249,6 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
     }
-
 
     @Override
     public long getTtl() {

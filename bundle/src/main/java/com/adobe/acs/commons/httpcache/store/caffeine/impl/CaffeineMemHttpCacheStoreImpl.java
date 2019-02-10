@@ -26,19 +26,15 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemCacheMBean;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemCachePersistenceObject;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.adobe.acs.commons.util.impl.AbstractCacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Expiry;
-import com.github.benmanes.caffeine.cache.RemovalCause;
-import com.github.benmanes.caffeine.cache.RemovalListener;
-import com.github.benmanes.caffeine.cache.Weigher;
+import com.github.benmanes.caffeine.cache.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.*;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +51,50 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * In-memory cache store implementation. Uses Caffeine Cache.
  */
-public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
+
+
+@Component(
+        label = "ACS AEM Commons - HTTP Cache - Caffeine In-Memory cache store",
+        description = "Cache data store implementation for storage using Caffeine cache.",
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
+@Properties({
+        @Property(
+                name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
+                value = HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE,
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "jmx.objectname",
+                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Caffeine Cache Store",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "TTL: {httpcache.cachestore.caffeine.ttl}, Max size in MB: {httpcache.cachestore.caffeine.maxsize}",
+                propertyPrivate = true
+        )
+})
+@Service(HttpCacheStore.class)
+public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, CaffeineCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(CaffeineMemHttpCacheStoreImpl.class);
+
+    private static final long DEFAULT_TTL = -1L; // Defaults to -1 meaning no TTL.
+    @Property(label = "TTL",
+            description = "TTL for all entries in this cache in seconds. Default to -1 meaning no TTL.",
+            longValue = DEFAULT_TTL)
+    private static final String PROP_TTL = "httpcache.cachestore.caffeine.ttl";
+    private long ttl;
+
+    private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+    @Property(label = "Maximum size of this store in MB",
+            description = "Default to 10MB. If cache size goes beyond this size, least used entry will be evicted "
+                    + "from the cache",
+            longValue = DEFAULT_MAX_SIZE_IN_MB)
+    private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.caffeine.maxsize";
+    private long maxSizeInMb;
+
 
     /** Megabyte to byte */
     private static final long MEGABYTE = 1024L * 1024L;
@@ -64,25 +102,30 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     protected static final int NANOSECOND_MODIFIER = 1000000;
 
     /** Cache - Uses Caffeine cache */
-    private final Cache<CacheKey, MemCachePersistenceObject> cache;
+    private Cache<CacheKey, MemCachePersistenceObject> cache;
+    private Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
 
-    private final Expiry<CacheKey, MemCachePersistenceObject> expiryPolicy;
-    private final long ttl;
-    private final long maxSizeInMb;
-
-    public CaffeineMemHttpCacheStoreImpl(Config config) throws NotCompliantMBeanException {
-        super(MemCacheMBean.class);
+    @Activate
+    protected void activate(Map<String, Object> config) {
         // Read config and populate values.
-        expiryPolicy = new CacheExpiryPolicy(config.httpcache_cachestore_caffeinecache_ttl());
-        this.ttl = config.httpcache_cachestore_caffeinecache_ttl();
-        this.maxSizeInMb = config.httpcache_cachestore_caffeinecache_maxsize();
+        ttl = PropertiesUtil.toLong(config.get(PROP_TTL), DEFAULT_TTL);
+        maxSizeInMb = PropertiesUtil.toLong(config.get(PROP_MAX_SIZE_IN_MB), DEFAULT_MAX_SIZE_IN_MB);
+        expiryPolicy = new CacheExpiryPolicy(ttl);
 
         // Initializing the cache.
         // If cache is present, invalidate all and reinitialize the cache.
+        deactivate();
+
         // Recording cache usage stats enabled.
         cache = buildCache();
     }
 
+    @Deactivate
+    public void deactivate() {
+        if (cache != null) {
+            cache.invalidateAll();
+        }
+    }
 
     private Cache<CacheKey, MemCachePersistenceObject> buildCache() {
         return Caffeine.newBuilder()
@@ -92,6 +135,10 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
                 .removalListener(new MemCacheEntryRemovalListener())
                 .recordStats()
                 .build();
+    }
+
+    public CaffeineMemHttpCacheStoreImpl() throws NotCompliantMBeanException {
+        super(CaffeineCacheMBean.class);
     }
 
     @Override
@@ -139,7 +186,6 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     protected Cache<CacheKey, MemCachePersistenceObject> getCache() {
         return cache;
     }
-
 
     /**
      * Removal listener for cache entry items.
@@ -240,10 +286,5 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
     public String getStoreType() {
         return HttpCacheStore.VALUE_CAFFEINE_MEMORY_STORE_TYPE;
     }
-
-    //-------------------------<Mbean specific implementation>
-
-
-
 
 }

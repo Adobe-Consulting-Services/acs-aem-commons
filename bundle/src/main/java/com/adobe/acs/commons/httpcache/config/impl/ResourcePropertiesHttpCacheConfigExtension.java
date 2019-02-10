@@ -22,9 +22,11 @@ package com.adobe.acs.commons.httpcache.config.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -32,14 +34,12 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
- * RequestHeaderHttpCacheConfigExtension
+ * ResourcePropertiesHttpCacheConfigExtension
  * <p>
- * This extension on the HTTP cache allows for specific HTTP Request Header combinations to create separate cache entries.
+ * This extension on the HTTP cache allows for specific Resource Property combinations to create separate cache entries.
  * </p>
  */
 @Component(
@@ -47,27 +47,27 @@ import java.util.UUID;
         service = {HttpCacheConfigExtension.class, CacheKeyFactory.class}
 )
 @Designate(
-        ocd = RequestHeaderHttpCacheConfigExtension.Config.class,
+        ocd = ResourcePropertiesHttpCacheConfigExtension.Config.class,
         factory = true
 )
-public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
+public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
 
     @ObjectClassDefinition(
-            name = "ACS AEM Commons - HTTP Cache - Extension - Request Header",
-            description = "Defined Request headers / Request header values that will be allowed for this extension (HttpCacheConfig and CacheKeyFactory)."
+            name = "ACS AEM Commons - HTTP Cache - Extension - Resource Properties",
+            description = "Defines Resource Property names / Resource Property values that will be allowed for this extension (HttpCacheConfig and CacheKeyFactory)."
     )
     public @interface Config {
         @AttributeDefinition(
-                name = "Allowed Request Header",
-                description = "The HTTP Request Header to check."
+                name = "Allowed Property names",
+                description = "The Resource Property name to check."
         )
-        String httpcache_config_extension_requestheader() default "";
+        String httpcache_config_extension_property() default "";
 
         @AttributeDefinition(
-                name = "Allowed Request Header values",
-                description = "This request is only accepted for caching when its named request header (above) contains one of these values. Leave blank for any value."
+                name = "Allowed Property values",
+                description = "This request is only accepted for caching when its named resource property (above) contains one of these values. Leave blank for any value."
         )
-        String[] httpcache_config_extension_requestheader_values() default {};
+        String[] httpcache_config_extension_property_values() default {};
 
         @AttributeDefinition(
                 name = "Config Name"
@@ -75,49 +75,50 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         String config_name() default StringUtils.EMPTY;
 
         @AttributeDefinition
-        String webconsole_configurationFactory_nameHint() default "Request Headers: [ {httpcache.config.extension.requestheader} ] Request Header values: [ {httpcache.config.extension.requestheader.values} ] Config name: [ {config.name} ]";
+        String webconsole_configurationFactory_nameHint() default "Properties: [ {httpcache.config.extension.property} ] Property values: [ {httpcache.config.extension.property.values} ] Config name: [ {config.name} ]";
     }
 
-    private Map<String, String[]> allowedHeaders;
+    private Map<String, String[]> allowedProperties;
 
     private String cacheKeyId;
 
     @Override
     public Map<String, String[]> getAllowedKeyValues() {
-        return allowedHeaders;
+        return allowedProperties;
     }
 
     @Override
     public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues) {
         for (final Map.Entry<String, String[]> entry : allowedKeyValues.entrySet()) {
-            final String header = request.getHeader(entry.getKey());
+            final ValueMap properties = request.getResource().getValueMap();
 
-            if (header != null) {
-                if (ArrayUtils.isEmpty(entry.getValue())) {
-                    // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the request header
+            if (properties.containsKey(entry.getKey())) {
+                final String[] propertyValues = properties.get(entry.getKey(), String[].class);
+
+                if (ArrayUtils.isEmpty(propertyValues)) {
+                    // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the property
                     return true;
-                } else if (ArrayUtils.contains(entry.getValue(), header)) {
-                    // The request header value matched one of the allowed values
+                } else if (CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
+                    // The resource property value matched one of the allowed values
                     return true;
                 }
                 // No matches found for this row; continue looking through the allowed list
             }
         }
 
-        // No valid request headers could be found.
+        // No valid resource property could be found.
         return false;
     }
 
     @Override
     public String getCacheKeyId() {
-        return "[Request Header: " + cacheKeyId + "]";
+        return "[Resource Property: " + cacheKeyId + "]";
     }
 
     @Activate
-    public void activate(Config config) {
-        allowedHeaders = new HashMap<>();
-        allowedHeaders.put(config.httpcache_config_extension_requestheader(), config.httpcache_config_extension_requestheader_values());
-
+    public void activate(ResourcePropertiesHttpCacheConfigExtension.Config config) {
+        allowedProperties = new HashMap<>();
+        allowedProperties.put(config.httpcache_config_extension_property(), config.httpcache_config_extension_property_values());
         cacheKeyId = UUID.randomUUID().toString();
     }
 }

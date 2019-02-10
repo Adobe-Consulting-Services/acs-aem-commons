@@ -19,68 +19,46 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
-
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
-import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapperBuilder;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.osgi.service.component.annotations.Component;
 
 import java.util.Map;
-import java.util.Set;
 
-@Component
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
-    protected boolean emptyAllowed;
-    protected Set<String> valueMapKeys;
-    protected Map<String, String> allowedValues;
-    protected String configName;
+    abstract public Map<String, String[]> getAllowedKeyValues();
+
+    abstract public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
+
+    abstract public String getCacheKeyId();
 
     @Override
-    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException {
-        if(emptyAllowed){
-            return true;
-        }
-
-        KeyValueMapWrapper keyValueMapWrapper = getBuilder(request, valueMapKeys, allowedValues).build();
-        return !keyValueMapWrapper.isEmpty();
+    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+        return accepts(request, cacheConfig, getAllowedKeyValues());
     }
 
     @Override
-    public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-
-        KeyValueMapWrapper keyValueMapWrapper = getBuilder(request, valueMapKeys, allowedValues).build();
-        return new KeyValueHttpCacheKey(request, cacheConfig, keyValueMapWrapper);
+    public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+        return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
     }
 
     @Override
-    public CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
-        return new KeyValueHttpCacheKey(resourcePath, cacheConfig, new KeyValueMapWrapper(getKeyToStringRepresentation()));
+    public CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) {
+        return new KeyValueCacheKey(resourcePath, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
     }
 
-
-    protected abstract String getKeyToStringRepresentation();
-
     @Override
-    public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
+    public boolean doesKeyMatchConfig(CacheKey key, HttpCacheConfig cacheConfig) {
         // Check if key is instance of GroupCacheKey.
-        if (!(key instanceof KeyValueHttpCacheKey)) {
+        if (!(key instanceof KeyValueCacheKey)) {
             return false;
         }
-
-        KeyValueHttpCacheKey thatKey = (KeyValueHttpCacheKey) key;
-
-        return new KeyValueHttpCacheKey(thatKey.getUri(), cacheConfig, thatKey.getKeyValueMap()).equals(key);
-
+        // Validate if key request uri can be constructed out of uri patterns in cache config.
+        return new KeyValueCacheKey(key.getUri(), cacheConfig, getCacheKeyId(), getAllowedKeyValues()).equals(key);
     }
-
-    protected abstract KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String,String> allowedValues);
 
 }

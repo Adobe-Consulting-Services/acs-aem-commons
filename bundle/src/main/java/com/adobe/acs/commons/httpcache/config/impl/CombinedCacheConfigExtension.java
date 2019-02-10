@@ -22,6 +22,7 @@ package com.adobe.acs.commons.httpcache.config.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
@@ -44,10 +45,14 @@ import java.util.Map;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
- * Aggregates multiple cache config extensions into 1.
- * This is useful when you need functionality of 2 extensions together.
- * Instead of duplicating and merging the 2 extensions / factories into 1 class, you can leverage this class.
+ * Aggregates multiple cache config extensions into one.
+ * This is useful when you need functionality of two or more extensions together.
+ * Instead of duplicating and merging the multiple extensions / factories into a single class, this factory can be used to combine them.
  */
+
+// TODO This functionality is disabled as it is not working as expected.
+
+/*
 @Component(
         service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -55,74 +60,91 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE
         },
         reference = {
-            @Reference(
-                    name = "cacheConfigExtension",
-                    bind = "bindCacheConfigExtension",
-                    unbind = "unbindCacheConfigExtension",
-                    service = HttpCacheConfigExtension.class,
-                    policy = ReferencePolicy.DYNAMIC,
-                    cardinality = ReferenceCardinality.AT_LEAST_ONE)
+                @Reference(
+                        name = "cacheConfigExtension",
+                        bind = "bindCacheConfigExtension",
+                        unbind = "unbindCacheConfigExtension",
+                        service = HttpCacheConfigExtension.class,
+                        policy = ReferencePolicy.DYNAMIC,
+                        cardinality = ReferenceCardinality.AT_LEAST_ONE)
         }
-
 )
-@Designate(ocd=CombinedCacheConfigExtension.Config.class,factory=true)
+@Designate(
+        ocd = CombinedCacheConfigExtension.Config.class,
+        factory = true
+)
+*/
 public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
+    private static final Logger log = LoggerFactory.getLogger(CombinedCacheConfigExtension.class);
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Extension Combiner",
-            description = "Aggregates multiple extensions into 1")
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - HTTP Cache - Extension Combiner",
+            description = "Aggregates multiple extensions into a single referencable extension."
+    )
     public @interface Config {
-
-        @AttributeDefinition(name = "Config Name")
-        String configName() default EMPTY;
+        @AttributeDefinition(
+                name = "HttpCacheConfigExtension service PIDs",
+                description = "Service PIDs of target implementation of HttpCacheConfigExtensions to be combined and used."
+        )
+        String[] httpcache_config_extension_combiner_service_pids() default {};
 
         @AttributeDefinition(
-                name = "HttpCacheConfigExtension service pids",
-                description = "Service pids of target implementation of HttpCacheConfigExtensions to be combined and used. "
-                        + " Optional parameter.")
-        String cacheConfigExtension_target() default EMPTY;
+                name = "Require all extensions to accept",
+                description = ""
+        )
+        boolean httpcache_config_extension_combiner_require_all_to_accept() default true;
 
+
+        @AttributeDefinition(
+                name = "Config Name"
+        )
+        String config_name() default EMPTY;
     }
 
-    private static final Logger log = LoggerFactory.getLogger(CombinedCacheConfigExtension.class);
-    private String configName;
-
     private RankedServices<HttpCacheConfigExtension> cacheConfigExtensions = new RankedServices<>(Order.ASCENDING);
-    private String cacheConfigExtensionsTarget;
+
+    private Config cfg;
 
     @Override
-    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException {
-
-        for(HttpCacheConfigExtension extension: cacheConfigExtensions){
-            if(!extension.accepts(request, cacheConfig)){
-                return false;
+    public boolean accepts(final SlingHttpServletRequest request, final HttpCacheConfig cacheConfig) throws HttpCacheRepositoryAccessException {
+        if (!cfg.httpcache_config_extension_combiner_require_all_to_accept()) {
+            for (final HttpCacheConfigExtension extension : cacheConfigExtensions) {
+                if (extension.accepts(request, cacheConfig)) {
+                    // Return true as long as AT LEAST one extension accepts.
+                    return true;
+                }
             }
+            return false;
+        } else {
+            for (final HttpCacheConfigExtension extension : cacheConfigExtensions) {
+                if (!extension.accepts(request, cacheConfig)) {
+                    // Return true as long as AT LEAST one extension accepts.
+                    return false;
+                }
+            }
+            return true;
         }
-
-        return true;
     }
 
     @Activate
     @Modified
     protected void activate(CombinedCacheConfigExtension.Config config) {
-        this.configName = config.configName();
-        this.cacheConfigExtensionsTarget = config.cacheConfigExtension_target();
+        cfg = config;
     }
 
-
-
-    protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String,Object> properties){
-        if(extension != this){
-            cacheConfigExtensions.bind(extension, properties);
-        }else{
-            log.error("Invalid http cache config LDAP target string! Self is target(ed)! Breaking up infinite loop. Target: {}", this.cacheConfigExtensionsTarget);
+    protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
+        if (extension != this) {
+            if (ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),
+                    properties.get(Constants.SERVICE_PID))) {
+                // Only accept extensions whose service.pid's are enumerated in the configuration.
+                cacheConfigExtensions.bind(extension, properties);
+            }
         }
     }
 
-    protected void unbindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String,Object> properties){
-        if(extension != this) {
+    protected void unbindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
+        if (extension != this) {
             cacheConfigExtensions.unbind(extension, properties);
         }
     }
-
-
 }

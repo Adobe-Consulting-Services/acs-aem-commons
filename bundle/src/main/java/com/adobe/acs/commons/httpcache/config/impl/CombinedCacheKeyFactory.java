@@ -50,6 +50,10 @@ import java.util.Map;
  * Instead of duplicating and merging the 2 extensions / factories into 1 class, you can leverage this class.
  * It will use existing cache key factories to create a key for each one, and put them in a list.
  */
+
+// TODO This functionality is disabled as it is not working as expected.
+
+/*
 @Component(
         service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -67,20 +71,25 @@ import java.util.Map;
         }
 
 )
-@Designate(ocd = CombinedCacheKeyFactory.Config.class, factory = true)
+@Designate(
+        ocd = CombinedCacheKeyFactory.Config.class,
+        factory = true
+)
+*/
 public class CombinedCacheKeyFactory implements CacheKeyFactory {
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - CacheKeyFactory Combiner",
-            description = "Aggregates multiple extensions into 1")
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - HTTP Cache - CacheKeyFactory Combiner",
+            description = "Aggregates multiple extensions into a single cache key")
     public @interface Config {
 
         @AttributeDefinition(name = "Config Name")
-        String configName() default StringUtils.EMPTY;
+        String config_name() default StringUtils.EMPTY;
 
-        @AttributeDefinition(name = "CacheKeyFactory service pids",
-                description = "Service pid(s) of target implementation of CacheKeyFactory to be used."
+        @AttributeDefinition(name = "CacheKey factory service PIDs",
+                description = "Service PID(s) of target implementation of CacheKeyFactory to be used."
         )
-        String cacheKeyFactory_target();
+        String httpcache_config_cachekey_target();
     }
 
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);
@@ -126,8 +135,8 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
     @Activate
     @Modified
     protected void activate(CombinedCacheKeyFactory.Config config) {
-        this.configName = config.configName();
-        this.cacheKeyFactoriesTarget = config.cacheKeyFactory_target();
+        this.configName = config.config_name();
+        this.cacheKeyFactoriesTarget = config.httpcache_config_cachekey_target();
     }
 
 }

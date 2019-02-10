@@ -19,77 +19,51 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestCookieKeyValueWrapperBuilder;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.Cookie;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestCookieCacheExtensionTest {
+    @Rule
+    public AemContext ctx = new AemContext();
 
-    public static final String REQUEST_URI = "/check-in.html";
-    private static final String REQUEST_RESOURCE_PATH = "/content/eurowings/de/check-in";
-    @Mock
-    private SlingHttpServletRequest request;
+    private final RequestCookieHttpCacheConfigExtension extension = new RequestCookieHttpCacheConfigExtension();
 
-    @Mock
-    private SlingHttpServletRequest emptyRequest;
+    private Cookie myCookieWithoutValue;
+    private Cookie myCookieWithValue;
+    private Cookie randomCookie;
 
-    @Mock
-    private Cookie presentCookie;
-
-    @Mock
-    private Cookie irrelevantCookie;
-
-    private Cookie[] cookies;
-    private Cookie[] emptyCookies;
-
-    RequestCookieHttpCacheConfigExtension.Config configA = new RequestCookieHttpCacheConfigExtension.Config(){
+    RequestCookieHttpCacheConfigExtension.Config configWithCookie = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config2";
+        public String config_name() {
+            return "config-without-values";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-cookie-key", "non-present-cookie"};
+        public String httpcache_config_extension_cookie() {
+            return "myCookie";
         }
 
         @Override
-        public String[] allowedValues() {
+        public String[] httpcache_config_extension_cookie_values() {
             return new String[0];
         }
 
-        @Override
-        public boolean emptyAllowed() {
-            return false;
-        }
 
         @Override
         public String webconsole_configurationFactory_nameHint() {
@@ -97,30 +71,25 @@ public class RequestCookieCacheExtensionTest {
         }
     };
 
-    RequestCookieHttpCacheConfigExtension.Config configB = new RequestCookieHttpCacheConfigExtension.Config(){
+    RequestCookieHttpCacheConfigExtension.Config configWithCookieValues = new RequestCookieHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config";
+        public String config_name() {
+            return "config-with-values";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-cookie-key"};
+        public String httpcache_config_extension_cookie() {
+            return "myCookie";
         }
 
         @Override
-        public String[] allowedValues() {
-            return new String[]{"present-cookie-key=present-cookie-value|value2"};
-        }
-
-        @Override
-        public boolean emptyAllowed() {
-            return true;
+        public String[] httpcache_config_extension_cookie_values() {
+            return new String[]{"zip", "zap", "foo" };
         }
 
         @Override
@@ -128,87 +97,57 @@ public class RequestCookieCacheExtensionTest {
             return null;
         }
     };
-
-    @Mock
-    private HttpCacheConfig validCacheKeyConfig;
-
-    @Mock
-    private Resource requestResource;
-
-    private final RequestCookieHttpCacheConfigExtension systemUnderTest = new RequestCookieHttpCacheConfigExtension();
 
 
     @Before
     public void setUp(){
-
-        cookies = new Cookie[]{presentCookie};
-        emptyCookies = new Cookie[]{irrelevantCookie};
-
-        when(emptyRequest.getCookies()).thenReturn(emptyCookies);
-        when(request.getCookies()).thenReturn(cookies);
-
-        when(irrelevantCookie.getName()).thenReturn("bla");
-        when(presentCookie.getName()).thenReturn("present-cookie-key");
-        when(presentCookie.getValue()).thenReturn("present-cookie-value");
-
-        when(validCacheKeyConfig.getAuthenticationRequirement()).thenReturn("anonymous");
-        when(request.getRequestURI()).thenReturn(REQUEST_URI);
-        when(request.getResource()).thenReturn(requestResource);
-        when(requestResource.getPath()).thenReturn(REQUEST_RESOURCE_PATH);
+        myCookieWithoutValue = new Cookie("myCookie", "");
+        myCookieWithValue = new Cookie("myCookie", "foo");
+        randomCookie = new Cookie("randomCookie", "who cares!");
     }
 
     @Test
-    public void test() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithOnlyCookieNameMatch() {
+        ctx.request().addCookie(myCookieWithoutValue);
 
-        systemUnderTest.activate(configA);
-        assertTrue(systemUnderTest.accepts(request, null));
-        assertFalse(systemUnderTest.accepts(emptyRequest, null));
+        extension.activate(configWithCookie);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-cookie-key"));
-        assertEquals(StringUtils.EMPTY, map.get("present-cookie-key"));
-
-        assertFalse(map.containsKey("non-present-cookie"));
-
-        assertEquals("/check-in.html[CookieKeyValues:present-cookie-key][AUTH_REQ:anonymous]", cacheKey.toString());
-
+        assertTrue(actual);
     }
 
     @Test
-    public void test_with_specific_values() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithOnlyCookieNameMismatch() {
+        ctx.request().addCookie(randomCookie);
 
-        systemUnderTest.activate(configB);
-        assertTrue(systemUnderTest.accepts(request, null));
+        extension.activate(configWithCookie);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-cookie-key"));
-        assertEquals("present-cookie-value", map.get("present-cookie-key"));
+        assertFalse(actual);
+    }
 
-        assertFalse(map.containsKey("non-present-cookie"));
 
-        assertEquals("/check-in.html[CookieKeyValues:present-cookie-key=present-cookie-value][AUTH_REQ:anonymous]", cacheKey.toString());
+    @Test
+    public void test_WithValueMatch() {
+        ctx.request().addCookie(myCookieWithValue);
 
+        extension.activate(configWithCookieValues);
+
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
+
+        assertTrue(actual);
     }
 
     @Test
-    public void testKey() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
-        systemUnderTest.activate(configA);
-        assertTrue(systemUnderTest.accepts(request, null));
-        assertFalse(systemUnderTest.accepts(emptyRequest, null));
+    public void test_WithValueMismatch() {
+        ctx.request().addCookie(randomCookie);
 
-        ImmutableSet<String> allowedKeys = ImmutableSet.of("present-cookie-key", "non-present-cookie-key");
-        ImmutableSet<Cookie> presentValues = ImmutableSet.of(presentCookie);
+        extension.activate(configWithCookieValues);
 
-        Map<String, String> cookieKeyValues = new HashMap<>();
-        KeyValueMapWrapper requestCookieKeyValueMap = new RequestCookieKeyValueWrapperBuilder(allowedKeys, cookieKeyValues, presentValues).build();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        KeyValueHttpCacheKey cookieCacheKey = new KeyValueHttpCacheKey(REQUEST_URI, validCacheKeyConfig, requestCookieKeyValueMap);
-
-        assertTrue(systemUnderTest.doesKeyMatchConfig(cookieCacheKey, validCacheKeyConfig));
+        assertFalse(actual);
     }
-
 }

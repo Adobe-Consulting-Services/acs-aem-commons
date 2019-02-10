@@ -174,11 +174,27 @@ public class ParameterUtil {
      * @param values    Array of key/value pairs in the format => [ a<map-separator>b, x<map-separator>y<list-separator>z ] ... ex. ["dog:woof", "cat:meow,purr"]
      * @param mapSeparator separator between the key/values in the amp
      * @param listSeparator separator between the values in each list
-     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => "meow"
+     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => ["meow", "purr"]
      */
     public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator) {
-        final Map<String, String> map = toMap(values, mapSeparator);
-        final Map<String, String[]> result = new LinkedHashMap<String, String[]>(map.size());
+       return toMap(values, mapSeparator, listSeparator, false, null);
+    }
+
+
+    /**
+     * Util for parsing Arrays of Service properties in the form &gt;value&lt;&gt;map-separator&lt;&gt;value&gt;list-separator&lt;&gt;value&lt;&lt;
+     *
+     * @param values    Array of key/value pairs in the format => [ a<map-separator>b, x<map-separator>y<list-separator>z ] ... ex. ["dog:woof", "cat:meow,purr"]
+     * @param mapSeparator separator between the key/values in the amp
+     * @param listSeparator separator between the values in each list
+     * @param allowValuelessKeys true is keys are allowed without associated values
+     * @param defaultValue default value to use if a value for a key is not present and allowValuelessKeys is true*
+     * @return Map of key/value pairs; map.get("dog") => "woof", map.get("cat") => ["meow", "purr"]
+     */
+    public static Map<String, String[]> toMap(final String[] values, final String mapSeparator, final String listSeparator,
+                                              final boolean allowValuelessKeys, final String defaultValue) {
+        final Map<String, String> map = toMap(values, mapSeparator, allowValuelessKeys, defaultValue);
+        final Map<String, String[]> result = new LinkedHashMap<>(map.size());
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             result.put(entry.getKey(), StringUtils.split(entry.getValue(), listSeparator));
         }
