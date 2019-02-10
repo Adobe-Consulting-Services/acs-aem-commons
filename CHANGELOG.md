@@ -20,8 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
-- #1685 - HttpCache: Added OOTB config extension:: combined extension
-- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
+- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, resource properties value extension
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
