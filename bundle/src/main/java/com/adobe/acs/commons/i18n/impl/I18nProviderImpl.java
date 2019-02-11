@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component(
         property= {
-            "jmx.objectname=com.adobe.acs.httpcache:type=I18N Provider Cache"
+            "jmx.objectname=com.adobe.acs.commons.i18n:type=I18N Provider Cache"
         },
         service = I18nProvider.class,
         immediate = true,

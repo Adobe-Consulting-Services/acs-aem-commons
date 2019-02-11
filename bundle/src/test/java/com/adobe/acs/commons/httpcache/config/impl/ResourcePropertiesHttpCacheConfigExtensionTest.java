@@ -31,16 +31,15 @@ import java.lang.annotation.Annotation;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
 @RunWith(MockitoJUnitRunner.class)
-public class RequestHeaderHttpCacheConfigExtensionTest {
+public class ResourcePropertiesHttpCacheConfigExtensionTest {
 
     @Rule
     public AemContext ctx = new AemContext();
 
-    private final RequestHeaderHttpCacheConfigExtension extension = new RequestHeaderHttpCacheConfigExtension();
+    private final ResourcePropertiesHttpCacheConfigExtension extension = new ResourcePropertiesHttpCacheConfigExtension();
 
-    RequestHeaderHttpCacheConfigExtension.Config configWithRequestHeader = new RequestHeaderHttpCacheConfigExtension.Config(){
+    ResourcePropertiesHttpCacheConfigExtension.Config configWithoutValues = new ResourcePropertiesHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -48,16 +47,16 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
 
         @Override
         public String config_name() {
-            return "config-with-request-header";
+            return "config-without-values";
         }
 
         @Override
-        public String httpcache_config_extension_requestheader() {
-            return "myHeader";
+        public String httpcache_config_extension_property() {
+            return "cacheProperty";
         }
 
         @Override
-        public String[] httpcache_config_extension_requestheader_values() {
+        public String[] httpcache_config_extension_property_values() {
             return new String[0];
         }
 
@@ -67,7 +66,7 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
         }
     };
 
-    RequestHeaderHttpCacheConfigExtension.Config configWithRequestHeaderValues = new RequestHeaderHttpCacheConfigExtension.Config(){
+    ResourcePropertiesHttpCacheConfigExtension.Config configWithValues = new ResourcePropertiesHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -75,16 +74,16 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
 
         @Override
         public String config_name() {
-            return "config-with-request-header-values";
+            return "config-with-values";
         }
 
         @Override
-        public String httpcache_config_extension_requestheader() {
-            return "myHeader";
+        public String httpcache_config_extension_property() {
+            return "cacheProperty";
         }
 
         @Override
-        public String[] httpcache_config_extension_requestheader_values() {
+        public String[] httpcache_config_extension_property_values() {
             return new String[]{"zip", "zap", "foo"};
         }
 
@@ -94,17 +93,21 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
         }
     };
 
-
     @Before
     public void setUp(){
+        ctx.build().resource("/content/cache/property", "cacheProperty", null).commit();
+        ctx.build().resource("/content/cache/values", "cacheProperty", "foo").commit();
 
+        ctx.build().resource("/content/no-cache/property", "noCacheProperty", null).commit();
+        ctx.build().resource("/content/no-cache/values", "noCacheProperty", "bar").commit();
     }
 
-    @Test
-    public void test_WithOnlyNameMatch() {
-        ctx.request().addHeader("myHeader", "");
 
-        extension.activate(configWithRequestHeader);
+    @Test
+    public void test_WithOnlyPropertyNameMatch() {
+        ctx.currentResource(ctx.resourceResolver().getResource("/content/cache/property"));
+
+        extension.activate(configWithoutValues);
 
         boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
@@ -112,10 +115,10 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
     }
 
     @Test
-    public void test_WithOnlyNameMismatch() {
-        ctx.request().addHeader("randomHeader", null);
+    public void test_WithOnlyPropertyNameMismatch() {
+        ctx.currentResource(ctx.resourceResolver().getResource("/content/no-cache/property"));
 
-        extension.activate(configWithRequestHeader);
+        extension.activate(configWithoutValues);
 
         boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
@@ -125,9 +128,9 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
 
     @Test
     public void test_WithValueMatch() {
-        ctx.request().addHeader("myHeader", "foo");
+        ctx.currentResource(ctx.resourceResolver().getResource("/content/cache/values"));
 
-        extension.activate(configWithRequestHeaderValues);
+        extension.activate(configWithValues);
 
         boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
@@ -136,9 +139,9 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
 
     @Test
     public void test_WithValueMismatch() {
-        ctx.request().addHeader("myHeader", "bar");
+        ctx.currentResource(ctx.resourceResolver().getResource("/content/no-cache/values"));
 
-        extension.activate(configWithRequestHeaderValues);
+        extension.activate(configWithValues);
 
         boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 

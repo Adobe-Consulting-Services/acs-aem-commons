@@ -36,17 +36,7 @@ import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyUnbounded;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -90,7 +80,7 @@ import java.util.function.Function;
 )
 @Properties({
         @Property(name = "jmx.objectname",
-                value = "com.adobe.acs.httpcache:type=HTTP Cache Engine",
+                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
                 propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
                 value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
@@ -100,22 +90,25 @@ import java.util.function.Function;
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
                 referenceInterface = HttpCacheConfig.class,
                 policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
                 cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
                referenceInterface = HttpCacheHandlingRule.class,
                policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
                referenceInterface = HttpCacheStore.class,
                policy = ReferencePolicy.DYNAMIC,
+               policyOption = ReferencePolicyOption.GREEDY,
                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 })
 @Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
-    private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpCacheEngineImpl.class);
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
@@ -231,9 +224,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
         if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
 
-            log.debug("Cache store implementation {} has been added", (String) properties.get(HttpCacheStore
-                    .KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores in the map: {}", cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> ADDED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
         }
     }
 
@@ -246,8 +237,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
         final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
         if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
-            log.debug("Cache store removed - {}.", (String) properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores after removal: {}", cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> REMOVED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
         }
     }
 

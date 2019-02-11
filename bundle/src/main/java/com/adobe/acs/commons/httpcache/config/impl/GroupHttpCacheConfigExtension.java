@@ -58,16 +58,15 @@ import java.util.Map;
  * config extension accepts the http request only if at least one of the configured groups is present in the request
  * user's group membership list. Made it as config factory as it could move along 1-1 with HttpCacheConfig.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - Group based extension for HttpCacheConfig and CacheKeyFactory",
-           description = "HttpCacheConfig custom extension for group based configuration and associated cache key "
-                   + "creation.",
+@Component(label = "ACS AEM Commons - HTTP Cache - Extension - Group",
+           description = "HttpCacheConfig custom extension for group based configuration and associated cache key creation (HttpCacheConfig and CacheKeyFactory).",
            metatype = true,
            configurationFactory = true,
            policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(name = "webconsole.configurationFactory.nameHint",
-                  value = "Allowed user groups: {httpcache.config.extension.user-groups.allowed}")
+                  value = "Allowed user groups: [ {httpcache.config.extension.user-groups.allowed} ] Config name: [ config.name ]")
 })
 @Service
 public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
@@ -79,8 +78,7 @@ public class GroupHttpCacheConfigExtension implements HttpCacheConfigExtension, 
               unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_USER_GROUPS = "httpcache.config.extension.user-groups.allowed";
 
-    @Property(label = "Config Name",
-        description = "")
+    @Property(label = "Config Name")
     private static final String PROP_CONFIG_NAME = "config.name";
 
     private List<String> userGroups;

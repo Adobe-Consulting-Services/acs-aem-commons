@@ -52,14 +52,14 @@ import java.util.regex.Pattern;
  * config extension accepts the http request only if at least one of the configured patterns matches the resource type
  * of the request's resource.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - ResourceType based extension for HttpCacheConfig and CacheKeyFactory",
+@Component(label = "ACS AEM Commons - HTTP Cache - Extension - ResourceType",
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
         @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Allowed resource types: {httpcache.config.extension.resource-types.allowed}")
+                value = "Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]")
 })
 @Service
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
@@ -85,7 +85,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     private boolean checkContentResourceType;
 
     @Property(label = "Config Name",
-        description = "")
+            description = "")
     private static final String PROP_CONFIG_NAME = "config.name";
 
     //-------------------------<HttpCacheConfigExtension methods>
@@ -160,7 +160,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     protected void activate(Map<String, Object> configs) {
         resourceTypePatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESOURCE_TYPES), new String[]{}));
         pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
-        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE),false);
+        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE), false);
 
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }
