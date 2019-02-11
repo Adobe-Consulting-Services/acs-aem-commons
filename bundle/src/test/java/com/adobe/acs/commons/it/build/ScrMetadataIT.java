@@ -42,10 +42,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -62,10 +65,14 @@ public class ScrMetadataIT {
 
     private static final Set<String> ALLOWED_SCR_NS_URIS;
 
+    private static final String PROP_NAMEHINT = "webconsole.configurationFactory.nameHint";
+
+    private static final Pattern EXTRACT_VARIABLES;
+
     static {
         PROPERTIES_TO_IGNORE = new HashSet<>();
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_PID);
-        PROPERTIES_TO_IGNORE.add("webconsole.configurationFactory.nameHint");
+        PROPERTIES_TO_IGNORE.add(PROP_NAMEHINT);
         //PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
 
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
@@ -84,6 +91,8 @@ public class ScrMetadataIT {
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.2.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.3.0");
+
+        EXTRACT_VARIABLES = Pattern.compile("\\{([^}]+)}");
     }
 
     private JsonObjectResponseHandler responseHandler = new JsonObjectResponseHandler();
@@ -108,7 +117,25 @@ public class ScrMetadataIT {
                 } else {
                     System.out.printf("Component %s is only in current. Assuming OK.\n", cd.name);
                 }
+
+                if (cd.factory) {
+                    Optional<Property> nameHint = cd.properties.stream().filter(cp -> cp.name.equals(PROP_NAMEHINT)).findFirst();
+                    if (nameHint.isPresent()) {
+                        Set<String> propertyNames = cd.properties.stream().map(cp -> cp.name).collect(Collectors.toSet());
+                        String nameHintValue = nameHint.get().value;
+                        Matcher variableMatcher = EXTRACT_VARIABLES.matcher(nameHintValue);
+                        while (variableMatcher.find()) {
+                            String variable = variableMatcher.group(1);
+                            if (!propertyNames.contains(variable)) {
+                                problems.add(String.format("Property %s referenced in nameHint in %s is not defined.", variable, cd.name));
+                            }
+                        }
+                    } else {
+                        problems.add(String.format("Component factory %s doesn't have a namehint.", cd.name));
+                    }
+                }
             });
+
             if (!problems.isEmpty()) {
                 problems.forEach(System.err::println);
                 TestCase.fail();
@@ -251,6 +278,7 @@ public class ScrMetadataIT {
                         if (pidAttribute != null) {
                             result.name = pidAttribute.getValue();
                         }
+                        result.factory = true;
                     }
                 } else if (elementName.equals("AD")) {
                     String propName = start.getAttributeByName(new QName("id")).getValue();
@@ -297,6 +325,7 @@ public class ScrMetadataIT {
                         cd.properties.add(ap);
                     }
                 });
+                cd.factory = toAdd.factory || cd.factory;
             } else {
                 list.add(toAdd);
             }
@@ -310,6 +339,7 @@ public class ScrMetadataIT {
     private class Descriptor {
         private String name;
         private List<Property> properties = new ArrayList<>();
+        private boolean factory;
 
         @Override
         public String toString() {
