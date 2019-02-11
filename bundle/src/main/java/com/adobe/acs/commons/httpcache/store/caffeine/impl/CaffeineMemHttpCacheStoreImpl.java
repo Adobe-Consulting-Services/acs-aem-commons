@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Component(
         label = "ACS AEM Commons - HTTP Cache - Caffeine In-Memory cache store",
-        description = "Cache data store implementation for storage using Caffeine cache.",
+        description = "Cache data store implementation for storage using Caffeine cache. The 3rd-party Caffeine OSGi bundle MUST be installed and active before the OSGi service is enabled.",
         metatype = true,
         policy = ConfigurationPolicy.REQUIRE
 )
@@ -117,7 +117,12 @@ public class CaffeineMemHttpCacheStoreImpl extends AbstractCaffeineCacheMBean<Ca
         deactivate();
 
         // Recording cache usage stats enabled.
-        cache = buildCache();
+        try {
+            cache = buildCache();
+        } catch (Exception e) {
+            log.error("The 3rd-party Caffeine OSGi bundle must be installed and active for this OSGi service to be used. Please disable this OSGi service until the required Caffeine OSGi bundle is installed", e);
+            throw e;
+        }
     }
 
     @Deactivate
