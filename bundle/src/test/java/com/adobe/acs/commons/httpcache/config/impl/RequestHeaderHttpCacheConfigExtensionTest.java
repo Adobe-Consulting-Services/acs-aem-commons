@@ -102,7 +102,7 @@ public class RequestHeaderHttpCacheConfigExtensionTest {
 
     @Test
     public void test_WithOnlyNameMatch() {
-        ctx.request().addHeader("myHeader", null);
+        ctx.request().addHeader("myHeader", "");
 
         extension.activate(configWithRequestHeader);
 
