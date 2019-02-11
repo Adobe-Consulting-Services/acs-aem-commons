@@ -25,7 +25,7 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.caffeine.impl.Config;
+import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,8 +61,8 @@ public class MemHttpCacheStoreImplTest {
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
 
-        properties.put(Config.PROP_TTL, valueTtl);
-        properties.put(Config.PROP_MAX_SIZE_IN_MB, valueMaxSize);
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_TTL, valueTtl);
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_MAXSIZE, valueMaxSize);
         systemUnderTest.activate(properties);
     }
 
