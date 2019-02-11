@@ -71,6 +71,9 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider:provider.roots");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider:provider.ownsRoots");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl:jmx.objectname");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl:jmx.objectname");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.store.mem.impl.MemHttpCacheStoreImpl:jmx.objectname");
 
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
