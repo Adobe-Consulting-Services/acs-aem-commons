@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import javax.management.DynamicMBean;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
@@ -27,7 +26,7 @@ import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
-public interface CacheMBean extends DynamicMBean
+public interface CacheMBean
 {
     @Description("Clear entire cache")
     void clearCache();

@@ -20,12 +20,11 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution;
 
-import javax.jcr.RepositoryException;
-
-import org.apache.sling.api.resource.PersistenceException;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import org.apache.sling.api.resource.PersistenceException;
+
+import javax.jcr.RepositoryException;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

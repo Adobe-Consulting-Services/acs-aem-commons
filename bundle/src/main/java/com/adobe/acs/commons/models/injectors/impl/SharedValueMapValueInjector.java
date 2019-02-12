@@ -25,14 +25,16 @@ import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.Page;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -41,9 +43,10 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResource;
 
-@Component(service=Injector.class, property= {Constants.SERVICE_RANKING +":Integer=4500"})
+@Component
+@Service
+@Property(name = Constants.SERVICE_RANKING, intValue = 4500)
 public class SharedValueMapValueInjector implements Injector {
-
     @Reference
     private PageRootProvider pageRootProvider;
 

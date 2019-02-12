@@ -21,6 +21,7 @@ package com.adobe.acs.commons.wcm.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
@@ -28,25 +29,29 @@ import java.util.Map;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.polling.importer.ImportException;
 import com.day.cq.polling.importer.Importer;
 
-@Component(service=Importer.class)
-@Designate(ocd=FileImporter.Config.class)
+@Component(label = "ACS AEM Commons - File Importer",
+    description = "Importer which can import a file from the file system into the content repository.",
+    metatype = true)
+@Service
+@Property(label = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
+        name = "displayName", value = "File")
 public final class FileImporter implements Importer {
 
     private static final Logger log = LoggerFactory.getLogger(FileImporter.class);
@@ -55,22 +60,10 @@ public final class FileImporter implements Importer {
 
     @Reference
     private MimeTypeService mimeTypeService;
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - File Importer",
-        description = "Importer which can import a file from the file system into the content repository.")
-    public @interface Config {
-    
-    @AttributeDefinition(name = "Display Name", description = "Label which will be displayed in the Polling Importer Add... dialog",
-            defaultValue = "File")
-    String displayName();
 
-    @AttributeDefinition(name = "Importer Scheme",
-                description = "Scheme value that will be used for this importer. Must be unique across importers.",
-                defaultValue = DEFAULT_SCHEME)
-    String importer_scheme();
-
-    }
-
+    @Property(label = "Importer Scheme",
+            description = "Scheme value that will be used for this importer. Must be unique across importers.",
+            value = DEFAULT_SCHEME)
     private static final String PROP_SCHEME = Importer.SCHEME_PROPERTY;
 
     private String scheme;

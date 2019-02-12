@@ -20,12 +20,31 @@
 
 package com.adobe.acs.commons.wcm.views.impl;
 
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.WCMMode;
+import com.day.cq.wcm.api.components.Component;
+import com.day.cq.wcm.commons.WCMUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.AbstractResourceVisitor;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,61 +56,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.AbstractResourceVisitor;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.api.WCMMode;
-import com.day.cq.wcm.api.components.Component;
-import com.day.cq.wcm.commons.WCMUtils;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-
 @SuppressWarnings("serial")
-@org.osgi.service.component.annotations.Component(
-        service = Servlet.class,
-        property =
-                {
-                        SLING_SERVLET_RESOURCE_TYPES + "=cq/Page",
-                        SLING_SERVLET_METHODS + "=GET",
-                        SLING_SERVLET_EXTENSIONS + "=json",
-                        SLING_SERVLET_SELECTORS + "=wcm-views"
-                }
+@SlingServlet(
+        label = "ACS AEM Commons - WCM Views Servlet",
+        methods = {"GET"},
+        resourceTypes = {"cq/Page"},
+        selectors = {"wcm-views"},
+        extensions = {"json"},
+        metatype = true
 )
-@Designate(ocd = WCMViewsServlet.Config.class)
 public class WCMViewsServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(WCMViewsServlet.class);
 
+    private static final String[] DEFAULT_VIEWS = new String[]{};
     private Map<String, String[]> defaultViews = new HashMap<String, String[]>();
 
-    @ObjectClassDefinition(
-            name = "ACS AEM Commons - WCM Views Servlet"
-    )
-    public @interface Config {
-        @AttributeDefinition(name = "WCM Views by Path",
-                description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]")
-        String[] wcm_views();
-    }
+    @Property(label = "WCM Views by Path",
+            description = "Views to add to the Sidekick by default. Takes format [/path=view-1;view-2]",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_DEFAULT_VIEWS = "wcm-views";
 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
@@ -105,7 +89,7 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
             response.getWriter().write("");
             return;
         }
-
+        
         /* Valid WCMMode */
 
         final PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
@@ -117,18 +101,18 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
         final Set<String> viewSet = new HashSet<String>(visitor.getWCMViews());
 
         // Get the Views provided by the Servlet
-        for (final Map.Entry<String, String[]> entry : this.defaultViews.entrySet()) {
-            if (StringUtils.startsWith(page.getPath(), entry.getKey())) {
+        for(final Map.Entry<String, String[]> entry : this.defaultViews.entrySet()) {
+            if(StringUtils.startsWith(page.getPath(), entry.getKey())) {
                 viewSet.addAll(Arrays.asList(entry.getValue()));
             }
         }
-
+        
         final List<String> views = new ArrayList<String>(viewSet);
-
+        
         Collections.sort(views);
 
         log.debug("Collected WCM Views {} for Page [ {} ]", views, page.getPath());
-
+        
         final JsonArray jsonArray = new JsonArray();
 
         for (final String view : views) {
@@ -171,8 +155,8 @@ public class WCMViewsServlet extends SlingSafeMethodsServlet {
     }
 
     @Activate
-    protected final void activate(WCMViewsServlet.Config config) {
-        final String[] tmp = config.wcm_views();
+    protected final void activate(final Map<String, String> config) {
+        final String[] tmp = PropertiesUtil.toStringArray(config.get(PROP_DEFAULT_VIEWS), DEFAULT_VIEWS);
         this.defaultViews = ParameterUtil.toMap(tmp, "=", ";");
     }
 }

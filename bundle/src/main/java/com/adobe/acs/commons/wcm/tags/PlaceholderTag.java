@@ -28,9 +28,10 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.scripting.jsp.util.TagUtil;
-import org.osgi.annotation.versioning.ProviderType;
 
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.util.ModeUtil;
+
 import com.adobe.acs.commons.wcm.ComponentHelper;
 import com.adobe.acs.commons.wcm.impl.ComponentHelperImpl;
 import com.day.cq.wcm.api.components.Component;
@@ -38,17 +39,12 @@ import com.day.cq.wcm.api.components.DropTarget;
 import com.day.cq.wcm.commons.WCMUtils;
 import com.day.cq.wcm.foundation.Placeholder;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
-
 /**
  * JSP tag which outputs placeholders for components
  * for both Classic UI and Touch UI.
  *
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "placeholder")
 public final class PlaceholderTag extends BodyTagSupport {
 
     private static final long serialVersionUID = -2497240151981056169L;
@@ -86,12 +82,10 @@ public final class PlaceholderTag extends BodyTagSupport {
         }
     }
 
-    @TagAttribute(required = false)
     public void setClassNames(String classNames) {
         this.classNames = classNames;
     }
 
-    @TagAttribute(required = false)
     public void setDdType(String type) {
         this.ddType = type;
     }

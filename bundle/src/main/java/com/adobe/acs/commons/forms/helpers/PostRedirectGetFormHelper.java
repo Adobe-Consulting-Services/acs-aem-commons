@@ -19,14 +19,15 @@
  */
 package com.adobe.acs.commons.forms.helpers;
 
-import java.io.IOException;
-
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
 import com.day.cq.wcm.api.Page;
+
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+
+import java.io.IOException;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

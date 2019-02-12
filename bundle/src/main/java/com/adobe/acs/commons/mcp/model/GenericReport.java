@@ -19,19 +19,22 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.day.cq.commons.jcr.JcrUtil;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.inject.Inject;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-
+import com.adobe.acs.commons.mcp.util.StringUtil;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -41,11 +44,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.osgi.annotation.versioning.ProviderType;
-
-import com.adobe.acs.commons.mcp.ProcessInstance;
-import com.adobe.acs.commons.mcp.util.StringUtil;
-import com.day.cq.commons.jcr.JcrUtil;
 
 /**
  * Describes a very simple table, which is up to the process definition to

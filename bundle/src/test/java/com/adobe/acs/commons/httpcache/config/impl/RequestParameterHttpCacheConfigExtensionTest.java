@@ -19,166 +19,125 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
-import static java.util.Collections.emptyMap;
-import static org.apache.commons.collections.IteratorUtils.asEnumeration;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestParameterHttpCacheConfigExtensionTest {
+    @Rule
+    public AemContext ctx = new AemContext();
 
-    public static final String REQUEST_URI = "/check-in.html";
-    private static final String REQUEST_RESOURCE_PATH = "/content/eurowings/de/check-in";
-    @Mock
-    private SlingHttpServletRequest request;
-
-    @Mock
-    private SlingHttpServletRequest emptyRequest;
-
-    @Mock
-    private HttpCacheConfig validCacheKeyConfig;
-
-    @Mock
-    private Resource requestResource;
-
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameter = new RequestParameterHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config2";
+        public String config_name() {
+            return "config";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-parameter-key", "non-present-parameter"};
+        public String httpcache_config_extension_requestparameter() {
+            return "myParameter";
         }
 
         @Override
-        public String[] allowedValues() {
+        public String[] httpcache_config_extension_requestparameter_values() {
             return new String[0];
         }
 
         @Override
-        public boolean emptyAllowed() {
-            return false;
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameterValues = new RequestParameterHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config";
+        public String config_name() {
+            return "config-with-values";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-parameter-key"};
+        public String httpcache_config_extension_requestparameter() {
+            return "myParameter";
         }
 
         @Override
-        public String[] allowedValues() {
-            return new String[]{"present-parameter-key=present-parameter-value|value2"};
+        public String[] httpcache_config_extension_requestparameter_values() {
+            return new String[]{"zip", "zap", "foo"};
         }
 
         @Override
-        public boolean emptyAllowed() {
-            return true;
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 
-    private final Map<String,String[]> parameterValueMap = new HashMap<>();
-    private final RequestParameterHttpCacheConfigExtension systemUnderTest = new RequestParameterHttpCacheConfigExtension();
+    private final RequestParameterHttpCacheConfigExtension extension = new RequestParameterHttpCacheConfigExtension();
 
 
     @Before
-    public void setUp(){
+    public void setUp(){ }
 
-        parameterValueMap.put("present-parameter-key", new String[]{"present-parameter-value"});
+    @Test
+    public void test_WithOnlyNameMatch() {
+        ctx.request().setQueryString("myParameter");
 
-        when(request.getParameterNames()).thenAnswer((Answer<Enumeration<String>>) invocationOnMock -> asEnumeration(parameterValueMap.keySet().iterator()));
-        when(emptyRequest.getParameterNames()).thenAnswer((Answer<Enumeration<String>>) invocationOnMock -> asEnumeration(Collections.emptyIterator()));
+        extension.activate(configWithRequestParameter);
 
-        when(request.getParameterMap()).thenAnswer((Answer<Map<String, String[]>>) invocationOnMock -> parameterValueMap);
-        when(emptyRequest.getParameterMap()).thenAnswer((Answer<Map<String, String[]>>) invocationOnMock -> emptyMap());
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
+        assertTrue(actual);
+    }
 
-        when(request.getParameter(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
-            String key = invocationOnMock.getArguments()[0].toString();
-            return parameterValueMap.get(key)[0];
-        });
+    @Test
+    public void test_WithOnlyNameMismatch() {
+        ctx.request().setQueryString("randomParameter");
 
-        when(validCacheKeyConfig.getAuthenticationRequirement()).thenReturn("anonymous");
-        when(request.getRequestURI()).thenReturn(REQUEST_URI);
-        when(request.getResource()).thenReturn(requestResource);
-        when(requestResource.getPath()).thenReturn(REQUEST_RESOURCE_PATH);
+        extension.activate(configWithRequestParameter);
+
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
+
+        assertFalse(actual);
     }
 
 
     @Test
-    public void test() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithValueMatch() {
+        ctx.request().setQueryString("myParameter=foo");
 
-        systemUnderTest.activate(configA);
-        assertTrue(systemUnderTest.accepts(request, null));
-        assertFalse(systemUnderTest.accepts(emptyRequest, null));
+        extension.activate(configWithRequestParameterValues);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-parameter-key[0]"));
-        assertEquals(StringUtils.EMPTY, map.get("present-parameter-key[0]"));
-
-        assertFalse(map.containsKey("non-present-parameter"));
-
-        assertEquals("/check-in.html[RequestParameters:present-parameter-key[0]][AUTH_REQ:anonymous]", cacheKey.toString());
-
+        assertTrue(actual);
     }
 
     @Test
-    public void test_with_specific_values() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithValueMismatch() {
+        ctx.request().setQueryString("myParameter=bar");
 
-        systemUnderTest.activate(configB);
-        assertTrue(systemUnderTest.accepts(request, null));
+        extension.activate(configWithRequestParameterValues);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-parameter-key[0]"));
-        assertEquals("present-parameter-value", map.get("present-parameter-key[0]"));
-
-        assertFalse(map.containsKey("non-present-parameter"));
-
-        assertEquals("/check-in.html[RequestParameters:present-parameter-key[0]=present-parameter-value][AUTH_REQ:anonymous]", cacheKey.toString());
-
+        assertFalse(actual);
     }
 }

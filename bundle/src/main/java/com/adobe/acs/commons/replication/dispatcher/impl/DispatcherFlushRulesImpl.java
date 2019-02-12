@@ -20,34 +20,9 @@
 
 package com.adobe.acs.commons.replication.dispatcher.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter;
-import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.replication.dispatcher.DispatcherFlusher;
+import com.adobe.acs.commons.replication.dispatcher.DispatcherFlushFilter.FlushType;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.AgentManager;
 import com.day.cq.replication.Preprocessor;
@@ -56,11 +31,48 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 
-@Component(service=Preprocessor.class,
-configurationPolicy=ConfigurationPolicy.REQUIRE, property= {
-"webconsole.configurationFactory.nameHint" + "=" + "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]"
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Component(
+        label = "ACS AEM Commons - Dispatcher Flush Rules",
+        description = "Facilitates the flushing of associated paths based on resources being replicated. "
+                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
+                + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
+                + "'CQ-Action-Scope: ResourceOnly'."
+                + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
+                + "due to dangerous cyclic conditions.",
+        metatype = true,
+        configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE)
+@Service
+@Properties({
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Rule: {prop.replication-action-type}, for Hierarchy: [{prop.rules.hierarchical}] or Resources: [{prop.rules.resource-only}]")
 })
-@Designate(ocd=DispatcherFlushRulesImpl.Config.class,factory=true)
 public class DispatcherFlushRulesImpl implements Preprocessor {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlushRulesImpl.class);
 
@@ -73,58 +85,42 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             new DispatcherFlushRulesFilter(FlushType.Hierarchical);
     private static final DispatcherFlushFilter RESOURCE_ONLY_FILTER =
             new DispatcherFlushRulesFilter(FlushType.ResourceOnly);
-    
-    @ObjectClassDefinition(name  = "ACS AEM Commons - Dispatcher Flush Rules",
-        description = "Facilitates the flushing of associated paths based on resources being replicated. "
-                + "All flushes use the AEM Replication APIs and support queuing on the Replication Agent."
-                + "ResourceOnly flushes require Replication Flush Agents with the HTTP Header of "
-                + "'CQ-Action-Scope: ResourceOnly'."
-                + "Neither rule sets supports chaining; { /a/.*=/b/c -> /b/.*=/d/e }, "
-                + "due to dangerous cyclic conditions.")
-    public @interface Config {
-    
-    @AttributeDefinition(name = "Replication Action Type",
-                description = "The Replication Action Type to use when issuing the flush cmd to the associated paths. "
-                        + "If 'Inherit' is selected, the Replication Action Type of the observed Replication Action "
-                        + "will be used.",
-                options = {
-                        @Option(value = OPTION_INHERIT, label = "Inherit"),
-                        @Option(value = OPTION_ACTIVATE, label = "Invalidate Cache"),
-                        @Option(value = OPTION_DELETE, label = "Delete Cache")
-                })
-        String prop_replicationactiontype();
-    
-    @AttributeDefinition(name = "Flush Rules (Hierarchical)",
-                description = "Pattern to Path associations for flush rules."
-                        + "Format: <pattern-of-trigger-content>=<path-to-flush>")
-        String[] prop_rules_hierarchical();
-        
-    @AttributeDefinition(name = "Flush Rules (ResourceOnly)",
-                description = "Pattern to Path associations for flush rules. "
-                        + "Format: <pattern-of-trigger-content>=<path-to-flush>")
-        String[] prop_rules_resourceonly();
-
-
-
-    }
 
     /* Replication Action Type Property */
 
     private static final String DEFAULT_REPLICATION_ACTION_TYPE_NAME = OPTION_INHERIT;
-
-    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replicationactiontype";
+    @Property(label = "Replication Action Type",
+            description = "The Replication Action Type to use when issuing the flush cmd to the associated paths. "
+                    + "If 'Inherit' is selected, the Replication Action Type of the observed Replication Action "
+                    + "will be used.",
+            options = {
+                    @PropertyOption(name = OPTION_INHERIT, value = "Inherit"),
+                    @PropertyOption(name = OPTION_ACTIVATE, value = "Invalidate Cache"),
+                    @PropertyOption(name = OPTION_DELETE, value = "Delete Cache")
+            })
+    private static final String PROP_REPLICATION_ACTION_TYPE_NAME = "prop.replication-action-type";
 
 
     /* Flush Rules */
     private static final String[] DEFAULT_HIERARCHICAL_FLUSH_RULES = {};
 
+    @Property(label = "Flush Rules (Hierarchical)",
+            description = "Pattern to Path associations for flush rules."
+                    + "Format: <pattern-of-trigger-content>=<path-to-flush>",
+            cardinality = Integer.MAX_VALUE,
+            value = { })
     private static final String PROP_FLUSH_RULES = "prop.rules.hierarchical";
 
 
     /* Flush Rules */
     private static final String[] DEFAULT_RESOURCE_ONLY_FLUSH_RULES = {};
 
-    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resourceonly";
+    @Property(label = "Flush Rules (ResourceOnly)",
+            description = "Pattern to Path associations for flush rules. "
+                    + "Format: <pattern-of-trigger-content>=<path-to-flush>",
+            cardinality = Integer.MAX_VALUE,
+            value = { })
+    private static final String PROP_RESOURCE_ONLY_FLUSH_RULES = "prop.rules.resource-only";
 
     private static final String SERVICE_NAME = "dispatcher-flush";
     protected static final Map<String, Object> AUTH_INFO;

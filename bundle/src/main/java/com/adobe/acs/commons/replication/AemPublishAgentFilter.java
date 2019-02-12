@@ -20,12 +20,11 @@
 
 package com.adobe.acs.commons.replication;
 
-import org.apache.commons.lang3.StringUtils;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Replication Agent Filter used to identify AEM Publish Replication agents.

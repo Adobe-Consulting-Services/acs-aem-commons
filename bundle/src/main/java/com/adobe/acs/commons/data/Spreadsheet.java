@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.data;
 
+import org.osgi.annotation.versioning.ProviderType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -35,14 +36,12 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.request.RequestParameter;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Simple abstraction of reading a single spreadsheet of values. Expects a

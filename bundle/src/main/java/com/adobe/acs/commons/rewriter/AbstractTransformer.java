@@ -24,11 +24,12 @@ import java.io.IOException;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
-import org.osgi.annotation.versioning.ConsumerType;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Abstract base class to ease creating transformer pipeline components.

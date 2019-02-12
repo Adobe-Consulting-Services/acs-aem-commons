@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import org.osgi.annotation.versioning.ProviderType;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Annotation used to declare process inputs.

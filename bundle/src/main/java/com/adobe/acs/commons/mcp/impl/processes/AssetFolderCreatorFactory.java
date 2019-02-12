@@ -19,25 +19,28 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-
-import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
-import com.adobe.acs.commons.util.datadefinitions.ResourceDefinitionBuilder;
-
-@Component(service=ProcessDefinitionFactory.class,reference= {
-       @Reference(
-                   name = "resourceDefinitionBuilder",
-                   service = ResourceDefinitionBuilder.class,
-                   policy = ReferencePolicy.DYNAMIC,
-                   cardinality = ReferenceCardinality.MULTIPLE)
+@Component
+@References({
+        @Reference(
+                name = "resourceDefinitionBuilder",
+                referenceInterface = ResourceDefinitionBuilder.class,
+                policy = ReferencePolicy.DYNAMIC,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 })
+@Service(ProcessDefinitionFactory.class)
 public class AssetFolderCreatorFactory extends ProcessDefinitionFactory<AssetFolderCreator> {
 
     private Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders = new ConcurrentHashMap<String, ResourceDefinitionBuilder>();

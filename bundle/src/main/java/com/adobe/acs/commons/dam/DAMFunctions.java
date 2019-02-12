@@ -20,12 +20,11 @@
 package com.adobe.acs.commons.dam;
 
 import org.apache.commons.lang.StringUtils;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
-
-import tldgen.Function;
 
 /**
  * DAM JSP functions.
@@ -42,7 +41,6 @@ public final class DAMFunctions {
      * @param asset the asset
      * @return the asset title or name
      */
-    @Function
     public static String getTitleOrName(Asset asset) {
         String title = asset.getMetadataValue(DamConstants.DC_TITLE);
         return StringUtils.isNotBlank(title) ? title : asset.getName();

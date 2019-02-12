@@ -21,26 +21,32 @@ package com.adobe.acs.commons.logging.impl;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
-
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
 import ch.qos.logback.core.net.SyslogAppenderBase;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.component.ComponentContext;
 
 import ch.qos.logback.core.Appender;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE, immediate = true, property= {
-      "webconsole.configurationFactory.nameHint" + "=" + "Host: {host}, for loggers [{loggers}]"
+@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+        label = "ACS AEM Commons - Syslog Appender",
+        description = "Logback appender to send messages using Syslog")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Host: {host}, for loggers [{loggers}]")
 })
-@Designate(ocd=SyslogAppender.Config.class, factory=true)
 public final class SyslogAppender {
 
     private static final String ROOT = "ROOT";
@@ -52,40 +58,35 @@ public final class SyslogAppender {
     private static final String DEFAULT_FACILITY = "USER";
 
     private static final boolean DEFAULT_THROWABLE_EXCLUDED = false;
-    
-    @ObjectClassDefinition(name = "ACS AEM Commons - Syslog Appender",
-        description = "Logback appender to send messages using Syslog")
-    public @interface Config {
-       
-        @AttributeDefinition(name = "Host", description = "Host of Syslog server")
-        String host() default "";
 
-        @AttributeDefinition(name = "Logger Names", description = "List of logger categories (ROOT for all)",
-                 defaultValue = ROOT)
-        String[] loggers() default {ROOT};
+    @Property(label = "Host", description = "Host of Syslog server")
+    static final String PROP_HOST = "host";
 
-        @AttributeDefinition(name = "Port", description = "Port of Syslog server", defaultValue = ""+DEFAULT_PORT)
-        int port() default DEFAULT_PORT;
+    @Property(label = "Logger Names", description = "List of logger categories (ROOT for all)",
+            unbounded = PropertyUnbounded.ARRAY, value = ROOT)
+    static final String PROP_LOGGERS = "loggers";
 
-        @AttributeDefinition(name = "Suffix Pattern", description = "Logback Pattern defining the message format.",
-                defaultValue = DEFAULT_SUFFIX_PATTERN)
-        String suffix_pattern() default DEFAULT_SUFFIX_PATTERN;
+    @Property(label = "Port", description = "Port of Syslog server", intValue = -1)
+    static final String PROP_PORT = "port";
 
-        @AttributeDefinition(name = "Syslog Facility", defaultValue = DEFAULT_FACILITY,
-                description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
-                + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
-                + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
-                + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
-        String facility() default DEFAULT_FACILITY;
+    @Property(label = "Suffix Pattern", description = "Logback Pattern defining the message format.",
+            value = DEFAULT_SUFFIX_PATTERN)
+    static final String PROP_SUFFIX_PATTERN = "suffix.pattern";
 
-        @AttributeDefinition(name = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
-                 + "trace line. The default value for this property is a single tab character.")
-        String stack_trace_pattern();
+    @Property(label = "Syslog Facility", value = DEFAULT_FACILITY, propertyPrivate = true,
+            description = "The Syslog Facility is meant to identify the source of a message, separately from any context "
+            + "included in the Suffix Pattern. The facility option must be set to one of the strings KERN, USER, MAIL, DAEMON, "
+            + "AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, NTP, AUDIT, ALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, "
+            + "LOCAL5, LOCAL6, LOCAL7. Case is not important.")
+    static final String PROP_FACILITY = "facility";
 
-        @AttributeDefinition(name = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
-                + "By default, this is set to false so that stack trace data is sent to the syslog server.", defaultValue = ""+DEFAULT_THROWABLE_EXCLUDED)
-        boolean throwable_excluded() default DEFAULT_THROWABLE_EXCLUDED;
-    }
+    @Property(label = "Stack Trace Pattern", description = "Logback Pattern for customizing the string appearing just before each stack "
+             + "trace line. The default value for this property is a single tab character.")
+    static final String PROP_STACK_TRACE_PATTERN = "stack.trace.pattern";
+
+    @Property(label = "Exclude Throwables", description = "Set to true to cause stack trace data associated with a Throwable to be omitted. "
+            + "By default, this is set to false so that stack trace data is sent to the syslog server.", boolValue = DEFAULT_THROWABLE_EXCLUDED)
+    static final String PROP_THROWABLE_EXCLUDED = "throwable.excluded";
 
     private ch.qos.logback.classic.net.SyslogAppender appender;
 
@@ -93,22 +94,24 @@ public final class SyslogAppender {
 
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(final BundleContext ctx, final Config config) {
-        this.appender = constructAppender(config);
+    protected void activate(final BundleContext ctx, final Map<String, Object> properties) {
+        this.appender = constructAppender(properties);
 
-        final String[] loggers = config.loggers();
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        final String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put("loggers", loggers);
         appenderRegistration = ctx.registerService(Appender.class.getName(), appender, props);
     }
 
-    static ch.qos.logback.classic.net.SyslogAppender constructAppender(final Config config) {
-        final String suffixPattern = config.suffix_pattern();
-        final int port = config.port();
-        final String host = config.host();
-        final String facility = config.facility();
-        final String stackTracePattern = config.stack_trace_pattern();
-        final boolean throwableExcluded = config.throwable_excluded();
+    static ch.qos.logback.classic.net.SyslogAppender constructAppender(final Map<String, Object> properties) {
+        final String suffixPattern = PropertiesUtil
+                .toString(properties.get(PROP_SUFFIX_PATTERN), DEFAULT_SUFFIX_PATTERN);
+        final int port = PropertiesUtil.toInteger(properties.get(PROP_PORT), DEFAULT_PORT);
+        final String host = PropertiesUtil.toString(properties.get(PROP_HOST), null);
+        final String facility = PropertiesUtil.toString(properties.get(PROP_FACILITY), DEFAULT_FACILITY);
+        final String stackTracePattern = PropertiesUtil.toString(properties.get(PROP_STACK_TRACE_PATTERN), null);
+        final boolean throwableExcluded = PropertiesUtil.toBoolean(properties.get(PROP_THROWABLE_EXCLUDED), DEFAULT_THROWABLE_EXCLUDED);
+
 
         if (StringUtils.isEmpty(host) || port == -1) {
             throw new IllegalArgumentException(

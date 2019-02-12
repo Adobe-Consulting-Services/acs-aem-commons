@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,17 +30,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.osgi.annotation.versioning.ProviderType;
-
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 
 /**
  * Model bean for process instances.

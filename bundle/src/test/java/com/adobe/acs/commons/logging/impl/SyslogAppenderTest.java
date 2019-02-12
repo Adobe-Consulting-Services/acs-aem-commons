@@ -22,9 +22,11 @@ package com.adobe.acs.commons.logging.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.annotation.Annotation;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.sling.commons.testing.osgi.MockBundle;
 import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Test;
@@ -71,54 +73,23 @@ public class SyslogAppenderTest {
         }
     }
 
-    public static SyslogAppender.Config createConfig(final String host,
-                                                     final int port,
-                                                     final String suffixPattern,
-                                                     final String facility,
-                                                     final String stackTracePattern,
-                                                     final boolean throwableExcluded, final String... loggers) {
-        return new SyslogAppender.Config() {
-            @Override
-            public String host() {
-                return host;
-            }
-
-            @Override
-            public String[] loggers() {
-                return loggers;
-            }
-
-            @Override
-            public int port() {
-                return port;
-            }
-
-            @Override
-            public String suffix_pattern() {
-                return suffixPattern;
-            }
-
-            @Override
-            public String facility() {
-                return facility;
-            }
-
-            @Override
-            public String stack_trace_pattern() {
-                return stackTracePattern;
-            }
-
-            @Override
-            public boolean throwable_excluded() {
-                return throwableExcluded;
-            }
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return SyslogAppender.Config.class;
-            }
-        };
+    public static Map<String, Object> createConfig(final String host,
+                                                   final int port,
+                                                   final String suffixPattern,
+                                                   final String facility,
+                                                   final String stackTracePattern,
+                                                   final boolean throwableExcluded, final String... loggers) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(SyslogAppender.PROP_HOST, host);
+        map.put(SyslogAppender.PROP_PORT, port);
+        map.put(SyslogAppender.PROP_SUFFIX_PATTERN, suffixPattern);
+        map.put(SyslogAppender.PROP_FACILITY, facility);
+        map.put(SyslogAppender.PROP_STACK_TRACE_PATTERN, stackTracePattern);
+        map.put(SyslogAppender.PROP_THROWABLE_EXCLUDED, throwableExcluded);
+        map.put(SyslogAppender.PROP_LOGGERS, loggers);
+        return map;
     }
+
 
     @Test
     public void testActivate() {
