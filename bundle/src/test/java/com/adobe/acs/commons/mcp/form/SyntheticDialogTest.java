@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static com.adobe.acs.commons.mcp.form.MultifieldComponent.NODE_PATH;
 
 /**
  * Assert the generation behavior of synthetic dialogs from a java bean -- which
@@ -139,7 +140,7 @@ public class SyntheticDialogTest {
         @FormField(component = MultifieldComponent.class, name = "Multifield (composite)", category="1")
         List<TestSubtype> multiField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2", options = NODE_PATH)
         List<String> simpleMultiField;
 
         @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2")

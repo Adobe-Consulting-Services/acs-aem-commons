@@ -19,6 +19,11 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import com.adobe.acs.commons.mcp.form.PathfieldComponent.AssetSelectComponent;
+import com.adobe.acs.commons.mcp.form.PathfieldComponent.FolderSelectComponent;
+import com.adobe.acs.commons.mcp.form.PathfieldComponent.NodeSelectComponent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
@@ -29,11 +34,35 @@ import org.apache.sling.api.resource.ResourceMetadata;
  */
 public class MultifieldComponent extends AbstractContainerComponent {
 
+    static public final String NODE_PATH = "node_path";
+    static public final String ASSET_PATH = "asset_path";
+    static public final String FOLDER_PATH = "folder_path";
+    static public final String USE_CLASS = "use_class";
+
     public MultifieldComponent() {
         setResourceType("granite/ui/components/coral/foundation/form/multifield");
     }
 
-     @Override
+    public void init() {
+        if (hasOption(NODE_PATH)) {
+            setDefaultChildComponent(NodeSelectComponent.class);
+        } else if (hasOption(ASSET_PATH)) {
+            setDefaultChildComponent(AssetSelectComponent.class);
+        } else if (hasOption(FOLDER_PATH)) {
+            setDefaultChildComponent(FolderSelectComponent.class);
+        } else {
+            getOption(USE_CLASS).ifPresent(c -> {
+                try {
+                    setDefaultChildComponent((Class<? extends FieldComponent>) Class.forName(c));
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(MultifieldComponent.class.getName()).log(Level.SEVERE, "Unable to find class " + c, ex);
+                }
+            });
+        }
+        super.init();
+    }
+
+    @Override
     public Resource buildComponentResource() {
         getComponentMetadata().put("composite", isComposite());
         AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
@@ -50,6 +79,7 @@ public class MultifieldComponent extends AbstractContainerComponent {
         } else {
             for (FieldComponent component : fieldComponents.values()) {
                 component.setPath(getPath() + "/field");
+                component.getComponentMetadata().putAll(getComponentMetadata());
                 Resource comp = component.buildComponentResource();
                 comp.getResourceMetadata().put("name", getName());
                 res.addChild(comp);

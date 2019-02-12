@@ -24,6 +24,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
@@ -35,6 +37,7 @@ public class AbstractContainerComponent extends FieldComponent {
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
     private boolean composite;
     private AbstractGroupingContainerComponent groupingContainer;
+    private Class<? extends FieldComponent> defaultChildComponent = TextfieldComponent.class;
 
     @Override
     public void init() {
@@ -74,9 +77,18 @@ public class AbstractContainerComponent extends FieldComponent {
         return fieldComponents;
     }
 
+    public FieldComponent generateDefaultChildComponent() {
+        try {
+            return defaultChildComponent.newInstance();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            Logger.getLogger(AbstractContainerComponent.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
     private void extractFieldComponents(Class clazz) {
         if (clazz == String.class || clazz.isPrimitive()) {
-            FieldComponent comp = new TextfieldComponent();
+            FieldComponent comp = generateDefaultChildComponent();
             FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null);
             comp.setup(getName(), null, fieldDef, sling);
             comp.getComponentMetadata().put("title", getName());
@@ -137,5 +149,12 @@ public class AbstractContainerComponent extends FieldComponent {
                 .filter(s -> s != null && !s.isEmpty())
                 .distinct()
                 .count() > 1;
+    }
+
+    /**
+     * @param defaultChildComponent the defaultChildComponent to set
+     */
+    public void setDefaultChildComponent(Class<? extends FieldComponent> defaultChildComponent) {
+        this.defaultChildComponent = defaultChildComponent;
     }
 }
