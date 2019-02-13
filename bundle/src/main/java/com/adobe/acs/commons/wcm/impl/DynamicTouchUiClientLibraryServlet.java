@@ -45,6 +45,9 @@ import java.util.Map;
         )
 })
 @Service(Servlet.class)
+/**
+ * @deprecated Using Wrapper Client Library definitions is the preferred method of using ACS Commons-provided Client Libraries as of ACS Commons 4.0.0.
+ */
 @Deprecated
 public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
