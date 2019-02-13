@@ -26,22 +26,22 @@ import org.apache.sling.api.resource.ResourceMetadata;
  * Represent a button on a form
  */
 public class ButtonComponent extends FieldComponent {
-    private static final String ACTION_CONFIG_NAME = "actionConfigName";
-    private static final String ACTIVE = "active";
-    private static final String AUTOCOMPLETE = "autocomplete";
-    private static final String BLOCK = "block";
-    private static final String COMMAND = "command";
-    private static final String COMMENT = "text_commentI18n";
-    private static final String DISABLED = "disabled";
-    private static final String FORM_ID = "formId";
-    private static final String HIDE_TEXT = "hideText";
-    private static final String ICON = "icon";
-    private static final String ICON_SIZE = "iconSize";
-    private static final String TEXT = "text";
-    private static final String TRACKING_FEATURE = "trackingFeature";
-    private static final String TRACKING_ELEMENT = "trackingElement";
-    private static final String TYPE = "type";
-    private static final String VARIANT = "variant";
+    private static final String ACTION_CONFIG_NAME_OPT = "actionConfigName";
+    private static final String ACTIVE_OPT = "active";
+    private static final String AUTOCOMPLETE_OPT = "autocomplete";
+    private static final String BLOCK_OPT = "block";
+    private static final String COMMAND_OPT = "command";
+    private static final String COMMENT_OPT = "text_commentI18n";
+    private static final String DISABLED_OPT = "disabled";
+    private static final String FORM_ID_OPT = "formId";
+    private static final String HIDE_TEXT_OPT = "hideText";
+    private static final String ICON_OPT = "icon";
+    private static final String ICON_SIZE_OPT = "iconSize";
+    private static final String TEXT_OPT = "text";
+    private static final String TRACKING_FEATURE_OPT = "trackingFeature";
+    private static final String TRACKING_ELEMENT_OPT = "trackingElement";
+    private static final String TYPE_OPT = "type";
+    private static final String VARIANT_OPT = "variant";
 
     private String actionConfigName = "";
     private boolean active = true;
@@ -66,43 +66,43 @@ public class ButtonComponent extends FieldComponent {
 
     @Override
     public void init() {
-        getOption(ACTION_CONFIG_NAME).ifPresent(this::setActionConfigName);
-        getBooleanOption(ACTIVE).ifPresent(this::setActive);
-        getOption(AUTOCOMPLETE).ifPresent(this::setAutocomplete);
-        getBooleanOption(BLOCK).ifPresent(this::setBlock);
-        getOption(COMMAND).ifPresent(this::setCommand);
-        getOption(COMMENT).ifPresent(this::setComment);
-        getBooleanOption(DISABLED).ifPresent(this::setDisabled);
-        getOption(FORM_ID).ifPresent(this::setFormId);
-        getBooleanOption(HIDE_TEXT).ifPresent(this::setHideText);
-        getOption(ICON).ifPresent(this::setIcon);
-        getOption(ICON_SIZE).ifPresent(this::setIconSize);
-        getOption(TEXT).ifPresent(this::setText);
-        getOption(TRACKING_ELEMENT).ifPresent(this::setTrackingElement);
-        getOption(TRACKING_FEATURE).ifPresent(this::setTrackingFeature);
-        getOption(TYPE).ifPresent(this::setType);
-        getOption(VARIANT).ifPresent(this::setVariant);
+        getOption(ACTION_CONFIG_NAME_OPT).ifPresent(this::setActionConfigName);
+        getBooleanOption(ACTIVE_OPT).ifPresent(this::setActive);
+        getOption(AUTOCOMPLETE_OPT).ifPresent(this::setAutocomplete);
+        getBooleanOption(BLOCK_OPT).ifPresent(this::setBlock);
+        getOption(COMMAND_OPT).ifPresent(this::setCommand);
+        getOption(COMMENT_OPT).ifPresent(this::setComment);
+        getBooleanOption(DISABLED_OPT).ifPresent(this::setDisabled);
+        getOption(FORM_ID_OPT).ifPresent(this::setFormId);
+        getBooleanOption(HIDE_TEXT_OPT).ifPresent(this::setHideText);
+        getOption(ICON_OPT).ifPresent(this::setIcon);
+        getOption(ICON_SIZE_OPT).ifPresent(this::setIconSize);
+        getOption(TEXT_OPT).ifPresent(this::setText);
+        getOption(TRACKING_ELEMENT_OPT).ifPresent(this::setTrackingElement);
+        getOption(TRACKING_FEATURE_OPT).ifPresent(this::setTrackingFeature);
+        getOption(TYPE_OPT).ifPresent(this::setType);
+        getOption(VARIANT_OPT).ifPresent(this::setVariant);
     }
 
     @Override
     public Resource buildComponentResource() {
         ResourceMetadata meta = getComponentMetadata();
-        meta.put(ACTION_CONFIG_NAME, getActionConfigName());
-        meta.put(ACTIVE, isActive());
-        meta.put(AUTOCOMPLETE, getAutocomplete());
-        meta.put(BLOCK, isBlock());
-        meta.put(COMMAND, getCommand());
-        meta.put(COMMENT, getComment());
-        meta.put(DISABLED, isDisabled());
-        meta.put(FORM_ID, getFormId());
-        meta.put(HIDE_TEXT, isHideText());
-        meta.put(ICON, getIcon());
-        meta.put(ICON_SIZE, getIconSize());
-        meta.put(TEXT, getText());
-        meta.put(TRACKING_ELEMENT, getTrackingElement());
-        meta.put(TRACKING_FEATURE, getTrackingFeature());
-        meta.put(TYPE, getType());
-        meta.put(VARIANT, getVariant());
+        meta.put(ACTION_CONFIG_NAME_OPT, getActionConfigName());
+        meta.put(ACTIVE_OPT, isActive());
+        meta.put(AUTOCOMPLETE_OPT, getAutocomplete());
+        meta.put(BLOCK_OPT, isBlock());
+        meta.put(COMMAND_OPT, getCommand());
+        meta.put(COMMENT_OPT, getComment());
+        meta.put(DISABLED_OPT, isDisabled());
+        meta.put(FORM_ID_OPT, getFormId());
+        meta.put(HIDE_TEXT_OPT, isHideText());
+        meta.put(ICON_OPT, getIcon());
+        meta.put(ICON_SIZE_OPT, getIconSize());
+        meta.put(TEXT_OPT, getText());
+        meta.put(TRACKING_ELEMENT_OPT, getTrackingElement());
+        meta.put(TRACKING_FEATURE_OPT, getTrackingFeature());
+        meta.put(TYPE_OPT, getType());
+        meta.put(VARIANT_OPT, getVariant());
         return super.buildComponentResource();
     }
 

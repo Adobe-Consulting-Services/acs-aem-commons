@@ -142,7 +142,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param method the method to set
      */
-    final public void setMethod(String method) {
+    public final void setMethod(String method) {
         this.method = method;
     }
 
@@ -156,7 +156,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param action the action to set
      */
-    final public void setAction(String action) {
+    public final void setAction(String action) {
         this.action = action;
     }
 
@@ -170,7 +170,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param enctype the enctype to set
      */
-    final public void setEnctype(String enctype) {
+    public final void setEnctype(String enctype) {
         this.enctype = enctype;
     }
 
@@ -184,7 +184,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param target the target to set
      */
-    final public void setTarget(String target) {
+    public final void setTarget(String target) {
         this.target = target;
     }
 
@@ -198,7 +198,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param autocomplete the autocomplete to set
      */
-    final public void setAutocomplete(String autocomplete) {
+    public final void setAutocomplete(String autocomplete) {
         this.autocomplete = autocomplete;
     }
 
@@ -212,7 +212,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param novalidate the novalidate to set
      */
-    final public void setNovalidate(boolean novalidate) {
+    public final void setNovalidate(boolean novalidate) {
         this.novalidate = novalidate;
     }
 
@@ -226,7 +226,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param dataPath the dataPath to set
      */
-    final public void setDataPath(String dataPath) {
+    public final void setDataPath(String dataPath) {
         this.dataPath = dataPath;
     }
 
@@ -240,7 +240,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param nameNotFoundMode the nameNotFoundMode to set
      */
-    final public void setNameNotFoundMode(String nameNotFoundMode) {
+    public final void setNameNotFoundMode(String nameNotFoundMode) {
         this.nameNotFoundMode = nameNotFoundMode;
     }
 
@@ -254,7 +254,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param autosubmitForm the autosubmitForm to set
      */
-    final public void setAutosubmitForm(boolean autosubmitForm) {
+    public final void setAutosubmitForm(boolean autosubmitForm) {
         this.autosubmitForm = autosubmitForm;
     }
 
@@ -268,7 +268,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param margin the margin to set
      */
-    final public void setMargin(boolean margin) {
+    public final void setMargin(boolean margin) {
         this.margin = margin;
     }
 
@@ -282,7 +282,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param maximized the maximized to set
      */
-    final public void setMaximized(boolean maximized) {
+    public final void setMaximized(boolean maximized) {
         this.maximized = maximized;
     }
 
@@ -296,7 +296,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param foundationForm the foundationForm to set
      */
-    final public void setFoundationForm(boolean foundationForm) {
+    public final void setFoundationForm(boolean foundationForm) {
         this.foundationForm = foundationForm;
     }
 
@@ -310,7 +310,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param async the async to set
      */
-    final public void setAsync(boolean async) {
+    public final void setAsync(boolean async) {
         this.async = async;
     }
 
@@ -324,7 +324,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param loadingMask the loadingMask to set
      */
-    final public void setLoadingMask(boolean loadingMask) {
+    public final void setLoadingMask(boolean loadingMask) {
         this.loadingMask = loadingMask;
     }
 
@@ -338,7 +338,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param ui the ui to set
      */
-    final public void setUi(String ui) {
+    public final void setUi(String ui) {
         this.ui = ui;
     }
 
@@ -352,7 +352,7 @@ public class FormComponent extends AbstractContainerComponent {
     /**
      * @param successresponse the successresponse to set
      */
-    final public void setSuccessresponse(boolean successresponse) {
+    public final void setSuccessresponse(boolean successresponse) {
         this.successresponse = successresponse;
     }
 
