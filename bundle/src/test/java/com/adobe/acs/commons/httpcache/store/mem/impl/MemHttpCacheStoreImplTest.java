@@ -26,22 +26,21 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -128,7 +127,7 @@ public class MemHttpCacheStoreImplTest {
     }
 
     @Test
-    public void test_addCacheData() throws HttpCacheDataStreamException {
+    public void test_addCacheData() throws HttpCacheDataStreamException, IOException {
         Map<String, Object> data = new HashMap<>();
         MemCachePersistenceObject cacheObject = new MemCachePersistenceObject();
         InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
@@ -136,7 +135,8 @@ public class MemHttpCacheStoreImplTest {
         cacheObject.buildForCaching(200, "utf-8", "text/html", Collections.emptyMap(), inputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
         systemUnderTest.addCacheData(data, cacheObject);
 
-        assertEquals("65 bytes", data.get("Size"));
+        int size = getClass().getResourceAsStream("cachecontent.html").available();
+        assertEquals(size + " bytes", data.get("Size"));
         assertEquals("utf-8",    data.get("Character Encoding"));
         assertEquals("text/html", data.get("Content Type"));
     }
