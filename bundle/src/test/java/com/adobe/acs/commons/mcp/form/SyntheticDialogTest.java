@@ -20,12 +20,12 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import static com.adobe.acs.commons.mcp.form.MultifieldComponent.NODE_PATH;
+import static org.junit.Assert.*;
 
 /**
  * Assert the generation behavior of synthetic dialogs from a java bean -- which
@@ -74,33 +74,25 @@ public class SyntheticDialogTest {
         assertEquals("/test/path", res.getPath());
         assertNotNull("Multifield structure check 1", res.getChild("field"));
         assertNotNull("Multifield structure check 2", res.getChild("field/items"));
-        assertNotNull("Should include subfield1 component", res.getChild("field/items/subField1"));
-        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));
-        assertNotNull("Should include subfield3 component", res.getChild("field/items/subField3"));
-        assertNotNull("Should include subfield4 component", res.getChild("field/items/subField4"));
-        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField5"));
-        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField6"));
+        // Fields should be grouped in a fieldset, but not divided into categories
+        assertNotNull("Should include subfield1 component", res.getChild("field/items/fields/items/subField1"));
+        assertNotNull("Should include subfield2 component", res.getChild("field/items/fields/items/subField2"));
+        assertNotNull("Should include subfield3 component", res.getChild("field/items/fields/items/subField3"));
+        assertNotNull("Should include subfield4 component", res.getChild("field/items/fields/items/subField4"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/fields/items/subField5"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/fields/items/subField6"));
     }
 
     @Test
     public void testGroupingBehavior() {
         AbstractResourceImpl res = (AbstractResourceImpl) testPojo.getFormResource();
-        dumpResource(res, 0);
-    }
-
-    private void dumpResource(AbstractResourceImpl res, int indent) {
-        if (res == null) {
-            return;
+        assertNotNull("Form structure -- Confirm form container", res.getChild("items"));
+        assertNotNull("Form structure -- Confirm presence of tab container", res.getChild("items/tabs"));
+        assertNotNull("Form structure -- Confirm tab items list", res.getChild("items/tabs/items"));
+        assertEquals("Should have 4 tabs", 4, res.getChild("items/tabs/items").getChildren().spliterator().getExactSizeIfKnown());
+        for (Resource tab : res.getChild("items/tabs/items").getChildren()) {
+            assertNotEquals("Should not have a 'Misc' tab", AbstractGroupingContainerComponent.GENERIC_GROUP, tab.getResourceMetadata().get("jcr:title"));
         }
-        String indentStr = StringUtils.repeat(' ', indent * 4);
-        System.out.println(indentStr + res.getPath());
-        res.getResourceMetadata().forEach((name, val) -> {
-            System.out.println(indentStr +" @"+name+":="+String.valueOf(val));
-        });
-        res.getChildren().forEach(c -> {
-            dumpResource((AbstractResourceImpl) c, indent+1);
-        });
-        System.out.println(indentStr + "----");
     }
 
     @Test

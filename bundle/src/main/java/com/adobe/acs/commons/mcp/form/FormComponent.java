@@ -63,7 +63,6 @@ public class FormComponent extends AbstractContainerComponent {
     public FormComponent() {
         setResourceType("granite/ui/components/coral/foundation/form");
         setGroupingContainer(new AbstractGroupingContainerComponent.TabsComponent());
-        super.addComponent("submit", generateFormActions());
     }
 
     @Override
@@ -365,26 +364,5 @@ public class FormComponent extends AbstractContainerComponent {
      */
     public void setStyle(String style) {
         this.style = style;
-    }
-
-    private FieldComponent generateFormActions() {
-        FieldsetComponent container = new FieldsetComponent();
-        container.setCssClass("coral-Form-fieldwrapper coral-Form-fieldwrapper--alignLeft");
-
-        ButtonComponent submit = new ButtonComponent();
-        submit.setText("Submit");
-        submit.setIcon("save");
-        submit.setType("submit");
-        submit.setVariant("primary");
-
-        ButtonComponent reset = new ButtonComponent();
-        reset.setText("Reset");
-        reset.setIcon("undo");
-        reset.setType("reset");
-        reset.setVariant("secondary");
-
-        container.addComponent("reset", reset);
-        container.addComponent("submit", submit);
-        return container;
     }
 }
