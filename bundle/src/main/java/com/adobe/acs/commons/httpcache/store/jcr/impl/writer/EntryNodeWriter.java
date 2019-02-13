@@ -19,16 +19,8 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
-import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
-import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.jackrabbit.commons.JcrUtils;
+import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
 
-import javax.jcr.Binary;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,7 +30,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
+import javax.jcr.Binary;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.jackrabbit.commons.JcrUtils;
+
+import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
+import com.day.cq.commons.jcr.JcrConstants;
 
 public class EntryNodeWriter
 {

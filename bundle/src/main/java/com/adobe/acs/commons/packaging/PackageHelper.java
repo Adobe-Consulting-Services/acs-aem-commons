@@ -20,13 +20,7 @@
 
 package com.adobe.acs.commons.packaging;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
+import org.osgi.annotation.versioning.ProviderType;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -34,7 +28,14 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.osgi.annotation.versioning.ProviderType;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper interface for dynamic package creation.

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,40 +19,49 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import org.apache.jackrabbit.util.ISO8601;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON
  * objects.
  */
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
-        "webconsole.configurationFactory.nameHint" + "=" + "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'"
+@Component(metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE,
+        label = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
+@Properties({
+    @Property(
+            name = "webconsole.configurationFactory.nameHint",
+            value = "Logger: {event.logger.category} for events matching '{event.filter}' on '{event.topics}'")
 })
 @SuppressWarnings("PMD.MoreThanOneLogger")
-@Designate(ocd = JsonEventLogger.Config.class, factory = true)
 public class JsonEventLogger implements EventHandler {
 
     /**
@@ -85,27 +94,24 @@ public class JsonEventLogger implements EventHandler {
         }
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - JSON Event Logger", description = "Logs OSGi Events for any set of topics to an SLF4j Logger Category, as JSON objects.")
-    public @interface Config {
-        @AttributeDefinition(name = "Event Topics",
-                description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
-        String[] event_topics();
+    @Property(label = "Event Topics", unbounded = PropertyUnbounded.ARRAY,
+            description = "This value lists the topics handled by this logger. The value is a list of strings. If the string ends with a star, all topics in this package and all subpackages match. If the string does not end with a star, this is assumed to define an exact topic.")
+    static final String OSGI_TOPICS = EventConstants.EVENT_TOPIC;
 
-        @AttributeDefinition(name = "Event Filter", defaultValue = "(event.topics=*)", description = "LDAP-style event filter query. Leave the default to log all events to the configured topic or topics.")
-        String event_filter();
+    @Property(label = "Event Filter", description = "LDAP-style event filter query. Leave blank to log all events to the configured topic or topics.")
+    static final String OSGI_FILTER = EventConstants.EVENT_FILTER;
 
-        @AttributeDefinition(name = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
-        String event_logger_category() default "";
+    @Property(label = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
+    static final String OSGI_CATEGORY = "event.logger.category";
 
-        @AttributeDefinition(name = "Logger Level", defaultValue = DEFAULT_LEVEL, options = {
-                @Option(value = "NONE", label = "None (disabled)"),
-                @Option(value = "TRACE", label = "Trace"),
-                @Option(value = "DEBUG", label = "Debug"),
-                @Option(value = "INFO", label = "Information"),
-                @Option(value = "WARN", label = "Warnings"),
-                @Option(value = "ERROR", label = "Error")})
-        String event_logger_level() default DEFAULT_LEVEL;
-    }
+    @Property(label = "Logger Level", value = DEFAULT_LEVEL, options = {
+        @PropertyOption(name = "TRACE", value = "Trace"),
+        @PropertyOption(name = "DEBUG", value = "Debug"),
+        @PropertyOption(name = "INFO", value = "Information"),
+        @PropertyOption(name = "WARN", value = "Warnings"),
+        @PropertyOption(name = "ERROR", value = "Error")
+    }, description = "Select the logging level the messages should be sent with.")
+    static final String OSGI_LEVEL = "event.logger.level";
 
     private String[] topics;
     private String filter;
@@ -234,13 +240,12 @@ public class JsonEventLogger implements EventHandler {
     //
     @Activate
     @SuppressWarnings("squid:S1149")
-    protected void activate(final Config config) {
+    protected void activate(final Map<String, Object> config) {
         log.trace("[activate] entered activate method.");
-        this.topics = config.event_topics();
-        this.filter = config.event_filter();
-        this.category = config.event_logger_category();
-        this.level = config.event_logger_level();
-
+        this.topics = PropertiesUtil.toStringArray(config.get(OSGI_TOPICS));
+        this.filter = PropertiesUtil.toString(config.get(OSGI_FILTER), "").trim();
+        this.category = PropertiesUtil.toString(config.get(OSGI_CATEGORY), "").trim();
+        this.level = PropertiesUtil.toString(config.get(OSGI_LEVEL), DEFAULT_LEVEL);
 
         if (StringUtils.isNotEmpty(this.category)) {
             this.eventLogger = LoggerFactory.getLogger(this.category);

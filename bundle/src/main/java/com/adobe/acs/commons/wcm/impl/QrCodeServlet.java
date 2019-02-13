@@ -19,35 +19,48 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-
-import java.io.IOException;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.day.cq.commons.Externalizer;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Component(service = Servlet.class,
-configurationPolicy = ConfigurationPolicy.REQUIRE,
-property = 
-{ SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/qr-code/config",
-  SLING_SERVLET_EXTENSIONS + "=json", 
-  SLING_SERVLET_METHODS + "=GET"})
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+@Component(
+        label = "ACS AEM Commons - QR Code Configuration Servlet",
+        policy = ConfigurationPolicy.REQUIRE,
+        immediate = true
+)
+@Properties({
+    @Property(
+            name = "sling.servlet.methods",
+            value = "GET",
+            propertyPrivate = true
+    ),
+    @Property(
+            name = "sling.servlet.resourceTypes",
+            value = "acs-commons/components/utilities/qr-code/config",
+            propertyPrivate = true
+    ),
+    @Property(
+            name = "sling.servlet.extensions",
+            value = "json",
+            propertyPrivate = true
+    )
+})
+@Service
 public class QrCodeServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(QrCodeServlet.class);

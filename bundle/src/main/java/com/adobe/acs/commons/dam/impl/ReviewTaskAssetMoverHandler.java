@@ -21,16 +21,6 @@
 package com.adobe.acs.commons.dam.impl;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
 import com.adobe.acs.commons.search.CloseableQuery;
 import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.granite.asset.api.Asset;
@@ -41,35 +31,67 @@ import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.search.PredicateGroup;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-@Component(service=EventHandler.class,immediate = true,configurationPolicy=ConfigurationPolicy.REQUIRE,property= {
-      EventConstants.EVENT_TOPIC + "=" + "com/adobe/granite/taskmanagement/event",
-      EventConstants.EVENT_FILTER + "=" + "(&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))"
+@Component(
+        label = "ACS AEM Commons - Review Task Move Handler",
+        description = "Create an OSGi configuration to enable this feature.",
+        metatype = true,
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE
+)
+@Properties({
+        @Property(
+                label = "Event Topics",
+                value = {"com/adobe/granite/taskmanagement/event"},
+                description = "[Required] Event Topics this event handler will to respond to. Defaults to: com/adobe/granite/taskmanagement/event",
+                name = EventConstants.EVENT_TOPIC,
+                propertyPrivate = true
+        ),
 
+        /* Event filters support LDAP filter syntax and have access to event.getProperty(..) values */
+        /* LDAP Query syntax: https://goo.gl/MCX2or */
+        @Property(
+                label = "Event Filters",
+                // Only listen on events associated with nodes that end with /jcr:content
+                value = "(&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))",
+                description = "Event Filters used to further restrict this event handler; Uses LDAP expression against event properties. Defaults to: (&(TaskTypeName=dam:review)(EventType=TASK_COMPLETED))",
+                name = EventConstants.EVENT_FILTER,
+                propertyPrivate = true
+        )
 })
-@Designate(ocd=ReviewTaskAssetMoverHandler.Config.class)
+@Service
 public class ReviewTaskAssetMoverHandler implements EventHandler {
     private static final Logger log = LoggerFactory.getLogger(ReviewTaskAssetMoverHandler.class);
 
@@ -98,29 +120,6 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @ObjectClassDefinition(
-    name = "ACS AEM Commons - Review Task Move Handler",
-    description = "Create an OSGi configuration to enable this feature.")
-    public @interface Config {
-
-       @AttributeDefinition(name = "Default Conflict Resolution",
-               description = "Select default behavior if conflict resolution is not provided at the review task level.",
-               options = {
-                       @Option(label = CONFLICT_RESOLUTION_NEW_VERSION, value = "Add as version (new-version)"),
-                       @Option(label = CONFLICT_RESOLUTION_NEW_ASSET, value = "Add as new asset (new-asset)"),
-                       @Option(label = CONFLICT_RESOLUTION_REPLACE, value = "Replace (replace)"),
-                       @Option(label = CONFLICT_RESOLUTION_SKIP, value = "Skip (skip)")
-               },
-               defaultValue = DEFAULT_DEFAULT_CONFLICT_RESOLUTION)
-       String conflict$_$resolution_default() default DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
-
-       @AttributeDefinition(name = "Last Modified By",
-               description = "For Conflict Resolution: Version, the review task event does not track the user that completed the event. Use this property to specify the static name of of the [dam:Asset]/jcr:content@jcr:lastModifiedBy. Default: Review Task",
-               defaultValue = DEFAULT_LAST_MODIFIED_BY)
-        String conflict$_$resolution_version_last$_$modified$_$by() default DEFAULT_LAST_MODIFIED_BY;
-
-    }
-
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -132,14 +131,29 @@ public class ReviewTaskAssetMoverHandler implements EventHandler {
 
     private static final String DEFAULT_DEFAULT_CONFLICT_RESOLUTION = CONFLICT_RESOLUTION_NEW_VERSION;
     private String defaultConflictResolution = DEFAULT_DEFAULT_CONFLICT_RESOLUTION;
+    @Property(label = "Default Conflict Resolution",
+            description = "Select default behavior if conflict resolution is not provided at the review task level.",
+            options = {
+                    @PropertyOption(name = CONFLICT_RESOLUTION_NEW_VERSION, value = "Add as version (new-version)"),
+                    @PropertyOption(name = CONFLICT_RESOLUTION_NEW_ASSET, value = "Add as new asset (new-asset)"),
+                    @PropertyOption(name = CONFLICT_RESOLUTION_REPLACE, value = "Replace (replace)"),
+                    @PropertyOption(name = CONFLICT_RESOLUTION_SKIP, value = "Skip (skip)")
+            },
+            value = DEFAULT_DEFAULT_CONFLICT_RESOLUTION)
+    public static final String PROP_DEFAULT_CONFLICT_RESOLUTION = "conflict-resolution.default";
+
     private static final String DEFAULT_LAST_MODIFIED_BY = "Review Task";
     private String lastModifiedBy = DEFAULT_LAST_MODIFIED_BY;
+    @Property(label = "Last Modified By",
+            description = "For Conflict Resolution: Version, the review task event does not track the user that completed the event. Use this property to specify the static name of of the [dam:Asset]/jcr:content@jcr:lastModifiedBy. Default: Review Task",
+            value = DEFAULT_LAST_MODIFIED_BY)
+    public static final String PROP_LAST_MODIFIED_BY = "conflict-resolution.version.last-modified-by";
 
 
     @Activate
-    protected void activate(ReviewTaskAssetMoverHandler.Config config) {
-        lastModifiedBy = config.conflict$_$resolution_version_last$_$modified$_$by();
-        defaultConflictResolution = config.conflict$_$resolution_default();
+    protected void activate(Map<String, Object> config) {
+        lastModifiedBy = PropertiesUtil.toString(config.get(PROP_LAST_MODIFIED_BY), DEFAULT_LAST_MODIFIED_BY);
+        defaultConflictResolution = PropertiesUtil.toString(config.get(PROP_DEFAULT_CONFLICT_RESOLUTION), DEFAULT_DEFAULT_CONFLICT_RESOLUTION);
     }
 
     @Override

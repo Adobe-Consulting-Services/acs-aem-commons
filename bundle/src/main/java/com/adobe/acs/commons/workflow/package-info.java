@@ -20,7 +20,5 @@
 /**
  * AEM Workflow APIs
  */
-@Version("1.1.1")
+@org.osgi.annotation.versioning.Version("1.1.1")
 package com.adobe.acs.commons.workflow;
-
-import org.osgi.annotation.versioning.Version;

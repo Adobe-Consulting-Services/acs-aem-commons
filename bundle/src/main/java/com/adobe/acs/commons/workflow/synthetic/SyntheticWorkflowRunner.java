@@ -20,13 +20,12 @@
 
 package com.adobe.acs.commons.workflow.synthetic;
 
-import java.util.Map;
-
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
+import org.apache.sling.api.resource.ResourceResolver;
+
+import java.util.Map;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

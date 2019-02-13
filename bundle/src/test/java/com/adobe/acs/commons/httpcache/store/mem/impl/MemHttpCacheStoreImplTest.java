@@ -25,6 +25,7 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,23 +60,10 @@ public class MemHttpCacheStoreImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
-        systemUnderTest.activate(new MemHttpCacheStoreImpl.Config(){
 
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public long httpcache_cachestore_memcache_ttl() {
-                return valueTtl;
-            }
-
-            @Override
-            public long httpcache_cachestore_memcache_maxsize() {
-                return valueMaxSize;
-            }
-        });
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_TTL, valueTtl);
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_MAXSIZE, valueMaxSize);
+        systemUnderTest.activate(properties);
     }
 
     @Test

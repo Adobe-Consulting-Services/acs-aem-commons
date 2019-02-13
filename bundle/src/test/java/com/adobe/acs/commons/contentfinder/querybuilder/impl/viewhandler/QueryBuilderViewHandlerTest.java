@@ -30,6 +30,7 @@ import javax.jcr.Session;
 
 import com.adobe.acs.commons.search.CloseableQuery;
 import com.adobe.acs.commons.search.CloseableQueryBuilder;
+import com.day.cq.commons.predicate.PredicateProvider;
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
@@ -61,8 +62,12 @@ public class QueryBuilderViewHandlerTest {
     @Mock
     SearchResult searchResult;
 
+    @Mock
+    PredicateProvider predicateProvider;
+
     @Before
     public void setUp() throws Exception {
+        slingContext.registerService(PredicateProvider.class, predicateProvider);
         slingContext.registerService(CloseableQueryBuilder.class, queryBuilder);
         when(searchResult.getHits()).thenReturn(new ArrayList<>());
         when(query.getResult()).thenReturn(searchResult);

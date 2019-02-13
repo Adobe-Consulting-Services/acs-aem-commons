@@ -19,15 +19,14 @@
  */
 package com.adobe.acs.commons.httpcache.config;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import org.apache.sling.api.SlingHttpServletRequest;
+
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, cache store

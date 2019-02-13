@@ -19,45 +19,45 @@
  */
 package com.adobe.acs.commons.forms.helpers.impl;
 
-
-import static com.adobe.acs.commons.json.JsonObjectUtil.getOptionalObject;
-import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.forms.Form;
 import com.adobe.acs.commons.forms.helpers.FormHelper;
 import com.adobe.acs.commons.forms.helpers.PostRedirectGetFormHelper;
 import com.adobe.acs.commons.forms.impl.FormImpl;
 import com.adobe.acs.commons.json.JsonObjectUtil;
 import com.day.cq.wcm.api.Page;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.Map;
+import javax.servlet.ServletException;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET Form Helper
  *
  */
-
-@Component(service={ FormHelper.class, PostRedirectGetFormHelper.class}, property= {
-      Constants.SERVICE_RANKING +":Integer=" + FormHelper.SERVICE_RANKING_POST_REDIRECT_GET})
-
+@Component(inherit = true)
+@Property(label = "Service Ranking",
+        name = Constants.SERVICE_RANKING,
+        intValue = FormHelper.SERVICE_RANKING_POST_REDIRECT_GET)
+@Service(value = {FormHelper.class, PostRedirectGetFormHelper.class})
 public class PostRedirectGetFormHelperImpl extends AbstractFormHelperImpl implements PostRedirectGetFormHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);

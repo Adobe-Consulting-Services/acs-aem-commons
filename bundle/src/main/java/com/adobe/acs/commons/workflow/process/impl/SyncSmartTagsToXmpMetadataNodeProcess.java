@@ -77,6 +77,7 @@ public class SyncSmartTagsToXmpMetadataNodeProcess implements WorkflowProcess {
     @Reference
     private WorkflowPackageManager workflowPackageManager;
 
+    @SuppressWarnings("squid:S1141")
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap)
             throws WorkflowException {
 

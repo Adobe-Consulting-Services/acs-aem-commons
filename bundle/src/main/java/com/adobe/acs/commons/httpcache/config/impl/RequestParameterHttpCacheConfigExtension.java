@@ -19,44 +19,108 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
+import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapperBuilder;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.RequestParameterKeyValueWrapperBuilder;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
 /**
  * RequestParameterHttpCacheConfigExtension
  * <p>
- * This extension on the HTTP cache allows for specific request parameter combinations to create separated cache entries.
+ * This extension on the HTTP cache allows for specific HTTP Request parameter combinations to create separate cache entries.
  * </p>
- *
  */
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, service = {HttpCacheConfigExtension.class, CacheKeyFactory.class})
-@Designate(ocd = KeyValueConfig.class, factory = true)
+@Component(
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {HttpCacheConfigExtension.class, CacheKeyFactory.class}
+)
+@Designate(
+        ocd = RequestParameterHttpCacheConfigExtension.Config.class,
+        factory = true
+)
 public class RequestParameterHttpCacheConfigExtension extends AbstractKeyValueExtension implements CacheKeyFactory, HttpCacheConfigExtension {
 
-    public static final String KEY_TOSTRING_REPRESENTATION = "RequestParameters";
+    @ObjectClassDefinition(
+            name = "ACS AEM Commons - HTTP Cache - Extension - Request Parameter",
+            description = "Defined Request Parameters / Request Parameter values that will be allowed for this extension (HttpCacheConfig and CacheKeyFactory)."
+    )
+    public @interface Config {
+        @AttributeDefinition(
+                name = "Allow request headers",
+                description = "The HTTP Request Parameter to check."
+        )
+        String httpcache_config_extension_requestparameter() default "";
+
+        @AttributeDefinition(
+                name = "Allowed request header values",
+                description = "This request is only accepted for caching when its named request parameter (above) contains one of these values. Leave blank for any value."
+        )
+        String[] httpcache_config_extension_requestparameter_values() default {};
+
+        @AttributeDefinition(
+                name = "Config Name"
+        )
+        String config_name() default StringUtils.EMPTY;
+
+        @AttributeDefinition
+        String webconsole_configurationFactory_nameHint() default "Request Parameters: [ {httpcache.config.extension.requestparameter} ] Request Parameter values: [ {httpcache.config.extension.requestparameter.values} ] Config name: [ {config.name} ]";
+    }
+
+    private Map<String, String[]> allowedParameters;
+
+    private String cacheKeyId;
 
     @Override
-    protected String getKeyToStringRepresentation() {
-        return KEY_TOSTRING_REPRESENTATION;
+    public Map<String, String[]> getAllowedKeyValues() {
+        return allowedParameters;
     }
 
     @Override
-    protected KeyValueMapWrapperBuilder getBuilder(SlingHttpServletRequest request, Set<String> allowedKeys, Map<String, String> allowedValues) {
-        return new RequestParameterKeyValueWrapperBuilder(allowedKeys, allowedValues, request.getParameterMap());
+    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues) {
+        for (final Map.Entry<String, String[]> entry : allowedKeyValues.entrySet()) {
+
+            if (request.getParameterMap().keySet().contains(entry.getKey())) {
+                final String[] parameterValues = request.getParameterMap().get(entry.getKey());
+
+                if (ArrayUtils.isEmpty(entry.getValue())) {
+                    // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the request parameter
+                    return true;
+                } else if (CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(parameterValues))) {
+                    // The request parameter value matched one of the allowed values
+                    return true;
+                }
+                // No matches found for this row; continue looking through the allowed list
+            }
+        }
+
+        // No valid request parameter could be found.
+        return false;
+    }
+
+    @Override
+    public String getCacheKeyId() {
+        return "[Request Parameter: " + cacheKeyId + "]";
     }
 
     @Activate
-    public void activate(KeyValueConfig config){
-        this.init(config);
+    public void activate(RequestParameterHttpCacheConfigExtension.Config config) {
+        allowedParameters = new HashMap<>();
+        allowedParameters.put(config.httpcache_config_extension_requestparameter(), config.httpcache_config_extension_requestparameter_values());
+
+        cacheKeyId = UUID.randomUUID().toString();
     }
 }

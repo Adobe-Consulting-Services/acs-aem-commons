@@ -235,8 +235,8 @@ public class StringUtils {
      * @param str1 String 1
      * @param str2 String 2
      * @return negative integer if str1 lexicographically precedes str2
-     *    positive integer if str1 lexicographically follows str2
-     * 0 if both strings are equal
+     * 		   positive integer if str1 lexicographically follows str2
+     * 			0 if both strings are equal
      * @throws IllegalArgumentException throws exception if both or either of the strings is null
      */
     public static int compare(String str1, String str2) {

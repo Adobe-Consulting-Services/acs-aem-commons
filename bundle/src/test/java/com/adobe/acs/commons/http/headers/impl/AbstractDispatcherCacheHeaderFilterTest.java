@@ -115,7 +115,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             }
 
             @Override
-            protected void doActivate( ComponentContext context) throws Exception {
+            protected void doActivate(ComponentContext context) throws Exception {
             }
         };
         when(componentContext.getProperties()).thenReturn(properties);

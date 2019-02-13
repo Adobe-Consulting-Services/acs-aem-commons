@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.email.impl;
 
-import com.adobe.acs.commons.email.EmailService;
-import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
 import junitx.util.PrivateAccessor;
@@ -28,11 +26,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.mail.ByteArrayDataSource;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,20 +35,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import javax.activation.DataSource;
-import javax.jcr.Session;
 import javax.mail.internet.MimeMultipart;
-import java.io.File;
-import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,13 +62,15 @@ public class EmailServiceImplTest {
     @Mock
     private MessageGateway<HtmlEmail> messageGatewayHtmlEmail;
 
-    private EmailService emailService = new EmailServiceImpl();
+    @InjectMocks
+    private EmailServiceImpl emailService = new EmailServiceImpl();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    
+
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+
 
     private static final String emailTemplatePath = "/emailTemplate.txt";
     private static final String EMAIL_TEMPLATE = "emailTemplate.txt";
@@ -91,16 +79,15 @@ public class EmailServiceImplTest {
     private static final String EMAIL_TEMPLATE_ATTACHMENT = "emailTemplateAttachment.html";
 
     @Before
-    public final void setUp() {
-        context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE),emailTemplatePath);
+    public final void setUp() throws Exception  {
+        context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE), emailTemplatePath);
         context.load().binaryFile(this.getClass().getResourceAsStream(EMAIL_TEMPLATE_ATTACHMENT), emailTemplateAttachmentPath);
 
         when(messageGatewayService.getGateway(SimpleEmail.class)).thenReturn(messageGatewaySimpleEmail);
         when(messageGatewayService.getGateway(HtmlEmail.class)).thenReturn(messageGatewayHtmlEmail);
-        
+
         context.registerService(MessageGatewayService.class, messageGatewayService);
         context.registerInjectActivateService(emailService);
-
     }
 
 
@@ -224,6 +211,7 @@ public class EmailServiceImplTest {
         emailService.sendEmail(templatePath, params, recipients);
     }
 
+
     @Test(expected=IllegalArgumentException.class)
     public final void testBlankTemplatePath() {
         final String templatePath = null;
@@ -257,8 +245,7 @@ public class EmailServiceImplTest {
         Map<String, Object> params = new HashMap<>();
         params.put("so.timeout", 100);
         params.put("conn.timeout", 500);
-        //emailService.activate(params);
-        context.registerInjectActivateService(emailService, params);
+        emailService.activate(params);
         SimpleEmail email = sendTestEmail();
         assertEquals(500, email.getSocketConnectionTimeout());
         assertEquals(100, email.getSocketTimeout());

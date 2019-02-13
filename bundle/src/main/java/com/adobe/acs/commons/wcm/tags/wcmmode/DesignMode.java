@@ -23,9 +23,6 @@ import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-
 /**
  * Implementation of the &lt;wcmmode:design&gt; tag, everything inside this tag
  * will be executed when the <code>WCMMode</code> is <code>DESIGN</code>.
@@ -35,7 +32,6 @@ import tldgen.Tag;
  * @see <a href="http://dev.day.com/docs/en/cq/current/javadoc/com/day/cq/wcm/api/WCMMode.html">WCMMode</a>
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "design")
 public final class DesignMode extends AbstractMode {
 
     private static final long serialVersionUID = 7829588826750738104L;

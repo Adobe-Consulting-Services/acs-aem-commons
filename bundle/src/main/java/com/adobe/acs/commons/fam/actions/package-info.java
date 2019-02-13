@@ -17,7 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@Version("1.1.1")
+@org.osgi.annotation.versioning.Version("1.1.1")
 package com.adobe.acs.commons.fam.actions;
-
-import org.osgi.annotation.versioning.Version;

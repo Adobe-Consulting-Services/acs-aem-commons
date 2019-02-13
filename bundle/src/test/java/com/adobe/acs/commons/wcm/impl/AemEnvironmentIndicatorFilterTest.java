@@ -80,8 +80,8 @@ public class AemEnvironmentIndicatorFilterTest {
         
         context.registerService(XSSAPI.class,xss);
         
-        props.put("css.color", "blue");
-        props.put("browser.title.prefix", "prefix");
+        props.put("css-color", "blue");
+        props.put("browser-title-prefix", "prefix");
     }
     
     
@@ -126,7 +126,7 @@ public class AemEnvironmentIndicatorFilterTest {
     
     @Test
     public void testDisallowedWcmMode() throws IOException, ServletException {
-        props.put("excluded.wcmmodes","edit");
+        props.put("excluded-wcm-modes","edit");
         context.registerInjectActivateService(filter,props);
         context.request().setMethod("GET");  
         context.response().setContentType("text/html");
@@ -138,12 +138,12 @@ public class AemEnvironmentIndicatorFilterTest {
         }).when(chain).doFilter(anyObject(),anyObject());
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
-        assertEquals("<html><body>somebody</body></html>\n",response);
+        assertEquals(String.format("%s%n", "<html><body>somebody</body></html>"),response);
     }
     
     @Test
     public void testAllowedWcmMode() throws IOException, ServletException {
-        props.put("excluded.wcmmodes","edit");
+        props.put("excluded-wcm-modes","edit");
         context.registerInjectActivateService(filter,props);
         context.request().setMethod("GET");  
         context.response().setContentType("text/html");

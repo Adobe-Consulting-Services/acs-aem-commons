@@ -20,7 +20,5 @@
 /**
  * Workflow processes
  */
-@Version("1.10.4")
+@org.osgi.annotation.versioning.Version("1.10.4")
 package com.adobe.acs.commons.workflow.process;
-
-import org.osgi.annotation.versioning.Version;

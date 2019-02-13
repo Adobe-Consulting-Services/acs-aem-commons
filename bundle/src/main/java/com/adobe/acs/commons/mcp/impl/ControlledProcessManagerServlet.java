@@ -39,8 +39,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -48,17 +49,13 @@ import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet for interacting with MCP.
  */
-@Component(service = Servlet.class)
-@SlingServletResourceTypes(
+@SlingServlet(
         resourceTypes = "acs-commons/components/utilities/manage-controlled-processes",
         selectors = {"start", "list", "status", "halt", "haltAll", "purge"},
         methods = {"GET", "POST"},

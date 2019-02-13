@@ -607,11 +607,11 @@ public class CMYKJPEGImageReader extends ImageReader {
             int cr = 255 - ycckCr[i];
             int cmykC, cmykM, cmykY;
             // Range-limiting is essential due to noise introduced by DCT losses.
-            cmykC = MAXJSAMPLE - (y + Cr_r_tab[cr]);// red
+            cmykC = MAXJSAMPLE - (y + Cr_r_tab[cr]);	// red
             cmykM = MAXJSAMPLE - (y + // green
                     (Cb_g_tab[cb] + Cr_g_tab[cr]
                     >> SCALEBITS));
-            cmykY = MAXJSAMPLE - (y + Cb_b_tab[cb]);// blue
+            cmykY = MAXJSAMPLE - (y + Cb_b_tab[cb]);	// blue
       /* K passes through unchanged */
             cmyk[i] = (cmykC < 0 ? 0 : (cmykC > 255) ? 255 : cmykC) << 24
                     | (cmykM < 0 ? 0 : (cmykM > 255) ? 255 : cmykM) << 16
@@ -643,11 +643,11 @@ public class CMYKJPEGImageReader extends ImageReader {
             int cr = ycckCr[i];
             int cmykC, cmykM, cmykY;
             // Range-limiting is essential due to noise introduced by DCT losses.
-            cmykC = MAXJSAMPLE - (y + Cr_r_tab[cr]);// red
+            cmykC = MAXJSAMPLE - (y + Cr_r_tab[cr]);	// red
             cmykM = MAXJSAMPLE - (y + // green
                     (Cb_g_tab[cb] + Cr_g_tab[cr]
                     >> SCALEBITS));
-            cmykY = MAXJSAMPLE - (y + Cb_b_tab[cb]);// blue
+            cmykY = MAXJSAMPLE - (y + Cb_b_tab[cb]);	// blue
       /* K passes through unchanged */
             cmyk[i] = (cmykC < 0 ? 0 : (cmykC > 255) ? 255 : cmykC) << 24
                     | (cmykM < 0 ? 0 : (cmykM > 255) ? 255 : cmykM) << 16

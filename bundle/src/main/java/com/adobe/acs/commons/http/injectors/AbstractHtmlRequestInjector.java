@@ -22,9 +22,9 @@ package com.adobe.acs.commons.http.injectors;
 
 import com.adobe.acs.commons.util.BufferingResponse;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

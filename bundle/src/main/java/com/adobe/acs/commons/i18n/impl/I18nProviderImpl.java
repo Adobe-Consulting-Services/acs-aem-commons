@@ -31,7 +31,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.Order;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.apache.sling.i18n.ResourceBundleProvider;
 import org.osgi.service.component.annotations.Component;
@@ -40,7 +39,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.Designate;
 
-import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -54,9 +52,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component(
         property= {
-            "jmx.objectname=com.adobe.acs.httpcache:type=I18N Provider Cache"
+            "jmx.objectname=com.adobe.acs.commons.i18n:type=I18N Provider Cache"
         },
-        service = {I18nProvider.class,DynamicMBean.class},
+        service = I18nProvider.class,
         immediate = true,
         reference = {
             @Reference(
@@ -70,7 +68,7 @@ import java.util.concurrent.TimeUnit;
         }
 )
 @Designate(ocd = Config.class)
-public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> implements I18nProvider, DynamicMBean {
+public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> implements I18nProvider {
 
     private static final String JMX_PN_I18N = "I18n Object";
 

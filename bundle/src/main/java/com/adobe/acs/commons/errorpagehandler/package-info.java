@@ -20,7 +20,5 @@
 /**
  * Dynamic Error Page Handler.
  */
-@Version("1.3.1")
+@org.osgi.annotation.versioning.Version("1.3.1")
 package com.adobe.acs.commons.errorpagehandler;
-
-import org.osgi.annotation.versioning.Version;

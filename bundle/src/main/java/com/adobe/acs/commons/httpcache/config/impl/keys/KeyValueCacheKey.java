@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.httpcache.config.impl.keys;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
 import com.adobe.acs.commons.httpcache.keys.AbstractCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -31,35 +30,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
-/**
- * KeyValueHttpCacheKey
- *
- * <p>CacheKey that differentiates based on key / values..</p>
- *
- * <p>Example with cookie key / values: Useful when cached content needs to be differentiated for logged in user groups.</p>
- * <p>Use your middleware / front-end to set a cookie with a user group, and create a configuration of this class with the key used.</p>
- *
- */
-public class KeyValueHttpCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
+import java.util.Map;
 
 
-    private KeyValueMapWrapper keyValueMap;
+public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
+    private final String cacheKeyId;
+    private Map<String, String[]> allowedKeyValues;
 
-    public KeyValueHttpCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, KeyValueMapWrapper keyValueMap) {
-
+    public KeyValueCacheKey(final SlingHttpServletRequest request, final HttpCacheConfig cacheConfig,
+                            final String cacheKeyId, final Map<String, String[]> allowedKeyValues) {
         super(request, cacheConfig);
-        this.keyValueMap = keyValueMap;
+        this.cacheKeyId = cacheKeyId;
+        this.allowedKeyValues = allowedKeyValues;
     }
 
-    public KeyValueHttpCacheKey(String uri, HttpCacheConfig cacheConfig, KeyValueMapWrapper keyValueMap) {
+    public KeyValueCacheKey(final String uri, final HttpCacheConfig cacheConfig, final String cacheKeyId,
+                            final Map<String, String[]> allowedKeyValues) {
         super(uri, cacheConfig);
-
-        this.keyValueMap = keyValueMap;
-    }
-
-    public KeyValueMapWrapper getKeyValueMap() {
-        return keyValueMap;
+        this.cacheKeyId = cacheKeyId;
+        this.allowedKeyValues = allowedKeyValues;
     }
 
     @Override
@@ -68,7 +57,7 @@ public class KeyValueHttpCacheKey extends AbstractCacheKey implements CacheKey, 
             return false;
         }
 
-        KeyValueHttpCacheKey that = (KeyValueHttpCacheKey) o;
+        KeyValueCacheKey that = (KeyValueCacheKey) o;
 
         if(that == null){
             return false;
@@ -76,7 +65,7 @@ public class KeyValueHttpCacheKey extends AbstractCacheKey implements CacheKey, 
 
         return new EqualsBuilder()
                 .append(getUri(), that.getUri())
-                .append(keyValueMap, that.keyValueMap)
+                .append(cacheKeyId, that.cacheKeyId)
                 .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
                 .isEquals();
     }
@@ -85,30 +74,29 @@ public class KeyValueHttpCacheKey extends AbstractCacheKey implements CacheKey, 
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(getUri())
-                .append(keyValueMap)
+                .append(cacheKeyId)
                 .append(getAuthenticationRequirement()).toHashCode();
     }
 
     @Override
     public String toString() {
         StringBuilder formattedString = new StringBuilder(this.uri);
-        formattedString.append(keyValueMap);
+        formattedString.append(cacheKeyId);
         formattedString.append("[AUTH_REQ:" + getAuthenticationRequirement() + "]");
+
         return formattedString.toString();
     }
 
     /** For Serialization **/
-    private void writeObject(ObjectOutputStream o) throws IOException
-    {
+    private void writeObject(ObjectOutputStream o) throws IOException  {
         parentWriteObject(o);
-        o.writeObject(keyValueMap);
+        o.writeObject(allowedKeyValues);
     }
 
-    /** For De serialization **/
-    private void readObject(ObjectInputStream o)
-            throws IOException, ClassNotFoundException {
-
+    /** For De-serialization **/
+    private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
         parentReadObject(o);
-        keyValueMap = (KeyValueMapWrapper) o.readObject();
+        allowedKeyValues = (Map<String, String[]>) o.readObject();
     }
+
 }

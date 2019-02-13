@@ -19,14 +19,18 @@
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Service;
 
-@Component(service=SharedComponentProperties.class,
-        configurationPolicy = ConfigurationPolicy.REQUIRE
+@Component(
+        label = "ACS AEM Commons - Shared Component Properties",
+        description = "Create an OSGi configuration to enable Shared Component Properties",
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = false
 )
+@Service
 public class SharedComponentPropertiesImpl implements SharedComponentProperties {
 
 }

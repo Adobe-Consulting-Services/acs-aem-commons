@@ -21,6 +21,12 @@
 package com.adobe.acs.commons.dam.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -34,9 +40,6 @@ import org.apache.sling.servlets.post.AbstractPostResponse;
 import org.apache.sling.servlets.post.Modification;
 import org.apache.sling.servlets.post.PostOperation;
 import org.apache.sling.servlets.post.SlingPostProcessor;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +54,39 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-@Component(configurationPolicy=ConfigurationPolicy.REQUIRE,properties= {
-        "service.ranking:Integer=-2000",
-        "sling.filter.scope=REQUEST",
-        "sling.filter.pattern=/content/dam/.*",
-        "sling.servlet.methods=GET",
-        "sling.servlet.resourceTypes=acs-commons/touchui-widgets/asset-folder-properties-support"
+@Component(
+        label = "ACS AEM Commons - Assets Folder Properties Support",
+        policy = ConfigurationPolicy.REQUIRE,
+        immediate = true
+)
+@Properties({
+        @Property(
+                name = "service.ranking",
+                intValue = -2000,
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.filter.scope",
+                value = "REQUEST",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.filter.pattern",
+                value = "/content/dam/.*",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.servlet.methods",
+                value = "GET",
+                propertyPrivate = true
+        ),
+        @Property(
+                name = "sling.servlet.resourceTypes",
+                value = "acs-commons/touchui-widgets/asset-folder-properties-support",
+                propertyPrivate = true
+        )
 })
-
+@Service
 public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet implements Filter, SlingPostProcessor {
     private static final Logger log = LoggerFactory.getLogger(AssetsFolderPropertiesSupport.class);
 
@@ -69,13 +97,9 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
     private static final String GRANITE_UI_FORM_VALUES = "granite.ui.form.values";
 
     /**
-     * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) 
-     * to ensure that all OOTB behaviors are executed.
-     * NOTE: When switching to OSGI annotations, the original annotation caused validation errors; I had to put
-     * parenthesis ("(" and ")" characters) around the whole expression to make it pass validation. You might
-     * want to recheck this!
+     * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) to ensure that all OOTB behaviors are executed.
      */
-    @Reference(target="(&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST))")
+    @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
     private PostOperation folderShareHandler;
 
     /**

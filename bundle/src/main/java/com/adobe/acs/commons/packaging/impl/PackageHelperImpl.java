@@ -19,18 +19,15 @@
  */
 package com.adobe.acs.commons.packaging.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
+import com.adobe.acs.commons.packaging.PackageHelper;
+import com.day.cq.commons.jcr.JcrUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
@@ -43,22 +40,25 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.packaging.Packaging;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ACS AEM Commons - Package Helper Helper utility for creating CRX Packages and
  * using the ACS AEM Commons packager.
  */
-@Component(service=PackageHelper.class)
+@Component
+@Service
 public final class PackageHelperImpl implements PackageHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PackageHelperImpl.class);
