@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
 - #1692 - HttpCache: Refactored resource / group config extensions 
@@ -57,7 +58,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1716 - Added short-name to all TLD files.
 
 ### Changed
-- #1560 - Changing to osgi annotations
+- #1726 - Deploy the bundle via the dedicated DAV url
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
