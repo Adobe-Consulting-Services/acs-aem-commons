@@ -37,54 +37,55 @@ import static org.mockito.Mockito.*;
  */
 public class SyntheticFormResourceTest {
     private enum TestEnum {value1,value2,value3}
-    
+
     @FormField(
             component = TextfieldComponent.class,
             name = "Text component",
-            options = {"default=defaultValue"}            
+            options = {"default=defaultValue"},
+            required = true
     )
     private String textComponentTest;
-    
+
     @FormField(
             component = EnumerationSelector.class,
             name = "Radio component",
             options = {"default=value3"}
     )
     private TestEnum enumComponentTest;
-    
+
     @FormField(
             component = AssetSelectComponent.class,
             name = "Path component",
             options = {"default=/dam/content"}
     )
     private String pathComponentTest;
-    
+
     @FormField(
             component = CheckboxComponent.class,
             name = "Checkbox component",
             options = {"default=true"}
     )
     private boolean checkboxComponentTest;
-    
+
     @Test
     public void defaultValuesTest() throws DeserializeException {
-        Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), null);        
+        Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), null);
         assertNotNull(form.get("textComponentTest"));
         assertNotNull(form.get("enumComponentTest"));
         assertNotNull(form.get("pathComponentTest"));
         assertNotNull(form.get("checkboxComponentTest"));
-        
+
         assertEquals(TextfieldComponent.class, form.get("textComponentTest").getClass());
         assertEquals(EnumerationSelector.class, form.get("enumComponentTest").getClass());
         assertEquals(AssetSelectComponent.class, form.get("pathComponentTest").getClass());
         assertEquals(CheckboxComponent.class, form.get("checkboxComponentTest").getClass());
-        
+
         assertEquals("defaultValue", form.get("textComponentTest").getOption("default").orElse(null));
         assertEquals(TestEnum.value3.name(), form.get("enumComponentTest").getOption("default").orElse(null));
         assertEquals("/dam/content", form.get("pathComponentTest").getOption("default").orElse(null));
         assertEquals("true", form.get("checkboxComponentTest").getOption("default").orElse(null));
     }
-    
+
     @Test
     public void syntheticResourceTest() throws DeserializeException {
         SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
@@ -98,5 +99,5 @@ public class SyntheticFormResourceTest {
         assertEquals("textComponentTest", fieldResource.getResourceMetadata().get("name"));
         assertEquals("Text component", fieldResource.getResourceMetadata().get("fieldLabel"));
         assertEquals(true, fieldResource.getResourceMetadata().get("required"));
-    }    
+    }
 }
