@@ -49,6 +49,8 @@ public class GeneratedDialog {
     @Inject
     private SlingScriptHelper sling;
 
+    private FormComponent form;
+
     Map<String, FieldComponent> fieldComponents;
 
     @PostConstruct
@@ -56,10 +58,13 @@ public class GeneratedDialog {
         if (getResource() == null && getRequest() != null) {
             resource = getRequest().getResource();
         }
-        fieldComponents = AnnotatedFieldDeserializer.getFormFields(getClass(), getSlingHelper());
+        getFieldComponents();
     }
 
     public Map<String, FieldComponent> getFieldComponents() {
+        if (fieldComponents == null) {
+            fieldComponents = AnnotatedFieldDeserializer.getFormFields(getClass(), getSlingHelper());
+        }
         return fieldComponents;
     }
 
@@ -103,5 +108,23 @@ public class GeneratedDialog {
      */
     public SlingScriptHelper getSlingHelper() {
         return sling;
+    }
+
+    public Resource getFormResource() {
+        return getForm().buildComponentResource();
+    }
+
+    public FormComponent getForm() {
+        if (form == null) {
+            form = new FormComponent();
+            if (sling != null) {
+                form.setSlingHelper(sling);
+                form.setPath(sling.getRequest().getResource().getPath());
+            } else {
+                form.setPath("/form");
+            }
+            getFieldComponents().forEach((name, component) -> form.addComponent(name, component));
+        }
+        return form;
     }
 }
