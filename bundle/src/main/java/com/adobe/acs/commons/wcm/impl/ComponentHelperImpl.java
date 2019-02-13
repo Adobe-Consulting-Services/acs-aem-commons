@@ -28,10 +28,11 @@ import com.day.cq.wcm.commons.WCMUtils;
 import com.day.cq.wcm.foundation.Placeholder;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.osgi.service.component.annotations.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,7 +47,10 @@ import javax.servlet.ServletRequest;
  *
  * Get using @Reference annotation or via SlingScriptHelper's .getService(..) method
  */
-@Component(service=ComponentHelper.class)
+@Component(label = "ACS AEM Commons - Component Helper",
+        description = "Component Helper is a service used in the context of CQ Components for "
+                + "encapsulating common tasks and performing common checks.")
+@Service
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1192"})
 public final class ComponentHelperImpl implements ComponentHelper {
     private static final String CSS_EDIT_MODE = "wcm-helper-edit-mode";

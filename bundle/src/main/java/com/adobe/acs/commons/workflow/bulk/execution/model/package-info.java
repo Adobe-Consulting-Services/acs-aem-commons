@@ -21,7 +21,5 @@
 /**
  * Bulk Execution Model API
  */
-@Version("4.0.0")
+@org.osgi.annotation.versioning.Version("4.0.0")
 package com.adobe.acs.commons.workflow.bulk.execution.model;
-
-import org.osgi.annotation.versioning.Version;

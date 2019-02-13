@@ -51,6 +51,19 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- TODO: Remove this plugin-->                
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-scr-plugin</artifactId>
+                    <version>${scr.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-simple</artifactId>
+                            <version>${sl4fj.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -59,13 +72,13 @@
                         3.5.1: Manifest XML files are generated but are completely empty
                         3.5.0: Produces 57 test failures
                     -->
-                    <version>4.1.0</version>
+                    <version>3.4.0</version>
                     <extensions>true</extensions>
                     <executions>
                         <execution>
                             <id>baseline</id>
                             <goals>
-                                <goal>baseline</goal>
+                                <goal>baseline</goal>   
                             </goals>
                         </execution>
                     </executions>
@@ -241,6 +254,18 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.cmpn</artifactId>
                 <version>6.0.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.annotations</artifactId>
+                <version>1.9.8</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>biz.aQute</groupId>
+                <artifactId>bndlib</artifactId>
+                <version>1.50.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -436,7 +461,7 @@
                 <version>1.0.1</version>
                 <scope>provided</scope>
             </dependency>
-
+            
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>

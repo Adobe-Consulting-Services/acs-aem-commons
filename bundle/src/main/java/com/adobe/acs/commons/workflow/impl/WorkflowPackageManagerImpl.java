@@ -30,16 +30,16 @@ import com.day.cq.workflow.collection.ResourceCollection;
 import com.day.cq.workflow.collection.ResourceCollectionManager;
 import com.day.cq.workflow.collection.ResourceCollectionUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +50,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ACS AEM Commons - Workflow Package Manager.
  * Manager for creating and working with Workflow Packages.
  *
  */
-@Component(
-        service = WorkflowPackageManager.class
-)
-@Designate(
-        ocd = WorkflowPackageManagerImpl.Config.class
-)
+@Component
+@Service
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
@@ -85,25 +82,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
 
-    @ObjectClassDefinition(
-            name = "ACS AEM Commons - Workflow Package Manager"
-    )
-    public @interface Config {
-        String DEFAULTS_CQPAGE = "cq:Page";
-        String DEFAULTS_CQPAGECONTENT = "cq:PageContent";
-        String DEFAULTS_DAM_ASSET = "dam:Asset";
+    @Property(label = "Workflow Package Types",
+            description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
+            value = { "cq:Page", "cq:PageContent", "dam:Asset" })
+    public static final String PROP_WF_PACKAGE_TYPES = "wf-package.types";
 
-        @AttributeDefinition(
-                name = "Workflow Package Types",
-                description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
-                defaultValue = {
-                        DEFAULTS_CQPAGE,
-                        DEFAULTS_CQPAGECONTENT,
-                        DEFAULTS_DAM_ASSET
-                }
-        )
-        String[] wf$_$package_types() default {DEFAULTS_CQPAGE, DEFAULTS_CQPAGECONTENT, DEFAULTS_DAM_ASSET};
-    }
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
@@ -272,7 +255,8 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     }
 
     @Activate
-    protected final void activate(WorkflowPackageManagerImpl.Config config) {
-        workflowPackageTypes = config.wf$_$package_types();
+    protected final void activate(final Map<String, String> config) {
+        workflowPackageTypes =
+                PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
     }
 }

@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.dam.audio.watson.impl;
 
-import java.io.InputStream;
-
 import org.osgi.annotation.versioning.ProviderType;
+
+import java.io.InputStream;
 
 /**
  * Service fronting Watson Speech to Text API.

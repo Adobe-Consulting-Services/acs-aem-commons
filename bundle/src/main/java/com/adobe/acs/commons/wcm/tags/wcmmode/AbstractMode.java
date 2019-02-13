@@ -27,8 +27,6 @@ import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
-import tldgen.TagAttribute;
-
 /**
  * Abstract class used to implement the other tags for the WcmMode.
  * The WcmMode tags can be used in your JSP to show/hide particular bits
@@ -63,7 +61,6 @@ abstract class AbstractMode extends TagSupport {
         reset();
     }
 
-    @TagAttribute(runtimeValueAllowed = true, required = false)
     public final void setNot(final boolean not) {
         this.not = not;
     }

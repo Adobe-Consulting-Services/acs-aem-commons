@@ -20,15 +20,21 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
+import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-import static com.adobe.acs.commons.json.JsonObjectUtil.getInteger;
-import static com.adobe.acs.commons.json.JsonObjectUtil.getLong;
-import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
-import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,32 +42,18 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowInstanceRemover;
-import com.adobe.acs.commons.workflow.bulk.removal.WorkflowRemovalForceQuitException;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Workflow Instance Remover - Remove Servlet
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = {
-SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
-SLING_SERVLET_SELECTORS + "=remove",
-SLING_SERVLET_METHODS + "=POST",
-SLING_SERVLET_EXTENSIONS + "=json" })
+@SlingServlet(
+        methods = { "POST" },
+        resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
+        selectors = { "remove" },
+        extensions = { "json" }
+)
 public class RemoveServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(RemoveServlet.class);
 

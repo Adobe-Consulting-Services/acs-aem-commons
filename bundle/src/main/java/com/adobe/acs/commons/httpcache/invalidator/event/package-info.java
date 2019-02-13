@@ -18,7 +18,6 @@
  * #L%
  */
 
-@Version("2.0.0")
+@org.osgi.annotation.versioning.Version("1.0.1")
 package com.adobe.acs.commons.httpcache.invalidator.event;
 
-import org.osgi.annotation.versioning.Version;

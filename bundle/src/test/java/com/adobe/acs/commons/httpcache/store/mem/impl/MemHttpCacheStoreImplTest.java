@@ -25,6 +25,7 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.caffeine.impl.CaffeineMemHttpCacheStoreImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,23 +60,10 @@ public class MemHttpCacheStoreImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new MemHttpCacheStoreImpl();
-        systemUnderTest.activate(new MemHttpCacheStoreImpl.Config(){
 
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public long httpcache_cachestore_memcache_ttl() {
-                return valueTtl;
-            }
-
-            @Override
-            public long httpcache_cachestore_memcache_maxsize() {
-                return valueMaxSize;
-            }
-        });
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_TTL, valueTtl);
+        properties.put(CaffeineMemHttpCacheStoreImpl.PN_MAXSIZE, valueMaxSize);
+        systemUnderTest.activate(properties);
     }
 
     @Test
@@ -141,7 +128,7 @@ public class MemHttpCacheStoreImplTest {
     }
 
     @Test
-    public void test_addCacheData() throws HttpCacheDataStreamException {
+    public void test_addCacheData() throws HttpCacheDataStreamException, IOException {
         Map<String, Object> data = new HashMap<>();
         MemCachePersistenceObject cacheObject = new MemCachePersistenceObject();
         InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
@@ -149,7 +136,8 @@ public class MemHttpCacheStoreImplTest {
         cacheObject.buildForCaching(200, "utf-8", "text/html", Collections.emptyMap(), inputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
         systemUnderTest.addCacheData(data, cacheObject);
 
-        assertEquals("65 bytes", data.get("Size"));
+        int size = getClass().getResourceAsStream("cachecontent.html").available();
+        assertEquals(size + " bytes", data.get("Size"));
         assertEquals("utf-8",    data.get("Character Encoding"));
         assertEquals("text/html", data.get("Content Type"));
     }

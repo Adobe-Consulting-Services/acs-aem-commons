@@ -19,15 +19,15 @@
  */
 package com.adobe.acs.commons.dam;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.RenditionPicker;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * RenditionPicker that picks Assets based on a Regex pattern that matches against

@@ -29,11 +29,14 @@ import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +48,18 @@ import java.util.Map;
 /**
  * ACS AEM Commons - Quickly - DuckDuckGo Docs Operation
  */
-@Component(service=Operation.class, property= {
-   Operation.PROP_CMD + "=" + DuckDuckGoDocsOperationImpl.CMD,
-   Operation.PROP_DESCRIPTION + "=" + "Search Docs"
+@Component
+@Properties({
+        @Property(
+                name = Operation.PROP_CMD,
+                value = DuckDuckGoDocsOperationImpl.CMD
+        ),
+        @Property(
+                name = Operation.PROP_DESCRIPTION,
+                value = "Search Docs"
+        )
 })
+@Service
 public class DuckDuckGoDocsOperationImpl extends AbstractOperation {
     public static final String CMD = "docs";
 
@@ -113,7 +124,7 @@ public class DuckDuckGoDocsOperationImpl extends AbstractOperation {
     }
 
     @Activate
-    protected void activate() {
+    protected void activate(Map<String, String> config) {
         ProductInfo productInfo = null;
         for (ProductInfo i : productInfoService.getInfos()) {
             String shortName = i.getShortName();

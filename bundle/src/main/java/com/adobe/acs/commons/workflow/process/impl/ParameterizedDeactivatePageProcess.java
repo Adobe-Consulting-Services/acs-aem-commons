@@ -20,7 +20,10 @@
 package com.adobe.acs.commons.workflow.process.impl;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.osgi.service.component.annotations.Component;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentFilter;
@@ -29,12 +32,24 @@ import com.day.cq.wcm.workflow.process.DeactivatePageProcess;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
 
-@Component(service=WorkflowProcess.class, property= {
-        "process.label = ACS AEM Commons - Parameterized Deactivate Resource Process"
+//@formatter:off
+@Component(
+        metatype = true,
+        label = "ACS AEM Commons - Workflow Process - Parameterized Deactivate Resource",
+        description = "Triggers a deactivation replication event, but only to specifically configured agents."
+)
+@Properties({
+        @Property(
+                label = "Workflow Label",
+                name = "process.label", 
+                value = "Parameterized Deactivate Resource Process",
+                description = "Triggers a deactivation replication event, but only to specifically configured agents."
+        )
 })
+@Service
+//@formatter:on
 public class ParameterizedDeactivatePageProcess extends DeactivatePageProcess {
 
     private static final String AGENT_ARG = "replicationAgent";

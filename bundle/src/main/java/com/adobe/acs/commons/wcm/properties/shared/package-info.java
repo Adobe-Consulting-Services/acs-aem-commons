@@ -20,7 +20,5 @@
 /**
  * Shared Component Properties.
  */
-@Version("1.2.1")
+@org.osgi.annotation.versioning.Version("1.2.1")
 package com.adobe.acs.commons.wcm.properties.shared;
-
-import org.osgi.annotation.versioning.Version;

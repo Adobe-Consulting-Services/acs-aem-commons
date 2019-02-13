@@ -20,6 +20,4 @@
 /**
  * Bulk Workflow Management.
  */
-@Version("1.0.1") package com.adobe.acs.commons.workflow.bulk;
-
-import org.osgi.annotation.versioning.Version;
+@org.osgi.annotation.versioning.Version("1.0.1") package com.adobe.acs.commons.workflow.bulk;

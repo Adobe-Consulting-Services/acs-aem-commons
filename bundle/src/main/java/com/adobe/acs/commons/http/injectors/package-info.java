@@ -20,7 +20,5 @@
 /**
  * Http Injectors.
  */
-@Version("2.1.3")
+@org.osgi.annotation.versioning.Version("2.1.2")
 package com.adobe.acs.commons.http.injectors;
-
-import org.osgi.annotation.versioning.Version;

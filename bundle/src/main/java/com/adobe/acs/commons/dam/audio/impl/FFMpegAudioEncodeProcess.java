@@ -19,9 +19,6 @@
  */
 package com.adobe.acs.commons.dam.audio.impl;
 
-import static com.day.cq.dam.api.DamConstants.DC_EXTENT;
-import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,33 +28,40 @@ import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
+import com.day.cq.workflow.WorkflowException;
+import com.day.cq.workflow.exec.WorkItem;
+import com.day.cq.workflow.exec.WorkflowProcess;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.util.WorkflowHelper;
-import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.handler.ffmpeg.ExecutableLocator;
 import com.day.cq.dam.handler.ffmpeg.FFMpegWrapper;
 import com.day.cq.dam.video.FFMpegTranscodeProcess.Arguments;
 import com.day.cq.dam.video.VideoProfile;
-import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
 import com.day.cq.workflow.metadata.MetaDataMap;
+
+import static com.day.cq.dam.api.DamConstants.DC_EXTENT;
+import static com.day.cq.dam.api.DamConstants.METADATA_FOLDER;
 
 /**
  * CQ DAM FFmpeg Audio Encode Process
  * Workflow process that transcodes audio files into different formats
  */
-@Component(service=WorkflowProcess.class,properties= {
-        "process.label=Encode Audio"
-})
+@Component
+@Service(WorkflowProcess.class)
+@Properties({ @Property(name = "process.label", value = "Encode Audio") })
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 public final class FFMpegAudioEncodeProcess implements WorkflowProcess, AudioHelper.AudioProcessor<MetaDataMap, Void> {
 

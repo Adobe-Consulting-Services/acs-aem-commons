@@ -29,10 +29,12 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.jackrabbit.util.ISO8601;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
@@ -110,33 +112,13 @@ public class JsonEventLoggerTest {
         assertEquals("complex event, string set props", "second", jStringSet.getJSONArray("resourceChangedAttributes").getString(1));
     }
 
-    JsonEventLogger.Config constructConfig(final String category, final String level, final String filter, final String... eventTopics) {
-        return new JsonEventLogger.Config() {
-            @Override
-            public String[] event_topics() {
-                return eventTopics;
-            }
-
-            @Override
-            public String event_filter() {
-                return filter;
-            }
-
-            @Override
-            public String event_logger_category() {
-                return category;
-            }
-
-            @Override
-            public String event_logger_level() {
-                return level;
-            }
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return JsonEventLogger.Config.class;
-            }
-        };
+    Map<String, Object> constructConfig(final String category, final String level, final String filter, final String... eventTopics) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(JsonEventLogger.OSGI_CATEGORY, category);
+        map.put(JsonEventLogger.OSGI_LEVEL, level);
+        map.put(JsonEventLogger.OSGI_FILTER, filter);
+        map.put(JsonEventLogger.OSGI_TOPICS, eventTopics);
+        return map;
     }
 
     @Test

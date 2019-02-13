@@ -20,7 +20,5 @@
 /**
  * Forms System - Components.
  */
-@Version("1.0.2")
+@org.osgi.annotation.versioning.Version("1.0.2")
 package com.adobe.acs.commons.forms.components;
-
-import org.osgi.annotation.versioning.Version;

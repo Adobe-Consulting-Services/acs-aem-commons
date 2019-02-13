@@ -28,24 +28,21 @@ import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.ResultBuilder;
 import com.day.cq.wcm.api.AuthoringUIMode;
 import com.day.cq.wcm.api.AuthoringUIModeService;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,18 +52,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component(
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service = QuicklyEngine.class,
-        reference = {
-                @Reference(
-                        name = "operations",
-                        service = Operation.class,
-                        policy = ReferencePolicy.DYNAMIC,
-                        cardinality = ReferenceCardinality.AT_LEAST_ONE
-                )
-        }
+        label = "ACS AEM Commons - Quickly",
+        metatype = true,
+        policy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd = QuicklyEngineImpl.Config.class)
+@Reference(
+        name = "operations",
+        referenceInterface = Operation.class,
+        policy = ReferencePolicy.DYNAMIC,
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE
+)
+@Service
 public class QuicklyEngineImpl implements QuicklyEngine {
     private static final Logger log = LoggerFactory.getLogger(QuicklyEngineImpl.class);
 
@@ -74,22 +70,11 @@ public class QuicklyEngineImpl implements QuicklyEngine {
 
     private ValueMap config;
 
-    @ObjectClassDefinition(
-            name = "ACS AEM Commons - Quickly"
-    )
-    public @interface Config {
-        @AttributeDefinition(name = "Result Modes",
-                description = "Additive - options: [ dev ], [ blank is the baseline ]",
-                cardinality = 100,
-                defaultValue = {})
-        String[] result_modes();
-
-    }
-
-
-    private static final String[] DEFAULT_RESULT_MODES = {};
-
-
+    private static final String[] DEFAULT_RESULT_MODES = { };
+    @Property(label = "Result Modes",
+            description = "Additive - options: [ dev ], [ blank is the baseline ]",
+            cardinality = 100,
+            value = { })
     public static final String PROP_RESULT_MODES = "result.modes";
 
     @Reference
@@ -105,7 +90,7 @@ public class QuicklyEngineImpl implements QuicklyEngine {
 
     @Override
     public final JsonObject execute(final SlingHttpServletRequest request, SlingHttpServletResponse response,
-                                    final Command cmd) {
+                              final Command cmd) {
 
         for (final Operation operation : operations.values()) {
             if (operation.accepts(request, cmd)) {

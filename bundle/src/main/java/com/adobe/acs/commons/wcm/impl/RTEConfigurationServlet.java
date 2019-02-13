@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,16 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
@@ -44,16 +43,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.sling.xss.XSSAPI;
 
-
-import org.apache.sling.xss.XSSAPI;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
-
 import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
 
 /**
@@ -63,38 +52,20 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.toJsonObject;
  * <pre>
  * slingscriptinclude
  * </pre>
- * <p>
+ *
  * and set the script to
  *
  * <pre>
  * rte.CONFIGNAME.FIELDNAME.json.jsp
  * </pre>
- * <p>
+ *
  * . This will iterate through nodes under /etc/rteconfig to find a matching
  * site (by regex). Then, look for a node named CONFIGNAME and use that
  * configuration.
  */
 @SuppressWarnings({"serial", "checkstyle:abbreviationaswordinname"})
-@Component(
-        service = Servlet.class,
-        property = {
-                SLING_SERVLET_EXTENSIONS + "=json",
-                SLING_SERVLET_SELECTORS + "=rte",
-                SLING_SERVLET_RESOURCE_TYPES + "=sling/servlet/default"
-        })
-@Designate(ocd = RTEConfigurationServlet.Config.class)
+@SlingServlet(extensions = "json", selectors = "rte", resourceTypes = "sling/servlet/default")
 public final class RTEConfigurationServlet extends AbstractWidgetConfigurationServlet {
-
-    @ObjectClassDefinition(
-            name = "ACS AEM Commons - RTE Configuration Servlet"
-    )
-    public @interface Config {
-        @AttributeDefinition(defaultValue = {DEFAULT_ROOT_PATH})
-        String root_path() default DEFAULT_ROOT_PATH;
-    }
-
-    @Reference
-    private XSSAPI xssApi;
 
     private static final int RTE_HEIGHT = 200;
 
@@ -102,9 +73,16 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
 
     private static final String DEFAULT_CONFIG_NAME = "default";
 
-    private static final String DEFAULT_CONFIG = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
+    @Reference
+    private XSSAPI xssApi;
+
+    private static final String DEFAULT_CONFIG
+            = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
 
     private static final String DEFAULT_ROOT_PATH = "/etc/rteconfig";
+
+    @Property(value = DEFAULT_ROOT_PATH)
+    private static final String PROP_ROOT_PATH = "root.path";
 
     private static final String EXTERNAL_STYLESHEETS_PROPERTY = "externalStyleSheets";
 
@@ -133,7 +111,7 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
     }
 
     private void writeConfigResource(Resource resource, String rteName,
-                                     SlingHttpServletRequest request, SlingHttpServletResponse response)
+            SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws IOException, ServletException {
         JsonObject widget = createEmptyWidget(rteName);
 
@@ -183,8 +161,8 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
     }
 
     @Activate
-    protected void activate(RTEConfigurationServlet.Config config) {
-        rootPath = config.root_path();
+    protected void activate(Map<String, Object> props) {
+        rootPath = PropertiesUtil.toString(props.get(PROP_ROOT_PATH), DEFAULT_ROOT_PATH);
     }
 
     @Override

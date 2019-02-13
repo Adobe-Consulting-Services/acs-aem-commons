@@ -20,7 +20,5 @@
 /**
  * Image utilities.
  */
-@Version("1.3.1")
+@org.osgi.annotation.versioning.Version("1.3.1")
 package com.adobe.acs.commons.images;
-
-import org.osgi.annotation.versioning.Version;

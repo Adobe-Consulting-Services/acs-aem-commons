@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import org.apache.jackrabbit.api.security.user.User;
 import org.osgi.annotation.versioning.ConsumerType;
+import org.apache.jackrabbit.api.security.user.User;
 
 @ConsumerType
 public abstract class ProcessDefinitionFactory<P extends ProcessDefinition> {
