@@ -45,6 +45,7 @@ import java.util.Map;
         )
 })
 @Service(Servlet.class)
+@Deprecated
 public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
     private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";
