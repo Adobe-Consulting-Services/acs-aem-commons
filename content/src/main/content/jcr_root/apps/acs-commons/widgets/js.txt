@@ -14,4 +14,6 @@ validate_responsive_column_control_dialog.js
 add_dynamic_options_to_feed_importer.js
 add_language_titles_to_item_dialog.js
 icon-picker.js
-dynamic-loader.js
+
+# Remove automatic inclusion with updated approach using Wrapper Client Library approach (#1715)
+#dynamic-loader.js

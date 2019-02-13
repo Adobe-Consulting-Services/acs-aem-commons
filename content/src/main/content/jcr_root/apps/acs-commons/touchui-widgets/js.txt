@@ -5,4 +5,6 @@ touchui-limit-parsys.js
 touchui-configure-parsys-placeholder.js
 search-based-pathbrowser.js
 draggablelist.js
-dynamic-loader.js
+
+# Remove automatic inclusion with updated approach using Wrapper Client Library approach (#16715)
+#dynamic-loader.js

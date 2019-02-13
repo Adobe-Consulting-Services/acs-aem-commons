@@ -21,17 +21,30 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
+import javax.servlet.Servlet;
 import java.util.Map;
 
-@SlingServlet(paths = "/bin/acs-commons/dynamic-touchui-clientlibs.json",
-    label = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
-    description = "Allows for dynamic loading of optional Touch UI Client Libraries",
-    metatype = true)
+@Component(
+        label = "ACS AEM Commons - Dynamic Touch UI Client Library Loader",
+        description = "(DEPRECATD) Allows for dynamic loading of optional Touch UI Client Libraries",
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true
+)
+@Properties({
+        @Property(
+                name = "sling.servlet.paths",
+                value = "/bin/acs-commons/dynamic-touchui-clientlibs.json"
+        )
+})
+@Service(Servlet.class)
 public class DynamicTouchUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
     private static final String CATEGORY_LIMIT = "acs-commons.cq-authoring.add-ons.touchui-limit-parsys";

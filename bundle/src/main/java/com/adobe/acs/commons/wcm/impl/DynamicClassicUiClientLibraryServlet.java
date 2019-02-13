@@ -21,17 +21,31 @@ package com.adobe.acs.commons.wcm.impl;
 
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
+import javax.servlet.Servlet;
 import java.util.Map;
 
-@SlingServlet(paths = "/bin/acs-commons/dynamic-classicui-clientlibs.json",
-    label = "ACS AEM Commons - Dynamic Classic UI Client Library Loader",
-    description = "Allows for dynamic loading of optional Classic UI Client Libraries",
-    metatype = true)
+@Component(
+        label = "ACS AEM Commons - Dynamic Classic UI Client Library Loader ",
+        description = "(DEPRECATED) Allows for dynamic loading of optional Classic UI Client Libraries",
+        policy = ConfigurationPolicy.REQUIRE,
+        metatype = true
+)
+@Properties({
+        @Property(
+                name = "sling.servlet.paths",
+                value = "/bin/acs-commons/dynamic-classicui-clientlibs.json"
+        )
+})
+@Service(Servlet.class)
+@Deprecated
 public class DynamicClassicUiClientLibraryServlet extends AbstractDynamicClientLibraryServlet {
 
     private static final String CATEGORY_LIMIT = "acs-commons.cq-widgets.add-ons.classicui-limit-parsys";
