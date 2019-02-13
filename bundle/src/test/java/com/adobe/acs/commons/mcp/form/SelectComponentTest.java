@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,20 +33,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RadioComponentTest {
-
-    @Mock
-    private FormField formField;
+public class SelectComponentTest {
 
     @Mock
     private SlingScriptHelper sling;
@@ -59,45 +55,23 @@ public class RadioComponentTest {
 
     private Field javaField;
 
+    @Mock
+    private FormField formField;
+
     @Before
     public void setup() throws NoSuchFieldException {
         when(sling.getRequest()).thenReturn(request);
         javaField = TestFieldContainer.class.getField("field");
+
+        when(formField.category()).thenReturn("some-category");
     }
 
     @Test
-    public void testRadioComponentDoesntSetFieldLabelOrDescription() {
-        when(formField.options()).thenReturn(new String[0]);
-        when(formField.name()).thenReturn("NAME");
-        when(formField.description()).thenReturn("DESCRIPTION");
+    public void testWithoutDefault() {
+        SelectComponent.EnumerationSelector selectComponent = new SelectComponent.EnumerationSelector();
+        selectComponent.setup("testSelect", javaField, formField, sling);
 
-        RadioComponent cmp = new RadioComponent() {
-            @Override
-            public Map<String, String> getOptions() {
-                return new HashMap<String, String>() { {
-                    put("v1", "t1");
-                    put("v2", "t2");
-                    put("v3", "t3");
-                }
-            };
-            }
-        };
-        cmp.setup("test", null, formField, sling);
-
-        Resource r = cmp.buildComponentResource();
-        ValueMap map = r.getValueMap();
-        assertEquals("NAME", map.get("text"));
-        assertFalse(map.containsKey("fieldLabel"));
-        assertFalse(map.containsKey("fieldDescription"));
-
-    }
-
-    @Test
-    public void testEnumWithoutDefault() {
-        RadioComponent.EnumerationSelector radioComponent = new RadioComponent.EnumerationSelector();
-        radioComponent.setup("testRadio", javaField, formField, sling);
-
-        radioComponent.getHtml();
+        selectComponent.getHtml();
 
         verify(sling, times(1)).include(resourceCaptor.capture());
         Resource resource = resourceCaptor.getValue();
@@ -110,6 +84,29 @@ public class RadioComponentTest {
         assertEquals(Arrays.asList(
             "First:first:false",
             "Second:second:false",
+            "Third:third:false"
+        ), options);
+    }
+
+    @Test
+    public void testWithDefault() {
+        when(formField.options()).thenReturn(new String[] { "default=second" });
+        SelectComponent.EnumerationSelector selectComponent = new SelectComponent.EnumerationSelector();
+        selectComponent.setup("testSelect", javaField, formField, sling);
+
+        selectComponent.getHtml();
+
+        verify(sling, times(1)).include(resourceCaptor.capture());
+        Resource resource = resourceCaptor.getValue();
+
+        List<String> options = StreamSupport.stream(resource.getChild("items").getChildren().spliterator(), false).map(r -> {
+            ValueMap props = r.getValueMap();
+            return String.format("%s:%s:%s", props.get("text"), props.get("value"), props.get("selected", false));
+        }).collect(Collectors.toList());
+
+        assertEquals(Arrays.asList(
+            "First:first:false",
+            "Second:second:true",
             "Third:third:false"
         ), options);
     }

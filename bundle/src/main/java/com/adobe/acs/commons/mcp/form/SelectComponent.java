@@ -25,6 +25,7 @@ import com.day.cq.commons.jcr.JcrUtil;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,7 +39,10 @@ public abstract class SelectComponent extends FieldComponent {
         @Override
         public Map<String, String> getOptions() {
             return Stream.of((Enum[]) getField().getType().getEnumConstants())
-                    .collect(Collectors.toMap(Enum::name, e->StringUtil.getFriendlyName(e.name())));
+                    .collect(Collectors.toMap(Enum::name,
+                                              e -> StringUtil.getFriendlyName(e.name()),
+                                              (k, v)-> { throw new IllegalArgumentException("cannot merge"); },
+                                              LinkedHashMap::new));
         }        
     }
     
