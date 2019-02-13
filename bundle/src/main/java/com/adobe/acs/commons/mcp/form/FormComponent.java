@@ -1,6 +1,9 @@
 /*
- * Copyright 2019 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.form;
 
@@ -24,23 +28,23 @@ import org.apache.sling.api.resource.ResourceMetadata;
  */
 public class FormComponent extends AbstractContainerComponent {
 
-    private static final String ACTION = "action";
-    private static final String ASYNC = "async";
-    private static final String AUTOCOMPLETE = "autocomplete";
-    private static final String AUTOSUBMIT_FORM = "autosubmitForm";
-    private static final String DATA_PATH = "dataPath";
-    private static final String ENCTYPE = "enctype";
-    private static final String FOUNDATION_FORM = "foundationForm";
-    private static final String LOADING_MASK = "loadingMask";
-    private static final String MARGIN = "margin";
-    private static final String MAXIMIZED = "maximized";
-    private static final String METHOD = "method";
-    private static final String NAME_NOT_FOUND_MODE = "nameNotFoundMode";
-    private static final String NOVALIDATE = "novalidate";
-    private static final String STYLE = "style";
-    private static final String SUCCESSRESPONSE = "successresponse";
-    private static final String TARGET = "target";
-    private static final String UI = "ui";
+    private static final String ACTION_OPT = "action";
+    private static final String ASYNC_OPT = "async";
+    private static final String AUTOCOMPLETE_OPT = "autocomplete";
+    private static final String AUTOSUBMIT_FORM_OPT = "autosubmitForm";
+    private static final String DATA_PATH_OPT = "dataPath";
+    private static final String ENCTYPE_OPT = "enctype";
+    private static final String FOUNDATION_FORM_OPT = "foundationForm";
+    private static final String LOADING_MASK_OPT = "loadingMask";
+    private static final String MARGIN_OPT = "margin";
+    private static final String MAXIMIZED_OPT = "maximized";
+    private static final String METHOD_OPT = "method";
+    private static final String NAME_NOT_FOUND_MODE_OPT = "nameNotFoundMode";
+    private static final String NOVALIDATE_OPT = "novalidate";
+    private static final String STYLE_OPT = "style";
+    private static final String SUCCESSRESPONSE_OPT = "successresponse";
+    private static final String TARGET_OPT = "target";
+    private static final String UI_OPT = "ui";
 
     private String action = "";
     private boolean async = false;
@@ -77,46 +81,46 @@ public class FormComponent extends AbstractContainerComponent {
         if (!StringUtils.isEmpty(getPath()) && StringUtils.isEmpty(dataPath)) {
             setDataPath(getPath());
         }
-        getOption(ACTION).ifPresent(this::setAction);
-        getBooleanOption(ASYNC).ifPresent(this::setAsync);
-        getOption(AUTOCOMPLETE).ifPresent(this::setAutocomplete);
-        getBooleanOption(AUTOSUBMIT_FORM).ifPresent(this::setAutosubmitForm);
-        getOption(DATA_PATH).ifPresent(this::setDataPath);
-        getOption(ENCTYPE).ifPresent(this::setEnctype);
-        getBooleanOption(FOUNDATION_FORM).ifPresent(this::setFoundationForm);
-        getBooleanOption(LOADING_MASK).ifPresent(this::setLoadingMask);
-        getBooleanOption(MARGIN).ifPresent(this::setMargin);
-        getBooleanOption(MAXIMIZED).ifPresent(this::setMaximized);
-        getOption(METHOD).ifPresent(this::setMethod);
-        getOption(NAME_NOT_FOUND_MODE).ifPresent(this::setNameNotFoundMode);
-        getBooleanOption(NOVALIDATE).ifPresent(this::setNovalidate);
-        getOption(STYLE).ifPresent(this::setStyle);
-        getBooleanOption(SUCCESSRESPONSE).ifPresent(this::setSuccessresponse);
-        getOption(TARGET).ifPresent(this::setTarget);
-        getOption(UI).ifPresent(this::setUi);
+        getOption(ACTION_OPT).ifPresent(this::setAction);
+        getBooleanOption(ASYNC_OPT).ifPresent(this::setAsync);
+        getOption(AUTOCOMPLETE_OPT).ifPresent(this::setAutocomplete);
+        getBooleanOption(AUTOSUBMIT_FORM_OPT).ifPresent(this::setAutosubmitForm);
+        getOption(DATA_PATH_OPT).ifPresent(this::setDataPath);
+        getOption(ENCTYPE_OPT).ifPresent(this::setEnctype);
+        getBooleanOption(FOUNDATION_FORM_OPT).ifPresent(this::setFoundationForm);
+        getBooleanOption(LOADING_MASK_OPT).ifPresent(this::setLoadingMask);
+        getBooleanOption(MARGIN_OPT).ifPresent(this::setMargin);
+        getBooleanOption(MAXIMIZED_OPT).ifPresent(this::setMaximized);
+        getOption(METHOD_OPT).ifPresent(this::setMethod);
+        getOption(NAME_NOT_FOUND_MODE_OPT).ifPresent(this::setNameNotFoundMode);
+        getBooleanOption(NOVALIDATE_OPT).ifPresent(this::setNovalidate);
+        getOption(STYLE_OPT).ifPresent(this::setStyle);
+        getBooleanOption(SUCCESSRESPONSE_OPT).ifPresent(this::setSuccessresponse);
+        getOption(TARGET_OPT).ifPresent(this::setTarget);
+        getOption(UI_OPT).ifPresent(this::setUi);
     }
 
     @Override
     public Resource buildComponentResource() {
         initOptions();
         ResourceMetadata meta = getComponentMetadata();
-        meta.put(ACTION, getAction());
-        meta.put(ASYNC, isAsync());
-        meta.put(AUTOCOMPLETE, getAutocomplete());
-        meta.put(AUTOSUBMIT_FORM, isAutosubmitForm());
-        meta.put(DATA_PATH, getDataPath());
-        meta.put(ENCTYPE, getEnctype());
-        meta.put(FOUNDATION_FORM, isFoundationForm());
-        meta.put(LOADING_MASK, isLoadingMask());
-        meta.put(MARGIN, isMargin());
-        meta.put(MAXIMIZED, isMaximized());
-        meta.put(METHOD, getMethod());
-        meta.put(NAME_NOT_FOUND_MODE, getNameNotFoundMode());
-        meta.put(NOVALIDATE, isNovalidate());
-        meta.put(STYLE, getStyle());
-        meta.put(SUCCESSRESPONSE, isSuccessresponse());
-        meta.put(TARGET, getTarget());
-        meta.put(UI, getUi());
+        meta.put(ACTION_OPT, getAction());
+        meta.put(ASYNC_OPT, isAsync());
+        meta.put(AUTOCOMPLETE_OPT, getAutocomplete());
+        meta.put(AUTOSUBMIT_FORM_OPT, isAutosubmitForm());
+        meta.put(DATA_PATH_OPT, getDataPath());
+        meta.put(ENCTYPE_OPT, getEnctype());
+        meta.put(FOUNDATION_FORM_OPT, isFoundationForm());
+        meta.put(LOADING_MASK_OPT, isLoadingMask());
+        meta.put(MARGIN_OPT, isMargin());
+        meta.put(MAXIMIZED_OPT, isMaximized());
+        meta.put(METHOD_OPT, getMethod());
+        meta.put(NAME_NOT_FOUND_MODE_OPT, getNameNotFoundMode());
+        meta.put(NOVALIDATE_OPT, isNovalidate());
+        meta.put(STYLE_OPT, getStyle());
+        meta.put(SUCCESSRESPONSE_OPT, isSuccessresponse());
+        meta.put(TARGET_OPT, getTarget());
+        meta.put(UI_OPT, getUi());
         purgeEmptyMetadata();
 
         AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), meta);

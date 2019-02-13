@@ -34,10 +34,11 @@ import org.apache.sling.api.resource.ResourceMetadata;
  */
 public class MultifieldComponent extends AbstractContainerComponent {
 
-    static public final String NODE_PATH = "node_path";
-    static public final String ASSET_PATH = "asset_path";
-    static public final String FOLDER_PATH = "folder_path";
-    static public final String USE_CLASS = "use_class";
+    public static final String FIELD_PATH = "/field";
+    public static final String NODE_PATH = "node_path";
+    public static final String ASSET_PATH = "asset_path";
+    public static final String FOLDER_PATH = "folder_path";
+    public static final String USE_CLASS = "use_class";
 
     public MultifieldComponent() {
         setResourceType("granite/ui/components/coral/foundation/form/multifield");
@@ -70,15 +71,15 @@ public class MultifieldComponent extends AbstractContainerComponent {
             res.setResourceResolver(sling.getRequest().getResourceResolver());
         }
         if (isComposite()) {
-            AbstractResourceImpl field = new AbstractResourceImpl(getPath() + "/field", "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());
+            AbstractResourceImpl field = new AbstractResourceImpl(getPath() + FIELD_PATH, "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());
             // The container component is what sets the name, not the base component
             field.getResourceMetadata().put("name", getName());
             res.addChild(field);
-            AbstractResourceImpl items = generateItemsResource(getPath() + "/field", true);
+            AbstractResourceImpl items = generateItemsResource(getPath() + FIELD_PATH, true);
             field.addChild(items);
         } else {
             for (FieldComponent component : fieldComponents.values()) {
-                component.setPath(getPath() + "/field");
+                component.setPath(getPath() + FIELD_PATH);
                 component.getComponentMetadata().putAll(getComponentMetadata());
                 Resource comp = component.buildComponentResource();
                 comp.getResourceMetadata().put("name", getName());
