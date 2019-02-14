@@ -30,9 +30,10 @@ import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.ReplicationResult;
 import com.day.cq.replication.Replicator;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,8 @@ import java.util.Map;
  * ACS AEM Commons - Dispatcher Flusher
  * Service used to issue flush requests to enabled Dispatcher Flush Agents.
  */
-@Component(service=DispatcherFlusher.class)
+@Component
+@Service
 public class DispatcherFlusherImpl implements DispatcherFlusher {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherImpl.class);
 

@@ -27,13 +27,10 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.jsp.util.TagUtil;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.designer.Design;
-
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
 
 /**
  * JSP Tag which includes client libraries based on the design.
@@ -41,7 +38,6 @@ import tldgen.TagAttribute;
  */
 @ProviderType
 @SuppressWarnings("serial")
-@Tag(bodyContentType = BodyContentType.EMPTY, value = "includeClientLibraries")
 public final class IncludeDesignLibrariesTag extends TagSupport {
 
     private PageRegion region;
@@ -83,22 +79,18 @@ public final class IncludeDesignLibrariesTag extends TagSupport {
         super.release();
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setCss(boolean css) {
         this.css = css;
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setDesign(Design design) {
         this.design = design;
     }
 
-    @TagAttribute(runtimeValueAllowed = true)
     public void setJs(boolean js) {
         this.js = js;
     }
 
-    @TagAttribute(required = true, runtimeValueAllowed = true)
     public void setRegion(String region) {
         this.region = PageRegion.valueOf(region.toUpperCase());
     }

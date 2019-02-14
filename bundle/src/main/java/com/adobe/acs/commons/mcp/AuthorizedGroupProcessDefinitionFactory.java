@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import org.osgi.annotation.versioning.ConsumerType;
+import org.apache.jackrabbit.api.security.user.User;
+
+import javax.jcr.RepositoryException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
-
-import javax.jcr.RepositoryException;
-
-import org.apache.jackrabbit.api.security.user.User;
-import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * ProcessDefinitionFactory which limits availability of a process to the admin users and members of the specified

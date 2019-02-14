@@ -21,11 +21,13 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.AdminOnlyProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.event.jobs.JobManager;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
-@Component(service=ProcessDefinitionFactory.class)
+@Component
+@Service(ProcessDefinitionFactory.class)
 public class DeepPruneFactory extends AdminOnlyProcessDefinitionFactory<DeepPrune> {
 
     @Reference

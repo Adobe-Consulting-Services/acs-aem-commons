@@ -19,10 +19,8 @@
  */
 package com.adobe.acs.commons.xss;
 
-import org.apache.sling.xss.XSSAPI;
 import org.osgi.annotation.versioning.ProviderType;
-
-import tldgen.Function;
+import org.apache.sling.xss.XSSAPI;
 
 
 /**
@@ -39,7 +37,6 @@ public final class XSSFunctions {
      * @param source the source string
      * @return the encoded string
      */
-    @Function
     public static CharSequence encodeForHTML(XSSAPI xssAPI, String source) {
         return xssAPI.encodeForHTML(source);
     }
@@ -51,7 +48,6 @@ public final class XSSFunctions {
      * @param source the source string
      * @return the encoded string
      */
-    @Function
     public static CharSequence encodeForHTMLAttr(XSSAPI xssAPI, String source) {
         return xssAPI.encodeForHTMLAttr(source);
     }
@@ -63,7 +59,6 @@ public final class XSSFunctions {
      * @param source the source string
      * @return the encoded string
      */
-    @Function
     public static CharSequence encodeForJSString(XSSAPI xssAPI, String source) {
         return xssAPI.encodeForJSString(source);
     }
@@ -75,7 +70,6 @@ public final class XSSFunctions {
      * @param source the source string
      * @return the encoded string
      */
-    @Function
     public static CharSequence filterHTML(XSSAPI xssAPI, String source) {
         return xssAPI.filterHTML(source);
     }
@@ -88,7 +82,6 @@ public final class XSSFunctions {
      * @param source the source string
      * @return the encoded string
      */
-    @Function
     public static CharSequence getValidHref(XSSAPI xssAPI, String source) {
         return xssAPI.getValidHref(source);
     }
@@ -105,7 +98,6 @@ public final class XSSFunctions {
      * @param defaultValue a default value if the source can't be used
      * @return a sanitized dimension
      */
-    @Function
     public static String getValidDimension(XSSAPI xssAPI, String dimension, String defaultValue) {
         return xssAPI.getValidDimension(dimension, defaultValue);
     }
@@ -119,7 +111,6 @@ public final class XSSFunctions {
      * @param defaultValue a default value if the source can't be used
      * @return a sanitized integer
      */
-    @Function
     public static Integer getValidInteger(XSSAPI xssAPI, String integer, int defaultValue) {
         return xssAPI.getValidInteger(integer, defaultValue);
     }
@@ -133,7 +124,6 @@ public final class XSSFunctions {
      * @param defaultValue a default value to use if the source doesn't meet validity constraints.
      * @return a string containing a single identifier, a literal number, or a literal string token
      */
-    @Function
     public static String getValidJSToken(XSSAPI xssAPI, String token, String defaultValue) {
         return xssAPI.getValidJSToken(token, defaultValue);
     }

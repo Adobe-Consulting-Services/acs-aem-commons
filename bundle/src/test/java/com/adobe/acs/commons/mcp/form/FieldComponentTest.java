@@ -23,13 +23,18 @@ import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Optional;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class FieldComponentTest {
     @Test
-    public void hasOption() throws Exception {
+    public void hasOption() {
         FieldComponent testComponent = new TestFieldComponent(new String[]{"a=b", "c", "d="});
         assertTrue(testComponent.hasOption("a"));
         assertTrue(testComponent.hasOption("c"));
@@ -38,10 +43,22 @@ public class FieldComponentTest {
     }
 
     @Test
-    public void getOption() throws Exception {
+    public void getOption() {
         FieldComponent testComponent = new TestFieldComponent(new String[]{"a=b", "c", "d="});
         assertEquals("b", testComponent.getOption("a").get());
         assertEquals(Optional.empty(), testComponent.getOption("c"));
+        assertEquals(Optional.empty(), testComponent.getOption("z"));
+    }
+
+    @Test
+    public void hasOptionNullOptions() {
+        FieldComponent testComponent = new TestFieldComponent(null);
+        assertFalse(testComponent.hasOption("z"));
+    }
+
+    @Test
+    public void getOptionNullOptions() {
+        FieldComponent testComponent = new TestFieldComponent(null);
         assertEquals(Optional.empty(), testComponent.getOption("z"));
     }
 
@@ -65,9 +82,26 @@ public class FieldComponentTest {
         assertArrayEquals(new String[]{"All-Test2", "All-Test1"}, componentA.getClientLibraryCategories().get(ClientLibraryType.ALL).toArray());
     }
 
+    @Test
+    public void testGetHtmlCallsSlingInclude() {
+        SlingScriptHelper sling = mock(SlingScriptHelper.class);
+        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+        when(sling.getRequest()).thenReturn(request);
+
+        TestFieldComponent componentA = new TestFieldComponent(null);
+        componentA.setHelper(sling);
+        componentA.setPath("/apps/some/path");
+
+        assertEquals("", componentA.getHtml());
+
+        ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+        verify(sling, times(1)).include(resourceCaptor.capture());
+        assertEquals("/apps/some/path", resourceCaptor.getValue().getPath());
+    }
+
     public class TestFieldComponent extends FieldComponent {
         public TestFieldComponent(String[] options) {
-            formField = new FormField() {
+            FormField field = new FormField() {
                 @Override
                 public boolean equals(Object obj) {
                     return false;
@@ -104,6 +138,11 @@ public class FieldComponentTest {
                 }
 
                 @Override
+                public String category() {
+                    return null;
+                }
+
+                @Override
                 public boolean required() {
                     return false;
                 }
@@ -118,6 +157,7 @@ public class FieldComponentTest {
                     return options;
                 }
             };
+            setup("test", null, field, null);
         }
 
         @Override

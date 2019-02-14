@@ -20,7 +20,5 @@
 /**
  * Dispatcher utilities.
  */
-@Version("1.0.2")
+@org.osgi.annotation.versioning.Version("1.0.2")
 package com.adobe.acs.commons.replication.dispatcher;
-
-import org.osgi.annotation.versioning.Version;

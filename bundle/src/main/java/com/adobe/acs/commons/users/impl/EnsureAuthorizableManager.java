@@ -21,7 +21,6 @@
 package com.adobe.acs.commons.users.impl;
 
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 

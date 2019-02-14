@@ -20,7 +20,7 @@
 /**
  * Data handling functions
  */
-@Version("1.0.1")
+@Version("2.0.0")
 package com.adobe.acs.commons.data;
 
 import org.osgi.annotation.versioning.Version;

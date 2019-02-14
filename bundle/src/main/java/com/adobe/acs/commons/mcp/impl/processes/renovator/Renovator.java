@@ -274,7 +274,7 @@ public class Renovator extends ProcessDefinition {
     private void validateSpreadsheetInput() throws RepositoryException {
         Spreadsheet sheet;
         try {
-            sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
+            sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL).buildSpreadsheet();
         } catch (IOException ex) {
             Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
             throw new RepositoryException("Unable to parse spreadsheet", ex);

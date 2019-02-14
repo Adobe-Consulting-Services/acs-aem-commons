@@ -19,167 +19,130 @@
  */
 package com.adobe.acs.commons.httpcache.config.impl;
 
-import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueHttpCacheKey;
-import com.adobe.acs.commons.httpcache.config.impl.keys.helper.KeyValueMapWrapper;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
-import static org.apache.commons.collections.IteratorUtils.asEnumeration;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestHeaderHttpCacheConfigExtensionTest {
 
-    public static final String REQUEST_URI = "/check-in.html";
-    private static final String REQUEST_RESOURCE_PATH = "/content/eurowings/de/check-in";
-    @Mock
-    private SlingHttpServletRequest request;
+    @Rule
+    public AemContext ctx = new AemContext();
 
-    @Mock
-    private SlingHttpServletRequest emptyRequest;
+    private final RequestHeaderHttpCacheConfigExtension extension = new RequestHeaderHttpCacheConfigExtension();
 
-    @Mock
-    private HttpCacheConfig validCacheKeyConfig;
-
-    @Mock
-    private Resource requestResource;
-
-    KeyValueConfig configA = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configWithRequestHeader = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config2";
+        public String config_name() {
+            return "config-with-request-header";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-header-key", "non-present-header"};
+        public String httpcache_config_extension_requestheader() {
+            return "myHeader";
         }
 
         @Override
-        public String[] allowedValues() {
+        public String[] httpcache_config_extension_requestheader_values() {
             return new String[0];
         }
 
         @Override
-        public boolean emptyAllowed() {
-            return false;
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
 
-    KeyValueConfig configB = new KeyValueConfig(){
+    RequestHeaderHttpCacheConfigExtension.Config configWithRequestHeaderValues = new RequestHeaderHttpCacheConfigExtension.Config(){
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
         }
 
         @Override
-        public String configName() {
-            return "unique-config";
+        public String config_name() {
+            return "config-with-request-header-values";
         }
 
         @Override
-        public String[] allowedKeys() {
-            return new String[]{"present-header-key"};
+        public String httpcache_config_extension_requestheader() {
+            return "myHeader";
         }
 
         @Override
-        public String[] allowedValues() {
-            return new String[]{"present-header-key=present-header-value|value2"};
+        public String[] httpcache_config_extension_requestheader_values() {
+            return new String[]{"zip", "zap", "foo"};
         }
 
         @Override
-        public boolean emptyAllowed() {
-            return true;
+        public String webconsole_configurationFactory_nameHint() {
+            return null;
         }
     };
-
-    private final Map<String,String> headerValueMap = new HashMap<>();
-    private final RequestHeaderHttpCacheConfigExtension systemUnderTest = new RequestHeaderHttpCacheConfigExtension();
 
 
     @Before
     public void setUp(){
 
-        headerValueMap.put("present-header-key","present-header-value");
+    }
 
-        when(request.getHeaderNames()).thenAnswer((Answer<Enumeration<String>>) invocationOnMock -> asEnumeration(headerValueMap.keySet().iterator()));
-        when(emptyRequest.getHeaderNames()).thenAnswer((Answer<Enumeration<String>>) invocationOnMock -> asEnumeration(Collections.emptyIterator()));
+    @Test
+    public void test_WithOnlyNameMatch() {
+        ctx.request().addHeader("myHeader", "");
 
-        when(request.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
-            String key = invocationOnMock.getArguments()[0].toString();
-            return headerValueMap.get(key);
-        });
+        extension.activate(configWithRequestHeader);
 
-        when(validCacheKeyConfig.getAuthenticationRequirement()).thenReturn("anonymous");
-        when(request.getRequestURI()).thenReturn(REQUEST_URI);
-        when(request.getResource()).thenReturn(requestResource);
-        when(requestResource.getPath()).thenReturn(REQUEST_RESOURCE_PATH);
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void test_WithOnlyNameMismatch() {
+        ctx.request().addHeader("randomHeader", null);
+
+        extension.activate(configWithRequestHeader);
+
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
+
+        assertFalse(actual);
     }
 
 
     @Test
-    public void test() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithValueMatch() {
+        ctx.request().addHeader("myHeader", "foo");
 
-        systemUnderTest.activate(configA);
-        assertTrue(systemUnderTest.accepts(request, null));
-        assertFalse(systemUnderTest.accepts(emptyRequest, null));
+        extension.activate(configWithRequestHeaderValues);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-header-key"));
-        assertEquals(StringUtils.EMPTY, map.get("present-header-key"));
-
-        assertFalse(map.containsKey("non-present-header"));
-
-        assertEquals("/check-in.html[RequestHeaders:present-header-key][AUTH_REQ:anonymous]", cacheKey.toString());
-
+        assertTrue(actual);
     }
 
     @Test
-    public void test_with_specific_values() throws HttpCacheRepositoryAccessException, HttpCacheKeyCreationException {
+    public void test_WithValueMismatch() {
+        ctx.request().addHeader("myHeader", "bar");
 
-        systemUnderTest.activate(configB);
-        assertTrue(systemUnderTest.accepts(request, null));
+        extension.activate(configWithRequestHeaderValues);
 
-        KeyValueHttpCacheKey cacheKey = (KeyValueHttpCacheKey) systemUnderTest.build(request, validCacheKeyConfig);
-        KeyValueMapWrapper map = cacheKey.getKeyValueMap();
+        boolean actual = extension.accepts(ctx.request(), null, extension.getAllowedKeyValues());
 
-        assertTrue(map.containsKey("present-header-key"));
-        assertEquals("present-header-value", map.get("present-header-key"));
-
-        assertFalse(map.containsKey("non-present-header"));
-
-        assertEquals("/check-in.html[RequestHeaders:present-header-key=present-header-value][AUTH_REQ:anonymous]", cacheKey.toString());
-
+        assertFalse(actual);
     }
-
-
-
 
 }

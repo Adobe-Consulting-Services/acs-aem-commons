@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,9 +83,6 @@ public class HttpCacheEngineImplTest {
     @Mock
     HttpCacheStore jcrCacheStore;
 
-    @Mock
-    HttpCacheEngineImpl.Config config;
-
     @Captor
     ArgumentCaptor<CacheContent> cacheContentCaptor;
 
@@ -95,8 +93,7 @@ public class HttpCacheEngineImplTest {
     public void init() throws NotCompliantMBeanException {
         systemUnderTest = new HttpCacheEngineImpl();
 
-        when(config.httpcache_engine_cachehandling_rules_global()).thenReturn(new String[]{});
-        systemUnderTest.activate(config);
+        systemUnderTest.activate(Collections.emptyMap());
 
         sharedMemConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_MEM_CACHE_STORE_TYPE);
         sharedJcrConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_JCR_CACHE_STORE_TYPE);

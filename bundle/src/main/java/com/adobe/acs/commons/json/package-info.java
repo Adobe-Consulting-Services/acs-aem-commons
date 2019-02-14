@@ -20,7 +20,5 @@
 /**
  * JSON Utilities
  */
-@Version("2.0.0")
+@org.osgi.annotation.versioning.Version("2.0.0")
 package com.adobe.acs.commons.json;
-
-import org.osgi.annotation.versioning.Version;

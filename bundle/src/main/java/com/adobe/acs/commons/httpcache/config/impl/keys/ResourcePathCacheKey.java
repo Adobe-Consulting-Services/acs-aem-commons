@@ -39,12 +39,11 @@ import java.io.Serializable;
  */
 public class ResourcePathCacheKey extends AbstractCacheKey implements CacheKey, Serializable
 {
-    public ResourcePathCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) throws
-            HttpCacheKeyCreationException {
+    public ResourcePathCacheKey(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         super(request, cacheConfig);
     }
 
-    public ResourcePathCacheKey(String uri, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException {
+    public ResourcePathCacheKey(String uri, HttpCacheConfig cacheConfig) {
         super(uri, cacheConfig);
     }
 
@@ -76,7 +75,6 @@ public class ResourcePathCacheKey extends AbstractCacheKey implements CacheKey, 
     @Override
     public String toString() {
         return this.resourcePath + " [AUTH_REQ:" + getAuthenticationRequirement() + "]";
-
     }
 
     @Override
@@ -85,16 +83,12 @@ public class ResourcePathCacheKey extends AbstractCacheKey implements CacheKey, 
     }
 
     /** For Serialization **/
-    private void writeObject(ObjectOutputStream o) throws IOException
-    {
+    private void writeObject(ObjectOutputStream o) throws IOException {
         parentWriteObject(o);
     }
 
-
     /** For De serialization **/
-    private void readObject(ObjectInputStream o)
-            throws IOException, ClassNotFoundException {
-
+    private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
         parentReadObject(o);
     }
 }

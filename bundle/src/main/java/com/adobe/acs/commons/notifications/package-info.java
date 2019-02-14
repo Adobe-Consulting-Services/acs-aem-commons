@@ -17,7 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@Version("3.1.1")
+@org.osgi.annotation.versioning.Version("3.1.1")
 package com.adobe.acs.commons.notifications;
-
-import org.osgi.annotation.versioning.Version;

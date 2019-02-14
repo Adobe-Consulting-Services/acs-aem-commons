@@ -20,9 +20,18 @@
 
 package com.adobe.acs.commons.quickly.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import com.adobe.acs.commons.quickly.QuicklyEngine;
+import com.adobe.acs.commons.util.BufferingResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,27 +41,23 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-
-import com.adobe.acs.commons.quickly.QuicklyEngine;
-import com.adobe.acs.commons.util.BufferingResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * ACS AEM Commons - Quickly - App HTML Injection Filter
  * Injects the necessary HTML into the Request page.
  */
-@Component(service=Filter.class,configurationPolicy=ConfigurationPolicy.OPTIONAL, 
-property= {
-      HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=" +  "/",
-      HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT + "=" + "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*"      
-})
+@Component(policy = ConfigurationPolicy.OPTIONAL)
+@Properties({
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN,
+                          value = "/"),
+                @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                          value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)")
+            })
+@Service
 public class QuicklyFilter implements Filter {
     private static final String[] REJECT_PATH_PREFIXES = new String[]{
             "/libs/granite/core/content/login",
@@ -136,7 +141,7 @@ public class QuicklyFilter implements Filter {
     }
 
     @Activate
-    protected final void activate() throws IOException {
+    protected final void activate(final Map<String, String> config) throws IOException {
         InputStream inputStream = null;
         try {
             inputStream = getClass().getResourceAsStream(HTML_FILE);

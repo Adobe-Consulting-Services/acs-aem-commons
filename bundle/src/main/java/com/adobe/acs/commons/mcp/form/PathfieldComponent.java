@@ -39,7 +39,8 @@ public abstract class PathfieldComponent extends FieldComponent {
         getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
     }
 
-    public static class AssetSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class AssetSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
@@ -48,7 +49,8 @@ public abstract class PathfieldComponent extends FieldComponent {
         }
     }
 
-    public static class NodeSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class NodeSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
@@ -57,7 +59,8 @@ public abstract class PathfieldComponent extends FieldComponent {
         }
     }
 
-    public static class PageSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class PageSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
@@ -66,7 +69,8 @@ public abstract class PathfieldComponent extends FieldComponent {
         }
     }
 
-    public static class FolderSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class FolderSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {

@@ -23,9 +23,6 @@ import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
-import tldgen.BodyContentType;
-import tldgen.Tag;
-
 /**
  * Implementation of the &lt;wcmmode:disabled&gt; tag, everything inside this tag
  * will be executed when the <code>WCMMode</code> is <code>DISABLED</code>.
@@ -35,7 +32,6 @@ import tldgen.Tag;
  * @see <a href="http://dev.day.com/docs/en/cq/current/javadoc/com/day/cq/wcm/api/WCMMode.html">WCMMode</a>
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "disabled")
 public final class DisabledMode extends AbstractMode {
 
     private static final long serialVersionUID = -6562052427982138483L;

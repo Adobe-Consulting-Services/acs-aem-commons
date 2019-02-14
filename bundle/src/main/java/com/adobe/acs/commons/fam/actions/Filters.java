@@ -19,13 +19,12 @@
  */
 package com.adobe.acs.commons.fam.actions;
 
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ProviderType;
-
 import com.adobe.acs.commons.functions.CheckedBiFunction;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.dam.commons.util.DamUtil;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Utility filters useful for sifting through search results without over-complicating search queries.

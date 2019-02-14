@@ -22,31 +22,25 @@ package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
 import java.io.IOException;
 
 /**
  * ACS AEM Commons - Bulk Workflow Manager - Stop Servle
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = {
-SLING_SERVLET_RESOURCE_TYPES + "=" + BulkWorkflowEngine.SLING_RESOURCE_TYPE,
-SLING_SERVLET_SELECTORS + "=stop",
-SLING_SERVLET_METHODS + "=POST",
-SLING_SERVLET_EXTENSIONS + "=json" })
+@SlingServlet(
+        methods = {"POST"},
+        resourceTypes = {BulkWorkflowEngine.SLING_RESOURCE_TYPE},
+        selectors = {"stop"},
+        extensions = {"json"}
+)
 public class StopServlet extends SlingAllMethodsServlet {
 
     @Reference

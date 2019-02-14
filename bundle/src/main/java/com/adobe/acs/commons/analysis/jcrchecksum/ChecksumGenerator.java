@@ -20,13 +20,12 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import java.io.IOException;
-import java.util.Map;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-
-import org.osgi.annotation.versioning.ProviderType;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Utility that generates checksums for JCR paths.  The checksum is calculated using a depth first traversal

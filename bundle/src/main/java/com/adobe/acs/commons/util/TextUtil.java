@@ -19,15 +19,16 @@
  */
 package com.adobe.acs.commons.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+
+import org.osgi.annotation.versioning.ProviderType;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
 public final class TextUtil {

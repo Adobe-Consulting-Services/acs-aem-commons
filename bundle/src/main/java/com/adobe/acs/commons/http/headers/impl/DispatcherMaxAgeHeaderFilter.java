@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,39 +19,46 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Dictionary;
+import java.util.Enumeration;
 
 //@formatter:off
 @Component(
-        factory = "DispatcherMaxAgeHeaderFilter",
-        configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
-        "webconsole.configurationFactory.nameHint" + "=" + "Max Age: {max.age} for Patterns: [{filter.pattern}]"
+      label = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
+      description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.",
+      metatype = true,
+      configurationFactory = true,
+      policy = ConfigurationPolicy.REQUIRE)
+@Properties({
+    @Property(label = "Filter Patterns",
+        description = "Patterns on which to apply this Max Age cache-control rule.",
+        cardinality = Integer.MAX_VALUE,
+        name = AbstractDispatcherCacheHeaderFilter.PROP_FILTER_PATTERN,
+        propertyPrivate = false,
+        value = { }),
+    @Property(
+        name = "webconsole.configurationFactory.nameHint",
+        value = "Max Age: {max.age} for Patterns: [{filter.pattern}]",
+        propertyPrivate = true)
 })
-@Designate(ocd = DispatcherMaxAgeHeaderFilter.Config.class, factory = true)
 //@formatter:on
 public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderFilter {
 
     protected static final String CACHE_CONTROL_NAME = "Cache-Control";
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Dispacher Cache Control Header - Max Age",
-            description = "Adds a Cache-Control max-age header to content to enable Dispatcher TTL support.")
-    public @interface Config {
-        @AttributeDefinition(name = "Cache-Control Max Age",
-                description = "Max age value (in seconds) to put in Cache Control header.")
-        int max_age();
-
-        @AttributeDefinition(name = "Filter Patterns",
-                description = "Patterns on which to apply this Max Age cache-control rule.",
-                cardinality = Integer.MAX_VALUE)
-        String[] filter_pattern();
-    }
+    @Property(label = "Cache-Control Max Age",
+            description = "Max age value (in seconds) to put in Cache Control header.")
+    public static final String PROP_MAX_AGE = "max.age";
 
     private static final String HEADER_PREFIX = "max-age=";
 
@@ -67,18 +74,12 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
         return HEADER_PREFIX + maxage;
     }
 
-
     @Override
     protected void doActivate(ComponentContext context) throws Exception {
-        // no implementation
-    }
-
-
-    @Activate
-    protected void activate(DispatcherMaxAgeHeaderFilter.Config config) throws Exception {
-        maxage = config.max_age();
+        Dictionary<?, ?> properties = context.getProperties();
+        maxage = PropertiesUtil.toLong(properties.get(PROP_MAX_AGE), -1);
         if (maxage < 0) {
-            throw new ConfigurationException("max.age", "Max Age must be specified and greater than 0.");
+            throw new ConfigurationException(PROP_MAX_AGE, "Max Age must be specified and greater than 0.");
         }
     }
 

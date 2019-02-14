@@ -19,11 +19,10 @@
  */
 package com.adobe.acs.commons.twitter;
 
+import twitter4j.Twitter;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.webservicesupport.Configuration;
-
-import twitter4j.Twitter;
 
 /**
  * Service interface which wraps the Twitter4j API to expose the originating
