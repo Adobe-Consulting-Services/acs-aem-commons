@@ -49,7 +49,6 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -104,7 +103,6 @@ public class RenovatorTest {
     }
 
     @Test
-    @Ignore
     public void noPublishTest() throws Exception {
         assertEquals("Renovator: relocator test", instance.getName());
         Map<String, Object> values = new HashMap<>();

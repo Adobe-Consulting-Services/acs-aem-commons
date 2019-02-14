@@ -33,6 +33,7 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
+import com.adobe.acs.commons.util.visitors.TraversalException;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -43,6 +44,7 @@ import com.day.cq.replication.Replicator;
 import com.day.cq.tagging.TagConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.PageManagerFactory;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -63,6 +65,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.request.RequestParameter;
@@ -143,7 +146,6 @@ public class Renovator extends ProcessDefinition {
 
     @FormField(name = "Publish",
             description = "Self-managed handles publishing in-process where as Queue will add it to the system publish queue where progress is not tracked here.",
-            required = false,
             component = RadioComponent.EnumerationSelector.class,
             options = {"vertical", "default=SELF_MANAGED"})
     public PublishMethod publishMethod = PublishMethod.SELF_MANAGED;
@@ -177,24 +179,24 @@ public class Renovator extends ProcessDefinition {
     private boolean detailedReport = false;
 
     private final transient String[] requiredMovePrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE,
-        Privilege.JCR_REMOVE_CHILD_NODES,
-        Privilege.JCR_REMOVE_NODE,
-        Replicator.REPLICATE_PRIVILEGE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE,
+            Privilege.JCR_REMOVE_CHILD_NODES,
+            Privilege.JCR_REMOVE_NODE,
+            Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredMovePrivileges;
 
     private final transient String[] requiredPublishPrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE,
-        Replicator.REPLICATE_PRIVILEGE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE,
+            Replicator.REPLICATE_PRIVILEGE
     };
     Privilege[] requiredPublishPrivileges;
 
     private final transient String[] requiredUpdatePrivilegeNames = {
-        Privilege.JCR_READ,
-        Privilege.JCR_WRITE
+            Privilege.JCR_READ,
+            Privilege.JCR_WRITE
     };
     Privilege[] requiredUpdatePrivileges;
 
@@ -328,34 +330,37 @@ public class Renovator extends ProcessDefinition {
                     Resource res = rr2.getResource(source);
                     Optional<MovingNode> rootNode = buildMoveNode(res);
                     if (rootNode.isPresent()) {
-                        MovingNode root = rootNode.get();
-                        root.setDestinationPath(dest);
-                        if (root instanceof MovingAsset) {
-                            String destFolder = StringUtils.substringBeforeLast(dest, "/");
-                            if (!additionalTargetFolders.contains(destFolder) && rr2.getResource(destFolder) == null) {
-                                additionalTargetFolders.add(destFolder);
-                            }
-                        }
-                        moves.add(root);
-                        note(source, Report.misc, "Root path");
-                        note(source, Report.target, dest);
-
-                        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
-                                JcrConstants.NT_FOLDER,
-                                JcrResourceConstants.NT_SLING_FOLDER,
-                                JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
-                                NameConstants.NT_PAGE
-                        );
-
-                        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
-                        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
-
-                        visitor.accept(res);
-                        note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
+                        identifyStructureFromRoot(visitedSourceNodes, source, dest, rr2, res, rootNode.get());
                     }
                 });
             });
         });
+    }
+
+    private void identifyStructureFromRoot(AtomicInteger visitedSourceNodes, String source, String dest, ResourceResolver rr, Resource res, MovingNode root) throws TraversalException {
+        root.setDestinationPath(dest);
+        if (root instanceof MovingAsset) {
+            String destFolder = StringUtils.substringBeforeLast(dest, "/");
+            if (!additionalTargetFolders.contains(destFolder) && rr.getResource(destFolder) == null) {
+                additionalTargetFolders.add(destFolder);
+            }
+        }
+        moves.add(root);
+        note(source, Report.misc, "Root path");
+        note(source, Report.target, dest);
+
+        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
+                JcrConstants.NT_FOLDER,
+                JcrResourceConstants.NT_SLING_FOLDER,
+                JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
+                NameConstants.NT_PAGE
+        );
+
+        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
+        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
+
+        visitor.accept(res);
+        note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
     }
 
     private void buildMoveTree(Resource r, int level, MovingNode root, AtomicInteger visitedSourceNodes) throws RepositoryException {
@@ -515,6 +520,7 @@ public class Renovator extends ProcessDefinition {
             });
         });
     }
+
     // Move assets and pages, and in some cases folders that were not already moved in the previous step
     protected void moveTree(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
@@ -719,7 +725,7 @@ public class Renovator extends ProcessDefinition {
     }
 
     private void performNecessaryReplicationOnAncestors(ResourceResolver rr, String path) throws ReplicationException {
-        String checkPath  = "";
+        String checkPath = "";
         for (String part : path.split(Pattern.quote("/"))) {
             if (part.isEmpty()) {
                 continue;
