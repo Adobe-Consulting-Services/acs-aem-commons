@@ -55,6 +55,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -169,10 +170,11 @@ public class RenovatorTest {
         instance.init(rr, values);
 
         instance.run(rr);
-        assertEquals(1.0, instance.updateProgress(), 0.00001);
         // Make sure that target folders were created
         assertNotNull(rr.getResource("/content/dam/folderC"));
         assertNotNull(rr.getResource("/content/dam/folderC/subfolder"));
+        // Ensure process finished
+        assertEquals(1.0, instance.updateProgress(), 0.00001);
         assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC"));
         assertTrue("Should publish new folders", queue.getActivateOperations().containsKey("/content/dam/folderC/subfolder"));
     }
@@ -197,6 +199,8 @@ public class RenovatorTest {
             String path = entry.getKey();
             String type = entry.getValue();
             AbstractResourceImpl mockFolder = new AbstractResourceImpl(path, type, "", new ResourceMetadata());
+            mockFolder.getResourceMetadata().put(JCR_PRIMARYTYPE, type);
+
             when(rr.resolve(path)).thenReturn(mockFolder);
             when(rr.getResource(path)).thenReturn(mockFolder);
         }
