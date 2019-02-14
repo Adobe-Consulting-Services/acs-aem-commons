@@ -19,29 +19,31 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceMetadata;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Select (drop-down) selector component
  */
 @ProviderType
 public abstract class SelectComponent extends FieldComponent {
-    public static class EnumerationSelector extends SelectComponent {
+
+    @ProviderType
+    public static final class EnumerationSelector extends SelectComponent {
+
         @Override
         public Map<String, String> getOptions() {
             return Stream.of((Enum[]) getField().getType().getEnumConstants())
-                    .collect(Collectors.toMap(Enum::name, e->StringUtil.getFriendlyName(e.name())));
-        }        
+                    .collect(Collectors.toMap(Enum::name, e -> StringUtil.getFriendlyName(e.name())));
+        }
     }
-    
+
     @Override
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/select");
@@ -53,13 +55,13 @@ public abstract class SelectComponent extends FieldComponent {
         AbstractResourceImpl component = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl options = new AbstractResourceImpl("items", null, null, new ResourceMetadata());
         component.addChild(options);
-        
+
         String defaultValue = getOption("default").orElse(null);
-        
-        getOptions().forEach((value, name)->{
+
+        getOptions().forEach((value, name) -> {
             final ResourceMetadata meta = new ResourceMetadata();
             final String nodeName = JcrUtil.escapeIllegalJcrChars(value);
-            
+
             if (value.equals(defaultValue)) {
                 meta.put("selected", true);
             }
@@ -74,6 +76,6 @@ public abstract class SelectComponent extends FieldComponent {
         });
         return component;
     }
-    
+
     public abstract Map<String, String> getOptions();
 }

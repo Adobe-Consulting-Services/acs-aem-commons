@@ -26,13 +26,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represent multifield with sub-fields based on referenced class. Depending on
  * where this is used, some javascript should be included by the front-end to
  * process the resulting form correctly.
  */
-public class MultifieldComponent extends AbstractContainerComponent {
+@ProviderType
+public final class MultifieldComponent extends AbstractContainerComponent {
 
     public static final String FIELD_PATH = "/field";
     public static final String NODE_PATH = "node_path";
@@ -67,8 +69,8 @@ public class MultifieldComponent extends AbstractContainerComponent {
     public Resource buildComponentResource() {
         getComponentMetadata().put("composite", isComposite());
         AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
-        if (sling != null) {
-            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        if (getHelper() != null) {
+            res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
         if (isComposite()) {
             AbstractResourceImpl field = new AbstractResourceImpl(getPath() + FIELD_PATH, "granite/ui/components/coral/foundation/container", getResourceSuperType(), new ResourceMetadata());

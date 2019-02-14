@@ -21,11 +21,13 @@ package com.adobe.acs.commons.mcp.form;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represent a button on a form
  */
-public class ButtonComponent extends FieldComponent {
+@ProviderType
+public final class ButtonComponent extends FieldComponent {
     private static final String ACTION_CONFIG_NAME_OPT = "actionConfigName";
     private static final String ACTIVE_OPT = "active";
     private static final String AUTOCOMPLETE_OPT = "autocomplete";

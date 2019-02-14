@@ -67,7 +67,7 @@ public class FieldComponentTest {
 
     public class TestFieldComponent extends FieldComponent {
         public TestFieldComponent(String[] options) {
-            formField = new FormField() {
+            FormField field = new FormField() {
                 @Override
                 public boolean equals(Object obj) {
                     return false;
@@ -123,6 +123,7 @@ public class FieldComponentTest {
                     return options;
                 }
             };
+            setup("test", null, field, null);
         }
 
         @Override

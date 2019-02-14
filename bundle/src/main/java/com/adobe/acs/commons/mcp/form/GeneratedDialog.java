@@ -30,6 +30,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Generates a dialog out of @FormField annotations
@@ -39,6 +40,7 @@ import org.apache.sling.models.annotations.Model;
         adaptables = {SlingHttpServletRequest.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
+@ProviderType
 public class GeneratedDialog {
     @Inject
     private Resource resource;
@@ -118,7 +120,7 @@ public class GeneratedDialog {
         if (form == null) {
             form = new FormComponent();
             if (sling != null) {
-                form.setSlingHelper(sling);
+                form.setHelper(sling);
                 form.setPath(sling.getRequest().getResource().getPath());
             } else {
                 form.setPath("/form");

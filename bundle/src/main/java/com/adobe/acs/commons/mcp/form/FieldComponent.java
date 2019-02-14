@@ -44,9 +44,9 @@ import org.osgi.annotation.versioning.ProviderType;
 public abstract class FieldComponent {
 
     private String name;
-    protected FormField formField;
-    protected Field javaField;
-    protected SlingScriptHelper sling;
+    private FormField formField;
+    private Field javaField;
+    private SlingScriptHelper sling;
     private final ResourceMetadata componentMetadata = new ResourceMetadata();
     private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
     private String resourceSuperType = "granite/ui/components/coral/foundation/form/field";
@@ -78,27 +78,31 @@ public abstract class FieldComponent {
 
     public abstract void init();
 
-    public SlingScriptHelper getHelper() {
+    public final void setHelper(SlingScriptHelper helper) {
+        this.sling = helper;
+    }
+
+    public final SlingScriptHelper getHelper() {
         return sling;
     }
 
-    public void setPath(String path) {
+    public final void setPath(String path) {
         this.path = path;
     }
 
-    public String getPath() {
+    public final String getPath() {
         return path;
     }
 
-    public Field getField() {
+    public final Field getField() {
         return javaField;
     }
 
-    public FormField getFieldDefinition() {
+    public final FormField getFieldDefinition() {
         return formField;
     }
 
-    public String getHtml() {
+    public final String getHtml() {
         sling.include(getComponentResource());
         return "";
     }
@@ -133,29 +137,29 @@ public abstract class FieldComponent {
     /**
      * @return the componentMetadata
      */
-    public ResourceMetadata getComponentMetadata() {
+    public final ResourceMetadata getComponentMetadata() {
         return componentMetadata;
     }
 
-    public Map<ClientLibraryType, Set<String>> getClientLibraryCategories() {
+    public final Map<ClientLibraryType, Set<String>> getClientLibraryCategories() {
         return Collections.unmodifiableMap(clientLibraries);
     }
 
-    public void addClientLibrary(String category) {
+    public final void addClientLibrary(String category) {
         addClientLibraries(ClientLibraryType.ALL, Arrays.asList(category));
     }
 
-    public void addClientLibraries(ClientLibraryType type, String... categories) {
+    public final void addClientLibraries(ClientLibraryType type, String... categories) {
         addClientLibraries(type, Arrays.asList(categories));
     }
 
-    public void addClientLibraries(ClientLibraryType type, Collection<String> categories) {
+    public final void addClientLibraries(ClientLibraryType type, Collection<String> categories) {
         Set<String> categoriesSet = clientLibraries.getOrDefault(type, new LinkedHashSet<>());
         categoriesSet.addAll(categories);
         clientLibraries.put(type, categoriesSet);
     }
 
-    public void addClientLibraries(FieldComponent component) {
+    public final void addClientLibraries(FieldComponent component) {
         component.getClientLibraryCategories().forEach((type, categories) -> {
             if (categories != null) {
                 addClientLibraries(type, categories);
@@ -166,32 +170,32 @@ public abstract class FieldComponent {
     /**
      * @return the resourceType
      */
-    public String getResourceType() {
+    public final String getResourceType() {
         return resourceType;
     }
 
     /**
      * @param resourceType the resourceType to set
      */
-    public void setResourceType(String resourceType) {
+    public final void setResourceType(String resourceType) {
         this.resourceType = resourceType;
     }
 
     /**
      * @return the resourceSuperType
      */
-    public String getResourceSuperType() {
+    public final String getResourceSuperType() {
         return resourceSuperType;
     }
 
     /**
      * @param resourceSuperType the resourceSuperType to set
      */
-    public void setResourceSuperType(String resourceSuperType) {
+    public final void setResourceSuperType(String resourceSuperType) {
         this.resourceSuperType = resourceSuperType;
     }
 
-    public void purgeEmptyMetadata() {
+    public final void purgeEmptyMetadata() {
         Set<String> emptyKeys = new HashSet<>();
         componentMetadata.forEach((key, value) -> {
             if (value == null || "".equals(value)) {
@@ -201,18 +205,14 @@ public abstract class FieldComponent {
         componentMetadata.keySet().removeAll(emptyKeys);
     }
 
-    public void setSlingHelper(SlingScriptHelper helper) {
-        this.sling = helper;
-    }
-
     /**
      * @return the name
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public boolean hasOption(String optionName) {
+    public final boolean hasOption(String optionName) {
         if (formField == null || formField.options() == null) {
             return false;
         } else {
@@ -222,7 +222,7 @@ public abstract class FieldComponent {
         }
     }
 
-    public Optional<String> getOption(String option) {
+    public final Optional<String> getOption(String option) {
         if (formField == null || formField.options() == null) {
             return Optional.empty();
         } else {
@@ -232,25 +232,25 @@ public abstract class FieldComponent {
         }
     }
 
-    public Optional<Boolean> getBooleanOption(String option) {
+    public final Optional<Boolean> getBooleanOption(String option) {
         return getOption(option).map(s -> Variant.convert(s, Boolean.class));
     }
 
-    public static enum ClientLibraryType {
-        JS, CSS, ALL
-    }
 
     /**
      * @return the category
      */
-    public String getCategory() {
+    public final String getCategory() {
         return category;
     }
 
     /**
      * @param category the category to set
      */
-    public void setCategory(String category) {
+    public final void setCategory(String category) {
         this.category = category;
+    }
+    public static enum ClientLibraryType {
+        JS, CSS, ALL
     }
 }
