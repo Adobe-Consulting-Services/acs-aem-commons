@@ -236,7 +236,6 @@ public abstract class FieldComponent {
         return getOption(option).map(s -> Variant.convert(s, Boolean.class));
     }
 
-
     /**
      * @return the category
      */
@@ -250,6 +249,7 @@ public abstract class FieldComponent {
     public final void setCategory(String category) {
         this.category = category;
     }
+
     public static enum ClientLibraryType {
         JS, CSS, ALL
     }

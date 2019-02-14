@@ -32,5 +32,6 @@ public final class PasswordComponent extends FieldComponent {
 
     @Override
     public void init() {
+        // Nothing special happens here
     }
 }
