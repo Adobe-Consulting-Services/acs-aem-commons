@@ -25,20 +25,7 @@ import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.NonExistingResource;
-import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.Privilege;
+import com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.Report;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -48,17 +35,30 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.security.Privilege;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.NonExistingResource;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
+import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.Report;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectBrokenReferences;
-import static com.adobe.acs.commons.mcp.impl.processes.BrokenLinksReport.collectPaths;
 
 /**
  *
@@ -137,7 +137,7 @@ public class BrokenLinksTest {
         return t.createProcessDefinition();
     }
 
-    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException {
+    private ResourceResolver getEnhancedMockResolver() throws RepositoryException, LoginException, PersistenceException {
         final ResourceResolver rr = getFreshMockResolver();
 
         AbstractResourceImpl processes = new AbstractResourceImpl(ProcessInstanceImpl.BASE_PATH, null, null, new ResourceMetadata());
@@ -154,7 +154,7 @@ public class BrokenLinksTest {
     }
 
 
-    private ControlledProcessManager getControlledProcessManager() throws LoginException {
+    private ControlledProcessManager getControlledProcessManager() throws LoginException, PersistenceException {
         ActionManager am = getActionManager();
 
         ActionManagerFactory amf = mock(ActionManagerFactoryImpl.class);
