@@ -20,12 +20,12 @@
 
 package com.adobe.acs.commons.images;
 
-import java.util.Map;
-
-import org.apache.sling.api.resource.ValueMap;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.image.Layer;
+import org.apache.sling.api.resource.ValueMap;
+
+import java.util.Map;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")

@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -62,6 +63,8 @@ public class Spreadsheet {
     private List<String> headerRow;
     private final Map<String, String> delimiters;
     private boolean enableHeaderNameConversion = true;
+    private InputStream inputStream;
+    private List<String> caseInsensitiveHeaders;
 
     /**
      * Simple constructor used for unit testing purposes
@@ -71,22 +74,37 @@ public class Spreadsheet {
      */
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         this.enableHeaderNameConversion = convertHeaderNames;
-        headerTypes = Arrays.stream(headerArray).collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
+        headerTypes = Arrays.stream(headerArray)
+                            .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
         headerRow = Arrays.asList(headerArray);
         requiredColumns = Collections.EMPTY_LIST;
         dataRows = new ArrayList<>();
         delimiters = new HashMap<>();
     }
 
-    public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) throws IOException {
+    /**
+     * Simple constructor used for unit testing purposes
+     *
+     * @param convertHeaderNames If true, header names are converted
+     * @param caseInsensitiveHeaders Header names that will be ignored during conversion
+     * @param headerArray List of strings for header columns
+     */
+    public Spreadsheet(boolean convertHeaderNames, List<String> caseInsensitiveHeaders, String... headerArray) {
+        this(convertHeaderNames, headerArray);
+        this.caseInsensitiveHeaders = caseInsensitiveHeaders;
+    }
+
+    public Spreadsheet(boolean convertHeaderNames, InputStream file, String... required) {
         delimiters = new HashMap<>();
         this.enableHeaderNameConversion = convertHeaderNames;
         if (required == null || required.length == 0) {
             requiredColumns = Collections.EMPTY_LIST;
         } else {
-            requiredColumns = Arrays.stream(required).map(this::convertHeaderName).collect(Collectors.toList());
+            requiredColumns = Arrays.stream(required)
+                                    .map(this::convertHeaderName)
+                                    .collect(Collectors.toList());
         }
-        parseInputFile(file);
+        this.inputStream = file;
     }
 
     public Spreadsheet(boolean convertHeaderNames, RequestParameter file, String... required) throws IOException {
@@ -94,12 +112,17 @@ public class Spreadsheet {
         fileName = file.getFileName();
     }
 
-    public Spreadsheet(InputStream file, String... required) throws IOException {
+    public Spreadsheet(InputStream file, String... required) {
         this(true, file, required);
     }
 
     public Spreadsheet(RequestParameter file, String... required) throws IOException {
         this(true, file, required);
+    }
+
+    public Spreadsheet(RequestParameter file, List<String> caseInsensitiveHeaders, String... required) throws IOException {
+        this(true, file, required);
+        this.caseInsensitiveHeaders = caseInsensitiveHeaders;
     }
 
     /**
@@ -108,9 +131,9 @@ public class Spreadsheet {
      * @return List of files that will be imported, including any renditions
      * @throws IOException if the file couldn't be read
      */
-    private void parseInputFile(InputStream file) throws IOException {
+    public Spreadsheet buildSpreadsheet() throws IOException {
 
-        XSSFWorkbook workbook = new XSSFWorkbook(file);
+        XSSFWorkbook workbook = new XSSFWorkbook(this.inputStream);
 
         final XSSFSheet sheet = workbook.getSheetAt(0);
         rowCount = sheet.getLastRowNum();
@@ -134,6 +157,8 @@ public class Spreadsheet {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+
+        return this;
     }
 
     private List<Variant> readRow(Row row) {
@@ -232,10 +257,16 @@ public class Spreadsheet {
         } else {
             name = str;
         }
-        if (enableHeaderNameConversion) {
+        if (enableHeaderNameConversion && isHeaderCaseInsensitive(name)) {
             name = String.valueOf(name).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
         }
+
         return name;
+    }
+
+    private boolean isHeaderCaseInsensitive(String name) {
+        return CollectionUtils.isEmpty(caseInsensitiveHeaders)
+                || caseInsensitiveHeaders.stream().anyMatch(s -> s.equalsIgnoreCase(name));
     }
 
     /**

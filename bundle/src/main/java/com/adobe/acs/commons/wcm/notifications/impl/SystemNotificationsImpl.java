@@ -20,24 +20,18 @@
 
 package com.adobe.acs.commons.wcm.notifications.impl;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
+import com.adobe.acs.commons.util.CookieUtil;
+import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -50,23 +44,29 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
-import com.adobe.acs.commons.util.CookieUtil;
-import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-@Component(service=SystemNotifications.class)
+@Component(immediate = true)
+@Service(value = SystemNotifications.class)
 public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 

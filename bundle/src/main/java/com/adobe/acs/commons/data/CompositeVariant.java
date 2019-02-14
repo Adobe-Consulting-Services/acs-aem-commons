@@ -19,12 +19,11 @@
  */
 package com.adobe.acs.commons.data;
 
+import org.osgi.annotation.versioning.ProviderType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a value which could be either a list of variants or a single variant. The idea is that this supports a

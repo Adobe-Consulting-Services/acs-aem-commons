@@ -20,7 +20,5 @@
 /**
  * Packaging utilities.
  */
-@Version("2.0.1")
+@org.osgi.annotation.versioning.Version("2.0.1")
 package com.adobe.acs.commons.packaging;
-
-import org.osgi.annotation.versioning.Version;

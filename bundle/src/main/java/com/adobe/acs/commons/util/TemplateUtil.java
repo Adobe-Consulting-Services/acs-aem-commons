@@ -22,12 +22,11 @@ package com.adobe.acs.commons.util;
 import javax.annotation.CheckForNull;
 
 import org.apache.sling.api.resource.ValueMap;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
-
-import tldgen.Function;
 
 /**
  * Utility functions for working with CQ Templates.
@@ -46,7 +45,6 @@ public final class TemplateUtil {
      * @param templatePath the path of the template to check
      * @return true if the page is of the defined template
      */
-    @Function
     public static boolean hasTemplate(@CheckForNull final Page page, @CheckForNull final String templatePath) {
         if (page == null) {
             return false;

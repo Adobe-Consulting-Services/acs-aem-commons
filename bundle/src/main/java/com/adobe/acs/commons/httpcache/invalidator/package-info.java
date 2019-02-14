@@ -24,7 +24,7 @@
  * invalidates the cache. For a typical implementation, invalidation event could be custom supplied based on the cache
  * config invalidation requirements. A sample implementation based on sling eventing is provided.
  */
-@Version("2.0.0")
+@org.osgi.annotation.versioning.Version("1.1.0")
 package com.adobe.acs.commons.httpcache.invalidator;
 
-import org.osgi.annotation.versioning.Version;
+

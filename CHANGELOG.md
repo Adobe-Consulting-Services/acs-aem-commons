@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
 - #1564 - Added SFTP support for asset ingest utilities
@@ -19,16 +20,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1670 - Added @JsonValueMapValue, @I18N, @HierarchicalPageProperty, and improved @AemObject and @SharedValueMapValue.
 - #1686 - Added CloseableQueryBuilder service to deal with CQ QueryBuilder's shallow unclosed ResourceResolvers.
 - #1683 - HttpCache: Added OOTB config extension:: request cookie extension
-- #1685 - HttpCache: Added OOTB config extension:: combined extension
-- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, valuemap value extension
+- #1692 - HttpCache: Added OOTB config extension:: request header,parameter, resource properties value extension
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1733 - Do not throw ReplicationExceptions from Dispatcher Flush Rules Preprocessor
+- #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
+- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
-- #1692 - HttpCache: Refactored resource / group config extensions 
-- #1691 - Manage Controlled Process feature doesn't work because of R6 annotations
-- #1667 - Refactored the activate methods of all http cache services
-- #1664 - OSGI annotations : fixed default values for various activate methods
+- #1692 - HttpCache: Refactored resource / group config extensions
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -56,25 +56,28 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1684 - Useing Autocloseable when closing resourceresolvers
 - #1694 - Switch S3AssetIngestorTest and FileAssetIngestorTest back to JCR_OAK to avoid UnsupportedOperationException on MockSession.refresh().
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
+- #1716 - Added short-name to all TLD files.
+- #1730 - MCP Forms Multifield class now handles arrays correctly
+- #1723 - Fix unclosed channel when non exising path provided
 
 ### Changed
+- #1726 - Deploy the bundle via the dedicated DAV url
 - #1571 - Remove separate twitter bundle and use exception trapping to only register AdapterFactory when Twitter4J is available.
 - #1573 - Tag Creator - automatic detection/support of /etc/tags or /content/cq:tags root paths
 - #1578 - Asset import needs additional configuration inputs
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1609 - EnsureOakIndex excludes property seed, and sub-tree [oak:QueryIndexDefinition]/facets/jcr:content, by way up an updated to ChecksumGeneratorImpl that allows specific excludedNodeNames and excludedSubTrees.
-- #1560 - Changing to osgi annotations
+- #1614 - (Breaking change) Disables all auto-on clientlibs by default, requiring proxy clientlibs.
 - #1615 - Add cq:Tag as a contentType for ContentVisitor API (allowing Content Traversing workflows to act upon cq:Tags)
 - #1619 - Implemented dependency checking, updating Guava and jjwt to latest versions.
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
-- #1719 - Added missing OSGi metatype names for 10 OSGi components.
-- #1722 - Added dashes back to OSGi properties using R7 support ($_$)
-- #1723 - Fix unclosed channel when non exising path provided
-- #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
+- #1720 - Adjusted metatype for HTTP Cache components.
+- #1729 - Url Asset Ingestor | Support case sensitive properties
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
+- #1716 - TLD files are no longer automatically generated
 
 ## [3.19.0] - 2018-11-03
 

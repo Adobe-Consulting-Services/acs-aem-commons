@@ -19,48 +19,6 @@
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Function;
-
-import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
@@ -76,44 +34,81 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.DynamicMBean;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
  * HttpCacheStore} also get bound to this.
  */
 // @formatter:off
-@Component(service= {DynamicMBean.class, HttpCacheEngine.class},property= {
-"jmx.objectname" + "=" +  "com.adobe.acs.httpcache:type=HTTP Cache Engine",
-"webconsole.configurationFactory.nameHint" + "=" + "Global handling rules: {httpcache.engine.cache-handling-rules.global}"
-}, reference = {
+@Component(
+        label = "ACS AEM Commons - HTTP Cache - Engine",
+        description = "Controlling service for http cache implementation.",
+        metatype = true
+)
+@Properties({
+        @Property(name = "jmx.objectname",
+                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
+                propertyPrivate = true),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
+                propertyPrivate = true)
+})
+@References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
-                bind = "bindHttpCacheConfig",
-                unbind = "unbindHttpCacheConfig",
-                service = HttpCacheConfig.class,
+                referenceInterface = HttpCacheConfig.class,
                 policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.AT_LEAST_ONE),
+                policyOption = ReferencePolicyOption.GREEDY,
+                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
-        @Reference(
-                name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-                bind = "bindHttpCacheHandlingRule",
-                unbind = "unbindHttpCacheHandlingRule",
-                service = HttpCacheHandlingRule.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.MULTIPLE),
+        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
+               referenceInterface = HttpCacheHandlingRule.class,
+               policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
+               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
-        @Reference(
-                name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-                bind = "bindHttpCacheStore",
-                unbind = "unbindHttpCacheStore",
-                service = HttpCacheStore.class,
-                policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.AT_LEAST_ONE
-        )
-} )
-@Designate(ocd=HttpCacheEngineImpl.Config.class)
+        @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
+               referenceInterface = HttpCacheStore.class,
+               policy = ReferencePolicy.DYNAMIC,
+               policyOption = ReferencePolicyOption.GREEDY,
+               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
+})
+@Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
-    private static final Logger log = LoggerFactory.getLogger(HttpCacheConfigImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpCacheEngineImpl.class);
 
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
@@ -142,26 +137,17 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     private static final ConcurrentHashMap<String, HttpCacheHandlingRule> cacheHandlingRules = new
             ConcurrentHashMap<String, HttpCacheHandlingRule>();
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Engine",
-            description = "Controlling service for http cache implementation.")
-    public @interface Config {
-
-        @AttributeDefinition(name = "Global HttpCacheHandlingRules",
-                description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-                defaultValue = {
-                        "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                        "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                        "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                        "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-                })
-        String[] httpcache_engine_cachehandling_rules_global() default {
-                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-        };
-    }
-
+    // formatter:off
+    @Property(label = "Global HttpCacheHandlingRules",
+              description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
+              unbounded = PropertyUnbounded.ARRAY,
+              value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                      "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
+                      "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
+                      "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
+              })
+    // formatter:on
+    private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
@@ -238,9 +224,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
         if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
 
-            log.debug("Cache store implementation {} has been added", (String) properties.get(HttpCacheStore
-                    .KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores in the map: {}", cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> ADDED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
         }
     }
 
@@ -253,8 +237,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
         final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
         if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
-            log.debug("Cache store removed - {}.", (String) properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE));
-            log.debug("Total number of cache stores after removal: {}", cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> REMOVED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
         }
     }
 
@@ -292,10 +275,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     @Activate
-    protected void activate(Config config) {
+    protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(config.httpcache_engine_cachehandling_rules_global()));
+        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
+                PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();

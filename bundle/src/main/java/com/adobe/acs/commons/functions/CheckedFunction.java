@@ -19,9 +19,8 @@
  */
 package com.adobe.acs.commons.functions;
 
-import java.util.function.Function;
-
 import org.osgi.annotation.versioning.ConsumerType;
+import java.util.function.Function;
 
 /**
  * Created work-alike for functionality not introduced until Java 8

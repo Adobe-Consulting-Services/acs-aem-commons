@@ -51,7 +51,7 @@ public interface CacheKeyFactory {
     CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) throws HttpCacheKeyCreationException;
 
     /**
-     * Does the Cache Key matches the Htt[ Cache Config.
+     * Does the Cache Key matches the Http Cache Config.
      * @param key
      * @param cacheConfig
      * @return True if key and config match.

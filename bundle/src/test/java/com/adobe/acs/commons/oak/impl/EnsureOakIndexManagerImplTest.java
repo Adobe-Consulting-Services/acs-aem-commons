@@ -94,7 +94,7 @@ public class EnsureOakIndexManagerImplTest {
         context.build().resource(definitionPath, ensureIndexProperties).commit();
         Map<String,Object> props = new HashMap<>();
         props.put("oak.indexes.path", OAK_INDEX);
-        props.put("ensure.definitions.path",definitionPath);
+        props.put("ensure-definitions.path",definitionPath);
         props.put("immediate", "false");
         
 

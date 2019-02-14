@@ -26,8 +26,16 @@ import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationEvent;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.vault.packaging.*;
-import org.apache.sling.api.resource.*;
+import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.VaultPackage;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
@@ -42,7 +50,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 
 import javax.jcr.Node;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.sling.discovery.InstanceDescription;
 import org.apache.sling.discovery.TopologyEvent;
@@ -136,7 +148,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         when(jcrPackage.getPackage()).thenReturn(vaultPackage);
         when(vaultPackage.getCreated()).thenReturn(calendar);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(JcrConstants.JCR_LASTMODIFIED, calendar);
         when(jcrPackageJcrContent.adaptTo(ValueMap.class)).thenReturn(new ValueMapDecorator(properties));
 
@@ -167,8 +179,7 @@ public class JcrPackageReplicationStatusEventHandlerTest {
     public void testProcess() throws Exception {
         final Map<String, String> config = new HashMap<>();
 
-        config.put(JcrPackageReplicationStatusEventHandler.PROP_REPLICATED_BY_OVERRIDE, "Package Replication");
-        
+        config.put("replicated-by.override", "Package Replication");
 
         eventHandler.activate(config);
         eventHandler.process(job);

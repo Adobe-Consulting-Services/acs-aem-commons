@@ -29,6 +29,7 @@ import com.google.common.base.Function;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -58,6 +60,9 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class UrlAssetImportTest {
+
+    private static List<String> CASE_INSENSITIVE_HEADERS = Arrays.asList("Source", "Rendition", "Target",
+                                                                         "Original");
 
     @Rule
     public final SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
@@ -145,5 +150,26 @@ public class UrlAssetImportTest {
         importProcess.importAssets(actionManager);
         importProcess.updateMetadata(actionManager);
         importProcess.importRenditions(actionManager);
+    }
+
+    @Test
+    public void testAddedCamelCaseProperties() throws IOException, RepositoryException {
+        importProcess.fileData = new Spreadsheet(true, CASE_INSENSITIVE_HEADERS,
+                                                 "source", "target", "rendition", "original", "dc:title", "test:camelCase");
+        importProcess.init();
+        URL testImg = getClass().getResource("/img/test.png");
+        final String expectedTitle = "title";
+        final String expectedCamelCaseProp = "come test value";
+        addImportRow(testImg.toString(), "/content/dam/test", "", "", expectedTitle, expectedCamelCaseProp);
+        importProcess.files = importProcess.extractFilesAndFolders(
+                importProcess.fileData.getDataRowsAsCompositeVariants());
+        importProcess.createFolders(actionManager);
+        importProcess.importAssets(actionManager);
+        importProcess.updateMetadata(actionManager);
+
+        Resource metadata = context.resourceResolver().getResource("/content/dam/test/test.png/jcr:content/metadata");
+        ValueMap valueMap = metadata.getValueMap();
+        assertEquals(expectedTitle, valueMap.get("dc:title"));
+        assertEquals(expectedCamelCaseProp, valueMap.get("test:camelCase"));
     }
 }

@@ -105,7 +105,7 @@ public class ContentFragmentImport extends ProcessDefinition {
     public void init() throws RepositoryException {
         try {
             // Read spreadsheet
-            spreadsheet = new Spreadsheet(importFile, PATH, TEMPLATE, NAME, TITLE);
+            spreadsheet = new Spreadsheet(importFile, PATH, TEMPLATE, NAME, TITLE).buildSpreadsheet();
         } catch (IOException ex) {
             throw new RepositoryException("Unable to process spreadsheet", ex);
         }

@@ -19,12 +19,13 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.form.FieldComponent;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Generate a tag picker component
  */
-public class TagPickerComponent extends FieldComponent {
+@ProviderType
+public final class TagPickerComponent extends FieldComponent {
 
     @Override
     public void init() {

@@ -20,26 +20,6 @@
 
 package com.adobe.acs.commons.workflow.bulk.removal.impl.servlets;
 
-
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_EXTENSIONS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_METHODS;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES;
-import static org.apache.sling.api.servlets.ServletResolverConstants.SLING_SERVLET_SELECTORS;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.jcr.Session;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowService;
 import com.day.cq.workflow.WorkflowSession;
@@ -48,15 +28,29 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+
+import javax.jcr.Session;
+import javax.servlet.ServletException;
+
+import java.io.IOException;
+import java.util.Arrays;
+
 /**
  * ACS AEM Commons - Workflow Instance Remover - Init Servlet
  */
 @SuppressWarnings("serial")
-@Component(service = Servlet.class, property = {
-SLING_SERVLET_RESOURCE_TYPES + "=acs-commons/components/utilities/workflow-remover",
-SLING_SERVLET_SELECTORS + "=init",
-SLING_SERVLET_METHODS + "=GET",
-SLING_SERVLET_EXTENSIONS + "=json" })
+@SlingServlet(
+        methods = { "GET" },
+        resourceTypes = { "acs-commons/components/utilities/workflow-remover" },
+        selectors = { "init" },
+        extensions = { "json" }
+)
 public class InitServlet extends SlingSafeMethodsServlet {
 
     private static final String[] WORKFLOW_STATUSES = new String[]{"COMPLETED", "ABORTED", "RUNNING",
@@ -92,6 +86,7 @@ public class InitServlet extends SlingSafeMethodsServlet {
      * @param resourceResolver
      * @return
      * @throws WorkflowException
+     * @throws JSONException
      */
     private JsonObject getFormJSONObject(final ResourceResolver resourceResolver) throws WorkflowException {
 

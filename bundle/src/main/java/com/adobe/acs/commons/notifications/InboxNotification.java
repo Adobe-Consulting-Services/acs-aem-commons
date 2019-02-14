@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.notifications;
 
-import java.io.Serializable;
-
 import org.osgi.annotation.versioning.ConsumerType;
+
+import java.io.Serializable;
 
 /**
  * Represents a Inbox Notification.

@@ -25,18 +25,19 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
-import org.osgi.service.component.annotations.Component;
 
 import com.adobe.cq.dialogconversion.AbstractDialogRewriteRule;
 import com.adobe.cq.dialogconversion.DialogRewriteException;
-import com.adobe.cq.dialogconversion.DialogRewriteRule;
 import com.adobe.cq.dialogconversion.DialogRewriteUtils;
 
 /**
  * DialogRewriteRule which handles rewriting of the 'multifieldpanel' xtype.
  */
-@Component(service=DialogRewriteRule.class)
+@Component
+@Service
 public final class MultifieldPanelDialogRewriteRule extends AbstractDialogRewriteRule {
 
     private static final String PN_NAME = "name";

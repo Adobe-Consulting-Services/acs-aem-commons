@@ -21,24 +21,19 @@ package com.adobe.acs.commons.genericlists.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
-import org.apache.sling.spi.resource.provider.ResolveContext;
-import org.apache.sling.spi.resource.provider.ResourceContext;
-import org.apache.sling.spi.resource.provider.ResourceProvider;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,18 +42,23 @@ import com.adobe.acs.commons.genericlists.GenericList.Item;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.google.gson.Gson;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.sling.spi.resource.provider.ResolveContext;
+import org.apache.sling.spi.resource.provider.ResourceContext;
+import org.apache.sling.spi.resource.provider.ResourceProvider;
 
 /**
  * Resource provider which makes Generic Lists available as JSON String resources
  * for use with the Touch UI Metadata Asset Editor.
  */
-
-@Component(service = ResourceProvider.class, property = {
-        ResourceProvider.PROPERTY_ROOT + "=" + GenericListJsonResourceProvider.ROOT
-})
-@Designate(ocd = GenericListJsonResourceProvider.Config.class)
+@Component(metatype = true, label = "ACS AEM Commons - Generic List JSON Resource Provider",
+    description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
+//TODO: Confirm this works considering that spi Resource Provider is not an interface!
+@Service(ResourceProvider.class)
+@Properties({ @Property(name = ResourceProvider.PROPERTY_ROOT, value = GenericListJsonResourceProvider.ROOT) })
 public final class GenericListJsonResourceProvider extends ResourceProvider {
-
 
     private static final Logger log = LoggerFactory.getLogger(GenericListJsonResourceProvider.class);
 
@@ -70,18 +70,14 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static final int EXTENSION_LENGTH = EXTENSION.length();
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Generic List JSON Resource Provider",
-            description = "Resource Provider which makes Generic Lists available as JSON structures suitable for use in the Touch UI Asset Metadata Editor")
-    public @interface Config {
-        @AttributeDefinition(name = "Generic List Root", description = "Root path under which generic lists can be found", defaultValue = DEFAULT_LIST_ROOT)
-        String list_root() default DEFAULT_LIST_ROOT;
-    }
+    @Property(label = "Generic List Root", description = "Root path under which generic lists can be found", value = DEFAULT_LIST_ROOT)
+    private static final String PROP_LIST_ROOT = "list.root";
 
     private String listRoot;
 
     @Activate
-    protected void activate(GenericListJsonResourceProvider.Config config) {
-        this.listRoot = config.list_root();
+    protected void activate(final Map<String, String> props) {
+        this.listRoot = PropertiesUtil.toString(props.get(PROP_LIST_ROOT), DEFAULT_LIST_ROOT);
     }
 
     @Override

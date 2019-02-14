@@ -20,9 +20,9 @@
 
 package com.adobe.acs.commons.workflow.synthetic;
 
-import java.util.Map;
-
 import org.osgi.annotation.versioning.ProviderType;
+
+import java.util.Map;
 
 @ProviderType
 public interface SyntheticWorkflowModel {

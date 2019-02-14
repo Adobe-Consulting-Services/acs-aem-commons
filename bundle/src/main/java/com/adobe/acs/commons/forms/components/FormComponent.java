@@ -19,11 +19,12 @@
  */
 package com.adobe.acs.commons.forms.components;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.osgi.annotation.versioning.ProviderType;
 
 import com.adobe.acs.commons.forms.Form;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 
 @ProviderType
 @SuppressWarnings("squid:S00112")

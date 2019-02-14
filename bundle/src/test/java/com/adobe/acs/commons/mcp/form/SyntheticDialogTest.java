@@ -20,9 +20,11 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.List;
+import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.adobe.acs.commons.mcp.form.MultifieldComponent.NODE_PATH;
 import static org.junit.Assert.*;
 
 /**
@@ -38,6 +40,7 @@ public class SyntheticDialogTest {
     public void init() {
         testPojo = new TestPojo();
         testPojo.init();
+        testPojo.getFieldComponents();
     }
 
     @Test
@@ -65,25 +68,38 @@ public class SyntheticDialogTest {
         assertNotNull(component.getFieldComponents().get("subField4"));
         assertNotNull(component.getFieldComponents().get("subField5"));
         assertNotNull(component.getFieldComponents().get("subField6"));
-        assertTrue(component.isComposite);
+        assertTrue(component.isComposite());
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
         assertNotNull("Multifield structure check 1", res.getChild("field"));
         assertNotNull("Multifield structure check 2", res.getChild("field/items"));
-        assertNotNull("Should include subfield1 component", res.getChild("field/items/subField1"));
-        assertNotNull("Should include subfield2 component", res.getChild("field/items/subField2"));
-        assertNotNull("Should include subfield3 component", res.getChild("field/items/subField3"));
-        assertNotNull("Should include subfield4 component", res.getChild("field/items/subField4"));
-        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField5"));
-        assertNotNull("Should include subfield5 component", res.getChild("field/items/subField6"));
+        // Fields should be grouped in a fieldset, but not divided into categories
+        assertNotNull("Should include subfield1 component", res.getChild("field/items/fields/items/subField1"));
+        assertNotNull("Should include subfield2 component", res.getChild("field/items/fields/items/subField2"));
+        assertNotNull("Should include subfield3 component", res.getChild("field/items/fields/items/subField3"));
+        assertNotNull("Should include subfield4 component", res.getChild("field/items/fields/items/subField4"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/fields/items/subField5"));
+        assertNotNull("Should include subfield5 component", res.getChild("field/items/fields/items/subField6"));
+    }
+
+    @Test
+    public void testGroupingBehavior() {
+        AbstractResourceImpl res = (AbstractResourceImpl) testPojo.getFormResource();
+        assertNotNull("Form structure -- Confirm form container", res.getChild("items"));
+        assertNotNull("Form structure -- Confirm presence of tab container", res.getChild("items/tabs"));
+        assertNotNull("Form structure -- Confirm tab items list", res.getChild("items/tabs/items"));
+        assertEquals("Should have 4 tabs", 4, res.getChild("items/tabs/items").getChildren().spliterator().getExactSizeIfKnown());
+        for (Resource tab : res.getChild("items/tabs/items").getChildren()) {
+            assertNotEquals("Should not have a 'Misc' tab", AbstractGroupingContainerComponent.GENERIC_GROUP, tab.getResourceMetadata().get("jcr:title"));
+        }
     }
 
     @Test
     public void testSimpleMultifieldComponentGeneration() {
         MultifieldComponent component = (MultifieldComponent) testPojo.getFieldComponents().get("simpleMultiField");
         component.setPath("/test/path");
-        assertFalse(component.isComposite);
+        assertFalse(component.isComposite());
         AbstractResourceImpl res = (AbstractResourceImpl) component.buildComponentResource();
         assertNotNull(res);
         assertEquals("/test/path", res.getPath());
@@ -110,22 +126,25 @@ public class SyntheticDialogTest {
     }
 
     public static class TestPojo extends GeneratedDialog {
-        @FormField(component = TextfieldComponent.class, name = "Text Field")
+        @FormField(component = TextfieldComponent.class, name = "Text Field", category="1")
         String textField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield (composite)")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (composite)", category="1")
         List<TestSubtype> multiField;
 
-        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2", options = NODE_PATH)
         List<String> simpleMultiField;
 
-        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only")
+        @FormField(component = MultifieldComponent.class, name = "Multifield (simple)", category="2")
+        String[] simpleArrayMultiField;
+
+        @FormField(component = ReadonlyTextfieldComponent.class, name = "Read-only", category="3")
         String readOnly;
 
-        @FormField(component = TagPickerComponent.class, name = "tags")
+        @FormField(component = TagPickerComponent.class, name = "tags", category="3")
         List<String> tags;
 
-        @FormField(component = TextareaComponent.class, name = "Text Area")
+        @FormField(component = TextareaComponent.class, name = "Text Area", category="4")
         String textArea;
     }
 

@@ -33,10 +33,7 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
-
-import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
-import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
-
+import com.adobe.acs.commons.util.visitors.TraversalException;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -64,7 +61,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.security.AccessControlManager;
@@ -77,7 +73,11 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+
+import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * Relocate Pages and/or Sites using a parallelized move process
@@ -146,7 +146,6 @@ public class Renovator extends ProcessDefinition {
 
     @FormField(name = "Publish",
             description = "Self-managed handles publishing in-process where as Queue will add it to the system publish queue where progress is not tracked here.",
-            required = false,
             component = RadioComponent.EnumerationSelector.class,
             options = {"vertical", "default=SELF_MANAGED"})
     public PublishMethod publishMethod = PublishMethod.SELF_MANAGED;
@@ -204,7 +203,8 @@ public class Renovator extends ProcessDefinition {
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
     private final Set<MovingNode> moves = Collections.synchronizedSet(new HashSet<>());
-    private final Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
+    private final Set<String> additionalTargetFolders = Collections.synchronizedSet(new TreeSet<>());
+    final Map<String, String> movePaths = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public void init() throws RepositoryException {
@@ -276,7 +276,7 @@ public class Renovator extends ProcessDefinition {
     private void validateSpreadsheetInput() throws RepositoryException {
         Spreadsheet sheet;
         try {
-            sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL);
+            sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL).buildSpreadsheet();
         } catch (IOException ex) {
             Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
             throw new RepositoryException("Unable to parse spreadsheet", ex);
@@ -330,28 +330,37 @@ public class Renovator extends ProcessDefinition {
                     Resource res = rr2.getResource(source);
                     Optional<MovingNode> rootNode = buildMoveNode(res);
                     if (rootNode.isPresent()) {
-                        MovingNode root = rootNode.get();
-                        root.setDestinationPath(dest);
-                        moves.add(root);
-                        note(source, Report.misc, "Root path");
-                        note(source, Report.target, dest);
-
-                        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
-                                JcrConstants.NT_FOLDER,
-                                JcrResourceConstants.NT_SLING_FOLDER,
-                                JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
-                                NameConstants.NT_PAGE
-                        );
-
-                        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
-                        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
-
-                        visitor.accept(res);
-                        note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
+                        identifyStructureFromRoot(visitedSourceNodes, source, dest, rr2, res, rootNode.get());
                     }
                 });
             });
         });
+    }
+
+    private void identifyStructureFromRoot(AtomicInteger visitedSourceNodes, String source, String dest, ResourceResolver rr, Resource res, MovingNode root) throws TraversalException {
+        root.setDestinationPath(dest);
+        if (root instanceof MovingAsset) {
+            String destFolder = StringUtils.substringBeforeLast(dest, "/");
+            if (!additionalTargetFolders.contains(destFolder) && rr.getResource(destFolder) == null) {
+                additionalTargetFolders.add(destFolder);
+            }
+        }
+        moves.add(root);
+        note(source, Report.misc, "Root path");
+        note(source, Report.target, dest);
+
+        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor(
+                JcrConstants.NT_FOLDER,
+                JcrResourceConstants.NT_SLING_FOLDER,
+                JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
+                NameConstants.NT_PAGE
+        );
+
+        visitor.setResourceVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
+        visitor.setLeafVisitorChecked((r, level) -> buildMoveTree(r, level, root, visitedSourceNodes));
+
+        visitor.accept(res);
+        note("All scanned nodes", Report.misc, "Scanned " + visitedSourceNodes.get() + " source nodes.");
     }
 
     private void buildMoveTree(Resource r, int level, MovingNode root, AtomicInteger visitedSourceNodes) throws RepositoryException {
@@ -497,6 +506,16 @@ public class Renovator extends ProcessDefinition {
                             childNode.move(replicatorQueue, rr3);
                         });
                     }, null, MovingNode::isCopiedBeforeMove);
+                });
+            });
+            additionalTargetFolders.forEach(path -> {
+                manager.deferredWithResolver(rr2 -> {
+                    Actions.setCurrentItem("Building structure for " + path);
+                    performNecessaryReplicationOnAncestors(rr2, path);
+                    ResourceUtil.getOrCreateResource(rr2, path, Collections.EMPTY_MAP, "sling:Folder", false);
+                    if (detailedReport) {
+                        note(path, Report.misc, "Created additional destination folder");
+                    }
                 });
             });
         });
@@ -705,4 +724,16 @@ public class Renovator extends ProcessDefinition {
         }
     }
 
+    private void performNecessaryReplicationOnAncestors(ResourceResolver rr, String path) throws ReplicationException {
+        String checkPath = "";
+        for (String part : path.split(Pattern.quote("/"))) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            checkPath += "/" + part;
+            if (rr.getResource(checkPath) == null) {
+                performNecessaryReplication(rr, checkPath);
+            }
+        }
+    }
 }
