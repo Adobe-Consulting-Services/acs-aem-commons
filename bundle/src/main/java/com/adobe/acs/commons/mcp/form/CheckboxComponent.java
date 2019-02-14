@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Radio button selector component
  */
 @ProviderType
-public class CheckboxComponent extends FieldComponent {
+public final class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/checkbox");

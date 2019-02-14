@@ -67,6 +67,18 @@ public class SyntheticFormResourceTest {
     )
     private boolean checkboxComponentTest;
 
+    @FormField(
+            component = PasswordComponent.class,
+            name = "password component"
+    )
+    private String passwordComponentTest;
+
+    @FormField(
+            component = ButtonComponent.class,
+            name = "generic button"
+    )
+    private String button;
+
     @Test
     public void defaultValuesTest() throws DeserializeException {
         Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), null);
@@ -74,16 +86,19 @@ public class SyntheticFormResourceTest {
         assertNotNull(form.get("enumComponentTest"));
         assertNotNull(form.get("pathComponentTest"));
         assertNotNull(form.get("checkboxComponentTest"));
+        assertNotNull(form.get("passwordComponentTest"));
 
         assertEquals(TextfieldComponent.class, form.get("textComponentTest").getClass());
         assertEquals(EnumerationSelector.class, form.get("enumComponentTest").getClass());
         assertEquals(AssetSelectComponent.class, form.get("pathComponentTest").getClass());
         assertEquals(CheckboxComponent.class, form.get("checkboxComponentTest").getClass());
+        assertEquals(PasswordComponent.class, form.get("passwordComponentTest").getClass());
 
         assertEquals("defaultValue", form.get("textComponentTest").getOption("default").orElse(null));
         assertEquals(TestEnum.value3.name(), form.get("enumComponentTest").getOption("default").orElse(null));
         assertEquals("/dam/content", form.get("pathComponentTest").getOption("default").orElse(null));
         assertEquals("true", form.get("checkboxComponentTest").getOption("default").orElse(null));
+        assertNull(form.get("passwordComponentTest").getOption("default").orElse(null));
     }
 
     @Test

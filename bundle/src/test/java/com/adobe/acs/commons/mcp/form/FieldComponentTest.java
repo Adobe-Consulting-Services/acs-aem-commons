@@ -23,7 +23,6 @@ import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Optional;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -31,7 +30,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.*;
-
 import static org.mockito.Mockito.*;
 
 public class FieldComponentTest {
@@ -91,7 +89,7 @@ public class FieldComponentTest {
         when(sling.getRequest()).thenReturn(request);
 
         TestFieldComponent componentA = new TestFieldComponent(null);
-        componentA.setSlingHelper(sling);
+        componentA.setHelper(sling);
         componentA.setPath("/apps/some/path");
 
         assertEquals("", componentA.getHtml());
@@ -103,7 +101,7 @@ public class FieldComponentTest {
 
     public class TestFieldComponent extends FieldComponent {
         public TestFieldComponent(String[] options) {
-            formField = new FormField() {
+            FormField field = new FormField() {
                 @Override
                 public boolean equals(Object obj) {
                     return false;
@@ -159,6 +157,7 @@ public class FieldComponentTest {
                     return options;
                 }
             };
+            setup("test", null, field, null);
         }
 
         @Override

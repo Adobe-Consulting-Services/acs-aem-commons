@@ -20,11 +20,13 @@
 package com.adobe.acs.commons.mcp.form;
 
 import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wrap a field set (section) component which is similar to container but also has a class attribute
  */
-public class FieldsetComponent extends ContainerComponent {
+@ProviderType
+public final class FieldsetComponent extends ContainerComponent {
     private static final String CLASS = "class";
 
     private String cssClass;

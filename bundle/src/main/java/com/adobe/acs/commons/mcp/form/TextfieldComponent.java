@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,8 +27,11 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class TextfieldComponent extends FieldComponent {
+    private static final String MAX_LENGTH_OPT = "maxlength";
+
     @Override
     public void init() {
-        getOption("maxlength").ifPresent(val->getComponentMetadata().put("maxlength", val));
+        ResourceMetadata meta = getComponentMetadata();
+        getOption(MAX_LENGTH_OPT).ifPresent(val->meta.put(MAX_LENGTH_OPT, val));
     }
 }

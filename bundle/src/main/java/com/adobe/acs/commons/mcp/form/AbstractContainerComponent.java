@@ -28,10 +28,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represent a generic container component which has one or more children
  */
+@ProviderType
 public class AbstractContainerComponent extends FieldComponent {
 
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
@@ -57,8 +59,8 @@ public class AbstractContainerComponent extends FieldComponent {
                 });
             }
         }
-        if (sling != null) {
-            setPath(sling.getRequest().getResource().getPath());
+        if (getHelper() != null) {
+            setPath(getHelper().getRequest().getResource().getPath());
         }
     }
 
@@ -90,13 +92,13 @@ public class AbstractContainerComponent extends FieldComponent {
         if (clazz == String.class || clazz.isPrimitive()) {
             FieldComponent comp = generateDefaultChildComponent();
             FormField fieldDef = FormField.Factory.create(getName(), "", null, null, false, comp.getClass(), null);
-            comp.setup(getName(), null, fieldDef, sling);
+            comp.setup(getName(), null, fieldDef, getHelper());
             comp.getComponentMetadata().put("title", getName());
             // TODO: Provide a proper mechanism for setting path when creating components
             addComponent(getName(), comp);
             composite = false;
         } else {
-            AnnotatedFieldDeserializer.getFormFields(clazz, sling).forEach((name, component) -> addComponent(name, component));
+            AnnotatedFieldDeserializer.getFormFields(clazz, getHelper()).forEach((name, component) -> addComponent(name, component));
             composite = true;
         }
         fieldComponents.values().forEach(this::addClientLibraries);
@@ -118,20 +120,20 @@ public class AbstractContainerComponent extends FieldComponent {
             FieldsetComponent fieldset = new FieldsetComponent();
             fieldComponents.forEach((name, comp) -> fieldset.addComponent(name, comp));
             fieldset.setPath(path + "/fields");
-            fieldset.sling = getHelper();
+            fieldset.setHelper(getHelper());
             items.addChild(fieldset.buildComponentResource());
         } else {
             for (FieldComponent component : fieldComponents.values()) {
-                if (sling != null) {
-                    component.setSlingHelper(sling);
+                if (getHelper() != null) {
+                    component.setHelper(getHelper());
                 }
                 component.setPath(path + "/items/" + component.getName());
                 Resource child = component.buildComponentResource();
                 items.addChild(child);
             }
         }
-        if (sling != null) {
-            items.setResourceResolver(sling.getRequest().getResourceResolver());
+        if (getHelper() != null) {
+            items.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
         return items;
     }

@@ -47,8 +47,8 @@ public class ContainerComponent extends AbstractContainerComponent {
             getComponentMetadata().put(JCR_TITLE, getTitle());
         }
         AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), getComponentMetadata());
-        if (sling != null) {
-            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        if (getHelper() != null) {
+            res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
         res.addChild(generateItemsResource(getPath() + "/items", false));
         return res;
