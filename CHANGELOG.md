@@ -72,6 +72,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1634 - Made reference policy option greedy to allow plugging in a custom DispatcherFlusher service
 - #1649 - Added support for custom Content-Type header.
 - #1720 - Adjusted metatype for HTTP Cache components.
+- #1729 - Url Asset Ingestor | Support case sensitive properties
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
