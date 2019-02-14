@@ -73,6 +73,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1649 - Added support for custom Content-Type header.
 - #1720 - Adjusted metatype for HTTP Cache components.
 - #1729 - Url Asset Ingestor | Support case sensitive properties
+- #1753 - Remove Dynamic*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
