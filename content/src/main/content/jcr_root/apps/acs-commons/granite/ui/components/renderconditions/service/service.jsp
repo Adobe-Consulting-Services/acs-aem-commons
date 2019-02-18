@@ -1,7 +1,7 @@
 <%@include file="/libs/foundation/global.jsp"%>
 <%@page session="false"
         import="java.lang.IllegalArgumentException,
-          com.adobe.acs.commons.rendercondition.GraniteRenderConditionUtil,
+          com.adobe.acs.commons.rendercondition.GraniteRenderConditionEvaluator,
           com.adobe.granite.ui.components.rendercondition.RenderCondition,
           com.adobe.granite.ui.components.rendercondition.SimpleRenderCondition"%>
 <%--###
@@ -21,9 +21,9 @@ Template
       [granite:RenderConditionsService]
 
       /**
-       * The service.pid property of an OSGI service that implements com.adobe.acs.commons.rendercondition.GraniteRenderCondition
+       * The condition.name property of an OSGI service that implements com.adobe.acs.commons.rendercondition.GraniteRenderCondition
        */
-      - service.pid (String)
+      - condition.name (String)
 
       /**
        * The default fallback value, if anything fails (class loading, exceptions, or anything else).
@@ -33,7 +33,7 @@ Template
 ###--%>
 <sling:defineObjects/>
 <%
-  // all logic is in GraniteRenderConditionUtil class.
-  boolean vote = GraniteRenderConditionUtil.evaluate(slingRequest, request, sling, pageContext);
+  // all logic is in GraniteRenderConditionEvaluator class.
+  boolean vote = GraniteRenderConditionEvaluator.evaluate(slingRequest, request, sling, pageContext);
   request.setAttribute(RenderCondition.class.getName(), new SimpleRenderCondition(vote));
 %>

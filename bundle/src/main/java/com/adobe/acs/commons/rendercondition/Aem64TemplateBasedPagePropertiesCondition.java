@@ -18,13 +18,23 @@ import org.slf4j.LoggerFactory;
  * and that page path is passed via a request param called "item".
  * For example, if you open page properties for page: /content/my-company/my-page, the URL would be:
  * http://localhost:4502/mnt/overlay/wcm/core/content/sites/properties.html?item=/content/my-company/my-page
+ *
+ * Sample render:condition node:
+ *
+ * granite:rendercondition
+ *   - jcr:primaryType: "nt:unstructured",
+ *   - templatePath: "/conf/my-com/settings/wcm/templates/community-page",
+ *   - condition.name: "acs-template-based-page-properties-condition",
+ *   - sling:resourceType: "/apps/acs-commons/granite/ui/components/renderconditions/service"
+ *
  */
 
 @Component(
     immediate = true,
     property = {
         "label=AEM 6.4 Template Based Page Properties Render Condition",
-        "description=Renders Granite Widgets in Page Properties if page template matches tha passed template path"
+        "description=Renders Granite Widgets in Page Properties if page template matches tha passed template path",
+        GraniteRenderCondition.CONDITION_NAME + "=acs-template-based-page-properties-condition"
     },
     service = GraniteRenderCondition.class)
 public class Aem64TemplateBasedPagePropertiesCondition implements GraniteRenderCondition {

@@ -6,12 +6,20 @@ import com.adobe.granite.ui.components.Config;
 
 /**
  * This interface is to be implemented by an OSGI service that wishes to register as a
- * Granite Render Condition. The actual render condition^ will then get the implemented service by PID
+ * Granite Render Condition. The implementation must declare an OSGI property "condition.name".
+ * The actual render condition^ will then get the implemented service by condition.name property
  * and execute the service's evaluate method to determine if the Granite Widget should be rendered.
+ *
+ * See com.adobe.acs.commons.rendercondition.Aem64TemplateBasedPagePropertiesCondition for example.
  *
  * ^Service Render condition: /apps/acs-commons/granite/ui/components/renderconditions/service/service.jsp
  */
 public interface GraniteRenderCondition {
+
+  /**
+   * An OSGI service property name used to find a particular GraniteRenderCondition service.
+   */
+  String CONDITION_NAME = "condition.name";
 
   /**
    *

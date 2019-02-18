@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
  * Called here: /apps/acs-commons/granite/ui/components/renderconditions/service/service.jsp
  * Does the heavy lifting for the Render Condition feature. instead of putting all this code in a JSP.
  */
-public class GraniteRenderConditionUtil {
+public class GraniteRenderConditionEvaluator {
 
-  private static final Logger log = LoggerFactory.getLogger(GraniteRenderConditionUtil.class);
+  private static final Logger log = LoggerFactory.getLogger(GraniteRenderConditionEvaluator.class);
 
   /**
    * All params passed from the JSP in which this method is called.
@@ -34,7 +34,7 @@ public class GraniteRenderConditionUtil {
     Config cfg = cmp.getConfig();
 
     // get properties on the render condition
-    String servicePID = cfg.get("service.pid", null);
+    String servicePID = cfg.get(GraniteRenderCondition.CONDITION_NAME, null);
     boolean defaultValue = cfg.get("default", false);
 
     if (servicePID != null) {
@@ -58,7 +58,7 @@ public class GraniteRenderConditionUtil {
       SlingScriptHelper slingScriptHelper,
       @Nonnull String servicePID) {
 
-    String filter = "(service.pid="+ servicePID +")";
+    String filter = "(" + GraniteRenderCondition.CONDITION_NAME +"="+ servicePID +")";
     GraniteRenderCondition[] services = slingScriptHelper.getServices(GraniteRenderCondition.class, filter);
     if (ArrayUtils.isNotEmpty(services)) {
       return services[0];
