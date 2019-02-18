@@ -122,6 +122,8 @@ public class GeneratedDialog {
             if (sling != null) {
                 form.setHelper(sling);
                 form.setPath(sling.getRequest().getResource().getPath());
+                form.setAsync(true);
+                form.getComponentMetadata().put("granite:id", "mcp-generated-form");
             } else {
                 form.setPath("/form");
             }
