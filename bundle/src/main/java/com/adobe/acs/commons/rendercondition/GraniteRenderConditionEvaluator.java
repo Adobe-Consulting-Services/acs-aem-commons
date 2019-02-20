@@ -2,6 +2,7 @@ package com.adobe.acs.commons.rendercondition;
 
 import com.adobe.granite.ui.components.ComponentHelper;
 import com.adobe.granite.ui.components.Config;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
@@ -19,6 +20,10 @@ public class GraniteRenderConditionEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(GraniteRenderConditionEvaluator.class);
 
+  private GraniteRenderConditionEvaluator() {
+    throw new IllegalStateException("Tried to instantiate a utility class");
+  }
+
   /**
    * All params passed from the JSP in which this method is called.
    * Tries to get the intended GraniteRenderCondition service and call its evaluate method.
@@ -34,7 +39,7 @@ public class GraniteRenderConditionEvaluator {
     Config cfg = cmp.getConfig();
 
     // get properties on the render condition
-    String servicePID = cfg.get(GraniteRenderCondition.CONDITION_NAME, null);
+    String servicePID = cfg.get(GraniteRenderConditionConstants.CONDITION_NAME, null);
     boolean defaultValue = cfg.get("default", false);
 
     if (servicePID != null) {
@@ -58,12 +63,17 @@ public class GraniteRenderConditionEvaluator {
       SlingScriptHelper slingScriptHelper,
       @Nonnull String servicePID) {
 
-    String filter = "(" + GraniteRenderCondition.CONDITION_NAME +"="+ servicePID +")";
-    GraniteRenderCondition[] services = slingScriptHelper.getServices(GraniteRenderCondition.class, filter);
-    if (ArrayUtils.isNotEmpty(services)) {
-      return services[0];
-    } else {
-      return null;
-    }
+    return Optional.ofNullable(slingScriptHelper)
+        .map(helper -> helper.getServices(GraniteRenderCondition.class, getConditionServiceFilter(servicePID)))
+        .filter(ArrayUtils::isNotEmpty)
+        .map(services -> services[0])
+        .orElse(null);
+  }
+
+  /**
+   * Returns an OSGI service filter based on the condition.name service property.
+   */
+  private static String getConditionServiceFilter(String servicePID){
+    return "(" + GraniteRenderConditionConstants.CONDITION_NAME +"="+ servicePID +")";
   }
 }

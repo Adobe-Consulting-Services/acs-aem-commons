@@ -3,11 +3,10 @@ package com.adobe.acs.commons.rendercondition;
 import com.adobe.granite.ui.components.Config;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.Template;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
     property = {
         "label=AEM 6.4 Template Based Page Properties Render Condition",
         "description=Renders Granite Widgets in Page Properties if page template matches tha passed template path",
-        GraniteRenderCondition.CONDITION_NAME + "=acs-template-based-page-properties-condition"
+        GraniteRenderConditionConstants.CONDITION_NAME + "=acs-template-based-page-properties-condition"
     },
     service = GraniteRenderCondition.class)
 public class Aem64TemplateBasedPagePropertiesCondition implements GraniteRenderCondition {
@@ -51,33 +50,32 @@ public class Aem64TemplateBasedPagePropertiesCondition implements GraniteRenderC
 
     String expectedTemplatePath = cfg.get("templatePath", "");
 
+
     if (slingHttpServletRequest == null
         || httpServletRequest == null
         || StringUtils.isBlank(expectedTemplatePath)) {
       throw new IllegalArgumentException("One of the passed parameters is null.");
     }
 
-    // the open console is the page properties console.
-    if (StringUtils.contains(httpServletRequest.getPathInfo(), PAGE_PROPERTIES_CONSOLE)) {
-
-      // get the actual page path
-      String pagePath = httpServletRequest.getParameter("item");
-
-      ResourceResolver resourceResolver = slingHttpServletRequest.getResourceResolver();
-
-      if (resourceResolver != null) {
-        Resource pageResource = resourceResolver.getResource(pagePath);
-        if (pageResource != null) {
-          Page page = pageResource.adaptTo(Page.class);
-          if (page != null) {
-            Template template = page.getTemplate();
-            if (template != null) {
-              return StringUtils.contains(template.getPath(), expectedTemplatePath);
-            } else log.error("Could not determine template path for page at path: {}.", pagePath);
-          } else log.error("Could not adapt resource at path: {}, to a Page.", pagePath);
-        } else log.error("Could not get page resource at path: {}. Returning default value", pagePath);
-      } else log.error("Could not get Resource Resolver. Returning default.");
+    // not in page properties console, exit.
+    if (!StringUtils.contains(httpServletRequest.getPathInfo(), PAGE_PROPERTIES_CONSOLE)) {
+      return defaultValue;
     }
-    return defaultValue;
+
+    // make sure page path exists
+    String pagePath = httpServletRequest.getParameter("item");
+    if (StringUtils.isBlank(pagePath)) {
+      log.warn("item parameter is blank, returning default value, {}", defaultValue);
+      return defaultValue;
+    }
+
+    return Optional.ofNullable(slingHttpServletRequest)
+        .map(SlingHttpServletRequest::getResourceResolver)
+        .map(resolver -> resolver.getResource(pagePath))
+        .map(pageResource -> pageResource.adaptTo(Page.class))
+        .map(Page::getTemplate)
+        .map(Template::getPath)
+        .map(templatePath -> StringUtils.contains(templatePath, expectedTemplatePath))
+        .orElse(defaultValue);
   }
 }

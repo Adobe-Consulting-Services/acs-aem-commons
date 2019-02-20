@@ -17,11 +17,6 @@ import com.adobe.granite.ui.components.Config;
 public interface GraniteRenderCondition {
 
   /**
-   * An OSGI service property name used to find a particular GraniteRenderCondition service.
-   */
-  String CONDITION_NAME = "condition.name";
-
-  /**
    *
    * @param slingHttpServletRequest The sling Request you know and love.
    * @param httpServletRequest The Servlet Request
