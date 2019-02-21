@@ -111,7 +111,7 @@ public class GraniteRenderConditionEvaluator {
   /**
    * Returns an OSGI service filter based on the condition.name service property.
    */
-  private static String getConditionServiceFilter(String servicePID){
-    return "(" + GraniteRenderConditionConstants.CONDITION_NAME +"="+ servicePID +")";
+  private static String getConditionServiceFilter(String servicePid){
+    return "(" + GraniteRenderConditionConstants.CONDITION_NAME +"="+ servicePid +")";
   }
 }
