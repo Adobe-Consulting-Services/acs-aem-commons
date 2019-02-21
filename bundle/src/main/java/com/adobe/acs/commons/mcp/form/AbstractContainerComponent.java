@@ -28,12 +28,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represent a generic container component which has one or more children
  */
-@ProviderType
 public class AbstractContainerComponent extends FieldComponent {
 
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
