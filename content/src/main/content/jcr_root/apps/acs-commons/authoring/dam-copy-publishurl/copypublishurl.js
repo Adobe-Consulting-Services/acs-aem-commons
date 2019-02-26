@@ -2,7 +2,11 @@
  * #%L
  * ACS AEM Commons Package
  * %%
+<<<<<<< HEAD
  * Copyright (C) 2017 Adobe
+=======
+ * Copyright (C) 2016 Adobe
+>>>>>>> 6469552... #1101 Added a button to grab the publish url of a published asset.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

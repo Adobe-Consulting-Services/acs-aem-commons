@@ -32,6 +32,6 @@
             }
         }
     }  /* Display or hide the widget */
-         request.setAttribute(RenderCondition.class.getName(), new SimpleRenderCondition(vote));
-
+    
+    request.setAttribute(RenderCondition.class.getName(), new SimpleRenderCondition(vote));
 %>
