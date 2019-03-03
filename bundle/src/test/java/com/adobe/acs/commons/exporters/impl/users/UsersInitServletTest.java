@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.exporters.impl.users;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +44,7 @@ import com.google.gson.JsonParser;
 
 public class UsersInitServletTest {
 
-    Logger LOG = LoggerFactory.getLogger(UsersInitServletTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UsersInitServletTest.class);
     
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -58,7 +77,7 @@ public class UsersInitServletTest {
     public void testGroupExistence() throws Exception {
         UsersInitServlet servlet = new UsersInitServlet();
         servlet.doGet(context.request(), context.response());
-        LOG.info (context.response().getOutputAsString());
+        LOG.info(context.response().getOutputAsString());
         
         JsonObject json = new JsonParser().parse(context.response().getOutputAsString()).getAsJsonObject();
         JsonObject options = json.get("options").getAsJsonObject();
