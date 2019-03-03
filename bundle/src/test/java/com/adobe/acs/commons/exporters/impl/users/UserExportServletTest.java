@@ -151,7 +151,7 @@ public class UserExportServletTest {
      * @param group
      * @return
      */
-    JsonObject buildParameterObject(String groupFilter,String group) {
+    public static JsonObject buildParameterObject(String groupFilter,String group) {
         JsonObject params = new JsonObject();
         params.addProperty("groupFilter", groupFilter);
         JsonArray groups = new JsonArray();
