@@ -65,7 +65,8 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);
 
-    private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users]) ORDER BY [rep:principalName]";
+//    private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users]) ORDER BY [rep:principalName]";
+    private static final String QUERY = "SELECT * FROM [rep:User] ORDER BY [rep:principalName]";
     private static final String GROUP_DELIMITER = "|";
 
     /**
