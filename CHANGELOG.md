@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+## [4.0.0] - 2019-02-20
+
 ### Added
 - #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
@@ -74,6 +76,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1649 - Added support for custom Content-Type header.
 - #1720 - Adjusted metatype for HTTP Cache components.
 - #1729 - Url Asset Ingestor | Support case sensitive properties
+- #1753 - Remove Dynamic*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin
