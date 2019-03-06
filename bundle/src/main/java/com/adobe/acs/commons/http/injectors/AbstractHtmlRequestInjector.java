@@ -75,7 +75,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
             filterChain.doFilter(request, originalResponse);
 
             // Get contents
-            final String originalContents = originalResponse.getBufferedString();
+            final String originalContents = originalResponse.getBufferedServletOutput().getBufferedString();
 
             if (originalContents != null 
                     && StringUtils.contains(response.getContentType(), "html")) {

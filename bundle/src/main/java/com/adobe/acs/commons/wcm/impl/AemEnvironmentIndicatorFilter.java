@@ -188,7 +188,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             }
     
             // Get contents
-            final String contents = capturedResponse.getBufferedString();
+            final String contents = capturedResponse.getBufferedServletOutput().getBufferedString();
     
             if (doInclude && contents != null && StringUtils.contains(response.getContentType(), "html")) {
     

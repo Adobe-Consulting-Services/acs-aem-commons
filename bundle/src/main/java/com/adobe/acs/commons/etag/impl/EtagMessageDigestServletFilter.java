@@ -19,7 +19,9 @@
  */
 package com.adobe.acs.commons.etag.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -27,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
@@ -37,10 +40,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
-import org.apache.sling.servlets.annotations.SlingServletFilter;
-import org.apache.sling.servlets.annotations.SlingServletFilterScope;
+import org.apache.sling.engine.EngineConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -51,19 +56,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.etag.impl.EtagMessageDigestServletFilter.Config;
-import com.adobe.acs.commons.util.BufferedServletResponse.ResponseWriteMethod;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
 import com.google.common.io.BaseEncoding;
 
 /** Generates the ETag response header from a message digest of the response. This header is supposed to be cached also on the dispatcher! */
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE)
-@SlingServletFilter(scope = SlingServletFilterScope.REQUEST)
+@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, property=EngineConstants.SLING_FILTER_SCOPE+"="+EngineConstants.FILTER_SCOPE_REQUEST)
 @Designate(ocd = Config.class)
 public class EtagMessageDigestServletFilter implements Filter {
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Digest-based ETag Servlet Filter", description = "Sets an ETag response header based on a message digest from the response's content and optionally its other headers. Enabling it increases the memory consumption as the full response need to be buffered before being sent to the client!")
-    @interface Config {
-        @AttributeDefinition(description = "If this filter should not be active, rather try to delete this config. Only in cases where this cannot be easily accomplished uncheck this option to disable the filter.")
+    @ObjectClassDefinition(name = "ACS AEM Commons - Digest-based ETag Servlet Filter", description = "Sets an ETag response header based on a message digest from the response's content and optionally its' other headers. Enabling it increases the memory consumption as the full response need to be buffered before being sent to the client!")
+    public @interface Config {
+        @AttributeDefinition(name = "Enabled", description = "If this filter should not be active, rather try to delete this config. Only in cases where this cannot be easily accomplished uncheck this option to disable the filter.")
         boolean enabled() default true;
 
         @AttributeDefinition(name = "Message Digest Algorithm", description = "The message digest algorithm for calculating the ETag header. Must be one of the supported ones by the JRE (for Oracle JRE8 listed in https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest).")
@@ -83,9 +87,15 @@ public class EtagMessageDigestServletFilter implements Filter {
 
         @AttributeDefinition(name = "Ignored Response Headers", description = "The header names (case-insensitive) which should in no case be considered for the digest calculation as they are considered also for a 304 response (compare with https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.5).")
         String[] ignoredResponseHeaders() default {"Date", "Cache-Control", "Expires",  "Vary"};
-        
+
         @AttributeDefinition(name = "Salt", description = "The (optional) salt is also taken into account for the message digest calculation. It is necessary to change that value whenever the response content or the response headers are now modified differently in a proxy instance between client and AEM (e.g. Dispatcher sets additional headers).")
         String salt();
+
+        @AttributeDefinition(name = "Enabled for output streams", description = "If set to 'true' this will also calculate the ETag for response output streams (binary output) and not only for respone writers (text output). Enabling this option might lead to heavy memory demands as the full output stream is then buffered (i.e. kept in memory) before being delivered to the client. Especially if you deliver large assets like videos from AEM you should not enable this option.")
+        boolean enabledForOutputStream() default false;
+
+        @AttributeDefinition(name = "Add as HTML comment", description = "If set to 'true' this filter will also emit a HTML comment at the very end of each HTML document exposing the ETag. This may be helpful to debug issues with stale HTML cache entries in case the ETag header is not properly propagated.")
+        boolean addAsHtmlComment() default false;
     }
 
     private static final Logger log = LoggerFactory.getLogger(EtagMessageDigestServletFilter.class);
@@ -97,11 +107,11 @@ public class EtagMessageDigestServletFilter implements Filter {
     public void activate(Config configuration) {
         this.configuration = configuration;
         if (configuration.ignoredResponseHeaders() != null && configuration.ignoredResponseHeaders().length > 0) {
-            ignoredHeaderNames = Arrays.asList(configuration.ignoredResponseHeaders()).stream().map(String::toLowerCase).collect(Collectors.toSet());
             // turn to lower case
+            ignoredHeaderNames = Arrays.asList(configuration.ignoredResponseHeaders()).stream().map(String::toLowerCase).collect(Collectors.toSet());
         } else {
             ignoredHeaderNames = Collections.emptySet();
-        };
+        }
     }
 
     @Override
@@ -111,42 +121,82 @@ public class EtagMessageDigestServletFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!(response instanceof SlingHttpServletResponse)) {
+        if (!(response instanceof SlingHttpServletResponse) || !(request instanceof SlingHttpServletRequest)) {
             throw new IllegalStateException("Filter not properly registered as Sling Servlet Filter");
         }
         if (!configuration.enabled()) {
             log.debug("ETag filter not enabled");
             chain.doFilter(request, response);
-        } else {
-            try {
-                // we already checked that this is a HTTP servlet response before
-                SlingHttpServletResponse slingHttpServletResponse = (SlingHttpServletResponse)response;
-                try (BufferedSlingHttpServletResponse bufferedResponse = new BufferedSlingHttpServletResponse((SlingHttpServletResponse) response)) {
-                    chain.doFilter(request, bufferedResponse);
-                    if (!configuration.overwrite() && slingHttpServletResponse.containsHeader(HttpConstants.HEADER_ETAG)) {
-                        log.debug("Do not overwrite existing ETag header with value '{}'", slingHttpServletResponse.getHeader(HttpConstants.HEADER_ETAG));
-                    } else {
-                        if (slingHttpServletResponse.isCommitted()) {
-                            log.error("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
-                        } else {
-                          String digest = calculateDigestFromResponse(bufferedResponse);
-                          slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, digest);
-                        }
-                    }
+            return;
+        } 
+        try {
+            // we already checked that this is a HTTP servlet response before
+            SlingHttpServletResponse slingHttpServletResponse = (SlingHttpServletResponse)response;
+            SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest)request;
+            ByteArrayOutputStream outputStream = configuration.enabledForOutputStream() ? new ByteArrayOutputStream() : null;
+            try (BufferedSlingHttpServletResponse bufferedResponse = new BufferedSlingHttpServletResponse(slingHttpServletResponse, new StringWriter(), outputStream)) {
+                chain.doFilter(request, bufferedResponse);
+                if (!configuration.overwrite() && slingHttpServletResponse.containsHeader(HttpConstants.HEADER_ETAG)) {
+                    log.debug("Do not overwrite existing ETag header with value '{}'", slingHttpServletResponse.getHeader(HttpConstants.HEADER_ETAG));
+                    return;
+                } 
+                // was the response buffered?
+                if (!configuration.enabledForOutputStream() && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.OUTPUTSTREAM) {
+                    log.debug("Can not calculate message digest as response was written via output stream which was not buffered.");
+                    return;
+                } 
+                if (slingHttpServletResponse.isCommitted()) {
+                    log.error("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
+                    return;
+                } 
+                String digest = calculateDigestFromResponse(bufferedResponse);
+                slingHttpServletRequest.getRequestProgressTracker().log("ETag from digest calculated with {0}: {1}", configuration.messageDigestAlgorithm(), digest);
+                slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, digest);
+                if (isUnmodified(slingHttpServletRequest.getHeaders(HttpHeaders.IF_NONE_MATCH), digest)) {
+                    log.debug("Digest is equal to one of the given ETags in the If-None-Match request header, returning empty response with a 304");
+                    bufferedResponse.resetBuffer();
+                    slingHttpServletResponse.setStatus(HttpStatus.SC_NOT_MODIFIED);
+                    return;
                 }
-            } catch (NoSuchAlgorithmException e) {
-                log.error("The algorithm configured for this servlet filter is invalid: " + configuration.messageDigestAlgorithm(), e);
+                if (configuration.addAsHtmlComment() && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER && slingHttpServletResponse.getContentType() != null && slingHttpServletResponse.getContentType().startsWith("text/html")) {
+                    bufferedResponse.getWriter().println(String.format("%n<!-- ETag: %s -->", digest));
+                }
             }
+        } catch (NoSuchAlgorithmException e) {
+            log.error("The algorithm configured for this servlet filter is invalid: " + configuration.messageDigestAlgorithm(), e);
         }
     }
+    
+    /**
+     * Handles conditional requests like outlined in RFC7232.
+     * @param slingHttpServletRequest
+     * @param slingHttpServletResponse
+     * @return {@code true} in case this was a conditional request and the response was not modified, otherwise {@code false}
+     * @see <a href="// https://tools.ietf.org/html/rfc7232#section-3.2">RFC7232</a>
+     */
+    boolean isUnmodified(Enumeration<String> ifNoneMatchETags, String responseETag) {
+        if (ifNoneMatchETags == null) {
+            throw new IllegalStateException("Can not access request headers");
+        }
+        while (ifNoneMatchETags.hasMoreElements()) {
+            String ifNoneMatchETag = ifNoneMatchETags.nextElement();
+            if (ifNoneMatchETag.equals(responseETag) || ifNoneMatchETag.equals("*")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private String calculateDigestFromResponse(BufferedSlingHttpServletResponse bufferedResponse) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest messageDigest;
-        messageDigest = MessageDigest.getInstance(configuration.messageDigestAlgorithm());
-        if (bufferedResponse.getWriteMethod() == ResponseWriteMethod.OUTPUTSTREAM) {
-            messageDigest.update(bufferedResponse.getBufferedBytes());
-        } else if (bufferedResponse.getWriteMethod() == ResponseWriteMethod.WRITER) {
-            messageDigest.update(bufferedResponse.getBufferedString().getBytes(bufferedResponse.getCharacterEncoding()));
+    String calculateDigestFromResponse(BufferedSlingHttpServletResponse bufferedResponse) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest messageDigest = MessageDigest.getInstance(configuration.messageDigestAlgorithm());
+        if (bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.OUTPUTSTREAM) {
+            messageDigest.update(bufferedResponse.getBufferedServletOutput().getBufferedBytes());
+        } else if (bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+            String charsetName = bufferedResponse.getCharacterEncoding();
+            if (charsetName == null) {
+                charsetName = StandardCharsets.ISO_8859_1.name();
+            }
+            messageDigest.update(bufferedResponse.getBufferedServletOutput().getBufferedString().getBytes(charsetName));
         }
    
         // consider header values as well?

@@ -55,7 +55,7 @@ public class ResourceDataUtil {
 
             requestDispatcher.include(slingRequest, responseWrapper);
 
-            return StringUtils.stripToNull(responseWrapper.getBufferedString());
+            return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
         } catch (Exception ex) {
             log.error("Error creating the String representation for: " + path, ex);
         }

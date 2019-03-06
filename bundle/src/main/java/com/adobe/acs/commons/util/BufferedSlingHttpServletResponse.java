@@ -20,29 +20,67 @@
 package com.adobe.acs.commons.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import javax.servlet.ServletOutputStream;
+
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.wrappers.SlingHttpServletResponseWrapper;
 
-public class BufferedSlingHttpServletResponse extends BufferedHttpServletResponse implements SlingHttpServletResponse {
+/**
+ * A wrapper around a {@link SlingHttpServletResponse} which buffers all output being written to {@link #getOutputStream()} or {@link #getWriter()}. The response cannot
+ * be committed via {@link #flushBuffer} but only via {@link #close()}. Access to the underlying buffer is provided via
+ * {@link #getBufferedServletOutput()}. 
+ * <p/>
+ * Hint: This servlet wrapper must extend {@link SlingHttpServletResponseWrapper}, as otherwise RequestData.unwrap() throws exceptions
+ *
+ */
+public class BufferedSlingHttpServletResponse extends SlingHttpServletResponseWrapper implements Closeable {
 
-    private final SlingHttpServletResponse wrappedResponse;
+    private final BufferedServletOutput bufferedOutput;
 
-    public BufferedSlingHttpServletResponse(SlingHttpServletResponse wrappedResponse) throws IOException {
+    public BufferedSlingHttpServletResponse(SlingHttpServletResponse wrappedResponse) {
         super(wrappedResponse);
-        this.wrappedResponse = wrappedResponse;
+        this.bufferedOutput = new BufferedServletOutput(wrappedResponse);
     }
     
-    public BufferedSlingHttpServletResponse(SlingHttpServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream)
-            throws IOException {
-        super(wrappedResponse, writer, outputStream);
-        this.wrappedResponse = wrappedResponse;
+    public BufferedSlingHttpServletResponse(SlingHttpServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream) {
+        super(wrappedResponse);
+        this.bufferedOutput = new BufferedServletOutput(wrappedResponse, writer, outputStream);
     }
 
     @Override
-    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        return wrappedResponse.adaptTo(type);
+    public ServletOutputStream getOutputStream() throws IOException {
+        return bufferedOutput.getOutputStream();
     }
 
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        return bufferedOutput.getWriter();
+    }
+
+    @Override
+    public void flushBuffer() throws IOException {
+        bufferedOutput.flushBuffer();
+    }
+
+    @Override
+    public void resetBuffer() {
+        bufferedOutput.resetBuffer();
+    }
+
+    @Override
+    public void close() throws IOException {
+        bufferedOutput.close();
+    }
+
+    /**
+     * @return the underlying wrapper around the buffered output
+     */
+    public BufferedServletOutput getBufferedServletOutput() {
+        return bufferedOutput;
+    }
 }

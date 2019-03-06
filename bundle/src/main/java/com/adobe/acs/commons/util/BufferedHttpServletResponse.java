@@ -20,130 +20,61 @@
 package com.adobe.acs.commons.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
 
-import javax.servlet.http.Cookie;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
-public class BufferedHttpServletResponse extends BufferedServletResponse implements HttpServletResponse {
+/** 
+ * A wrapper around a {@link HttpServletResponse}  which buffers all output being written to {@link #getOutputStream()} or {@link #getWriter()}. The response cannot
+ * be committed via {@link #flushBuffer} but only via {@link #close()}. Access to the underlying buffer is provided via
+ * {@link #getBufferedServletOutput()}. 
+ */
+public class BufferedHttpServletResponse extends HttpServletResponseWrapper implements Closeable {
 
-    private final HttpServletResponse wrappedResponse;
+    private final BufferedServletOutput bufferedOutput;
 
-    public BufferedHttpServletResponse(HttpServletResponse wrappedResponse) throws IOException {
+    public BufferedHttpServletResponse(HttpServletResponse wrappedResponse) {
         super(wrappedResponse);
-        this.wrappedResponse = wrappedResponse;
+        this.bufferedOutput = new BufferedServletOutput(wrappedResponse);
     }
-
-    public BufferedHttpServletResponse(HttpServletResponse wrappedResponse, StringWriter writer,
-            ByteArrayOutputStream outputStream) throws IOException {
-        super(wrappedResponse, writer, outputStream);
-        this.wrappedResponse = wrappedResponse;
-    }
-
-    @Override
-    public void addCookie(Cookie cookie) {
-        wrappedResponse.addCookie(cookie);
+    
+    public BufferedHttpServletResponse(HttpServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream) {
+        super(wrappedResponse);
+        this.bufferedOutput = new BufferedServletOutput(wrappedResponse, writer, outputStream);
     }
 
     @Override
-    public boolean containsHeader(String name) {
-        return wrappedResponse.containsHeader(name);
+    public ServletOutputStream getOutputStream() throws IOException {
+        return bufferedOutput.getOutputStream();
     }
 
     @Override
-    public String encodeURL(String url) {
-        return wrappedResponse.encodeURL(url);
+    public PrintWriter getWriter() throws IOException {
+        return bufferedOutput.getWriter();
     }
 
     @Override
-    public String encodeRedirectURL(String url) {
-        return wrappedResponse.encodeRedirectURL(url);
+    public void flushBuffer() throws IOException {
+        bufferedOutput.flushBuffer();
     }
 
     @Override
-    public String encodeUrl(String url) {
-        return wrappedResponse.encodeUrl(url);
+    public void resetBuffer() {
+        bufferedOutput.resetBuffer();
     }
 
     @Override
-    public String encodeRedirectUrl(String url) {
-        return wrappedResponse.encodeRedirectUrl(url);
+    public void close() throws IOException {
+        bufferedOutput.close();
     }
 
-    @Override
-    public void sendError(int sc, String msg) throws IOException {
-        wrappedResponse.sendError(sc, msg);
-    }
-
-    @Override
-    public void sendError(int sc) throws IOException {
-        wrappedResponse.sendError(sc);
-    }
-
-    @Override
-    public void sendRedirect(String location) throws IOException {
-        wrappedResponse.sendRedirect(location);
-    }
-
-    @Override
-    public void setDateHeader(String name, long date) {
-        wrappedResponse.setDateHeader(name, date);
-    }
-
-    @Override
-    public void addDateHeader(String name, long date) {
-        wrappedResponse.addDateHeader(name, date);
-    }
-
-    public void setHeader(String name, String value) {
-        wrappedResponse.setHeader(name, value);
-    }
-
-    @Override
-    public void addHeader(String name, String value) {
-        wrappedResponse.addHeader(name, value);
-    }
-
-    @Override
-    public void setIntHeader(String name, int value) {
-        wrappedResponse.setIntHeader(name, value);
-    }
-
-    @Override
-    public void addIntHeader(String name, int value) {
-        wrappedResponse.addIntHeader(name, value);
-    }
-
-    @Override
-    public void setStatus(int sc) {
-        wrappedResponse.setStatus(sc);
-    }
-
-    @Override
-    public void setStatus(int sc, String sm) {
-        wrappedResponse.setStatus(sc, sm);
-    }
-
-    @Override
-    public int getStatus() {
-        return wrappedResponse.getStatus();
-    }
-
-    @Override
-    public String getHeader(String name) {
-        return wrappedResponse.getHeader(name);
-    }
-
-    @Override
-    public Collection<String> getHeaders(String name) {
-        return wrappedResponse.getHeaders(name);
-    }
-
-    @Override
-    public Collection<String> getHeaderNames() {
-        return wrappedResponse.getHeaderNames();
+    public BufferedServletOutput getBufferedServletOutput() {
+        return bufferedOutput;
     }
 
 }

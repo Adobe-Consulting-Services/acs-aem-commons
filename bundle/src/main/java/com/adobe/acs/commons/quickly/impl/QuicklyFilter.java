@@ -96,7 +96,7 @@ public class QuicklyFilter implements Filter {
             filterChain.doFilter(request, capturedResponse);
     
             // Get contents
-            final String contents = capturedResponse.getBufferedString();
+            final String contents = capturedResponse.getBufferedServletOutput().getBufferedString();
     
             if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
     
