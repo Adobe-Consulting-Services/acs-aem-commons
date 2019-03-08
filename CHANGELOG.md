@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Added
+
+### Fixed
+- #1773 - Fix name clashes for pipeline.types
+
 ## [4.0.0] - 2019-02-20
 
 ### Added
