@@ -22,11 +22,13 @@ package com.adobe.acs.commons.mcp.form;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represent a form
  */
-public class FormComponent extends AbstractContainerComponent {
+@ProviderType
+public final class FormComponent extends AbstractContainerComponent {
 
     private static final String ACTION_OPT = "action";
     private static final String ASYNC_OPT = "async";
@@ -124,8 +126,8 @@ public class FormComponent extends AbstractContainerComponent {
         purgeEmptyMetadata();
 
         AbstractResourceImpl res = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), meta);
-        if (sling != null) {
-            res.setResourceResolver(sling.getRequest().getResourceResolver());
+        if (getHelper() != null) {
+            res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
 
         res.addChild(generateItemsResource(getPath() + "/items", true));

@@ -32,12 +32,14 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.annotation.versioning.ProviderType;
 
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
 
 /**
  * This is a mock resource class used to pass values in to the granite UI components.
  */
+@ProviderType
 public class AbstractResourceImpl extends AbstractResource {
 
     List<Resource> children;

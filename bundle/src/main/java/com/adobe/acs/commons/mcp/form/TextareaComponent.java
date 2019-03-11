@@ -19,15 +19,16 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.form.TextfieldComponent;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Generates a text area component
  */
-public class TextareaComponent extends TextfieldComponent {
+@ProviderType
+public final class TextareaComponent extends TextfieldComponent {
 
     public TextareaComponent() {
         super();
         setResourceType("granite/ui/components/coral/foundation/form/textarea");
-    }    
+    }
 }

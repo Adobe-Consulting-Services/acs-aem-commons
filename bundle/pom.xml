@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.19.1-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -92,7 +92,7 @@
                         <configuration>
                             <target>
                                 <move todir="${project.build.outputDirectory}/OSGI-INF.bak">
-                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF"/>
+                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF" />
                                 </move>
                             </target>
                         </configuration>
@@ -106,9 +106,9 @@
                         <configuration>
                             <target>
                                 <move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
-                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF.bak"/>
+                                    <fileset dir="${project.build.outputDirectory}/OSGI-INF.bak" />
                                 </move>
-                                <delete dir="${project.build.outputDirectory}/OSGI-INF.bak"/>
+                                <delete dir="${project.build.outputDirectory}/OSGI-INF.bak" />
                             </target>
                         </configuration>
                         <goals>
@@ -121,8 +121,7 @@
                         <configuration>
                             <target>
                                 <jar update="true" destfile="${project.build.directory}/${project.build.finalName}.jar">
-                                    <fileset dir="${project.build.outputDirectory}"
-                                             includes="OSGI-INF/l10n/**"/>
+                                    <fileset dir="${project.build.outputDirectory}" includes="OSGI-INF/l10n/**" />
                                 </jar>
                             </target>
                         </configuration>
