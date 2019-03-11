@@ -325,7 +325,7 @@ public class FileAssetIngestor extends AssetIngestor {
             return getParent() == null && isFolder();
         }
 
-        ChannelSftp openChannel() throws JSchException {
+        private ChannelSftp openChannel() throws JSchException {
             if (channel == null || !channel.isConnected()) {
                 JSch jsch = new JSch();
                 int port = uri.getPort() <= 0 ? 22 : uri.getPort();
@@ -343,7 +343,7 @@ public class FileAssetIngestor extends AssetIngestor {
             return channel;
         }
 
-        void closeChannel() {
+        private void closeChannel() {
             if (channel != null) {
                 channel.disconnect();
                 try {
@@ -355,7 +355,7 @@ public class FileAssetIngestor extends AssetIngestor {
             channel = null;
         }
 
-        void retrieveDetails() throws JSchException, SftpException {
+        private void retrieveDetails() throws JSchException, SftpException {
             if (!retrieved) {
                 try {
                     openChannel();
@@ -424,7 +424,7 @@ public class FileAssetIngestor extends AssetIngestor {
             return !(".".equals(entry.getFilename()) || "..".equals(entry.getFilename()));
         }
 
-        HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
+        private HierarchicalElement getChildFromEntry(ChannelSftp.LsEntry entry) {
             try {
                 String childPath = getSourcePath() + "/" + entry.getFilename();
                 SftpHierarchicalElement child = new SftpHierarchicalElement(childPath, channel, true);
