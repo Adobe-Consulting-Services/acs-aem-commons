@@ -35,11 +35,10 @@ import org.slf4j.LoggerFactory;
  * This job will sync asset nodes based on OSGi configuration.
  */
 @Component(
-        factory = "com.adobe.acs.commons.remoteassets.impl.RemoteAssetsNodeSyncScheduler",
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         service = Runnable.class,
         property = {
-                "scheduler.concurrent=false"
+                "scheduler.concurrent:Boolean=false"
         }
 )
 @Designate(ocd = RemoteAssetsNodeSyncScheduler.Config.class)
@@ -47,7 +46,7 @@ public class RemoteAssetsNodeSyncScheduler implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncScheduler.class);
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Remote Assets Sync Job",
+    @ObjectClassDefinition(name = "ACS AEM Commons - Remote Assets Sync Scheduler",
             description = "Scheduled Service that runs the Remote Assets node sync.")
     public @interface Config {
         String DEFAULT_SCHEDULER_EXPRESSION = "0 0 0,4,8,12,16,20 ? * *";
