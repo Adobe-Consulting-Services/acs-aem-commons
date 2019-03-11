@@ -1,10 +1,11 @@
 <%@ page session="false" contentType="text/html" pageEncoding="utf-8"
          import="com.day.cq.i18n.I18n, 
          java.text.SimpleDateFormat,
-         java.util.Date" %><%
+         java.util.Date,
+         org.apache.sling.xss.XSSAPI" %><%
 %><%@include file="/libs/foundation/global.jsp" %><%
 %><%@taglib prefix="ui" uri="http://www.adobe.com/taglibs/granite/ui/1.0" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
     
     // 2015-10-22 03:03:00
     final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -26,6 +27,9 @@
     pageContext.setAttribute("style", properties.get("style", "green"));
     pageContext.setAttribute("dismissible", properties.get("dismissible", "true"));
 
+    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+
 %><!DOCTYPE html>
 <html class="coral-App">
 <head>
@@ -33,7 +37,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
-    <title><%= xssAPI.encodeForHTML(i18n.get("System Notification")) %></title>
+    <title><%= slingXssAPI.encodeForHTML(i18n.get("System Notification")) %></title>
 
     <ui:includeClientLib categories="acs-commons.system-notifications.page"/>
     <ui:includeClientLib css="acs-commons.system-notifications.notification"/>
@@ -60,7 +64,7 @@
 
     <nav class="js-coral-Wizard-nav coral-Wizard-nav coral--dark">
         <ol class="coral-Wizard-steplist">
-            <li class="js-coral-Wizard-steplist-item coral-Wizard-steplist-item"><%= xssAPI.encodeForHTML(i18n.get("System Notification")) %>
+            <li class="js-coral-Wizard-steplist-item coral-Wizard-steplist-item"><%= slingXssAPI.encodeForHTML(i18n.get("System Notification")) %>
             </li>
         </ol>
     </nav>
@@ -69,7 +73,7 @@
         <a class="js-coral-Wizard-step-control coral-Button" href="/miscadmin#/etc/acs-commons/notifications" data-action="cancel">Back</a>
         <button class="fn-acsCommons-Notifications-save js-coral-Wizard-step-control coral-Button" type="button" data-action="next">Save</button>
         
-        <h2 class="coral-Heading coral-Heading--2"><%= xssAPI.encodeForHTML(i18n.get("System Notification")) %></h2>
+        <h2 class="coral-Heading coral-Heading--2"><%= slingXssAPI.encodeForHTML(i18n.get("System Notification")) %></h2>
 
         <div id="acsCommons-System-Notifications">
             <sling:include replaceSelectors="notification"/>
@@ -108,7 +112,7 @@
                 <input type="text"
                        class="coral-Textfield acsCommons-System-Notifications-Page-input--text"
                        name="./jcr:title"
-                       value="${xss:encodeForHTML(xssAPI, properties["jcr:title"])}"/>
+                       value="${xss:encodeForHTML(slingXssAPI, properties["jcr:title"])}"/>
             </div>
 
             <div class="acsCommons-System-Notifications-Form-row">
@@ -116,7 +120,7 @@
                 <textarea
                         class="coral-Textfield coral-Textfield--multiline acsCommons-System-Notifications-Page-input--textarea"
                         rows="6"
-                        name="./jcr:description">${xss:encodeForHTML(xssAPI, properties["jcr:description"])}</textarea>
+                        name="./jcr:description">${xss:encodeForHTML(slingXssAPI, properties["jcr:description"])}</textarea>
             </div>
 
 
@@ -139,7 +143,7 @@
                              data-displayed-format="llll"
                              data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
                              data-init="datepicker">
-                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(xssAPI, onTime)}" type="datetime"
+                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(slingXssAPI, onTime)}" type="datetime"
                                    name="./onTime"/>
                             <span class="coral-InputGroup-button">
                                 <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"
@@ -159,7 +163,7 @@
                              data-displayed-format="llll"
                              data-stored-format="YYYY-MM-DD[T]HH:mm:ss.SSSZ"
                              data-init="datepicker">
-                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(xssAPI, offTime)}" type="datetime"
+                            <input class="coral-InputGroup-input coral-Textfield" value="${xss:encodeForHTMLAttr(slingXssAPI, offTime)}" type="datetime"
                                    name="./offTime"/>
                             <span class="coral-InputGroup-button">
                                 <button class="coral-Button coral-Button--secondary coral-Button--square" type="button"

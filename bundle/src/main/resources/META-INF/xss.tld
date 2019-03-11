@@ -6,41 +6,41 @@
     <function>
         <name>encodeForHTML</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.CharSequence encodeForHTML(com.adobe.granite.xss.XSSAPI,java.lang.String)</function-signature>
+        <function-signature>java.lang.CharSequence encodeForHTML(org.apache.sling.xss.XSSAPI,java.lang.String)</function-signature>
     </function>
     <function>
         <name>encodeForHTMLAttr</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.CharSequence encodeForHTMLAttr(com.adobe.granite.xss.XSSAPI,java.lang.String)</function-signature>
+        <function-signature>java.lang.CharSequence encodeForHTMLAttr(org.apache.sling.xss.XSSAPI,java.lang.String)</function-signature>
     </function>
     <function>
         <name>encodeForJSString</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.CharSequence encodeForJSString(com.adobe.granite.xss.XSSAPI,java.lang.String)</function-signature>
+        <function-signature>java.lang.CharSequence encodeForJSString(org.apache.sling.xss.XSSAPI,java.lang.String)</function-signature>
     </function>
     <function>
         <name>filterHTML</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.CharSequence filterHTML(com.adobe.granite.xss.XSSAPI,java.lang.String)</function-signature>
+        <function-signature>java.lang.CharSequence filterHTML(org.apache.sling.xss.XSSAPI,java.lang.String)</function-signature>
     </function>
     <function>
         <name>getValidHref</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.CharSequence getValidHref(com.adobe.granite.xss.XSSAPI,java.lang.String)</function-signature>
+        <function-signature>java.lang.CharSequence getValidHref(org.apache.sling.xss.XSSAPI,java.lang.String)</function-signature>
     </function>
     <function>
         <name>getValidDimension</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.String getValidDimension(com.adobe.granite.xss.XSSAPI,java.lang.String,java.lang.String)</function-signature>
+        <function-signature>java.lang.String getValidDimension(org.apache.sling.xss.XSSAPI,java.lang.String,java.lang.String)</function-signature>
     </function>
     <function>
         <name>getValidInteger</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.Integer getValidInteger(com.adobe.granite.xss.XSSAPI,java.lang.String,int)</function-signature>
+        <function-signature>java.lang.Integer getValidInteger(org.apache.sling.xss.XSSAPI,java.lang.String,int)</function-signature>
     </function>
     <function>
         <name>getValidJSToken</name>
         <function-class>com.adobe.acs.commons.xss.XSSFunctions</function-class>
-        <function-signature>java.lang.String getValidJSToken(com.adobe.granite.xss.XSSAPI,java.lang.String,java.lang.String)</function-signature>
+        <function-signature>java.lang.String getValidJSToken(org.apache.sling.xss.XSSAPI,java.lang.String,java.lang.String)</function-signature>
     </function>
 </taglib>
