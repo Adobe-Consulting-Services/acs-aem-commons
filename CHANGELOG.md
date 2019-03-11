@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1780 - Fixed compilation errors when using XSS Taglib
+
 ## [4.0.0] - 2019-02-20
 
 ### Added
