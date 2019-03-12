@@ -96,13 +96,13 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         @AttributeDefinition(
                 name = "Allow Insecure Connection",
                 description = "Allow non-https connection to remote assets server, "
-                        + "allowing potential compromize of conenction credentials"
+                        + "allowing potential compromise of connection credentials"
         )
         boolean server_insecure() default DEFAULT_ALLOW_INSECURE;
 
         @AttributeDefinition(
                 name = "Tag Sync Paths",
-                description = "Paths to sync tags from the remote server (e.g. /etc/tags/asset)",
+                description = "Paths to sync tags from the remote server (e.g. /content/cq:tags/client)",
                 cardinality = Integer.MAX_VALUE
         )
         String[] tag_paths() default {};
