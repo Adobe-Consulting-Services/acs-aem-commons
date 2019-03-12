@@ -134,6 +134,8 @@ public final class XSSFunctions {
      */
 
     /**
+     * @deprecated replaced by {@link #encodeForHTML(XSSAPI, String)}
+     *
      * Encode a string for HTML.
      *
      * @param xssAPI the XSSAPI
@@ -146,6 +148,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #encodeForHTMLAttr(XSSAPI, String)}
+     *
      * Encode a string for an HTML attribute.
      *
      * @param xssAPI the XSSAPI
@@ -158,6 +162,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #encodeForJSString(XSSAPI, String)}
+     *
      * Encode a string for an JavaScript string.
      *
      * @param xssAPI the XSSAPI
@@ -170,6 +176,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #filterHTML(XSSAPI, String)}
+     *
      * Filter a string for HTML.
      *
      * @param xssAPI the XSSAPI
@@ -182,6 +190,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #getValidHref(XSSAPI, String)}
+     *
      * Get a valid href. This does not use the standard XSS API due to a bug
      * impacting CQ 5.6.1 (and earlier). Internal bug reference: GRANITE-4193
      *
@@ -195,6 +205,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #getValidDimension(XSSAPI, String, String)}
+     *
      * Validate a string which should contain a dimension, returning a default value if the source is
      * empty, can't be parsed, or contains XSS risks.  Allows integer dimensions and the keyword "auto".
      *
@@ -209,6 +221,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #getValidInteger(XSSAPI, String, int)}
+     *
      * Validate a string which should contain an integer, returning a default value if the source is
      * empty, can't be parsed, or contains XSS risks.
      *
@@ -223,6 +237,8 @@ public final class XSSFunctions {
     }
 
     /**
+     * @deprecated replaced by {@link #getValidJSToken(XSSAPI, String, String)} 
+     *
      * Validate a Javascript token.  The value must be either a single identifier, a literal number,
      * or a literal string.
      *
