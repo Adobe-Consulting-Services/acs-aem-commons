@@ -20,7 +20,7 @@
 <%@include file="/libs/foundation/global.jsp"%><%
 %><%@ page import="java.util.Arrays,java.util.List,org.apache.sling.xss.XSSAPI" %><%
 %><%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 

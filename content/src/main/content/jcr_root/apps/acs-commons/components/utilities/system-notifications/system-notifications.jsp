@@ -5,7 +5,7 @@
          org.apache.sling.xss.XSSAPI" %><%
 %><%@include file="/libs/foundation/global.jsp" %><%
 %><%@taglib prefix="ui" uri="http://www.adobe.com/taglibs/granite/ui/1.0" %><%
-%><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
     
     // 2015-10-22 03:03:00
     final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
