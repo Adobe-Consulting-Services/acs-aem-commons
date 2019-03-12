@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+
 ## [4.0.0] - 2019-02-20
 
 ### Added

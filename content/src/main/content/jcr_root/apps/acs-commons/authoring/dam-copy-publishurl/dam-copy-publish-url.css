@@ -25,6 +25,17 @@
 
 .acs-aem-commons__dam-copy-published-url__text {
     min-width: 30rem;
-    min-height: 3rem;
-
+    min-height: 5rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.25rem;
+    border-color: #ccc;
  }
+
+.acs-aem-commons__dam-copy-published-url__text--failure {
+    padding: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #EA7B6F;
+    min-width: 30rem;
+}
