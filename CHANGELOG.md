@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Added
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI
+
 ### Fixed
 - #1780 - Fixed compilation errors when using XSS Taglib
 
