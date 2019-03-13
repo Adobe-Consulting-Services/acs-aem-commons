@@ -48,7 +48,6 @@ public class UsersSaveServletTest {
         context.build().resource(PATH, props ).commit();
         Resource resource = context.resourceResolver().getResource(PATH);
         context.request().setResource(resource);
-        
     }
     
     
@@ -71,5 +70,4 @@ public class UsersSaveServletTest {
         assertEquals("abc",vm.get(Constants.CUSTOM_PROPERTIES,"default")); 
         
     }
-
 }

@@ -53,8 +53,6 @@ import com.google.gson.JsonPrimitive;
 
 public class UserExportServletTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserExportServletTest.class);
-
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
@@ -63,7 +61,6 @@ public class UserExportServletTest {
     @Before
     public void setup() throws RepositoryException, Exception {
         
-
         JackrabbitSession session = (JackrabbitSession) context.resourceResolver().adaptTo(Session.class);
         UserManager um = session.getUserManager();
         
@@ -82,7 +79,6 @@ public class UserExportServletTest {
         allUsers.addMember(charly);
 
         session.save();
-
         servlet = new UsersExportServlet();
     }
 
@@ -91,11 +87,8 @@ public class UserExportServletTest {
         servlet.doGet(context.request(), context.response());
         assertEquals(context.response().getStatus(), 200);
         String output = context.response().getOutputAsString();
-        LOG.info("output = {}",output);
 
         CSVParser parser = CSVParser.parse(output, CSVFormat.DEFAULT.withHeader());
-        
-
         assertAllUsersPresent(parser.getRecords(), "alice","bob","charly","admin","anonymous");
     }
     
@@ -107,19 +100,15 @@ public class UserExportServletTest {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("params", params);
-        LOG.info("params = {}",params.toString());
         
         context.request().setParameterMap(parameters);
         servlet.doGet(context.request(), context.response());
         
         assertEquals(context.response().getStatus(), 200);
         String output = context.response().getOutputAsString();
-        LOG.info(output);
 
         CSVParser parser = CSVParser.parse(output, CSVFormat.DEFAULT.withHeader());
         assertAllUsersPresent(parser.getRecords(), "alice","bob");
-        
-        
     }
     
     @Test
@@ -158,7 +147,6 @@ public class UserExportServletTest {
 
         CSVParser parser = CSVParser.parse(output, CSVFormat.DEFAULT.withHeader());
         assertAllUsersPresent(parser.getRecords(), "alice","bob","charly");
-
     }
     
     
@@ -200,9 +188,6 @@ public class UserExportServletTest {
             assertTrue(presentUserIds.contains(id));
         }
         
-        
     }
     
-    
-
 }

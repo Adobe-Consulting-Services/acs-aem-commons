@@ -43,13 +43,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class UsersInitServletTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UsersInitServletTest.class);
     
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
-
-    
     
     @Before
     public void setup() throws Exception {
@@ -67,9 +63,6 @@ public class UsersInitServletTest {
         context.build().resource("/report",props).commit();
         
         context.request().setResource(context.resourceResolver().getResource("/report"));
-        
-        
-        
     }
     
     
@@ -77,7 +70,6 @@ public class UsersInitServletTest {
     public void testGroupExistence() throws Exception {
         UsersInitServlet servlet = new UsersInitServlet();
         servlet.doGet(context.request(), context.response());
-        LOG.info(context.response().getOutputAsString());
         
         JsonObject json = new JsonParser().parse(context.response().getOutputAsString()).getAsJsonObject();
         JsonObject options = json.get("options").getAsJsonObject();
@@ -85,6 +77,5 @@ public class UsersInitServletTest {
         assertEquals(2,groups.size());
         JSONAssert.assertEquals("[allusers, users]", groups.toString(),false);
     }
-    
-    
+     
 }

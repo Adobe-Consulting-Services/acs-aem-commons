@@ -25,6 +25,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -88,6 +90,11 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         final Writer writer = response.getWriter();
         csv.writeInit(writer);
 
+        Session session = request.getResourceResolver().adaptTo(Session.class);
+        if (session instanceof JackrabbitSession) {
+            JackrabbitSession jrSession = (JackrabbitSession) session;
+        }
+        
         final Iterator<Resource> resources = request.getResourceResolver().findResources(QUERY, Query.JCR_SQL2);
 
         // Using a HashMap to satisfy issue with duplicate results in AEM 6.1 GA
