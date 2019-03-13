@@ -230,7 +230,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
         if (DamConstants.NT_DAM_ASSET.equals(parentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class))
                 && DamConstants.NT_DAM_ASSETCONTENT.equals(resourceProperties.get(JcrConstants.JCR_PRIMARYTYPE, String.class))) {
             resourceProperties.put(RemoteAssets.IS_REMOTE_ASSET, true);
-            LOG.debug("Property '{}' added for resource '{}'.", RemoteAssets.IS_REMOTE_ASSET, resource.getPath());
+            LOG.trace("Property '{}' added for resource '{}'.", RemoteAssets.IS_REMOTE_ASSET, resource.getPath());
 
             // Save and refresh the session after the save refresh count has reached the configured amount.
             this.saveRefreshCount++;
@@ -310,7 +310,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     protected void setNodeMixinsProperty(final JsonArray jsonArray, final String key, final Resource resource) throws RepositoryException {
         Node node = resource.adaptTo(Node.class);
         for (JsonElement jsonElement : jsonArray) {
-            LOG.debug("Adding mixin '{}' for resource '{}'.", jsonElement.getAsString(), resource.getPath());
+            LOG.trace("Adding mixin '{}' for resource '{}'.", jsonElement.getAsString(), resource.getPath());
             node.addMixin(jsonElement.getAsString());
         }
     }
@@ -339,7 +339,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
         if (tagList.size() > 0) {
             tagManager.setTags(resource, tagList.toArray(new Tag[tagList.size()]));
-            LOG.debug("Tags added for resource '{}'.", resource.getPath());
+            LOG.trace("Tags added for resource '{}'.", resource.getPath());
         }
     }
 
@@ -380,7 +380,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
             ValueMap resourceProperties = resource.adaptTo(ModifiableValueMap.class);
             resourceProperties.put(key, values);
-            LOG.debug("Array property '{}' added for resource '{}'", key, resource.getPath());
+            LOG.trace("Array property '{}' added for resource '{}'", key, resource.getPath());
         } catch (Exception e) {
             LOG.error("Unable to assign property '{}' to resource '{}'", key, resource.getPath(), e);
         }
@@ -457,7 +457,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             resourceProperties.put(key, value.getAsString());
         }
 
-        LOG.debug("Property '{}' added for resource '{}'.", key, resource.getPath());
+        LOG.trace("Property '{}' added for resource '{}'.", key, resource.getPath());
     }
 
     /**

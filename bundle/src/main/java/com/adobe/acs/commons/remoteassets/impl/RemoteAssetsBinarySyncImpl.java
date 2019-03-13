@@ -129,7 +129,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private void setRenditionOnAsset(String remoteUrl, Rendition assetRendition, Asset asset, String renditionName)
             throws IOException {
 
-        LOG.debug("Syncing from remote asset url {}", remoteUrl);
+        LOG.debug("Syncing from remote asset url: {}", remoteUrl);
         Executor executor = this.remoteAssetsConfig.getRemoteAssetsHttpExecutor();
         try (InputStream inputStream = executor.execute(Request.Get(remoteUrl)).returnContent().asStream()) {
             asset.addRendition(renditionName, inputStream, assetRendition.getMimeType());
