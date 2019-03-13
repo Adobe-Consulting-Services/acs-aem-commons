@@ -98,7 +98,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             syncSuccessful = syncAssetBinaries(resource);
         }
         if (syncSuccessful) {
-            LOG.debug("Refreshing resource after binary sync of {}", resource.getPath());
+            LOG.trace("Refreshing resource after binary sync of {}", resource.getPath());
             resource.getResourceResolver().refresh();
             return resource.getResourceResolver().getResource(resource.getPath());
         } else {
@@ -178,10 +178,10 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             if (currentUser != null && !currentUser.isSystemUser()) {
                 return true;
             } else {
-                LOG.debug("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
+                LOG.trace("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
             }
         } else {
-            LOG.debug("Avoiding binary sync for admin user");
+            LOG.trace("Avoiding binary sync for admin user");
         }
         return false;
     }
