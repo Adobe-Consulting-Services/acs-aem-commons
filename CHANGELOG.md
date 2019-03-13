@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [3.19.0] - 2018-11-03
 
 ### Added
+- #1783 - Added the possibility to replace the existing host in an attribute
 - #1410 - Show/Hide fields and tabs based on dropdown and/or checkbox selections
 - #1446 - Renovator combines and replaces previous relocator tools in MCP
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.
