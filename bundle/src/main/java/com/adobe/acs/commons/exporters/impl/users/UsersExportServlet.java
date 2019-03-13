@@ -89,11 +89,6 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         final Csv csv = new Csv();
         final Writer writer = response.getWriter();
         csv.writeInit(writer);
-
-        Session session = request.getResourceResolver().adaptTo(Session.class);
-        if (session instanceof JackrabbitSession) {
-            JackrabbitSession jrSession = (JackrabbitSession) session;
-        }
         
         final Iterator<Resource> resources = request.getResourceResolver().findResources(QUERY, Query.JCR_SQL2);
 
