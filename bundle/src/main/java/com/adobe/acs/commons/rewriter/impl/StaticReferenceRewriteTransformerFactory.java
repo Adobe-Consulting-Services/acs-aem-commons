@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -106,6 +107,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             description = "Path prefixes to rewrite.")
     private static final String PROP_PREFIXES = "prefixes";
 
+    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten")
+    private static final String PROP_REPLACE_HOST = "replaceHost";
+
     private Map<String, String[]> attributes;
 
     private Map<String, Pattern> matchingPatterns;
@@ -115,6 +119,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private int staticHostCount;
 
     private String[] staticHostPattern;
+
+    private Boolean replaceHost;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
@@ -225,13 +231,21 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                     // prepend host
                     url = prependHostName(url);
                     m.appendReplacement(sb, Matcher.quoteReplacement(url));
+                    // Added check to determine whether the existing host has to be replaced
+                    if (BooleanUtils.isTrue(this.replaceHost)) {
+                        int index = attrValue.contains("://") ? attrValue.indexOf("://") + 1 : 0;
+                        sb.setLength(index);
+                        sb.append(url);
+                    }
                     // First prefix match wins
                     break;
                 }
             }
-
         }
-        m.appendTail(sb);
+
+        if (BooleanUtils.isFalse(this.replaceHost)) {
+            m.appendTail(sb);
+        }
 
         return sb.toString();
     }
@@ -250,6 +264,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
+        this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
     }
 
     private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
