@@ -230,14 +230,16 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 if (url.startsWith(prefix)) {
                     // prepend host
                     url = prependHostName(url);
-                    m.appendReplacement(sb, Matcher.quoteReplacement(url));
                     // Added check to determine whether the existing host has to be replaced
                     if (BooleanUtils.isTrue(this.replaceHost)) {
-                        int index = attrValue.contains("://") ? attrValue.indexOf("://") + 1 : 0;
-                        sb.setLength(index);
+                        int index = attrValue.indexOf("://");
+                        sb.setLength(0);
+                        sb.append(attrValue,0, index + 1);
                         sb.append(url);
+                    } else {
+                        m.appendReplacement(sb, Matcher.quoteReplacement(url));
+                        // First prefix match wins
                     }
-                    // First prefix match wins
                     break;
                 }
             }
