@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
+
 ## [4.0.0] - 2019-02-20
 
 ### Added
