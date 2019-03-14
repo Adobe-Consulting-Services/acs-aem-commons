@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Changed
+
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+
 ## [4.0.0] - 2019-02-20
 
 ### Added
