@@ -107,7 +107,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             description = "Path prefixes to rewrite.")
     private static final String PROP_PREFIXES = "prefixes";
 
-    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten")
+    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten", boolValue = false)
     private static final String PROP_REPLACE_HOST = "replaceHost";
 
     private Map<String, String[]> attributes;
@@ -120,7 +120,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private String[] staticHostPattern;
 
-    private Boolean replaceHost;
+    private boolean replaceHost;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
@@ -231,7 +231,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                     // prepend host
                     url = prependHostName(url);
                     // Added check to determine whether the existing host has to be replaced
-                    if (BooleanUtils.isTrue(this.replaceHost)) {
+                    if (this.replaceHost) {
                         int index = attrValue.indexOf("://");
                         sb.setLength(0);
                         sb.append(attrValue,0, index + 1);
@@ -245,7 +245,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             }
         }
 
-        if (BooleanUtils.isFalse(this.replaceHost)) {
+        if (!this.replaceHost) {
             m.appendTail(sb);
         }
 

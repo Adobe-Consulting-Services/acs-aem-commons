@@ -129,7 +129,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         ctx.setProperty("attributes", new String[] { "img:src" });
         ctx.setProperty("host.pattern", "static.host.com");
         ctx.setProperty("matchingPatterns", "img:src;(\\/content\\/dam\\/.+?\\.(png|jpg))");
-        ctx.setProperty("replaceHost", "true");
+        ctx.setProperty("replaceHost", true);
 
         StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
         factory.activate(ctx);
@@ -155,7 +155,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         ctx.setProperty("attributes", new String[] { "img:src" });
         ctx.setProperty("host.pattern", "static.host.com");
         ctx.setProperty("matchingPatterns", "img:src;(\\/content\\/dam\\/.+?\\.(png|jpg))");
-        ctx.setProperty("replaceHost", "true");
+        ctx.setProperty("replaceHost", true);
 
         StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
         factory.activate(ctx);
