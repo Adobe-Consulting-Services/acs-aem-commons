@@ -267,6 +267,10 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
         this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
+
+        if (!this.replaceHost && !matchingPatterns.values().stream().anyMatch(str -> str.toString().startsWith("^"))) {
+            log.warn("BEWARE! Replace host is false and your regex is not anchored to the start of the string, this may result in a double host.");
+        }
     }
 
     private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
