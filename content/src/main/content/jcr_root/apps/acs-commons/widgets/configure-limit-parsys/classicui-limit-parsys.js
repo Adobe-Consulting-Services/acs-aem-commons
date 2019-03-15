@@ -93,7 +93,7 @@
         return function(dragSource, e, data){
             var limit = isWithinLimit(this.editComponent);
 
-            if(!limit.isWithin){
+            if(typeof limit !== 'undefined' && !limit.isWithin){
                 this.editComponent.hideTarget();
                 CQ.Ext.Msg.alert('Error', "Limit exceeded, allowed: " + limit.currentLimit);
                 return false;
