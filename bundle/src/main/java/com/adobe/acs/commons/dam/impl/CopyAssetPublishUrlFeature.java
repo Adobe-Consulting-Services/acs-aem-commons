@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 )
 @Designate(ocd = CopyAssetPublishUrlFeature.Config.class)
 public class CopyAssetPublishUrlFeature implements Feature {
-    private static final Logger log = LoggerFactory.getLogger(CopyAssetPublishUrlFeature.class);
     static final String FEATURE_FLAG_PID = "com.adobe.acs.commons.dam.impl.copyassetpublishurlfeature.feature.flag";
 
     private Config config;
