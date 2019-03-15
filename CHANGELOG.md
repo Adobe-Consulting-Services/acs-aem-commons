@@ -7,9 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Changed
+- #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+
 ### Fixed
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
-
 
 ## [4.0.0] - 2019-02-20
 
