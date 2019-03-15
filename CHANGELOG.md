@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
 
 ## [4.0.0] - 2019-02-20
 
