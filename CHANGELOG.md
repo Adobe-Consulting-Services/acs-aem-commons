@@ -8,10 +8,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
-- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 
 ### Fixed
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
 - #1780 - Fixed compilation errors when using XSS Taglib
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
 
 ## [4.0.0] - 2019-02-20
 
