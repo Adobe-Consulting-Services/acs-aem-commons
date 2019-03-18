@@ -241,8 +241,12 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.google</pattern>
-                                    <shadedPattern>acscommons.com.google</shadedPattern>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.jcraft</pattern>
