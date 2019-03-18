@@ -28,6 +28,7 @@ import com.google.common.io.Files;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -310,9 +311,7 @@ public class FileAssetIngestorTest {
     @Test
     public void testSftpRecursion() throws URISyntaxException, JSchException, SftpException, UnsupportedEncodingException {
         configureSftpFields();
-        ChannelSftp channel = mock(ChannelSftp.class);
-        when(channel.isConnected()).thenReturn(true);
-        when(channel.getSession()).thenReturn(mock(Session.class));
+        ChannelSftp channel = getSftpChannelMock();
 
         Vector<ChannelSftp.LsEntry> entries = (new MockDirectoryBuilder())
                 .addDirectory(".")
@@ -387,6 +386,14 @@ public class FileAssetIngestorTest {
             Assert.assertEquals(validPath, expectedPath.equals(actualPath));
             Assert.assertEquals(ingestor.jcrBasePath + expectedPath, elem.getNodePath(false));
         }
+    }
+
+    private ChannelSftp getSftpChannelMock() throws JSchException {
+        ChannelSftp channel = mock(ChannelSftp.class);
+        when(channel.isConnected()).thenReturn(true);
+        when(channel.getSession()).thenReturn(mock(Session.class));
+
+        return channel;
     }
 
     @Test
