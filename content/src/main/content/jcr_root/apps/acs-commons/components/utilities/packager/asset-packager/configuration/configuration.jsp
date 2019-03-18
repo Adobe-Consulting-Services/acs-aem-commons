@@ -35,6 +35,13 @@
     /* Asset Packaging Configuration */
     final String pagePath = properties.get("pagePath", "");
     final boolean excludePages = properties.get("excludePages", false);
+
+    /* Advanced Packaging Details */
+    final String assetPrefix = properties.get("assetPrefix", "");
+    final String[] pageExclusions = properties.get("pageExclusions", new String[]{});
+    final String[] assetExclusions = properties.get("assetExclusions", new String[]{});
+
+    final boolean showAdvanced = !"".equals(assetPrefix) || pageExclusions.length > 0 || assetExclusions.length > 0;
 %>
 
 <h3>Package definition</h3>
@@ -52,6 +59,27 @@
     <li>Page Path: <%= pagePath %></li>
     <li>Exclude Pages: <%= excludePages %></li>
 </ul>
+
+<% if (showAdvanced) { %>
+<h3>Advanced Details</h3>
+<ul>
+    <li>Asset Prefix: <%= assetPrefix %></li>
+    <li>Page Exclusion Patterns:
+      <ul style="margin-bottom:0;">
+        <% for (String exclusion : pageExclusions) { %>
+          <li><%= exclusion %></li>
+        <% } %>
+      </ul>
+    </li>
+    <li>Asset Exclusion Patterns:
+      <ul style="margin-bottom:0;">
+        <% for (String exclusion : assetExclusions) { %>
+          <li><%= exclusion %></li>
+        <% } %>
+      </ul>
+    </li>
+</ul>
+<% } %>
 
 <%-- Common Form (Preview / Create Package) used for submitting Packager requests --%>
 <%-- Requires this configuration component have a sling:resourceSuperType of the ACS AEM Commons Packager --%>

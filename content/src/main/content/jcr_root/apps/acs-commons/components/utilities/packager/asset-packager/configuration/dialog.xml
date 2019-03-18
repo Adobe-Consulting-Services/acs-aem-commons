@@ -102,5 +102,39 @@
                     xtype="selection"/>
             </items>
         </tab1>
+    <tab2
+        jcr:primaryType="cq:Widget"
+        title="Advanced"
+        xtype="panel">
+        <items jcr:primaryType="cq:WidgetCollection">
+            <asset-prefix
+                jcr:primaryType="cq:Widget"
+                fieldDescription="The path that the asset reference has to start with."
+                fieldLabel="Asset Prefix"
+                name="./assetPrefix"
+                rootPath="/content/dam"
+                xtype="pathfield"/>
+            <page-exclusions
+                jcr:primaryType="cq:Widget"
+                fieldDescription="Click the '+' to add a new exclude pattern. The pattern will both exclude the pages from the package and exclude them from the asset search.&lt;br/>By default all pages are searched and included in the package."
+                fieldLabel="Exclude Page patterns"
+                name="./pageExclusions"
+                xtype="multifield">
+                <fieldConfig
+                    jcr:primaryType="cq:Widget"
+                    xtype="textfield"/>
+            </page-exclusions>
+            <asset-exclusions
+                jcr:primaryType="cq:Widget"
+                fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude the assets from the package.&lt;br/>By default all assets are included."
+                fieldLabel="Exclude Asset patterns"
+                name="./assetExclusions"
+                xtype="multifield">
+                <fieldConfig
+                    jcr:primaryType="cq:Widget"
+                    xtype="textfield"/>
+            </asset-exclusions>
+        </items>
+    </tab2>
     </items>
 </jcr:root>
