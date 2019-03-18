@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Added
+
+### Fixed
+- #1776 - Fix possibly negative index
+
+### Changed
+
+### Removed
+
 ## [4.0.0] - 2019-02-20
 
 ### Added
@@ -60,7 +69,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
-- #1776 - Fix possibly negative index
 
 ### Changed
 - #1726 - Deploy the bundle via the dedicated DAV url
