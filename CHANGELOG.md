@@ -8,8 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Changed
-
+- #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+
+### Fixed
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
 
 ## [4.0.0] - 2019-02-20
 
@@ -34,7 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
-- #1692 - HttpCache: Refactored resource / group config extensions 
+- #1692 - HttpCache: Refactored resource / group config extensions
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -64,6 +67,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
+- #1723 - Fix unclosed channel when non exising path provided
 
 ### Changed
 - #1726 - Deploy the bundle via the dedicated DAV url
@@ -88,6 +92,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [3.19.0] - 2018-11-03
 
 ### Added
+- #1783 - Added the possibility to replace the existing host in an attribute
 - #1410 - Show/Hide fields and tabs based on dropdown and/or checkbox selections
 - #1446 - Renovator combines and replaces previous relocator tools in MCP
 - #1526 - Added a priority to the Action Manager and associated classes so that Actions can executed in order of priority.

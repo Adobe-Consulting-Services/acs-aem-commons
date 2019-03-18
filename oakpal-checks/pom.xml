@@ -25,18 +25,34 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+                <version>4.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bnd-process</goal>
+                        </goals>
+                        <configuration>
+                            <bnd><![CDATA[
+                                Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-oakpal-checks
+                                Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
+                                Oakpal-Checklist: OAKPAL-INF/checklist/acs-internal.json,\
+                                    OAKPAL-INF/checklist/acs-commons-integrators.json
+                                Export-Package: com.adobe.acs.commons.oakpal.checks
+                                Import-Package: org.json;version="[20090211,20180813]",*
+                            ]]></bnd>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
                     <archive>
-                        <manifestEntries>
-                            <Oakpal-ModuleName>com.adobe.acs.acs-aem-commons-oakpal-checks</Oakpal-ModuleName>
-                            <Oakpal-Checklist>
-                                OAKPAL-INF/checklist/acs-internal.json,
-                                OAKPAL-INF/checklist/acs-commons-integrators.json
-                            </Oakpal-Checklist>
-                        </manifestEntries>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
             </plugin>
