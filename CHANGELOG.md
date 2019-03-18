@@ -8,15 +8,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
-- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI
-
-### Fixed
-- #1780 - Fixed compilation errors when using XSS Taglib
 - #1783 - Added the possibility to replace the existing host in an attribute
-- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 
 ### Changed
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+
+### Fixed
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
 
 ## [4.0.0] - 2019-02-20
 
