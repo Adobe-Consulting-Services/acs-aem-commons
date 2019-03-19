@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1795 - Added the Asset Content Packager and unit tests
 - #1783 - Added the possibility to replace the existing host in an attribute
 
 ### Changed
