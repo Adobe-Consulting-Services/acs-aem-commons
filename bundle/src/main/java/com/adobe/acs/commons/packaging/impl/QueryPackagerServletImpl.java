@@ -22,7 +22,6 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.QueryHelper;
-import com.day.cq.search.QueryBuilder;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
@@ -90,9 +89,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
     @Reference
     private PackageHelper packageHelper;
-
-    @Reference
-    private QueryBuilder queryBuilder;
 
     @Reference
     private QueryHelper queryHelper;
