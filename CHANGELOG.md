@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 
 ## [4.0.0] - 2019-02-20
 
