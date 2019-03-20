@@ -22,11 +22,7 @@ package com.adobe.acs.commons.httpcache.engine.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import com.adobe.acs.commons.httpcache.exception.*;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
@@ -57,14 +53,9 @@ import java.util.Map;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
@@ -101,18 +92,21 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheConfig.isValid()).thenReturn(true);
         when(memCacheConfig.getCacheStoreName()).thenReturn(VALUE_MEM_CACHE_STORE_TYPE);
         when(jcrCacheConfig.getCacheStoreName()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
+        when(memCacheStore.getStoreType()).thenReturn(VALUE_MEM_CACHE_STORE_TYPE);
+        when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
+
         systemUnderTest.bindHttpCacheConfig(memCacheConfig, sharedMemConfigProps);
         systemUnderTest.bindHttpCacheConfig(jcrCacheConfig, sharedJcrConfigProps);
-        systemUnderTest.bindHttpCacheStore(memCacheStore, sharedMemConfigProps);
-        systemUnderTest.bindHttpCacheStore(jcrCacheStore, sharedJcrConfigProps);
+        systemUnderTest.bindHttpCacheStore(memCacheStore);
+        systemUnderTest.bindHttpCacheStore(jcrCacheStore);
     }
 
     @After
     public void tearDown() {
         systemUnderTest.unbindHttpCacheConfig(memCacheConfig, sharedMemConfigProps);
         systemUnderTest.unbindHttpCacheConfig(jcrCacheConfig, sharedJcrConfigProps);
-        systemUnderTest.unbindHttpCacheStore(memCacheStore, sharedMemConfigProps);
-        systemUnderTest.unbindHttpCacheStore(jcrCacheStore, sharedJcrConfigProps);
+        systemUnderTest.unbindHttpCacheStore(memCacheStore);
+        systemUnderTest.unbindHttpCacheStore(jcrCacheStore);
         systemUnderTest.deactivate(emptyMap());
     }
 

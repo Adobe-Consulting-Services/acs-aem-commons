@@ -66,13 +66,21 @@ public class CombinedCacheConfigExtensionTest {
         when(extension3.accepts(request, config)).thenReturn(true);
         when(extension4.accepts(request, config)).thenReturn(true);
 
+        when(ocd.httpcache_config_extension_combiner_service_pids()).thenReturn(new String[]{
+            "extension1",
+            "extension2",
+            "extension3",
+            "extension4"
+        });
+        when(ocd.httpcache_config_extension_combiner_require_all_to_accept()).thenReturn(true);
+
         underTest.activate(ocd);
     }
 
     @Test
     public void test() throws HttpCacheRepositoryAccessException {
-        underTest.bindCacheConfigExtension(extension1, mockHttpCacheConfigExtension(1L, 1));
-        underTest.bindCacheConfigExtension(extension2, mockHttpCacheConfigExtension(2L, 2));
+        underTest.bindCacheConfigExtension(extension1, mockHttpCacheConfigExtension(1L, 1,"extension1"));
+        underTest.bindCacheConfigExtension(extension2, mockHttpCacheConfigExtension(2L, 2, "extension2"));
 
         boolean accepts = underTest.accepts(request, config);
 
@@ -81,15 +89,15 @@ public class CombinedCacheConfigExtensionTest {
         verify(extension1, times(1)).accepts(request, config);
         verify(extension2, never()).accepts(request, config);
 
-        underTest.unbindCacheConfigExtension(extension1, mockHttpCacheConfigExtension(1L, 1));
-        underTest.unbindCacheConfigExtension(extension2, mockHttpCacheConfigExtension(2L, 2));
+        underTest.unbindCacheConfigExtension(extension1, mockHttpCacheConfigExtension(1L, 1,"extension1"));
+        underTest.unbindCacheConfigExtension(extension2, mockHttpCacheConfigExtension(2L, 2,"extension2"));
 
     }
 
     @Test
     public void test_accepts() throws HttpCacheRepositoryAccessException {
-        underTest.bindCacheConfigExtension(extension3, mockHttpCacheConfigExtension(1L, 1));
-        underTest.bindCacheConfigExtension(extension4, mockHttpCacheConfigExtension(2L, 2));
+        underTest.bindCacheConfigExtension(extension3, mockHttpCacheConfigExtension(1L, 1,"extension3"));
+        underTest.bindCacheConfigExtension(extension4, mockHttpCacheConfigExtension(2L, 2,"extension4"));
 
         boolean accepts = underTest.accepts(request, config);
 
@@ -98,19 +106,19 @@ public class CombinedCacheConfigExtensionTest {
         verify(extension3, times(1)).accepts(request, config);
         verify(extension4, times(1)).accepts(request, config);
 
-        underTest.unbindCacheConfigExtension(extension3, mockHttpCacheConfigExtension(1L, 1));
-        underTest.unbindCacheConfigExtension(extension4, mockHttpCacheConfigExtension(2L, 2));
+        underTest.unbindCacheConfigExtension(extension3, mockHttpCacheConfigExtension(1L, 1, "extension3"));
+        underTest.unbindCacheConfigExtension(extension4, mockHttpCacheConfigExtension(2L, 2,"extension4"));
 
 
     }
 
-    private Map<String, Object> mockHttpCacheConfigExtension(long pid, int rank) {
+    private Map<String, Object> mockHttpCacheConfigExtension(long id, int rank, String pid) {
 
         Map<String, Object> properties = new HashMap<>();
 
         properties.put(Constants.SERVICE_RANKING, rank);
-        properties.put(Constants.SERVICE_ID, pid);
-
+        properties.put(Constants.SERVICE_ID, id);
+        properties.put(Constants.SERVICE_PID, pid);
         return properties;
 
     }

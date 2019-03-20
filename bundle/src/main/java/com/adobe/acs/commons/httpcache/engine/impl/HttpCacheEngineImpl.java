@@ -21,7 +21,6 @@ package com.adobe.acs.commons.httpcache.engine.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
-import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
@@ -65,7 +64,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -218,13 +216,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Binds cache store implementation
      *
      * @param cacheStore
-     * @param properties
      */
-    protected void bindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
-        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore) {
+        final String cacheStoreType = cacheStore.getStoreType();
         if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
-
-            log.debug("HTTP Cache Store [ {} -> ADDED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> ADDED ] for a total of [ {} ]", cacheStore.getStoreType(), cacheStoresMap.size());
         }
     }
 
@@ -232,12 +228,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * Unbinds cache store.
      *
      * @param cacheStore
-     * @param properties
      */
-    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore, final Map<String, Object> properties) {
-        final String cacheStoreType = PropertiesUtil.toString(properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), null);
+    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore) {
+        final String cacheStoreType = cacheStore.getStoreType();
         if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
-            log.debug("HTTP Cache Store [ {} -> REMOVED ] for a total of [ {} ]", properties.get(HttpCacheStore.KEY_CACHE_STORE_TYPE), cacheStoresMap.size());
+            log.debug("HTTP Cache Store [ {} -> REMOVED ] for a total of [ {} ]", cacheStore.getStoreType(), cacheStoresMap.size());
         }
     }
 
@@ -251,8 +246,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             properties) {
 
         // Get the service pid and make it as key.
-        String servicePid = PropertiesUtil.toString(properties.get("service.pid"), StringUtils.EMPTY);
-        if (cacheHandlingRules.putIfAbsent(servicePid, cacheHandlingRule) == null) {
+        if (cacheHandlingRules.putIfAbsent(getServicePid(properties), cacheHandlingRule) == null) {
             log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
         }
@@ -267,11 +261,19 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     protected void unbindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String,
             Object> configs) {
 
-        String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-        if (cacheHandlingRules.remove(servicePid) != null) {
+        if (cacheHandlingRules.remove(getServicePid(configs) ) != null) {
             log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
             log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
         }
+    }
+
+    private String getServicePid(Map<String, Object> configs) {
+        String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
+
+        if(StringUtils.isBlank(servicePid)){
+            servicePid =PropertiesUtil.toString(configs.get("component.name"), StringUtils.EMPTY);
+        }
+        return servicePid;
     }
 
     @Activate

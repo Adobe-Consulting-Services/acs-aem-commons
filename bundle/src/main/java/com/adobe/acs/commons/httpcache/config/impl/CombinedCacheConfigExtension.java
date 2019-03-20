@@ -27,9 +27,9 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 
 // TODO This functionality is disabled as it is not working as expected.
 
-/*
+
 @Component(
         service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -67,7 +67,6 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
         ocd = CombinedCacheConfigExtension.Config.class,
         factory = true
 )
-*/
 public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheConfigExtension.class);
 
