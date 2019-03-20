@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1783 - Added the possibility to replace the existing host in an attribute
+- TBD - Add a OakPal check to ensure that all the required imported packages are satisfied
 
 ### Changed
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
