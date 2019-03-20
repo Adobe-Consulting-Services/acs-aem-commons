@@ -116,9 +116,9 @@ public final class ImportedPackages implements ProgressCheckFactory {
                             parseExportPackage(exportPackageHeader);
 
                             String importedPackageHeader = manifest.getMainAttributes().getValue("Import-Package");
-                            Set<ImportedPackage> importedPackages = parseImportPackageHeader(importedPackageHeader);
+                            Set<ImportedPackage> importedPackagesForBundle = parseImportPackageHeader(importedPackageHeader);
 
-                            this.importedPackages.get(packageId).add(importedPackages);
+                            this.importedPackages.get(packageId).add(importedPackagesForBundle);
                             break;
                         }
 
@@ -132,9 +132,9 @@ public final class ImportedPackages implements ProgressCheckFactory {
 
         @Override
         public void finishedScan() {
-            importedPackages.forEach((packageId, allImportedPackages) -> {
-                allImportedPackages.forEach(importedPackages -> {
-                    importedPackages.forEach(importedPackage -> {
+            importedPackages.forEach((packageId, importedPackagesForPackage) -> {
+                importedPackagesForPackage.forEach(importedPackagesForBundle -> {
+                    importedPackagesForBundle.forEach(importedPackage -> {
                         if (!importedPackage.satisfied(exportedPackages)) {
                             severeViolation(String.format("Package import %s cannot be satisified", importedPackage), packageId);
                         }
