@@ -130,8 +130,8 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
     }
 
     protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
-        if (    extension != this &&
-                ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),properties.get(Constants.SERVICE_PID))
+        if (    extension != this
+                && ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),properties.get(Constants.SERVICE_PID))
         )
         {
             // Only accept extensions whose service.pid's are enumerated in the configuration.
