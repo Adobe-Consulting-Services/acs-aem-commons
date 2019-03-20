@@ -115,7 +115,7 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         if (factory != this) {
             cacheKeyFactories.bind(factory, properties);
         } else {
-            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Target: {}", this.cacheKeyFactoriesTarget);
+            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname:  Target: {}", this.configName, this.cacheKeyFactoriesTarget);
         }
     }
 

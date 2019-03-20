@@ -27,7 +27,13 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -43,10 +49,6 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
  * This is useful when you need functionality of two or more extensions together.
  * Instead of duplicating and merging the multiple extensions / factories into a single class, this factory can be used to combine them.
  */
-
-// TODO This functionality is disabled as it is not working as expected.
-
-
 @Component(
         service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -104,6 +106,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
             for (final HttpCacheConfigExtension extension : cacheConfigExtensions) {
                 if (extension.accepts(request, cacheConfig)) {
                     // Return true as long as AT LEAST one extension accepts.
+                    log.debug("require one: extension {} accepting: {}", cfg.config_name(), extension.getClass().getName());
                     return true;
                 }
             }
@@ -112,6 +115,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
             for (final HttpCacheConfigExtension extension : cacheConfigExtensions) {
                 if (!extension.accepts(request, cacheConfig)) {
                     // Return true as long as AT LEAST one extension accepts.
+                    log.debug("require all: extension {} not accepting: {}", cfg.config_name(), extension.getClass().getName());
                     return false;
                 }
             }
@@ -126,12 +130,12 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
     }
 
     protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
-        if (extension != this) {
-            if (ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),
-                    properties.get(Constants.SERVICE_PID))) {
-                // Only accept extensions whose service.pid's are enumerated in the configuration.
-                cacheConfigExtensions.bind(extension, properties);
-            }
+        if (    extension != this &&
+                ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),properties.get(Constants.SERVICE_PID))
+        )
+        {
+            // Only accept extensions whose service.pid's are enumerated in the configuration.
+            cacheConfigExtensions.bind(extension, properties);
         }
     }
 
