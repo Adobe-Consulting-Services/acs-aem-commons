@@ -22,7 +22,7 @@ package com.adobe.acs.commons.httpcache.engine.impl;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
@@ -111,7 +111,7 @@ public class HttpCacheEngineImplTest {
     }
 
     @Test
-    public void test_get_cache_config() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException {
+    public void test_get_cache_config() throws HttpCacheException {
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
 
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
@@ -121,7 +121,7 @@ public class HttpCacheEngineImplTest {
     }
 
     @Test
-    public void test_cache_hit() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, HttpCacheKeyCreationException, HttpCachePersistenceException {
+    public void test_cache_hit() throws HttpCacheException{
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
 
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
@@ -139,7 +139,7 @@ public class HttpCacheEngineImplTest {
     }
 
     @Test
-    public void test_deliver_cache_content() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, HttpCacheKeyCreationException, HttpCachePersistenceException, HttpCacheDataStreamException, IOException {
+    public void test_deliver_cache_content() throws HttpCacheException, IOException {
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
 
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
@@ -166,7 +166,7 @@ public class HttpCacheEngineImplTest {
     }
 
     @Test
-    public void test_deliver_cache_content_outputstream() throws HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, HttpCacheKeyCreationException, HttpCachePersistenceException, HttpCacheDataStreamException, IOException {
+    public void test_deliver_cache_content_outputstream() throws HttpCacheException, IOException {
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
         when(jcrCacheConfig.accepts(request)).thenReturn(true);
@@ -194,7 +194,7 @@ public class HttpCacheEngineImplTest {
     }
 
     @Test
-    public void test_cache_response() throws HttpCachePersistenceException, HttpCacheDataStreamException, HttpCacheKeyCreationException, HttpCacheRepositoryAccessException, HttpCacheConfigConflictException, IOException {
+    public void test_cache_response() throws HttpCacheException, IOException {
 
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
         SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);

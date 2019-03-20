@@ -28,13 +28,19 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.metatype.annotations.Designate;
 import java.util.Map;
 
 /**
@@ -44,9 +50,6 @@ import java.util.Map;
  * It will use existing cache key factories to create a key for each one, and put them in a list.
  */
 
-// TODO This functionality is disabled as it is not working as expected.
-
-/*
 @Component(
         service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -68,7 +71,6 @@ import java.util.Map;
         ocd = CombinedCacheKeyFactory.Config.class,
         factory = true
 )
-*/
 public class CombinedCacheKeyFactory implements CacheKeyFactory {
 
     @ObjectClassDefinition(
@@ -115,7 +117,7 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         if (factory != this) {
             cacheKeyFactories.bind(factory, properties);
         } else {
-            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname:  Target: {}", this.configName, this.cacheKeyFactoriesTarget);
+            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname: {}  Target: {}", this.configName, this.cacheKeyFactoriesTarget);
         }
     }
 
