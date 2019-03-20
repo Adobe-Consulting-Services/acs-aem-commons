@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1796 - HttpCache: Added back in CombinedCacheKeyFactory
 - #1733 - Do not throw ReplicationExceptions from Dispatcher Flush Rules Preprocessor
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
