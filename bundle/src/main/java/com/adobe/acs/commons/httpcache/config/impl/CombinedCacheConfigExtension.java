@@ -53,7 +53,8 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
         service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
-                Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE
+                Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
+                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.extension.combiner.service.pids} ] Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
