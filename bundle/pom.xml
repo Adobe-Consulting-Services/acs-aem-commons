@@ -442,7 +442,8 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-        </dependency>
+        </dependency>        
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -477,6 +478,12 @@
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.6</version>
+            <scope>test</scope>
         </dependency>
         <!--
         needed to override the embedded commons.osgi in org.apache.sling.models.impl
