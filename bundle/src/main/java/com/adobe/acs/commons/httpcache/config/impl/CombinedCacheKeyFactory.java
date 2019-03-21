@@ -55,7 +55,7 @@ import java.util.Map;
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
-                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.extension.combiner.service.pids} ] Config name: [ config.name ]"
+                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.cachekey.target} ] Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
