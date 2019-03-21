@@ -171,7 +171,7 @@
                         <executions>
                             <execution>
                                 <id>extract-bundle-info</id>
-                                <phase>generate-sources</phase>
+                                <phase>generate-resources</phase>
                                 <goals>
                                     <goal>execute</goal>
                                 </goals>

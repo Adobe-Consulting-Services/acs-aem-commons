@@ -58,8 +58,8 @@ import java.util.zip.ZipInputStream;
 
 public final class ImportedPackages implements ProgressCheckFactory {
 
-    static final String CONFIG_VERSION = "aemVersion";
-    static final String DEFAULT_VERSION = "6.3";
+    private static final String CONFIG_VERSION = "aemVersion";
+    private static final List<String> DEFAULT_VERSIONS = Arrays.asList("6.3", "6.4");
 
 
     @Override
@@ -69,7 +69,7 @@ public final class ImportedPackages implements ProgressCheckFactory {
         if (versionsFromConfig != null) {
             versions = versionsFromConfig.stream().map(v -> (JsonString)v).map(JsonString::getString).collect(Collectors.toList());
         } else {
-            versions = Arrays.asList(DEFAULT_VERSION);
+            versions = DEFAULT_VERSIONS;
         }
         Map<String, Map<String, Set<Version>>> exportedPackagesByVersion = versions.stream()
             .map(version -> {
