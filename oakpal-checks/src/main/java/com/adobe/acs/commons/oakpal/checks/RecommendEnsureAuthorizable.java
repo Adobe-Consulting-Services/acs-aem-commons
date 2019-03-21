@@ -19,9 +19,14 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
+import static net.adamcin.oakpal.core.JavaxJson.optArray;
+
+import java.util.Collections;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.json.JsonObject;
 
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
@@ -33,7 +38,6 @@ import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.json.JSONObject;
 
 /**
  * Report explicitly-imported rep:SystemUser and rep:Group nodes as violations, to encourage migration to ACS AEM Commons
@@ -50,7 +54,7 @@ import org.json.JSONObject;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
+public final class RecommendEnsureAuthorizable extends CompatBaseFactory implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -58,11 +62,11 @@ public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
     public static final String DEFAULT_RECOMMENDATION = "We recommend using Ensure Authorizable instead. https://adobe-consulting-services.github.io/acs-aem-commons/features/ensure-service-users/index.html";
 
     @Override
-    public ProgressCheck newInstance(final JSONObject config) throws Exception {
-        final Violation.Severity severity = Violation.Severity.valueOf(config.optString(CONFIG_SEVERITY,
+    public ProgressCheck newInstance(final JsonObject config) {
+        final Violation.Severity severity = Violation.Severity.valueOf(config.getString(CONFIG_SEVERITY,
                 Violation.Severity.MINOR.name()).toUpperCase());
-        final String recommendation = config.optString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
-        final List<Rule> scopeIds = Rule.fromJSON(config.optJSONArray(CONFIG_SCOPE_IDS));
+        final String recommendation = config.getString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
+        final List<Rule> scopeIds = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
         return new Check(severity, recommendation, scopeIds);
     }
 
