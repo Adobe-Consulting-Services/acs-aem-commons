@@ -35,18 +35,18 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,33 +64,53 @@ public final class ImportedPackages implements ProgressCheckFactory {
 
     @Override
     public ProgressCheck newInstance(JsonObject config) throws Exception {
-        final String version = config.getString(CONFIG_VERSION, DEFAULT_VERSION);
-        InputStream inputStream = getClass().getResourceAsStream(String.format("/bundleinfo/%s.json", version));
-        if (inputStream == null) {
-            throw new IllegalArgumentException(String.format("Unknown version %s", version));
+        final List<String> versions;
+        JsonArray versionsFromConfig = config.getJsonArray(CONFIG_VERSION);
+        if (versionsFromConfig != null) {
+            versions = versionsFromConfig.stream().map(v -> (JsonString)v).map(JsonString::getString).collect(Collectors.toList());
+        } else {
+            versions = Arrays.asList(DEFAULT_VERSION);
         }
-        try (JsonReader reader = Json.createReader(inputStream)) {
-            JsonObject packageDefinitions = reader.readObject();
-            ImmutableMap.Builder<String, Set<Version>> builder = ImmutableMap.builder();
-            packageDefinitions.keySet().forEach(key -> {
-                builder.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
-                    String str = ((JsonString) v).getString();
-                    return new Version(str);
-                }).collect(Collectors.toSet()));
-            });
-            return new Check(builder.build());
-        }
+        Map<String, Map<String, Set<Version>>> exportedPackagesByVersion = versions.stream()
+            .map(version -> {
+                InputStream inputStream = getClass().getResourceAsStream(String.format("/bundleinfo/%s.json", version));
+                if (inputStream == null) {
+                    throw new IllegalArgumentException(String.format("Unknown version %s", version));
+                }
+                try (JsonReader reader = Json.createReader(inputStream)) {
+                    JsonObject packageDefinitions = reader.readObject();
+                    ImmutableMap.Builder<String, Set<Version>> builder = ImmutableMap.builder();
+                    packageDefinitions.keySet().forEach(key -> {
+                        builder.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
+                            String str = ((JsonString) v).getString();
+                            return new Version(str);
+                        }).collect(Collectors.toSet()));
+                    });
+                    return new AbstractMap.SimpleEntry<>(version, builder.build());
+                }
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return new Check(exportedPackagesByVersion);
 
     }
 
     static final class Check extends SimpleProgressCheck {
 
-        private final Map<String, Set<Version>> exportedPackages;
+        private final Map<String, Map<String, Set<Version>>> exportedPackagesByVersion;
 
         private Map<PackageId, List<Set<ImportedPackage>>> importedPackages;
 
-        Check(Map<String, Set<Version>> exportedPackages) {
-            this.exportedPackages = new HashMap<>(exportedPackages);
+        Check(Map<String, Map<String, Set<Version>>> exportedPackagesByVersion) {
+            ImmutableMap.Builder<String, Map<String, Set<Version>>> builder = ImmutableMap.builder();
+            exportedPackagesByVersion.forEach((version, exportedPackages) -> {
+                Map<String, Set<Version>> mutableExports = new HashMap<>();
+                exportedPackages.forEach((packageName, versions) -> {
+                    mutableExports.put(packageName, new HashSet<>(versions));
+                });
+                builder.put(version, mutableExports);
+            });
+
+            this.exportedPackagesByVersion = builder.build();
         }
 
         @Override
@@ -132,12 +152,21 @@ public final class ImportedPackages implements ProgressCheckFactory {
 
         @Override
         public void finishedScan() {
-            importedPackages.forEach((packageId, importedPackagesForPackage) -> {
-                importedPackagesForPackage.forEach(importedPackagesForBundle -> {
-                    importedPackagesForBundle.forEach(importedPackage -> {
-                        if (!importedPackage.satisfied(exportedPackages)) {
-                            severeViolation(String.format("Package import %s cannot be satisified", importedPackage), packageId);
-                        }
+            exportedPackagesByVersion.forEach((version, exportedPackages) -> {
+                importedPackages.forEach((packageId, importedPackagesForPackage) -> {
+                    importedPackagesForPackage.forEach(importedPackagesForBundle -> {
+                        importedPackagesForBundle.forEach(importedPackage -> {
+                            Result result = importedPackage.satisfied(exportedPackages);
+                            if (!result.satisfied) {
+                                if (result.availableVersions.isEmpty()) {
+                                    severeViolation(String.format("Package import %s cannot be satisified by AEM Version %s. Package is not exported.", importedPackage, version), packageId);
+                                } else {
+                                    severeViolation(String.format("Package import %s cannot be satisified by AEM Version %s. Available package versions are (%s).",
+                                        importedPackage, version, result.availableVersions.stream().map(Version::toString).collect(Collectors.joining(", "))),
+                                        packageId);
+                                }
+                            }
+                        });
                     });
                 });
             });
@@ -147,6 +176,7 @@ public final class ImportedPackages implements ProgressCheckFactory {
             if (header == null) {
                 return;
             }
+            header = header.replaceAll(";uses:=\"[^\"]+\"", "");
             String[] parts = header.split(",");
             Arrays.stream(parts).forEach(this::parseExportPackageClause);
         }
@@ -163,8 +193,10 @@ public final class ImportedPackages implements ProgressCheckFactory {
                 }
             }
             if (packageName != null) {
-                Set<Version> versions = this.exportedPackages.computeIfAbsent(packageName, s -> new HashSet<>());
-                versions.add(new Version(version));
+                for (Map<String, Set<Version>> exportedPackages : exportedPackagesByVersion.values()) {
+                    Set<Version> versions = exportedPackages.computeIfAbsent(packageName, s -> new HashSet<>());
+                    versions.add(new Version(version));
+                }
             }
         }
     }
@@ -232,20 +264,23 @@ public final class ImportedPackages implements ProgressCheckFactory {
         private boolean optional;
         private VersionRange versionRange;
 
-        boolean satisfied(Map<String, Set<Version>> availablePackages) {
+        private static final Result OK = new Result();
+        private static final Result NO_EXPORTS = new Result(Collections.emptySet());
+
+        Result satisfied(Map<String, Set<Version>> availablePackages) {
             if (optional || versionRange == null) {
-                return true;
+                return OK;
             }
             Set<Version> availableVersions = availablePackages.get(packageName);
             if (availableVersions == null) {
-                return false;
+                return NO_EXPORTS;
             }
             for (Version availableVersion : availableVersions) {
                 if (versionRange.includes(availableVersion)) {
-                    return true;
+                    return OK;
                 }
             }
-            return false;
+            return new Result(availableVersions);
         }
 
         @Override
@@ -261,6 +296,21 @@ public final class ImportedPackages implements ProgressCheckFactory {
                 builder.append(";version=\"").append(versionRange.toString()).append('"');
             }
             return builder.toString();
+        }
+    }
+
+    static class Result {
+        final boolean satisfied;
+        final Set<Version> availableVersions;
+
+        Result() {
+            this.satisfied = true;
+            this.availableVersions = Collections.emptySet();
+        }
+
+        Result(Set<Version> availableVersions) {
+            this.satisfied = false;
+            this.availableVersions = availableVersions;
         }
     }
 
