@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 
 ## [4.0.0] - 2019-02-20
 
