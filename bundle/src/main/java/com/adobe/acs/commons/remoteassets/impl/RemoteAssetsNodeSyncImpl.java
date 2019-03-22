@@ -467,6 +467,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      * @return InputStream for the placeholder binary
      * @throws RepositoryException
      */
+    @SuppressWarnings("squid:S1479")
     protected InputStream getRemoteAssetPlaceholder(Resource renditionContentResource) throws RepositoryException {
         String mimeType = (String) renditionContentResource.getValueMap().get(JcrConstants.JCR_MIMETYPE);
         InputStream inputStream;
