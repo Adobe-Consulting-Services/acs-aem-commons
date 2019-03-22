@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1294 - New Remote Assets feature
 - #1783 - Added the possibility to replace the existing host in an attribute
 
 ### Changed
