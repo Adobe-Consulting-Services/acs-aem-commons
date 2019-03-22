@@ -22,17 +22,21 @@
   to maximize reuse of client code.
   
   --%><%@ include file="/libs/foundation/global.jsp" %><%
+%><%@ page import="org.apache.sling.xss.XSSAPI" %><%
 %><%@taglib prefix="audio" uri="http://www.adobe.com/consulting/acs-aem-commons/audio" %><%
 %><%@taglib prefix="dam" uri="http://www.adobe.com/consulting/acs-aem-commons/dam" %><%
-%><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %>
-<c:set var="resourcePath">${xss:encodeForJSString(xssAPI, resource.resourceType)}</c:set>
+%><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
+    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+%>
+<c:set var="resourcePath">${xss:encodeForJSString(slingXssAPI, resource.resourceType)}</c:set>
 <script type="text/javascript">
 (function() {
 
     //get audio file name,fileName and path
-    var mediaName = '${xss:encodeForJSString(xssAPI, dam:getTitleOrName(audio_asset))}';
-    var mediaFile = '${xss:encodeForJSString(xssAPI, audio_asset.name)}';
-    var mediaPath = '${xss:encodeForJSString(xssAPI, audio_asset.path)}';
+    var mediaName = '${xss:encodeForJSString(slingXssAPI, dam:getTitleOrName(audio_asset))}';
+    var mediaFile = '${xss:encodeForJSString(slingXssAPI, audio_asset.name)}';
+    var mediaPath = '${xss:encodeForJSString(slingXssAPI, audio_asset.path)}';
 
     var audio = document.getElementById("${id}");
     var audioOpen = false;
