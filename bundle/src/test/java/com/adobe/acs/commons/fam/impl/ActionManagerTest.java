@@ -208,9 +208,10 @@ public class ActionManagerTest {
     
     @Test
     public void pendingCommitsAreFlushedTest() throws Exception {
-      int saveInterval = 10;
-      int taskCount = 17;   // Make sure taskCount is _not_ a multiple of saveInterval, otherwise the issue may be masked.
-      int expectedCommitCount = 2;  // TaskCount divided by saveInterval and rounded _up_.
+      final int saveInterval = 10;
+      final int taskCount = 17;   // Make sure taskCount is _not_ a multiple of saveInterval, otherwise the issue may be masked.
+      final int expectedCommitCount = 2;  // TaskCount divided by saveInterval and rounded _up_.
+      
       final ResourceResolver rr = getFreshMockResolver();
 
       // We need a task runner that uses only one thread, so we won't get a bunch of thread-local resolver clones.
