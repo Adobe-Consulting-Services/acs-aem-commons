@@ -30,7 +30,6 @@ import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
