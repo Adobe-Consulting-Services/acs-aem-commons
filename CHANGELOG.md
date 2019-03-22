@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1776 - Fix possibly negative index
 
 ## [4.0.0] - 2019-02-20
 
