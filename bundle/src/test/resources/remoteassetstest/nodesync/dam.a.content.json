@@ -1,0 +1,9 @@
+{
+  "jcr:primaryType": "nt:unstructured",
+  "jcr:title": "A",
+  "folderThumbnail": {
+    "jcr:primaryType": "nt:file",
+    "jcr:createdBy": "idsjobprocessor",
+    "jcr:created": "Mon Jan 14 2019 13:08:07 GMT-0600"
+  }
+}
