@@ -1,0 +1,8 @@
+{
+  "jcr:primaryType": "cq:Tag",
+  "jcr:createdBy": "admin",
+  "jcr:title": "Tag A2",
+  "jcr:created": "Mon Jan 14 2019 09:46:52 GMT-0600",
+  "jcr:description": "Test Tag #A2",
+  "sling:resourceType": "cq/tagging/components/tag"
+}
