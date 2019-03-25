@@ -17,11 +17,15 @@
   limitations under the License.
   #L%
   --%>
-<%@include file="/libs/foundation/global.jsp" %>
-<%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
+<%@include file="/libs/foundation/global.jsp" %><%
+%><%@ page import="org.apache.sling.xss.XSSAPI" %><%
+%><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
 %><%@ taglib prefix="widgets" uri="http://www.adobe.com/consulting/acs-aem-commons/widgets" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
-%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %>
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
+%><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
+    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+%>
 <c:set var="definitions" value="${widgets:getMultiFieldPanelValues(resource, 'definitions')}"/>
 <c:choose>
     <c:when test="${empty definitions}">
@@ -30,8 +34,8 @@
     <c:otherwise>
         <dl>
             <c:forEach items="${definitions}" var="definition">
-                <dt>${xss:encodeForHTML(xssAPI, definition['term'])}</dt>
-                <dd>${xss:encodeForHTML(xssAPI, definition['definition'])}</dt>
+                <dt>${xss:encodeForHTML(slingXssAPI, definition['term'])}</dt>
+                <dd>${xss:encodeForHTML(slingXssAPI, definition['definition'])}</dt>
             </c:forEach>
         </dl>
     </c:otherwise>

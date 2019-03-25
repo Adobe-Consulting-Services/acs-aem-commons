@@ -1,0 +1,11 @@
+{
+  "jcr:primaryType": "cq:Tag",
+  "jcr:createdBy": "admin",
+  "jcr:title": "Tag A1",
+  "jcr:created": "Mon Jan 14 2019 09:46:30 GMT-0600",
+  "jcr:description": "Test Tag #A1",
+  "sling:resourceType": "cq/tagging/components/tag",
+  "tag_a1a": {
+    "some": "data... (this doesnt actually get used b/c each level deeper is re-fetched)"
+  }
+}

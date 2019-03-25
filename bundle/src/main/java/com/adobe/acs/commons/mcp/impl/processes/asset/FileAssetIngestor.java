@@ -114,10 +114,10 @@ public class FileAssetIngestor extends AssetIngestor {
                 ((SftpHierarchicalElement) baseHierarchicalElement).retrieveDetails();
             } catch (URISyntaxException | UnsupportedEncodingException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException("Unable to process URL!");
+                throw new RepositoryException("Unable to process URL!", ex);
             } catch (JSchException | SftpException ex) {
                 Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RepositoryException(ex.getMessage());
+                throw new RepositoryException(ex.getMessage(), ex);
             }
         } else {
             File base = new File(url);
@@ -357,11 +357,17 @@ public class FileAssetIngestor extends AssetIngestor {
 
         private void retrieveDetails() throws JSchException, SftpException {
             if (!retrieved) {
-                openChannel();
-                SftpATTRS attributes = channel.lstat(path);
-                processAttrs(attributes);
-                if (!keepChannelOpen) {
-                    closeChannel();
+                try {
+                    openChannel();
+                    SftpATTRS attributes = channel.lstat(path);
+                    processAttrs(attributes);
+                } catch (JSchException | SftpException ex) {
+                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                     throw ex;
+                } finally {
+                    if (!keepChannelOpen) {
+                        closeChannel();
+                    }
                 }
             }
         }
@@ -448,7 +454,7 @@ public class FileAssetIngestor extends AssetIngestor {
                     source = new SftpSource(size, this::openChannel, this);
                 } catch (JSchException | SftpException ex) {
                     Logger.getLogger(FileAssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } 
             }
             return source;
         }

@@ -53,35 +53,45 @@ public class Parameters {
     }
 
     public Parameters(SlingHttpServletRequest request) throws IOException {
-        final JsonObject json = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
-
-        final List<String> tmpCustomProperties = new ArrayList<String>();
-        final List<String> tmpGroups = new ArrayList<String>();
-
-        groupFilter = getString(json, GROUP_FILTER);
-
-        JsonArray groupsJSON = json.getAsJsonArray(GROUPS);
-        for (int i = 0; i < groupsJSON.size(); i++) {
-            tmpGroups.add(groupsJSON.get(i).getAsString());
-        }
-
-        this.groups = tmpGroups.toArray(new String[tmpGroups.size()]);
-
-        JsonArray customPropertiesJSON = json.getAsJsonArray(CUSTOM_PROPERTIES);
-        for (int i = 0; i < customPropertiesJSON.size(); i++) {
-            JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
-
-            if (tmp.has(RELATIVE_PROPERTY_PATH)) {
-                String relativePropertyPath = getString(tmp, RELATIVE_PROPERTY_PATH);
-                tmpCustomProperties.add(relativePropertyPath);
+        
+        groups = new String[] {};
+        
+        if (request.getParameter("params") != null) {
+            
+            final JsonObject json = new JsonParser().parse(request.getParameter("params")).getAsJsonObject();
+    
+            final List<String> tmpCustomProperties = new ArrayList<String>();
+            final List<String> tmpGroups = new ArrayList<String>();
+    
+            groupFilter = getString(json, GROUP_FILTER);
+    
+            JsonArray groupsJSON = json.getAsJsonArray(GROUPS);
+            for (int i = 0; i < groupsJSON.size(); i++) {
+                tmpGroups.add(groupsJSON.get(i).getAsString());
             }
+    
+            this.groups = tmpGroups.toArray(new String[tmpGroups.size()]);
+    
+            JsonArray customPropertiesJSON = json.getAsJsonArray(CUSTOM_PROPERTIES);
+            for (int i = 0; i < customPropertiesJSON.size(); i++) {
+                JsonObject tmp = customPropertiesJSON.get(i).getAsJsonObject();
+    
+                if (tmp.has(RELATIVE_PROPERTY_PATH)) {
+                    String relativePropertyPath = getString(tmp, RELATIVE_PROPERTY_PATH);
+                    tmpCustomProperties.add(relativePropertyPath);
+                }
+            }
+    
+            this.customProperties = tmpCustomProperties.toArray(new String[tmpCustomProperties.size()]);
         }
-
-        this.customProperties = tmpCustomProperties.toArray(new String[tmpCustomProperties.size()]);
     }
 
     public String[] getCustomProperties() {
-        return Arrays.copyOf(customProperties, customProperties.length);
+        if (customProperties != null) {
+            return Arrays.copyOf(customProperties, customProperties.length);
+        } else {
+            return new String[] {};
+        }
     }
 
     protected JsonArray getCustomPropertiesAsJSON() {

@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1778 - Added folder support to system notifications
+- #1294 - New Remote Assets feature
+- #1783 - Added the possibility to replace the existing host in an attribute
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
+
+### Changed
+- #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+
+### Fixed
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1776 - Fix possibly negative index
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
 
 ## [4.0.0] - 2019-02-20
 
@@ -33,7 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
-- #1692 - HttpCache: Refactored resource / group config extensions 
+- #1692 - HttpCache: Refactored resource / group config extensions
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -63,6 +76,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
+- #1723 - Fix unclosed channel when non exising path provided
 
 ### Changed
 - #1726 - Deploy the bundle via the dedicated DAV url
