@@ -67,7 +67,6 @@ public class AssetFolderCreatorTest {
 
     @Rule
     public final SlingContext context = new SlingContext();
-    
 
     @Mock
     private ActionManager actionManager;
@@ -108,7 +107,8 @@ public class AssetFolderCreatorTest {
         assetFolderCreator.parseAssetFolderDefinitions(actionManager);
         final int expected = 9 // Col 3
                 + 2 // Col 2
-                + 2; // Col 1
+                + 2 // Col 1
+                + 3; // Numeric folders 2019/9/16
 
         assertEquals(expected, assetFolderCreator.assetFolderDefinitions.size());
     }
@@ -123,7 +123,6 @@ public class AssetFolderCreatorTest {
 
         assertTrue(context.resourceResolver().hasChanges());
 
-
         assertEquals("Michigan",
                 context.resourceResolver().getResource("/content/dam/mi/jcr:content").getValueMap().get("jcr:title", String.class));
 
@@ -132,6 +131,10 @@ public class AssetFolderCreatorTest {
 
         assertEquals("West Michigan",
                 context.resourceResolver().getResource("/content/dam/mi/west-mi/jcr:content").getValueMap().get("jcr:title", String.class));
+
+        assertEquals("16",
+                context.resourceResolver().getResource("/content/dam/2019/9/16/jcr:content").getValueMap().get("jcr:title", String.class));
+
     }
 
     @Test
@@ -147,7 +150,7 @@ public class AssetFolderCreatorTest {
 
         assertTrue(context.resourceResolver().hasChanges());
 
-        assertEquals("Massachusettes",
+        assertEquals("Massachusetts",
                 context.resourceResolver().getResource("/content/dam/ma/jcr:content").getValueMap().get("jcr:title", String.class));
     }
 }

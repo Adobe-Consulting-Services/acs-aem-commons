@@ -50,7 +50,7 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
         extensions = {"json"}
 )
 public class UsersInitServlet extends SlingSafeMethodsServlet {
-    private static final String QUERY = "SELECT * FROM [rep:Group] WHERE ISDESCENDANTNODE([/home/groups]) ORDER BY [rep:principalName]";
+    private static final String QUERY = "SELECT * FROM [rep:Group]  ORDER BY [rep:principalName]";
     private static final String KEY_TEXT = "text";
     private static final String KEY_VALUE = "value";
 

@@ -30,10 +30,18 @@ import java.util.regex.Pattern;
 @SuppressWarnings("squid:S1214")
 public interface WorkflowInstanceRemover {
 
+    /**
+     * @deprecated please use the multi-value WORKFLOW_INSTANCES_PATHS instead.
+     */
+    @Deprecated
     String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
 
-    String MODEL_ID = "modelId";
+    String[] WORKFLOW_INSTANCES_PATHS = {
+            "/etc/workflow/instances",
+            "/var/workflow/instances"
+    };
 
+    String MODEL_ID = "modelId";
 
     /**
      * Removes workflow instances that match the parameter criteria.

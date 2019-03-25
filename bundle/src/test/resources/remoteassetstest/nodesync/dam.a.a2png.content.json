@@ -1,0 +1,35 @@
+{
+  "jcr:primaryType": "dam:AssetContent",
+  "jcr:lastModifiedBy": "admin",
+  "dam:assetState": "processed",
+  "jcr:lastModified": "Mon Jan 14 2019 13:11:37 GMT-0600",
+  "dam:relativePath": "a/image_a2.png",
+  "renditions": {
+    "jcr:primaryType": "nt:folder",
+    "jcr:createdBy": "admin",
+    "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600"
+  },
+  "metadata": {
+    "jcr:primaryType": "nt:unstructured",
+    "jcr:mixinTypes": [
+      "cq:Taggable"
+    ],
+    "dam:Physicalheightininches": "0.6943576335906982",
+    "dam:Physicalwidthininches": "0.6943576335906982",
+    "dam:Fileformat": "PNG",
+    "dam:Progressive": "no",
+    "tiff:ImageLength": 50,
+    "dam:extracted": "Mon Jan 14 2019 13:11:37 GMT-0600",
+    "dc:format": "image/png",
+    "dam:Bitsperpixel": 24,
+    "dam:MIMEtype": "image/png",
+    "dam:Comments": "Comment: CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), quality = 65\n\n",
+    "dam:Physicalwidthindpi": 72,
+    "dam:Physicalheightindpi": 72,
+    "dam:Numberofimages": 1,
+    "dam:Numberoftextualcomments": 1,
+    "tiff:ImageWidth": 50,
+    "dam:sha1": "69094bb512ac7923f8a90c742afaae0290ae358f",
+    "dam:size": 5296
+  }
+}

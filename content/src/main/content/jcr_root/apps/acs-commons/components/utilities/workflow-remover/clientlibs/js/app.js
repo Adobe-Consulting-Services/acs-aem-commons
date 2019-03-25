@@ -36,7 +36,8 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                 ],
                 models: [],
                 statuses: [],
-                batchSize: 1000
+                batchSize: 1000,
+                olderThan: null
             };
 
             $scope.status = {};
@@ -108,7 +109,8 @@ angular.module('acs-commons-workflow-remover-app', ['acsCoral', 'ACS.Commons.not
                 $scope.app.running = NotificationsService.running(true);
 
                 if (payload.olderThan) {
-                    payload.olderThan = moment(payload.olderThan, "YYYY-MM-DD HH:MM").valueOf();
+                    // As seconds
+                    payload.olderThan = moment(payload.olderThan, "YYYY-MM-DD HH:mm").valueOf() / 1000;
                 }
 
                 $http({
