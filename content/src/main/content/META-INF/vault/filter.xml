@@ -113,5 +113,4 @@
         <include pattern="/etc/notification/email/acs-commons/(.*)?"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
-
 </workspaceFilter>
