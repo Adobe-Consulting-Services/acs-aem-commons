@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
 - #1776 - Fix possibly negative index
 - #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
+- #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 
 ## [4.0.0] - 2019-02-20
 
