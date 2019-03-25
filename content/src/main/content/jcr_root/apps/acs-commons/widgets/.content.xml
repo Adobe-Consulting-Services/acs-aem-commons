@@ -17,5 +17,5 @@ Wrapper Client Library definition:
           allowProxy="{Boolean}true"
           categories="[cq.widgets]"
           channels="[extjs,ie6]"
-          embed="[acs-commons.cq.widgets]"/>
+          embed="[acs-commons.classicui.widgets]"/>
 -->

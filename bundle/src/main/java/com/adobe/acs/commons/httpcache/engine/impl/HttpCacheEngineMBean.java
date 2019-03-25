@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
 import com.adobe.granite.jmx.annotation.Description;
+import com.adobe.granite.jmx.annotation.Name;
 
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
@@ -38,5 +41,8 @@ public interface HttpCacheEngineMBean {
 
     @Description("Registered Persistence Stores")
     TabularData getRegisteredPersistenceStores() throws OpenDataException;
+
+    @Description("Invalidate")
+    void invalidateCache(@Name(value="Path") String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException;
 }
 

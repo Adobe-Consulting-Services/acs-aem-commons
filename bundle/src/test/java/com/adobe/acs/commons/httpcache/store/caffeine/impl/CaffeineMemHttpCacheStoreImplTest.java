@@ -129,7 +129,7 @@ public class CaffeineMemHttpCacheStoreImplTest {
     }
 
     @Test
-    public void test_addCacheData() throws HttpCacheDataStreamException {
+    public void test_addCacheData() throws HttpCacheDataStreamException, IOException {
         Map<String, Object> data = new HashMap<>();
         MemCachePersistenceObject cacheObject = new MemCachePersistenceObject();
         InputStream inputStream = getClass().getResourceAsStream("cachecontent.html");
@@ -137,7 +137,8 @@ public class CaffeineMemHttpCacheStoreImplTest {
         cacheObject.buildForCaching(200, "utf-8", "text/html", Collections.emptyMap(), inputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
         caffeine.addCacheData(data, cacheObject);
 
-        assertEquals("65 bytes", data.get("Size"));
+        int size = getClass().getResourceAsStream("cachecontent.html").available();
+        assertEquals(size + " bytes", data.get("Size"));
         assertEquals("utf-8", data.get("Character Encoding"));
         assertEquals("text/html", data.get("Content Type"));
     }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -8,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>3.19.1-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -26,18 +25,34 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+                <version>4.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bnd-process</goal>
+                        </goals>
+                        <configuration>
+                            <bnd><![CDATA[
+                                Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-oakpal-checks
+                                Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
+                                Oakpal-Checklist: OAKPAL-INF/checklist/acs-internal.json,\
+                                    OAKPAL-INF/checklist/acs-commons-integrators.json
+                                Export-Package: com.adobe.acs.commons.oakpal.checks
+                                Import-Package: org.json;version="[20090211,20180813]",*
+                            ]]></bnd>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
                     <archive>
-                        <manifestEntries>
-                            <Oakpal-ModuleName>com.adobe.acs.acs-aem-commons-oakpal-checks</Oakpal-ModuleName>
-                            <Oakpal-Checklist>
-                                OAKPAL-INF/checklist/acs-internal.json,
-                                OAKPAL-INF/checklist/acs-commons-integrators.json
-                            </Oakpal-Checklist>
-                        </manifestEntries>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
             </plugin>

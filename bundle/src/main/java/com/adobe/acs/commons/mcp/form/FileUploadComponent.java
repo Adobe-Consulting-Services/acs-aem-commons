@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * File upload component
  */
 @ProviderType
-public class FileUploadComponent extends FieldComponent {
+public final class FileUploadComponent extends FieldComponent {
 
     private static final String OPTION_MIME_TYPES = "mimeTypes";
 

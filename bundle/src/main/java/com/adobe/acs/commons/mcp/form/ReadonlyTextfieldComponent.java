@@ -19,13 +19,16 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Generates a read-only text component
  */
-public class ReadonlyTextfieldComponent extends TextfieldComponent {
+@ProviderType
+public final class ReadonlyTextfieldComponent extends TextfieldComponent {
 
     public ReadonlyTextfieldComponent() {
         super();
         setResourceType("granite/ui/components/coral/foundation/form/textfield/readonly");
-    }    
+    }
 }

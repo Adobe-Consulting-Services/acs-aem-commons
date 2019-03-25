@@ -19,12 +19,12 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.ProviderType;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Annotation used to declare process inputs.
@@ -40,7 +40,9 @@ public @interface FormField {
 
     String description() default "";
 
-    boolean required() default true;
+    String category() default "";
+
+    boolean required() default false;
 
     Class<? extends FieldComponent> component() default TextfieldComponent.class;
 
@@ -52,7 +54,7 @@ public @interface FormField {
         }
 
         // Create FormField annotation, used to programatically generate forms when introspection isn't an option.
-        public static FormField create(String name, String hint, String description, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
+        public static FormField create(String name, String hint, String description, String category, boolean required, Class<? extends FieldComponent> clazz, String[] options) {
             return new FormField() {
                 @Override
                 public String name() {
@@ -67,6 +69,11 @@ public @interface FormField {
                 @Override
                 public String description() {
                     return description;
+                }
+
+                @Override
+                public String category() {
+                    return category;
                 }
 
                 @Override

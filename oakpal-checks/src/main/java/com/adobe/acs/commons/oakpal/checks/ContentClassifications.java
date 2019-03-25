@@ -19,19 +19,20 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static java.util.Optional.ofNullable;
+import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
+import static net.adamcin.oakpal.core.JavaxJson.optArray;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.json.JsonObject;
 
+import net.adamcin.oakpal.core.JavaxJson;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
 import net.adamcin.oakpal.core.SimpleProgressCheck;
@@ -39,7 +40,6 @@ import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.apache.jackrabbit.vault.util.Text;
-import org.json.JSONObject;
 
 /**
  * Enforce rules for "Content Classifications" in
@@ -65,7 +65,7 @@ import org.json.JSONObject;
  * default applies.</dd>
  * </dl>
  */
-public final class ContentClassifications implements ProgressCheckFactory {
+public final class ContentClassifications extends CompatBaseFactory implements ProgressCheckFactory {
     private static final String P_SLING_RESOURCE_TYPE = "{http://sling.apache.org/jcr/sling/1.0}resourceType";
     private static final String P_SLING_RESOURCE_SUPER_TYPE = "{http://sling.apache.org/jcr/sling/1.0}resourceSuperType";
     private static final String T_GRANITE_PUBLIC_AREA = "{http://www.adobe.com/jcr/granite/1.0}PublicArea";
@@ -80,15 +80,13 @@ public final class ContentClassifications implements ProgressCheckFactory {
     private static final String CONFIG_SEARCH_PATHS = "searchPaths";
 
     @Override
-    public ProgressCheck newInstance(final JSONObject jsonObject) {
-        final String libsPathPrefix = jsonObject.optString(CONFIG_LIBS_PATH_PREFIX, LIBS_PATH_PREFIX);
-        final Violation.Severity severity = Violation.Severity.valueOf(jsonObject.optString(CONFIG_SEVERITY,
+    public ProgressCheck newInstance(final JsonObject jsonObject) {
+        final String libsPathPrefix = jsonObject.getString(CONFIG_LIBS_PATH_PREFIX, LIBS_PATH_PREFIX);
+        final Violation.Severity severity = Violation.Severity.valueOf(jsonObject.getString(CONFIG_SEVERITY,
                 Violation.Severity.MAJOR.name()).toUpperCase());
-        final List<Rule> scopePaths = Rule.fromJSON(jsonObject.optJSONArray(CONFIG_SCOPE_PATHS));
-        final List<String> searchPaths = ofNullable(jsonObject.optJSONArray(CONFIG_SEARCH_PATHS))
-                .map(array -> StreamSupport.stream(array.spliterator(), false)
-                        .map(String::valueOf).collect(Collectors.toList()))
-                .orElse(Arrays.asList("/apps", "/libs"));
+        final List<Rule> scopePaths = Rule.fromJsonArray(arrayOrEmpty(jsonObject, CONFIG_SCOPE_PATHS));
+        final List<String> searchPaths = optArray(jsonObject, CONFIG_SEARCH_PATHS)
+                .map(JavaxJson::mapArrayOfStrings).orElse(Arrays.asList("/apps", "/libs"));
 
         return new Check(libsPathPrefix, severity, scopePaths, searchPaths);
     }

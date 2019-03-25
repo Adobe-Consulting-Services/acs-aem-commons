@@ -19,30 +19,17 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
+import com.adobe.acs.commons.data.CompositeVariant;
+import com.adobe.acs.commons.data.Spreadsheet;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
-import com.adobe.acs.commons.data.Spreadsheet;
-import com.adobe.acs.commons.data.CompositeVariant;
 import com.adobe.acs.commons.mcp.form.PasswordComponent;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -59,6 +46,21 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Import assets and metadata provided by a spreadsheet
@@ -156,7 +158,8 @@ public class UrlAssetImport extends AssetIngestor {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         try {
-            fileData = new Spreadsheet(importFile);
+            fileData = new Spreadsheet(importFile, Arrays.asList(SOURCE, RENDITION_NAME, TARGET_FOLDER, ORIGINAL_FILE_NAME))
+                    .buildSpreadsheet();
             files = extractFilesAndFolders(fileData.getDataRowsAsCompositeVariants());
             instance.getInfo().setDescription(String.format("Import %s (%s rows)",  fileData.getFileName(), fileData.getRowCount()));
         } catch (IOException ex) {
