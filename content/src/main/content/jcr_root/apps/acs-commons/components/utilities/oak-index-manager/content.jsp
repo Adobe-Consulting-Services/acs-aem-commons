@@ -28,6 +28,15 @@
          <div ng-controller="MainCtrl"
               ng-init="app.resource = '${resourcePath}'; init();">
 
+
+             <div class="coral-Alert coral-Alert--error coral-Alert--large">
+                 <i class="coral-Alert-typeIcon coral-Icon coral-Icon--sizeS coral-Icon--alert"></i>
+                 <strong class="coral-Alert-title">ACS AEM Commons Oak Index Manager is deprecated!</strong>
+                 <div class="coral-Alert-message">Please use the official <a
+                         x-cq-linkchecker="skip"
+                         href="/libs/granite/operations/content/diagnosistools/indexManager.html">Oak Index Manager</a> provided by Adobe Experience Manager.</div>
+             </div>
+
              <div class="acs-section">
                  <%-- Bulk Reindex --%>
                  <div style="float: right;">

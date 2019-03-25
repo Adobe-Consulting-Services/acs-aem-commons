@@ -1,0 +1,20 @@
+{
+  "jcr:primaryType": "nt:folder",
+  "jcr:createdBy": "admin",
+  "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600",
+  "cq5dam.web.1280.1280.png": {
+    "jcr:primaryType": "nt:file",
+    "jcr:createdBy": "workflow-process-service",
+    "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600"
+  },
+  "cq5dam.thumbnail.48.48.png": {
+    "jcr:primaryType": "nt:file",
+    "jcr:createdBy": "workflow-process-service",
+    "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600"
+  },
+  "original": {
+    "jcr:primaryType": "nt:file",
+    "jcr:createdBy": "admin",
+    "jcr:created": "Mon Jan 14 2019 13:11:37 GMT-0600"
+  }
+}
