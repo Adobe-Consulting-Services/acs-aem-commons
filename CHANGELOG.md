@@ -8,19 +8,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
-- #1778 - Added folder support to system notifications
 - #1294 - New Remote Assets feature
-- #1783 - Added the possibility to replace the existing host in an attribute
+- #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
+- #1783 - Added the possibility to replace the existing host in an attribute
 
 ### Changed
+- #1539 - Removed unused references to the QueryBuilder API.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 
 ### Fixed
+- #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
-- #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
 - #1776 - Fix possibly negative index
 - #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
