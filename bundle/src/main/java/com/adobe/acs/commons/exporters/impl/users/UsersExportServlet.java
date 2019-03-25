@@ -25,6 +25,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.Group;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.query.Query;
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -65,7 +67,7 @@ import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 public class UsersExportServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(UsersExportServlet.class);
 
-    private static final String QUERY = "SELECT * FROM [rep:User] WHERE ISDESCENDANTNODE([/home/users]) ORDER BY [rep:principalName]";
+    private static final String QUERY = "SELECT * FROM [rep:User] ORDER BY [rep:principalName]";
     private static final String GROUP_DELIMITER = "|";
 
     /**
@@ -87,7 +89,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
         final Csv csv = new Csv();
         final Writer writer = response.getWriter();
         csv.writeInit(writer);
-
+        
         final Iterator<Resource> resources = request.getResourceResolver().findResources(QUERY, Query.JCR_SQL2);
 
         // Using a HashMap to satisfy issue with duplicate results in AEM 6.1 GA

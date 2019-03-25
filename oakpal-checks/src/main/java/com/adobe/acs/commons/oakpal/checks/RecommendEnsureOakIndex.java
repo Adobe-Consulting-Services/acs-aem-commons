@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
+
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.json.JsonObject;
 
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
@@ -29,7 +32,6 @@ import net.adamcin.oakpal.core.SimpleProgressCheck;
 import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.json.JSONObject;
 
 /**
  * Report explicitly-imported oak:index nodes as violations to encourage migration to ACS AEM Commons - Ensure Oak Index.
@@ -47,7 +49,7 @@ import org.json.JSONObject;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
+public final class RecommendEnsureOakIndex extends CompatBaseFactory implements ProgressCheckFactory {
     public static final String NN_OAK_INDEX = "oak:index";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -55,11 +57,11 @@ public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
     public static final String DEFAULT_RECOMMENDATION = "We recommend using Ensure Oak Index instead. https://adobe-consulting-services.github.io/acs-aem-commons/features/ensure-oak-index/index.html";
 
     @Override
-    public ProgressCheck newInstance(final JSONObject config) throws Exception {
-        final Violation.Severity severity = Violation.Severity.valueOf(config.optString(CONFIG_SEVERITY,
+    public ProgressCheck newInstance(final JsonObject config) {
+        final Violation.Severity severity = Violation.Severity.valueOf(config.getString(CONFIG_SEVERITY,
                 Violation.Severity.MINOR.name()).toUpperCase());
-        final String recommendation = config.optString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
-        final List<Rule> scopePaths = Rule.fromJSON(config.optJSONArray(CONFIG_SCOPE_PATHS));
+        final String recommendation = config.getString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
+        final List<Rule> scopePaths = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_PATHS));
         return new Check(severity, recommendation, scopePaths);
     }
 

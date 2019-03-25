@@ -1,0 +1,32 @@
+{
+  "jcr:primaryType": "nt:unstructured",
+  "jcr:mixinTypes": [
+    "cq:Taggable"
+  ],
+  "dam:Physicalheightininches": "0.6944444179534912",
+  "dam:Physicalwidthininches": "0.6944444179534912",
+  "dam:Fileformat": "JPEG",
+  "dam:Progressive": "yes",
+  "tiff:ImageLength": 50,
+  "jcr:lastModifiedBy": "admin",
+  "dam:extracted": "Mon Jan 14 2019 13:10:50 GMT-0600",
+  "dc:format": "image/jpeg",
+  "dam:Bitsperpixel": 24,
+  "dam:MIMEtype": "image/jpeg",
+  "dam:Comments": "CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), quality = 65\n\n",
+  "dam:Physicalwidthindpi": 72,
+  "dam:Physicalheightindpi": 72,
+  "dc:modified": "Thu Jan 17 2019 16:53:17 GMT-0600",
+  "dam:Numberofimages": 1,
+  "cq:tags": [
+    "a:tag_a1/tag_a1a",
+    "a:tag_a2",
+    "a:tag_a3",
+    "b:tag_b1"
+  ],
+  "jcr:lastModified": "Thu Jan 17 2019 17:01:28 GMT-0600",
+  "dam:Numberoftextualcomments": 1,
+  "tiff:ImageWidth": 50,
+  "dam:sha1": "615d9536e70ba31c86571a4eeeee7b138ea7562f",
+  "dam:size": 2071
+}
