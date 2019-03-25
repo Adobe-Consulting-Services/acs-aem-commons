@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 
 ### Fixed
+- #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
 - #1776 - Fix possibly negative index
