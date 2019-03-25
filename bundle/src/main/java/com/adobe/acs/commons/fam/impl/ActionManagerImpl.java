@@ -319,9 +319,20 @@ class ActionManagerImpl extends CancelHandler implements ActionManager, Serializ
                     }
                 }
                 runCompletionTasks();
+                savePendingChanges();
                 closeAllResolvers();
             }, priority);
         }
+    }
+    
+    private void savePendingChanges() {
+      for (ReusableResolver resolver : resolvers) {
+        try {
+          resolver.commit();
+        } catch (PersistenceException e) {
+          logPersistenceException(resolver.getPendingItems(), e);
+        }
+      }
     }
 
     @Override

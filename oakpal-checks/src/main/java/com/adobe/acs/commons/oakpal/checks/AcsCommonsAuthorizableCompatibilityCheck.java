@@ -19,9 +19,12 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
+import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
+
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.json.JsonObject;
 
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
@@ -32,7 +35,6 @@ import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.json.JSONObject;
 
 /**
  * Checks the authorizableId of imported {@link Authorizable} nodes to ensure they do not begin with "acs-commons".
@@ -44,9 +46,15 @@ import org.json.JSONObject;
  * compatibility check.</dd>
  * </dl>
  */
-public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressCheckFactory {
+public final class AcsCommonsAuthorizableCompatibilityCheck extends CompatBaseFactory implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SCOPE_IDS = "scopeIds";
+
+    @Override
+    public ProgressCheck newInstance(final JsonObject config) {
+        final List<Rule> scopeIds = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
+        return new Check(scopeIds);
+    }
 
     static final class Check extends SimpleProgressCheck {
         private final List<Rule> scopeIds;
@@ -88,11 +96,5 @@ public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressC
                 }
             }
         }
-    }
-
-    @Override
-    public ProgressCheck newInstance(final JSONObject config) {
-        final List<Rule> scopeIds = Rule.fromJSON(config.optJSONArray(CONFIG_SCOPE_IDS));
-        return new Check(scopeIds);
     }
 }

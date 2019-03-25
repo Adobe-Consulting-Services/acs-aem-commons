@@ -122,6 +122,58 @@ public class StaticReferenceRewriteTransformerFactoryTest {
     }
 
     @Test
+    public void test_with_prefix_and_matching_pattern_and_single_host_and_replace_host() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/content/dam" });
+        ctx.setProperty("attributes", new String[] { "img:src" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        ctx.setProperty("matchingPatterns", "img:src;(\\/content\\/dam\\/.+?\\.(png|jpg))");
+        ctx.setProperty("replaceHost", true);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl imageWithJustSrc = new AttributesImpl();
+        imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "https://www.host.com/content/dam/flower.jpg");
+        transformer.startElement(null, "img", null, imageWithJustSrc);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+                attributesCaptor.capture());
+        List<Attributes> values = attributesCaptor.getAllValues();
+        assertEquals("https://static.host.com/content/dam/flower.jpg", values.get(0).getValue(0));
+    }
+
+    @Test
+    public void test_with_prefix_and_matching_pattern_and_single_host_and_replace_host_without_protocol() throws Exception {
+        MockBundle bundle = new MockBundle(-1);
+        MockComponentContext ctx = new MockComponentContext(bundle);
+        ctx.setProperty("prefixes", new String[] { "/content/dam" });
+        ctx.setProperty("attributes", new String[] { "img:src" });
+        ctx.setProperty("host.pattern", "static.host.com");
+        ctx.setProperty("matchingPatterns", "img:src;(\\/content\\/dam\\/.+?\\.(png|jpg))");
+        ctx.setProperty("replaceHost", true);
+
+        StaticReferenceRewriteTransformerFactory factory = new StaticReferenceRewriteTransformerFactory();
+        factory.activate(ctx);
+
+        Transformer transformer = factory.createTransformer();
+        transformer.setContentHandler(handler);
+
+        AttributesImpl imageWithJustSrc = new AttributesImpl();
+        imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "//www.host.com/content/dam/flower_2.jpg");
+        transformer.startElement(null, "img", null, imageWithJustSrc);
+
+        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+                attributesCaptor.capture());
+        List<Attributes> values = attributesCaptor.getAllValues();
+        assertEquals("//static.host.com/content/dam/flower_2.jpg", values.get(0).getValue(0));
+    }
+
+    @Test
     public void test_with_nostatic_class() throws Exception {
         MockBundle bundle = new MockBundle(-1);
         MockComponentContext ctx = new MockComponentContext(bundle);
