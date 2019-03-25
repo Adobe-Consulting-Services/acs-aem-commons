@@ -8,14 +8,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
-- #1795 - Added the Asset Content Packager and unit tests
+- #1294 - New Remote Assets feature
+- #1778 - Added folder support to system notifications
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
+- #1795 - Added the Asset Content Packager and unit tests
 
 ### Changed
+- #1539 - Removed unused references to the QueryBuilder API.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 
 ### Fixed
+- #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
+- #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1776 - Fix possibly negative index
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
+- #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
+- #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
+- #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
 
 ## [4.0.0] - 2019-02-20
 
@@ -36,6 +49,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1796 - HttpCache: Added back in CombinedCacheKeyFactory
 - #1733 - Do not throw ReplicationExceptions from Dispatcher Flush Rules Preprocessor
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows

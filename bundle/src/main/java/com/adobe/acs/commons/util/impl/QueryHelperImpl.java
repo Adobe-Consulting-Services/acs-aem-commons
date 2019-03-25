@@ -25,7 +25,6 @@ import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;

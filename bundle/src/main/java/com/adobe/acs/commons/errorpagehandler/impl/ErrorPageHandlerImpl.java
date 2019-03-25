@@ -29,7 +29,6 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -244,9 +243,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private QueryBuilder queryBuilder;
 
     @Reference
     private Authenticator authenticator;

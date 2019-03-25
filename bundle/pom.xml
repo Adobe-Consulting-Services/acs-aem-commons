@@ -64,7 +64,6 @@
                             !android.util.*,
                             *
                         </Import-Package>
-                        <Embed-Dependency>*;scope=compile;inline=true</Embed-Dependency>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
@@ -214,6 +213,82 @@
                                     </includes>
                                 </bannedDependencies>
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.google.guava:guava</include>
+                                    <include>com.google.guava:failureaccess</include>
+                                    <include>com.jcraft:jsch</include>
+                                    <include>com.jcraft:jzlib</include>
+                                    <include>io.jsonwebtoken:jjwt</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>acscommons.com.google.common</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>acscommons.com.google.thirdparty</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.jcraft</pattern>
+                                    <shadedPattern>acscommons.com.jcraft</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.jsonwebtoken</pattern>
+                                    <shadedPattern>acscommons.io.jsonwebtoken</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>com.google.guava:guava</artifact>
+                                    <includes>
+                                        <include>com/google/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.google.guava:failureaccess</artifact>
+                                    <includes>
+                                        <include>com/google/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.jcraft:jsch</artifact>
+                                    <includes>
+                                        <include>com/jcraft/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.jcraft:jzlib</artifact>
+                                    <includes>
+                                        <include>com/jcraft/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>io.jsonwebtoken:jjwt</artifact>
+                                    <includes>
+                                        <include>io/jsonwebtoken/**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -442,7 +517,8 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-        </dependency>
+        </dependency>        
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -477,6 +553,12 @@
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.6</version>
+            <scope>test</scope>
         </dependency>
         <!--
         needed to override the embedded commons.osgi in org.apache.sling.models.impl

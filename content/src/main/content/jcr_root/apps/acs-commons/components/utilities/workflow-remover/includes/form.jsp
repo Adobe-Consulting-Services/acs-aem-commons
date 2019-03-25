@@ -130,7 +130,9 @@
         <h3 class="coral-Form-fieldset-legend">Workflows older than</h3>
 
         <div class="coral-Datepicker coral-InputGroup" data-init="datepicker">
-          <input class="coral-InputGroup-input coral-Textfield" ng-model="form.olderThan" type="date">
+          <input class="coral-InputGroup-input coral-Textfield" type="date">
+          <input type="text" ng-model="form.olderThan" style="display: none;"/>
+
           <span class="coral-InputGroup-button">
             <button class="coral-Button coral-Button--secondary coral-Button--square" type="button" title="Datetime Picker">
               <i class="coral-Icon coral-Icon--sizeS coral-Icon--calendar"></i>

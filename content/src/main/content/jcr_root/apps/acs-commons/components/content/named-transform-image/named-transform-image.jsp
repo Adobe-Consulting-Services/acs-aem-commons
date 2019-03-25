@@ -4,10 +4,11 @@
                  com.day.cq.wcm.api.components.DropTarget,
                  com.day.cq.wcm.foundation.Image,
                  com.day.cq.wcm.foundation.Placeholder,
-                 org.apache.commons.lang.StringUtils" %><%
+                 org.apache.commons.lang.StringUtils,
+                 org.apache.sling.xss.XSSAPI" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
 %><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
+%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
 
     Image image = new Image(resource);
 
@@ -41,6 +42,9 @@
     pageContext.setAttribute("image", image);
     pageContext.setAttribute("linkURL", linkURL);
 
+    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    pageContext.setAttribute("slingXssAPI", slingXssAPI);
+
 %><c:choose>
     <c:when test="${wcmmode:isEdit(pageContext) && empty image}">
         <wcm:placeholder classNames="cq-image-placeholder cq-block-placeholder" ddType="image"/>
@@ -49,14 +53,14 @@
         <%-- Component has not been configured on Publish; Hide the component --%>
     </c:when>
     <c:when test="${not empty linkURL}">
-        <a href="${xss:getValidHref(xssAPI, linkURL)}"><img
-                src="${xss:getValidHref(xssAPI, image.src)}"
+        <a href="${xss:getValidHref(slingXssAPI, linkURL)}"><img
+                src="${xss:getValidHref(slingXssAPI, image.src)}"
                 class="cq-dd-image"
-                alt="${xss:encodeForHTMLAttr(xssAPI, image.alt)}"/></a>
+                alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/></a>
     </c:when>
     <c:otherwise>
-        <img src="${xss:getValidHref(xssAPI, image.src)}"
+        <img src="${xss:getValidHref(slingXssAPI, image.src)}"
              class="cq-dd-image"
-             alt="${xss:encodeForHTMLAttr(xssAPI, image.alt)}"/>
+             alt="${xss:encodeForHTMLAttr(slingXssAPI, image.alt)}"/>
     </c:otherwise>
 </c:choose>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: 0.5;
+      }
+
+      .cls-2, .cls-3 {
+        stroke: #000;
+        stroke-width: 3px;
+        fill: none;
+      }
+
+      .cls-3 {
+        fill-rule: evenodd;
+      }
+
+      .cls-4, .cls-5 {
+        font-size: 54px;
+      }
+
+      .cls-5 {
+        text-anchor: middle;
+        font-family: "Arial-BoldMT";
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+    </style>
+  </defs>
+  <g class="cls-1">
+    <rect width="600" height="600" class="cls-2"/>
+    <path d="M1.061,601.061 L-1.061,598.939 L598.939,-1.061 L601.061,1.061 L1.061,601.061 Z" class="cls-3"/>
+    <path d="M-1.061,1.061 L1.061,-1.061 L601.061,598.939 L598.939,601.061 L-1.061,1.061 Z" class="cls-3"/>
+  </g>
+  <text x="300" y="292" class="cls-4"><tspan x="300" class="cls-5">Remote Asset</tspan><tspan dy="1.038em" x="300" class="cls-5">FIle Format: svg</tspan></text>
+</svg>

@@ -1,8 +1,8 @@
 /*
  * #%L
- * ACS AEM Commons Package
+ * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2018 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,5 @@
  * limitations under the License.
  * #L%
  */
-.acs-aem-commons__dam-copy-published-url__button {
-    display: block;
-    text-align: center;
-    margin: 5px auto auto auto;
- }
-
-.acs-aem-commons__dam-copy-published-url__text {
-    min-width: 30rem;
-    min-height: 3rem;
-
- }
+@aQute.bnd.annotation.Version("1.0.0")
+package com.adobe.acs.commons.remoteassets;

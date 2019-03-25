@@ -76,6 +76,8 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private static final String PN_STARTED_AT = "startedAt";
 
+    private static final String PN_START_TIME = "startTime";
+
     private static final String PN_STATUS = "status";
 
     private static final String PAYLOAD_PATH = "data/payload/path";
@@ -276,7 +278,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
                         final String instanceStatus = getStatus(instance);
                         final String model = properties.get(PN_MODEL_ID, String.class);
-                        final Calendar startTime = properties.get(PN_STARTED_AT, Calendar.class);
+                        final Calendar startTime = properties.get(PN_START_TIME, properties.get(PN_STARTED_AT, Calendar.class));
                         final String payload = properties.get(PAYLOAD_PATH, String.class);
 
                         if (StringUtils.isBlank(payload)) {
@@ -291,7 +293,7 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
                             log.trace("Workflow instance [ {} ] has non-matching model of [ {} ]", instance.getPath(), model);
                             remaining++;
                             continue;
-                        } else if (olderThan != null && startTime != null && startTime.before(olderThan)) {
+                        } else if (olderThan != null && startTime != null && startTime.after(olderThan)) {
                             log.trace("Workflow instance [ {} ] has non-matching start time of [ {} ]", instance.getPath(),
                                     startTime);
                             remaining++;
@@ -515,25 +517,31 @@ public final class WorkflowInstanceRemoverImpl implements WorkflowInstanceRemove
 
     private List<Resource> getWorkflowInstanceFolders(final ResourceResolver resourceResolver) {
         final List<Resource> folders = new ArrayList<Resource>();
-        final Resource root = resourceResolver.getResource(WORKFLOW_INSTANCES_PATH);
-        final Iterator<Resource> itr = root.listChildren();
 
-        boolean addedRoot = false;
+        for (final String rootPath : WORKFLOW_INSTANCES_PATHS) {
 
-        while (itr.hasNext()) {
-            Resource resource = itr.next();
+            final Resource root = resourceResolver.getResource(rootPath);
+            final Iterator<Resource> itr = root.listChildren();
+            boolean addedRoot = false;
 
-            if (isWorkflowServerFolder(resource)) {
-                folders.add(resource);
-            } else if (!addedRoot && isWorkflowDatedFolder(resource)) {
+            while (itr.hasNext()) {
+                Resource resource = itr.next();
+
+                if (isWorkflowServerFolder(resource)) {
+                    folders.add(resource);
+                } else if (!addedRoot && isWorkflowDatedFolder(resource)) {
+                    folders.add(root);
+                    addedRoot = true;
+                }
+            }
+
+            if (folders.isEmpty()) {
                 folders.add(root);
-                addedRoot = true;
             }
         }
 
-        if (folders.isEmpty()) {
-            folders.add(root);
-        }
+        log.debug("Collected workflow instance folders [ {} ] for removal.",
+                org.apache.commons.lang3.StringUtils.join(folders, ","));
 
         return folders;
     }
