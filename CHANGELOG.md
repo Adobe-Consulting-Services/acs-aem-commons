@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1778 - Added folder support to system notifications
 - #1294 - New Remote Assets feature
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
