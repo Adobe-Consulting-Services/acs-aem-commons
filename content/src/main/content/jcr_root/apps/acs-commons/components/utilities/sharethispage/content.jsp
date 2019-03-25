@@ -18,7 +18,6 @@
   ~ #L%
   --%>
 <%@include file="/libs/foundation/global.jsp"%><%
-%><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %><%
 %>
 <ul>
     <li>Publisher ID: <%= xssAPI.encodeForHTML(properties.get("publisherId", "none")) %></li>

@@ -8,13 +8,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1778 - Added folder support to system notifications
+- #1294 - New Remote Assets feature
 - #1783 - Added the possibility to replace the existing host in an attribute
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 
 ### Changed
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 
 ### Fixed
+- #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1776 - Fix possibly negative index
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 
 ## [4.0.0] - 2019-02-20

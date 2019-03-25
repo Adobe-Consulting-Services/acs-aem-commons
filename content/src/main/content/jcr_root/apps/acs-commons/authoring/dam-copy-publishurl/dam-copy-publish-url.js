@@ -21,25 +21,25 @@
     "use strict";
 
     $( document ).one('foundation-toggleable-show', '#aem-assets-show-publish-url', function(e) {
-        var modalBody = $(e.target).find('.coral-Dialog-content');
-        var headingFailure = Granite.I18n.get('An error occured in fetching publish URL');
+        var modalBody = $(e.target).find('coral-dialog-content'),
+            failureMessage = Granite.I18n.get('An error occurred determining the asset\'s publish URL.'),
+            publishUrl = Granite.HTTP.externalize('/apps/acs-commons/gui/content/publishurl.html' + $(e.target).data('assetpath'));
 
-        var publishUrlFrag = '/apps/acs-commons/gui/content/publishurl.html';
-
-        var content = '<textarea class="acs-aem-commons__dam-copy-published-url__text" readonly>';
         var result =
             Granite.$.ajax({
                 type : "GET",
-                async : false,
+                //async : false,
                 dataType : 'text',
-                url : Granite.HTTP.externalize(publishUrlFrag + $(e.target).data('assetpath'))
+                url : publishUrl
             });
         result.done(function(text) {
-            content += text + '</textarea>';
+            var content = '<textarea class="coral-Form-field acs-aem-commons__dam-copy-published-url__text " readonly rows="5">' +
+                text +
+                '</textarea>';
             modalBody.html(content);
         });
         result.fail(function() {
-            modalBody.html('<p class="asset-publishurl-err-content">'+headingFailure+'</p>');
+            modalBody.html('<p class="acs-aem-commons__dam-copy-published-url__text--failure">' + failureMessage + '</p>');
         });
     });
 
