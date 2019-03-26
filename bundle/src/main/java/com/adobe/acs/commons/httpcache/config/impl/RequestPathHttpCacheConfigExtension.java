@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2015 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.httpcache.config.impl;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
@@ -20,9 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.emptyList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 @Component(configurationPolicy = ConfigurationPolicy.REQUIRE, service = {HttpCacheConfigExtension.class, CacheKeyFactory.class})
@@ -59,6 +80,9 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
         )
         String[] httpcache_config_extension_extensions_allowed();
 
+        @AttributeDefinition
+        String webconsole_configurationFactory_nameHint() default "Config name: [ {config.name}  RequestPath: [ {httpcache.config.extension.paths.allowed}]";
+
     }
 
     private static final Logger log = LoggerFactory.getLogger(RequestPathHttpCacheConfigExtension.class);
@@ -78,7 +102,7 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
                 && matches(selectorPatterns, requestPathInfo.getSelectorString())
                 && matches(extensionPatterns, requestPathInfo.getExtension());
 
-        log.debug("Extension {} : Passed : {} for {}}", configName, match, requestPathInfo.getResourcePath());
+        log.debug("Extension {} : Passed : {} for {}", configName, match, requestPathInfo.getResourcePath());
 
         return match;
     }
@@ -93,7 +117,7 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
         } else if (CollectionUtils.isNotEmpty(patternList) && StringUtils.isNotBlank(query)) {
             for (Pattern pattern : patternList) {
                 if (pattern.matcher(query).find()) {
-                    log.debug("Extension {} : Passed all patterns: {} for query: {}", patternList, query);
+                    log.debug("Extension {} : Passed all patterns: {} for query: {}",  configName, patternList, query);
                     return true;
                 }
             }
@@ -135,7 +159,7 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
 
     protected List<Pattern> compileToPatterns(String[] regexes) {
         if (ArrayUtils.isEmpty(regexes)) {
-            return null;
+            return emptyList();
         }
 
         List<Pattern> patterns = new ArrayList<>();
