@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Vector;
 
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.junit.Assert;
@@ -54,6 +55,7 @@ public class EtagMessageDigestServletFilterTest {
     public void setUp() {
         Mockito.when(configuration.enabled()).thenReturn(true);
         Mockito.when(configuration.messageDigestAlgorithm()).thenReturn("MD5");
+        Mockito.when(configuration.ignoredResponseHeaders()).thenReturn(new String[] { "ignoredHeader" });
         filter = new EtagMessageDigestServletFilter();
         filter.activate(configuration);
         bufferedResponse = new BufferedSlingHttpServletResponse(mockResponse);
@@ -80,16 +82,45 @@ public class EtagMessageDigestServletFilterTest {
     }
 
     @Test
+    public void testCalculateFromResponseWithOutputStreamAndNoHeaders() throws NoSuchAlgorithmException, IOException {
+        bufferedResponse.getOutputStream().print(EXAMPLE_TEXT);
+        // the MD5 is taken from https://en.wikipedia.org/wiki/MD5
+        Assert.assertEquals("9e107d9d372bb6826bd81d3542a419d6", filter.calculateDigestFromResponse(bufferedResponse));
+    }
+
+    @Test
     public void testCalculateFromResponseConsidersHeaders() throws NoSuchAlgorithmException, UnsupportedEncodingException {
         Mockito.when(configuration.considerResponseHeaders()).thenReturn(true);
-        
         Mockito.when(bufferedResponse.getHeaderNames()).thenReturn(Collections.singletonList("header1"));
         Mockito.when(bufferedResponse.getHeaders(Mockito.eq("header1"))).thenReturn(Arrays.asList("value1", "value2"));
         String md5WithSomeHeaders = filter.calculateDigestFromResponse(bufferedResponse);
         String md5WithSameHeaders = filter.calculateDigestFromResponse(bufferedResponse);
         Assert.assertEquals(md5WithSomeHeaders, md5WithSameHeaders);
+        
+        Mockito.when(bufferedResponse.getHeaderNames()).thenReturn(Arrays.asList("header1", "ignoredHeader"));
+        Mockito.when(bufferedResponse.getHeaders(Mockito.eq("ignoredHeader"))).thenReturn(Arrays.asList("somevalue"));
+        String md5WithSomeIgnoredHeaders = filter.calculateDigestFromResponse(bufferedResponse);
+        Assert.assertEquals(md5WithSomeHeaders, md5WithSomeIgnoredHeaders);
+        
         Mockito.when(bufferedResponse.getHeaders(Mockito.eq("header1"))).thenReturn(Arrays.asList("value1", "value3"));
         String md5WithOtherHeaders = filter.calculateDigestFromResponse(bufferedResponse);
         Assert.assertNotEquals(md5WithSomeHeaders, md5WithOtherHeaders);
+    }
+
+    @Test
+    public void testIsUnmodified() {
+        Vector<String> ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("ab");
+        ifNoneMatchETags.add("cd");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "ab"));
+        Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "de"));
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("*");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "sometag"));
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testIsUnmodifiedWithNullParameter() {
+        EtagMessageDigestServletFilter.isUnmodified(null, null);
     }
 }

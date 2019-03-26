@@ -174,7 +174,7 @@ public class EtagMessageDigestServletFilter implements Filter {
      * @return {@code true} in case this was a conditional request and the response was not modified, otherwise {@code false}
      * @see <a href="// https://tools.ietf.org/html/rfc7232#section-3.2">RFC7232</a>
      */
-    boolean isUnmodified(Enumeration<String> ifNoneMatchETags, String responseETag) {
+    static boolean isUnmodified(Enumeration<String> ifNoneMatchETags, String responseETag) {
         if (ifNoneMatchETags == null) {
             throw new IllegalStateException("Can not access request headers");
         }
