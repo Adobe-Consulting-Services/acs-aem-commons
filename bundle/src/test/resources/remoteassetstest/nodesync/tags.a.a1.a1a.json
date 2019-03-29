@@ -1,0 +1,37 @@
+{
+  "jcr:primaryType": "cq:Tag",
+  "jcr:createdBy": "admin",
+  "jcr:title": "Tag A1a",
+  "testBool": true,
+  "testDate": "Sun Jan 06 2019 18:15:24 GMT-0600",
+  "testLong": 4223,
+  "testArrayBool": [
+    false,
+    true,
+    false
+  ],
+  "testArrayLong": [
+    53,
+    4,
+    55425546
+  ],
+  "jcr:created": "Mon Jan 14 2019 09:47:32 GMT-0600",
+  "testArrayString": [
+    "Hello",
+    "World"
+  ],
+  "jcr:description": "Test Tag #A1a",
+  "testDecimal": "453.3218937128937",
+  "testArrayDecimal": [
+    "1.1",
+    "28",
+    "4.8972834"
+  ],
+  "sling:resourceType": "cq/tagging/components/tag",
+  ":testBinary": 956,
+  "testArrayDecimalBadData": [
+    "1.234",
+    "somevalue",
+    "45.21"
+  ]
+}

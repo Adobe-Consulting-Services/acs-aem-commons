@@ -1,1 +1,1 @@
-copypublishurl.js
+dam-copy-publish-url.js

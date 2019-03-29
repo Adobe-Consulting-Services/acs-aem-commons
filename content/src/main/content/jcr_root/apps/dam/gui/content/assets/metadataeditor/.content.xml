@@ -31,7 +31,7 @@
                                 <condition3
                                     jcr:primaryType="nt:unstructured"
                                     sling:resourceType="granite/ui/components/foundation/renderconditions/feature"
-                                    feature="com.adobe.acs.commons.dam.impl.assetsurl.feature.flag"/>
+                                    feature="com.adobe.acs.commons.dam.impl.copyassetpublishurlfeature.feature.flag"/>
                             </granite:rendercondition>
                         </copypublishurl>
                     </items>
@@ -52,29 +52,29 @@
                             sling:resourceType="granite/ui/components/coral/foundation/form/textarea"/>
                     </items>
                     <footer jcr:primaryType="nt:unstructured">
-                        <copytext
-                            granite:id="asset-publishurl-copy-cmd"
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/button"
-                            icon="attach"
-                            iconSize="XS"
-                            text="Copy"
-                            variant="minimal">
-                            <granite:rendercondition
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
-                                expression="${!granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPad&quot;) &amp;&amp; !granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPhone&quot;)}"/>
-                        </copytext>
                         <dismiss
                             granite:rel="foundation-toggleable"
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/button"
                             text="Dismiss"
-                            variant="primary">
+                            variant="minimal">
                             <parentConfig
                                 jcr:primaryType="nt:unstructured"
                                 close="{Boolean}true"/>
                         </dismiss>
+                        <copy
+                                granite:id="asset-publishurl-copy-cmd"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/button"
+                                icon="attach"
+                                iconSize="XS"
+                                text="Copy"
+                                variant="primary">
+                            <granite:rendercondition
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/renderconditions/simple"
+                                    expression="${!granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPad&quot;) &amp;&amp; !granite:containsIgnoreCase(header[&quot;User-Agent&quot;], &quot;iPhone&quot;)}"/>
+                        </copy>
                     </footer>
                 </dialogpublishurl>
             </items>
