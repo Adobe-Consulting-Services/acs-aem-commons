@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1294 - New Remote Assets feature
+- #1713 - Added Servlet Filter to generate an ETag header based on a message digest
 - #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute

@@ -20,14 +20,21 @@
 
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
-import com.adobe.acs.commons.util.BufferingResponse;
-import com.adobe.acs.commons.util.InfoWriter;
-import com.adobe.acs.commons.util.PathInfoUtil;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Property;
@@ -41,18 +48,14 @@ import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.adobe.acs.commons.json.JsonObjectUtil.getString;
+import com.adobe.acs.commons.json.AbstractJSONObjectVisitor;
+import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
+import com.adobe.acs.commons.util.InfoWriter;
+import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  * ACS AEM Commons - CQInclude Property Namespace.
@@ -156,11 +159,11 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         final RequestDispatcherOptions options = new RequestDispatcherOptions();
         options.setReplaceSelectors(AEM_CQ_INCLUDE_SELECTORS);
 
-        final BufferingResponse bufferingResponse = new BufferingResponse(response);
-        request.getRequestDispatcher(request.getResource(), options).forward(request, bufferingResponse);
+        BufferedSlingHttpServletResponse bufferedResponse = new BufferedSlingHttpServletResponse(response, new StringWriter(), null);
+        request.getRequestDispatcher(request.getResource(), options).forward(request, bufferedResponse);
 
         Gson gson = new Gson();
-         final JsonObject json = gson.toJsonTree(bufferingResponse.getContents()).getAsJsonObject();
+         final JsonObject json = gson.toJsonTree(bufferedResponse.getBufferedServletOutput().getBufferedString()).getAsJsonObject();
          final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
 
          propertyNamespaceUpdater.accept(json);
