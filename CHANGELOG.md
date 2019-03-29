@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1773 - Fix name clashes for pipeline.types
 - #1776 - Fix possibly negative index
 - #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 @Component
 @Service
-@Property(name = "pipeline.type", value = "xml-generator")
+@Property(name = "pipeline.type", value = "acs-aem-commons-xml-generator")
 public final class XMLParserGeneratorFactory implements GeneratorFactory {
 
     private static final Logger log = LoggerFactory.getLogger(XMLParserGeneratorFactory.class);
