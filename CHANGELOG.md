@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
+- #1806 - Http Cache: Added RequestPath extension
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
