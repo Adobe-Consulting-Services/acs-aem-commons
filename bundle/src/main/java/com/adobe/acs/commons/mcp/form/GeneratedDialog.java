@@ -41,7 +41,6 @@ import org.osgi.annotation.versioning.ProviderType;
         adaptables = {SlingHttpServletRequest.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
-@ProviderType
 public class GeneratedDialog {
     @Inject
     @JsonIgnore

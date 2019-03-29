@@ -137,6 +137,14 @@ public class AbstractContainerComponent extends FieldComponent {
     }
 
     /**
+     * Set the composite flag (generally you don't need to but in case you have to override the behavior for some reason)
+     * @param val new value for composite flag
+     */
+    public void setComposite(boolean val) {
+        composite = val;
+    }
+
+    /**
      * @return the composite
      */
     public boolean isComposite() {
