@@ -19,17 +19,16 @@
  */
 package com.adobe.acs.commons.it.build;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class BundleContainsTldsIT {
 
-    private static final int EXPECTED_TLD_FILES = 7;
+    private static final int EXPECTED_TLD_FILES = 8;
 
     @Test
     public void test() throws Exception {

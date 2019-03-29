@@ -19,7 +19,22 @@
  */
 package com.adobe.acs.commons.wcm.notifications.impl;
 
+import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
+import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
+import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
+import static org.apache.sling.jcr.resource.api.JcrResourceConstants.NT_SLING_ORDERED_FOLDER;
+import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.http.Cookie;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.resource.PersistenceException;
@@ -32,20 +47,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.http.Cookie;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-
-import static org.junit.Assert.*;
-import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
-import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
-import static org.apache.jackrabbit.JcrConstants.NT_UNSTRUCTURED;
-import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 
 public class SystemNotificationsImplTest {
 
@@ -90,7 +91,7 @@ public class SystemNotificationsImplTest {
         assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
         assertEquals(0, aemContext.getServices(Filter.class, null).length);
 
-        aemContext.create().resource("/etc/acs-commons/notifications/first");
+        aemContext.create().resource("/etc/acs-commons/notifications/first", JCR_PRIMARYTYPE, NT_PAGE);
         commit();
         sendEvent();
         assertEquals(1, aemContext.getServices(Filter.class, null).length);
@@ -110,6 +111,29 @@ public class SystemNotificationsImplTest {
 
         // then remove the resource
         delete("/etc/acs-commons/notifications/enabled");
+        commit();
+        sendEvent();
+        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+
+        notifications.deactivate(aemContext.componentContext());
+        assertEquals(0, aemContext.getServices(Filter.class, null).length);
+        assertEquals(0, aemContext.getServices(EventHandler.class, null).length);
+    }
+
+    @Test
+    public void testOnAuthorPopulatedNotificationsSubFolder() throws Exception  {
+        setAuthorRunmode();
+        aemContext.build()
+            .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED);
+
+        createEnabledNotification("/etc/acs-commons/notifications/subfolder/enabled");
+        aemContext.registerInjectActivateService(notifications);
+        assertEquals(1, aemContext.getServices(EventHandler.class, null).length);
+        assertEquals(1, aemContext.getServices(Filter.class, null).length);
+
+        // then remove the resource
+        delete("/etc/acs-commons/notifications/subfolder/enabled");
         commit();
         sendEvent();
         assertEquals(0, aemContext.getServices(Filter.class, null).length);
@@ -178,13 +202,16 @@ public class SystemNotificationsImplTest {
     };
 
     private void createEnabledNotification() throws PersistenceException {
+        createEnabledNotification("/etc/acs-commons/notifications/enabled");
+    }
+
+    private void createEnabledNotification(String path) throws PersistenceException {
         aemContext.build()
-                .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
-                .siblingsMode()
-                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
-                .hierarchyMode()
-                .resource("enabled", JCR_PRIMARYTYPE, NT_PAGE)
-                .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
+            .resource("/etc/acs-commons/notifications", JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED)
+            .withIntermediatePrimaryType(NT_SLING_ORDERED_FOLDER)
+            .resource(path, JCR_PRIMARYTYPE, NT_PAGE)
+            .resource("jcr:content", JCR_PRIMARYTYPE, NT_UNSTRUCTURED, "enabled", true, "cq:lastModified", zeroHour);
         commit();
     }
 

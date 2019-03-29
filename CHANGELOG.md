@@ -8,6 +8,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## [Unreleased]
 
 ### Added
+- #1294 - New Remote Assets feature
+- #1713 - Added Servlet Filter to generate an ETag header based on a message digest
+- #1778 - Added folder support to system notifications
+- #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
+- #1783 - Added the possibility to replace the existing host in an attribute
+- #1806 - Http Cache: Added RequestPath extension
+
+### Changed
+- #1539 - Removed unused references to the QueryBuilder API.
+- #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
+- #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+
+### Fixed
+- #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
+- #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
+- #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1773 - Fix name clashes for pipeline.types
+- #1776 - Fix possibly negative index
+- #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
+- #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
+- #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
+- #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
+
+## [4.0.0] - 2019-02-20
+
+### Added
 - #1743 - Added support for v2.1 of org.apache.sling.xss bundle
 - Created log and error output for Asset Ingestor when asset is null
 - Add oakpal-maven-plugin and oakpal-checks module, using the acs-internal checklist for acs-aem-commons-content acceptance tests, and export the acs-commons-integrators checklist for downstream compatibility checks.
@@ -24,11 +51,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1700 - MCP Forms framework now tracks client libraries required for components as needed
 
 ### Fixed
+- #1796 - HttpCache: Added back in CombinedCacheKeyFactory
 - #1733 - Do not throw ReplicationExceptions from Dispatcher Flush Rules Preprocessor
 - #1745 - Show/hide widgets: feature can now also show/hide complex fields like Image or FileUpload
 - #1724 - AemEnvironmentIndicatorFilterTest.testDisallowedWcmMode is failed because of caret in windows
 - #1699 - MCP UI doesn't work because of StackOverflowError exception
-- #1692 - HttpCache: Refactored resource / group config extensions 
+- #1692 - HttpCache: Refactored resource / group config extensions
 - #1607 - HttpCache: improved the write to response mechanism.
 - #1539 - Reviewed usages of QueryBuilder for ResourceResolver leakages and close leaks.
 - #1590 - Multifield component doesn't render non-composite at all (NPE error)
@@ -58,6 +86,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1699 - Updated MCP servlet to not serialize known types that would otherwise cause problems
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
+- #1723 - Fix unclosed channel when non exising path provided
 
 ### Changed
 - #1726 - Deploy the bundle via the dedicated DAV url
@@ -73,6 +102,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1649 - Added support for custom Content-Type header.
 - #1720 - Adjusted metatype for HTTP Cache components.
 - #1729 - Url Asset Ingestor | Support case sensitive properties
+- #1753 - Remove Dynamic*ClientLibraryServlet and breaks out TouchUI widgets into discrete Client Libraries
 
 ### Removed
 - #1635 - Removed WCM Inbox Web Console Plugin

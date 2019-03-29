@@ -49,8 +49,8 @@ public class RoundRobin<T> implements Iterable<T> {
 
             @Override
             public synchronized T next() {
-                int idx = index.getAndIncrement() % items.size();
-                return items.get(idx);
+                int idx = index.getAndUpdate(x -> ++x > 0 ? x : 0);
+                return items.get(idx % items.size());
             }
 
             @Override
