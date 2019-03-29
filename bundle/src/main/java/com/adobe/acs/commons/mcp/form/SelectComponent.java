@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 /**
  * Select (drop-down) selector component
  */
-@ProviderType
 public abstract class SelectComponent extends FieldComponent {
+    @ProviderType
     public static class EnumerationSelector extends SelectComponent {
         @Override
         public Map<String, String> getOptions() {

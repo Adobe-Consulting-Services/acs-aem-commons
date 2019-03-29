@@ -26,7 +26,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * of tree shown to user multiple -- If added it indicates the user can make
  * multiple selections and values are stored in a multi-value field
  */
-@ProviderType
 public abstract class PathfieldComponent extends FieldComponent {
 
     private static final String OPTION_PREDICATE = "predicate";

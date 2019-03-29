@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1760 - Corrected provider type usage for MCP form classes, as well as JSON serialization issues
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
 - #1773 - Fix name clashes for pipeline.types
 - #1776 - Fix possibly negative index

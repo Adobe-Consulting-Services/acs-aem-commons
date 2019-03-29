@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -40,19 +41,23 @@ import org.osgi.annotation.versioning.ProviderType;
         adaptables = {SlingHttpServletRequest.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
-@ProviderType
 public class GeneratedDialog {
     @Inject
+    @JsonIgnore
     private Resource resource;
 
     @Inject
+    @JsonIgnore
     private SlingHttpServletRequest request;
 
     @Inject
+    @JsonIgnore
     private SlingScriptHelper sling;
 
+    @JsonIgnore
     private FormComponent form;
 
+    @JsonIgnore
     Map<String, FieldComponent> fieldComponents;
 
     @PostConstruct
@@ -63,6 +68,7 @@ public class GeneratedDialog {
         getFieldComponents();
     }
 
+    @JsonIgnore
     public Map<String, FieldComponent> getFieldComponents() {
         if (fieldComponents == null) {
             fieldComponents = AnnotatedFieldDeserializer.getFormFields(getClass(), getSlingHelper());
@@ -70,14 +76,17 @@ public class GeneratedDialog {
         return fieldComponents;
     }
 
+    @JsonIgnore
     public Collection<String> getAllClientLibraries() {
         return getClientLibraries(FieldComponent.ClientLibraryType.ALL);
     }
 
+    @JsonIgnore
     public Collection<String> getCssClientLibraries() {
         return getClientLibraries(FieldComponent.ClientLibraryType.CSS);
     }
 
+    @JsonIgnore
     public Collection<String> getJsClientLibraries() {
         return getClientLibraries(FieldComponent.ClientLibraryType.JS);
     }
@@ -94,6 +103,7 @@ public class GeneratedDialog {
     /**
      * @return the resource
      */
+    @JsonIgnore
     public Resource getResource() {
         return resource;
     }
@@ -101,6 +111,7 @@ public class GeneratedDialog {
     /**
      * @return the request
      */
+    @JsonIgnore
     public SlingHttpServletRequest getRequest() {
         return request;
     }
@@ -108,14 +119,17 @@ public class GeneratedDialog {
     /**
      * @return the sling helper
      */
+    @JsonIgnore
     public SlingScriptHelper getSlingHelper() {
         return sling;
     }
 
+    @JsonIgnore
     public Resource getFormResource() {
         return getForm().buildComponentResource();
     }
 
+    @JsonIgnore
     public FormComponent getForm() {
         if (form == null) {
             form = new FormComponent();
