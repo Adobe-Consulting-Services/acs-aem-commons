@@ -64,6 +64,12 @@
                             !android.util.*,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            com.google.common.*,
+                            com.google.thirdparty.publicsuffix,
+                            io.jsonwebtoken.*,
+                            com.adobe.acs.commons.*
+                        </Private-Package>
                         <Sling-Model-Packages>
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
