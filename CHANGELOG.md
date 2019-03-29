@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1773 - Fix name clashes for pipeline.types
 - #1776 - Fix possibly negative index
 - #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
+- #1789 - Corrected handling of checkboxes in MCP, fixing renovator dry-run bug.
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
