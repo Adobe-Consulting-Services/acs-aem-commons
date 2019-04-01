@@ -62,6 +62,11 @@
                             !org.bouncycastle.jce.*,
                             !org.checkerframework.checker.nullness.qual,
                             !android.util.*,
+                            <!-- shaded libraries -->
+                            !com.google.common.*,
+                            !com.google.thirdparty.*,
+                            !com.jcraft.*,
+                            !io.jsonwebtoken.*
                             *
                         </Import-Package>
                         <Sling-Model-Packages>
