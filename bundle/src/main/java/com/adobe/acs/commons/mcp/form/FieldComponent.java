@@ -35,12 +35,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Describes a component in a manner which supports auto-generated forms
  */
-@ProviderType
 public abstract class FieldComponent {
 
     private String name;

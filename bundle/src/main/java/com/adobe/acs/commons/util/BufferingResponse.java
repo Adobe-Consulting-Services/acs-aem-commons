@@ -33,8 +33,9 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Generic HttpServletResponseWrapper which will buffer the output content
  * to a buffer. Only 
- *
+ * @deprecated Rather use {@link BufferedHttpServletResponse}
  */
+@Deprecated
 @ProviderType
 public final class BufferingResponse extends HttpServletResponseWrapper {
 

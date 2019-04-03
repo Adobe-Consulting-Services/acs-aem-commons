@@ -9,10 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1294 - New Remote Assets feature
+- #1713 - Added Servlet Filter to generate an ETag header based on a message digest
 - #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1795 - Added the Asset Content Packager and unit tests
+- #1806 - Http Cache: Added RequestPath extension
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
@@ -23,9 +25,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
+- #1760 - Corrected provider type usage for MCP form classes, as well as JSON serialization issues
 - #1762 - Fixed missing code for DAM Assets Copy Publish URL feature.
+- #1773 - Fix name clashes for pipeline.types
 - #1776 - Fix possibly negative index
 - #1780 - Fixed ACS Commons XSS Taglib to work with the support XSSFunctions class.
+- #1789 - Corrected handling of checkboxes in MCP, fixing renovator dry-run bug.
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
