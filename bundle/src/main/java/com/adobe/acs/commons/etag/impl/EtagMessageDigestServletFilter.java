@@ -91,7 +91,7 @@ public class EtagMessageDigestServletFilter implements Filter {
         @AttributeDefinition(name = "Salt", description = "The (optional) salt is also taken into account for the message digest calculation. It is necessary to change that value whenever the response content or the response headers are now modified differently in a proxy instance between client and AEM (e.g. Dispatcher sets additional headers).")
         String salt();
 
-        @AttributeDefinition(name = "Enabled for output streams", description = "If set to 'true' this will also calculate the ETag for response output streams (binary output) and not only for respone writers (text output). Enabling this option might lead to heavy memory demands as the full output stream is then buffered (i.e. kept in memory) before being delivered to the client. Especially if you deliver large assets like videos from AEM you should not enable this option.")
+        @AttributeDefinition(name = "Enabled for output streams", description = "If set to 'true' this will also calculate the ETag for response output streams (binary output) and not only for response writers (text output). Enabling this option might lead to heavy memory demands as the full output stream is then buffered (i.e. kept in memory) before being delivered to the client. Especially if you deliver large assets like videos from AEM you should not enable this option.")
         boolean enabledForOutputStream() default false;
 
         @AttributeDefinition(name = "Add as HTML comment", description = "If set to 'true' this filter will also emit a HTML comment at the very end of each HTML document exposing the ETag. This may be helpful to debug issues with stale HTML cache entries in case the ETag header is not properly propagated.")
