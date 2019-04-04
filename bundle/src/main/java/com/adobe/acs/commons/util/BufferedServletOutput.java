@@ -146,7 +146,7 @@ public final class BufferedServletOutput {
     }
 
     public void resetBuffer() {
-        if (printWriter != null) {
+        if (writer != null) {
             writer.getBuffer().setLength(0);
         }
         if (outputStream != null) {
@@ -161,9 +161,9 @@ public final class BufferedServletOutput {
      * 
      * @throws IOException */
     void close() throws IOException {
-        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
+        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) {
             wrappedResponse.getOutputStream().write(getBufferedBytes());
-        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod)) {
+        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null) {
             wrappedResponse.getWriter().write(getBufferedString());
         }
         if (flushBuffer) {
