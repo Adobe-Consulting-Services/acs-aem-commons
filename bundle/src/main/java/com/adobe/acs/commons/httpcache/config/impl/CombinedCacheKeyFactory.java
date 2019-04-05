@@ -49,6 +49,14 @@ import java.util.Map;
  * This is useful when you need differentiation of 2 cache keys together.
  * Instead of duplicating and merging the 2 extensions / factories into 1 class, you can leverage this class.
  * It will use existing cache key factories to create a key for each one, and put them in a list.
+ *
+ *  Use as follows in your HTTP cache config to leverage multiple factories:
+ *  cacheConfigFactories.target="
+ *             (|
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.RequestPathHttpCacheConfigExtension)(config.name=someConfig))
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(config.name=someOtherConfig))
+ *             )
+ *           "
  */
 
 @Component(

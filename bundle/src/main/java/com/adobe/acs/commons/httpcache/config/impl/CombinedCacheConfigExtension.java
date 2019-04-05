@@ -48,6 +48,14 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
  * Aggregates multiple cache config extensions into one.
  * This is useful when you need functionality of two or more extensions together.
  * Instead of duplicating and merging the multiple extensions / factories into a single class, this factory can be used to combine them.
+ *
+ *  Use as follows in your HTTP cache config to leverage multiple factories:
+ *  cacheConfigExtensions.target="
+ *             (|
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.RequestPathHttpCacheConfigExtension)(config.name=someConfig))
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(config.name=someOtherConfig))
+ *             )
+ *           "
  */
 @Component(
         service = {HttpCacheConfigExtension.class},
