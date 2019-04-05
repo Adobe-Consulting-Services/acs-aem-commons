@@ -30,17 +30,18 @@ import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.metatype.annotations.Designate;
+
 import java.util.Map;
 
 /**
@@ -59,7 +60,7 @@ import java.util.Map;
         },
         reference = {
                 @Reference(
-                        name = "cacheKeyFactory",
+                        name = "cacheKeyFactories",
                         bind = "bindCacheKeyFactory",
                         unbind = "unbindCacheKeyFactory",
                         service = CacheKeyFactory.class,
@@ -85,14 +86,13 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         @AttributeDefinition(name = "CacheKey factory service PIDs",
                 description = "Service PID(s) of target implementation of CacheKeyFactory to be used."
         )
-        String httpcache_config_cachekey_target();
+        String cacheKeyFactories_target();
     }
 
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);
 
     private String configName;
-    private String cacheKeyFactoriesTarget;
-
+   
     private RankedServices<CacheKeyFactory> cacheKeyFactories = new RankedServices<>(Order.ASCENDING);
 
     @Override
@@ -118,7 +118,7 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         if (factory != this) {
             cacheKeyFactories.bind(factory, properties);
         } else {
-            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname: {}  Target: {}", this.configName, this.cacheKeyFactoriesTarget);
+            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname: {}", this.configName);
         }
     }
 
@@ -132,7 +132,6 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
     @Modified
     protected void activate(CombinedCacheKeyFactory.Config config) {
         this.configName = config.config_name();
-        this.cacheKeyFactoriesTarget = config.httpcache_config_cachekey_target();
     }
 
 }

@@ -58,7 +58,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
         },
         reference = {
                 @Reference(
-                        name = "cacheConfigExtension",
+                        name = "cacheConfigExtensions",
                         bind = "bindCacheConfigExtension",
                         unbind = "unbindCacheConfigExtension",
                         service = HttpCacheConfigExtension.class,
@@ -82,7 +82,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
                 name = "HttpCacheConfigExtension service PIDs",
                 description = "Service PIDs of target implementation of HttpCacheConfigExtensions to be combined and used."
         )
-        String[] httpcache_config_extension_combiner_service_pids() default {};
+        String cacheConfigExtensions_target();
 
         @AttributeDefinition(
                 name = "Require all extensions to accept",
@@ -131,9 +131,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
     }
 
     protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
-        if (    extension != this
-                && ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),properties.get(Constants.SERVICE_PID))
-        )
+        if (extension != this)
         {
             // Only accept extensions whose service.pid's are enumerated in the configuration.
             cacheConfigExtensions.bind(extension, properties);
