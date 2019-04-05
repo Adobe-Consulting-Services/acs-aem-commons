@@ -64,7 +64,7 @@ import java.util.Map;
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
-                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.cachekey.target} ] Config name: [ config.name ]"
+                "webconsole.configurationFactory.nameHint=Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
@@ -100,7 +100,7 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);
 
     private String configName;
-   
+
     private RankedServices<CacheKeyFactory> cacheKeyFactories = new RankedServices<>(Order.ASCENDING);
 
     @Override

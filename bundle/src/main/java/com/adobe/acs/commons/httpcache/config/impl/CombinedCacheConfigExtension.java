@@ -62,7 +62,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
-                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.extension.combiner.service.pids} ] Config name: [ config.name ]"
+                "webconsole.configurationFactory.nameHint=Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
