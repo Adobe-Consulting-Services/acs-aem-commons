@@ -39,6 +39,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,11 @@ import java.util.regex.Pattern;
 )
 @Properties({
         @Property(name = "webconsole.configurationFactory.nameHint",
-                value = "Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]")
+                value = "Allowed resource types: [ {httpcache.config.extension.resource-types.allowed} ] Config name: [ {config.name} ]"),
+        @Property(
+                name = Constants.SERVICE_RANKING,
+                intValue = 60
+        )
 })
 @Service
 public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
