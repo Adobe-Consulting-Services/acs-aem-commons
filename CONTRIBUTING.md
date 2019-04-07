@@ -56,3 +56,23 @@ The _compat/6.0_ branch (2.x) is expected to be installable on AEM 6.0 and AEM 6
 
 Even if you don't have time to contribute code, reviewing code contributed by other people is an option. To do this, go to [https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls](https://github.com/Adobe-Consulting-Services/acs-aem-commons/pulls) to see the open pull requests.
 
+## Using 3rd Party Libraries
+
+Ideally, ACS AEM Commons would only rely upon libraries already available inside AEM. There are, however, exceptions. When this is necessary, there are several options:
+
+1. Ensure the dependency is optional. At minimum, this involves setting the `Import-Package` header for any referenced packages to have `resolution:=optional`.
+Depending on the specifics of the feature, additional guard code may be necessary. When installing ACS AEM Commons without the optional
+dependencies available inside AEM, ensure that **no exceptions** are logged at install time as these create confusion (and thus GitHub issues).
+2. Embed the dependency. Embedding is tricky because it has a transitive effect where all of dependencies of the embedded dependencies must now also
+be handled. If you do use an embedded dependency it must *not* be exposed in the API of ACS AEM Commons.
+
+### Proper Dependency Embedding
+
+If you do want to embed a dependency, this must be done in multiple parts:
+
+1. Ensure that the dependency is in the `compile` scope. This will ensure that it is subjected to the OWASP security scanning.
+2. Since `compile` scope dependencies are banned by default, all the coordinates of the embedded dependency to the list of dependencies in the `enforce-banned-dependencies` execution of the `maven-enforcer-plugin`.
+3. To avoid conflicts with downstream projects, all embedded dependencies must be "shaded" by the `maven-shade-plugin`. This rewrites the embedded classes (and any referencing bytecode);
+for example, from `com.google.common.cache.Cache` to `acscommons.com.google.common.cache.Cache`. As a result, any embedded dependency must be
+added to the configuration of the `maven-shade-plugin`.
+4. Finally, any embedded/shaded plugins have to be manually excluded from the imported package list.

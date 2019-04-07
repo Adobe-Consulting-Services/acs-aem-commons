@@ -23,14 +23,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * An expression of the tab layout container with convenience methods to build
  * tabs more easily. The data structures are meant to show content in the order
  * it is added.
  */
-@ProviderType
 public abstract class AbstractGroupingContainerComponent extends ContainerComponent {
     public static String GENERIC_GROUP = "Misc";
 
