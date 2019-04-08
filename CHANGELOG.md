@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1539 - Removed unused references to the QueryBuilder API.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+- #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
 
 ### Fixed
 - #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.

@@ -1,8 +1,8 @@
 /*
  * #%L
- * ACS AEM Commons Bundle
+ * ACS AEM Commons OakPAL Checks
  * %%
- * Copyright (C) 2013 - 2018 Adobe
+ * Copyright (C) 2013 - 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
