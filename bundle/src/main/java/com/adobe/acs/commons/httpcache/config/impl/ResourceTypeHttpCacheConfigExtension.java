@@ -122,32 +122,17 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         }
         log.debug("ResourceHttpCacheConfigExtension checking for resource type matches");
         // Match resource types.
-        if (checkResourceType(candidateResource)) return true;
-
-        return false;
+        return checkResourceType(candidateResource);
     }
 
     private boolean checkResourceType(Resource candidateResource) {
         if(checkResourceSuperType){
-            for (Pattern pattern : resourceTypePatterns) {
-                if( candidateResource.getResourceResolver().isResourceType(candidateResource, pattern.pattern())){
-                    return true;
-                }
-            }
+            return resourceTypePatterns.stream()
+                    .anyMatch( pattern -> candidateResource.getResourceResolver().isResourceType(candidateResource, pattern.pattern()));
         }else{
-            for (Pattern pattern : resourceTypePatterns) {
-                Matcher m = pattern.matcher(candidateResource.getResourceType());
-
-                if (m.matches()) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("ResourceHttpCacheConfigExtension accepts request [ {} ]", candidateResource);
-                    }
-                    return true;
-                }
-            }
+            return resourceTypePatterns.stream()
+                    .anyMatch( pattern -> pattern.matcher(candidateResource.getResourceType()).matches());
         }
-
-        return false;
     }
 
     //-------------------------<CacheKeyFactory methods>
