@@ -22,6 +22,7 @@ package com.adobe.acs.commons.fam.impl;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,9 @@ import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 /**
  * Runnable task that has a time limit
  */
-public class TimedRunnable implements Runnable, Comparable {
+public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
+    private static AtomicLong taskCounter = new AtomicLong();
+    private Long createOrder = taskCounter.getAndAdd(1);
 
     long created = System.currentTimeMillis();
     long started = -1;
@@ -115,14 +118,13 @@ public class TimedRunnable implements Runnable, Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        if(o instanceof TimedRunnable) {
-            TimedRunnable other = (TimedRunnable) o;
-            int compareResult = Integer.compare(other.priority, this.priority);
+    public int compareTo(TimedRunnable other) {
+        int compareResult = Integer.compare(other.priority, this.priority);
 
-            return compareResult;
+        if (compareResult == 0) {
+            compareResult = createOrder.compareTo(other.createOrder);
         }
 
-        return 0;
+        return compareResult;
     }
 }
