@@ -73,7 +73,9 @@ import org.osgi.service.component.annotations.Component;
  * possible to treat the score explanation as a special case in the UI.
  * <p>
  * The first element of each row, therefore, contains the text of the score explanation, which is a pre-formatted string
- * with new lines and a 2-space shift-width indent.
+ * with new lines and a 2-space shift-width indent. If a fulltext score is not computed for the query,
+ * i.e. because the statement did not use the 'contains()' function or because the plan selected a non-lucene index, the
+ * first element will contain the JSON null value.
  * <p>
  * For example, if you were to submit the following query:
  * <p>
