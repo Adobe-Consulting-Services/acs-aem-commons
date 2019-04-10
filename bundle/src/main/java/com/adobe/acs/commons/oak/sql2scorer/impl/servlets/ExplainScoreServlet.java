@@ -53,37 +53,37 @@ import org.osgi.service.component.annotations.Component;
  * This servlet submits a JCR-SQL2 query with an additional oak:scoreExplanation column that contains the explanation of
  * the Lucene fulltext score, where applicable. Also executes the "explain" command to provide the index plan used in the
  * same JSON response.
- *
+ * <p>
  * The query result is returned as rows, not nodes, which means jcr:path must actually be selected in the query if it is
  * to be returned as a column.
- *
+ * <p>
  * This servlet is intended to be used as a tool for development and exploration of oak:index definitions, and is not
  * designed for running arbitrary queries, since the oak:scoreExplanation column will add considerable cost to each
  * operation.
- *
+ * <p>
  * The response JSON object contains 4 properties:
  * - stmt: the JCR-SQL2 query statement, as executed
  * - plan: the 'explain' plan, which identifies the index used and the filter expression
  * - cols: an array of column names specified in the executed query statement
  * - rows: a 2-dimensional array of query result rows, as in '.rows[result index][column index]'. Each row has as many
- *         array elements as there are elements in the .cols array. A non-existing value for a row in a particular
- *         column will be represented by the json {@code null} value.
- *
+ * array elements as there are elements in the .cols array. A non-existing value for a row in a particular
+ * column will be represented by the json {@code null} value.
+ * <p>
  * The first column will always be 'oak:scoreExplanation', i.e. .cols[0] === 'oak:scoreExplanation', in order to make it
  * possible to treat the score explanation as a special case in the UI.
- *
+ * <p>
  * The first element of each row, therefore, contains the text of the score explanation, which is a pre-formatted string
  * with new lines and a 2-space shift-width indent.
- *
+ * <p>
  * For example, if you were to submit the following query:
- *
- *  select [jcr:path] from [cq:Page] where contains(*, 'we-retail')
- *
+ * <p>
+ * select [jcr:path] from [cq:Page] where contains(*, 'we-retail')
+ * <p>
  * Your plan might be something like:
- *
- *  [cq:Page] as [cq:Page] /* lucene:cqPageLucene(/oak:index/cqPageLucene) +:fulltext:we +:fulltext:retail
- *                            ft:("we-retail") where contains([cq:Page].[*], 'we-retail')
- *
+ * <p>
+ * [cq:Page] as [cq:Page] /* lucene:cqPageLucene(/oak:index/cqPageLucene) +:fulltext:we +:fulltext:retail
+ * ft:("we-retail") where contains([cq:Page].[*], 'we-retail')
+ * <p>
  * You might get an explanation similar to this for the first result:
  *
  * <pre>
@@ -113,7 +113,7 @@ import org.osgi.service.component.annotations.Component;
  * </pre>
  */
 @Component(property = {
-        "sling.servlet.resourceTypes="+ExplainScoreServlet.RT_SQL2SCORER,
+        "sling.servlet.resourceTypes=" + ExplainScoreServlet.RT_SQL2SCORER,
         "sling.servlet.methods=POST",
         "sling.servlet.selectors=sql2scorer",
         "sling.servlet.extensions=json"
@@ -123,6 +123,11 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
     static final String P_STATEMENT = "statement";
     static final String P_LIMIT = "limit";
     static final String P_OFFSET = "offset";
+    static final String KEY_STMT = "stmt";
+    static final String KEY_PLAN = "plan";
+    static final String KEY_COLS = "cols";
+    static final String KEY_ROWS = "rows";
+    static final String KEY_ERROR = "error";
 
     @Override
     protected void doPost(@Nonnull final SlingHttpServletRequest request,
@@ -135,6 +140,15 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
         final long offset = ofNullable(request.getParameter(P_OFFSET))
                 .map(Long::valueOf).orElse(0L);
 
+        // require a query statement
+        final String rawStatement = request.getParameter(P_STATEMENT);
+        if (rawStatement == null) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty(KEY_ERROR, "please submit a valid JCR-SQL2 query in the `statement` parameter.");
+            response.getWriter().write(obj.toString());
+            return;
+        }
+
         try {
             final Session session = request.getResourceResolver().adaptTo(Session.class);
             if (session == null) {
@@ -143,40 +157,36 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
 
             final QueryManager qm = session.getWorkspace().getQueryManager();
 
-            final String rawStatement = request.getParameter(P_STATEMENT);
-            if (rawStatement == null) {
-                JsonObject obj = new JsonObject();
-                obj.addProperty("error", "please submit a valid JCR-SQL2 query in the `statement` parameter.");
-                response.getWriter().write(obj.toString());
-                return;
-            }
+            // validate the syntax of the raw statement.
+            Query rawQuery = qm.createQuery(rawStatement, Query.JCR_SQL2);
+            rawQuery.setLimit(1L);
+            rawQuery.execute();
 
-            try {
-                Query query = qm.createQuery(rawStatement, Query.JCR_SQL2);
-                query.setLimit(1L);
-                query.execute();
-            } catch (final InvalidQueryException iqe) {
-                JsonObject obj = new JsonObject();
-                obj.addProperty("error", "please submit a valid JCR-SQL2 query in the `statement` parameter: "
-                        + iqe.getMessage());
-                response.getWriter().write(obj.toString());
-                return;
-            }
-
+            // we can then expect the first SELECT to exist and be the instance we want to replace. (case-insensitive)
             final String statement = rawStatement.replaceFirst("(?i)SELECT",
                     "SELECT [oak:scoreExplanation],");
 
+            // create a new query using our enhanced statement
             final Query query = qm.createQuery(statement, Query.JCR_SQL2);
 
+            // set limit and offset
             query.setLimit(limit);
             query.setOffset(offset);
 
-            Gson json = new GsonBuilder().registerTypeHierarchyAdapter(Query.class, new QueryExecutingTypeAdapter(qm)).create();
+            // prepare Gson with QueryExecutingTypeAdapter
+            Gson json = new GsonBuilder().registerTypeHierarchyAdapter(Query.class,
+                    new QueryExecutingTypeAdapter(qm)).create();
 
+            // execute the query and write the response.
             response.getWriter().write(json.toJson(query));
+        } catch (final InvalidQueryException e) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty(KEY_ERROR, "please submit a valid JCR-SQL2 query in the `statement` parameter: "
+                    + e.getMessage());
+            response.getWriter().write(obj.toString());
         } catch (final RepositoryException e) {
             JsonObject obj = new JsonObject();
-            obj.addProperty("error", e.getMessage());
+            obj.addProperty(KEY_ERROR, e.getMessage());
             response.getWriter().write(obj.toString());
         }
     }
@@ -195,22 +205,21 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
                 final Query explainQuery = qm.createQuery("explain " + query.getStatement(),
                         Query.JCR_SQL2);
                 final QueryResult explainResult = explainQuery.execute();
-
                 final Optional<Row> planRow = ofNullable(explainResult.getRows())
                         .filter(RowIterator::hasNext).map(RowIterator::nextRow);
 
                 jsonWriter.beginObject();
-                jsonWriter.name("stmt").value(query.getStatement());
+                jsonWriter.name(KEY_STMT).value(query.getStatement());
                 if (planRow.isPresent()) {
-                    jsonWriter.name("plan").value(planRow.get().getValue("plan").getString());
+                    jsonWriter.name(KEY_PLAN).value(planRow.get().getValue("plan").getString());
                 }
-                jsonWriter.name("cols");
+                jsonWriter.name(KEY_COLS);
                 jsonWriter.beginArray();
                 for (String column : queryResult.getColumnNames()) {
                     jsonWriter.value(column);
                 }
                 jsonWriter.endArray();
-                jsonWriter.name("rows");
+                jsonWriter.name(KEY_ROWS);
                 jsonWriter.beginArray();
                 for (RowIterator rowIt = queryResult.getRows(); rowIt.hasNext(); ) {
                     final Row row = rowIt.nextRow();
