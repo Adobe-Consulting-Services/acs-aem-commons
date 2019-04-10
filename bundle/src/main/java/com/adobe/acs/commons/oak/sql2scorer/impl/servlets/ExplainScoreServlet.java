@@ -153,8 +153,8 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
 
         try {
             final Session session = request.getResourceResolver().adaptTo(Session.class);
-            if (session == null) {
-                throw new ServletException("failed to get a JCR session from the request");
+            if (session == null || !session.isLive()) {
+                throw new RepositoryException("failed to get a live JCR session from the request");
             }
 
             final QueryManager qm = session.getWorkspace().getQueryManager();
@@ -239,11 +239,11 @@ public class ExplainScoreServlet extends SlingAllMethodsServlet {
         }
 
         @Override
-        public Query read(final JsonReader jsonReader) throws IOException {
+        public Query read(final JsonReader jsonReader) {
             throw new UnsupportedOperationException("not implemented");
         }
 
-        private void writeValue(JsonWriter writer, Value v) throws IOException, RepositoryException {
+        void writeValue(JsonWriter writer, Value v) throws IOException, RepositoryException {
             if (v == null) {
                 writer.nullValue();
             } else {

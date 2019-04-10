@@ -23,22 +23,39 @@ package com.adobe.acs.commons.oak.sql2scorer.impl.servlets;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jcr.Binary;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.query.Query;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import org.apache.sling.servlethelpers.MockSlingHttpServletRequest;
 import org.apache.sling.servlethelpers.MockSlingHttpServletResponse;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ExplainScoreServletTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplainScoreServletTest.class);
 
@@ -80,15 +97,37 @@ public class ExplainScoreServletTest {
     }
 
     @Test
-    public void test_doPost_sql2_happy_no_score() throws Exception {
+    public void test_doPost_sql2_fail_logout() throws Exception {
         ExplainScoreServlet servlet = new ExplainScoreServlet();
         MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver());
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
         Map<String, Object> params = new HashMap<>();
+        params.put("statement", "select * from [nt:base]");
+        request.setParameterMap(params);
+
+        final Session jcr = context.resourceResolver().adaptTo(Session.class);
+
+        jcr.logout();
+
+        servlet.doPost(request, response);
+        Gson gson = new Gson();
+        JsonObject json = gson.fromJson(response.getOutputAsString(), JsonObject.class);
+        assertTrue("response should have error key", json.has("error"));
+
+        LOGGER.info("response string: {}", json.get("error").getAsString());
+    }
+
+    @Test
+    public void test_doPost_sql2_happy_no_score() throws Exception {
+        final Map<String, Object> params = new HashMap<>();
         params.put("statement", "select [jcr:path] from [nt:base] where ISSAMENODE([nt:base], '/')");
         params.put("limit", "1");
         params.put("offset", "0");
+
+        ExplainScoreServlet servlet = new ExplainScoreServlet();
+        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver());
+        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
         request.setParameterMap(params);
 
         servlet.doPost(request, response);
@@ -122,4 +161,63 @@ public class ExplainScoreServletTest {
                 json.get("rows").getAsJsonArray().get(0).getAsJsonArray().get(1).getAsString());
     }
 
+    @Test
+    public void test_TypeAdapter_write_fail() throws Exception {
+        final Session session = context.resourceResolver().adaptTo(Session.class);
+        final ExplainScoreServlet servlet = new ExplainScoreServlet();
+        final ExplainScoreServlet.QueryExecutingTypeAdapter adapter =
+                servlet.new QueryExecutingTypeAdapter(session.getWorkspace().getQueryManager());
+        final JsonWriter mockWriter = mock(JsonWriter.class);
+        final Query mockQuery = mock(Query.class);
+        when(mockQuery.execute()).thenThrow(new RepositoryException("I am a RepositoryException!"));
+
+        boolean caughtIOException = false;
+        try {
+            adapter.write(mockWriter, mockQuery);
+        } catch (final IOException e) {
+            caughtIOException = true;
+        }
+
+        assertTrue("adapter.write() should throw IOException when RepositoryException is encountered",
+                caughtIOException);
+    }
+
+    @Test
+    public void test_TypeAdapter_read_fail() throws Exception {
+        final Session session = context.resourceResolver().adaptTo(Session.class);
+        final ExplainScoreServlet servlet = new ExplainScoreServlet();
+        final ExplainScoreServlet.QueryExecutingTypeAdapter adapter =
+                servlet.new QueryExecutingTypeAdapter(session.getWorkspace().getQueryManager());
+        final JsonReader mockReader = mock(JsonReader.class);
+
+        boolean caughtUOException = false;
+        try {
+            adapter.read(mockReader);
+        } catch (final UnsupportedOperationException e) {
+            caughtUOException = true;
+        }
+
+        assertTrue("adapter.read() should throw UnsupportedOperationException when called",
+                caughtUOException);
+    }
+
+    @Test
+    public void test_TypeAdapter_writeValue() throws Exception {
+        final Session session = context.resourceResolver().adaptTo(Session.class);
+        final ExplainScoreServlet servlet = new ExplainScoreServlet();
+        final ExplainScoreServlet.QueryExecutingTypeAdapter adapter =
+                servlet.new QueryExecutingTypeAdapter(session.getWorkspace().getQueryManager());
+        final JsonWriter mockWriter = mock(JsonWriter.class);
+        Binary binary = session.getValueFactory()
+                .createBinary(new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)));
+
+        adapter.writeValue(mockWriter, null);
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(binary));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(1L));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(Calendar.getInstance()));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(true));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue("hello"));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(42.0D));
+        adapter.writeValue(mockWriter, session.getValueFactory().createValue(new BigDecimal("42.0")));
+    }
 }
