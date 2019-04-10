@@ -1,6 +1,6 @@
 /*
  * #%L
- * ACS AEM Commons OakPAL Checks
+ * ACS AEM Commons Bundle
  * %%
  * Copyright (C) 2013 - 2019 Adobe
  * %%
