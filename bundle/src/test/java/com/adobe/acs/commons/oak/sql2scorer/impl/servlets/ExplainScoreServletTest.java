@@ -98,12 +98,13 @@ public class ExplainScoreServletTest {
 
     @Test
     public void test_doPost_sql2_fail_logout() throws Exception {
-        ExplainScoreServlet servlet = new ExplainScoreServlet();
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver());
-        MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
-
-        Map<String, Object> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put("statement", "select * from [nt:base]");
+
+        final ExplainScoreServlet servlet = new ExplainScoreServlet();
+        final MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(context.resourceResolver());
+        final MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
+
         request.setParameterMap(params);
 
         final Session jcr = context.resourceResolver().adaptTo(Session.class);
@@ -171,15 +172,15 @@ public class ExplainScoreServletTest {
         final Query mockQuery = mock(Query.class);
         when(mockQuery.execute()).thenThrow(new RepositoryException("I am a RepositoryException!"));
 
-        boolean caughtIOException = false;
+        boolean caughtException = false;
         try {
             adapter.write(mockWriter, mockQuery);
         } catch (final IOException e) {
-            caughtIOException = true;
+            caughtException = true;
         }
 
         assertTrue("adapter.write() should throw IOException when RepositoryException is encountered",
-                caughtIOException);
+                caughtException);
     }
 
     @Test
@@ -190,15 +191,15 @@ public class ExplainScoreServletTest {
                 servlet.new QueryExecutingTypeAdapter(session.getWorkspace().getQueryManager());
         final JsonReader mockReader = mock(JsonReader.class);
 
-        boolean caughtUOException = false;
+        boolean caughtException = false;
         try {
             adapter.read(mockReader);
         } catch (final UnsupportedOperationException e) {
-            caughtUOException = true;
+            caughtException = true;
         }
 
         assertTrue("adapter.read() should throw UnsupportedOperationException when called",
-                caughtUOException);
+                caughtException);
     }
 
     @Test
