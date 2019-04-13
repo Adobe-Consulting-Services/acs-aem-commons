@@ -48,17 +48,25 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
  * Aggregates multiple cache config extensions into one.
  * This is useful when you need functionality of two or more extensions together.
  * Instead of duplicating and merging the multiple extensions / factories into a single class, this factory can be used to combine them.
+ *
+ *  Use as follows in your HTTP cache config to leverage multiple factories:
+ *  cacheConfigExtensions.target="
+ *             (|
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.RequestPathHttpCacheConfigExtension)(config.name=someConfig))
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(config.name=someOtherConfig))
+ *             )
+ *           "
  */
 @Component(
         service = {HttpCacheConfigExtension.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
                 Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
-                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.extension.combiner.service.pids} ] Config name: [ config.name ]"
+                "webconsole.configurationFactory.nameHint=Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
-                        name = "cacheConfigExtension",
+                        name = "cacheConfigExtensions",
                         bind = "bindCacheConfigExtension",
                         unbind = "unbindCacheConfigExtension",
                         service = HttpCacheConfigExtension.class,
@@ -82,7 +90,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
                 name = "HttpCacheConfigExtension service PIDs",
                 description = "Service PIDs of target implementation of HttpCacheConfigExtensions to be combined and used."
         )
-        String[] httpcache_config_extension_combiner_service_pids() default {};
+        String cacheConfigExtensions_target();
 
         @AttributeDefinition(
                 name = "Require all extensions to accept",
@@ -131,9 +139,7 @@ public class CombinedCacheConfigExtension implements HttpCacheConfigExtension {
     }
 
     protected void bindCacheConfigExtension(HttpCacheConfigExtension extension, Map<String, Object> properties) {
-        if (    extension != this
-                && ArrayUtils.contains(cfg.httpcache_config_extension_combiner_service_pids(),properties.get(Constants.SERVICE_PID))
-        )
+        if (extension != this)
         {
             // Only accept extensions whose service.pid's are enumerated in the configuration.
             cacheConfigExtensions.bind(extension, properties);
