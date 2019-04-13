@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
+- #1833 - Fixes issue with ACS AEM Commons utility report page's header bar not rendering properly.
 
 ## [4.0.0] - 2019-02-20
 
