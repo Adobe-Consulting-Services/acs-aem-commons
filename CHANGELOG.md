@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 
 ### Fixed
+- #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
 - #1528 - Added support for 6.4/6.5 workflow instances location and fixed issue with removing workflows older than.
 - #1709 - Fixes issue with ACS AEM Commons utility page's header bars not rendering properly.
 - #1759 - Fixing the undefined error on limit object in classicui-limit-parsys.js
