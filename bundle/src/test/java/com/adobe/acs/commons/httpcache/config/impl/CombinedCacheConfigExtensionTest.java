@@ -65,13 +65,7 @@ public class CombinedCacheConfigExtensionTest {
         when(extension2.accepts(request, config)).thenReturn(false);
         when(extension3.accepts(request, config)).thenReturn(true);
         when(extension4.accepts(request, config)).thenReturn(true);
-
-        when(ocd.httpcache_config_extension_combiner_service_pids()).thenReturn(new String[]{
-            "extension1",
-            "extension2",
-            "extension3",
-            "extension4"
-        });
+        
         when(ocd.httpcache_config_extension_combiner_require_all_to_accept()).thenReturn(true);
 
         underTest.activate(ocd);
