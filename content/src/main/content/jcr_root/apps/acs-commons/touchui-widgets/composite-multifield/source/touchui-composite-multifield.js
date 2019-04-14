@@ -231,7 +231,12 @@
             value = $field.val();
 
             if (this.isCheckbox($field)) {
-                value = $field.prop("checked") ? $field.val() : "";
+				if ($field.prop("checked"))
+					value = $field.val();
+				else {
+					var uncheckedValue = $field.attr('name')+'@DefaultValue';
+					value = $field.parent().find('[name="'+uncheckedValue+'"]') ? $field.parent().find('[name="'+uncheckedValue+'"]').val() : "";
+				}
             }
 
             if (this.isAutocomplete($field) || this.isTagsField($field)) {
