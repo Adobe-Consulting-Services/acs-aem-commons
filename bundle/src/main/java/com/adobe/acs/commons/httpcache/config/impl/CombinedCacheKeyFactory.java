@@ -63,7 +63,7 @@ import java.util.Map;
         service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
-                Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
+                Constants.SERVICE_RANKING + ":Integer=" + Integer.MAX_VALUE,
                 "webconsole.configurationFactory.nameHint=Config name: [ config.name ]"
         },
         reference = {
