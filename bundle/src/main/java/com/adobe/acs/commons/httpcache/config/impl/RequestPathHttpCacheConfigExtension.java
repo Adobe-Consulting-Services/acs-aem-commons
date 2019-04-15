@@ -29,6 +29,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -39,14 +40,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
-@Component(configurationPolicy = ConfigurationPolicy.REQUIRE, service = {HttpCacheConfigExtension.class, CacheKeyFactory.class})
+@Component(
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
+        property = {
+                Constants.SERVICE_RANKING + ":Integer=40"
+        }
+)
 @Designate(ocd = RequestPathHttpCacheConfigExtension.Config.class, factory = true)
 public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
@@ -98,7 +104,7 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
 
         RequestPathInfo requestPathInfo = request.getRequestPathInfo();
 
-        boolean match =  matches(resourcePathPatterns, requestPathInfo.getResourcePath())
+        boolean match = matches(resourcePathPatterns, requestPathInfo.getResourcePath())
                 && matches(selectorPatterns, requestPathInfo.getSelectorString())
                 && matches(extensionPatterns, requestPathInfo.getExtension());
 
@@ -108,8 +114,6 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
     }
 
 
-
-
     protected boolean matches(List<Pattern> patternList, String query) {
         if (isEmpty(patternList)) {
             log.debug("Extension {} : Non defined patternList {} : skipping check for query: {}", configName, patternList, query);
@@ -117,7 +121,7 @@ public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExten
         } else if (CollectionUtils.isNotEmpty(patternList) && StringUtils.isNotBlank(query)) {
             for (Pattern pattern : patternList) {
                 if (pattern.matcher(query).find()) {
-                    log.debug("Extension {} : Passed all patterns: {} for query: {}",  configName, patternList, query);
+                    log.debug("Extension {} : Passed all patterns: {} for query: {}", configName, patternList, query);
                     return true;
                 }
             }
