@@ -30,17 +30,18 @@ import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.RankedServices;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.metatype.annotations.Designate;
+
 import java.util.Map;
 
 /**
@@ -48,18 +49,26 @@ import java.util.Map;
  * This is useful when you need differentiation of 2 cache keys together.
  * Instead of duplicating and merging the 2 extensions / factories into 1 class, you can leverage this class.
  * It will use existing cache key factories to create a key for each one, and put them in a list.
+ *
+ *  Use as follows in your HTTP cache config to leverage multiple factories:
+ *  cacheConfigFactories.target="
+ *             (|
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.RequestPathHttpCacheConfigExtension)(config.name=someConfig))
+ *                 (&amp;(service.factoryPid=com.adobe.acs.commons.httpcache.config.impl.ResourceTypeHttpCacheConfigExtension)(config.name=someOtherConfig))
+ *             )
+ *           "
  */
 
 @Component(
         service = {CacheKeyFactory.class},
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = {
-                Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
-                "webconsole.configurationFactory.nameHint=Service PIDS: [ {httpcache.config.cachekey.target} ] Config name: [ config.name ]"
+                Constants.SERVICE_RANKING + ":Integer=" + Integer.MAX_VALUE,
+                "webconsole.configurationFactory.nameHint=Config name: [ config.name ]"
         },
         reference = {
                 @Reference(
-                        name = "cacheKeyFactory",
+                        name = "cacheKeyFactories",
                         bind = "bindCacheKeyFactory",
                         unbind = "unbindCacheKeyFactory",
                         service = CacheKeyFactory.class,
@@ -85,13 +94,12 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         @AttributeDefinition(name = "CacheKey factory service PIDs",
                 description = "Service PID(s) of target implementation of CacheKeyFactory to be used."
         )
-        String httpcache_config_cachekey_target();
+        String cacheKeyFactories_target();
     }
 
     private static final Logger log = LoggerFactory.getLogger(CombinedCacheKeyFactory.class);
 
     private String configName;
-    private String cacheKeyFactoriesTarget;
 
     private RankedServices<CacheKeyFactory> cacheKeyFactories = new RankedServices<>(Order.ASCENDING);
 
@@ -118,7 +126,7 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
         if (factory != this) {
             cacheKeyFactories.bind(factory, properties);
         } else {
-            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname: {}  Target: {}", this.configName, this.cacheKeyFactoriesTarget);
+            log.error("Invalid key factory LDAP target string! Self is target(ed)! Breaking up infinite loop. Configname: {}", this.configName);
         }
     }
 
@@ -132,7 +140,6 @@ public class CombinedCacheKeyFactory implements CacheKeyFactory {
     @Modified
     protected void activate(CombinedCacheKeyFactory.Config config) {
         this.configName = config.config_name();
-        this.cacheKeyFactoriesTarget = config.httpcache_config_cachekey_target();
     }
 
 }

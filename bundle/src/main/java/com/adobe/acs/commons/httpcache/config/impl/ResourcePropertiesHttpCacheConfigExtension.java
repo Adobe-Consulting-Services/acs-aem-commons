@@ -27,6 +27,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ValueMap;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -44,7 +45,8 @@ import java.util.*;
  */
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service = {HttpCacheConfigExtension.class, CacheKeyFactory.class}
+        service = {HttpCacheConfigExtension.class, CacheKeyFactory.class},
+        property = {Constants.SERVICE_RANKING + ":Integer=50" }
 )
 @Designate(
         ocd = ResourcePropertiesHttpCacheConfigExtension.Config.class,

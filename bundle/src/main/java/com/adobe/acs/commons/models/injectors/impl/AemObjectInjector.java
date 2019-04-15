@@ -43,6 +43,7 @@ import com.day.cq.i18n.I18n;
 import javax.jcr.Session;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getComponentContext;
 import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getCurrentDesign;
@@ -144,9 +145,23 @@ public final class AemObjectInjector implements Injector {
             return getSession(adaptable);
         case XSS_API:
             return resolveXssApi(adaptable);
+        case LOCALE:
+            return resolveLocale(adaptable);
         default:
             return null;
         }
+    }
+
+    private Object resolveLocale(Object adaptable) {
+        final Page page = getResourcePage(adaptable);
+        if (page != null) {
+            return page.getLanguage(false);
+        }else{
+            if (adaptable instanceof SlingHttpServletRequest) {
+                return ((SlingHttpServletRequest) adaptable).getLocale();
+            }
+        }
+        return null;
     }
 
     private Object resolveXssApi(Object adaptable) {
@@ -176,6 +191,7 @@ public final class AemObjectInjector implements Injector {
         RESOURCE_DESIGN,
         CURRENT_STYLE,
         SESSION,
+        LOCALE,
         XSS_API;
 
         private static final String RESOURCE_PAGE_STRING = "resourcePage";
@@ -203,6 +219,8 @@ public final class AemObjectInjector implements Injector {
                 return ObjectType.SESSION;
             } else if (classOrGenericParam.isAssignableFrom(XSSAPI.class)) {
                 return ObjectType.XSS_API;
+            } else if(classOrGenericParam.isAssignableFrom(Locale.class)){
+                return ObjectType.LOCALE;
             }
 
             return null;
