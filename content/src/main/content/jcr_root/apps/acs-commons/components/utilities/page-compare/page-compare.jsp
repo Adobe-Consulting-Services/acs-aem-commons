@@ -53,7 +53,7 @@
         <coral-shell-header-home class="globalnav-toggle"
                                  data-globalnav-toggle-href="/"
                                  role="heading"
-                                 aria-level="2"
+                                 aria-level="2">
             <a is="coral-shell-homeanchor"
                style="display: inline-block; padding-right: 0;"
                icon="adobeExperienceManagerColor"
