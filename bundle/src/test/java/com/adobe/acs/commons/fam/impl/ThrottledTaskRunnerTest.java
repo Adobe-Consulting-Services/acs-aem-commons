@@ -17,24 +17,20 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.fam.impl;
 
-import static org.junit.Assert.assertEquals;
-
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import javax.management.NotCompliantMBeanException;
-
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
-import java.util.Collections;
+import static org.junit.Assert.assertEquals;
 
 public class ThrottledTaskRunnerTest {
 
@@ -49,22 +45,18 @@ public class ThrottledTaskRunnerTest {
 
         List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
-        for(int i=0;i<10;i++) {
+        ttr.setThreadPoolSize(1);
+        ttr.pauseExecution();
+
+        for (int i = 0; i < 10; i++) {
             int finalI = i;
             ttr.scheduleWork(() -> {
-                try {
-                    // sleep to slow these down so that higher priority tasks go first
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    log.error("", e);
-                }
                 log.info("very low priority: {}", finalI);
                 executions.add(1L);
             }, Integer.MIN_VALUE);
         }
 
-
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
             int finalI = i;
             ttr.scheduleWork(() -> {
                 log.info("very high priority: {}", finalI);
@@ -72,7 +64,9 @@ public class ThrottledTaskRunnerTest {
             }, Integer.MAX_VALUE);
         }
 
-        while(ttr.getActiveCount() > 0) {
+        ttr.resumeExecution();
+
+        while (ttr.getActiveCount() > 0) {
             Thread.sleep(1000);
         }
 
@@ -94,22 +88,18 @@ public class ThrottledTaskRunnerTest {
 
         final List<Long> executions = Collections.synchronizedList(new ArrayList<>());
 
-        for(int i=0;i<10;i++) {
+        ttr.setThreadPoolSize(1);
+        ttr.pauseExecution();
+
+        for (int i = 0; i < 10; i++) {
             int finalI = i;
             ttr.scheduleWork(() -> {
-                try {
-                    // sleep to slow these down so that higher priority tasks go first
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    log.error("", e);
-                }
-                log.info("normal priority: {}",  finalI);
+                log.info("normal priority: {}", finalI);
                 executions.add(1L);
             }, 1);
         }
 
-
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
             int finalI = i;
             ttr.scheduleWork(() -> {
                 log.info("high priority: {}", finalI);
@@ -117,7 +107,9 @@ public class ThrottledTaskRunnerTest {
             }, 5);
         }
 
-        while(ttr.getActiveCount() > 0) {
+        ttr.resumeExecution();
+
+        while (ttr.getActiveCount() > 0) {
             Thread.sleep(1000);
         }
 
@@ -133,4 +125,34 @@ public class ThrottledTaskRunnerTest {
 
     }
 
+
+    @Test
+    public void assertFIFOOrder() throws NotCompliantMBeanException, InterruptedException {
+        ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
+
+        List<Integer> executions = Collections.synchronizedList(new ArrayList<>());
+
+        ttr.setThreadPoolSize(1);
+        ttr.pauseExecution();
+
+        for (int i = 0; i < 100; i++) {
+            int finalI = i;
+            ttr.scheduleWork(() -> {
+                log.info("Executed job: {}", finalI);
+                executions.add(finalI);
+            }, Integer.MIN_VALUE);
+        }
+
+        ttr.resumeExecution();
+
+        while (ttr.getActiveCount() > 0) {
+            Thread.sleep(1000);
+        }
+
+        assertEquals("wrong number of items executed", 100, executions.size());
+        for (int i = 0; i < 100; i++) {
+            assertEquals("wrong value for item: " + i, i, executions.get(i).longValue());
+        }
+
+    }
 }
