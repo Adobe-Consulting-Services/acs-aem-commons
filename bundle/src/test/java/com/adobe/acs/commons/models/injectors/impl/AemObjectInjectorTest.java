@@ -19,11 +19,13 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import static org.junit.Assert.assertNotNull;
-
-import javax.inject.Inject;
-import javax.jcr.Session;
-
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.components.ComponentContext;
+import com.day.cq.wcm.api.designer.Design;
+import com.day.cq.wcm.api.designer.Designer;
+import com.day.cq.wcm.api.designer.Style;
+import com.google.common.base.Function;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -39,12 +41,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.wcm.api.components.ComponentContext;
-import com.day.cq.wcm.api.designer.Design;
-import com.day.cq.wcm.api.designer.Designer;
-import com.day.cq.wcm.api.designer.Style;
+import javax.inject.Inject;
+import javax.jcr.Session;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AemObjectInjectorTest {
@@ -55,23 +59,30 @@ public class AemObjectInjectorTest {
     @Mock
     private Designer designer;
 
+    @Mock
+    private Page resourcePage;
+
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
     
-    
-    
+
     @Before
     public final void setUp() throws Exception {
         AemObjectInjector aemObjectsInjector = new AemObjectInjector();
         context.registerService(aemObjectsInjector);
-        
+
+
+        Function adaptHandler = input -> pageManager;
+        context.registerAdapter(ResourceResolver.class, PageManager.class, adaptHandler);
         context.registerService(PageManager.class,pageManager);
         context.registerService(Designer.class,designer);
         context.addModelsForClasses(TestResourceModel.class);
 
+
         // create a resource to have something we can adapt
         context.create().resource("/content/resource");
-        
+        when(resourcePage.getLanguage(false)).thenReturn(Locale.ENGLISH);
+        when(pageManager.getContainingPage(any(Resource.class))).thenReturn(resourcePage);
     }
 
     @Test
@@ -85,7 +96,9 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
         assertNotNull(testResourceModel.getDesigner());
-        assertNotNull(testResourceModel.getSession());
+        assertNotNull(testResourceModel.getLocale());
+        assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
+
         // TODO: Tests for the remaining injectable objects
     }
 
@@ -100,7 +113,8 @@ public class AemObjectInjectorTest {
         assertNotNull(testResourceModel.getResourceResolver());
         assertNotNull(testResourceModel.getPageManager());
         assertNotNull(testResourceModel.getDesigner());
-        assertNotNull(testResourceModel.getSession());
+        assertNotNull(testResourceModel.getLocale());
+        assertEquals(Locale.ENGLISH, testResourceModel.getLocale());
         // TODO: Tests for the remaining injectable objects
     }
 
@@ -135,6 +149,9 @@ public class AemObjectInjectorTest {
         private XSSAPI xssApi;
         @Inject @Optional
         private String namedSomethingElse;
+
+        @Inject @Optional
+        private Locale locale;
 
         public Resource getResource() {
             return resource;
@@ -182,6 +199,10 @@ public class AemObjectInjectorTest {
 
         public XSSAPI getXssApi() {
             return xssApi;
+        }
+
+        public Locale getLocale() {
+            return locale;
         }
     }
 }
