@@ -127,7 +127,7 @@ public class ThrottledTaskRunnerTest {
 
 
     @Test
-    public void assertFIFOOrder() throws NotCompliantMBeanException, InterruptedException {
+    public void assertFifoOrder() throws NotCompliantMBeanException, InterruptedException {
         ThrottledTaskRunner ttr = osgiContext.registerInjectActivateService(new ThrottledTaskRunnerImpl());
 
         List<Integer> executions = Collections.synchronizedList(new ArrayList<>());
