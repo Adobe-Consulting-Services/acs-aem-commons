@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1539 - Removed unused references to the QueryBuilder API.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+- #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
@@ -35,6 +36,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
+- #1833 - Fixes issue with ACS AEM Commons utility report page's header bar not rendering properly.
 
 ## [4.0.0] - 2019-02-20
 
