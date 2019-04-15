@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1806 - Http Cache: Added RequestPath extension
+- #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
