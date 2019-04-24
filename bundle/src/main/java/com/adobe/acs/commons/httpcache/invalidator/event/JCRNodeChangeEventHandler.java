@@ -89,6 +89,7 @@ public class JCRNodeChangeEventHandler implements EventHandler, ResourceChangeLi
     private ServiceRegistration<?> registration;
     
     @Activate
+    @SuppressWarnings("squid:S1149")
     protected void activate(BundleContext context, Map<String, Object> config) {
         String pathFilter = PropertiesUtil.toString(config.get(EventConstants.EVENT_FILTER), "");
         if (!pathFilter.isEmpty()) {
