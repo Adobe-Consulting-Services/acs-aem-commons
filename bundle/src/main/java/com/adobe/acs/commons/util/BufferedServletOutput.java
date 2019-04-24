@@ -122,7 +122,7 @@ public final class BufferedServletOutput {
      */
     public String getBufferedString() {
         if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
-            throw new IllegalStateException("Cannot invoke getBufferedString() once getWriter() has been called.");
+            throw new IllegalStateException("Cannot invoke getBufferedString() once getOutputStream() has been called.");
         }
         if (writer == null) {
             throw new IllegalStateException("Cannot get buffered string, as the writer was not buffered!");
@@ -137,7 +137,7 @@ public final class BufferedServletOutput {
      */
     public byte[] getBufferedBytes() {
         if (ResponseWriteMethod.WRITER.equals(this.writeMethod)) {
-            throw new IllegalStateException("Cannot invoke getBufferedBytes() once getOutputStream() has been called.");
+            throw new IllegalStateException("Cannot invoke getBufferedBytes() once getWriter() has been called.");
         }
         if (outputStream == null) {
             throw new IllegalStateException("Cannot get buffered bytes, as the output stream was not buffered!");
