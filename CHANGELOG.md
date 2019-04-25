@@ -15,11 +15,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1795 - Added the Asset Content Packager and unit tests
 - #1806 - Http Cache: Added RequestPath extension
+- #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
+- #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
@@ -35,6 +37,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1791 - Fixed Asset Folder Creator to support non-string cell types (ie. Numeric)
 - #1800 - Make sure all pending changes are committed in Fast Action Manager when saveInterval isn't 1
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
+- #1833 - Fixes issue with ACS AEM Commons utility report page's header bar not rendering properly.
+- #1840 - Fixed UI issue with User Exporter to allow removal of all properties.
 
 ## [4.0.0] - 2019-02-20
 
