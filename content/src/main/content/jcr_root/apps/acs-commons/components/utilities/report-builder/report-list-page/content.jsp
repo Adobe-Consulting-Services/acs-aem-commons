@@ -75,7 +75,7 @@
 					<td is="coral-table-cell">
 						<form action="${report.path}" method="post" class="coral-Form--aligned" id="fn-acsCommons-remove_${report.name}" ng-submit="postValues($event,'fn-acsCommons-remove_${report.name}')">
 							<input type="hidden"  name=":operation" value="delete" />
-							<div class="coral-Form-fieldwrapper" style="margin-top: .9375rem;">
+							<div class="coral-Form-fieldwrapper">
 								<button is="coral-button" icon="delete" iconsize="S"></button>
 							</div>
 						</form>
