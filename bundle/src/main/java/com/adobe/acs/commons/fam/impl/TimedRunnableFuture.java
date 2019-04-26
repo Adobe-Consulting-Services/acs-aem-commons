@@ -17,16 +17,17 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.fam.impl;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A runnable future for {@link TimedRunnable} which implements comparable for the purpsoe of priority execution.
+ * A runnable future for {@link TimedRunnable} which implements comparable for
+ * the purpsoe of priority execution.
  */
-public class TimedRunnableFuture extends FutureTask implements Comparable {
+public class TimedRunnableFuture extends FutureTask implements Comparable<TimedRunnableFuture> {
 
     private TimedRunnable timedRunnable;
 
@@ -42,22 +43,18 @@ public class TimedRunnableFuture extends FutureTask implements Comparable {
      */
     public TimedRunnableFuture(Runnable runnable, Object result) {
         super(runnable, result);
-        if(runnable instanceof TimedRunnable) {
+        if (runnable instanceof TimedRunnable) {
             timedRunnable = (TimedRunnable) runnable;
         }
     }
 
     @Override
-    public int compareTo(Object o) {
-        if(o instanceof TimedRunnableFuture) {
-            TimedRunnableFuture other = (TimedRunnableFuture) o;
-            TimedRunnable otherTimedRunnable = other.timedRunnable;
-            if(otherTimedRunnable!=null && timedRunnable!=null) {
-                return timedRunnable.compareTo(otherTimedRunnable);
-            } else {
-                return 0;
-            }
+    public int compareTo(TimedRunnableFuture other) {
+        TimedRunnable otherTimedRunnable = other.timedRunnable;
+        if (otherTimedRunnable != null && timedRunnable != null) {
+            return timedRunnable.compareTo(otherTimedRunnable);
+        } else {
+            return 0;
         }
-        return 0;
     }
 }

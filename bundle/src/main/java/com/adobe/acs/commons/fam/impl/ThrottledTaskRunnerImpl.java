@@ -87,25 +87,32 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     @Override
     public void scheduleWork(Runnable work) {
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
-        workerPool.submit(r);
+        submitWork(r);
     }
 
     public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
-        workerPool.submit(r);
+        submitWork(r);
     }
-
 
     @Override
     public void scheduleWork(Runnable work, int priority) {
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, priority);
-        workerPool.submit(r);
+        submitWork(r);
     }
     
     public void scheduleWork(Runnable work, CancelHandler cancelHandler, int priority) {
         TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, priority);
-        workerPool.submit(r);
-    }    
+        submitWork(r);
+    }
+
+    private void submitWork(TimedRunnable r) {
+        if (isPaused) {
+            resumeList.add(r);
+        } else {
+            workerPool.submit(r);
+        }
+    }
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -290,9 +297,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
         // Terminate pool if the thread size has changed
         if (workerPool != null && workerPool.getMaximumPoolSize() != maxThreads) {
             try {
+                workerPool.shutdown();
                 workerPool.awaitTermination(taskTimeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOG.error("Timeout occurred when waiting to terminate worker pool", ex);
+                workerPool.shutdownNow();
             }
             workerPool = null;
         }
