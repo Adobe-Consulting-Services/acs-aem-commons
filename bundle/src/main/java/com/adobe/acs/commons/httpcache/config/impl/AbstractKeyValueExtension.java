@@ -29,13 +29,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import java.util.Map;
 
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
-
-    abstract public Map<String, String[]> getAllowedKeyValues();
-
-    abstract public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
-
-    abstract public String getCacheKeyId();
-
+    
     @Override
     public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         return accepts(request, cacheConfig, getAllowedKeyValues());
@@ -61,4 +55,9 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         return new KeyValueCacheKey(key.getUri(), cacheConfig, getCacheKeyId(), getAllowedKeyValues()).equals(key);
     }
 
+    abstract public Map<String, String[]> getAllowedKeyValues();
+
+    abstract public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
+
+    abstract public String getCacheKeyId();
 }
