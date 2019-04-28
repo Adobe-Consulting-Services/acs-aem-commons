@@ -83,12 +83,12 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         String webconsole_configurationFactory_nameHint() default "Request Headers: [ {httpcache.config.extension.requestheader} ] Request Header values: [ {httpcache.config.extension.requestheader.values} ] Config name: [ {config.name} ]";
     }
 
-    private Map<String, String[]> allowedHeaders;
+    private HashMap<String, String[]> allowedHeaders;
 
     private String cacheKeyId;
 
     @Override
-    public Map<String, String[]> getAllowedKeyValues() {
+    public HashMap<String, String[]> getAllowedKeyValues() {
         return allowedHeaders;
     }
 

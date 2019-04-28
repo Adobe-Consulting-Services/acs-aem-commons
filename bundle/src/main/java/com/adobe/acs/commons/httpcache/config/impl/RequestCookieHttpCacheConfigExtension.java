@@ -86,12 +86,12 @@ public class RequestCookieHttpCacheConfigExtension extends AbstractKeyValueExten
         String webconsole_configurationFactory_nameHint() default "Cookie name: [ {httpcache.config.extension.cookie} ] Cookie values: [  {httpcache.config.extension.cookie.values} ] Config name: [ {config.name} ]";
     }
 
-    private Map<String, String[]> allowedCookies;
+    private HashMap<String, String[]> allowedCookies;
 
     private String cacheKeyId;
 
     @Override
-    public Map<String, String[]> getAllowedKeyValues() {
+    public HashMap<String, String[]> getAllowedKeyValues() {
         return allowedCookies;
     }
 

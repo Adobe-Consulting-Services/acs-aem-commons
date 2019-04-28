@@ -85,12 +85,12 @@ public class RequestParameterHttpCacheConfigExtension extends AbstractKeyValueEx
         String webconsole_configurationFactory_nameHint() default "Request Parameters: [ {httpcache.config.extension.requestparameter} ] Request Parameter values: [ {httpcache.config.extension.requestparameter.values} ] Config name: [ {config.name} ]";
     }
 
-    private Map<String, String[]> allowedParameters;
+    private HashMap<String, String[]> allowedParameters;
 
     private String cacheKeyId;
 
     @Override
-    public Map<String, String[]> getAllowedKeyValues() {
+    public HashMap<String, String[]> getAllowedKeyValues() {
         return allowedParameters;
     }
 

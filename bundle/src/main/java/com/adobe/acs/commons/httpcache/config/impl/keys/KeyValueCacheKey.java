@@ -30,22 +30,24 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 
 public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
-    private final String cacheKeyId;
-    private Map<String, String[]> allowedKeyValues;
+    private String cacheKeyId;
+    private HashMap<String, String[]> allowedKeyValues;
 
     public KeyValueCacheKey(final SlingHttpServletRequest request, final HttpCacheConfig cacheConfig,
-                            final String cacheKeyId, final Map<String, String[]> allowedKeyValues) {
+                            final String cacheKeyId, final HashMap<String, String[]> allowedKeyValues) {
         super(request, cacheConfig);
         this.cacheKeyId = cacheKeyId;
         this.allowedKeyValues = allowedKeyValues;
     }
 
     public KeyValueCacheKey(final String uri, final HttpCacheConfig cacheConfig, final String cacheKeyId,
-                            final Map<String, String[]> allowedKeyValues) {
+                            final HashMap<String, String[]> allowedKeyValues) {
         super(uri, cacheConfig);
         this.cacheKeyId = cacheKeyId;
         this.allowedKeyValues = allowedKeyValues;
@@ -67,7 +69,32 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
                 .append(getUri(), that.getUri())
                 .append(cacheKeyId, that.cacheKeyId)
                 .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
+                .appendSuper(getEqualForAllowedKeyValues(that))
                 .isEquals();
+    }
+
+    private boolean getEqualForAllowedKeyValues(KeyValueCacheKey other){
+
+        if(this.getAllowedKeyValues().size() != other.getAllowedKeyValues().size()){
+            return false;
+        }
+
+        for(Map.Entry<String,String[]> entry: getAllowedKeyValues().entrySet()){
+
+            final String key = entry.getKey();
+            final String[] val = entry.getValue();
+
+            if( !other.getAllowedKeyValues().containsKey(key) ||
+                !Arrays.equals(val, other.getAllowedKeyValues().get(key))){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public Map<String, String[]> getAllowedKeyValues() {
+        return allowedKeyValues;
     }
 
     @Override
@@ -90,13 +117,15 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
     /** For Serialization **/
     private void writeObject(ObjectOutputStream o) throws IOException  {
         parentWriteObject(o);
+        o.writeUTF(cacheKeyId);
         o.writeObject(allowedKeyValues);
     }
 
     /** For De-serialization **/
     private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
         parentReadObject(o);
-        allowedKeyValues = (Map<String, String[]>) o.readObject();
+        cacheKeyId = o.readUTF();
+        allowedKeyValues = (HashMap<String, String[]>) o.readObject();
     }
 
 }
