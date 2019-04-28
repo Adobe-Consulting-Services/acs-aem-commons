@@ -37,6 +37,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.ArrayUtils.contains;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 /**
  * RequestHeaderHttpCacheConfigExtension
  * <p>
@@ -95,11 +98,8 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
             final String header = request.getHeader(entry.getKey());
 
             if (header != null) {
-                if (ArrayUtils.isEmpty(entry.getValue())) {
+                if (isEmpty(entry.getValue()) || contains(entry.getValue(), header)) {
                     // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the request header
-                    return true;
-                } else if (ArrayUtils.contains(entry.getValue(), header)) {
-                    // The request header value matched one of the allowed values
                     return true;
                 }
                 // No matches found for this row; continue looking through the allowed list

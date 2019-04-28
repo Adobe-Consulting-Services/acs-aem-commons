@@ -39,6 +39,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.collections.CollectionUtils.containsAny;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+
 /**
  * RequestParameterHttpCacheConfigExtension
  * <p>
@@ -98,11 +101,8 @@ public class RequestParameterHttpCacheConfigExtension extends AbstractKeyValueEx
             if (request.getParameterMap().keySet().contains(entry.getKey())) {
                 final String[] parameterValues = request.getParameterMap().get(entry.getKey());
 
-                if (ArrayUtils.isEmpty(entry.getValue())) {
+                if (isEmpty(entry.getValue()) || containsAny(Arrays.asList(entry.getValue()), Arrays.asList(parameterValues))) {
                     // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the request parameter
-                    return true;
-                } else if (CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(parameterValues))) {
-                    // The request parameter value matched one of the allowed values
                     return true;
                 }
                 // No matches found for this row; continue looking through the allowed list
