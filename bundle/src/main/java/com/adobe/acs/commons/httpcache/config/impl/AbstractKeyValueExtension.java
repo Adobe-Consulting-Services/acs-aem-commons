@@ -56,10 +56,9 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         return accepts(request, cacheConfig, getAllowedKeyValues());
     }
 
-    abstract public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
+    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
 
-    abstract public HashMap<String, String[]> getAllowedKeyValues();
+    public abstract HashMap<String, String[]> getAllowedKeyValues();
 
-
-    abstract public String getCacheKeyId();
+    public abstract String getCacheKeyId();
 }

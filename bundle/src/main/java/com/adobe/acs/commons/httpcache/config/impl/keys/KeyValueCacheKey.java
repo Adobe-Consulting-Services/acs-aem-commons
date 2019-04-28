@@ -84,8 +84,8 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
             final String key = entry.getKey();
             final String[] val = entry.getValue();
 
-            if( !other.getAllowedKeyValues().containsKey(key) ||
-                !Arrays.equals(val, other.getAllowedKeyValues().get(key))){
+                if(     !other.getAllowedKeyValues().containsKey(key)
+                    ||  !Arrays.equals(val, other.getAllowedKeyValues().get(key))){
                 return false;
             }
         }
