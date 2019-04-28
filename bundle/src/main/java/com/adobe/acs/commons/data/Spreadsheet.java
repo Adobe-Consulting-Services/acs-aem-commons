@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -65,6 +66,7 @@ public class Spreadsheet {
     private boolean enableHeaderNameConversion = true;
     private InputStream inputStream;
     private List<String> caseInsensitiveHeaders;
+    private Locale locale = Locale.getDefault();
 
     /**
      * Simple constructor used for unit testing purposes
@@ -124,6 +126,25 @@ public class Spreadsheet {
         this(true, file, required);
         this.caseInsensitiveHeaders = caseInsensitiveHeaders;
     }
+    
+    /**
+     * Sets the locale to be used for numeric and date/time conversions.
+     * @param locale The new locale to use.
+     * @return This Spreadsheet instance for method chaining.
+     */
+    public Spreadsheet setLocale(Locale locale) {
+        this.locale = locale;
+        return this;
+    }
+    
+    /**
+     * Returns the locale to be used for numeric and date/time conversions.
+     * The default is the system-wide default locale reported by {@code locale.getDefault()}.
+     * @return The locale to be used for numeric and date/time conversions.
+     */
+    public Locale getLocale() {
+        return locale;
+    }
 
     /**
      * Parse out the input file synchronously for easier unit test validation
@@ -169,7 +190,7 @@ public class Spreadsheet {
             while (c.getColumnIndex() > rowOut.size()) {
                 rowOut.add(null);
             }
-            Variant val = new Variant(c);
+            Variant val = new Variant(c, locale);
             rowOut.add(val.isEmpty() ? null : val);
         }
         return rowOut;

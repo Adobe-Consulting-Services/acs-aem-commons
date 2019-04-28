@@ -19,19 +19,21 @@
  */
 package com.adobe.acs.commons.data;
 
-import org.osgi.annotation.versioning.ProviderType;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Optional;
-import java.text.ParseException;
 import java.util.function.Function;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Used to represent values that might be provided as one type but used as
@@ -64,9 +66,13 @@ public final class Variant {
     public <T> Variant(T src) {
         setValue(src);
     }
-
+    
     public Variant(Cell src) {
-        setValue(src);
+        this(src, Locale.getDefault());
+    }
+
+    public Variant(Cell src, Locale locale) {
+        setValue(src, locale);
     }
 
     public void clear() {
@@ -85,7 +91,7 @@ public final class Variant {
                 && !booleanVal.isPresent();
     }
 
-    private void setValue(Cell cell) {
+    private void setValue(Cell cell, Locale locale) {
         int cellType = cell.getCellType();
         if (cellType == Cell.CELL_TYPE_FORMULA) {
             cellType = cell.getCachedFormulaResultType();
@@ -104,7 +110,7 @@ public final class Variant {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     setValue(cell.getDateCellValue());
                 }
-                DataFormatter dataFormatter = new DataFormatter();
+                DataFormatter dataFormatter = new DataFormatter(locale);
                 if (cellType == Cell.CELL_TYPE_FORMULA) {
                     setValue(dataFormatter.formatCellValue(cell));
                 } else {
