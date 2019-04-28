@@ -97,11 +97,8 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         for (final Map.Entry<String, String[]> entry : allowedKeyValues.entrySet()) {
             final String header = request.getHeader(entry.getKey());
 
-            if (header != null) {
-                if (isEmpty(entry.getValue()) || contains(entry.getValue(), header)) {
-                    // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the request header
-                    return true;
-                }
+            if (header != null && (isEmpty(entry.getValue()) || contains(entry.getValue(), header))) {
+               return true;
                 // No matches found for this row; continue looking through the allowed list
             }
         }
