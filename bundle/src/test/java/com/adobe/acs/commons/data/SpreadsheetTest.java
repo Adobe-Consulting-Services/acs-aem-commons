@@ -54,7 +54,7 @@ public class SpreadsheetTest {
     static String[] headerNames = new String[]{"path", "title", "someOtherCol", "int-val", "string-list1", "string-list2",
         "double-val", "array", "array", "array", "date-val"};
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
-    static Date testDate = new Date();
+    static Calendar testDate = Calendar.getInstance();
     static Spreadsheet dataTypesSheet;
 
     @BeforeClass

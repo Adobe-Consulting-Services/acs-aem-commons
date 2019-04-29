@@ -24,8 +24,8 @@ import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -59,7 +58,7 @@ public class Spreadsheet {
     private int rowCount;
     private transient List<Map<String, CompositeVariant>> dataRows;
     private final List<String> requiredColumns;
-    private Map<String, Class> headerTypes;
+    private Map<String, Optional<Class>> headerTypes;
     private List<String> headerRow;
     private final Map<String, String> delimiters;
     private boolean enableHeaderNameConversion = true;
@@ -186,9 +185,10 @@ public class Spreadsheet {
             if (colName != null && data.get(i) != null && !data.get(i).isEmpty()) {
                 empty = false;
                 if (!out.containsKey(colName)) {
-                    out.put(colName, new CompositeVariant(headerTypes.get(colName)));
+                    Class type = headerTypes.get(colName).orElse(data.get(i).getBaseType());
+                    out.put(colName, new CompositeVariant(type));
                 }
-                if (headerTypes.get(colName).isArray()) {
+                if (headerTypes.get(colName).isPresent() && headerTypes.get(colName).get().isArray()) {
                     String[] values = data.get(i).toString().split(Pattern.quote(delimiters.getOrDefault(colName, DEFAULT_DELIMITER)));
                     for (String value : values) {
                         if (value != null && !value.isEmpty()) {
@@ -287,7 +287,7 @@ public class Spreadsheet {
      * @param name
      * @return
      */
-    private Class detectTypeFromName(String name) {
+    private Optional<Class> detectTypeFromName(String name) {
         boolean isArray = false;
         Class detectedClass = String.class;
         if (name.contains("@")) {
@@ -302,11 +302,13 @@ public class Spreadsheet {
                 }
             }
             detectedClass = getClassFromName(typeStr);
+        } else {
+            return Optional.empty();
         }
         if (isArray) {
-            return getArrayType(detectedClass);
+            return getArrayType(Optional.of(detectedClass));
         } else {
-            return detectedClass;
+            return Optional.of(detectedClass);
         }
     }
 
@@ -324,7 +326,7 @@ public class Spreadsheet {
             case "calendar":
             case "cal":
             case "time":
-                return Date.class;
+                return Calendar.class;
             case "boolean":
             case "bool":
                 return Boolean.TYPE;
@@ -345,25 +347,25 @@ public class Spreadsheet {
      * @param b
      * @return
      */
-    private Class upgradeToArray(Class a, Class b) {
-        if (a == null) {
+    private Optional<Class> upgradeToArray(Optional<Class> a, Optional<Class> b) {
+        if (!a.isPresent()) {
             return b;
         }
-        if (b == null) {
+        if (b.isPresent()) {
             return a;
         }
-        if (a.equals(b) || b == String.class) {
+        if (a.equals(b) || b.get() == String.class) {
             return getArrayType(a);
         } else {
             return getArrayType(b);
         }
     }
 
-    private static Class getArrayType(Class clazz) {
-        if (clazz.isArray()) {
+    private static Optional<Class> getArrayType(Optional<Class> clazz) {
+        if (clazz.get().isArray()) {
             return clazz;
         } else {
-            return Array.newInstance(clazz, 0).getClass();
+            return Optional.of(Array.newInstance(clazz.get(), 0).getClass());
         }
     }
 }
