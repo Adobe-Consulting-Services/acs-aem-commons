@@ -84,12 +84,12 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         String webconsole_configurationFactory_nameHint() default "Properties: [ {httpcache.config.extension.property} ] Property values: [ {httpcache.config.extension.property.values} ] Config name: [ {config.name} ]";
     }
 
-    private HashMap<String, String[]> allowedProperties;
+    private Map<String, String[]> allowedProperties;
 
     private String cacheKeyId;
 
     @Override
-    public HashMap<String, String[]> getAllowedKeyValues() {
+    public Map<String, String[]> getAllowedKeyValues() {
         return allowedProperties;
     }
 

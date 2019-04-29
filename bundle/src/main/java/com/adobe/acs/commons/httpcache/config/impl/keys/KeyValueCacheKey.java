@@ -61,6 +61,10 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
         KeyValueCacheKey that = (KeyValueCacheKey) o;
 
+        if (that == null) {
+            return false;
+        }
+
         return new EqualsBuilder()
                 .append(getUri(), that.getUri())
                 .append(cacheKeyId, that.cacheKeyId)

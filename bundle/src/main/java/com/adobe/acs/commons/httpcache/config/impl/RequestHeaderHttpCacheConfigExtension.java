@@ -37,9 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.ArrayUtils.contains;
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-
 /**
  * RequestHeaderHttpCacheConfigExtension
  * <p>
@@ -83,12 +80,12 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         String webconsole_configurationFactory_nameHint() default "Request Headers: [ {httpcache.config.extension.requestheader} ] Request Header values: [ {httpcache.config.extension.requestheader.values} ] Config name: [ {config.name} ]";
     }
 
-    private HashMap<String, String[]> allowedHeaders;
+    private Map<String, String[]> allowedHeaders;
 
     private String cacheKeyId;
 
     @Override
-    public HashMap<String, String[]> getAllowedKeyValues() {
+    public Map<String, String[]> getAllowedKeyValues() {
         return allowedHeaders;
     }
 
@@ -97,7 +94,7 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         for (final Map.Entry<String, String[]> entry : allowedKeyValues.entrySet()) {
             final String header = request.getHeader(entry.getKey());
 
-            if (header != null && (isEmpty(entry.getValue()) || contains(entry.getValue(), header))) {
+            if (header != null && (ArrayUtils.isEmpty(entry.getValue()) || ArrayUtils.contains(entry.getValue(), header))) {
                return true;
                 // No matches found for this row; continue looking through the allowed list
             }
