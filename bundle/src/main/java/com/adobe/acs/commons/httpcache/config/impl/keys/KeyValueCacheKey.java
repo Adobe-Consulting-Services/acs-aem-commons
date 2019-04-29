@@ -53,6 +53,10 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
         this.allowedKeyValues = allowedKeyValues;
     }
 
+    Map<String, String[]> getAllowedKeyValues() {
+        return allowedKeyValues;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!super.equals(o)) {
