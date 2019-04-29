@@ -40,9 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.commons.collections.CollectionUtils.containsAny;
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
-
 
 /**
  * ResourcePropertiesHttpCacheConfigExtension
@@ -104,7 +101,7 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
             if (properties.containsKey(entry.getKey())) {
                 final String[] propertyValues = properties.get(entry.getKey(), String[].class);
 
-                if (isEmpty(propertyValues) || containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
+                if (ArrayUtils.isEmpty(propertyValues) || CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
                     // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the property
                     return true;
                 }
