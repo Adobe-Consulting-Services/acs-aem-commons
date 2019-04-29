@@ -60,7 +60,7 @@
                                placeholder="profile/customProp"
                                ng-model="customProperty.relPropertyPath"/></td>
                     <td class="coral-Table-cell acs-table-cell-action">
-                        <i ng-show="form.customProperties.length > 1"
+                        <i ng-show="form.customProperties.length > 0"
                            ng-click="form.customProperties.splice($index, 1)"
                            class="coral-Icon coral-Icon--minusCircle"></i>
                     </td>
