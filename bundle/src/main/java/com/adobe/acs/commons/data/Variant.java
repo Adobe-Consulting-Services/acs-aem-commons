@@ -25,7 +25,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Function;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
@@ -166,8 +165,8 @@ public final class Variant {
             if (baseType == null || baseType == String.class) {
                 baseType = Long.TYPE;
             }
-        } else if (valueType == Float.TYPE || valueType == Float.class ||
-                valueType == Double.TYPE || valueType == Double.class) {
+        } else if (valueType == Float.TYPE || valueType == Float.class
+                || valueType == Double.TYPE || valueType == Double.class) {
             setDoubleVal((Double) val);
             if (baseType == null || baseType == String.class) {
                 baseType = Double.TYPE;
