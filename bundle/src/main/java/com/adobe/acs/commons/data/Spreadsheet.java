@@ -194,7 +194,8 @@ public class Spreadsheet {
                     }
                     out.put(colName, new CompositeVariant(type));
                 }
-                if (headerTypes.get(colName).isPresent() && headerTypes.get(colName).get().isArray()) {
+                Optional<Class> type = headerTypes.get(colName);
+                if (type.isPresent() && type.get().isArray()) {
                     String[] values = data.get(i).toString().split(Pattern.quote(delimiters.getOrDefault(colName, DEFAULT_DELIMITER)));
                     for (String value : values) {
                         if (value != null && !value.isEmpty()) {
@@ -371,7 +372,9 @@ public class Spreadsheet {
     }
 
     private static Optional<Class> getArrayType(Optional<Class> clazz) {
-        if (clazz.get().isArray()) {
+        if (!clazz.isPresent()) {
+            return Optional.empty();
+        } else if (clazz.get().isArray()) {
             return clazz;
         } else {
             return Optional.of(Array.newInstance(clazz.get(), 0).getClass());

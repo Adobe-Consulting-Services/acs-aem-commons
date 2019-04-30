@@ -224,19 +224,15 @@ public class SpreadsheetTest {
 
             // According to JCR 2.0 spec 3.6.1.8, Dates are stored as Calendar objects
             Calendar date1 = (Calendar) row.get("date1").toPropertyValue();
-            System.out.println(date1.toString());
             assertEquals(Calendar.JANUARY, date1.get(Calendar.MONTH));
             assertEquals(2000L, date1.get(Calendar.YEAR));
             Calendar date2 = (Calendar) row.get("date2").toPropertyValue();
-            System.out.println(date2.toString());
             assertEquals(Calendar.JANUARY, date2.get(Calendar.MONTH));
             assertEquals(2000L, date2.get(Calendar.YEAR));
             Calendar date3 = (Calendar) row.get("date3").toPropertyValue();
-            System.out.println(date3.toString());
             assertEquals(Calendar.JANUARY, date3.get(Calendar.MONTH));
             assertEquals(2000L, date3.get(Calendar.YEAR));
             Calendar date4 = (Calendar) row.get("date4").toPropertyValue();
-            System.out.println(date4.toString());
             assertEquals(Calendar.JANUARY, date4.get(Calendar.MONTH));
             assertEquals(2000L, date4.get(Calendar.YEAR));
         }
