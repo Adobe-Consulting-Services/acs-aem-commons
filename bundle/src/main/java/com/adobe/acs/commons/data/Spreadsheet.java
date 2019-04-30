@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -69,12 +70,12 @@ public class Spreadsheet {
      * Simple constructor used for unit testing purposes
      *
      * @param convertHeaderNames If true, header names are converted
-     * @param headerArray List of strings for header columns
+     * @param headerArray        List of strings for header columns
      */
     public Spreadsheet(boolean convertHeaderNames, String... headerArray) {
         this.enableHeaderNameConversion = convertHeaderNames;
         headerTypes = Arrays.stream(headerArray)
-                            .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
+                .collect(Collectors.toMap(this::convertHeaderName, this::detectTypeFromName));
         headerRow = Arrays.asList(headerArray);
         requiredColumns = Collections.EMPTY_LIST;
         dataRows = new ArrayList<>();
@@ -84,9 +85,9 @@ public class Spreadsheet {
     /**
      * Simple constructor used for unit testing purposes
      *
-     * @param convertHeaderNames If true, header names are converted
+     * @param convertHeaderNames     If true, header names are converted
      * @param caseInsensitiveHeaders Header names that will be ignored during conversion
-     * @param headerArray List of strings for header columns
+     * @param headerArray            List of strings for header columns
      */
     public Spreadsheet(boolean convertHeaderNames, List<String> caseInsensitiveHeaders, String... headerArray) {
         this(convertHeaderNames, headerArray);
@@ -100,8 +101,8 @@ public class Spreadsheet {
             requiredColumns = Collections.EMPTY_LIST;
         } else {
             requiredColumns = Arrays.stream(required)
-                                    .map(this::convertHeaderName)
-                                    .collect(Collectors.toList());
+                    .map(this::convertHeaderName)
+                    .collect(Collectors.toList());
         }
         this.inputStream = file;
     }
@@ -186,6 +187,11 @@ public class Spreadsheet {
                 empty = false;
                 if (!out.containsKey(colName)) {
                     Class type = headerTypes.get(colName).orElse(data.get(i).getBaseType());
+                    if (type == Object.class) {
+                        type = data.get(i).getBaseType();
+                    } else if (type == Object[].class) {
+                        type = getArrayType(Optional.of(data.get(i).getBaseType())).get();
+                    }
                     out.put(colName, new CompositeVariant(type));
                 }
                 if (headerTypes.get(colName).isPresent() && headerTypes.get(colName).get().isArray()) {
@@ -257,6 +263,9 @@ public class Spreadsheet {
         } else {
             name = str;
         }
+        if (name.contains("[")) {
+            name = StringUtils.substringBefore(name, "[");
+        }
         if (enableHeaderNameConversion && isHeaderCaseInsensitive(name)) {
             name = String.valueOf(name).toLowerCase().replaceAll("[^0-9a-zA-Z:\\-]+", "_");
         }
@@ -289,21 +298,21 @@ public class Spreadsheet {
      */
     private Optional<Class> detectTypeFromName(String name) {
         boolean isArray = false;
-        Class detectedClass = String.class;
+        Class detectedClass = Object.class;
         if (name.contains("@")) {
             String typeStr = StringUtils.substringAfter(name, "@");
-            if (name.endsWith("]")) {
-                String colName = convertHeaderName(name);
-                isArray = true;
-                String delimiter = StringUtils.substringBetween(name, "[", "]");
-                typeStr = StringUtils.substringBefore("[", delimiter);
-                if (!StringUtils.isEmpty(delimiter)) {
-                    delimiters.put(colName, delimiter);
-                }
+            if (typeStr.contains("[")) {
+                typeStr = StringUtils.substringBefore(typeStr, "[");
             }
             detectedClass = getClassFromName(typeStr);
-        } else {
-            return Optional.empty();
+        }
+        if (name.endsWith("]")) {
+            isArray = true;
+            String delimiter = StringUtils.substringBetween(name, "[", "]");
+            if (!StringUtils.isEmpty(delimiter)) {
+                String colName = convertHeaderName(name);
+                delimiters.put(colName, delimiter);
+            }
         }
         if (isArray) {
             return getArrayType(Optional.of(detectedClass));
@@ -351,10 +360,10 @@ public class Spreadsheet {
         if (!a.isPresent()) {
             return b;
         }
-        if (b.isPresent()) {
+        if (!b.isPresent()) {
             return a;
         }
-        if (a.equals(b) || b.get() == String.class) {
+        if (a.get().equals(b.get()) || b.get() == Object.class) {
             return getArrayType(a);
         } else {
             return getArrayType(b);
