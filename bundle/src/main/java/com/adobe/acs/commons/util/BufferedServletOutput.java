@@ -122,7 +122,7 @@ public final class BufferedServletOutput {
      */
     public String getBufferedString() {
         if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
-            throw new IllegalStateException("Cannot invoke getBufferedString() once getWriter() has been called.");
+            throw new IllegalStateException("Cannot invoke getBufferedString() once getOutputStream() has been called.");
         }
         if (writer == null) {
             throw new IllegalStateException("Cannot get buffered string, as the writer was not buffered!");
@@ -137,7 +137,7 @@ public final class BufferedServletOutput {
      */
     public byte[] getBufferedBytes() {
         if (ResponseWriteMethod.WRITER.equals(this.writeMethod)) {
-            throw new IllegalStateException("Cannot invoke getBufferedBytes() once getOutputStream() has been called.");
+            throw new IllegalStateException("Cannot invoke getBufferedBytes() once getWriter() has been called.");
         }
         if (outputStream == null) {
             throw new IllegalStateException("Cannot get buffered bytes, as the output stream was not buffered!");
@@ -145,6 +145,9 @@ public final class BufferedServletOutput {
         return outputStream.toByteArray();
     }
 
+    /**
+     * Flushes the buffers bound to this object. In addition calls {@link ServletResponse#flushBuffer()} of the underlying response.
+     */
     public void resetBuffer() {
         if (writer != null) {
             writer.getBuffer().setLength(0);
@@ -175,7 +178,11 @@ public final class BufferedServletOutput {
      * Will not commit the response, but only make sure that the wrapped response's {@code flushBuffer()} is executed, once this {@link #close()} is called
      */
     public void flushBuffer() {
-        log.error("Prevent committing the response, it will be committed deferred, i.e. once this response is closed");
+        log.warn("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
+        if (log.isDebugEnabled()) {
+            Throwable t = new Throwable("");
+            log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
+        }
         flushBuffer = true;
     }
 }

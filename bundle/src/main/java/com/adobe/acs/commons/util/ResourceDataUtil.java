@@ -37,6 +37,7 @@ import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.commons.jcr.JcrConstants;
 
 @ProviderType
@@ -54,8 +55,9 @@ public class ResourceDataUtil {
             final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
 
             requestDispatcher.include(slingRequest, responseWrapper);
-
-            return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            }
         } catch (Exception ex) {
             log.error("Error creating the String representation for: " + path, ex);
         }
