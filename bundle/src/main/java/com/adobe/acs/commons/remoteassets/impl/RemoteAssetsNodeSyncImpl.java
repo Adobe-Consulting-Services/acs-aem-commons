@@ -68,6 +68,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -84,7 +85,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
     private static final Pattern DATE_REGEX = Pattern
             .compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z", Locale.US);
     private static final Pattern DECIMAL_REGEX = Pattern.compile("-?\\d+\\.\\d+");
     private static final String ASSET_FILE_PREFIX = "remoteassets/remote_asset";
     private static final Set<String> PROTECTED_PROPERTIES = new HashSet<>(Arrays.asList(
