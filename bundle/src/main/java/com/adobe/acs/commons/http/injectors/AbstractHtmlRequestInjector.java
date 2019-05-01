@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 
 public abstract class AbstractHtmlRequestInjector implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractHtmlRequestInjector.class);
@@ -75,7 +76,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
             filterChain.doFilter(request, originalResponse);
 
             // Get contents
-            final String originalContents = originalResponse.getBufferedServletOutput().getBufferedString();
+            final String originalContents = originalResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? originalResponse.getBufferedServletOutput().getBufferedString() : null;
 
             if (originalContents != null 
                     && StringUtils.contains(response.getContentType(), "html")) {
@@ -83,6 +84,8 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
                 final int injectionIndex = getInjectIndex(originalContents);
                 
                 if (injectionIndex != -1) {
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    originalResponse.resetBuffer();
                     final PrintWriter printWriter = response.getWriter();
 
                     // Write all content up to the injection index
