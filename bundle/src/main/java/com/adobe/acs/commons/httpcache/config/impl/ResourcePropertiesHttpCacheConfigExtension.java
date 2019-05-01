@@ -35,7 +35,11 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 
 /**
  * ResourcePropertiesHttpCacheConfigExtension
@@ -97,11 +101,8 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
             if (properties.containsKey(entry.getKey())) {
                 final String[] propertyValues = properties.get(entry.getKey(), String[].class);
 
-                if (ArrayUtils.isEmpty(propertyValues)) {
+                if (ArrayUtils.isEmpty(propertyValues) || CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
                     // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the property
-                    return true;
-                } else if (CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
-                    // The resource property value matched one of the allowed values
                     return true;
                 }
                 // No matches found for this row; continue looking through the allowed list
