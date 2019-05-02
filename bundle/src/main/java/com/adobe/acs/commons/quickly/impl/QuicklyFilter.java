@@ -48,6 +48,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import com.adobe.acs.commons.quickly.QuicklyEngine;
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 
 /**
  * ACS AEM Commons - Quickly - App HTML Injection Filter
@@ -96,13 +97,14 @@ public class QuicklyFilter implements Filter {
             filterChain.doFilter(request, capturedResponse);
     
             // Get contents
-            final String contents = capturedResponse.getBufferedServletOutput().getBufferedString();
+            final String contents = capturedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? capturedResponse.getBufferedServletOutput().getBufferedString() : null;
     
             if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
     
                 final int bodyIndex = contents.indexOf("</body>");
                 if (bodyIndex != -1) {
-    
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    capturedResponse.resetBuffer();
                     final PrintWriter printWriter = response.getWriter();
     
                     printWriter.write(contents.substring(0, bodyIndex));

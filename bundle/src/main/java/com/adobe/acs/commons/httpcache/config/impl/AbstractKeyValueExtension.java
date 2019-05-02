@@ -30,16 +30,16 @@ import java.util.Map;
 
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
-    abstract public Map<String, String[]> getAllowedKeyValues();
+    public abstract Map<String, String[]> getAllowedKeyValues();
 
-    abstract public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
-
-    abstract public String getCacheKeyId();
+    public abstract String getCacheKeyId();
 
     @Override
     public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         return accepts(request, cacheConfig, getAllowedKeyValues());
     }
+
+    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
 
     @Override
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
@@ -60,5 +60,4 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         // Validate if key request uri can be constructed out of uri patterns in cache config.
         return new KeyValueCacheKey(key.getUri(), cacheConfig, getCacheKeyId(), getAllowedKeyValues()).equals(key);
     }
-
 }

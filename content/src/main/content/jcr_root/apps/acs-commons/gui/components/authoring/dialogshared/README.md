@@ -1,0 +1,2 @@
+This is a deprecated sling:resourceType that was required to prevent a NPE in AEM 6.1.  Shared and global properties
+dialogs on AEM 6.2+ should instead be using the default OOTB dialog type of `cq/gui/components/authoring/dialog`.
