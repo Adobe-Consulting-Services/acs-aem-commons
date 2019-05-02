@@ -42,7 +42,7 @@ public class ReferencesModel implements ReportCellCSVExporter {
   @Inject
   @OSGiService
   private ReferenceAggregator aggregator;
-  
+
   private ReferenceList referenceList;
 
   private Resource resource;
@@ -50,7 +50,7 @@ public class ReferencesModel implements ReportCellCSVExporter {
   public ReferencesModel(Resource resource) {
     this.resource = resource;
   }
-  
+
   public List<Reference> getReferences() {
     return referenceList;
   }
@@ -67,11 +67,11 @@ public class ReferencesModel implements ReportCellCSVExporter {
   }
 
   @PostConstruct
-  public void init(){
+  public void init() {
     referenceList = aggregator.createReferenceList(resource);
     Iterator<Reference> references = referenceList.iterator();
-    while(references.hasNext()){
-      if(references.next().getTarget().getPath().equals(resource.getPath())){
+    while (references.hasNext()) {
+      if (references.next().getTarget().getPath().equals(resource.getPath())) {
         references.remove();
       }
     }

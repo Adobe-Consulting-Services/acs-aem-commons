@@ -34,25 +34,26 @@ import com.adobe.granite.ui.components.rendercondition.RenderCondition;
 import com.github.jknack.handlebars.Handlebars;
 
 @Component(service = { Servlet.class }, property = {
-		"sling.servlet.resourceTypes=acs-commons/components/report-builder/rendercondition" })
+    "sling.servlet.resourceTypes=acs-commons/components/report-builder/rendercondition" })
 public class ReportsRenderCondition extends SlingSafeMethodsServlet {
 
-	private static final long serialVersionUID = 8821022395219226632L;
+  private static final long serialVersionUID = 8821022395219226632L;
 
-	@Override
-    protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute(RenderCondition.class.getName(), INSTANCE);
+  @Override
+  protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
+      throws ServletException, IOException {
+    request.setAttribute(RenderCondition.class.getName(), INSTANCE);
+  }
+
+  private static final RenderCondition INSTANCE = new RenderCondition() {
+    @Override
+    public boolean check() {
+      try {
+        new Handlebars();
+        return true;
+      } catch (NoClassDefFoundError e) {
+        return false;
+      }
     }
-
-    private static final RenderCondition INSTANCE = new RenderCondition() {
-        @Override
-        public boolean check() {
-            try {
-                new Handlebars();
-                return true;
-            } catch (NoClassDefFoundError e) {
-                return false;
-            }
-        }
-    };
+  };
 }
