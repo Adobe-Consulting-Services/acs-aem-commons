@@ -50,13 +50,15 @@
     String message = properties.get("jcr:description", String.class);
     message = systemNotifications.getMessage(message, onTimeFormatted, offTimeFormatted);
     pageContext.setAttribute("message", message);
-    
-    pageContext.setAttribute("dismissible", properties.get("dismissible", true));
+
+
+    boolean dismissible = properties.get("dismissible", true);
+    pageContext.setAttribute("dismissible", dismissible );
 
 %><div class="acsCommons-System-Notification acsCommons-System-Notification--${style}"
        data-dismissible="${dismissible}"
        data-uid="${uid}">
-    <a href="#" class="acsCommons-System-Notification-dismiss">Dismiss</a>
+<% if (dismissible) { %>    <a href="#" class="acsCommons-System-Notification-dismiss">Dismiss</a><% } %>
     <div class="acsCommons-System-Notification-title">${title}</div>
     <div class="acsCommons-System-Notification-message">${message}</div>
 </div>
