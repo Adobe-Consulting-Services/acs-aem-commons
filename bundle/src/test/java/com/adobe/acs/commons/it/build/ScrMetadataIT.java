@@ -84,6 +84,10 @@ public class ScrMetadataIT {
         // the following two values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1773
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.PlainXMLSerializerFactory:pipeline.type");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.XMLParserGeneratorFactory:pipeline.type");
+        
+        // properties removed when updating to OSGi R6 annotations
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportCSVExportServlet:service.vendor");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportsRenderCondition:service.vendor");
 
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
