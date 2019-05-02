@@ -59,7 +59,7 @@ public class ReferencesModel implements ReportCellCSVExporter {
   public String getValue(Object result) {
     resource = (Resource) result;
     init();
-    List<String> refStrings = new ArrayList<String>();
+    List<String> refStrings = new ArrayList<>();
     for (Reference reference : referenceList) {
       refStrings.add(reference.getType() + " - " + reference.getTarget().getPath());
     }

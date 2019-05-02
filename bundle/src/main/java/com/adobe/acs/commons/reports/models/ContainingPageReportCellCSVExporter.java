@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.reports.models;
 
+import java.util.Optional;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
@@ -37,7 +39,7 @@ public class ContainingPageReportCellCSVExporter implements ReportCellCSVExporte
   public String getValue(Object obj) {
     Resource result = (Resource) obj;
     PageManager pageMgr = result.getResourceResolver().adaptTo(PageManager.class);
-    Page page = pageMgr.getContainingPage(result);
+    Page page = Optional.ofNullable(pageMgr).map(p -> p.getContainingPage(result)).orElse(null);
     return page != null ? page.getPath() : "";
   }
 
