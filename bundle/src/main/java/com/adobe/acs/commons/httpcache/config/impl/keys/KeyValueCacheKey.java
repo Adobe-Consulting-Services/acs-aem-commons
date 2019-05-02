@@ -30,11 +30,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 
 public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Serializable {
-    private final String cacheKeyId;
+    private String cacheKeyId;
     private Map<String, String[]> allowedKeyValues;
 
     public KeyValueCacheKey(final SlingHttpServletRequest request, final HttpCacheConfig cacheConfig,
@@ -51,6 +53,10 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
         this.allowedKeyValues = allowedKeyValues;
     }
 
+    Map<String, String[]> getAllowedKeyValues() {
+        return allowedKeyValues;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!super.equals(o)) {
@@ -59,7 +65,7 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
         KeyValueCacheKey that = (KeyValueCacheKey) o;
 
-        if(that == null){
+        if (that == null) {
             return false;
         }
 
@@ -67,7 +73,27 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
                 .append(getUri(), that.getUri())
                 .append(cacheKeyId, that.cacheKeyId)
                 .append(getAuthenticationRequirement(), that.getAuthenticationRequirement())
+                .appendSuper(getEqualForAllowedKeyValues(that))
                 .isEquals();
+    }
+
+    private boolean getEqualForAllowedKeyValues(KeyValueCacheKey other) {
+        if (this.allowedKeyValues.size() != other.allowedKeyValues.size()) {
+            return false;
+        }
+
+        for (Map.Entry<String,String[]> entry: allowedKeyValues.entrySet()) {
+
+            final String key = entry.getKey();
+            final String[] val = entry.getValue();
+
+                if(     !other.allowedKeyValues.containsKey(key)
+                    ||  !Arrays.equals(val, other.allowedKeyValues.get(key))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -80,22 +106,20 @@ public class KeyValueCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
     @Override
     public String toString() {
-        StringBuilder formattedString = new StringBuilder(this.uri);
-        formattedString.append(cacheKeyId);
-        formattedString.append("[AUTH_REQ:" + getAuthenticationRequirement() + "]");
-
-        return formattedString.toString();
+        return String.format("%s%s[AUTH_REQ:%s]", this.uri, cacheKeyId, getAuthenticationRequirement());
     }
 
     /** For Serialization **/
     private void writeObject(ObjectOutputStream o) throws IOException  {
         parentWriteObject(o);
-        o.writeObject(allowedKeyValues);
+        o.writeUTF(cacheKeyId);
+        o.writeObject(new HashMap<>(allowedKeyValues));
     }
 
     /** For De-serialization **/
     private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
         parentReadObject(o);
+        cacheKeyId = o.readUTF();
         allowedKeyValues = (Map<String, String[]>) o.readObject();
     }
 
