@@ -116,7 +116,7 @@
                 xtype="pathfield"/>
             <page-exclusions
                 jcr:primaryType="cq:Widget"
-                fieldDescription="Click the '+' to add a new exclude pattern. The pattern will both exclude the pages from the package and exclude them from the asset search.&lt;br/>By default all pages are searched and included in the package."
+                fieldDescription="Click the '+' to add a new exclude pattern. The pattern will exclude both the pages and their assets from the package.&lt;br/>By default all pages are searched and included in the package."
                 fieldLabel="Exclude Page patterns"
                 name="./pageExclusions"
                 xtype="multifield">
