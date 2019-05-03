@@ -123,21 +123,6 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
     }
 
     /**
-     * Gets the properties saved to the Asset Packager Page's jcr:content node.
-     *
-     * @param request The request obj
-     * @return A ValueMap representing the properties
-     */
-    private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if (request.getResource().getChild("configuration") == null) {
-            log.warn("Asset Packager Configuration node could not be found for: {}", request.getResource());
-            return new ValueMapDecorator(new HashMap<>());
-        } else {
-            return request.getResource().getChild("configuration").getValueMap();
-        }
-    }
-
-    /**
      * Takes a list of Strings that should be valid patterns. If they are not then the exception is
      * logged and the pattern is not added to the list of checked patterns.
      *
