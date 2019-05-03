@@ -102,23 +102,17 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 
         try {
             final String pagePath = properties.get(PN_PAGE_PATH, String.class);
-            final List<PathFilterSet> paths;
+            final List<PathFilterSet> packageFilterPaths;
             if (StringUtils.isBlank(pagePath)) {
-                paths = Collections.emptyList();
+                packageFilterPaths = Collections.emptyList();
             } else {
-                paths = this.findAssetPaths(resourceResolver, pagePath);
-            }
-            if (!properties.get(PN_EXCLUDE_PAGES, false) && paths.size() > 0) {
-                PathFilterSet pageFilter = new PathFilterSet(pagePath);
-                if (excludedPages.size() > 0) {
-                    for (String excludedPath : excludedPages) {
-                        pageFilter.addExclude(new DefaultPathFilter(excludedPath));
-                    }
-                }
-                paths.add(0, pageFilter);
+                packageFilterPaths = this.findAssetPaths(resourceResolver, pagePath);
             }
 
-            doPackaging(request, response, preview, properties, paths);
+            // Add the page path as a filter unless it is explicitly excluded
+            this.addPagePath(packageFilterPaths, pagePath, properties.get(PN_EXCLUDE_PAGES, false));
+
+            doPackaging(request, response, preview, properties, packageFilterPaths);
         } catch (RepositoryException ex) {
             log.error("Repository error while creating Asset Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
@@ -206,6 +200,27 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
         }
 
         return filters;
+    }
+
+    /**
+     * Optionally adds a single page path to the list of package path filters. Also adds any
+     * exclusions generated when creating the list of asset paths.
+     *
+     * @param currentPaths The current set of path filters
+     * @param pagePath     The page path specified in the packager dialog
+     * @param excludePages The property value for whether the page path should be added to the
+     *                     package
+     */
+    private void addPagePath(List<PathFilterSet> currentPaths, String pagePath, boolean excludePages) {
+        if (!excludePages && currentPaths.size() > 0) {
+            PathFilterSet pageFilter = new PathFilterSet(pagePath);
+            if (excludedPages.size() > 0) {
+                for (String excludedPath : excludedPages) {
+                    pageFilter.addExclude(new DefaultPathFilter(excludedPath));
+                }
+            }
+            currentPaths.add(0, pageFilter);
+        }
     }
 
     /**
