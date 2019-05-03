@@ -1,0 +1,12 @@
+{
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "jcr:title": "Sample Page",
+        "jcr:description": "",
+        "sling:resourceType": "a/totally/real/path",
+        "cq:tags": [
+            "workflow:wcm"
+        ]
+    }
+}
