@@ -139,7 +139,7 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
             log.warn("Asset Packager Configuration node could not be found for: {}", request.getResource());
             return new ValueMapDecorator(new HashMap<>());
         } else {
-            return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
+            return request.getResource().getChild("configuration").getValueMap();
         }
     }
 
