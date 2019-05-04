@@ -18,10 +18,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
+- #1765 - Strings in spreadsheet input are no longer automatically assumed to be strings -- Fixes to spreadsheet and variant for handling data types, especially dates, as well as unit test coverage for data importer.
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
-- #1845 - Fixes to spreadsheet and variant for handling data types, especially dates, as well as unit test coverage for data importer
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
