@@ -41,6 +41,8 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
@@ -183,18 +185,23 @@ public class AnnotatedFieldDeserializer {
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
         return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
                 .stream()
-                .collect(Collectors.toMap(Field::getName, f -> {
+                .collect(Collectors.toMap(AnnotatedFieldDeserializer::getFieldName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
                         component = fieldDefinition.component().newInstance();
-                        component.setup(f.getName(), f, fieldDefinition, sling);
+                        component.setup(getFieldName(f), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
                         LOG.error("Unable to instantiate field component for " + f.getName(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private static String getFieldName(Field f) {
+        Named named = f.getAnnotation(Named.class);
+        return named == null ? f.getName() : named.value();
     }
 
     private AnnotatedFieldDeserializer() {
