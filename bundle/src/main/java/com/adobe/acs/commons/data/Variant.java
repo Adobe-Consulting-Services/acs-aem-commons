@@ -36,13 +36,14 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Used to represent values that might be provided as one type but used as
+ * Used to represent values that might be provided as one baseType but used as
  * another. Avoids glue code and switch statements in other parts of the code
  * especially dealing with data from spreadsheets.
  */
 @ProviderType
 public final class Variant {
 
+    private Class baseType = null;
     private static final FastDateFormat STANDARD_DATE_FORMAT = FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.SHORT);
     private Optional<Long> longVal = Optional.empty();
     private Optional<Double> doubleVal = Optional.empty();
@@ -51,14 +52,17 @@ public final class Variant {
     private Optional<Date> dateVal = Optional.empty();
 
     private static final FastDateFormat[] DATE_FORMATS = {
-        FastDateFormat.getDateInstance(FastDateFormat.SHORT),
-        FastDateFormat.getDateInstance(FastDateFormat.LONG),
-        FastDateFormat.getTimeInstance(FastDateFormat.SHORT),
-        FastDateFormat.getTimeInstance(FastDateFormat.LONG),
-        STANDARD_DATE_FORMAT,
-        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT),
-        FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG),
-        FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),};
+            FastDateFormat.getDateInstance(FastDateFormat.SHORT),
+            FastDateFormat.getDateInstance(FastDateFormat.LONG),
+            FastDateFormat.getTimeInstance(FastDateFormat.SHORT),
+            FastDateFormat.getTimeInstance(FastDateFormat.LONG),
+            STANDARD_DATE_FORMAT,
+            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.SHORT),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.SHORT, FastDateFormat.LONG),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.LONG, FastDateFormat.LONG),
+            FastDateFormat.getDateTimeInstance(FastDateFormat.FULL, FastDateFormat.FULL),
+            FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    };
 
     public Variant() {
     }
@@ -109,6 +113,7 @@ public final class Variant {
                 }
                 if (DateUtil.isCellDateFormatted(cell)) {
                     setValue(cell.getDateCellValue());
+                    baseType = Calendar.class;
                 }
                 DataFormatter dataFormatter = new DataFormatter(locale);
                 if (cellType == Cell.CELL_TYPE_FORMULA) {
@@ -137,38 +142,65 @@ public final class Variant {
         if (val == null) {
             return;
         }
-        Class type = val.getClass();
-        if (type == Variant.class) {
+        Class valueType = val.getClass();
+        if (valueType == Variant.class) {
             Variant v = (Variant) val;
             longVal = v.longVal;
             doubleVal = v.doubleVal;
             stringVal = v.stringVal;
             booleanVal = v.booleanVal;
             dateVal = v.dateVal;
-        } else if (type == Byte.TYPE || type == Byte.class) {
+            this.baseType = v.baseType;
+        } else if (valueType == Byte.TYPE || valueType == Byte.class) {
             setLongVal(((Byte) val).longValue());
-        } else if (type == Integer.TYPE || type == Integer.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Long.TYPE;
+            }
+        } else if (valueType == Integer.TYPE || valueType == Integer.class) {
             setLongVal(((Integer) val).longValue());
-        } else if (type == Long.TYPE || type == Long.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Long.TYPE;
+            }
+        } else if (valueType == Long.TYPE || valueType == Long.class) {
             setLongVal((Long) val);
-        } else if (type == Short.TYPE || type == Short.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Long.TYPE;
+            }
+        } else if (valueType == Short.TYPE || valueType == Short.class) {
             setLongVal(((Short) val).longValue());
-        } else if (type == Float.TYPE || type == Float.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Long.TYPE;
+            }
+        } else if (valueType == Float.TYPE || valueType == Float.class
+                || valueType == Double.TYPE || valueType == Double.class) {
             setDoubleVal((Double) val);
-        } else if (type == Double.TYPE || type == Double.class) {
-            setDoubleVal((Double) val);
-        } else if (type == Boolean.TYPE || type == Boolean.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Double.TYPE;
+            }
+        } else if (valueType == Boolean.TYPE || valueType == Boolean.class) {
             setBooleanVal((Boolean) val);
-        } else if (type == String.class) {
+            if (baseType == null || baseType == String.class) {
+                baseType = Boolean.TYPE;
+            }
+        } else if (valueType == String.class) {
             setStringVal((String) val);
-        } else if (type == Date.class) {
+            if (baseType == null) {
+                baseType = String.class;
+            }
+        } else if (valueType == Date.class) {
             setDateVal((Date) val);
-        } else if (type == Instant.class) {
+            baseType = Calendar.class;
+        } else if (valueType == Instant.class) {
             setDateVal(new Date(((Instant) val).toEpochMilli()));
-        } else if (type == Calendar.class) {
+            baseType = Calendar.class;
+        } else if (valueType == Calendar.class) {
             setDateVal(((Calendar) val).getTime());
+            baseType = Calendar.class;
         } else {
             setStringVal(String.valueOf(val));
+            if (baseType == null) {
+                baseType = String.class;
+            }
         }
     }
 
@@ -221,6 +253,7 @@ public final class Variant {
                         })));
     }
 
+    @Override
     public String toString() {
         return stringVal.orElse(dateVal.map(STANDARD_DATE_FORMAT::format)
                 .orElse(doubleVal.map(String::valueOf)
@@ -306,5 +339,9 @@ public final class Variant {
     public static <S, D> D convert(S val, Class<D> destType) {
         Variant v = new Variant(val);
         return v.asType(destType);
+    }
+
+    Class getBaseType() {
+        return baseType;
     }
 }
