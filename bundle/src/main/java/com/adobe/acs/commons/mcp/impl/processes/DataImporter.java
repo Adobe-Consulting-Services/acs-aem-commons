@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes;
 
+import com.adobe.acs.commons.data.CompositeVariant;
 import com.adobe.acs.commons.data.Spreadsheet;
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -28,15 +29,13 @@ import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
-import com.adobe.acs.commons.data.CompositeVariant;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.request.RequestParameter;
@@ -49,10 +48,12 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.adobe.acs.commons.data.Spreadsheet.ROW_NUMBER;
 import static javax.jcr.Property.JCR_PRIMARY_TYPE;
 
 /**
- * Read node and metadata from a spreadsheet and update underlying node storage with provided data.
+ * Read node and metadata from a spreadsheet and update underlying node storage
+ * with provided data.
  */
 public class DataImporter extends ProcessDefinition {
 
@@ -100,13 +101,13 @@ public class DataImporter extends ProcessDefinition {
             options = {"default=sling:Folder"}
     )
     private String defaultNodeType = "sling:Folder";
-    
+
     @FormField(
             name = "Convert header names",
             description = "If checked, property names in the header are converted to lower-case and non-compatible characters are converted to underscores",
             component = CheckboxComponent.class
     )
-    private boolean enableHeaderNameConversion = false;    
+    private boolean enableHeaderNameConversion = false;
 
     @FormField(
             name = "Dry run",
@@ -141,7 +142,7 @@ public class DataImporter extends ProcessDefinition {
     EnumMap<ReportColumns, Object> noChangeNodes
             = trackActivity(TOTAL, "No Change", 0);
 
-    @SuppressWarnings("squid:S00115")  
+    @SuppressWarnings("squid:S00115")
     public static enum ReportColumns {
         item, action, count
     }
@@ -175,16 +176,18 @@ public class DataImporter extends ProcessDefinition {
 
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
-        try {
-            data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH).buildSpreadsheet();
-            if (presortData) {
-                Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
+        if (data == null && importFile != null) {
+            try {
+                data = new Spreadsheet(enableHeaderNameConversion, importFile, PATH).buildSpreadsheet();
+                if (presortData) {
+                    Collections.sort(data.getDataRowsAsCompositeVariants(), (a, b) -> b.get(PATH).toString().compareTo(a.get(PATH).toString()));
+                }
+                instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
+            } catch (IOException ex) {
+                LOG.error("Unable to process import", ex);
+                instance.getInfo().setDescription("Import " + data.getFileName() + " (failed)");
+                throw new RepositoryException("Unable to parse input file", ex);
             }
-            instance.getInfo().setDescription("Import " + data.getFileName() + " (" + data.getRowCount() + " rows)");
-        } catch (IOException ex) {
-            LOG.error("Unable to process import", ex);
-            instance.getInfo().setDescription("Import " + data.getFileName() + " (failed)");
-            throw new RepositoryException("Unable to parse input file", ex);
         }
         instance.defineCriticalAction("Import Data", rr, this::importData);
     }
@@ -240,7 +243,14 @@ public class DataImporter extends ProcessDefinition {
         if (!row.containsKey(JCR_PRIMARY_TYPE)) {
             row.put("JCR_TYPE", new CompositeVariant(defaultNodeType));
         }
-        Map<String, Object> nodeProps = new HashMap(row);
+        Map<String, Object> nodeProps = row.entrySet().stream()
+                .filter(e -> !e.getKey().equals(ROW_NUMBER) && e.getValue() != null)
+                .collect(
+                        Collectors.toMap(
+                                e -> e.getKey(),
+                                e -> e.getValue().toPropertyValue()
+                        )
+                );
         rr.refresh();
         rr.create(parent, nodeName, nodeProps);
     }
@@ -267,7 +277,8 @@ public class DataImporter extends ProcessDefinition {
 
     public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
         for (String prop : data.getHeaderRow()) {
-            if (!prop.equals(PATH)
+            if (prop != null
+                    && !prop.equals(PATH)
                     && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
                 CompositeVariant value = nodeInfo.get(prop);
                 if (value == null || value.isEmpty()) {
