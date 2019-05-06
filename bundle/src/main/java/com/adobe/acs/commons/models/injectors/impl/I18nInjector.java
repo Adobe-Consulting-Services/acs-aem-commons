@@ -68,7 +68,7 @@ public class I18nInjector implements Injector {
                 Resource resource = getResource(adaptable);
                 return i18nProvider.translate(key, resource);
             }
-        }else if(canAdaptToObject(adaptable, type)){
+        } else if(canAdaptToObject(adaptable, type)){
             if (adaptable instanceof HttpServletRequest) {
                 HttpServletRequest request = (HttpServletRequest) adaptable;
                 return i18nProvider.i18n(request);
