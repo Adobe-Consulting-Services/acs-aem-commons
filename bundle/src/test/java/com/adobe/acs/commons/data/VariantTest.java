@@ -21,9 +21,9 @@ package com.adobe.acs.commons.data;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -78,6 +78,13 @@ public class VariantTest {
         assertNotNull(Variant.convert(nowStringLong, Date.class).getTime());
         assertNotNull(Variant.convert(nowStringShort, Date.class).getTime());
         assertNotNull(Variant.convert("12:00 AM", Date.class).getTime());
+    }
+
+    @Test
+    public void databaseDateFormatConversion() {
+        Calendar cal = Variant.convert("2016-02-12T14:47:41.922-05:00", Calendar.class);
+        assertNotNull(cal);
+        assertEquals(2016L, cal.get(Calendar.YEAR));
     }
 
     @Test
