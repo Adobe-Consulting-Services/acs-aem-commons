@@ -29,6 +29,7 @@ import com.day.cq.i18n.I18n;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.Adaptable;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.Injector;
 import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProcessorFactory;
 import org.junit.Before;
@@ -39,11 +40,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.servlet.http.HttpServletRequest;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -114,5 +117,11 @@ public class I18NInjectorTest {
         assertEquals("FromNameValue", adapted.getAnotherValidI18nField());
         assertNull("we should skip javax.Inject", adapted.getInjectField());
         assertSame(i18n, adapted.getI18n());
+
+        if (adaptable instanceof Resource) {
+            verify(i18nService, times(1)).i18n((Resource) adaptable);
+        } else if (adaptable instanceof HttpServletRequest) {
+            verify(i18nService, times(1)).i18n((HttpServletRequest) adaptable);
+        }
     }
 }
