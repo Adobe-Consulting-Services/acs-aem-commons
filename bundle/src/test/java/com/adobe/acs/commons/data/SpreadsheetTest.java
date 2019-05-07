@@ -59,7 +59,7 @@ public class SpreadsheetTest {
 
     @BeforeClass
     public static void setUp() throws IOException {
-    	Locale.setDefault(LOCALE);
+        Locale.setDefault(LOCALE);
         testWorkbook = new XSSFWorkbook();
         XSSFSheet sheet = testWorkbook.createSheet("sheet 1");
         createRow(sheet, header);
