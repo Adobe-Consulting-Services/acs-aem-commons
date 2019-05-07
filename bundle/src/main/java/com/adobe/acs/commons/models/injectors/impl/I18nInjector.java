@@ -57,8 +57,13 @@ public class I18nInjector implements Injector {
     @Override
     public Object getValue(Object adaptable, String name, Type type, AnnotatedElement annotatedElement, DisposalCallbackRegistry disposal) {
 
-        if (annotatedElement.isAnnotationPresent(I18N.class) && canAdaptToString(adaptable, type)) {
+        if(!annotatedElement.isAnnotationPresent(I18N.class)){
             //skipping javax.Inject for performance reasons. Only supports direct injection.
+            return null;
+        }
+
+        if (canAdaptToString(adaptable, type)) {
+
             String key = getI18nKey(name, annotatedElement);
 
             if (adaptable instanceof HttpServletRequest) {
