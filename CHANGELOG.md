@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+## [4.1.0] - 2019-05-07
+
 ### Added
 - #1294 - New Remote Assets feature
 - #1713 - Added Servlet Filter to generate an ETag header based on a message digest
