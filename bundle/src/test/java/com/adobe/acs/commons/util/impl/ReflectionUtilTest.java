@@ -61,6 +61,8 @@ public class ReflectionUtilTest {
         public Collection<Long> longCollection;
         public Float[] floatArray;
         public Number atomicInteger;
+        public String string;
+        public CharSequence charSequence;
     }
 
     @Before
@@ -147,6 +149,15 @@ public class ReflectionUtilTest {
                     assertFalse(isArray(type));
                     assertTrue(isAssignableFrom(type, AtomicInteger.class));
                     assertSame(Number.class, getClassOrGenericParam(type));
+                    break;
+                case "string":
+                    assertTrue(isAssignableFrom(type, String.class));
+                    assertFalse(isAssignableFrom(type, CharSequence.class));
+                    break;
+                case "charSequence":
+                    assertTrue(isAssignableFrom(type, String.class));
+                    assertTrue(isAssignableFrom(type, CharSequence.class));
+                    assertFalse(isAssignableFrom(type, Number.class));
                     break;
                 default:
                     break;
