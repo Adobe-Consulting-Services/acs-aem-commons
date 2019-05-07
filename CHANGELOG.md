@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1840 - Fixed UI issue with User Exporter to allow removal of all properties.
 - #1855 - Remote asset sync functionality couldn't sync date properties unless the OS language was set to English.
 - #1858 - Fixed issue with legacy dialog type for Shared Component Properties.
+- #1839 - Fixed editing page for system notifications
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 
 ## [4.0.0] - 2019-02-20
