@@ -145,7 +145,7 @@ public class ReflectionUtilTest {
                     assertFalse(isSetType(type));
                     assertFalse(isCollectionType(type));
                     assertFalse(isArray(type));
-                    assertTrue(isAssignableFrom(type, Number.class));
+                    assertTrue(isAssignableFrom(type, AtomicInteger.class));
                     assertSame(AtomicInteger.class, getClassOrGenericParam(type));
                     break;
                 default:
