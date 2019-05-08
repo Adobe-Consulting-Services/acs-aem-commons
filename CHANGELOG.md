@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1805 - Fixing the unit tests of the Variant class that may fail on unusual OS locale settings
 - #1833 - Fixes issue with ACS AEM Commons utility report page's header bar not rendering properly.
 - #1840 - Fixed UI issue with User Exporter to allow removal of all properties.
+- #1859 - Fixes the misalignment of delete icon in Reports List Page
 - #1855 - Remote asset sync functionality couldn't sync date properties unless the OS language was set to English.
 - #1858 - Fixed issue with legacy dialog type for Shared Component Properties.
 - #1839 - Fixed editing page for system notifications
