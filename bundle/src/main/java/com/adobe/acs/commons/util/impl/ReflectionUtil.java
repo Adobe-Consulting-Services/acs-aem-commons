@@ -147,7 +147,7 @@ public class ReflectionUtil {
         }
         if (assignableFromType instanceof Class<?>) {
             Class<?> assignAbleFromClazz = (Class<?>) assignableFromType;
-            return assignAbleFromClazz.isAssignableFrom(assignAbleFromClazz);
+            return assignAbleFromClazz.isAssignableFrom(clazz);
         } else {
             ParameterizedType parameterizedType = (ParameterizedType) assignableFromType;
             return ((Class<?>) parameterizedType.getRawType()).isAssignableFrom(clazz);
