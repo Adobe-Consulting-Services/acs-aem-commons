@@ -21,11 +21,10 @@ package com.adobe.acs.commons.rewriter.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
+import com.adobe.acs.commons.rewriter.DelegatedTransformer;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -42,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -189,11 +187,9 @@ final class CssInlinerTransformer extends AbstractTransformer {
     }
 }
 
-final class SelectorAwareCssInlinerTransformer implements Transformer {
+final class SelectorAwareCssInlinerTransformer extends DelegatedTransformer {
 
     private final HtmlLibraryManager htmlLibraryManager;
-
-    private Transformer delegate;
 
     public SelectorAwareCssInlinerTransformer(final HtmlLibraryManager htmlLibraryManager) {
         this.htmlLibraryManager = htmlLibraryManager;
@@ -209,77 +205,12 @@ final class SelectorAwareCssInlinerTransformer implements Transformer {
         }
 
         if (inlineCss) {
-            delegate = new CssInlinerTransformer(htmlLibraryManager);
+            setDelegate(new CssInlinerTransformer(htmlLibraryManager));
         } else {
-            delegate = new AbstractTransformer() {
-            };
+            setDelegate(new AbstractTransformer() {
+            });
         }
 
-        delegate.init(context, componentConfiguration);
-    }
-
-    @Override
-    public void setContentHandler(ContentHandler contentHandler) {
-        delegate.setContentHandler(contentHandler);
-    }
-
-    @Override
-    public void dispose() {
-        delegate.dispose();
-    }
-
-    @Override
-    public void setDocumentLocator(Locator locator) {
-        delegate.setDocumentLocator(locator);
-    }
-
-    @Override
-    public void startDocument() throws SAXException {
-        delegate.startDocument();
-    }
-
-    @Override
-    public void endDocument() throws SAXException {
-        delegate.endDocument();
-    }
-
-    @Override
-    public void startPrefixMapping(String prefix, String uri) throws SAXException {
-        delegate.startPrefixMapping(prefix, uri);
-    }
-
-    @Override
-    public void endPrefixMapping(String prefix) throws SAXException {
-        delegate.endPrefixMapping(prefix);
-    }
-
-    @Override
-    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        delegate.startElement(uri, localName, qName, atts);
-    }
-
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-        delegate.endElement(uri, localName, qName);
-    }
-
-    @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
-        delegate.characters(ch, start, length);
-    }
-
-    @Override
-    public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-        delegate.ignorableWhitespace(ch, start, length);
-    }
-
-    @Override
-    public void processingInstruction(String target, String data) throws SAXException {
-        delegate.processingInstruction(target, data);
-    }
-
-    @Override
-    public void skippedEntity(String name) throws SAXException {
-        delegate.skippedEntity(name);
+        super.init(context, componentConfiguration);
     }
 }
