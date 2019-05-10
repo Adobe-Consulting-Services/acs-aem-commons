@@ -20,5 +20,5 @@
 /**
  * Rewriter Utilities.
  */
-@org.osgi.annotation.versioning.Version("1.2.2")
+@org.osgi.annotation.versioning.Version("1.3.0")
 package com.adobe.acs.commons.rewriter;
