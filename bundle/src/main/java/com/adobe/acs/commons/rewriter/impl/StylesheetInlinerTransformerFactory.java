@@ -19,18 +19,13 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
 import com.adobe.acs.commons.rewriter.DelegatedTransformer;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -44,10 +39,11 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * ACS AEM Commons - Stylesheet inliner removes stylesheet links the output adds
@@ -63,154 +59,148 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 @Service(value = {TransformerFactory.class})
 public final class StylesheetInlinerTransformerFactory implements TransformerFactory {
 
+    private static final Logger log = LoggerFactory.getLogger(StylesheetInlinerTransformerFactory.class);
+
+    private static final char[] NEWLINE = new char[]{'\n'};
+
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
 
     public Transformer createTransformer() {
         return new SelectorAwareCssInlinerTransformer(htmlLibraryManager);
     }
-}
 
-final class CssInlinerTransformer extends AbstractTransformer {
+    private final class CssInlinerTransformer extends AbstractTransformer {
 
-    private static final Logger log = LoggerFactory.getLogger(StylesheetInlinerTransformerFactory.class);
+        private static final String STYLE = "style";
+        private static final String HEAD = "head";
 
-    private static final char[] NEWLINE = new char[]{'\n'};
-    private static final String STYLE = "style";
-    private static final String HEAD = "head";
+        private final Attributes attrs = new AttributesImpl();
 
-    private final Attributes attrs = new AttributesImpl();
+        private final Map<String, char[]> stylesheetsInHead = new LinkedHashMap<>();
 
-    private final Map<String, char[]> stylesheetsInHead = new LinkedHashMap<>();
+        private SlingHttpServletRequest slingRequest;
+        private boolean afterHeadElement = false;
 
-    private final HtmlLibraryManager htmlLibraryManager;
+        @Override
+        public void init(final ProcessingContext context, final ProcessingComponentConfiguration config) throws IOException {
+            super.init(context, config);
+            slingRequest = context.getRequest();
+            log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
+        }
 
-    private SlingHttpServletRequest slingRequest;
-    private boolean afterHeadElement = false;
-
-    public CssInlinerTransformer(final HtmlLibraryManager htmlLibraryManager) {
-        this.htmlLibraryManager = htmlLibraryManager;
-    }
-
-    @Override
-    public void init(final ProcessingContext context, final ProcessingComponentConfiguration config) throws IOException {
-        super.init(context, config);
-        slingRequest = context.getRequest();
-        log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
-    }
-
-    public void startElement(final String namespaceURI, final String localName, final String qName,
-                             final Attributes attrs) throws SAXException {
-        try {
-            final ContentHandler contentHandler = getContentHandler();
-            if (SaxElementUtils.isCss(localName, attrs)) {
-                final String sheet = attrs.getValue("", "href");
-                if (afterHeadElement) {
-                    log.debug("Inlining stylesheet link found in BODY: '{}'", sheet);
-                    if (!inlineSheet(namespaceURI, sheet)) {
-                        contentHandler.startElement(namespaceURI, localName, qName, attrs);
+        public void startElement(final String namespaceURI, final String localName, final String qName,
+                                 final Attributes attrs) throws SAXException {
+            try {
+                final ContentHandler contentHandler = getContentHandler();
+                if (SaxElementUtils.isCss(localName, attrs)) {
+                    final String sheet = attrs.getValue("", "href");
+                    if (afterHeadElement) {
+                        log.debug("Inlining stylesheet link found in BODY: '{}'", sheet);
+                        if (!inlineSheet(namespaceURI, sheet)) {
+                            contentHandler.startElement(namespaceURI, localName, qName, attrs);
+                        }
+                    } else {
+                        final Optional<char[]> contents = readSheetContent(sheet);
+                        if (contents.isPresent()) {
+                            stylesheetsInHead.put(sheet, contents.get());
+                        } else {
+                            contentHandler.startElement(namespaceURI, localName, qName, attrs);
+                        }
                     }
                 } else {
-                    final char[] contents = readSheetContent(sheet);
-                    if (contents == null) {
-                        contentHandler.startElement(namespaceURI, localName, qName, attrs);
-                    } else {
-                        stylesheetsInHead.put(sheet, contents);
-                    }
-                }
-            } else {
-                contentHandler.startElement(namespaceURI, localName, qName, attrs);
-            }
-        } catch (Exception e) {
-            log.error("Exception in stylesheet inliner", e);
-            throw new SAXException(e);
-        }
-    }
-
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-        if (localName.equalsIgnoreCase(HEAD)) {
-            afterHeadElement = true;
-            try {
-                // add each of the accumulated stylesheet references
-                for (final Map.Entry<String, char[]> entry : stylesheetsInHead.entrySet()) {
-                    log.debug("Inlining sheet found in HEAD: '{}'", entry.getKey());
-                    inlineSheet(uri, entry.getValue());
+                    contentHandler.startElement(namespaceURI, localName, qName, attrs);
                 }
             } catch (Exception e) {
                 log.error("Exception in stylesheet inliner", e);
                 throw new SAXException(e);
             }
         }
-        getContentHandler().endElement(uri, localName, qName);
-    }
 
-    private char[] readSheetContent(final String sheet) throws IOException, SAXException {
-        InputStream inputStream = null;
-
-        final String withoutExtension = sheet.substring(0, sheet.indexOf(LibraryType.CSS.extension));
-        final HtmlLibrary library = htmlLibraryManager.getLibrary(LibraryType.CSS, withoutExtension);
-        if (library != null) {
-            inputStream = library.getInputStream();
-        } else {
-            final Resource resource = slingRequest.getResourceResolver().getResource(sheet);
-
-            if (resource != null) {
-                inputStream = resource.adaptTo(InputStream.class);
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if (localName.equalsIgnoreCase(HEAD)) {
+                afterHeadElement = true;
+                try {
+                    // add each of the accumulated stylesheet references
+                    for (final Map.Entry<String, char[]> entry : stylesheetsInHead.entrySet()) {
+                        log.debug("Inlining sheet found in HEAD: '{}'", entry.getKey());
+                        inlineSheet(uri, entry.getValue());
+                    }
+                } catch (Exception e) {
+                    log.error("Exception in stylesheet inliner", e);
+                    throw new SAXException(e);
+                }
             }
+            getContentHandler().endElement(uri, localName, qName);
         }
 
-        if (inputStream != null) {
-            return IOUtils.toCharArray(inputStream, "UTF-8");
+        private Optional<char[]> readSheetContent(final String sheet) throws IOException, SAXException {
+            InputStream inputStream = null;
+
+            final String withoutExtension = sheet.substring(0, sheet.indexOf(LibraryType.CSS.extension));
+            final HtmlLibrary library = htmlLibraryManager.getLibrary(LibraryType.CSS, withoutExtension);
+            if (library != null) {
+                inputStream = library.getInputStream();
+            } else {
+                final Resource resource = slingRequest.getResourceResolver().getResource(sheet);
+
+                if (resource != null) {
+                    inputStream = resource.adaptTo(InputStream.class);
+                }
+            }
+
+            if (inputStream != null) {
+                return Optional.of(IOUtils.toCharArray(inputStream, "UTF-8"));
+            }
+
+            return Optional.empty();
         }
 
-        return null;
+        private boolean inlineSheet(final String namespaceURI, final char[] content) throws SAXException {
+            if (content != null) {
+                final ContentHandler contentHandler = getContentHandler();
+                contentHandler.startElement(namespaceURI, STYLE, null, attrs);
+                contentHandler.characters(NEWLINE, 0, 1);
+                contentHandler.characters(content, 0, content.length);
+                contentHandler.endElement(namespaceURI, STYLE, null);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean inlineSheet(final String namespaceURI, final String sheet) throws IOException, SAXException {
+            return inlineSheet(namespaceURI, readSheetContent(sheet).orElse(null));
+        }
     }
 
-    private boolean inlineSheet(final String namespaceURI, final char[] content) throws SAXException {
-        if (content != null) {
-            final ContentHandler contentHandler = getContentHandler();
-            contentHandler.startElement(namespaceURI, STYLE, null, attrs);
-            contentHandler.characters(NEWLINE, 0, 1);
-            contentHandler.characters(content, 0, content.length);
-            contentHandler.endElement(namespaceURI, STYLE, null);
+    final class SelectorAwareCssInlinerTransformer extends DelegatedTransformer {
 
-            return true;
+        private final HtmlLibraryManager htmlLibraryManager;
+
+        public SelectorAwareCssInlinerTransformer(final HtmlLibraryManager htmlLibraryManager) {
+            this.htmlLibraryManager = htmlLibraryManager;
         }
 
-        return false;
-    }
+        @Override
+        public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
+            final SlingHttpServletRequest request = context.getRequest();
+            boolean inlineCss = false;
+            final String[] selectors = request.getRequestPathInfo().getSelectors();
+            for (int i = 0; !inlineCss && i < selectors.length; i++) {
+                inlineCss = "inline-css".equals(selectors[i]);
+            }
 
-    private boolean inlineSheet(final String namespaceURI, final String sheet) throws IOException, SAXException {
-        final char[] content = readSheetContent(sheet);
-        return inlineSheet(namespaceURI, content);
-    }
-}
+            if (inlineCss) {
+                setDelegate(new CssInlinerTransformer());
+            } else {
+                setDelegate(new AbstractTransformer() {
+                });
+            }
 
-final class SelectorAwareCssInlinerTransformer extends DelegatedTransformer {
-
-    private final HtmlLibraryManager htmlLibraryManager;
-
-    public SelectorAwareCssInlinerTransformer(final HtmlLibraryManager htmlLibraryManager) {
-        this.htmlLibraryManager = htmlLibraryManager;
-    }
-
-    @Override
-    public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
-        final SlingHttpServletRequest request = context.getRequest();
-        boolean inlineCss = false;
-        final String[] selectors = request.getRequestPathInfo().getSelectors();
-        for (int i = 0; !inlineCss && i < selectors.length; i++) {
-            inlineCss = "inline-css".equals(selectors[i]);
+            super.init(context, componentConfiguration);
         }
-
-        if (inlineCss) {
-            setDelegate(new CssInlinerTransformer(htmlLibraryManager));
-        } else {
-            setDelegate(new AbstractTransformer() {
-            });
-        }
-
-        super.init(context, componentConfiguration);
     }
 }
