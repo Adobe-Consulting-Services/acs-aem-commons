@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1858 - Fixed issue with legacy dialog type for Shared Component Properties.
 - #1839 - Fixed editing page for system notifications
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
-- Fixed issues in SpreadsheetTest regarding locale.
+- #1882 - Fixed issues in SpreadsheetTest regarding locale.
 
 ## [4.0.0] - 2019-02-20
 
