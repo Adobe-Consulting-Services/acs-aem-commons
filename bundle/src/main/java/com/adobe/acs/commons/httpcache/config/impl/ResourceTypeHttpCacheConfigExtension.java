@@ -74,13 +74,13 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     @Property(label = "Allowed paths",
             description = "Regex of content paths that can be cached.",
             unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
+    static final String PROP_PATHS = "httpcache.config.extension.paths.allowed";
     private List<Pattern> pathPatterns;
 
     @Property(label = "Allowed resource types",
             description = "Regex of resource types that can be cached.",
             unbounded = PropertyUnbounded.ARRAY)
-    private static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
+    static final String PROP_RESOURCE_TYPES = "httpcache.config.extension.resource-types.allowed";
     private List<Pattern> resourceTypePatterns;
 
     @Property(label = "Check RT of ./jcr:content?",
@@ -93,12 +93,13 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     @Property(label = "Check resourceSuperType",
             description = "Should the resourceType check check super Types?",
             boolValue = false)
-    public static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
+    static final String PROP_CHECK_RESOURCE_SUPER_TYPE = "httpcache.config.extension.resource-types.superType";
     private boolean checkResourceSuperType;
 
     @Property(label = "Config Name",
             description = "")
-    private static final String PROP_CONFIG_NAME = "config.name";
+    static final String PROP_CONFIG_NAME = "config.name";
+    private String configName;
 
     //-------------------------<HttpCacheConfigExtension methods>
 
@@ -107,7 +108,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
             HttpCacheRepositoryAccessException {
 
         if (log.isDebugEnabled()) {
-            log.debug("ResourceType acceptance check on [ {} ~> {} ]", request.getResource(), request.getResource().getResourceType());
+            log.debug("ResourceHttpCacheConfigExtension {} : ResourceType acceptance check on [ {} ~> {} ]", configName, request.getResource(), request.getResource().getResourceType());
         }
 
         for (Pattern pattern : pathPatterns) {
@@ -125,7 +126,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
                 return false;
             }
         }
-        log.debug("ResourceHttpCacheConfigExtension checking for resource type matches");
+        log.debug("ResourceHttpCacheConfigExtension {} :  checking for resource type matches", configName);
         // Match resource types.
         return checkResourceType(candidateResource);
     }
@@ -171,7 +172,8 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     protected void activate(Map<String, Object> configs) {
         resourceTypePatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESOURCE_TYPES), new String[]{}));
         pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
-        checkResourceSuperType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE), false);
+        checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE), false);
+        checkResourceSuperType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_RESOURCE_SUPER_TYPE), false);
 
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }
