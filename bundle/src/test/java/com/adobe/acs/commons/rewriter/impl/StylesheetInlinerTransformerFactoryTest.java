@@ -31,9 +31,9 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.junit.After;
@@ -55,7 +55,6 @@ import junitx.util.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StylesheetInlinerTransformerFactoryTest {
-    
 
     @Mock
     private HtmlLibraryManager htmlLibraryManager;
@@ -65,36 +64,38 @@ public class StylesheetInlinerTransformerFactoryTest {
 
     @Mock
     private ContentHandler handler;
-    
+
     @Mock
     private ProcessingContext processingContext;
-    
+
     @Mock
     private SlingHttpServletRequest slingRequest;
-    
+
+    @Mock
+    private RequestPathInfo requestPathInfo;
+
     @Mock
     private ResourceResolver resourceResolver;
-    
-    @Mock 
+
+    @Mock
     private Resource resource;
-    
-    
+
     private StylesheetInlinerTransformerFactory factory;
-    
+
     private Transformer transformer;
 
     private Attributes empty = new AttributesImpl();
-    
+
     private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
     private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
     private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
-    
+
     private static final String CSS_CONTENTS = "div {display:block;}";
     private static final String NEWLINE = "\n";
 
-    
+
     private static final String TEST_DATA = "some test data";
-    
+
 
     @Before
     public void setUp() throws Throwable {
@@ -110,11 +111,11 @@ public class StylesheetInlinerTransformerFactoryTest {
         when(resourceResolver.getResource(eq(NON_EXISTING_PATH))).thenReturn(null);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(processingContext.getRequest()).thenReturn(slingRequest);
-        
+        when(slingRequest.getRequestPathInfo()).thenReturn(requestPathInfo);
+        when(requestPathInfo.getSelectors()).thenReturn(new String[] { "inline-css" });
+
         transformer = factory.createTransformer();
-        PrivateAccessor.invoke(transformer, "init", 
-                new Class[] {ProcessingContext.class, ProcessingComponentConfiguration.class}, 
-                new Object[] {processingContext, null} );
+        transformer.init(processingContext, null);
         transformer.setContentHandler(handler);
     }
 
@@ -139,7 +140,6 @@ public class StylesheetInlinerTransformerFactoryTest {
         verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
     }
 
-    
     @Test
     public void testClientLibReferenceInHead() throws Exception {
 
