@@ -19,13 +19,18 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.rewriter.DelegatedTransformer;
-import com.adobe.granite.ui.clientlibs.HtmlLibrary;
-import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
-import com.adobe.granite.ui.clientlibs.LibraryType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -39,11 +44,11 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.DelegatedTransformer;
+import com.adobe.granite.ui.clientlibs.HtmlLibrary;
+import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
+import com.adobe.granite.ui.clientlibs.LibraryType;
 
 /**
  * ACS AEM Commons - Stylesheet inliner removes stylesheet links the output adds
@@ -67,7 +72,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
     private HtmlLibraryManager htmlLibraryManager;
 
     public Transformer createTransformer() {
-        return new SelectorAwareCssInlinerTransformer(htmlLibraryManager);
+        return new SelectorAwareCssInlinerTransformer();
     }
 
     private final class CssInlinerTransformer extends AbstractTransformer {
@@ -177,12 +182,6 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
     }
 
     final class SelectorAwareCssInlinerTransformer extends DelegatedTransformer {
-
-        private final HtmlLibraryManager htmlLibraryManager;
-
-        public SelectorAwareCssInlinerTransformer(final HtmlLibraryManager htmlLibraryManager) {
-            this.htmlLibraryManager = htmlLibraryManager;
-        }
 
         @Override
         public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
