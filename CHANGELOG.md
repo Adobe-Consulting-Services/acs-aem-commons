@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
+
 ## [4.1.0] - 2019-05-07
 
 ### Added
