@@ -56,7 +56,7 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({ResourceCollectionUtil.class, JcrUtil.class})
 public class WorkflowPackageManagerImplTest {
     private static final String NORMAL_PAGE_PATH = "/content/test";
-    private static final String WORKFLOW_PACKAGE_PATH = "/etc/packages/test";
+    private static final String WORKFLOW_PACKAGE_PATH = "/var/workflow/packages/test";
     private static final String[] PAYLOAD_PATHS = {"/content/one", "/content/two"};
 
     @Mock
@@ -78,6 +78,8 @@ public class WorkflowPackageManagerImplTest {
     Resource workflowPackageResource;
 
     @Mock
+    Resource workflowPackageRootResource;
+    @Mock
     Node workflowPackageNode;
 
     @Mock
@@ -96,6 +98,7 @@ public class WorkflowPackageManagerImplTest {
     public void setUp() throws Exception {
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.getResource("/var/workflow/packages")).thenReturn(workflowPackageRootResource);
         when(resourceResolver.getResource(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackageResource);
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);

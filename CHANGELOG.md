@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
+
 ## [4.1.0] - 2019-05-07
 
 ### Added
