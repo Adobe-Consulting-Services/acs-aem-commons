@@ -121,6 +121,20 @@ public class AssetPackagerServletImplTest {
             "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
             "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg"};
 
+    private final String[] multipleAssetExclusionResults = {"/content/we-retail/language-masters/en/experience",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg"};
+
+    private final String[] multiplePageExclusionResults = {"/content/we-retail/language-masters/en/experience",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
+
     @Before
     public void setup() {
         context.load().json(getClass().getResourceAsStream("AssetPackagerServletContent.json"), "/content/we-retail/language-masters/en/experience");
@@ -202,6 +216,42 @@ public class AssetPackagerServletImplTest {
         assertEquals(filterSets.length(), assetPrefixResults.length);
         for (int i = 0; i < assetPrefixResults.length; i++) {
             assertEquals(filterSets.getJSONObject(i).getString(ROOT_PATH), assetPrefixResults[i]);
+        }
+    }
+
+    @Test
+    public void testMultipleAssetExclusions() throws Exception {
+        context.load().json(getClass().getResourceAsStream("AssetPackagerServletConfiguration5.json"), PACKAGER_CONTENT_PATH);
+        request.setResource(context.resourceResolver().getResource(PACKAGER_JCR_CONTENT_PATH));
+        Map<String, Object> params = new HashMap<>();
+        params.put(PREVIEW, false);
+        request.setParameterMap(params);
+        assetPackagerServlet.doPost(request, response);
+        JSONObject responseJSON = new JSONObject(response.getOutputAsString());
+        assertEquals(responseJSON.getString(STATUS), SUCCESS_MESSAGE);
+        assertEquals(responseJSON.getString(PACKAGE_PATH_PARAM), PACKAGE_PATH);
+        JSONArray filterSets = responseJSON.getJSONArray(FILTER_OBJECT);
+        assertEquals(filterSets.length(), multipleAssetExclusionResults.length);
+        for (int i = 0; i < multipleAssetExclusionResults.length; i++) {
+            assertEquals(filterSets.getJSONObject(i).getString(ROOT_PATH), multipleAssetExclusionResults[i]);
+        }
+    }
+
+    @Test
+    public void testMultiplePageExclusions() throws Exception {
+        context.load().json(getClass().getResourceAsStream("AssetPackagerServletConfiguration6.json"), PACKAGER_CONTENT_PATH);
+        request.setResource(context.resourceResolver().getResource(PACKAGER_JCR_CONTENT_PATH));
+        Map<String, Object> params = new HashMap<>();
+        params.put(PREVIEW, false);
+        request.setParameterMap(params);
+        assetPackagerServlet.doPost(request, response);
+        JSONObject responseJSON = new JSONObject(response.getOutputAsString());
+        assertEquals(responseJSON.getString(STATUS), SUCCESS_MESSAGE);
+        assertEquals(responseJSON.getString(PACKAGE_PATH_PARAM), PACKAGE_PATH);
+        JSONArray filterSets = responseJSON.getJSONArray(FILTER_OBJECT);
+        assertEquals(filterSets.length(), multiplePageExclusionResults.length);
+        for (int i = 0; i < multiplePageExclusionResults.length; i++) {
+            assertEquals(filterSets.getJSONObject(i).getString(ROOT_PATH), multiplePageExclusionResults[i]);
         }
     }
 }
