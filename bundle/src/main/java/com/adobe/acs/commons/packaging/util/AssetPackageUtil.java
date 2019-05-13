@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class AssetPackageUtil {
 
-    protected final static Logger log = LoggerFactory.getLogger(AssetPackageUtil.class);
+    protected static final Logger log = LoggerFactory.getLogger(AssetPackageUtil.class);
 
     /* Property names */
     private static final String PN_PAGE_PATH = "pagePath";
