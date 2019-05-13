@@ -21,33 +21,18 @@
 package com.adobe.acs.commons.packaging.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.jcr.RepositoryException;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
+import com.adobe.acs.commons.packaging.util.AssetPackageUtil;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
-import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
-import org.apache.jackrabbit.vault.fs.filter.DefaultPathFilter;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 /**
  * ACS AEM Commons - Asset Packager Servlet
@@ -62,13 +47,6 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 )
 public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 
-    /* Property names */
-    private static final String PN_PAGE_PATH = "pagePath";
-    private static final String PN_EXCLUDE_PAGES = "excludePages";
-    private static final String PN_ASSET_PREFIX = "assetPrefix";
-    private static final String PN_PAGE_EXCLUSIONS = "pageExclusions";
-    private static final String PN_ASSET_EXCLUSIONS = "assetExclusions";
-
     /* Default Properties */
     private static final String DEFAULT_PACKAGE_NAME = "assets";
     private static final String DEFAULT_PACKAGE_GROUP_NAME = "Assets";
@@ -79,11 +57,6 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 
     @Reference
     private PackageHelper packageHelper;
-
-    private String customPrefix;
-    private List<Pattern> pageExclusionPatterns;
-    private List<Pattern> assetExclusionPatterns;
-    private final List<String> excludedPages = new ArrayList<>();
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -96,23 +69,11 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
 
         final ValueMap properties = this.getProperties(request);
 
-        this.customPrefix = properties.get(PN_ASSET_PREFIX, String.class);
-        this.pageExclusionPatterns = generatePatterns(properties.get(PN_PAGE_EXCLUSIONS, new String[]{}));
-        this.assetExclusionPatterns = generatePatterns(properties.get(PN_ASSET_EXCLUSIONS, new String[]{}));
+        // Instantiate AssetPackageUtil class to run the search in a threadsafe manner
+        AssetPackageUtil assetPackageUtil = new AssetPackageUtil(properties, resourceResolver);
 
         try {
-            final String pagePath = properties.get(PN_PAGE_PATH, String.class);
-            final List<PathFilterSet> packageFilterPaths;
-            if (StringUtils.isBlank(pagePath)) {
-                packageFilterPaths = Collections.emptyList();
-            } else {
-                packageFilterPaths = this.findAssetPaths(resourceResolver, pagePath);
-            }
-
-            // Add the page path as a filter unless it is explicitly excluded
-            this.addPagePath(packageFilterPaths, pagePath, properties.get(PN_EXCLUDE_PAGES, false));
-
-            doPackaging(request, response, preview, properties, packageFilterPaths);
+            doPackaging(request, response, preview, properties, assetPackageUtil.getPackageFilterPaths());
         } catch (RepositoryException ex) {
             log.error("Repository error while creating Asset Package", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
@@ -122,137 +83,6 @@ public class AssetPackagerServletImpl extends AbstractPackagerServlet {
         }
     }
 
-    /**
-     * Takes a list of Strings that should be valid patterns. If they are not then the exception is
-     * logged and the pattern is not added to the list of checked patterns.
-     *
-     * @param input The array of intended patterns
-     * @return The converted array of patterns
-     */
-    private List<Pattern> generatePatterns(String[] input) {
-        final List<Pattern> patterns = new ArrayList<>();
-        for (String item : input) {
-            try {
-                patterns.add(Pattern.compile(item));
-            } catch (PatternSyntaxException e) {
-                log.error("Pattern invalid, skipping. Pattern value: " + item);
-            }
-        }
-        return patterns;
-    }
-
-    /**
-     * Recursively iterate over the parent path specified in the configuration to aggregate all the
-     * String or String Array property values that are referencing a path in the DAM.
-     *
-     * @param resourceResolver Resolver from the current Request
-     * @param pagePath         The page path
-     * @return The full list of filter sets
-     */
-    private List<PathFilterSet> findAssetPaths(final ResourceResolver resourceResolver,
-                                               final String pagePath) {
-
-        final List<PathFilterSet> filters = new ArrayList<>();
-        final Resource parentResource = resourceResolver.resolve(pagePath);
-        if (isExcluded(this.pageExclusionPatterns, pagePath)) {
-            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-            Page page = pageManager.getContainingPage(parentResource);
-            if (!excludedPages.contains(page.getPath())) {
-                excludedPages.add(page.getPath());
-            }
-            return filters;
-        }
-        final ValueMap properties = parentResource.getValueMap();
-
-        // Iterate over property map for Strings and String arrays and optionally add a filter
-        for (String key : properties.keySet()) {
-            final Object value = properties.get(key);
-            if (value instanceof String) {
-                addFilter(filters, (String) value, resourceResolver);
-            } else if (value instanceof String[]) {
-                final String[] arrayValue = (String[]) value;
-                for (String stringValue : arrayValue) {
-                    addFilter(filters, stringValue, resourceResolver);
-                }
-            }
-        }
-
-        // Recurse over child nodes and add the asset references found there.
-        final Iterator<Resource> children = parentResource.listChildren();
-        while (children.hasNext()) {
-            final Resource child = children.next();
-            filters.addAll(findAssetPaths(resourceResolver, child.getPath()));
-        }
-
-        return filters;
-    }
-
-    /**
-     * Optionally adds a single page path to the list of package path filters. Also adds any
-     * exclusions generated when creating the list of asset paths.
-     *
-     * @param currentPaths The current set of path filters
-     * @param pagePath     The page path specified in the packager dialog
-     * @param excludePages The property value for whether the page path should be added to the
-     *                     package
-     */
-    private void addPagePath(List<PathFilterSet> currentPaths, String pagePath, boolean excludePages) {
-        if (!excludePages && currentPaths.size() > 0) {
-            PathFilterSet pageFilter = new PathFilterSet(pagePath);
-            if (excludedPages.size() > 0) {
-                for (String excludedPath : excludedPages) {
-                    pageFilter.addExclude(new DefaultPathFilter(excludedPath));
-                }
-            }
-            currentPaths.add(0, pageFilter);
-        }
-    }
-
-    /**
-     * Adds a property value to the filter set list if it is not empty, referencing the DAM, and is
-     * an actual DAM Asset.
-     *
-     * @param filters The total list of filter sets
-     * @param value   The current property value
-     */
-    private void addFilter(final List<PathFilterSet> filters, final String value,
-                           final ResourceResolver resourceResolver) {
-        if (StringUtils.isNotBlank(value) && DamUtil.isAsset(resourceResolver.getResource(value))
-                && fitsAssetPattern(value)) {
-            filters.add(new PathFilterSet(value));
-        }
-    }
-
-    /**
-     * Checks to see if the passed asset path fits the patterns necessary. It checks the path prefix
-     * as well as seeing if the path is excluded from the aggregation.
-     *
-     * @param assetPath The current asset path property value
-     * @return The boolean result
-     */
-    private boolean fitsAssetPattern(final String assetPath) {
-        boolean startsWith = this.customPrefix != null
-                ? assetPath.startsWith(this.customPrefix)
-                : assetPath.startsWith(DamConstants.MOUNTPOINT_ASSETS);
-        boolean notExcluded = !isExcluded(this.assetExclusionPatterns, assetPath);
-        return startsWith && notExcluded;
-    }
-
-    /**
-     * Checks if the path should be excluded by checking it against the passed pattern list.
-     *
-     * @param patterns The passed list of patterns to check against
-     * @param path     The current path to check
-     * @return The boolean result
-     */
-    private boolean isExcluded(List<Pattern> patterns, String path) {
-        for (Pattern pattern : patterns) {
-            if (pattern.matcher(path).matches()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     protected String getDefaultPackageDescription() {
