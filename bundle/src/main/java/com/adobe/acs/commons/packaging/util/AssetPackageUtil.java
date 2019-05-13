@@ -23,7 +23,9 @@ package com.adobe.acs.commons.packaging.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -55,7 +57,7 @@ public class AssetPackageUtil {
     private String customPrefix;
     private List<Pattern> pageExclusionPatterns;
     private List<Pattern> assetExclusionPatterns;
-    private final List<String> excludedPages;
+    private final Set<String> excludedPages;
     private final ValueMap properties;
     private final ResourceResolver resourceResolver;
 
@@ -65,7 +67,7 @@ public class AssetPackageUtil {
         this.customPrefix = properties.get(PN_ASSET_PREFIX, String.class);
         this.pageExclusionPatterns = generatePatterns(properties.get(PN_PAGE_EXCLUSIONS, new String[]{}));
         this.assetExclusionPatterns = generatePatterns(properties.get(PN_ASSET_EXCLUSIONS, new String[]{}));
-        this.excludedPages = new ArrayList<>();
+        this.excludedPages = new LinkedHashSet<>();
     }
 
     /**
@@ -123,9 +125,7 @@ public class AssetPackageUtil {
         if (isExcluded(this.pageExclusionPatterns, pagePath)) {
             final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
             Page page = pageManager.getContainingPage(parentResource);
-            if (!excludedPages.contains(page.getPath())) {
-                excludedPages.add(page.getPath());
-            }
+            excludedPages.add(page.getPath());
             return filters;
         }
         final ValueMap properties = parentResource.getValueMap();
