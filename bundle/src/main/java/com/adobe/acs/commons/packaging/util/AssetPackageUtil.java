@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class AssetPackageUtil {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    protected final static Logger log = LoggerFactory.getLogger(AssetPackageUtil.class);
 
     /* Property names */
     private static final String PN_PAGE_PATH = "pagePath";
@@ -128,11 +128,11 @@ public class AssetPackageUtil {
             excludedPages.add(page.getPath());
             return filters;
         }
-        final ValueMap properties = parentResource.getValueMap();
+        final ValueMap parentResourceProperties = parentResource.getValueMap();
 
         // Iterate over property map for Strings and String arrays and optionally add a filter
-        for (String key : properties.keySet()) {
-            final Object value = properties.get(key);
+        for (String key : parentResourceProperties.keySet()) {
+            final Object value = parentResourceProperties.get(key);
             if (value instanceof String) {
                 addFilter(filters, (String) value, resourceResolver);
             } else if (value instanceof String[]) {
