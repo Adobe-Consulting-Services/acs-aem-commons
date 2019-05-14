@@ -214,6 +214,7 @@
                                         <include>io.jsonwebtoken:jjwt</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
+                                        <include>javax.annotation:javax.annotation-api</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
@@ -730,6 +731,9 @@
             <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
     </dependencies>
 </project>
