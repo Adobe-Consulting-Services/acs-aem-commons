@@ -6,6 +6,8 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
+
+### Added
 - #1795 - Added the Asset Content Packager
 
 ## [4.1.0] - 2019-05-07
