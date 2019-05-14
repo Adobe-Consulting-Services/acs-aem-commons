@@ -1,4 +1,5 @@
 (function(){
+
   // new coral text field to be use as filter input
   function newFilterTextField() {
     var filter = new Coral.Textfield();
@@ -6,6 +7,7 @@
     filter.placeholder = "filter";
     return filter;
   }
+
   /**
    * validates some assumptions about the select element structure:
    *  1. it must have a coral-overlay child.
@@ -19,6 +21,7 @@
     // coral-overlay must exist & coral-selectlist must exist & coral-selectlist must have items.
     return !!overlay && !!selectList && !!items;
   }
+
   /**
    * Hides all items on the selectListEl that do not conatain the filterText, ignoring case.
    * @param {*} selectListEl the "coral-selectlist" element.
@@ -70,9 +73,11 @@
     });
   }
 
+  // listen for component initialization (AEM component dialogs or otherwise)
   $(document).on("foundation-contentloaded", function(e) {
     var container = e.target;
     $("coral-select", container)
+    .filter("[data-acs-select-filter]") // only elements with attribute data-acs-select-filter
     .each(function (i, el) {
       Coral.commons.ready(el, function(selectEl) {
         initFilter(selectEl);
