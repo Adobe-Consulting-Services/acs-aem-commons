@@ -81,56 +81,56 @@ public class AssetPackagerServletImplTest {
     private static final String PACKAGER_JCR_CONTENT_PATH = PACKAGER_CONTENT_PATH + "/" + NameConstants.NN_CONTENT;
 
     private final String[] previewResults = {"/content/we-retail/language-masters/en/experience",
-            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
+            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg",
             "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
-            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg"};
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
 
     private final String[] assetExclusionResults = {"/content/we-retail/language-masters/en/experience",
-            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
             "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg"};
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
 
     private final String[] pageExclusionResults = {"/content/we-retail/language-masters/en/experience",
-            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
-            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg"};
+            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
 
     private final String[] assetPrefixResults = {"/content/we-retail/language-masters/en/experience",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
+            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg",
             "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-01.jpg",
-            "/content/dam/we-retail/en/experiences/48-hours-of-wilderness/48-hours-of-wilderness-1.jpg"};
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten"};
 
     private final String[] multipleAssetExclusionResults = {"/content/we-retail/language-masters/en/experience",
-            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg",
             "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/northern-lights.jpg",
-            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/majestic-rainbow.jpg"};
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-fire.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/camp-tent.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-wave-02.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/surfer-ready-to-go.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/fjord-waves.jpg",
+            "/content/dam/we-retail/en/experiences/arctic-surfing-in-lofoten/arctic-surfing-in-lofoten",
+            "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
 
     private final String[] multiplePageExclusionResults = {"/content/we-retail/language-masters/en/experience",
             "/content/dam/we-retail/en/activities/hiking-camping/trekker-ama-dablam.jpg"};
