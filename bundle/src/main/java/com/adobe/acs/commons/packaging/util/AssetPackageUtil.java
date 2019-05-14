@@ -77,16 +77,19 @@ public class AssetPackageUtil {
      */
     public List<PathFilterSet> getPackageFilterPaths() {
         final String pagePath = properties.get(PN_PAGE_PATH, String.class);
-        final List<PathFilterSet> packageFilterPaths;
+        final Set<PathFilterSet> packageFilterPathSet;
         if (StringUtils.isBlank(pagePath)) {
-            packageFilterPaths = Collections.emptyList();
+            packageFilterPathSet = Collections.emptySet();
         } else {
-            packageFilterPaths = this.findAssetPaths(resourceResolver, pagePath);
+            packageFilterPathSet = this.findAssetPaths(resourceResolver, pagePath);
         }
 
         // Add the page path as a filter unless it is explicitly excluded
-        this.addPagePath(packageFilterPaths, pagePath, properties.get(PN_EXCLUDE_PAGES, false));
+        this.addPagePath(packageFilterPathSet, pagePath, properties.get(PN_EXCLUDE_PAGES, false));
 
+        List<PathFilterSet> packageFilterPaths = new ArrayList<>(packageFilterPathSet);
+        // Reverse the new list to put the page inclusion at the top
+        Collections.reverse(packageFilterPaths);
         return packageFilterPaths;
     }
 
@@ -117,10 +120,10 @@ public class AssetPackageUtil {
      * @param pagePath         The page path
      * @return The full list of filter sets
      */
-    private List<PathFilterSet> findAssetPaths(final ResourceResolver resourceResolver,
+    private Set<PathFilterSet> findAssetPaths(final ResourceResolver resourceResolver,
                                                final String pagePath) {
 
-        final List<PathFilterSet> filters = new ArrayList<>();
+        final Set<PathFilterSet> filters = new LinkedHashSet<>();
         final Resource parentResource = resourceResolver.resolve(pagePath);
         if (isExcluded(this.pageExclusionPatterns, pagePath)) {
             final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
@@ -162,7 +165,7 @@ public class AssetPackageUtil {
      * @param excludePages The property value for whether the page path should be added to the
      *                     package
      */
-    private void addPagePath(List<PathFilterSet> currentPaths, String pagePath, boolean excludePages) {
+    private void addPagePath(Set<PathFilterSet> currentPaths, String pagePath, boolean excludePages) {
         if (!excludePages && currentPaths.size() > 0) {
             PathFilterSet pageFilter = new PathFilterSet(pagePath);
             if (excludedPages.size() > 0) {
@@ -170,7 +173,7 @@ public class AssetPackageUtil {
                     pageFilter.addExclude(new DefaultPathFilter(excludedPath));
                 }
             }
-            currentPaths.add(0, pageFilter);
+            currentPaths.add(pageFilter);
         }
     }
 
@@ -181,7 +184,7 @@ public class AssetPackageUtil {
      * @param filters The total list of filter sets
      * @param value   The current property value
      */
-    private void addFilter(final List<PathFilterSet> filters, final String value,
+    private void addFilter(final Set<PathFilterSet> filters, final String value,
                            final ResourceResolver resourceResolver) {
         if (StringUtils.isNotBlank(value) && DamUtil.isAsset(resourceResolver.getResource(value))
                 && fitsAssetPattern(value)) {
