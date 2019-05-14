@@ -31,6 +31,7 @@ import java.util.regex.PatternSyntaxException;
 
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
@@ -104,6 +105,9 @@ public class AssetPackageUtil {
         final List<Pattern> patterns = new ArrayList<>();
         for (String item : input) {
             try {
+                if (StringUtils.isBlank(item)) {
+                    continue;
+                }
                 patterns.add(Pattern.compile(item));
             } catch (PatternSyntaxException e) {
                 log.error("Pattern invalid, skipping. Pattern value: " + item);
@@ -126,6 +130,9 @@ public class AssetPackageUtil {
         final Set<PathFilterSet> filters = new LinkedHashSet<>();
         final Resource parentResource = resourceResolver.resolve(pagePath);
         if (isExcluded(this.pageExclusionPatterns, pagePath)) {
+            if (pagePath.endsWith("/" + NameConstants.NN_CONTENT)) {
+                return filters;
+            }
             final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
             Page page = pageManager.getContainingPage(parentResource);
             excludedPages.add(page.getPath());
@@ -216,7 +223,17 @@ public class AssetPackageUtil {
      */
     private boolean isExcluded(List<Pattern> patterns, String path) {
         for (Pattern pattern : patterns) {
+
+            // Check the current path against the actual pattern (supporting regex)
             if (pattern.matcher(path).matches()) {
+                return true;
+            }
+
+            // Check the current path against the literal string of the path (supporting folder
+            // exclusion without needing /.* at the end of a folder for assets)
+            String literalPattern = pattern.toString();
+            literalPattern = literalPattern.endsWith("/") ? literalPattern : literalPattern + "/";
+            if (path.startsWith(literalPattern)) {
                 return true;
             }
         }
