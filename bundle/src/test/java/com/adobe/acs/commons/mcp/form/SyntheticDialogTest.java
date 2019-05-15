@@ -133,7 +133,8 @@ public class SyntheticDialogTest {
         assertEquals("Tab 3 should be third", "3", children.next().getValueMap().get("jcr:title"));
         assertEquals("Tab 4 should be fourth", "4", children.next().getValueMap().get("jcr:title"));
         // Check if additionalTestArea is last
-        tabs.children.get(3).getChild("items");
+        AbstractResourceImpl tab4 = (AbstractResourceImpl) tabs.children.get(3).getChild("items");
+        assertEquals("additionalTextArea should be last", "additionalTextArea", tab4.children.get(1).getName());
     }
 
     public static class ComponentWithClientLibraries extends FieldComponent {
