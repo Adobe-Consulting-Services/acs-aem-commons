@@ -96,21 +96,6 @@ public class AuthorizablePackagerServletImpl extends AbstractPackagerServlet {
         }
     }
 
-    /**
-     * Gets the properties saved to the Query Packager Page's jcr:content node.
-     *
-     * @param request the request obj
-     * @return a ValueMap representing the properties
-     */
-    private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if (request.getResource().getChild("configuration") == null) {
-            log.warn("Authorizable Packager Configuration node could not be found for: {}", request.getResource());
-            return new ValueMapDecorator(new HashMap<String, Object>());
-        } else {
-            return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
-        }
-    }
-
     private List<PathFilterSet> findPaths(final ResourceResolver resourceResolver,
                                          final String[] authorizableIds) throws RepositoryException {
 
