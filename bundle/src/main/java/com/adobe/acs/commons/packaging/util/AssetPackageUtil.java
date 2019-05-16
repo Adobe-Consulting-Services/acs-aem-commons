@@ -135,7 +135,11 @@ public class AssetPackageUtil {
             }
             final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
             Page page = pageManager.getContainingPage(parentResource);
-            excludedPages.add(page.getPath());
+            if (page != null) {
+                excludedPages.add(page.getPath());
+            } else {
+                excludedPages.add(parentResource.getPath());
+            }
             return filters;
         }
         final ValueMap parentResourceProperties = parentResource.getValueMap();
