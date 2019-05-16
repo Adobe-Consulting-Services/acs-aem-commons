@@ -5,7 +5,13 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## [4.2.0]
+
+### Added
+- #1880 - Granite Select Filter
+
+### Added
+- #1795 - Added the Asset Content Packager
 
 ### Fixed
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
@@ -27,6 +33,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
+- #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
