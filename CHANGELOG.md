@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
+
 ## [4.1.0] - 2019-05-07
 
 ### Added
