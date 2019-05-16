@@ -5,7 +5,10 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## [4.2.0]
+
+### Added
+- #1880 - Granite Select Filter
 
 ### Fixed
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
