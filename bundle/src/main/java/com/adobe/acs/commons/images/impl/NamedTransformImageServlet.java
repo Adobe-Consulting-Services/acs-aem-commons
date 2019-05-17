@@ -204,7 +204,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
-
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
 
@@ -250,7 +249,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @return the transformed Image layer
      */
     protected final Layer transform(Layer layer, final ValueMap imageTransformersWithParams) {
-
         for (final String type : imageTransformersWithParams.keySet()) {
             if (StringUtils.equals(TYPE_QUALITY, type)) {
                 // Do not process the "quality" transform in the usual manner
@@ -354,7 +352,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, renditionResource.getPath());
             return image;
-
         } else if (DamUtil.isRendition(resource)
                 || resourceResolver.isResourceType(resource, JcrConstants.NT_FILE)
                 || resourceResolver.isResourceType(resource, JcrConstants.NT_RESOURCE)) {
@@ -362,14 +359,21 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, resource.getPath());
             return image;
-
         } else if (page != null) {
+            Resource contentResource = page.getContentResource();
             if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
-                    || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
+                    || StringUtils.equals(resource.getPath(), contentResource.getPath())) {
                 // Is a Page or Page's Content Resource; use the Page's image resource
-                return new Image(page.getContentResource(), NAME_IMAGE);
-            } else {
-                return new Image(resource);
+                Page current = page;
+                while (current != null && current.getContentResource(NAME_IMAGE) == null) {
+                    current = current.getParent();
+                }
+
+                if (current != null) {
+                    contentResource = current.getContentResource();
+                }
+
+                return new Image(contentResource, NAME_IMAGE);
             }
         } else {
             if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
