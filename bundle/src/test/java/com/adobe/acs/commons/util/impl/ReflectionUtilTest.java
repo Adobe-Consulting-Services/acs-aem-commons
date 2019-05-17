@@ -60,12 +60,14 @@ public class ReflectionUtilTest {
         public Set<Integer> integerSet;
         public Collection<Long> longCollection;
         public Float[] floatArray;
-        public AtomicInteger atomicInteger;
+        public Number atomicInteger;
+        public String string;
+        public CharSequence charSequence;
     }
 
     @Before
     public void setUp() {
-        HashMap<String, Object> map = new HashMap();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("myIntegerField", 22);
         map.put("myIntegerArray", new Integer[]{22, 33});
         map.put("myDoubleArray", new Double[]{11.11, 22.22});
@@ -145,8 +147,17 @@ public class ReflectionUtilTest {
                     assertFalse(isSetType(type));
                     assertFalse(isCollectionType(type));
                     assertFalse(isArray(type));
-                    assertTrue(isAssignableFrom(type, Number.class));
-                    assertSame(AtomicInteger.class, getClassOrGenericParam(type));
+                    assertTrue(isAssignableFrom(type, AtomicInteger.class));
+                    assertSame(Number.class, getClassOrGenericParam(type));
+                    break;
+                case "string":
+                    assertTrue(isAssignableFrom(type, String.class));
+                    assertFalse(isAssignableFrom(type, CharSequence.class));
+                    break;
+                case "charSequence":
+                    assertTrue(isAssignableFrom(type, String.class));
+                    assertTrue(isAssignableFrom(type, CharSequence.class));
+                    assertFalse(isAssignableFrom(type, Number.class));
                     break;
                 default:
                     break;
