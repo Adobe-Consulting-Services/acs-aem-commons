@@ -34,17 +34,17 @@ public class DelegatedTransformer implements Transformer {
 
     private Transformer delegate;
 
-    public void setDelegate(Transformer delegate) {
+    public void setDelegate(final Transformer delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
+    public void init(final ProcessingContext context, final ProcessingComponentConfiguration componentConfiguration) throws IOException {
         delegate.init(context, componentConfiguration);
     }
 
     @Override
-    public void setContentHandler(ContentHandler contentHandler) {
+    public void setContentHandler(final ContentHandler contentHandler) {
         delegate.setContentHandler(contentHandler);
     }
 
@@ -54,7 +54,7 @@ public class DelegatedTransformer implements Transformer {
     }
 
     @Override
-    public void setDocumentLocator(Locator locator) {
+    public void setDocumentLocator(final Locator locator) {
         delegate.setDocumentLocator(locator);
     }
 
@@ -69,42 +69,43 @@ public class DelegatedTransformer implements Transformer {
     }
 
     @Override
-    public void startPrefixMapping(String prefix, String uri) throws SAXException {
+    public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
         delegate.startPrefixMapping(prefix, uri);
     }
 
     @Override
-    public void endPrefixMapping(String prefix) throws SAXException {
+    public void endPrefixMapping(final String prefix) throws SAXException {
         delegate.endPrefixMapping(prefix);
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        delegate.startElement(uri, localName, qName, atts);
+    public void startElement(final String uri, final String localName, final String qName, final Attributes attrs) throws SAXException {
+        delegate.startElement(uri, localName, qName, attrs);
     }
 
     @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
+    public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         delegate.endElement(uri, localName, qName);
     }
 
     @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
+    public void characters(final char[] ch, final int start, final int length) throws SAXException {
         delegate.characters(ch, start, length);
     }
 
     @Override
-    public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+    public void ignorableWhitespace(final char[] ch, final int start, final int length) throws SAXException {
         delegate.ignorableWhitespace(ch, start, length);
     }
 
     @Override
-    public void processingInstruction(String target, String data) throws SAXException {
+    public void processingInstruction(final String target, final String data) throws SAXException {
         delegate.processingInstruction(target, data);
     }
 
     @Override
-    public void skippedEntity(String name) throws SAXException {
+    public void skippedEntity(final String name) throws SAXException {
         delegate.skippedEntity(name);
     }
+
 }

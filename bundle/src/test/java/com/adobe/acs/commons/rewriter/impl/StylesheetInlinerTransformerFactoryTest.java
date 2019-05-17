@@ -24,10 +24,10 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -36,7 +36,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +53,22 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 import junitx.util.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StylesheetInlinerTransformerFactoryTest {
+public final class StylesheetInlinerTransformerFactoryTest {
+
+    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
+    private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
+    private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
+
+    private static final String CSS_CONTENTS = "div {display:block;}";
+    private static final String NEWLINE = "\n";
+
+    private static final String TEST_DATA = "some test data";
+
+    private StylesheetInlinerTransformerFactory factory = new StylesheetInlinerTransformerFactory();
+
+    private final Transformer transformer = factory.createTransformer();
+
+    private final Attributes empty = new AttributesImpl();
 
     @Mock
     private HtmlLibraryManager htmlLibraryManager;
@@ -80,32 +94,15 @@ public class StylesheetInlinerTransformerFactoryTest {
     @Mock
     private Resource resource;
 
-    private StylesheetInlinerTransformerFactory factory;
-
-    private Transformer transformer;
-
-    private Attributes empty = new AttributesImpl();
-
-    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
-    private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
-    private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
-
-    private static final String CSS_CONTENTS = "div {display:block;}";
-    private static final String NEWLINE = "\n";
-
-
-    private static final String TEST_DATA = "some test data";
-
 
     @Before
-    public void setUp() throws Throwable {
-        factory = new StylesheetInlinerTransformerFactory();
+    public void setUp() throws NoSuchFieldException, IOException {
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
 
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(CLIENTLIB_PATH))).thenReturn(htmlLibrary);
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), not(eq(CLIENTLIB_PATH)))).thenReturn(null);
-        when( slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
+        when(slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
         when(resource.adaptTo(eq(InputStream.class))).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(resourceResolver.getResource(eq(CSS_RESOURCE_PATH + ".css" ))).thenReturn(resource);
         when(resourceResolver.getResource(eq(NON_EXISTING_PATH))).thenReturn(null);
@@ -114,20 +111,12 @@ public class StylesheetInlinerTransformerFactoryTest {
         when(slingRequest.getRequestPathInfo()).thenReturn(requestPathInfo);
         when(requestPathInfo.getSelectors()).thenReturn(new String[] { "inline-css" });
 
-        transformer = factory.createTransformer();
         transformer.init(processingContext, null);
         transformer.setContentHandler(handler);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        reset(htmlLibraryManager, htmlLibrary, handler);
-        transformer = null;
-    }
-
     @Test
-    public void testNoop() throws Exception {
-
+    public void testNoop() throws SAXException {
         startHeadSection(empty);
         startBodySection(empty);
         endBodySection();
@@ -141,8 +130,7 @@ public class StylesheetInlinerTransformerFactoryTest {
     }
 
     @Test
-    public void testClientLibReferenceInHead() throws Exception {
-
+    public void testClientLibReferenceInHead() throws SAXException {
         startHeadSection(empty);
         addStylesheetLink(CLIENTLIB_PATH);
         startBodySection(empty);
@@ -158,8 +146,7 @@ public class StylesheetInlinerTransformerFactoryTest {
     }
 
     @Test
-    public void testClientLibReferenceInBody() throws Exception {
-
+    public void testClientLibReferenceInBody() throws SAXException {
         startHeadSection(empty);
         startBodySection(empty);
         addDiv(empty);
@@ -178,8 +165,7 @@ public class StylesheetInlinerTransformerFactoryTest {
 
 
     @Test
-    public void testResourceReferenceInHead() throws Exception {
-
+    public void testResourceReferenceInHead() throws SAXException {
         startHeadSection(empty);
         addStylesheetLink(CSS_RESOURCE_PATH);
         startBodySection(empty);
@@ -195,8 +181,7 @@ public class StylesheetInlinerTransformerFactoryTest {
     }
 
     @Test
-    public void testResourceReferenceInBody() throws Exception {
-
+    public void testResourceReferenceInBody() throws SAXException {
         startHeadSection(empty);
         startBodySection(empty);
         addDiv(empty);
@@ -215,8 +200,7 @@ public class StylesheetInlinerTransformerFactoryTest {
 
 
     @Test
-    public void testNonExistingResource() throws Exception {
-
+    public void testNonExistingResource() throws SAXException {
         startHeadSection(empty);
         addStylesheetLink(NON_EXISTING_PATH);
         startBodySection(empty);
