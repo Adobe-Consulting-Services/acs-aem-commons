@@ -72,7 +72,7 @@ public class TagReportTest {
   @Test
   public void testTraverseTags() throws Exception {
 
-    tagReporter.path = "/etc/tags/workflow";
+    tagReporter.tagPath = "/etc/tags/workflow";
 
     tagReporter.traverseTags(actionManager);
     assertEquals(11, tagReporter.getReportRows().size());
@@ -90,7 +90,7 @@ public class TagReportTest {
   @Test
   public void testInvalidRoot() throws Exception {
 
-    tagReporter.path = "/etc/tags/totally-a-tag";
+    tagReporter.tagPath = "/etc/tags/totally-a-tag";
 
     tagReporter.traverseTags(actionManager);
     assertEquals(1, tagReporter.getReportRows().size());

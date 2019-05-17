@@ -21,13 +21,21 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.jcr.RepositoryException;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -36,10 +44,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.form.CheckboxComponent;
+import com.adobe.acs.commons.mcp.form.Description;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
+import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.RangeIterator;
@@ -55,8 +67,18 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     FAILURE, INVALID_TAG, SUCCESS
   }
 
+  public enum ReferenceMethod {
+
+    @Description("Quicker method, requires the references to be in a cq:tags field of a cq:Taggable node (or mixin)")
+    DEFAULT_TAG_MANAGER_FIND,
+
+    @Description("Slower method, will find references in any attribute, but runs a full text search for each tag")
+    DEEP_SEARCH
+
+  }
+
   public enum REPORT_COLUMNS {
-    REFERENCE_COUNT, STATUS, TAG_ID, TAG_TITLE
+    REFERENCE_COUNT, REFERENCES, STATUS, TAG_ID, TAG_TITLE
   }
 
   private static final Logger log = LoggerFactory.getLogger(TagReporter.class);
@@ -64,21 +86,73 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   public static final String PROCESS_NAME = "Tag Report";
 
   private static final long serialVersionUID = 4325471295421747160L;
-  @FormField(name = "Root Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
+
+  @FormField(name = "Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
       "default=/content/cq:tags", "base=/" })
-  public transient String path = null;
+  public transient String tagPath = null;
+
+  @FormField(name = "Root Search path", description = "The path under which to search for references to the tags", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
+      "default=/content", "base=/" })
+  public transient String rootSearchPath = null;
+
+  @FormField(name = "Include References", description = "Include the references to the tags in the report", component = CheckboxComponent.class)
+  private boolean includeReferences = false;
+
+  @FormField(name = "Reference Method", description = "The method used for finding references to the tag", component = RadioComponent.EnumerationSelector.class, options = {
+      "vertical", "default=DEFAULT_TAG_FIND" })
+  public ReferenceMethod referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
+
   private final transient GenericReport report = new GenericReport();
 
   private final transient List<EnumMap<REPORT_COLUMNS, Object>> reportRows = new ArrayList<>();
 
-  private transient TagManager tagManager;
+  private List<Pair<String, String>> tags = new ArrayList<>();
 
   @Override
   public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
     log.trace("buildProcess");
     report.setName(instance.getName());
-    instance.getInfo().setDescription(String.format("Report for tags under [ %s ]", path));
+    instance.getInfo()
+        .setDescription(String.format("Report for tags under [ %s ], referenced from [ %s ]", tagPath, rootSearchPath));
     instance.defineCriticalAction("Traversing tags", rr, this::traverseTags);
+
+    instance.defineCriticalAction("Finding references", rr, this::recordTags);
+  }
+
+  private void findReferencesDeep(ResourceResolver resolver, String id, String title) {
+    ReferenceFinder referenceFinder = new ReferenceFinder(resolver, id, this.rootSearchPath, true);
+    if (this.includeReferences) {
+      record(ITEM_STATUS.SUCCESS, id, title,
+          referenceFinder.getAllReferences().stream().map(Pair::getLeft).collect(Collectors.toSet()));
+    } else {
+      record(ITEM_STATUS.SUCCESS, id, title, referenceFinder.getAllReferences().size());
+    }
+  }
+
+  private void findReferencesTM(ResourceResolver resolver, String id, String title) {
+    TagManager tagManager = resolver.adaptTo(TagManager.class);
+    RangeIterator<Resource> refs = Optional.ofNullable(tagManager)
+        .map(tm -> tm.find(this.rootSearchPath, new String[] { id })).orElse(null);
+    List<String> references = new ArrayList<>();
+
+    if (refs != null) {
+      int count = 0;
+      while (refs.hasNext()) {
+        count++;
+        Resource ref = refs.next();
+        if (this.includeReferences) {
+          references.add(ref.getPath());
+        }
+      }
+      if (this.includeReferences) {
+        record(ITEM_STATUS.SUCCESS, id, title, references);
+      } else {
+        record(ITEM_STATUS.SUCCESS, id, title, count);
+      }
+    } else {
+      log.debug("TagManager failed to return reference list for: {}", id);
+      record(ITEM_STATUS.INVALID_TAG, id, title, -1);
+    }
   }
 
   public GenericReport getReport() {
@@ -94,6 +168,20 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     // nothing to do here
   }
 
+  private void record(ITEM_STATUS status, String tagId, String title, Collection<String> references) {
+    final EnumMap<REPORT_COLUMNS, Object> row = new EnumMap<>(REPORT_COLUMNS.class);
+
+    row.put(REPORT_COLUMNS.STATUS, StringUtil.getFriendlyName(status.name()));
+    row.put(REPORT_COLUMNS.TAG_ID, tagId);
+    row.put(REPORT_COLUMNS.REFERENCE_COUNT, references.size());
+    row.put(REPORT_COLUMNS.TAG_TITLE, title);
+    if (this.includeReferences) {
+      row.put(REPORT_COLUMNS.REFERENCES, StringUtils.join(references, ",\n"));
+    }
+
+    reportRows.add(row);
+  }
+
   private void record(ITEM_STATUS status, String tagId, String title, long referenceCount) {
     final EnumMap<REPORT_COLUMNS, Object> row = new EnumMap<>(REPORT_COLUMNS.class);
 
@@ -105,28 +193,30 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     reportRows.add(row);
   }
 
-  private void recordTag(Tag tag) {
+  private void recordTag(ResourceResolver resolver, Pair<String, String> tag) {
     log.trace("recordTag {}", tag);
-
-    RangeIterator<Resource> it = tagManager.find(tag.getTagID());
-    if (it != null) {
-      long count = it.getSize();
-      if (count == -1) {
-        count = 0L;
-        while (it.hasNext()) {
-          count++;
-          it.next();
-        }
+    String id = tag.getLeft();
+    String title = tag.getRight();
+    try {
+      if (this.referenceMethod == ReferenceMethod.DEEP_SEARCH) {
+        findReferencesDeep(resolver, id, title);
+      } else {
+        findReferencesTM(resolver, id, title);
       }
-      record(ITEM_STATUS.SUCCESS, tag.getTagID(), tag.getTitle(), count);
-    } else {
-      record(ITEM_STATUS.INVALID_TAG, tag.getTagID(), tag.getTitle(), -1);
+    } catch (Exception e) {
+      log.warn("Failed to find references to tag due to exception", e);
+      record(ITEM_STATUS.INVALID_TAG, id, title, -1);
     }
+  }
 
-    Iterator<Tag> children = tag.listChildren();
-    while (children.hasNext()) {
-      recordTag(children.next());
-    }
+  public void recordTags(ActionManager manager) {
+    log.trace("recordReferences");
+
+    this.tags.forEach(t -> manager.deferredWithResolver(resolver -> {
+      log.debug("Recording references to: {}", t.getLeft());
+      Actions.setCurrentItem(String.format("Recording references to [ %s ]", t.getLeft()));
+      recordTag(resolver, t);
+    }));
   }
 
   @Override
@@ -140,14 +230,30 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   public void traverseTags(ActionManager manager) throws Exception {
     log.trace("traverseTags");
     manager.withResolver(resolver -> {
-      tagManager = resolver.adaptTo(TagManager.class);
-      Tag rootTag = Optional.ofNullable(resolver.getResource(path)).map(r -> r.adaptTo(Tag.class)).orElse(null);
-      if (rootTag == null) {
-        log.warn("Failed to find tag at path: {}", path);
-        record(ITEM_STATUS.FAILURE, "Failed to find tag at path: " + path, "N/A", 0);
+      Resource root = resolver.getResource(tagPath);
+      log.info("Finding tags under: {}", root);
+      if (root != null) {
+        List<Tag> roots = Optional.ofNullable(root.adaptTo(Tag.class)).map(Collections::singletonList)
+            .orElse(StreamSupport.stream(root.getChildren().spliterator(), false).map(c -> {
+              log.debug("Checking if child resource {} is a tag", c);
+              return c.adaptTo(Tag.class);
+            }).filter(Objects::nonNull).collect(Collectors.toList()));
+        roots.forEach(this::traverseTags);
       } else {
-        recordTag(rootTag);
+        log.warn("Failed to find resource at path: {}", tagPath);
+        record(ITEM_STATUS.FAILURE, "Failed to find resource at path: " + tagPath, "N/A", -1);
       }
+
     });
+  }
+
+  private void traverseTags(Tag tag) {
+    log.debug("traverseTags({})", tag.getTagID());
+    Actions.setCurrentItem("Traversing tags: "+tag.getTagID());
+    this.tags.add(new ImmutablePair<String, String>(tag.getTagID(), tag.getTitle()));
+    Iterator<Tag> children = tag.listChildren();
+    while (children.hasNext()) {
+      traverseTags(children.next());
+    }
   }
 }
