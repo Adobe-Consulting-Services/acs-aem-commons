@@ -83,38 +83,38 @@ public final class NamedTransformImageServletTest {
 
     @Before
     public void setUp() {
-    	final Map<Object, Object> props = new HashMap<>();
-    	servlet.bindImageTransformers(null, props);
-    	servlet.bindNamedImageTransformers(null, props);
+        final Map<Object, Object> props = new HashMap<>();
+        servlet.bindImageTransformers(null, props);
+        servlet.bindNamedImageTransformers(null, props);
 
-    	props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
-    	servlet.bindImageTransformers(resizeImageTransformer, props);
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
+        servlet.bindImageTransformers(resizeImageTransformer, props);
 
-    	props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_GREYSCALE);
-    	servlet.bindImageTransformers(greyscaleImageTransformer, props);
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_GREYSCALE);
+        servlet.bindImageTransformers(greyscaleImageTransformer, props);
 
-    	props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
-    	servlet.bindNamedImageTransformers(featureImageTransformer, props);
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
+        servlet.bindNamedImageTransformers(featureImageTransformer, props);
 
-    	props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_SMALL);
-    	servlet.bindNamedImageTransformers(smallImageTransformer, props);
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_SMALL);
+        servlet.bindNamedImageTransformers(smallImageTransformer, props);
     }
 
     @Test
     public void testBinders() {
-    	final Map<Object, Object> props = new HashMap<>();
+        final Map<Object, Object> props = new HashMap<>();
 
-    	servlet.bindImageTransformers(null, props);
-    	servlet.bindNamedImageTransformers(null, props);
+        servlet.bindImageTransformers(null, props);
+        servlet.bindNamedImageTransformers(null, props);
 
-    	servlet.unbindImageTransformers(null, props);
-    	servlet.unbindNamedImageTransformers(null, props);
+        servlet.unbindImageTransformers(null, props);
+        servlet.unbindNamedImageTransformers(null, props);
 
-    	props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
-    	servlet.unbindImageTransformers(resizeImageTransformer, props);
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
+        servlet.unbindImageTransformers(resizeImageTransformer, props);
 
-    	props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
-    	servlet.unbindNamedImageTransformers(featureImageTransformer, props);
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
+        servlet.unbindNamedImageTransformers(featureImageTransformer, props);
 
         assertFalse(servlet.accepts(request));
     }
