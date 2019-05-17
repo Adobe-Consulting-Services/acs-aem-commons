@@ -121,7 +121,7 @@ import java.util.regex.Pattern;
         )
 })
 @Service(Servlet.class)
-public final class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
+public class NamedTransformImageServlet extends SlingSafeMethodsServlet implements OptingServlet {
 
     private static final Logger log = LoggerFactory.getLogger(NamedTransformImageServlet.class);
 
@@ -514,7 +514,7 @@ public final class NamedTransformImageServlet extends SlingSafeMethodsServlet im
     }
 
     @Activate
-    protected final void activate(final Map<String, String> properties) throws Exception {
+    protected final void activate(final Map<String, String> properties) {
         final String regex = PropertiesUtil.toString(properties.get(PROP_ASSET_RENDITION_PICKER_REGEX),
                 DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
