@@ -5,13 +5,17 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [4.2.0]
-
-### Added
-- #1880 - Granite Select Filter
+## Unreleased
 
 ### Added
 - #1795 - Added the Asset Content Packager
+- #1880 - Granite Select Filter
+
+### Fixed
+- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
+
+### Fixed
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
