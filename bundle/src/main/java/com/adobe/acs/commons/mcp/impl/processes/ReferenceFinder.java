@@ -1,10 +1,30 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.jcr.query.Query;
 
@@ -41,29 +61,21 @@ public class ReferenceFinder {
 
   private final List<Pair<String, String>> allReferences = new ArrayList<>();
 
-  private final List<String> publishedReferences = new ArrayList<>();
+  private final boolean exact;
 
-  private String reference;
-  private boolean exact;
+  private final List<String> publishedReferences = new ArrayList<>();
+  private final String reference;
 
   public ReferenceFinder(ResourceResolver resolver, String reference, String searchRoot, boolean exact) {
-
-    log.trace("Finding references to {}", reference);
-    this.reference = reference;
     this.exact = exact;
-    String query = "SELECT * FROM [nt:base] AS s WHERE ISDESCENDANTNODE([" + searchRoot + "]) AND CONTAINS(s.*, '"
-        + Text.escapeIllegalXpathSearchChars(reference) + "')";
+    this.reference = reference;
     Set<String> paths = new HashSet<>();
-
-    Iterator<Resource> resources = resolver.findResources(query, Query.JCR_SQL2);
-    log.trace("Checking for references with: {}", query);
-    while (resources.hasNext()) {
-      Resource r = resources.next();
+    findReferences(resolver, reference, searchRoot).forEach(r -> {
       if (!paths.contains(r.getPath())) {
         checkReferences(r);
         paths.add(r.getPath());
       }
-    }
+    });
   }
 
   private void addReference(Resource resource, String key) {
@@ -81,22 +93,41 @@ public class ReferenceFinder {
     ValueMap properties = resource.getValueMap();
     properties.keySet().forEach(k -> {
       if (properties.get(k) instanceof String) {
-        String value = properties.get(k, "");
-        if (reference.equals(value) || (!exact && value.contains(reference))) {
-          log.trace("Found reference in property {}@{}", resource.getPath(), k);
-          addReference(resource, k);
-        }
+        checkStringReference(resource, properties, k);
       } else if (properties.get(k) instanceof String[]) {
-        for (String v : properties.get(k, String[].class)) {
-          if (reference.equals(v) || (!exact && v != null && v.contains(reference))) {
-            log.trace("Found reference in property {}@{}", resource.getPath(), k);
-            addReference(resource, k);
-            break;
-          }
-        }
+        checkStringArrayReference(resource, properties, k);
       }
 
     });
+  }
+
+  private void checkStringArrayReference(Resource resource, ValueMap properties, String k) {
+    for (String v : properties.get(k, String[].class)) {
+      if (reference.equals(v) || (!exact && v != null && v.contains(reference))) {
+        log.trace("Found reference in property {}@{}", resource.getPath(), k);
+        addReference(resource, k);
+        break;
+      }
+    }
+  }
+
+  private void checkStringReference(Resource resource, ValueMap properties, String k) {
+    String value = properties.get(k, "");
+    if (reference.equals(value) || (!exact && value.contains(reference))) {
+      log.trace("Found reference in property {}@{}", resource.getPath(), k);
+      addReference(resource, k);
+    }
+  }
+
+  protected Stream<Resource> findReferences(ResourceResolver resolver, String reference, String searchRoot) {
+    log.trace("Finding references to {}", reference);
+    String query = "SELECT * FROM [nt:base] AS s WHERE ISDESCENDANTNODE([" + searchRoot + "]) AND CONTAINS(s.*, '"
+        + Text.escapeIllegalXpathSearchChars(reference) + "')";
+
+    log.trace("Checking for references with: {}", query);
+    Iterable<Resource> resources = () -> resolver.findResources(query, Query.JCR_SQL2);
+
+    return StreamSupport.stream(resources.spliterator(), false);
   }
 
   public List<Pair<String, String>> getAllReferences() {

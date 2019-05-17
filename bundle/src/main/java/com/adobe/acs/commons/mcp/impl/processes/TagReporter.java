@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import com.day.cq.tagging.TagManager;
  * are referenced
  */
 public class TagReporter extends ProcessDefinition implements Serializable {
-  public enum ITEM_STATUS {
+  public enum ItemStatus {
     FAILURE, INVALID_TAG, SUCCESS
   }
 
@@ -77,7 +77,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   }
 
-  public enum REPORT_COLUMNS {
+  public enum ReportColumns {
     REFERENCE_COUNT, REFERENCES, STATUS, TAG_ID, TAG_TITLE
   }
 
@@ -96,7 +96,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   public transient String rootSearchPath = null;
 
   @FormField(name = "Include References", description = "Include the references to the tags in the report", component = CheckboxComponent.class)
-  private boolean includeReferences = false;
+  public boolean includeReferences = false;
 
   @FormField(name = "Reference Method", description = "The method used for finding references to the tag", component = RadioComponent.EnumerationSelector.class, options = {
       "vertical", "default=DEFAULT_TAG_FIND" })
@@ -104,7 +104,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private final transient GenericReport report = new GenericReport();
 
-  private final transient List<EnumMap<REPORT_COLUMNS, Object>> reportRows = new ArrayList<>();
+  private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
   private List<Pair<String, String>> tags = new ArrayList<>();
 
@@ -122,14 +122,14 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   private void findReferencesDeep(ResourceResolver resolver, String id, String title) {
     ReferenceFinder referenceFinder = new ReferenceFinder(resolver, id, this.rootSearchPath, true);
     if (this.includeReferences) {
-      record(ITEM_STATUS.SUCCESS, id, title,
+      record(ItemStatus.SUCCESS, id, title,
           referenceFinder.getAllReferences().stream().map(Pair::getLeft).collect(Collectors.toSet()));
     } else {
-      record(ITEM_STATUS.SUCCESS, id, title, referenceFinder.getAllReferences().size());
+      record(ItemStatus.SUCCESS, id, title, referenceFinder.getAllReferences().size());
     }
   }
 
-  private void findReferencesTM(ResourceResolver resolver, String id, String title) {
+  private void findReferencesTagMgr(ResourceResolver resolver, String id, String title) {
     TagManager tagManager = resolver.adaptTo(TagManager.class);
     RangeIterator<Resource> refs = Optional.ofNullable(tagManager)
         .map(tm -> tm.find(this.rootSearchPath, new String[] { id })).orElse(null);
@@ -145,13 +145,13 @@ public class TagReporter extends ProcessDefinition implements Serializable {
         }
       }
       if (this.includeReferences) {
-        record(ITEM_STATUS.SUCCESS, id, title, references);
+        record(ItemStatus.SUCCESS, id, title, references);
       } else {
-        record(ITEM_STATUS.SUCCESS, id, title, count);
+        record(ItemStatus.SUCCESS, id, title, count);
       }
     } else {
       log.debug("TagManager failed to return reference list for: {}", id);
-      record(ITEM_STATUS.INVALID_TAG, id, title, -1);
+      record(ItemStatus.INVALID_TAG, id, title, -1);
     }
   }
 
@@ -159,7 +159,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     return report;
   }
 
-  public List<EnumMap<REPORT_COLUMNS, Object>> getReportRows() {
+  public List<EnumMap<ReportColumns, Object>> getReportRows() {
     return reportRows;
   }
 
@@ -168,27 +168,27 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     // nothing to do here
   }
 
-  private void record(ITEM_STATUS status, String tagId, String title, Collection<String> references) {
-    final EnumMap<REPORT_COLUMNS, Object> row = new EnumMap<>(REPORT_COLUMNS.class);
+  private void record(ItemStatus status, String tagId, String title, Collection<String> references) {
+    final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
-    row.put(REPORT_COLUMNS.STATUS, StringUtil.getFriendlyName(status.name()));
-    row.put(REPORT_COLUMNS.TAG_ID, tagId);
-    row.put(REPORT_COLUMNS.REFERENCE_COUNT, references.size());
-    row.put(REPORT_COLUMNS.TAG_TITLE, title);
+    row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
+    row.put(ReportColumns.TAG_ID, tagId);
+    row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
+    row.put(ReportColumns.TAG_TITLE, title);
     if (this.includeReferences) {
-      row.put(REPORT_COLUMNS.REFERENCES, StringUtils.join(references, ",\n"));
+      row.put(ReportColumns.REFERENCES, StringUtils.join(references, ",\n"));
     }
 
     reportRows.add(row);
   }
 
-  private void record(ITEM_STATUS status, String tagId, String title, long referenceCount) {
-    final EnumMap<REPORT_COLUMNS, Object> row = new EnumMap<>(REPORT_COLUMNS.class);
+  private void record(ItemStatus status, String tagId, String title, long referenceCount) {
+    final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
-    row.put(REPORT_COLUMNS.STATUS, StringUtil.getFriendlyName(status.name()));
-    row.put(REPORT_COLUMNS.TAG_ID, tagId);
-    row.put(REPORT_COLUMNS.REFERENCE_COUNT, referenceCount);
-    row.put(REPORT_COLUMNS.TAG_TITLE, title);
+    row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
+    row.put(ReportColumns.TAG_ID, tagId);
+    row.put(ReportColumns.REFERENCE_COUNT, referenceCount);
+    row.put(ReportColumns.TAG_TITLE, title);
 
     reportRows.add(row);
   }
@@ -201,11 +201,11 @@ public class TagReporter extends ProcessDefinition implements Serializable {
       if (this.referenceMethod == ReferenceMethod.DEEP_SEARCH) {
         findReferencesDeep(resolver, id, title);
       } else {
-        findReferencesTM(resolver, id, title);
+        findReferencesTagMgr(resolver, id, title);
       }
     } catch (Exception e) {
       log.warn("Failed to find references to tag due to exception", e);
-      record(ITEM_STATUS.INVALID_TAG, id, title, -1);
+      record(ItemStatus.INVALID_TAG, id, title, -1);
     }
   }
 
@@ -223,7 +223,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   public void storeReport(ProcessInstance instance, ResourceResolver rr)
       throws RepositoryException, PersistenceException {
     log.trace("storeReport");
-    report.setRows(reportRows, REPORT_COLUMNS.class);
+    report.setRows(reportRows, ReportColumns.class);
     report.persist(rr, instance.getPath() + "/jcr:content/report");
   }
 
@@ -241,7 +241,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
         roots.forEach(this::traverseTags);
       } else {
         log.warn("Failed to find resource at path: {}", tagPath);
-        record(ITEM_STATUS.FAILURE, "Failed to find resource at path: " + tagPath, "N/A", -1);
+        record(ItemStatus.FAILURE, "Failed to find resource at path: " + tagPath, "N/A", -1);
       }
 
     });
@@ -249,7 +249,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private void traverseTags(Tag tag) {
     log.debug("traverseTags({})", tag.getTagID());
-    Actions.setCurrentItem("Traversing tags: "+tag.getTagID());
+    Actions.setCurrentItem("Traversing tags: " + tag.getTagID());
     this.tags.add(new ImmutablePair<String, String>(tag.getTagID(), tag.getTitle()));
     Iterator<Tag> children = tag.listChildren();
     while (children.hasNext()) {
