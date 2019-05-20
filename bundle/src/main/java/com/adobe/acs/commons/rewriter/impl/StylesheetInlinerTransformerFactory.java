@@ -77,8 +77,8 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
 
     private final class CssInlinerTransformer extends AbstractTransformer {
 
-        private static final String STYLE = "style";
         private static final String HEAD = "head";
+        private static final String STYLE = "style";
 
         private final Attributes attrs = new AttributesImpl();
 
@@ -94,6 +94,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
             log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
         }
 
+        @Override
         public void startElement(final String namespaceURI, final String localName, final String qName,
                                  final Attributes attrs) throws SAXException {
             try {
@@ -116,15 +117,15 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
                 } else {
                     contentHandler.startElement(namespaceURI, localName, qName, attrs);
                 }
-            } catch (Exception e) {
+            } catch (final IOException | SAXException e) {
                 log.error("Exception in stylesheet inliner", e);
                 throw new SAXException(e);
             }
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            if (localName.equalsIgnoreCase(HEAD)) {
+        public void endElement(final String uri, final String localName, final String qName) throws SAXException {
+            if (HEAD.equalsIgnoreCase(localName)) {
                 afterHeadElement = true;
                 try {
                     // add each of the accumulated stylesheet references
@@ -137,6 +138,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
                     throw new SAXException(e);
                 }
             }
+
             getContentHandler().endElement(uri, localName, qName);
         }
 
@@ -184,7 +186,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
     final class SelectorAwareCssInlinerTransformer extends DelegatingTransformer {
 
         @Override
-        public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
+        public void init(final ProcessingContext context, final ProcessingComponentConfiguration componentConfiguration) throws IOException {
             final SlingHttpServletRequest request = context.getRequest();
             boolean inlineCss = false;
             final String[] selectors = request.getRequestPathInfo().getSelectors();

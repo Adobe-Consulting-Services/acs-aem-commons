@@ -55,7 +55,15 @@ import junitx.util.PrivateAccessor;
 @RunWith(MockitoJUnitRunner.class)
 public final class StylesheetInlinerTransformerFactoryTest {
 
-    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
+	private static final String CDATA = "CDATA";
+	private static final String HTML = "html";
+	private static final String HEAD = "head";
+	private static final String BODY = "body";
+	private static final String STYLE = "style";
+	private static final String DIV = "div";
+    private static final String LINK = "link";
+
+	private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
     private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
     private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
 
@@ -94,7 +102,6 @@ public final class StylesheetInlinerTransformerFactoryTest {
     @Mock
     private Resource resource;
 
-
     @Before
     public void setUp() throws NoSuchFieldException, IOException {
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
@@ -117,145 +124,154 @@ public final class StylesheetInlinerTransformerFactoryTest {
 
     @Test
     public void testNoop() throws SAXException {
-        startHeadSection(empty);
-        startBodySection(empty);
+        startHeadSection();
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
     @Test
     public void testClientLibReferenceInHead() throws SAXException {
-        startHeadSection(empty);
+        startHeadSection();
         addStylesheetLink(CLIENTLIB_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
     @Test
     public void testClientLibReferenceInBody() throws SAXException {
-        startHeadSection(empty);
-        startBodySection(empty);
-        addDiv(empty);
+        startHeadSection();
+        startBodySection();
+        addDiv();
         addStylesheetLink(CLIENTLIB_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
-
 
     @Test
     public void testResourceReferenceInHead() throws SAXException {
-        startHeadSection(empty);
+        startHeadSection();
         addStylesheetLink(CSS_RESOURCE_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
     @Test
     public void testResourceReferenceInBody() throws SAXException {
-        startHeadSection(empty);
-        startBodySection(empty);
-        addDiv(empty);
+        startHeadSection();
+        startBodySection();
+        addDiv();
         addStylesheetLink(CSS_RESOURCE_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
-
 
     @Test
     public void testNonExistingResource() throws SAXException {
-        startHeadSection(empty);
+        startHeadSection();
         addStylesheetLink(NON_EXISTING_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
-
 
     private void endBodySection() throws SAXException {
-        transformer.endElement(null, "body", null);
-        transformer.endElement(null, "html", null);
+        transformer.endElement(null, BODY, null);
+        transformer.endElement(null, HTML, null);
     }
 
-    private void startBodySection(Attributes atts) throws SAXException {
-        transformer.endElement(null, "head", null);
-        transformer.startElement(null, "body", null, atts);
+    private void startBodySection(final Attributes atts) throws SAXException {
+        transformer.endElement(null, HEAD, null);
+        transformer.startElement(null, BODY, null, atts);
     }
 
-    private void addDiv(Attributes atts) throws SAXException {
-        transformer.startElement(null, "div", null, atts);
+    private void startBodySection() throws SAXException {
+    	startBodySection(empty);
+    }
+
+    private void addDiv(final Attributes atts) throws SAXException {
+        transformer.startElement(null, DIV, null, atts);
         transformer.characters( TEST_DATA.toCharArray(), 0, TEST_DATA.length());
-        transformer.endElement(null, "div", null);
+        transformer.endElement(null, DIV, null);
+    }
+
+    private void addDiv() throws SAXException {
+    	addDiv(empty);
     }
 
     private void verifyDiv() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq("div"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(DIV), isNull(String.class), eq(empty));
         verify(handler).characters(TEST_DATA.toCharArray(), 0, TEST_DATA.length());
-        verify(handler).endElement(isNull(String.class), eq("div"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(DIV), isNull(String.class));
     }
 
     private void verifyInlineStyle() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq("style"), isNull(String.class), any(org.xml.sax.Attributes.class));
+        verify(handler).startElement(isNull(String.class), eq(STYLE), isNull(String.class), any(Attributes.class));
         verify(handler).characters(NEWLINE.toCharArray(), 0, NEWLINE.length());
         verify(handler).characters(CSS_CONTENTS.toCharArray(), 0, CSS_CONTENTS.length());
-        verify(handler).endElement(isNull(String.class), eq("style"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(STYLE), isNull(String.class));
     }
 
-    private void startHeadSection(Attributes atts) throws SAXException {
-        transformer.startElement(null, "html", null, atts);
-        transformer.startElement(null, "head", null, atts);
+    private void startHeadSection(final Attributes atts) throws SAXException {
+        transformer.startElement(null, HTML, null, atts);
+        transformer.startElement(null, HEAD, null, atts);
     }
 
-    private void addStylesheetLink(String path) throws SAXException {
+    private void startHeadSection() throws SAXException {
+    	startHeadSection(empty);
+    }
+
+    private void addStylesheetLink(final String path) throws SAXException {
         final AttributesImpl in = new AttributesImpl();
-        in.addAttribute("", "href", "", "CDATA", path + ".css");
-        in.addAttribute("", "type", "", "CDATA", "text/css");
-        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+        in.addAttribute("", "href", "", CDATA, path + ".css");
+        in.addAttribute("", "type", "", CDATA, "text/css");
+        in.addAttribute("", "rel", "", CDATA, "stylesheet");
 
-        transformer.startElement(null, "link", null, in);
-        transformer.endElement(null, "link", null);
+        transformer.startElement(null, LINK, null, in);
+        transformer.endElement(null, LINK, null);
     }
 }
