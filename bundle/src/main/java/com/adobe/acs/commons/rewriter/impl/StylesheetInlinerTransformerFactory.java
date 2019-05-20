@@ -133,7 +133,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
                         log.debug("Inlining sheet found in HEAD: '{}'", entry.getKey());
                         inlineSheet(uri, entry.getValue());
                     }
-                } catch (Exception e) {
+                } catch (final SAXException e) {
                     log.error("Exception in stylesheet inliner", e);
                     throw new SAXException(e);
                 }
@@ -151,7 +151,6 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
                 inputStream = library.getInputStream();
             } else {
                 final Resource resource = slingRequest.getResourceResolver().getResource(sheet);
-
                 if (resource != null) {
                     inputStream = resource.adaptTo(InputStream.class);
                 }
@@ -197,8 +196,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
             if (inlineCss) {
                 setDelegate(new CssInlinerTransformer());
             } else {
-                setDelegate(new AbstractTransformer() {
-                });
+                setDelegate(new AbstractTransformer());
             }
 
             super.init(context, componentConfiguration);

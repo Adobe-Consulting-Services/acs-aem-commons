@@ -38,6 +38,10 @@ public class DelegatingTransformer implements Transformer {
         this.delegate = delegate;
     }
 
+    public Transformer getDelegate() {
+        return delegate;
+    }
+
     @Override
     public void init(final ProcessingContext context, final ProcessingComponentConfiguration componentConfiguration) throws IOException {
         delegate.init(context, componentConfiguration);

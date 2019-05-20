@@ -36,6 +36,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.DelegatingTransformer;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -225,6 +228,18 @@ public final class StylesheetInlinerTransformerFactoryTest {
         startBodySection();
         addStylesheetLink(CSS_RESOURCE_PATH + "-incorrect");
         verify(handler).startElement(isNull(String.class), eq(LINK), isNull(String.class), any(Attributes.class));
+    }
+
+    @Test
+    public void testDefaultTransformer() throws IOException {
+        when(requestPathInfo.getSelectors()).thenReturn(new String[] { });
+        if (transformer instanceof DelegatingTransformer) {
+        	final DelegatingTransformer transformer = (DelegatingTransformer) this.transformer;
+            transformer.init(processingContext, null);
+            Assert.assertTrue(AbstractTransformer.class.equals(transformer.getDelegate().getClass()));
+        } else {
+        	Assert.fail("The transformer should be of a certain inner type.");
+        }
     }
 
     private void endBodySection() throws SAXException {
