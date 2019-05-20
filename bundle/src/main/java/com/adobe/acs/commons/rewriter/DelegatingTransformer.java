@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 
 
-public class DelegatedTransformer implements Transformer {
+public class DelegatingTransformer implements Transformer {
 
     private Transformer delegate;
 

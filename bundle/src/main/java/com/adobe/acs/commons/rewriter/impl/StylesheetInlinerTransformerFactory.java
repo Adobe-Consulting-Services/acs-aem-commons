@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import com.adobe.acs.commons.rewriter.AbstractTransformer;
-import com.adobe.acs.commons.rewriter.DelegatedTransformer;
+import com.adobe.acs.commons.rewriter.DelegatingTransformer;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -181,7 +181,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         }
     }
 
-    final class SelectorAwareCssInlinerTransformer extends DelegatedTransformer {
+    final class SelectorAwareCssInlinerTransformer extends DelegatingTransformer {
 
         @Override
         public void init(ProcessingContext context, ProcessingComponentConfiguration componentConfiguration) throws IOException {
