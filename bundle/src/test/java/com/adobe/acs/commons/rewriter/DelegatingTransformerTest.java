@@ -42,7 +42,7 @@ public final class DelegatingTransformerTest {
 
     @Before
     public void setUp() {
-    	delegating.setDelegate(transformer);
+        delegating.setDelegate(transformer);
     }
 
     @Test

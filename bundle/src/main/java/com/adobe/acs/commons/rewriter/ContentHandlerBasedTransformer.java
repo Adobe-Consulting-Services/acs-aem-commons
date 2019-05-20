@@ -53,6 +53,7 @@ public class ContentHandlerBasedTransformer implements Transformer {
      */
     @Override
     public void dispose() {
+        // Nothing to dispose here
     }
 
     /**
@@ -89,6 +90,7 @@ public class ContentHandlerBasedTransformer implements Transformer {
     @Override
     public void init(final ProcessingContext context, final ProcessingComponentConfiguration config)
             throws IOException {
+        // Nothing to init here
     }
 
     /**

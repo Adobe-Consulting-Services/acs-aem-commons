@@ -58,15 +58,15 @@ import junitx.util.PrivateAccessor;
 @RunWith(MockitoJUnitRunner.class)
 public final class StylesheetInlinerTransformerFactoryTest {
 
-	private static final String CDATA = "CDATA";
-	private static final String HTML = "html";
-	private static final String HEAD = "head";
-	private static final String BODY = "body";
-	private static final String STYLE = "style";
-	private static final String DIV = "div";
+    private static final String CDATA = "CDATA";
+    private static final String HTML = "html";
+    private static final String HEAD = "head";
+    private static final String BODY = "body";
+    private static final String STYLE = "style";
+    private static final String DIV = "div";
     private static final String LINK = "link";
 
-	private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
+    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
     private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
     private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
 
@@ -234,11 +234,11 @@ public final class StylesheetInlinerTransformerFactoryTest {
     public void testDefaultTransformer() throws IOException {
         when(requestPathInfo.getSelectors()).thenReturn(new String[] { });
         if (transformer instanceof DelegatingTransformer) {
-        	final DelegatingTransformer transformer = (DelegatingTransformer) this.transformer;
+            final DelegatingTransformer transformer = (DelegatingTransformer) this.transformer;
             transformer.init(processingContext, null);
             Assert.assertTrue(ContentHandlerBasedTransformer.class.equals(transformer.getDelegate().getClass()));
         } else {
-        	Assert.fail("The transformer should be of a certain inner type.");
+            Assert.fail("The transformer should be of a certain inner type.");
         }
     }
 
@@ -253,7 +253,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
     }
 
     private void startBodySection() throws SAXException {
-    	startBodySection(empty);
+        startBodySection(empty);
     }
 
     private void addDiv(final Attributes atts) throws SAXException {
@@ -263,7 +263,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
     }
 
     private void addDiv() throws SAXException {
-    	addDiv(empty);
+        addDiv(empty);
     }
 
     private void verifyDiv() throws SAXException {
@@ -285,7 +285,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
     }
 
     private void startHeadSection() throws SAXException {
-    	startHeadSection(empty);
+        startHeadSection(empty);
     }
 
     private void addStylesheetLink(final String path) throws SAXException {
