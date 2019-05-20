@@ -47,7 +47,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.rewriter.DelegatingTransformer;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
@@ -236,7 +236,7 @@ public final class StylesheetInlinerTransformerFactoryTest {
         if (transformer instanceof DelegatingTransformer) {
         	final DelegatingTransformer transformer = (DelegatingTransformer) this.transformer;
             transformer.init(processingContext, null);
-            Assert.assertTrue(AbstractTransformer.class.equals(transformer.getDelegate().getClass()));
+            Assert.assertTrue(ContentHandlerBasedTransformer.class.equals(transformer.getDelegate().getClass()));
         } else {
         	Assert.fail("The transformer should be of a certain inner type.");
         }

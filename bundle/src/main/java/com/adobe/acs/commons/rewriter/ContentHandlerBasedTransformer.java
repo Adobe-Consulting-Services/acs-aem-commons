@@ -37,7 +37,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * Similar to Cocoon's AbstractSAXPipe.
  */
 @ConsumerType
-public class AbstractTransformer implements Transformer {
+public class ContentHandlerBasedTransformer implements Transformer {
 
     private ContentHandler contentHandler;
 

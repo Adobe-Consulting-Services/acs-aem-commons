@@ -44,7 +44,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.rewriter.DelegatingTransformer;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
@@ -75,7 +75,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         return new SelectorAwareCssInlinerTransformer();
     }
 
-    private final class CssInlinerTransformer extends AbstractTransformer {
+    private final class CssInlinerTransformer extends ContentHandlerBasedTransformer {
 
         private static final String HEAD = "head";
         private static final String STYLE = "style";
@@ -196,7 +196,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
             if (inlineCss) {
                 setDelegate(new CssInlinerTransformer());
             } else {
-                setDelegate(new AbstractTransformer());
+                setDelegate(new ContentHandlerBasedTransformer());
             }
 
             super.init(context, componentConfiguration);
