@@ -219,6 +219,14 @@ public final class StylesheetInlinerTransformerFactoryTest {
         verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
+    @Test
+    public void testUnsuccessfulInlineSheet() throws SAXException {
+        startHeadSection();
+        startBodySection();
+        addStylesheetLink(CSS_RESOURCE_PATH + "-incorrect");
+        verify(handler).startElement(isNull(String.class), eq(LINK), isNull(String.class), any(Attributes.class));
+    }
+
     private void endBodySection() throws SAXException {
         transformer.endElement(null, BODY, null);
         transformer.endElement(null, HTML, null);
