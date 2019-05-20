@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 
+### Fixed
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
+
 ## [4.1.0] - 2019-05-07
 
 ### Added
