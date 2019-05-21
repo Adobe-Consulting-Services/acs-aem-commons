@@ -194,9 +194,9 @@ public final class EnsureGroup implements EnsureAuthorizable {
         org.apache.jackrabbit.api.security.user.Group jcrGroup = findGroup(resourceResolver, group.getPrincipalName());
 
         ensureAce.removeAces(resourceResolver, jcrGroup, group);
-        ensureRemoveMembership(jcrGroup);
 
         if (jcrGroup != null) {
+            ensureRemoveMembership(jcrGroup);
             jcrGroup.remove();
         }
     }
