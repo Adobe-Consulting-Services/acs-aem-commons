@@ -20,13 +20,13 @@
 package com.adobe.acs.commons.reports.models;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
+import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 
 import java.util.Optional;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
-
 
 /**
  * An exporter for exporting the containing page.
@@ -38,7 +38,7 @@ public class ContainingPageReportCellCSVExporter implements ReportCellCSVExporte
   public String getValue(Object obj) {
     Resource result = (Resource) obj;
     PageManager pageMgr = result.getResourceResolver().adaptTo(PageManager.class);
-    return Optional.ofNullable(pageMgr).map(p -> p.getContainingPage(result)).map(p -> p.getPath()).orElse(null);
+    return Optional.ofNullable(pageMgr).map(p -> p.getContainingPage(result)).map(Page::getPath).orElse("");
   }
 
 }
