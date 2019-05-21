@@ -199,14 +199,13 @@ public class AbstractResourceImpl extends AbstractResource {
         return rr;
     }
 
-    @Override
-    public AbstractResourceImpl clone() {
+    public AbstractResourceImpl cloneResource() {
         ResourceMetadata clonedMetadata = new ResourceMetadata();
         if (meta != null) {
             clonedMetadata.putAll(meta);
         }
         AbstractResourceImpl clone = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), clonedMetadata);
-        getChildren().forEach(child -> clone.addChild(((AbstractResourceImpl) child).clone()));
+        getChildren().forEach(child -> clone.addChild(((AbstractResourceImpl) child).cloneResource()));
         return clone;
     }
 
