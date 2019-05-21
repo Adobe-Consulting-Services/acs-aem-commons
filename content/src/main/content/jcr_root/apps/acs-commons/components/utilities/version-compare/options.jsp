@@ -1,7 +1,7 @@
 <div class="options">
     <h2 acs-coral-heading>Configuration</h2>
-    <label acs-coral-checkbox><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
-    <label acs-coral-checkbox><input type="checkbox" ng-model="app.hideUnchanged"><span>Hide Unchanged</span></label>
+    <label acs-coral-checkbox><input type="checkbox" ng-model="app.paintConnections"/><span>Paint Connections</span></label>
+    <label acs-coral-checkbox><input type="checkbox" ng-model="app.hideUnchanged"/><span>Hide Unchanged</span></label>
 </div>
 <div class="options">
     <h2 acs-coral-heading>Hide Versions</h2>
