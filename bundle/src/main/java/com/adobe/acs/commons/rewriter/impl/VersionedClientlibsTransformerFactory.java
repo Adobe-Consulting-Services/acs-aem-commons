@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
@@ -322,7 +322,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
     }
 
-    private class VersionableClientlibsTransformer extends AbstractTransformer {
+    private class VersionableClientlibsTransformer extends ContentHandlerBasedTransformer {
 
         private SlingHttpServletRequest request;
 

@@ -62,6 +62,10 @@ import java.util.Map;
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
 
+    private static final String WORKFLOW_PACKAGES_PATH = "/var/workflow/packages";
+
+    private static final String LEGACY_WORKFLOW_PACKAGES_PATH = "/etc/workflow/packages";
+
     private static final String WORKFLOW_PACKAGE_TEMPLATE = "/libs/cq/workflow/templates/collectionpage";
 
     private static final String NT_VLT_DEFINITION = "vlt:PackageDefinition";
@@ -110,7 +114,8 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        String bucketPath = "/etc/workflow/packages";
+        String bucketPath = getBucketPath(resourceResolver);
+
         if (StringUtils.isNotBlank(bucketSegment)) {
             bucketPath += "/" + bucketSegment;
         }
@@ -252,6 +257,15 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         rules = new String[]{rootInclude, contentInclude};
 
         return rules;
+    }
+
+    private String getBucketPath(final ResourceResolver resourceResolver) {
+        if (resourceResolver.getResource(WORKFLOW_PACKAGES_PATH) != null) {
+            return WORKFLOW_PACKAGES_PATH;
+        } else {
+            return LEGACY_WORKFLOW_PACKAGES_PATH;
+        }
+
     }
 
     @Activate

@@ -37,7 +37,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * Similar to Cocoon's AbstractSAXPipe.
  */
 @ConsumerType
-public abstract class AbstractTransformer implements Transformer {
+public class ContentHandlerBasedTransformer implements Transformer {
 
     private ContentHandler contentHandler;
 
@@ -53,6 +53,7 @@ public abstract class AbstractTransformer implements Transformer {
      */
     @Override
     public void dispose() {
+        // Nothing to dispose here
     }
 
     /**
@@ -89,6 +90,7 @@ public abstract class AbstractTransformer implements Transformer {
     @Override
     public void init(final ProcessingContext context, final ProcessingComponentConfiguration config)
             throws IOException {
+        // Nothing to init here
     }
 
     /**
