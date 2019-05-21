@@ -83,8 +83,8 @@ public class AbstractResourceImpl extends AbstractResource {
             String originalName = res.getName();
             String name = originalName;
             int seq = 1;
-            while (getChild(name) != null) {
-                originalName += (seq++);
+            while (getChildNamed(name) != null) {
+                name = originalName + (seq++);
             }
             AbstractResourceImpl child = ((AbstractResourceImpl) res);
             child.parent = this;
