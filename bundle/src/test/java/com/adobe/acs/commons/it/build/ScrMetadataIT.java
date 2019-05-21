@@ -89,6 +89,12 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportCSVExportServlet:service.vendor");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportsRenderCondition:service.vendor");
 
+        // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/1852
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.topics");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.filter");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.packages.automatic.impl.ConfigurationUpdateListener:event.topics");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.packages.automatic.impl.ConfigurationUpdateListener:event.filter");
+
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");

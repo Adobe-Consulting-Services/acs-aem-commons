@@ -23,25 +23,21 @@ package com.adobe.acs.commons.wcm.notifications.impl;
 import static com.day.cq.wcm.api.NameConstants.NT_PAGE;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 
-import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
-import com.adobe.acs.commons.util.CookieUtil;
-import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -49,8 +45,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.AbstractResourceVisitor;
@@ -59,18 +53,24 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
+import org.apache.sling.api.resource.observation.ResourceChange;
+import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.settings.SlingSettingsService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.http.injectors.AbstractHtmlRequestInjector;
+import com.adobe.acs.commons.util.CookieUtil;
+import com.adobe.acs.commons.wcm.notifications.SystemNotifications;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+
 @Component(immediate = true)
 @Service(value = SystemNotifications.class)
-public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, EventHandler {
+public class SystemNotificationsImpl extends AbstractHtmlRequestInjector implements SystemNotifications, ResourceChangeListener, ExternalResourceChangeListener {
     private static final Logger log = LoggerFactory.getLogger(SystemNotificationsImpl.class);
 
     public static final String COOKIE_NAME = "acs-commons-system-notifications";
@@ -102,7 +102,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     private ComponentContext osgiComponentContext;
 
-    private ServiceRegistration eventHandlerRegistration;
+    private ServiceRegistration<ResourceChangeListener> eventHandlerRegistration;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -220,44 +220,33 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
 
     @SuppressWarnings("squid:S1149")
     private void registerAsEventHandler() {
-            final Hashtable filterProps = new Hashtable<String, String>();
+            final Hashtable<String, Object> filterProps = new Hashtable<>();
 
             // Listen on Add and Remove under /etc/acs-commons/notifications
-
-            // TODO: Register a Resource Change Listener instead as per the deprecation notes
-            // https://sling.apache.org/apidocs/sling9/org/apache/sling/api/resource/observation/ResourceChangeListener.html
-            filterProps.put(EventConstants.EVENT_TOPIC,
+            filterProps.put(ResourceChangeListener.CHANGES,
                     new String[]{
-                            SlingConstants.TOPIC_RESOURCE_ADDED,
-                            SlingConstants.TOPIC_RESOURCE_REMOVED });
+                            ResourceChange.ChangeType.ADDED.name(),
+                            ResourceChange.ChangeType.REMOVED.name() });
 
-            filterProps.put(EventConstants.EVENT_FILTER, "(&"
-                    + "(" + SlingConstants.PROPERTY_PATH + "=" + SystemNotificationsImpl.PATH_NOTIFICATIONS + "/*)"
-                    + ")");
+            filterProps.put(ResourceChangeListener.PATHS, new String[]{ SystemNotificationsImpl.PATH_NOTIFICATIONS });
 
             this.eventHandlerRegistration =
-                    this.osgiComponentContext.getBundleContext().registerService(EventHandler.class.getName(), this,
+                    this.osgiComponentContext.getBundleContext().registerService(ResourceChangeListener.class, this,
                             filterProps);
 
-            log.debug("Registered System Notifications as Event Handler");
+            log.debug("Registered System Notifications as Resource Change Listener");
     }
 
     @Override
-    public void handleEvent(final Event event) {
+    public void onChange(final List<ResourceChange> changes) {
         final long start = System.currentTimeMillis();
 
         if (!this.isAuthor()) {
-            log.warn("This event handler should ONLY run on AEM Author.");
+            log.warn("This change listener should ONLY run on AEM Author.");
             return;
         }
 
         /** The following code will ONLY execute on AEM Author **/
-
-        final String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
-        if (StringUtils.endsWith(path, JcrConstants.JCR_CONTENT)) {
-            // Ignore jcr:content nodes; Only handle events for cq:Page
-            return;
-        }
 
         if (this.hasNotifications()) {
             if (!this.isFilter.getAndSet(true)) {
@@ -271,7 +260,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
         }
 
         if (System.currentTimeMillis() - start > 2500) {
-            log.warn("Event handling for System notifications took [ {} ] ms. Event blacklisting occurs after 5000 ms.",
+            log.warn("Change handling for System notifications took [ {} ] ms.",
                     System.currentTimeMillis() - start);
         }
     }
