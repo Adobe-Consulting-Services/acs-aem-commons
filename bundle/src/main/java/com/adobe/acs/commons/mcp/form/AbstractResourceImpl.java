@@ -199,6 +199,7 @@ public class AbstractResourceImpl extends AbstractResource {
         return rr;
     }
 
+    @Override
     public AbstractResourceImpl clone() {
         ResourceMetadata clonedMetadata = new ResourceMetadata();
         if (meta != null) {
@@ -211,6 +212,6 @@ public class AbstractResourceImpl extends AbstractResource {
 
     public void disableMergeResourceProvider() {
         getResourceMetadata().put("sling:hideChildren", "*");
-        children.forEach(AbstractResourceImpl::disableMergeResourceProvider);
+        children.forEach(c -> ((AbstractResourceImpl) c).disableMergeResourceProvider());
     }
 }
