@@ -5,10 +5,17 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [4.2.0]
+## Unreleased
 
 ### Added
+- #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
+
+### Fixed
+- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
+
+### Fixed
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 
 ## [4.1.0] - 2019-05-07
 
@@ -50,6 +57,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1858 - Fixed issue with legacy dialog type for Shared Component Properties.
 - #1839 - Fixed editing page for system notifications
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
+- #1888 - Fixed issues with Stylesheet Inliner.
 
 ## [4.0.0] - 2019-02-20
 

@@ -122,15 +122,6 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
         }
     }
 
-    private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if (request.getResource().getChild("configuration") == null) {
-            log.warn("ACL Packager Configuration node could not be found for: {}", request.getResource());
-            return new ValueMapDecorator(new HashMap<String, Object>());
-        } else {
-            return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
-        }
-    }
-
     /**
      * Search the JCR for all rep:ACE nodes to be further filtered by Grant/Deny ACE rep:principalNames.
      *

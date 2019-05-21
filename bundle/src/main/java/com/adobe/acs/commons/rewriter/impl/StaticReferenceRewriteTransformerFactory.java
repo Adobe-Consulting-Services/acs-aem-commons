@@ -46,7 +46,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 
 /**
@@ -70,7 +70,7 @@ import com.adobe.acs.commons.util.ParameterUtil;
 
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
-    public final class StaticReferenceRewriteTransformer extends AbstractTransformer {
+    public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {
 
         public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
