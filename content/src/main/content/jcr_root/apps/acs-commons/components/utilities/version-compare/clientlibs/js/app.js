@@ -37,7 +37,7 @@ angular.module('versionComparator', ['acsCoral'])
 
         $scope.$watch('app.paintConnections', function(newValue,
                 oldValue) {
-            $scope.paintConnections(newValue);
+            $scope.refreshConnections(newValue);
         });
 
         $scope.addNotification = function(type, title, message) {
@@ -66,33 +66,40 @@ angular.module('versionComparator', ['acsCoral'])
             $scope.changeStatus.push(params);
         };
 
-        $scope.paintConnections = function(doPrint) {
-            var i;
-            if (doPrint) {
-                for (i = 0; i < $scope.connections.length; i++) {
-                    jsPlumb.connect({
-                        source : $scope.connections[i].source,
-                        target : $scope.connections[i].target,
-                        anchors : [ "Right", "Left" ],
-                        paintStyle : {
-                            lineWidth : 1,
-                            strokeStyle : 'grey'
-                        },
-                        hoverPaintStyle : {
-                            strokeStyle : "rgb(0, 0, 135)"
-                        },
-                        endpointStyle : {
-                            width : 1,
-                            height : 1
-                        },
-                        endpoint : "Rectangle",
-                        connector : "Straight"
-                    });
-                }
-            } else {
-                // $timeout(jsPlumb.reset, 100);
-                $('*[class^="_jsPlumb"]').remove();
+        var paintConnections = function() {
+            for (var i = 0; i < $scope.connections.length; i++) {
+                jsPlumb.connect({
+                    source : $scope.connections[i].source,
+                    target : $scope.connections[i].target,
+                    anchors : [ "Right", "Left" ],
+                    paintStyle : {
+                        lineWidth : 1,
+                        strokeStyle : 'grey'
+                    },
+                    hoverPaintStyle : {
+                        strokeStyle : "rgb(0, 0, 135)"
+                    },
+                    endpointStyle : {
+                        width : 1,
+                        height : 1
+                    },
+                    endpoint : "Rectangle",
+                    connector : "Straight"
+                });
             }
+        };
+
+        var removeConnections = function() {
+            $('*[class^="_jsPlumb"]').remove();
+        };
+
+        $scope.refreshConnections = function(doPrint) {
+            if (doPrint) {
+                paintConnections();
+            } else {
+                removeConnections();
+            }
+
             jsPlumb.repaintEverything();
         };
 
@@ -108,6 +115,7 @@ angular.module('versionComparator', ['acsCoral'])
                     }
                 }
             }
+
             return true;
         };
 
