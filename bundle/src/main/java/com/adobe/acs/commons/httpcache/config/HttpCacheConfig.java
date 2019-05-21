@@ -78,6 +78,14 @@ public interface HttpCacheConfig {
     List<Pattern> getJCRInvalidationPathPatterns();
 
     /**
+     * Get a list of headers that should NOT be put in the cached response, to be served to the output.
+     * This is useful for example with systems that put a login cookie in each response.
+     * @return
+     */
+    List<Pattern> getExcludedResponseHeaderPatterns();
+
+
+    /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension
      * .accept()</code> for providing share of control to the custom code.
      *

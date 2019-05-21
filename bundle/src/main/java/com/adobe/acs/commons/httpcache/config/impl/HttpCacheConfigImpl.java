@@ -28,6 +28,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.util.UserUtils;
+import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -216,6 +217,15 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     static final String PROP_CACHE_HANDLING_RULES_PID = "httpcache.config.cache-handling-rules.pid";
     private List<String> cacheHandlingRulesPid;
 
+
+
+    @Property(label = "Config-specific Excluded Response headers",
+            description = "List of headers that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_RESPONSE_HEADER_EXCLUSIONS = "httpcache.config.excluded.response.headers";
+    private List<Pattern> responseHeaderExclusions;
+
     @Property(label = "Expiry on create",
         description = "Specifies a custom expiry on create. Overrules the global expiry, unless the value is 0.")
     static final String PROP_EXPIRY_ON_CREATE = "httpcache.config.expiry.on.create";
@@ -248,6 +258,9 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         requestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_REQUEST_URI_PATTERNS), new
                 String[]{}));
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
+
+        responseHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+
 
         // Request URIs - Blacklisted.
         blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -451,5 +464,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public FilterScope getFilterScope() {
         return this.filterScope;
+    }
+
+    @Override
+    public List<Pattern> getExcludedResponseHeaderPatterns() {
+        return responseHeaderExclusions;
     }
 }
