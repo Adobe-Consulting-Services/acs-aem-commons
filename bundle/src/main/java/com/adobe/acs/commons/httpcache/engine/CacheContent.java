@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Represents response content to be cached.
@@ -132,9 +133,10 @@ public class CacheContent {
      * Construct from the custom servlet response wrapper..
      *
      * @param responseWrapper
+     * @param responseHeaderExclusions
      * @return
      */
-    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
+    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper, List<Pattern> responseHeaderExclusions) throws HttpCacheDataStreamException {
         this.status = responseWrapper.getStatus();
 
         // Extract information from response and populate state of the instance.
@@ -146,9 +148,11 @@ public class CacheContent {
 
         headerNames.addAll(responseWrapper.getHeaderNames());
         for (String headerName: headerNames) {
-            List<String> values = new ArrayList<String>();
-            values.addAll(responseWrapper.getHeaders(headerName));
-            headers.put(headerName, values);
+            if(!isResponseHeaderExcluded(headerName,responseHeaderExclusions)){
+                List<String> values = new ArrayList<String>();
+                values.addAll(responseWrapper.getHeaders(headerName));
+                headers.put(headerName, values);
+            }
         }
 
         // Get hold of the temp sink.
@@ -159,6 +163,18 @@ public class CacheContent {
         this.writeMethod = responseWrapper.getWriteMethod();
 
         return this;
+    }
+
+
+    private boolean isResponseHeaderExcluded(String headerName, List<Pattern> responseHeaderExclusions) {
+
+        if (responseHeaderExclusions
+                .stream()
+                .anyMatch(pattern -> pattern.matcher(headerName).matches())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

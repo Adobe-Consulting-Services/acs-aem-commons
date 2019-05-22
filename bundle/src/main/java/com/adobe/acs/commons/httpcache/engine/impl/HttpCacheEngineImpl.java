@@ -19,20 +19,19 @@
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
-import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
-import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
+import com.adobe.acs.commons.httpcache.exception.*;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -77,6 +76,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
@@ -156,13 +158,25 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                       "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
                       "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
               })
-    // formatter:on
-    private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
+
+    static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
+
+    @Property(label = "Global HttpCacheHandlingRules",
+            description = "List of headers that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
+    private List<Pattern> globalHeaderExclusions;
+    // formatter:on
 
     /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
     private final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
             ConcurrentHashMap<HttpCacheConfig, Map<String, Object>>();
+
+
+    @Reference
+    private ThrottledTaskRunner throttledTaskRunner;
 
     //-------------------<OSGi specific methods>---------------//
 
@@ -294,6 +308,9 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // PIDs of global cache handling rules.
         globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
                 PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+
+        globalHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -397,7 +414,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @Override
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
             response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException,
-            HttpCacheKeyCreationException, HttpCachePersistenceException {
+            HttpCachePersistenceException {
         // Wrap the response to get the copy of the stream.
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {
@@ -409,36 +426,40 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     @Override
     public void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
-            cacheConfig) throws HttpCacheKeyCreationException, HttpCacheDataStreamException,
-            HttpCachePersistenceException {
+            cacheConfig) {
 
-        // TODO - This can be made asynchronous to avoid performance penalty on response cache.
+        throttledTaskRunner.scheduleWork(() -> {
+            CacheContent cacheContent = null;
+            try {
+                // Construct the cache content.
+                HttpCacheServletResponseWrapper responseWrapper = null;
+                if (response instanceof HttpCacheServletResponseWrapper) {
+                    responseWrapper = (HttpCacheServletResponseWrapper) response;
+                } else {
+                    throw new AssertionError("Programming error.");
+                }
+                CacheKey cacheKey = cacheConfig.buildCacheKey(request);
+                List<Pattern> excludedHeaders =  Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
+                        .collect(Collectors.toList());
+                cacheContent = new CacheContent().build(responseWrapper, excludedHeaders);
 
-        CacheContent cacheContent = null;
-        try {
-            // Construct the cache content.
-            HttpCacheServletResponseWrapper responseWrapper = null;
-            if (response instanceof HttpCacheServletResponseWrapper) {
-                responseWrapper = (HttpCacheServletResponseWrapper) response;
-            } else {
-                throw new AssertionError("Programming error.");
+                // Persist in cache.
+                if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
+                    getCacheStore(cacheConfig).put(cacheKey, cacheContent);
+                    log.debug("Response for the URI cached - {}", request.getRequestURI());
+                }
+            } catch (HttpCacheException e) {
+                log.error("Error storing http response in httpcache", e);
+            } finally {
+                // Close the temp sink input stream.
+                if (null != cacheContent) {
+                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
+                }
             }
-            CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-            cacheContent = new CacheContent().build(responseWrapper);
-
-            // Persist in cache.
-            if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
-                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
-                log.debug("Response for the URI cached - {}", request.getRequestURI());
-            }
-        } finally {
-            // Close the temp sink input stream.
-            if (null != cacheContent) {
-                IOUtils.closeQuietly(cacheContent.getInputDataStream());
-            }
-        }
+        });
 
     }
+
 
     @Override
     public boolean isPathPotentialToInvalidate(String path) {
@@ -619,6 +640,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         response.setContentType(cacheContent.getContentType());
         response.setCharacterEncoding(cacheContent.getCharEncoding());
     }
+
 
     private boolean executeCacheContentDeliver(SlingHttpServletRequest request, SlingHttpServletResponse response, CacheContent cacheContent) throws HttpCacheDataStreamException {
         // Copy the cached data into the servlet output stream.
