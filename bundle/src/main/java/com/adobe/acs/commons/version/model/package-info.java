@@ -20,7 +20,7 @@
 /**
  * Version model classes.
  */
-@Version("1.0.0")
+@Version("2.0.0")
 package com.adobe.acs.commons.version.model;
 
 import org.osgi.annotation.versioning.Version;
