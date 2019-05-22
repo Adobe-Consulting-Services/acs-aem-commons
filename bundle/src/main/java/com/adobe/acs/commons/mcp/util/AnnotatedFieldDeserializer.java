@@ -34,14 +34,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Named;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Named;
 
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
@@ -94,7 +93,10 @@ public class AnnotatedFieldDeserializer {
             }
 
             if (val instanceof RequestParameter) {
-                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+                /**
+                 * Special case handling uploaded files; Method call ~ copied
+                 * from parseInputValue(..)
+                 */
                 if (field.getType() == RequestParameter.class) {
                     FieldUtils.writeField(field, target, val, true);
                 } else {
@@ -104,7 +106,7 @@ public class AnnotatedFieldDeserializer {
                         LOG.error("Unable to get InputStream for uploaded file [ {} ]", ((RequestParameter) val).getName(), ex);
                     }
                 }
-            } else{
+            } else {
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
@@ -203,6 +205,7 @@ public class AnnotatedFieldDeserializer {
     private static String getFieldName(Field f) {
         Named named = f.getAnnotation(Named.class);
         return named == null ? f.getName() : named.value();
+    }
 
     private static int superclassFieldsFirst(Field a, Field b) {
         if (a.getDeclaringClass() == b.getDeclaringClass()) {
