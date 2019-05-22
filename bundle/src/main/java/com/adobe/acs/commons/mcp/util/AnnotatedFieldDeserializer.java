@@ -92,7 +92,10 @@ public class AnnotatedFieldDeserializer {
             }
 
             if (val instanceof RequestParameter) {
-                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+                /**
+                 * Special case handling uploaded files; Method call ~ copied
+                 * from parseInputValue(..)
+                 */
                 if (field.getType() == RequestParameter.class) {
                     FieldUtils.writeField(field, target, val, true);
                 } else {
@@ -102,7 +105,7 @@ public class AnnotatedFieldDeserializer {
                         LOG.error("Unable to get InputStream for uploaded file [ {} ]", ((RequestParameter) val).getName(), ex);
                     }
                 }
-            } else{
+            } else {
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
