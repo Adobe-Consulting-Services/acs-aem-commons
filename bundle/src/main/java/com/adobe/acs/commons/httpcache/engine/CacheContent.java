@@ -24,11 +24,9 @@ import com.adobe.acs.commons.httpcache.store.TempSink;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Represents response content to be cached.
@@ -42,7 +40,7 @@ public class CacheContent {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    private Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    private Map<String, List<String>> headers = new HashMap<>();
     /** Response content as input stream */
     private InputStream dataInputStream;
     /** Temp sink attached to this cache content */
@@ -133,27 +131,18 @@ public class CacheContent {
      * Construct from the custom servlet response wrapper..
      *
      * @param responseWrapper
-     * @param responseHeaderExclusions
+     * @param headers
      * @return
      */
-    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper, List<Pattern> responseHeaderExclusions) throws HttpCacheDataStreamException {
-        this.status = responseWrapper.getStatus();
+    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map<String, List<String>> headers) throws HttpCacheDataStreamException {
+        this.status = status;
 
         // Extract information from response and populate state of the instance.
-        this.charEncoding = responseWrapper.getCharacterEncoding();
-        this.contentType = responseWrapper.getContentType();
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
 
         // Extracting header K,V.
-        List<String> headerNames = new ArrayList<String>();
-
-        headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName: headerNames) {
-            if(!isResponseHeaderExcluded(headerName,responseHeaderExclusions)){
-                List<String> values = new ArrayList<String>();
-                values.addAll(responseWrapper.getHeaders(headerName));
-                headers.put(headerName, values);
-            }
-        }
+        this.headers.putAll(headers);
 
         // Get hold of the temp sink.
         this.tempSink = responseWrapper.getTempSink();
@@ -163,18 +152,6 @@ public class CacheContent {
         this.writeMethod = responseWrapper.getWriteMethod();
 
         return this;
-    }
-
-
-    private boolean isResponseHeaderExcluded(String headerName, List<Pattern> responseHeaderExclusions) {
-
-        if (responseHeaderExclusions
-                .stream()
-                .anyMatch(pattern -> pattern.matcher(headerName).matches())) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

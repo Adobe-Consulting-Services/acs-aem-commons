@@ -432,20 +432,23 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     public void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
             cacheConfig) {
 
+        final HttpCacheServletResponseWrapper responseWrapper;
+        if (response instanceof HttpCacheServletResponseWrapper) {
+            responseWrapper = (HttpCacheServletResponseWrapper) response;
+        } else {
+            throw new AssertionError("Programming error.");
+        }
+        final Map<String, List<String>> extractedHeaders = extractHeaders(responseWrapper, cacheConfig);
+        final int status = responseWrapper.getStatus();
+        final String charEncoding = responseWrapper.getCharacterEncoding();
+        final String contentType = responseWrapper.getContentType();
+
         throttledTaskRunner.scheduleWork(() -> {
             CacheContent cacheContent = null;
+            // Construct the cache content.
             try {
-                // Construct the cache content.
-                HttpCacheServletResponseWrapper responseWrapper = null;
-                if (response instanceof HttpCacheServletResponseWrapper) {
-                    responseWrapper = (HttpCacheServletResponseWrapper) response;
-                } else {
-                    throw new AssertionError("Programming error.");
-                }
                 CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-                List<Pattern> excludedHeaders =  Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
-                        .collect(Collectors.toList());
-                cacheContent = new CacheContent().build(responseWrapper, excludedHeaders);
+                cacheContent = new CacheContent().build(responseWrapper, status, charEncoding, contentType, extractedHeaders);
 
                 // Persist in cache.
                 if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
@@ -463,6 +466,39 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         });
 
     }
+
+    private Map<String, List<String>> extractHeaders(SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
+
+        Map<String, List<String>> headers = new HashMap<>();
+        List<Pattern> excludedHeaders = Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
+                .collect(Collectors.toList());
+
+        List<String> headerNames = new ArrayList<String>();
+
+        headerNames.addAll(response.getHeaderNames());
+        for (String headerName : headerNames) {
+            if (!isResponseHeaderExcluded(headerName, excludedHeaders)) {
+                List<String> values = new ArrayList<String>();
+                values.addAll(response.getHeaders(headerName));
+                headers.put(headerName, values);
+            }
+        }
+
+        return headers;
+    }
+
+
+    private boolean isResponseHeaderExcluded(String headerName, List<Pattern> responseHeaderExclusions) {
+
+        if (responseHeaderExclusions
+                .stream()
+                .anyMatch(pattern -> pattern.matcher(headerName).matches())) {
+            return true;
+        }
+
+        return false;
+    }
+
 
 
     @Override
