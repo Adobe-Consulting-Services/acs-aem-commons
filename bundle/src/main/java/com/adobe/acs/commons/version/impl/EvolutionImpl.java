@@ -117,7 +117,7 @@ public final class EvolutionImpl implements Evolution {
             final Property property = r.adaptTo(Node.class).getProperty(key);
             final String relPath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
             if (config.handleProperty(relPath)) {
-                versionEntries.add(new EvolutionEntryImpl(property, version, config));
+                versionEntries.add(new EvolutionEntryImpl(property, version));
             }
         }
 
@@ -126,7 +126,7 @@ public final class EvolutionImpl implements Evolution {
             final Resource child = iter.next();
             final String relPath = EvolutionPathUtil.getRelativeResourceName(child.getPath());
             if (config.handleResource(relPath)) {
-                versionEntries.add(new EvolutionEntryImpl(child, version, config));
+                versionEntries.add(new EvolutionEntryImpl(child, version));
                 populate(child, depth + 1);
             }
         }

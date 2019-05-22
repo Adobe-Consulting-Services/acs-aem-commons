@@ -49,31 +49,29 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     private Version version;
     private String relativePath;
     private Property property;
-    private EvolutionConfig config;
 
-    public EvolutionEntryImpl(final Resource resource, final Version version, final EvolutionConfig config) {
-        this.config = config;
-        this.type = EvolutionEntryType.RESOURCE;
-        this.name = resource.getName();
-        this.depth = EvolutionPathUtil.getDepthForPath(resource.getPath());
-        this.path = resource.getParent().getName();
+    public EvolutionEntryImpl(final Resource resource, final Version version) {
+        type = EvolutionEntryType.RESOURCE;
+        name = resource.getName();
+        depth = EvolutionPathUtil.getDepthForPath(resource.getPath());
+        path = resource.getParent().getName();
         this.version = version;
-        this.value = null;
-        this.relativePath = EvolutionPathUtil.getRelativeResourceName(resource.getPath());
+        value = null;
+        relativePath = EvolutionPathUtil.getRelativeResourceName(resource.getPath());
     }
 
-    public EvolutionEntryImpl(final Property property, final Version version, final EvolutionConfig config) {
+    public EvolutionEntryImpl(final Property property, final Version version) {
+        this.property = property;
+        type = EvolutionEntryType.PROPERTY;
+        this.version = version;
+        value = EvolutionConfig.printProperty(property);
         try {
-            this.config = config;
-            this.property = property;
-            this.type = EvolutionEntryType.PROPERTY;
-            this.name = property.getName();
-            this.depth = EvolutionPathUtil.getDepthForPath(property.getPath());
-            this.version = version;
-            this.path = property.getParent().getName();
-            this.value = EvolutionConfig.printProperty(property);
-            this.relativePath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
-        } catch (Exception e) {
+            final String propertyPath = property.getPath();
+            name = property.getName();
+			depth = EvolutionPathUtil.getDepthForPath(propertyPath);
+            path = property.getParent().getName();
+            relativePath = EvolutionPathUtil.getRelativePropertyName(propertyPath);
+        } catch (final RepositoryException e) {
             log.error("Could not inititalize VersionEntry", e);
         }
     }
