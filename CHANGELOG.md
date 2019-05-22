@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 
+### Fixed
+- #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
+
 ## [4.1.0] - 2019-05-07
 
 ### Added
