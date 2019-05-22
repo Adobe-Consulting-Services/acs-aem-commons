@@ -21,6 +21,8 @@ package com.adobe.acs.commons.version.impl;
 
 import com.adobe.acs.commons.version.Evolution;
 import com.adobe.acs.commons.version.EvolutionContext;
+import com.day.cq.commons.jcr.JcrConstants;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -39,17 +41,32 @@ public final class EvolutionContextImpl implements EvolutionContext {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
 
-    private final Resource resource;
-    private final EvolutionConfig config;
     private final List<Evolution> versions = new ArrayList<Evolution>();
     private final List<Evolution> evolutionItems = new ArrayList<Evolution>();
-    private VersionManager versionManager;
-    private VersionHistory history;
 
-    public EvolutionContextImpl(final Resource resource, final EvolutionConfig config) {
-        this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
-        this.config = config;
-        populateEvolutions();
+    public EvolutionContextImpl(Resource resource, final EvolutionConfig config) {
+        final Resource r = resource.isResourceType("cq:Page") ? resource.getChild(JcrConstants.JCR_CONTENT) : resource;
+        final ResourceResolver resolver = r.getResourceResolver();
+        try {
+            final VersionManager versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
+            final VersionHistory history = versionManager.getVersionHistory(r.getPath());
+            final Iterator<Version> iter = history.getAllVersions();
+            while (iter.hasNext()) {
+                final Version next = iter.next();
+                final String versionPath = next.getFrozenNode().getPath();
+                final Resource versionResource = resolver.resolve(versionPath);
+                versions.add(new EvolutionImpl(next, versionResource, config));
+                log.debug("Version={} added to EvolutionItem", next.getName());
+            }
+        } catch (final UnsupportedRepositoryOperationException e) {
+            log.warn("Could not find versions for resource={}", r.getPath());
+        } catch (final Exception e) {
+            log.error("Could not find versions", e);
+        }
+
+        evolutionItems.addAll(versions);
+        evolutionItems.add(new CurrentEvolutionImpl(r, config));
+    
     }
 
     @Override
@@ -60,29 +77,6 @@ public final class EvolutionContextImpl implements EvolutionContext {
     @Override
     public List<Evolution> getVersions() {
         return versions;
-    }
-
-    private void populateEvolutions() {
-        final ResourceResolver resolver = resource.getResourceResolver();
-        try {
-            versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
-            history = versionManager.getVersionHistory(resource.getPath());
-            final Iterator<Version> iter = history.getAllVersions();
-            while (iter.hasNext()) {
-                final Version next = iter.next();
-                final String versionPath = next.getFrozenNode().getPath();
-                final Resource versionResource = resolver.resolve(versionPath);
-                versions.add(new EvolutionImpl(next, versionResource, config));
-                log.debug("Version={} added to EvolutionItem", next.getName());
-            }
-        } catch (final UnsupportedRepositoryOperationException e) {
-            log.warn("Could not find versions for resource={}", resource.getPath());
-        } catch (final Exception e) {
-            log.error("Could not find versions", e);
-        }
-
-        evolutionItems.addAll(versions);
-        evolutionItems.add(new CurrentEvolutionImpl(resource, config));
     }
 
 }

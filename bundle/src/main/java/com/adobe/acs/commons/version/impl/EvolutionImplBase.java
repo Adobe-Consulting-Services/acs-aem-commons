@@ -48,13 +48,8 @@ public abstract class EvolutionImplBase implements Evolution {
 
     private final Resource resource;
 
-    protected EvolutionImplBase(final Resource resource, final EvolutionConfig config) {
+    protected EvolutionImplBase(final Resource resource) {
         this.resource = resource;
-        try {
-            populate(resource, config, 0);
-        } catch (final RepositoryException e) {
-            log.warn("Could not populate Evolution", e);
-        }
     }
 
     @Override
@@ -70,13 +65,21 @@ public abstract class EvolutionImplBase implements Evolution {
         return resource.getValueMap();
     }
 
+	protected final void populate(final EvolutionConfig config) {
+		try {
+            populate(resource, config, 0);
+        } catch (final RepositoryException e) {
+            log.warn("Could not populate Evolution", e);
+        }
+	}
+
     private void populate(final Resource resource, final EvolutionConfig config, final int depth) throws PathNotFoundException, RepositoryException {
         final ValueMap map = resource.getValueMap();
         final List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
         for (final String key : keys) {
             final Property property = resource.adaptTo(Node.class).getProperty(key);
-            final String relPath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
+            final String relPath = getRelativeName(property);
             if (config.handleProperty(relPath)) {
                 versionEntries.add(createEntry(property));
             }
@@ -85,7 +88,7 @@ public abstract class EvolutionImplBase implements Evolution {
         final Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
             final Resource child = iter.next();
-            final String relPath = EvolutionPathUtil.getRelativeResourceName(child.getPath());
+            final String relPath = getRelativeName(child);
             if (config.handleResource(relPath)) {
                 versionEntries.add(createEntry(child));
                 populate(child, config, depth + 1);
@@ -93,8 +96,13 @@ public abstract class EvolutionImplBase implements Evolution {
         }
     }
 
-	protected abstract EvolutionEntry createEntry(Resource resource);
+	protected abstract String getRelativeName(Property property) throws RepositoryException;
 
 	protected abstract EvolutionEntry createEntry(Property property)
 			throws AccessDeniedException, ItemNotFoundException, RepositoryException;
+
+	protected abstract String getRelativeName(Resource resource);
+
+	protected abstract EvolutionEntry createEntry(Resource resource);
+
 }
