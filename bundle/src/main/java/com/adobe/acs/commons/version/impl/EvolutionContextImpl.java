@@ -35,20 +35,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class EvolutionContextImpl implements EvolutionContext {
+public final class EvolutionContextImpl implements EvolutionContext {
+
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
 
-    private Resource resource = null;
-    private VersionHistory history = null;
-    private ResourceResolver resolver = null;
-    private VersionManager versionManager = null;
-    private List<Evolution> versions = new ArrayList<Evolution>();
-    private List<Evolution> evolutionItems = new ArrayList<Evolution>();
-    private EvolutionConfig config;
+    private final Resource resource;
+    private VersionHistory history;
+    private final ResourceResolver resolver;
+    private VersionManager versionManager;
+    private final List<Evolution> versions = new ArrayList<Evolution>();
+    private final List<Evolution> evolutionItems = new ArrayList<Evolution>();
+    private final EvolutionConfig config;
 
-    public EvolutionContextImpl(Resource resource, EvolutionConfig config) {
+    public EvolutionContextImpl(final Resource resource, final EvolutionConfig config) {
         this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
         this.config = config;
+        resolver = resource.getResourceResolver();
         populateEvolutions();
     }
 
@@ -64,23 +66,23 @@ public class EvolutionContextImpl implements EvolutionContext {
 
     private void populateEvolutions() {
         try {
-            this.resolver = resource.getResourceResolver();
-            this.versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
-            this.history = versionManager.getVersionHistory(resource.getPath());
-            Iterator<Version> iter = history.getAllVersions();
+            versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
+            history = versionManager.getVersionHistory(resource.getPath());
+            final Iterator<Version> iter = history.getAllVersions();
             while (iter.hasNext()) {
-                Version next = iter.next();
-                String versionPath = next.getFrozenNode().getPath();
-                Resource versionResource = resolver.resolve(versionPath);
+                final Version next = iter.next();
+                final String versionPath = next.getFrozenNode().getPath();
+                final Resource versionResource = resolver.resolve(versionPath);
                 versions.add(new EvolutionImpl(next, versionResource, config));
                 log.debug("Version={} added to EvolutionItem", next.getName());
             }
-        } catch (UnsupportedRepositoryOperationException e1) {
+        } catch (final UnsupportedRepositoryOperationException e) {
             log.warn("Could not find version for resource={}", resource.getPath());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Could not find versions", e);
         }
-        evolutionItems = new ArrayList<>(versions);
+
+        evolutionItems.addAll(versions);
         evolutionItems.add(new CurrentEvolutionImpl(this.resource, this.config));
     }
 

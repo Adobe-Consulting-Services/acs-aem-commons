@@ -33,6 +33,6 @@ public interface EvolutionAnalyser {
      * 
      * @return the evolution context
      */
-    public EvolutionContext getEvolutionContext(Resource resource);
+    EvolutionContext getEvolutionContext(Resource resource);
 
 }

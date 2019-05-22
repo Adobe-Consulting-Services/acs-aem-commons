@@ -43,7 +43,7 @@ import com.adobe.acs.commons.version.EvolutionContext;
         @Property(label = "Ignored resource names",
                 description = "Resource names (regex possible) listed here will be excluded from the version compare feature.",
                 name = EvolutionAnalyserImpl.RESOURCE_IGNORES, value = { "" }, cardinality = Integer.MAX_VALUE) })
-public class EvolutionAnalyserImpl implements EvolutionAnalyser {
+public final class EvolutionAnalyserImpl implements EvolutionAnalyser {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionAnalyserImpl.class);
 

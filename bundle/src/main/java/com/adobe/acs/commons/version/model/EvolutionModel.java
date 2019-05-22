@@ -34,9 +34,11 @@ import com.adobe.acs.commons.version.EvolutionAnalyser;
 import com.adobe.acs.commons.version.EvolutionContext;
 
 @Model(adaptables = SlingHttpServletRequest.class)
-public class EvolutionModel {
+public final class EvolutionModel {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionModel.class);
+
+    private final String path;
 
     @Inject
     private ResourceResolver resolver;
@@ -44,9 +46,7 @@ public class EvolutionModel {
     @Inject
     private EvolutionAnalyser analyser;
 
-    private final String path;
-
-    public EvolutionModel(SlingHttpServletRequest request) {
+    public EvolutionModel(final SlingHttpServletRequest request) {
         this.path = request.getParameter("path");
     }
 
@@ -56,12 +56,14 @@ public class EvolutionModel {
 
     public EvolutionContext getEvolution() {
         if (StringUtils.isNotEmpty(path)) {
-            Resource resource = resolver.resolve(path);
+            final Resource resource = resolver.resolve(path);
             if (resource != null && !ResourceUtil.isNonExistingResource(resource)) {
                 return analyser.getEvolutionContext(resource);
             }
+
             log.warn("Could not resolve resource at path={}", path);
         }
+
         log.warn("No path provided");
         return null;
     }
