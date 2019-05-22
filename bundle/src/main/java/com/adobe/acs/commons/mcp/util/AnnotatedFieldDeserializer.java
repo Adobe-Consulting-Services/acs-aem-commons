@@ -183,6 +183,7 @@ public class AnnotatedFieldDeserializer {
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
         return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
                 .stream()
+                .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst)
                 .collect(Collectors.toMap(Field::getName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
@@ -195,6 +196,16 @@ public class AnnotatedFieldDeserializer {
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private static int superclassFieldsFirst(Field a, Field b) {
+        if (a.getDeclaringClass() == b.getDeclaringClass()) {
+            return 0;
+        } else if (a.getDeclaringClass().isAssignableFrom(b.getDeclaringClass())) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 
     private AnnotatedFieldDeserializer() {

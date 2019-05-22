@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import java.util.Iterator;
 import java.util.List;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
@@ -116,6 +117,31 @@ public class SyntheticDialogTest {
         assert(testPojo.getCssClientLibraries().contains("component-css"));
     }
 
+    @Test
+    public void testSubclassBehaviors() {
+        TestInherited subclass = new TestInherited();
+        subclass.init();
+        subclass.getFieldComponents();
+        Resource form = subclass.getFormResource();
+        // Check for correct number of categories
+        AbstractResourceImpl tabs = (AbstractResourceImpl) form.getChild("items/tabs/items");
+        assertEquals("Should have 4 tabs", 4, tabs.children.size());
+        // Assert correct number and order of tabs
+        Iterator<Resource> children = tabs.listChildren();
+        assertEquals("Tab 1 should be first", "1", children.next().getValueMap().get("jcr:title"));
+        assertEquals("Tab 2 should be second", "2", children.next().getValueMap().get("jcr:title"));
+        assertEquals("Tab 3 should be third", "3", children.next().getValueMap().get("jcr:title"));
+        assertEquals("Tab 4 should be fourth", "4", children.next().getValueMap().get("jcr:title"));
+        // Check if somethingElse is last
+        AbstractResourceImpl tab3 = (AbstractResourceImpl) tabs.children.get(2).getChild("items");
+        assertEquals("readOnly should be first", "readOnly", tab3.children.get(0).getName());
+        assertEquals("tags should be second", "tags", tab3.children.get(1).getName());
+        assertEquals("somethingElse should be last", "somethingElse", tab3.children.get(2).getName());
+        // Check if additionalTestArea is last
+        AbstractResourceImpl tab4 = (AbstractResourceImpl) tabs.children.get(3).getChild("items");
+        assertEquals("additionalTextArea should be last", "additionalTextArea", tab4.children.get(1).getName());
+    }
+
     public static class ComponentWithClientLibraries extends FieldComponent {
         @Override
         public void init() {
@@ -167,5 +193,13 @@ public class SyntheticDialogTest {
 
         @FormField(component = ComponentWithClientLibraries.class, name = "Component with client libs")
         String subField6;
+    }
+
+    public static class TestInherited extends TestPojo {
+        @FormField(component = TextareaComponent.class, name = "Something Else", category="3")
+        String somethingElse;
+
+        @FormField(component = TextareaComponent.class, name = "Text Area", category="4")
+        String additionalTextArea;
     }
 }
