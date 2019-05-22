@@ -21,6 +21,7 @@ package com.adobe.acs.commons.reports.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -36,32 +37,32 @@ import com.day.cq.tagging.TagManager;
 /**
  * Model for rendering Tag properties to CSV cells.
  */
-@Model(adaptables=Resource.class)
+@Model(adaptables = Resource.class)
 public class TagReportCellCSVExporter implements ReportCellCSVExporter {
 
   private static final Logger log = LoggerFactory.getLogger(TagReportCellCSVExporter.class);
 
   @Inject
   private String property;
-  
+
   @Override
   public String getValue(Object result) {
-    
+
     Resource resource = (Resource) result;
-    
+
     TagManager tagMgr = resource.getResourceResolver().adaptTo(TagManager.class);
 
     log.debug("Loading tags from {}@{}", resource.getPath(), property);
-    List<String> tags = new ArrayList<String>();
+    List<String> tags = new ArrayList<>();
     String[] values = resource.getValueMap().get(property, String[].class);
     if (values != null) {
       for (String value : values) {
-        tags.add(tagMgr.resolve(value).getTitle());
+        tags.add(Optional.ofNullable(tagMgr).map(tm -> tm.resolve(value).getTitle()).orElse(value));
       }
     }
     log.debug("Loaded {} tags", tags);
 
-    return StringUtils.join(tags,";");
+    return StringUtils.join(tags, ";");
   }
 
 }
