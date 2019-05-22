@@ -76,7 +76,7 @@ public final class EvolutionContextImpl implements EvolutionContext {
                 log.debug("Version={} added to EvolutionItem", next.getName());
             }
         } catch (final UnsupportedRepositoryOperationException e) {
-            log.warn("Could not find version for resource={}", resource.getPath());
+            log.warn("Could not find versions for resource={}", resource.getPath());
         } catch (final Exception e) {
             log.error("Could not find versions", e);
         }

@@ -19,107 +19,32 @@
  */
 package com.adobe.acs.commons.version.impl;
 
+import javax.jcr.AccessDeniedException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.version.EvolutionEntry;
-
-public final class CurrentEvolutionEntryImpl implements EvolutionEntry {
-
-    private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionEntryImpl.class);
-
-    private static final int MAX_CHARS = 200;
-
-    private EvolutionEntryType type;
-    private String name;
-    private Object value;
-    private int depth;
-    private String path;
+public final class CurrentEvolutionEntryImpl extends EvolutionEntryImplBase {
 
     public CurrentEvolutionEntryImpl(final Resource resource) {
-        this.type = EvolutionEntryType.RESOURCE;
-        this.name = resource.getName();
-        this.depth = EvolutionPathUtil.getLastDepthForPath(resource.getPath());
-        this.path = resource.getParent().getName();
-        this.value = null;
+    	super(resource, EvolutionPathUtil.getLastDepthForPath(resource.getPath()));
     }
 
-    public CurrentEvolutionEntryImpl(final Property property) {
-        this.type = EvolutionEntryType.PROPERTY;
-        this.value = EvolutionConfig.printProperty(property);
-        try {
-            this.name = property.getName();
-            this.depth = EvolutionPathUtil.getLastDepthForPath(property.getPath());
-            this.path = property.getParent().getName();
-        } catch (final RepositoryException e) {
-            log.error("Could not inititalize VersionEntry", e);
-        }
-    }
-
-    @Override
-    public boolean isResource() {
-        return EvolutionEntryType.RESOURCE == type;
-    }
-
-    @Override
-    public String getName() {
-        return name;
+    public CurrentEvolutionEntryImpl(final Property property)
+    		throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+    	super(property,	EvolutionPathUtil.getLastDepthForPath(property.getPath()));
     }
 
     @Override
     public String getUniqueName() {
-        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_").replace("content", "node");
-    }
-
-    @Override
-    public EvolutionEntryType getType() {
-        return type;
-    }
-
-    @Override
-    public String getValueString() {
-        return EvolutionConfig.printObject(value);
-    }
-
-    @Override
-    public String getValueStringShort() {
-    	final String tmpValue = getValueString();
-        if (tmpValue.length() > MAX_CHARS) {
-            return tmpValue.substring(0, MAX_CHARS) + "...";
-        }
-
-        return tmpValue;
-    }
-
-    @Override
-    public int getDepth() {
-        return depth - 1;
+        return getUniqueNameBase().replace("content", "node");
     }
 
     @Override
     public boolean isCurrent() {
         return true;
-    }
-
-    @Override
-    public String getStatus() {
-        if (isChanged() && isWillBeRemoved()) {
-            return EvolutionEntryImpl.V_CHANGED_REMOVED;
-        } else if (isAdded() && isWillBeRemoved()) {
-            return EvolutionEntryImpl.V_ADDED_REMOVED;
-        } else if (isAdded()) {
-            return EvolutionEntryImpl.V_ADDED;
-        } else if (isWillBeRemoved()) {
-            return EvolutionEntryImpl.V_REMOVED;
-        } else if (isChanged()) {
-            return EvolutionEntryImpl.V_CHANGED;
-        } else {
-            return "";
-        }
     }
 
     @Override
