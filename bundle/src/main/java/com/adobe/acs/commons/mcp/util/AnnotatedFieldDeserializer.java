@@ -188,7 +188,7 @@ public class AnnotatedFieldDeserializer {
         return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
                 .stream()
                 .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst)
-                .collect(Collectors.toMap(Field::getName, f -> {
+                .collect(Collectors.toMap(AnnotatedFieldDeserializer::getFieldName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
