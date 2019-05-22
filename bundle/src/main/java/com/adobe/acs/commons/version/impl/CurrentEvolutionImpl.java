@@ -84,7 +84,7 @@ public final class CurrentEvolutionImpl implements Evolution {
             Property property = r.adaptTo(Node.class).getProperty(key);
             String relPath = EvolutionPathUtil.getLastRelativePropertyName(property.getPath());
             if (config.handleProperty(relPath)) {
-                versionEntries.add(new CurrentEvolutionEntryImpl(property, config));
+                versionEntries.add(new CurrentEvolutionEntryImpl(property));
             }
         }
         Iterator<Resource> iter = r.getChildren().iterator();
@@ -93,7 +93,7 @@ public final class CurrentEvolutionImpl implements Evolution {
             Resource child = iter.next();
             String relPath = EvolutionPathUtil.getLastRelativeResourceName(child.getPath());
             if (config.handleResource(relPath)) {
-                versionEntries.add(new CurrentEvolutionEntryImpl(child, config));
+                versionEntries.add(new CurrentEvolutionEntryImpl(child));
                 populate(child, depth);
             }
             depth--;

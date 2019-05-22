@@ -55,7 +55,7 @@ public final class EvolutionImpl implements Evolution {
         this.versionResource = resource;
         try {
             populate(versionResource, 0);
-        } catch (final Exception e) {
+        } catch (final RepositoryException e) {
             log.warn("Could not populate Evolution", e);
         }
     }

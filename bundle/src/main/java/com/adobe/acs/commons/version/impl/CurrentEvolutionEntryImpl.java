@@ -19,12 +19,14 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import com.adobe.acs.commons.version.EvolutionEntry;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+
 import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Property;
+import com.adobe.acs.commons.version.EvolutionEntry;
 
 public final class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
@@ -37,10 +39,8 @@ public final class CurrentEvolutionEntryImpl implements EvolutionEntry {
     private Object value;
     private int depth;
     private String path;
-    private EvolutionConfig config;
 
-    public CurrentEvolutionEntryImpl(final Resource resource, final EvolutionConfig config) {
-        this.config = config;
+    public CurrentEvolutionEntryImpl(final Resource resource) {
         this.type = EvolutionEntryType.RESOURCE;
         this.name = resource.getName();
         this.depth = EvolutionPathUtil.getLastDepthForPath(resource.getPath());
@@ -48,15 +48,14 @@ public final class CurrentEvolutionEntryImpl implements EvolutionEntry {
         this.value = null;
     }
 
-    public CurrentEvolutionEntryImpl(final Property property, final EvolutionConfig config) {
+    public CurrentEvolutionEntryImpl(final Property property) {
+        this.type = EvolutionEntryType.PROPERTY;
+        this.value = EvolutionConfig.printProperty(property);
         try {
-            this.config = config;
-            this.type = EvolutionEntryType.PROPERTY;
             this.name = property.getName();
             this.depth = EvolutionPathUtil.getLastDepthForPath(property.getPath());
             this.path = property.getParent().getName();
-            this.value = EvolutionConfig.printProperty(property);
-        } catch (final Exception e) {
+        } catch (final RepositoryException e) {
             log.error("Could not inititalize VersionEntry", e);
         }
     }
