@@ -36,7 +36,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class CurrentEvolutionImpl implements Evolution {
+public final class CurrentEvolutionImpl implements Evolution {
 
     public static final String LATEST_VERSION = "Latest";
 

@@ -40,17 +40,15 @@ public final class EvolutionContextImpl implements EvolutionContext {
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
 
     private final Resource resource;
-    private VersionHistory history;
-    private final ResourceResolver resolver;
-    private VersionManager versionManager;
+    private final EvolutionConfig config;
     private final List<Evolution> versions = new ArrayList<Evolution>();
     private final List<Evolution> evolutionItems = new ArrayList<Evolution>();
-    private final EvolutionConfig config;
+    private VersionManager versionManager;
+    private VersionHistory history;
 
     public EvolutionContextImpl(final Resource resource, final EvolutionConfig config) {
         this.resource = resource.isResourceType("cq:Page") ? resource.getChild("jcr:content") : resource;
         this.config = config;
-        resolver = resource.getResourceResolver();
         populateEvolutions();
     }
 
@@ -65,6 +63,7 @@ public final class EvolutionContextImpl implements EvolutionContext {
     }
 
     private void populateEvolutions() {
+        final ResourceResolver resolver = resource.getResourceResolver();
         try {
             versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
             history = versionManager.getVersionHistory(resource.getPath());
@@ -83,7 +82,7 @@ public final class EvolutionContextImpl implements EvolutionContext {
         }
 
         evolutionItems.addAll(versions);
-        evolutionItems.add(new CurrentEvolutionImpl(this.resource, this.config));
+        evolutionItems.add(new CurrentEvolutionImpl(resource, config));
     }
 
 }

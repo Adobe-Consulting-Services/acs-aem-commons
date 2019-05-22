@@ -45,17 +45,17 @@ public final class EvolutionImpl implements Evolution {
     private static final Logger log = LoggerFactory.getLogger(EvolutionImpl.class);
 
     private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
-    private final Resource versionResource;
     private final Version version;
+    private final Resource versionResource;
     private final EvolutionConfig config;
 
-    public EvolutionImpl(Version version, Resource resource, EvolutionConfig config) {
+    public EvolutionImpl(final Version version, final Resource resource, final EvolutionConfig config) {
         this.version = version;
         this.config = config;
         this.versionResource = resource;
         try {
             populate(versionResource, 0);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.warn("Could not populate Evolution", e);
         }
     }
@@ -72,6 +72,7 @@ public final class EvolutionImpl implements Evolution {
         } catch (RepositoryException e) {
             log.warn("Could not get created date from version", e);
         }
+
         return null;
     }
 
@@ -82,19 +83,21 @@ public final class EvolutionImpl implements Evolution {
         } catch (RepositoryException e) {
             log.warn("Could not determine version name");
         }
+
         return "null";
     }
 
     @Override
     public boolean isCurrent() {
         try {
-            Version[] successors = version.getSuccessors();
+            final Version[] successors = version.getSuccessors();
             if (successors == null || successors.length == 0) {
                 return true;
             }
-        } catch (RepositoryException e) {
+        } catch (final RepositoryException e) {
             // no-op
         }
+
         return false;
     }
 
@@ -106,27 +109,26 @@ public final class EvolutionImpl implements Evolution {
         return versionResource.getValueMap();
     }
 
-    private void populate(Resource r, int depth) throws PathNotFoundException, RepositoryException {
-        ValueMap map = r.getValueMap();
-        List<String> keys = new ArrayList<String>(map.keySet());
+    private void populate(final Resource r, final int depth) throws PathNotFoundException, RepositoryException {
+        final ValueMap map = r.getValueMap();
+        final List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
-        for (String key : keys) {
-            Property property = r.adaptTo(Node.class).getProperty(key);
-            String relPath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
+        for (final String key : keys) {
+            final Property property = r.adaptTo(Node.class).getProperty(key);
+            final String relPath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
             if (config.handleProperty(relPath)) {
                 versionEntries.add(new EvolutionEntryImpl(property, version, config));
             }
         }
-        Iterator<Resource> iter = r.getChildren().iterator();
+
+        final Iterator<Resource> iter = r.getChildren().iterator();
         while (iter.hasNext()) {
-            depth++;
-            Resource child = iter.next();
-            String relPath = EvolutionPathUtil.getRelativeResourceName(child.getPath());
+            final Resource child = iter.next();
+            final String relPath = EvolutionPathUtil.getRelativeResourceName(child.getPath());
             if (config.handleResource(relPath)) {
                 versionEntries.add(new EvolutionEntryImpl(child, version, config));
-                populate(child, depth);
+                populate(child, depth + 1);
             }
-            depth--;
         }
     }
 }

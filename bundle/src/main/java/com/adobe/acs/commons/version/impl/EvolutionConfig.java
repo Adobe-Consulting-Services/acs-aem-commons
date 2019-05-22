@@ -34,36 +34,38 @@ import javax.jcr.Value;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-public class EvolutionConfig {
+public final class EvolutionConfig {
 
-    private String[] ignoreProperties;
-    private String[] ignoreResources;
+    private final String[] ignoreProperties;
+    private final String[] ignoreResources;
 
-    public EvolutionConfig(String[] ignoreProperties, String[] ignoreResources) {
+    public EvolutionConfig(final String[] ignoreProperties, final String[] ignoreResources) {
         this.ignoreProperties = ArrayUtils.clone(ignoreProperties);
         this.ignoreResources = ArrayUtils.clone(ignoreResources);
     }
 
 
-    public boolean handleProperty(String name) {
+    public boolean handleProperty(final String name) {
         for (String entry : ignoreProperties) {
             if (Pattern.matches(entry, name)) {
                 return false;
             }
         }
+
         return true;
     }
 
-    public boolean handleResource(String name) {
-        for (String entry : ignoreResources) {
+    public boolean handleResource(final String name) {
+        for (final String entry : ignoreResources) {
             if (Pattern.matches(entry, name)) {
                 return false;
             }
         }
+
         return true;
     }
 
-    public static String printProperty(javax.jcr.Property property) {
+    public static String printProperty(final javax.jcr.Property property) {
         try {
             return printObject(propertyToJavaObject(property));
         } catch (RepositoryException e1) {
@@ -71,15 +73,16 @@ public class EvolutionConfig {
         }
     }
 
-    public static String printObject(Object obj) {
+    public static String printObject(final Object obj) {
         if (obj == null) {
             return "";
         }
+
         if (obj instanceof String) {
             return (String) obj;
         } else if (obj instanceof String[]) {
-            String[] values = (String[]) obj;
-            StringBuilder result = new StringBuilder();
+        	final String[] values = (String[]) obj;
+        	final StringBuilder result = new StringBuilder();
             result.append("[");
             for (int i = 0; i < values.length; i++) {
                 result.append(values[i]);
@@ -87,11 +90,12 @@ public class EvolutionConfig {
                     result.append(", ");
                 }
             }
+
             result.append("]");
             return result.toString();
         } else if (obj instanceof Calendar) {
-            Calendar value = (Calendar) obj;
-            DateFormat dateFormat = DateFormat.getDateTimeInstance();
+        	final Calendar value = (Calendar) obj;
+        	final DateFormat dateFormat = DateFormat.getDateTimeInstance();
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             return dateFormat.format(value.getTime());
         } else {
@@ -100,11 +104,11 @@ public class EvolutionConfig {
     }
 
     @SuppressWarnings("squid:S3776")
-    private static Object propertyToJavaObject(Property property)
+    private static Object propertyToJavaObject(final Property property)
             throws RepositoryException {
         // multi-value property: return an array of values
         if (property.isMultiple()) {
-            Value[] values = property.getValues();
+        	final Value[] values = property.getValues();
             final Object firstValue = values.length > 0 ? valueToJavaObject(values[0]) : null;
             final Object[] result;
             if ( firstValue instanceof Boolean ) {
@@ -122,12 +126,14 @@ public class EvolutionConfig {
             } else {
                 result = new String[values.length];
             }
+
             for (int i = 0; i < values.length; i++) {
-                Value value = values[i];
+            	final Value value = values[i];
                 if (value != null) {
                     result[i] = valueToJavaObject(value);
                 }
             }
+
             return result;
         }
 
@@ -135,7 +141,7 @@ public class EvolutionConfig {
         return valueToJavaObject(property.getValue());
     }
 
-    private static Object valueToJavaObject(Value value) throws RepositoryException {
+    private static Object valueToJavaObject(final Value value) throws RepositoryException {
         switch (value.getType()) {
             case PropertyType.DECIMAL:
                 return value.getDecimal();
@@ -163,7 +169,7 @@ public class EvolutionConfig {
      * Lazily acquired InputStream which only accesses the JCR Value InputStream if
      * data is to be read from the stream.
      */
-    private static class LazyInputStream extends InputStream {
+    private static final class LazyInputStream extends InputStream {
 
         /** The JCR Value from which the input stream is requested on demand */
         private final Value value;
@@ -171,7 +177,7 @@ public class EvolutionConfig {
         /** The inputstream created on demand, null if not used */
         private InputStream delegatee;
 
-        public LazyInputStream(Value value) {
+        public LazyInputStream(final Value value) {
             this.value = value;
         }
 
@@ -196,17 +202,17 @@ public class EvolutionConfig {
         }
 
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(final byte[] b) throws IOException {
             return getStream().read(b);
         }
 
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(final byte[] b, final int off, final int len) throws IOException {
             return getStream().read(b, off, len);
         }
 
         @Override
-        public long skip(long n) throws IOException {
+        public long skip(final long n) throws IOException {
             return getStream().skip(n);
         }
 
@@ -217,11 +223,12 @@ public class EvolutionConfig {
             } catch (IOException ioe) {
                 // ignore
             }
+
             return false;
         }
 
         @Override
-        public synchronized void mark(int readlimit) {
+        public synchronized void mark(final int readlimit) {
             try {
                 getStream().mark(readlimit);
             } catch (IOException ioe) {
@@ -239,10 +246,11 @@ public class EvolutionConfig {
             if (delegatee == null) {
                 try {
                     delegatee = value.getBinary().getStream();
-                } catch (RepositoryException re) {
-                    throw (IOException) new IOException(re.getMessage()).initCause(re);
+                } catch (final RepositoryException re) {
+                    throw new IOException(re.getMessage(), re);
                 }
             }
+
             return delegatee;
         }
 

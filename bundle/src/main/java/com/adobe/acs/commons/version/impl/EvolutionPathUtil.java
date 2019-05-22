@@ -21,31 +21,31 @@ package com.adobe.acs.commons.version.impl;
 
 import org.apache.commons.lang.StringUtils;
 
-public class EvolutionPathUtil {
+public final class EvolutionPathUtil {
 
     private EvolutionPathUtil() {}
 
-    public static int getDepthForPath(String path) {
+    public static int getDepthForPath(final String path) {
         return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:frozenNode"), "/");
     }
 
-    public static String getRelativePropertyName(String path) {
+    public static String getRelativePropertyName(final String path) {
         return StringUtils.substringAfterLast(path, "jcr:frozenNode").replaceFirst("/", "");
     }
 
-    public static String getRelativeResourceName(String path) {
+    public static String getRelativeResourceName(final String path) {
         return StringUtils.substringAfterLast(path, "jcr:frozenNode/");
     }
 
-    public static int getLastDepthForPath(String path) {
+    public static int getLastDepthForPath(final String path) {
         return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:content"), "/");
     }
 
-    public static String getLastRelativePropertyName(String path) {
+    public static String getLastRelativePropertyName(final String path) {
         return StringUtils.substringAfterLast(path, "jcr:content").replaceFirst("/", "");
     }
 
-    public static String getLastRelativeResourceName(String path) {
+    public static String getLastRelativeResourceName(final String path) {
         return StringUtils.substringAfterLast(path, "jcr:content/");
     }
 }

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Property;
 
-public class CurrentEvolutionEntryImpl implements EvolutionEntry {
+public final class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionEntryImpl.class);
 
@@ -39,7 +39,7 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
     private String path;
     private EvolutionConfig config;
 
-    public CurrentEvolutionEntryImpl(Resource resource, EvolutionConfig config) {
+    public CurrentEvolutionEntryImpl(final Resource resource, final EvolutionConfig config) {
         this.config = config;
         this.type = EvolutionEntryType.RESOURCE;
         this.name = resource.getName();
@@ -48,15 +48,15 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
         this.value = null;
     }
 
-    public CurrentEvolutionEntryImpl(Property property, EvolutionConfig config) {
+    public CurrentEvolutionEntryImpl(final Property property, final EvolutionConfig config) {
         try {
             this.config = config;
             this.type = EvolutionEntryType.PROPERTY;
             this.name = property.getName();
             this.depth = EvolutionPathUtil.getLastDepthForPath(property.getPath());
             this.path = property.getParent().getName();
-            this.value = config.printProperty(property);
-        } catch (Exception e) {
+            this.value = EvolutionConfig.printProperty(property);
+        } catch (final Exception e) {
             log.error("Could not inititalize VersionEntry", e);
         }
     }
@@ -83,15 +83,16 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getValueString() {
-        return config.printObject(value);
+        return EvolutionConfig.printObject(value);
     }
 
     @Override
     public String getValueStringShort() {
-        String tmpValue = getValueString();
+    	final String tmpValue = getValueString();
         if (tmpValue.length() > MAX_CHARS) {
             return tmpValue.substring(0, MAX_CHARS) + "...";
         }
+
         return tmpValue;
     }
 
@@ -129,7 +130,6 @@ public class CurrentEvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public boolean isWillBeRemoved() {
-
         return false;
     }
 

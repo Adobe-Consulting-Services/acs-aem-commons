@@ -51,7 +51,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     private Property property;
     private EvolutionConfig config;
 
-    public EvolutionEntryImpl(Resource resource, Version version, EvolutionConfig config) {
+    public EvolutionEntryImpl(final Resource resource, final Version version, final EvolutionConfig config) {
         this.config = config;
         this.type = EvolutionEntryType.RESOURCE;
         this.name = resource.getName();
@@ -62,7 +62,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
         this.relativePath = EvolutionPathUtil.getRelativeResourceName(resource.getPath());
     }
 
-    public EvolutionEntryImpl(Property property, Version version, EvolutionConfig config) {
+    public EvolutionEntryImpl(final Property property, final Version version, final EvolutionConfig config) {
         try {
             this.config = config;
             this.property = property;
@@ -71,7 +71,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
             this.depth = EvolutionPathUtil.getDepthForPath(property.getPath());
             this.version = version;
             this.path = property.getParent().getName();
-            this.value = config.printProperty(property);
+            this.value = EvolutionConfig.printProperty(property);
             this.relativePath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
         } catch (Exception e) {
             log.error("Could not inititalize VersionEntry", e);
@@ -100,15 +100,16 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
 
     @Override
     public String getValueString() {
-        return config.printObject(value);
+        return EvolutionConfig.printObject(value);
     }
 
     @Override
     public String getValueStringShort() {
-        String tempValue = getValueString();
+    	final String tempValue = getValueString();
         if (tempValue.length() > MAX_CHARS) {
             return tempValue.substring(0, MAX_CHARS) + "...";
         }
+
         return tempValue;
     }
 
@@ -120,7 +121,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
     @Override
     public boolean isCurrent() {
         try {
-            Version[] successors = version.getSuccessors();
+        	final Version[] successors = version.getSuccessors();
             if (successors == null || successors.length == 0) {
                 return true;
             }
@@ -160,6 +161,7 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
         } catch (Exception e) {
             // no-op
         }
+
         return true;
     }
 
@@ -169,16 +171,18 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
             if (isCurrent()) {
                 return false;
             }
+
             if (isResource()) {
-                Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
+            	final Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
                 return node == null;
             } else {
-                Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
+            	final Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
                 return prop == null;
             }
         } catch (Exception e) {
             // no-op
         }
+
         return true;
     }
 
@@ -188,13 +192,14 @@ public final class EvolutionEntryImpl implements EvolutionEntry {
             if (isResource()) {
                 return false;
             }
-            Property prop = version.getLinearPredecessor().getFrozenNode().getProperty(relativePath);
-            String currentValue = config.printProperty(prop);
-            String oldValue = config.printProperty(property);
+            final Property prop = version.getLinearPredecessor().getFrozenNode().getProperty(relativePath);
+            final String currentValue = EvolutionConfig.printProperty(prop);
+            final String oldValue = EvolutionConfig.printProperty(property);
             return !currentValue.equals(oldValue);
         } catch (Exception e) {
             log.error("Unable to check changed status", e);
         }
+
         return false;
     }
 
