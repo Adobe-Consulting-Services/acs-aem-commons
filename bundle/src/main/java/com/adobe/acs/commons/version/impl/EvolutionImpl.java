@@ -19,57 +19,37 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
-import javax.jcr.Node;
-import javax.jcr.PathNotFoundException;
+import javax.jcr.AccessDeniedException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.version.Version;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.version.Evolution;
 import com.adobe.acs.commons.version.EvolutionEntry;
 
 
-public final class EvolutionImpl implements Evolution {
+public final class EvolutionImpl extends EvolutionImplBase {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionImpl.class);
 
-    private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
     private final Version version;
-    private final Resource versionResource;
-    private final EvolutionConfig config;
 
     public EvolutionImpl(final Version version, final Resource resource, final EvolutionConfig config) {
+    	super(resource, config);
         this.version = version;
-        this.config = config;
-        this.versionResource = resource;
-        try {
-            populate(versionResource, 0);
-        } catch (final RepositoryException e) {
-            log.warn("Could not populate Evolution", e);
-        }
-    }
-
-    @Override
-    public List<EvolutionEntry> getVersionEntries() {
-        return versionEntries;
     }
 
     @Override
     public Date getVersionDate() {
         try {
             return version.getCreated().getTime();
-        } catch (RepositoryException e) {
+        } catch (final RepositoryException e) {
             log.warn("Could not get created date from version", e);
         }
 
@@ -80,7 +60,7 @@ public final class EvolutionImpl implements Evolution {
     public String getVersionName() {
         try {
             return version.getName();
-        } catch (RepositoryException e) {
+        } catch (final RepositoryException e) {
             log.warn("Could not determine version name");
         }
 
@@ -101,34 +81,12 @@ public final class EvolutionImpl implements Evolution {
         return false;
     }
 
-    public Resource getResource() {
-        return versionResource;
-    }
+	protected EvolutionEntry createEntry(final Resource resource) {
+		return new EvolutionEntryImpl(resource, version);
+	}
 
-    public ValueMap getProperties() {
-        return versionResource.getValueMap();
-    }
-
-    private void populate(final Resource r, final int depth) throws PathNotFoundException, RepositoryException {
-        final ValueMap map = r.getValueMap();
-        final List<String> keys = new ArrayList<String>(map.keySet());
-        Collections.sort(keys);
-        for (final String key : keys) {
-            final Property property = r.adaptTo(Node.class).getProperty(key);
-            final String relPath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
-            if (config.handleProperty(relPath)) {
-                versionEntries.add(new EvolutionEntryImpl(property, version));
-            }
-        }
-
-        final Iterator<Resource> iter = r.getChildren().iterator();
-        while (iter.hasNext()) {
-            final Resource child = iter.next();
-            final String relPath = EvolutionPathUtil.getRelativeResourceName(child.getPath());
-            if (config.handleResource(relPath)) {
-                versionEntries.add(new EvolutionEntryImpl(child, version));
-                populate(child, depth + 1);
-            }
-        }
-    }
+	protected EvolutionEntry createEntry(final Property property)
+			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+		return new EvolutionEntryImpl(property, version);
+	}
 }

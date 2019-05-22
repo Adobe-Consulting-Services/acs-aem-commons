@@ -19,41 +19,23 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import com.adobe.acs.commons.version.Evolution;
-import com.adobe.acs.commons.version.EvolutionEntry;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Date;
 
-import javax.jcr.Node;
-import javax.jcr.PathNotFoundException;
+import javax.jcr.AccessDeniedException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
-public final class CurrentEvolutionImpl implements Evolution {
+import org.apache.sling.api.resource.Resource;
+
+import com.adobe.acs.commons.version.EvolutionEntry;
+
+public final class CurrentEvolutionImpl extends EvolutionImplBase {
 
     public static final String LATEST_VERSION = "Latest";
 
-    private static final Logger log = LoggerFactory.getLogger(CurrentEvolutionImpl.class);
-
-    private final Resource resource;
-    private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
-    private EvolutionConfig config;
-
-    public CurrentEvolutionImpl(Resource resource, EvolutionConfig config) {
-        this.resource = resource;
-        this.config = config;
-        try {
-            populate(this.resource, 0);
-        } catch (RepositoryException e) {
-            log.warn("Could not populate Evolution", e);
-        }
+    public CurrentEvolutionImpl(final Resource resource, final EvolutionConfig config) {
+    	super(resource, config);
     }
 
     @Override
@@ -71,31 +53,12 @@ public final class CurrentEvolutionImpl implements Evolution {
         return new Date();
     }
 
-    @Override
-    public List<EvolutionEntry> getVersionEntries() {
-        return this.versionEntries;
-    }
+	protected EvolutionEntry createEntry(final Resource resource) {
+		return new CurrentEvolutionEntryImpl(resource);
+	}
 
-    private void populate(final Resource r, final int depth) throws PathNotFoundException, RepositoryException {
-    	final ValueMap map = r.getValueMap();
-    	final List<String> keys = new ArrayList<String>(map.keySet());
-        Collections.sort(keys);
-        for (final String key : keys) {
-        	final Property property = r.adaptTo(Node.class).getProperty(key);
-        	final String relPath = EvolutionPathUtil.getLastRelativePropertyName(property.getPath());
-            if (config.handleProperty(relPath)) {
-                versionEntries.add(new CurrentEvolutionEntryImpl(property));
-            }
-        }
-
-        Iterator<Resource> iter = r.getChildren().iterator();
-        while (iter.hasNext()) {
-        	final Resource child = iter.next();
-        	final String relPath = EvolutionPathUtil.getLastRelativeResourceName(child.getPath());
-            if (config.handleResource(relPath)) {
-                versionEntries.add(new CurrentEvolutionEntryImpl(child));
-                populate(child, depth + 1);
-            }
-        }
-    }
+	protected EvolutionEntry createEntry(final Property property)
+			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+		return new CurrentEvolutionEntryImpl(property);
+	}
 }
