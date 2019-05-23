@@ -58,7 +58,7 @@ public class TemplateReplacementUtil {
 
     /**
      * Takes the current placeholder value and returns the key inside of it. This is used in
-     * conjunction with the {@link com.bounteous.dialogs.core.service.PropertyAggregatorService}
+     * conjunction with the {@link com.adobe.acs.commons.properties.PropertyAggregatorService}
      * properties.
      *
      * @param placeholder The placeholder input
