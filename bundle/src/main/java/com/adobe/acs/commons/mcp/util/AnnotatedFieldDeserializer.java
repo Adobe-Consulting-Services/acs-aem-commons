@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Named;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.ValueMap;
@@ -187,18 +188,23 @@ public class AnnotatedFieldDeserializer {
         return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
                 .stream()
                 .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst)
-                .collect(Collectors.toMap(Field::getName, f -> {
+                .collect(Collectors.toMap(AnnotatedFieldDeserializer::getFieldName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
                         component = fieldDefinition.component().newInstance();
-                        component.setup(f.getName(), f, fieldDefinition, sling);
+                        component.setup(getFieldName(f), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
                         LOG.error("Unable to instantiate field component for " + f.getName(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private static String getFieldName(Field f) {
+        Named named = f.getAnnotation(Named.class);
+        return named == null ? f.getName() : named.value();
     }
 
     private static int superclassFieldsFirst(Field a, Field b) {
