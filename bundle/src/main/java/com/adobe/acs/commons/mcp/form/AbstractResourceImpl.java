@@ -79,15 +79,19 @@ public class AbstractResourceImpl extends AbstractResource {
     }
 
     public void addChild(Resource res) {
-        children.add(res);
         if (res instanceof AbstractResourceImpl) {
+            String originalName = res.getName();
+            String name = originalName;
+            int seq = 1;
+            while (getChildNamed(name) != null) {
+                name = originalName + (seq++);
+            }
             AbstractResourceImpl child = ((AbstractResourceImpl) res);
             child.parent = this;
-            if (!child.path.startsWith("/")) {
-                child.path = path + "/" + child.path;
-            }
+            child.path = path + "/" + name;
             child.setResourceResolver(rr);
         }
+        children.add(res);
     }
 
     public void removeChild(Resource res) {
@@ -103,7 +107,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getName() {
-        return StringUtils.substringAfterLast(path, "/");
+        return path.contains("/") ? StringUtils.substringAfterLast(path, "/") : path;
     }
 
     @Override
@@ -193,5 +197,20 @@ public class AbstractResourceImpl extends AbstractResource {
     @Override
     public ResourceResolver getResourceResolver() {
         return rr;
+    }
+
+    public AbstractResourceImpl cloneResource() {
+        ResourceMetadata clonedMetadata = new ResourceMetadata();
+        if (meta != null) {
+            clonedMetadata.putAll(meta);
+        }
+        AbstractResourceImpl clone = new AbstractResourceImpl(getPath(), getResourceType(), getResourceSuperType(), clonedMetadata);
+        getChildren().forEach(child -> clone.addChild(((AbstractResourceImpl) child).cloneResource()));
+        return clone;
+    }
+
+    public void disableMergeResourceProvider() {
+        getResourceMetadata().put("sling:hideChildren", "*");
+        children.forEach(c -> ((AbstractResourceImpl) c).disableMergeResourceProvider());
     }
 }
