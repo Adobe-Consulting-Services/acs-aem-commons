@@ -40,8 +40,4 @@ public interface Evolution {
      */
     List<EvolutionEntry> getVersionEntries();
 
-    Evolution getPrev();
-
-    Evolution getNext();
-
 }
