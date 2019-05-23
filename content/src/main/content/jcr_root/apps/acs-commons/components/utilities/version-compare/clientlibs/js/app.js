@@ -70,7 +70,7 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.addNode = function(node) {
-            node['getTargetId'] = function(indexShift) {
+            node.getTargetId = function(indexShift) {
                 return this.name + "-" + (this.version + indexShift);
             };
 
@@ -98,13 +98,14 @@ angular.module('versionComparator', ['acsCoral'])
             }
 
             return true;
-        }
+        };
 
         var findTarget = function(node) {
+            var target;
             var i = 1;
             while (!target && node.version + i < $scope.versionsCount) {
                 var targetId = node.getTargetId(i);
-                var target = $scope.nodesMap[targetId];
+                target = $scope.nodesMap[targetId];
                 if (target && !isVisible(target)) {
                     target = null;
                 }
@@ -113,7 +114,7 @@ angular.module('versionComparator', ['acsCoral'])
             }
 
             return target;
-        }
+        };
 
         var paintConnections = function() {
             for (var i = 0; i < $scope.nodes.length; i++) {
