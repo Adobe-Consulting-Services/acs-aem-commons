@@ -29,6 +29,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Test;
 
+import javax.inject.Named;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -79,6 +81,15 @@ public class SyntheticFormResourceTest {
     )
     private String button;
 
+    @Named("test:differentName")
+    @FormField(
+            name = "Text component",
+            options = {"default=defaultValue"},
+            required = true
+    )
+    private String renamedComponentTest;
+
+
     @Test
     public void defaultValuesTest() throws DeserializeException {
         Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), null);
@@ -114,5 +125,12 @@ public class SyntheticFormResourceTest {
         assertEquals("textComponentTest", fieldResource.getResourceMetadata().get("name"));
         assertEquals("Text component", fieldResource.getResourceMetadata().get("fieldLabel"));
         assertEquals(true, fieldResource.getResourceMetadata().get("required"));
+    }
+
+    @Test
+    public void namedPropertiesTest() {
+        Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(getClass(), null);
+        assertNull("Should not map to variable name for named properties", form.get("renamedComponentTest"));
+        assertNotNull("Should not map to variable name for named properties", form.get("test:differentName"));
     }
 }
