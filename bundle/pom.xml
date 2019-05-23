@@ -75,7 +75,7 @@
                             com.adobe.acs.commons.workflow.bulk.execution.model,
                             com.adobe.acs.commons.mcp.model,
                             com.adobe.acs.commons.reports.models,
-                            com.adobe.acs.commons.properties
+                            com.adobe.acs.commons.properties.model
                         </Sling-Model-Packages>
                     </instructions>
                 </configuration>
