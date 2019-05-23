@@ -31,8 +31,6 @@ import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.version.EvolutionEntry;
-
 
 public final class EvolutionImpl extends EvolutionImplBase {
 
@@ -84,7 +82,7 @@ public final class EvolutionImpl extends EvolutionImplBase {
 		return EvolutionPathUtil.getRelativePropertyName(property.getPath());
 	}
 
-	protected EvolutionEntry createEntry(final Property property)
+	protected EvolutionEntryImplBase createEntry(final Property property)
 			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
 		return new EvolutionEntryImpl(property, version);
 	}
@@ -93,7 +91,7 @@ public final class EvolutionImpl extends EvolutionImplBase {
 		return EvolutionPathUtil.getRelativeResourceName(resource.getPath());
 	}
 
-	protected EvolutionEntry createEntry(final Resource resource) {
+	protected EvolutionEntryImplBase createEntry(final Resource resource) {
 		return new EvolutionEntryImpl(resource, version);
 	}
 }

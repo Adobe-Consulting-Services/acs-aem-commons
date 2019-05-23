@@ -44,6 +44,9 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
     private final Object value;
     private final int depth;
 
+    private EvolutionEntryImplBase prev;
+    private EvolutionEntryImplBase next;
+
     protected EvolutionEntryImplBase(
     		final String name,
     		final String path,
@@ -133,5 +136,21 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
             return "";
         }
     }
+
+	public EvolutionEntryImplBase getPrev() {
+		return prev;
+	}
+
+	public void setPrev(final EvolutionEntryImplBase prev) {
+		this.prev = prev;
+	}
+
+	public EvolutionEntryImplBase getNext() {
+		return next;
+	}
+
+	public void setNext(final EvolutionEntryImplBase next) {
+		this.next = next;
+	}
 
 }

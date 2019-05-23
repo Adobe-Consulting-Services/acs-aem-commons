@@ -45,6 +45,10 @@ public interface EvolutionEntry {
 
     boolean isWillBeRemoved();
 
+    EvolutionEntry getPrev();
+
+    EvolutionEntry getNext();
+
     /**
      * The available entry types.
      */

@@ -22,7 +22,10 @@ package com.adobe.acs.commons.version.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.jcr.AccessDeniedException;
 import javax.jcr.ItemNotFoundException;
@@ -44,17 +47,20 @@ public abstract class EvolutionImplBase implements Evolution {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionImplBase.class);
 
-    private final List<EvolutionEntry> versionEntries = new ArrayList<EvolutionEntry>();
+    private final Map<String, EvolutionEntryImplBase> versionEntries = new LinkedHashMap<>();
 
     private final Resource resource;
 
-    protected EvolutionImplBase(final Resource resource) {
+    private EvolutionImplBase prev;
+    private EvolutionImplBase next;
+
+	protected EvolutionImplBase(final Resource resource) {
         this.resource = resource;
     }
 
     @Override
     public List<EvolutionEntry> getVersionEntries() {
-        return versionEntries;
+        return versionEntries.values().stream().collect(Collectors.toList());
     }
 
     public Resource getResource() {
@@ -81,7 +87,8 @@ public abstract class EvolutionImplBase implements Evolution {
             final Property property = resource.adaptTo(Node.class).getProperty(key);
             final String relPath = getRelativeName(property);
             if (config.handleProperty(relPath)) {
-                versionEntries.add(createEntry(property));
+                final EvolutionEntryImplBase entry = createEntry(property);
+				versionEntries.put(entry.getUniqueName(), entry);
             }
         }
 
@@ -90,7 +97,8 @@ public abstract class EvolutionImplBase implements Evolution {
             final Resource child = iter.next();
             final String relPath = getRelativeName(child);
             if (config.handleResource(relPath)) {
-                versionEntries.add(createEntry(child));
+                final EvolutionEntryImplBase entry = createEntry(child);
+				versionEntries.put(entry.getUniqueName(), entry);
                 populate(child, config, depth + 1);
             }
         }
@@ -98,11 +106,33 @@ public abstract class EvolutionImplBase implements Evolution {
 
 	protected abstract String getRelativeName(Property property) throws RepositoryException;
 
-	protected abstract EvolutionEntry createEntry(Property property)
+	protected abstract EvolutionEntryImplBase createEntry(Property property)
 			throws AccessDeniedException, ItemNotFoundException, RepositoryException;
 
 	protected abstract String getRelativeName(Resource resource);
 
-	protected abstract EvolutionEntry createEntry(Resource resource);
+	protected abstract EvolutionEntryImplBase createEntry(Resource resource);
+
+    public EvolutionImplBase getPrev() {
+		return prev;
+	}
+
+	public void setPrev(final EvolutionImplBase prev) {
+		this.prev = prev;
+		for (final Map.Entry<String, EvolutionEntryImplBase> e : versionEntries.entrySet()) {
+			e.getValue().setPrev(prev.versionEntries.get(e.getKey()));
+		}
+	}
+
+	public EvolutionImplBase getNext() {
+		return next;
+	}
+
+	public void setNext(final EvolutionImplBase next) {
+		this.next = next;
+		for (final Map.Entry<String, EvolutionEntryImplBase> e : versionEntries.entrySet()) {
+			e.getValue().setNext(next.versionEntries.get(e.getKey()));
+		}
+	}
 
 }

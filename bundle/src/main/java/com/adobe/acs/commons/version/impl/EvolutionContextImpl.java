@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -44,8 +45,8 @@ public final class EvolutionContextImpl implements EvolutionContext {
 
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
 
-    private final List<Evolution> versions = new ArrayList<Evolution>();
-    private final List<Evolution> evolutionItems = new ArrayList<Evolution>();
+    private final List<EvolutionImplBase> versions = new ArrayList<EvolutionImplBase>();
+    private final List<EvolutionImplBase> evolutionItems = new ArrayList<EvolutionImplBase>();
 
     public EvolutionContextImpl(final Resource resource, final EvolutionConfig config) {
         final ResourceResolver resolver = resource.getResourceResolver();
@@ -74,21 +75,30 @@ public final class EvolutionContextImpl implements EvolutionContext {
 
         evolutionItems.addAll(versions);
         evolutionItems.add(new CurrentEvolutionImpl(versionedResource, config));
-    
+
+        connectPrevNext();
     }
 
 	private String getWarnMessage(final Resource resource) {
 		return String.format("Could not find versions for resource=%s", resource.getPath());
 	}
 
+	private void connectPrevNext() {
+		for (int i = evolutionItems.size() - 2; i > 1; i--) {
+			final EvolutionImplBase current = evolutionItems.get(i);
+			current.setPrev(evolutionItems.get(i - 1));
+			current.setNext(evolutionItems.get(i + 1));
+		}
+	}
+
     @Override
     public List<Evolution> getEvolutionItems() {
-        return evolutionItems;
+        return evolutionItems.stream().collect(Collectors.toList());
     }
 
     @Override
     public List<Evolution> getVersions() {
-        return versions;
+        return versions.stream().collect(Collectors.toList());
     }
 
 }

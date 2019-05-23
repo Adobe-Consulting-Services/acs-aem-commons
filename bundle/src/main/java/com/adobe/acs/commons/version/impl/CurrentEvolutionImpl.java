@@ -28,8 +28,6 @@ import javax.jcr.RepositoryException;
 
 import org.apache.sling.api.resource.Resource;
 
-import com.adobe.acs.commons.version.EvolutionEntry;
-
 public final class CurrentEvolutionImpl extends EvolutionImplBase {
 
     public static final String LATEST_VERSION = "Latest";
@@ -58,7 +56,7 @@ public final class CurrentEvolutionImpl extends EvolutionImplBase {
 		return EvolutionPathUtil.getLastRelativePropertyName(property.getPath());
 	}
 
-	protected EvolutionEntry createEntry(final Property property)
+	protected EvolutionEntryImplBase createEntry(final Property property)
 			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
 		return new CurrentEvolutionEntryImpl(property);
 	}
@@ -67,7 +65,7 @@ public final class CurrentEvolutionImpl extends EvolutionImplBase {
 		return EvolutionPathUtil.getLastRelativeResourceName(resource.getPath());
 	}
 
-	protected EvolutionEntry createEntry(final Resource resource) {
+	protected EvolutionEntryImplBase createEntry(final Resource resource) {
 		return new CurrentEvolutionEntryImpl(resource);
 	}
 }
