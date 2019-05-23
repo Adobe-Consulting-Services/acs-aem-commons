@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.properties.datasource;
+package com.adobe.acs.commons.properties.model;
 
 import java.util.Map;
 
