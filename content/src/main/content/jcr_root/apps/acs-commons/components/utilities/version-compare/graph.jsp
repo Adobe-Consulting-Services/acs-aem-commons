@@ -13,7 +13,13 @@
                 <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status}"
                      id="${versionEntry.uniqueName}-${evoCounter.index}"
                      ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""}
-                     ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">
+                     ng-init="addNode({
+                         'id': '${versionEntry.uniqueName}-${evoCounter.index}',
+                         'version': ${evoCounter.index},
+                         'name': '${versionEntry.uniqueName}',
+                         'isCurrent': ${evolutionItem.current},
+                         'changed': ${not empty versionEntry.status}
+                     })">
                     <div class="inner-version-entry depth-${versionEntry.depth}">
                         <span class="key"><c:out value="${versionEntry.name}"/>:</span>
                         <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
