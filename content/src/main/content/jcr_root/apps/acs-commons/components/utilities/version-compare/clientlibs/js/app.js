@@ -32,12 +32,23 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.notifications = [];
-        $scope.connections = [];
+        $scope.nodes = [];
+        $scope.nodesMap = {};
+        $scope.versionsMap = {};
+        $scope.versionsCount = 0;
         $scope.changeStatus = [];
 
         $scope.$watch('app.paintConnections', function(newValue,
                 oldValue) {
             $scope.refreshConnections(newValue);
+        });
+
+        $scope.$watch('app.hideUnchanged', function(newValue,
+                oldValue) {
+            if ($scope.app.paintConnections) {
+                removeConnections();
+                paintConnections();
+            }
         });
 
         $scope.addNotification = function(type, title, message) {
@@ -58,19 +69,68 @@ angular.module('versionComparator', ['acsCoral'])
             }, timeout);
         };
 
-        $scope.addConnection = function(params) {
-            $scope.connections.push(params);
+        $scope.addNode = function(node) {
+            node['getTargetId'] = function(indexShift) {
+                return this.name + "-" + (this.version + indexShift);
+            };
+
+            $scope.nodes.push(node);
+            $scope.nodesMap[node.id] = node;
+
+            var versionIndex = node.version;
+            var version = $scope.versionsMap[versionIndex] || {};
+            version[node.name] = node;
+            $scope.versionsMap[versionIndex] = version;
+
+            var versionsCount = versionIndex + 1;
+            if ($scope.versionsCount < versionsCount) {
+                $scope.versionsCount = versionsCount;
+            }
         };
 
         $scope.addChangeStatus = function(params) {
             $scope.changeStatus.push(params);
         };
 
+        var isVisible = function(node) {
+            if ($scope.app.hideUnchanged && !node.changed) {
+                return false;
+            }
+
+            return true;
+        }
+
+        var findTarget = function(node) {
+            var i = 1;
+            while (!target && node.version + i < $scope.versionsCount) {
+                var targetId = node.getTargetId(i);
+                var target = $scope.nodesMap[targetId];
+                if (target && !isVisible(target)) {
+                    target = null;
+                }
+
+                i++;
+            }
+
+            return target;
+        }
+
         var paintConnections = function() {
-            for (var i = 0; i < $scope.connections.length; i++) {
+            for (var i = 0; i < $scope.nodes.length; i++) {
+                var node = $scope.nodes[i];
+                var target = findTarget(node);
+
+                if (!target) {
+                    continue;
+                }
+
+                if (!isVisible(node) || !isVisible(target)) {
+                    continue;
+                }
+
                 jsPlumb.connect({
-                    source : $scope.connections[i].source,
-                    target : $scope.connections[i].target,
+                    source : node.id,
+                    target : target.id,
                     anchors : [ "Right", "Left" ],
                     paintStyle : {
                         lineWidth : 1,
