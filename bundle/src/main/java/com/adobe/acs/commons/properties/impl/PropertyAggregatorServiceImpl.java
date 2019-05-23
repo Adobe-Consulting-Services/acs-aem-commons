@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.adobe.acs.commons.properties.PropertyAggregatorService;
-import com.adobe.acs.commons.properties.model.BaseModel;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
@@ -165,7 +164,7 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
                 try {
                     Resource contentResource = page.getContentResource();
                     Class<?> modelClass = Class.forName(additionalData.get(prefix));
-                    BaseModel model = (BaseModel) contentResource.adaptTo(modelClass);
+                    Object model = contentResource.adaptTo(modelClass);
                     if (model != null) {
                         addBeanToMap(targetPropertyMap, prefix, model, 1);
                     }
