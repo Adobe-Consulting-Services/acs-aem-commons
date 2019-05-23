@@ -26,7 +26,12 @@ import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.engine.impl.delegate.HttpCacheEngineBindingsDelegate;
 import com.adobe.acs.commons.httpcache.engine.impl.delegate.HttpCacheEngineMBeanDelegate;
-import com.adobe.acs.commons.httpcache.exception.*;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
+import com.adobe.acs.commons.httpcache.exception.HttpCachePersistenceException;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
@@ -147,7 +152,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     private final HttpCacheEngineMBeanDelegate mBeanDelegate = new HttpCacheEngineMBeanDelegate();
     private final HttpCacheEngineBindingsDelegate bindingsDelegate = new HttpCacheEngineBindingsDelegate();
     //-------------------<OSGi specific methods>---------------//
-    
+
     @Activate
     protected void activate(Map<String, Object> configs) {
 
@@ -425,7 +430,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * @param config
      */
     protected void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
-        bindingsDelegate.unbindHttpCacheConfig(cacheConfig, config);
+        bindingsDelegate.unbindHttpCacheConfig(cacheConfig);
     }
 
     /**

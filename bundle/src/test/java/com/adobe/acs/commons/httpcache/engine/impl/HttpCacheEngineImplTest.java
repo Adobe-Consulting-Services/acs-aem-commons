@@ -50,6 +50,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -235,7 +238,7 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheConfig.accepts(request)).thenReturn(true);
         when(jcrCacheConfig.getExcludedResponseHeaderPatterns()).thenReturn( Arrays.asList(Pattern.compile("ignoredResponseHeaderConfigSpecific")));
 
-        CacheKey mockedCacheKey = mock(CacheKey.class);
+
         CacheContent mockedCacheContent = mock(CacheContent.class);
 
         when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
@@ -247,6 +250,7 @@ public class HttpCacheEngineImplTest {
         headers.put("ignoredResponseHeaderGlobal", new String[]{"SomeValue"});
         headers.put("ignoredResponseHeaderConfigSpecific", new String[]{"SomeValue"});
 
+        CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
         when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);

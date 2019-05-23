@@ -97,7 +97,7 @@ public class HttpCacheEngineBindingsDelegate {
      * @param cacheConfig
      * @param config
      */
-    public void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
+    public void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig) {
 
         if (cacheConfigs.contains(cacheConfig)) {
             // Remove the associated cached items from the cache store.
