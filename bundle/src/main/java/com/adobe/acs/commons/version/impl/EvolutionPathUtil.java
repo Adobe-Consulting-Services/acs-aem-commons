@@ -21,31 +21,35 @@ package com.adobe.acs.commons.version.impl;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.day.cq.commons.jcr.JcrConstants;
+
 public final class EvolutionPathUtil {
 
-    private EvolutionPathUtil() {}
+    private static final String SEP = "/";
+
+	private EvolutionPathUtil() {}
 
     public static int getDepthForPath(final String path) {
-        return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:frozenNode"), "/");
+        return StringUtils.countMatches(StringUtils.substringAfterLast(path, JcrConstants.JCR_FROZENNODE), SEP);
     }
 
     public static String getRelativePropertyName(final String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode").replaceFirst("/", "");
+        return StringUtils.substringAfterLast(path, JcrConstants.JCR_FROZENNODE).replaceFirst(SEP, "");
     }
 
     public static String getRelativeResourceName(final String path) {
-        return StringUtils.substringAfterLast(path, "jcr:frozenNode/");
+        return StringUtils.substringAfterLast(path, JcrConstants.JCR_FROZENNODE + SEP);
     }
 
     public static int getLastDepthForPath(final String path) {
-        return StringUtils.countMatches(StringUtils.substringAfterLast(path, "jcr:content"), "/");
+        return StringUtils.countMatches(StringUtils.substringAfterLast(path, JcrConstants.JCR_CONTENT), SEP);
     }
 
     public static String getLastRelativePropertyName(final String path) {
-        return StringUtils.substringAfterLast(path, "jcr:content").replaceFirst("/", "");
+        return StringUtils.substringAfterLast(path, JcrConstants.JCR_CONTENT).replaceFirst(SEP, "");
     }
 
     public static String getLastRelativeResourceName(final String path) {
-        return StringUtils.substringAfterLast(path, "jcr:content/");
+        return StringUtils.substringAfterLast(path, JcrConstants.JCR_CONTENT + SEP);
     }
 }

@@ -19,23 +19,26 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import com.adobe.acs.commons.version.Evolution;
-import com.adobe.acs.commons.version.EvolutionContext;
-import com.day.cq.commons.jcr.JcrConstants;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionHistory;
+import javax.jcr.version.VersionManager;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Session;
-import javax.jcr.UnsupportedRepositoryOperationException;
-import javax.jcr.version.Version;
-import javax.jcr.version.VersionHistory;
-import javax.jcr.version.VersionManager;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.adobe.acs.commons.version.Evolution;
+import com.adobe.acs.commons.version.EvolutionContext;
+import com.day.cq.commons.jcr.JcrConstants;
 
 public final class EvolutionContextImpl implements EvolutionContext {
 
@@ -44,13 +47,20 @@ public final class EvolutionContextImpl implements EvolutionContext {
     private final List<Evolution> versions = new ArrayList<Evolution>();
     private final List<Evolution> evolutionItems = new ArrayList<Evolution>();
 
-    public EvolutionContextImpl(Resource resource, final EvolutionConfig config) {
-        final Resource r = resource.isResourceType("cq:Page") ? resource.getChild(JcrConstants.JCR_CONTENT) : resource;
-        final ResourceResolver resolver = r.getResourceResolver();
+    public EvolutionContextImpl(final Resource resource, final EvolutionConfig config) {
+        final ResourceResolver resolver = resource.getResourceResolver();
+        final Optional<Workspace> workspace = Optional.ofNullable(resolver.adaptTo(Session.class))
+            .map(Session::getWorkspace);
+        if (!workspace.isPresent()) {
+            log.warn(getWarnMessage(resource));
+        }
+
+        final Resource versionedResource = resource.isResourceType("cq:Page") ? resource.getChild(JcrConstants.JCR_CONTENT) : resource;
         try {
-            final VersionManager versionManager = resolver.adaptTo(Session.class).getWorkspace().getVersionManager();
-            final VersionHistory history = versionManager.getVersionHistory(r.getPath());
-            final Iterator<Version> iter = history.getAllVersions();
+            final VersionManager versionManager = workspace.get().getVersionManager();
+            final VersionHistory history = versionManager.getVersionHistory(versionedResource.getPath());
+            @SuppressWarnings("unchecked")
+			final Iterator<Version> iter = history.getAllVersions();
             while (iter.hasNext()) {
                 final Version next = iter.next();
                 final String versionPath = next.getFrozenNode().getPath();
@@ -58,16 +68,18 @@ public final class EvolutionContextImpl implements EvolutionContext {
                 versions.add(new EvolutionImpl(next, versionResource, config));
                 log.debug("Version={} added to EvolutionItem", next.getName());
             }
-        } catch (final UnsupportedRepositoryOperationException e) {
-            log.warn("Could not find versions for resource={}", r.getPath());
-        } catch (final Exception e) {
-            log.error("Could not find versions", e);
+        } catch (final RepositoryException e) {
+            log.warn(getWarnMessage(resource), e);
         }
 
         evolutionItems.addAll(versions);
-        evolutionItems.add(new CurrentEvolutionImpl(r, config));
+        evolutionItems.add(new CurrentEvolutionImpl(versionedResource, config));
     
     }
+
+	private String getWarnMessage(final Resource resource) {
+		return String.format("Could not find versions for resource=%s", resource.getPath());
+	}
 
     @Override
     public List<Evolution> getEvolutionItems() {
