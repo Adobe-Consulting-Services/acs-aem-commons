@@ -34,7 +34,7 @@ public final class CurrentEvolutionEntryImpl extends EvolutionEntryImplBase {
 
     public CurrentEvolutionEntryImpl(final Property property)
             throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-        super(property,    EvolutionPathUtil.getLastDepthForPath(property.getPath()));
+        super(property, EvolutionPathUtil.getLastDepthForPath(property.getPath()));
     }
 
     @Override

@@ -246,8 +246,8 @@ public final class EvolutionConfig {
             if (delegatee == null) {
                 try {
                     delegatee = value.getBinary().getStream();
-                } catch (final RepositoryException re) {
-                    throw new IOException(re.getMessage(), re);
+                } catch (final RepositoryException e) {
+                    throw new IOException(e.getMessage(), e);
                 }
             }
 

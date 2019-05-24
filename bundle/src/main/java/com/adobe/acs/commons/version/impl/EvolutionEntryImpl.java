@@ -65,7 +65,7 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
             if (successors == null || successors.length == 0) {
                 return true;
             }
-        } catch (RepositoryException e) {
+        } catch (final RepositoryException e) {
             // no-op
         }
 
@@ -82,7 +82,7 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
                 Property prop = version.getLinearPredecessor().getFrozenNode().getProperty(relativePath);
                 return prop == null;
             }
-        } catch (Exception e) {
+        } catch (final RepositoryException e) {
             // no-op
         }
 
@@ -103,7 +103,7 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
                 final Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
                 return prop == null;
             }
-        } catch (Exception e) {
+        } catch (final RepositoryException e) {
             // no-op
         }
 
@@ -121,7 +121,7 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
             final String currentValue = EvolutionConfig.printProperty(prop);
             final String oldValue = EvolutionConfig.printProperty(property);
             return !currentValue.equals(oldValue);
-        } catch (Exception e) {
+        } catch (final RepositoryException e) {
             log.error("Unable to check changed status", e);
         }
 

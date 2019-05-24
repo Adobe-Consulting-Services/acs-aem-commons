@@ -74,7 +74,6 @@ public final class EvolutionContextImpl implements EvolutionContext {
 
         evolutionItems.addAll(versions);
         evolutionItems.add(new CurrentEvolutionImpl(versionedResource, config));
-    
     }
 
     private String getWarnMessage(final Resource resource) {
