@@ -132,6 +132,7 @@ public class CacheContent {
      * Construct from the custom servlet response wrapper..
      *
      * @param responseWrapper
+     * @deprecated
      * @return
      */
     @Deprecated
