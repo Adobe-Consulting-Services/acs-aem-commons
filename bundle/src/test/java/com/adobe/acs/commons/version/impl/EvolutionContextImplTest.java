@@ -85,8 +85,8 @@ public final class EvolutionContextImplTest {
 
     @Before
     public void setUp() throws RepositoryException {
-    	final FrozenResourceMock frozenResource1 = new FrozenResourceMock(FROZEN_NODE_1_PATH, VERSION_1, TESTED_VALUE_1);
-    	final FrozenResourceMock frozenResource2 = new FrozenResourceMock(FROZEN_NODE_2_PATH, VERSION_2, TESTED_VALUE_2);
+        final FrozenResourceMock frozenResource1 = new FrozenResourceMock(FROZEN_NODE_1_PATH, VERSION_1, TESTED_VALUE_1);
+        final FrozenResourceMock frozenResource2 = new FrozenResourceMock(FROZEN_NODE_2_PATH, VERSION_2, TESTED_VALUE_2);
         when(resource.getPath()).thenReturn(RESOURCE_PATH);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resource.getValueMap()).thenReturn(frozenResource2.getValueMap());

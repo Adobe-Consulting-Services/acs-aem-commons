@@ -54,7 +54,7 @@ public final class FrozenResourceMock {
     private final ValueMap valueMap;
 
     public FrozenResourceMock(final String resourcePath, final String versionName, final String propertyValue) throws RepositoryException {
-    	valueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, propertyValue));
+        valueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, propertyValue));
 
         when(version.getName()).thenReturn(versionName);
         when(version.getFrozenNode()).thenReturn(node);
@@ -76,19 +76,19 @@ public final class FrozenResourceMock {
         when(value.getType()).thenReturn(PropertyType.STRING);
     }
 
-	public Version getVersion() {
-		return version;
-	}
+    public Version getVersion() {
+        return version;
+    }
 
-	public Resource getResource() {
-		return resource;
-	}
+    public Resource getResource() {
+        return resource;
+    }
 
-	public ValueMap getValueMap() {
-		return valueMap;
-	}
+    public ValueMap getValueMap() {
+        return valueMap;
+    }
 
-	public Node getNode() {
-		return node;
-	}
+    public Node getNode() {
+        return node;
+    }
 }

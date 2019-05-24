@@ -27,10 +27,10 @@ public final class EvolutionConfigTest {
 
     @Test
     public void testHandleProperties() {
-    	final String[] ignoreProps = { "jcr:.*", "cq:.*", "par/cq:.*" };
-    	final String[] ignoreRes = {};
+        final String[] ignoreProps = { "jcr:.*", "cq:.*", "par/cq:.*" };
+        final String[] ignoreRes = {};
 
-    	final EvolutionConfig config = new EvolutionConfig(ignoreProps, ignoreRes);
+        final EvolutionConfig config = new EvolutionConfig(ignoreProps, ignoreRes);
         assertEquals(false, config.handleProperty("jcr:title"));
         assertEquals(true, config.handleProperty("test/jcr:title"));
         assertEquals(false, config.handleProperty("cq:name"));
@@ -40,10 +40,10 @@ public final class EvolutionConfigTest {
 
     @Test
     public void testHandleResources() {
-    	final String[] ignoreProps = {};
-    	final String[] ignoreRes = { "image", "par/image", ".*test.*" };
+        final String[] ignoreProps = {};
+        final String[] ignoreRes = { "image", "par/image", ".*test.*" };
 
-    	final EvolutionConfig config = new EvolutionConfig(ignoreProps, ignoreRes);
+        final EvolutionConfig config = new EvolutionConfig(ignoreProps, ignoreRes);
         assertEquals(false, config.handleResource("image"));
         assertEquals(false, config.handleResource("par/image"));
         assertEquals(true, config.handleResource("bert/image"));
