@@ -98,10 +98,10 @@ public abstract class EvolutionImplBase implements Evolution {
 
     protected abstract String getRelativeName(Property property) throws RepositoryException;
 
+    protected abstract String getRelativeName(Resource resource);
+
     protected abstract EvolutionEntry createEntry(Property property)
             throws AccessDeniedException, ItemNotFoundException, RepositoryException;
-
-    protected abstract String getRelativeName(Resource resource);
 
     protected abstract EvolutionEntry createEntry(Resource resource);
 

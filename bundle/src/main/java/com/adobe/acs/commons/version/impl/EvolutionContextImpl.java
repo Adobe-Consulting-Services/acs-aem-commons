@@ -51,25 +51,25 @@ public final class EvolutionContextImpl implements EvolutionContext {
         final ResourceResolver resolver = resource.getResourceResolver();
         final Optional<Workspace> workspace = Optional.ofNullable(resolver.adaptTo(Session.class))
             .map(Session::getWorkspace);
-        if (!workspace.isPresent()) {
-            log.warn(getWarnMessage(resource));
-        }
-
         final Resource versionedResource = resource.isResourceType("cq:Page") ? resource.getChild(JcrConstants.JCR_CONTENT) : resource;
-        try {
-            final VersionManager versionManager = workspace.get().getVersionManager();
-            final VersionHistory history = versionManager.getVersionHistory(versionedResource.getPath());
-            @SuppressWarnings("unchecked")
-            final Iterator<Version> iter = history.getAllVersions();
-            while (iter.hasNext()) {
-                final Version next = iter.next();
-                final String versionPath = next.getFrozenNode().getPath();
-                final Resource versionResource = resolver.resolve(versionPath);
-                versions.add(new EvolutionImpl(next, versionResource, config));
-                log.debug("Version={} added to EvolutionItem", next.getName());
+        if (workspace.isPresent()) {
+            try {
+                final VersionManager versionManager = workspace.get().getVersionManager();
+                final VersionHistory history = versionManager.getVersionHistory(versionedResource.getPath());
+                @SuppressWarnings("unchecked")
+                final Iterator<Version> iter = history.getAllVersions();
+                while (iter.hasNext()) {
+                    final Version next = iter.next();
+                    final String versionPath = next.getFrozenNode().getPath();
+                    final Resource versionResource = resolver.resolve(versionPath);
+                    versions.add(new EvolutionImpl(next, versionResource, config));
+                    log.debug("Version={} added to EvolutionItem", next.getName());
+                }
+            } catch (final RepositoryException e) {
+                log.warn(getWarnMessage(resource), e);
             }
-        } catch (final RepositoryException e) {
-            log.warn(getWarnMessage(resource), e);
+        } else {
+            log.warn(getWarnMessage(resource));
         }
 
         evolutionItems.addAll(versions);

@@ -84,13 +84,13 @@ public final class EvolutionImpl extends EvolutionImplBase {
         return EvolutionPathUtil.getRelativePropertyName(property.getPath());
     }
 
+    protected String getRelativeName(final Resource resource) {
+        return EvolutionPathUtil.getRelativeResourceName(resource.getPath());
+    }
+
     protected EvolutionEntry createEntry(final Property property)
             throws AccessDeniedException, ItemNotFoundException, RepositoryException {
         return new EvolutionEntryImpl(property, version);
-    }
-
-    protected String getRelativeName(final Resource resource) {
-        return EvolutionPathUtil.getRelativeResourceName(resource.getPath());
     }
 
     protected EvolutionEntry createEntry(final Resource resource) {
