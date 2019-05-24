@@ -28,12 +28,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.UnsupportedRepositoryOperationException;
 import javax.jcr.Value;
 import javax.jcr.Workspace;
 import javax.jcr.version.Version;
@@ -48,80 +51,79 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EvolutionContextImplTest {
+public final class EvolutionContextImplTest {
 
     private static final String RESOURCE_PATH = "/path/to/resource";
     private static final String FROZEN_NODE_1_PATH = "/path/to/first/jcr:frozenNode";
     private static final String FROZEN_NODE_2_PATH = "/path/to/second/jcr:frozenNode";
     private static final String VERSION_1 = "version-1";
     private static final String VERSION_2 = "version-2";
-    private static final String LATEST = "version-2";
 
     private static final String TESTED_KEY = "jcr:title";
     private static final String TESTED_VALUE_1 = "old";
     private static final String TESTED_VALUE_2 = "new";
 
     @Mock
-    Resource resource;
+    private Resource resource;
 
     @Mock
-    ResourceResolver resolver;
+    private ResourceResolver resolver;
 
     @Mock
-    Workspace workspace;
+    private Workspace workspace;
 
     @Mock
-    Session session;
+    private Session session;
 
     @Mock
-    VersionManager versionManager;
+    private VersionManager versionManager;
 
     @Mock
-    VersionHistory versionHistory;
+    private VersionHistory versionHistory;
 
     @Mock
-    VersionIterator versionIterator;
+    private VersionIterator versionIterator;
 
     @Mock
-    Version version1;
+    private Version version1;
 
     @Mock
-    Version version2;
+    private Version version2;
 
     @Mock
-    Node frozenNode1;
+    private Node frozenNode1;
 
     @Mock
-    Node frozenNode2;
+    private Node frozenNode2;
 
     @Mock
-    Resource frozenResource1;
+    private Resource frozenResource1;
 
     @Mock
-    Resource frozenResource2;
+    private Resource frozenResource2;
 
-    ValueMap frozenResource1ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_1));
+    private final ValueMap frozenResource1ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_1));
 
-    ValueMap frozenResource2ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_2));
-
-    @Mock
-    Property jcrPropertyTitle1;
+    private final ValueMap frozenResource2ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_2));
 
     @Mock
-    Property jcrPropertyTitle2;
+    private Property jcrPropertyTitle1;
 
     @Mock
-    Value value1;
+    private Property jcrPropertyTitle2;
 
     @Mock
-    Value value2;
+    private Value value1;
 
-    EvolutionConfig config = new EvolutionConfig(new String[]{"foo"}, new String[]{"bar"});
+    @Mock
+    private Value value2;
 
-    EvolutionContext evolutionContext;
+    private final EvolutionConfig config = new EvolutionConfig(new String[]{"foo"}, new String[]{"bar"});
+
+    private EvolutionContext evolutionContext;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws RepositoryException {
         when(resource.getPath()).thenReturn(RESOURCE_PATH);
         when(resource.getResourceResolver()).thenReturn(resolver);
         when(resource.getValueMap()).thenReturn(frozenResource2ValueMap);
