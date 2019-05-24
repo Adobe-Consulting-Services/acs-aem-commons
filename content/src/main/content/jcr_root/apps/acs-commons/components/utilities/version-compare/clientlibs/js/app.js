@@ -34,8 +34,8 @@ angular.module('versionComparator', ['acsCoral'])
         $scope.notifications = [];
         $scope.nodes = [];
         $scope.nodesMap = {};
-        $scope.versionsMap = {};
-        $scope.versionsCount = 0;
+        $scope.versions = [];
+        $scope.versionEntryMap = {};
         $scope.changeStatus = [];
 
         $scope.$watch('app.paintConnections', function(newValue,
@@ -73,6 +73,12 @@ angular.module('versionComparator', ['acsCoral'])
             }, timeout);
         };
 
+        $scope.addVersion = function(version) {
+            $scope.versions.push(version);
+            var index = version.index;
+            $scope.versionEntryMap[version.index] = {};
+        };
+
         $scope.addNode = function(node) {
             node.getTargetId = function(indexShift) {
                 return this.name + "-" + (this.version + indexShift);
@@ -80,16 +86,7 @@ angular.module('versionComparator', ['acsCoral'])
 
             $scope.nodes.push(node);
             $scope.nodesMap[node.id] = node;
-
-            var versionIndex = node.version;
-            var version = $scope.versionsMap[versionIndex] || {};
-            version[node.name] = node;
-            $scope.versionsMap[versionIndex] = version;
-
-            var versionsCount = versionIndex + 1;
-            if ($scope.versionsCount < versionsCount) {
-                $scope.versionsCount = versionsCount;
-            }
+            $scope.versionEntryMap[node.version][node.name] = node;
         };
 
         $scope.addChangeStatus = function(params) {
@@ -97,6 +94,10 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         var isVisible = function(node) {
+            if ($scope.app.hideVersions[node.version]) {
+                return false;
+            }
+
             if ($scope.app.hideUnchanged && !node.changed) {
                 return false;
             }
@@ -107,7 +108,7 @@ angular.module('versionComparator', ['acsCoral'])
         var findTarget = function(node) {
             var target;
             var i = 1;
-            while (!target && node.version + i < $scope.versionsCount) {
+            while (!target && node.version + i < $scope.versions.length) {
                 var targetId = node.getTargetId(i);
                 target = $scope.nodesMap[targetId];
                 if (target && !isVisible(target)) {
@@ -168,16 +169,9 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.showVersion = function(version) {
-            var property, value;
-            for (property in $scope.app.hideVersions) {
-                if ($scope.app.hideVersions
-                        .hasOwnProperty(property)) {
-                    value = $scope.app.hideVersions[property];
-                    if (version === property && value === true) {
-                        jsPlumb.repaintEverything();
-                        return false;
-                    }
-                }
+            if ($scope.app.hideVersions[version]) {
+                jsPlumb.repaintEverything();
+                return false;
             }
 
             return true;
