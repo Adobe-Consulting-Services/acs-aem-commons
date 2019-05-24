@@ -137,7 +137,18 @@ public class CacheContent {
      */
     @Deprecated
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
-        this.status = responseWrapper.getStatus();
+          // Extracting HTTP Response Header Names and Values
+         Map<String, List<String>> headers = new HashMap<>();
+        List<String> headerNames = new ArrayList<>();
+
+        headerNames.addAll(responseWrapper.getHeaderNames());
+        for (String headerName: headerNames) {
+            List<String> values = new ArrayList<>();
+            values.addAll(responseWrapper.getHeaders(headerName));
+            headers.put(headerName, values);
+        }
+
+        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), headerNames);
 
         // Extract information from response and populate state of the instance.
         this.charEncoding = responseWrapper.getCharacterEncoding();
