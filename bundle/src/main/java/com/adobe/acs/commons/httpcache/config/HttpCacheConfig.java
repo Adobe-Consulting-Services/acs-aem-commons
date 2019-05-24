@@ -28,6 +28,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.emptyList;
+
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, cache store
  * details and invalidation JCR path details are captured through configs. Developer hook supplied for extension of
@@ -37,7 +39,7 @@ import java.util.regex.Pattern;
 @ProviderType
 public interface HttpCacheConfig {
 
-    public enum FilterScope {
+    enum FilterScope {
         REQUEST,
         INCLUDE
     }
@@ -78,12 +80,13 @@ public interface HttpCacheConfig {
     List<Pattern> getJCRInvalidationPathPatterns();
 
     /**
-     * Get a list of headers that should NOT be put in the cached response, to be served to the output.
+     * Get a list of headers (as regex pattern) that should NOT be put in the cached response, to be served to the output.
      * This is useful for example with systems that put a login cookie in each response.
      * @return
      */
-    List<Pattern> getExcludedResponseHeaderPatterns();
-
+    default List<Pattern> getExcludedResponseHeaderPatterns() {
+        return emptyList();
+    }
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension

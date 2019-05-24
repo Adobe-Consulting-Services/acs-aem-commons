@@ -63,12 +63,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -317,36 +312,18 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     private Map<String, List<String>> extractHeaders(SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
 
-        Map<String, List<String>> headers = new HashMap<>();
         List<Pattern> excludedHeaders = Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
                 .collect(Collectors.toList());
 
-        List<String> headerNames = new ArrayList<>();
-
-        headerNames.addAll(response.getHeaderNames());
-        for (String headerName : headerNames) {
-            if (!isResponseHeaderExcluded(headerName, excludedHeaders)) {
-                List<String> values = new ArrayList<>();
-                values.addAll(response.getHeaders(headerName));
-                headers.put(headerName, values);
-            }
-        }
-
-        return headers;
+        return response.getHeaderNames().stream()
+                .filter(headerName -> excludedHeaders.stream()
+                        .noneMatch(pattern -> pattern.matcher(headerName).matches())
+                ).collect(
+                        Collectors.toMap(headerName -> headerName, headerName ->
+                                new ArrayList<>(response.getHeaders(headerName)
+                                )
+                        ));
     }
-
-
-    private boolean isResponseHeaderExcluded(String headerName, List<Pattern> responseHeaderExclusions) {
-
-        if (responseHeaderExclusions
-                .stream()
-                .anyMatch(pattern -> pattern.matcher(headerName).matches())) {
-            return true;
-        }
-
-        return false;
-    }
-
 
 
     @Override

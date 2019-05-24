@@ -24,6 +24,7 @@ import com.adobe.acs.commons.httpcache.store.TempSink;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,39 @@ public class CacheContent {
      * No argument constructor for the build method.
      */
     public CacheContent() {
+    }
+
+    /**
+     * Construct from the custom servlet response wrapper..
+     *
+     * @param responseWrapper
+     * @return
+     */
+    @Deprecated
+    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
+        this.status = responseWrapper.getStatus();
+
+        // Extract information from response and populate state of the instance.
+        this.charEncoding = responseWrapper.getCharacterEncoding();
+        this.contentType = responseWrapper.getContentType();
+
+        // Extracting header K,V.
+        List<String> headerNames = new ArrayList<String>();
+        headerNames.addAll(responseWrapper.getHeaderNames());
+        for (String headerName: headerNames) {
+            List<String> values = new ArrayList<String>();
+            values.addAll(responseWrapper.getHeaders(headerName));
+            headers.put(headerName, values);
+        }
+
+        // Get hold of the temp sink.
+        this.tempSink = responseWrapper.getTempSink();
+
+        // Get hold of the response content available in sink.
+        this.dataInputStream = responseWrapper.getTempSink().createInputStream();
+        this.writeMethod = responseWrapper.getWriteMethod();
+
+        return this;
     }
 
     /**
