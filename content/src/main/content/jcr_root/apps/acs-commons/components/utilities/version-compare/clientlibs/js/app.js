@@ -52,9 +52,7 @@ angular.module('versionComparator', ['acsCoral'])
                 elements.show();
             }
 
-            removeConnections();
-            paintConnections();
-            jsPlumb.repaintEverything();
+            $scope.refreshConnections();
         });
 
         $scope.addNotification = function(type, title, message) {
@@ -161,10 +159,9 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.refreshConnections = function(doPrint) {
-            if (doPrint) {
+            removeConnections();
+            if (doPrint || (typeof doPrint == 'undefined' && $scope.app.paintConnections)) {
                 paintConnections();
-            } else {
-                removeConnections();
             }
 
             jsPlumb.repaintEverything();
