@@ -45,10 +45,16 @@ angular.module('versionComparator', ['acsCoral'])
 
         $scope.$watch('app.hideUnchanged', function(newValue,
                 oldValue) {
-            if ($scope.app.paintConnections) {
-                removeConnections();
-                paintConnections();
+            var elements = $('div.unchanged');
+            if (newValue) {
+                elements.hide();
+            } else {
+                elements.show();
             }
+
+            removeConnections();
+            paintConnections();
+            jsPlumb.repaintEverything();
         });
 
         $scope.addNotification = function(type, title, message) {
