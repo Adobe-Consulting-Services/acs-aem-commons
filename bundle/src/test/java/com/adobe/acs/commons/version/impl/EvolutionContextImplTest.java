@@ -19,47 +19,42 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import com.adobe.acs.commons.version.EvolutionContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.UnsupportedRepositoryOperationException;
-import javax.jcr.Value;
-import javax.jcr.Workspace;
-import javax.jcr.version.Version;
-import javax.jcr.version.VersionHistory;
-import javax.jcr.version.VersionIterator;
-import javax.jcr.version.VersionManager;
-import java.util.Collections;
-
 import static com.adobe.acs.commons.version.impl.CurrentEvolutionImpl.LATEST_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.version.VersionHistory;
+import javax.jcr.version.VersionIterator;
+import javax.jcr.version.VersionManager;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.version.EvolutionContext;
+
 @RunWith(MockitoJUnitRunner.class)
 public final class EvolutionContextImplTest {
 
     private static final String RESOURCE_PATH = "/path/to/resource";
+
     private static final String FROZEN_NODE_1_PATH = "/path/to/first/jcr:frozenNode";
     private static final String FROZEN_NODE_2_PATH = "/path/to/second/jcr:frozenNode";
+
     private static final String VERSION_1 = "version-1";
     private static final String VERSION_2 = "version-2";
 
-    private static final String TESTED_KEY = "jcr:title";
     private static final String TESTED_VALUE_1 = "old";
     private static final String TESTED_VALUE_2 = "new";
 
@@ -84,55 +79,23 @@ public final class EvolutionContextImplTest {
     @Mock
     private VersionIterator versionIterator;
 
-    @Mock
-    private Version version1;
-
-    @Mock
-    private Version version2;
-
-    @Mock
-    private Node frozenNode1;
-
-    @Mock
-    private Node frozenNode2;
-
-    @Mock
-    private Resource frozenResource1;
-
-    @Mock
-    private Resource frozenResource2;
-
-    private final ValueMap frozenResource1ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_1));
-
-    private final ValueMap frozenResource2ValueMap = new ValueMapDecorator(Collections.singletonMap(TESTED_KEY, TESTED_VALUE_2));
-
-    @Mock
-    private Property jcrPropertyTitle1;
-
-    @Mock
-    private Property jcrPropertyTitle2;
-
-    @Mock
-    private Value value1;
-
-    @Mock
-    private Value value2;
-
-    private final EvolutionConfig config = new EvolutionConfig(new String[]{"foo"}, new String[]{"bar"});
+    private final EvolutionConfig config = new EvolutionConfig(new String[] { "foo" }, new String[] { "bar" });
 
     private EvolutionContext evolutionContext;
 
     @Before
     public void setUp() throws RepositoryException {
+    	final FrozenResourceMock frozenResource1 = new FrozenResourceMock(FROZEN_NODE_1_PATH, VERSION_1, TESTED_VALUE_1);
+    	final FrozenResourceMock frozenResource2 = new FrozenResourceMock(FROZEN_NODE_2_PATH, VERSION_2, TESTED_VALUE_2);
         when(resource.getPath()).thenReturn(RESOURCE_PATH);
         when(resource.getResourceResolver()).thenReturn(resolver);
-        when(resource.getValueMap()).thenReturn(frozenResource2ValueMap);
-        when(resource.adaptTo(Node.class)).thenReturn(frozenNode2);
+        when(resource.getValueMap()).thenReturn(frozenResource2.getValueMap());
+        when(resource.adaptTo(Node.class)).thenReturn(frozenResource2.getNode());
         when(resource.getChildren()).thenReturn(Collections.emptyList());
 
         when(resolver.adaptTo(Session.class)).thenReturn(session);
-        when(resolver.resolve(eq(FROZEN_NODE_1_PATH))).thenReturn(frozenResource1);
-        when(resolver.resolve(eq(FROZEN_NODE_2_PATH))).thenReturn(frozenResource2);
+        when(resolver.resolve(eq(FROZEN_NODE_1_PATH))).thenReturn(frozenResource1.getResource());
+        when(resolver.resolve(eq(FROZEN_NODE_2_PATH))).thenReturn(frozenResource2.getResource());
 
         when(session.getWorkspace()).thenReturn(workspace);
         when(workspace.getVersionManager()).thenReturn(versionManager);
@@ -140,40 +103,7 @@ public final class EvolutionContextImplTest {
         when(versionHistory.getAllVersions()).thenReturn(versionIterator);
 
         when(versionIterator.hasNext()).thenReturn(true, true, false);
-        when(versionIterator.next()).thenReturn(version1, version2);
-
-        when(version1.getName()).thenReturn(VERSION_1);
-        when(version2.getName()).thenReturn(VERSION_2);
-        when(version1.getFrozenNode()).thenReturn(frozenNode1);
-        when(version2.getFrozenNode()).thenReturn(frozenNode2);
-
-        when(frozenNode1.getPath()).thenReturn(FROZEN_NODE_1_PATH);
-        when(frozenNode2.getPath()).thenReturn(FROZEN_NODE_2_PATH);
-        when(frozenNode1.getProperty(TESTED_KEY)).thenReturn(jcrPropertyTitle1);
-        when(frozenNode2.getProperty(TESTED_KEY)).thenReturn(jcrPropertyTitle2);
-        when(frozenNode1.getName()).thenReturn(FROZEN_NODE_1_PATH);
-        when(frozenNode2.getName()).thenReturn(FROZEN_NODE_2_PATH);
-
-        when(frozenResource1.getValueMap()).thenReturn(frozenResource1ValueMap);
-        when(frozenResource2.getValueMap()).thenReturn(frozenResource2ValueMap);
-        when(frozenResource1.adaptTo(Node.class)).thenReturn(frozenNode1);
-        when(frozenResource2.adaptTo(Node.class)).thenReturn(frozenNode2);
-        when(frozenResource1.getChildren()).thenReturn(Collections.emptyList());
-        when(frozenResource2.getChildren()).thenReturn(Collections.emptyList());
-
-        when(jcrPropertyTitle1.getPath()).thenReturn(FROZEN_NODE_1_PATH + "/" + TESTED_KEY);
-        when(jcrPropertyTitle2.getPath()).thenReturn(FROZEN_NODE_2_PATH + "/" + TESTED_KEY);
-        when(jcrPropertyTitle1.getParent()).thenReturn(frozenNode1);
-        when(jcrPropertyTitle2.getParent()).thenReturn(frozenNode2);
-        when(jcrPropertyTitle1.isMultiple()).thenReturn(false);
-        when(jcrPropertyTitle2.isMultiple()).thenReturn(false);
-        when(jcrPropertyTitle1.getValue()).thenReturn(value1);
-        when(jcrPropertyTitle2.getValue()).thenReturn(value2);
-
-        when(value1.getString()).thenReturn(TESTED_VALUE_1);
-        when(value1.getType()).thenReturn(PropertyType.STRING);
-        when(value2.getString()).thenReturn(TESTED_VALUE_2);
-        when(value2.getType()).thenReturn(PropertyType.STRING);
+        when(versionIterator.next()).thenReturn(frozenResource1.getVersion(), frozenResource2.getVersion());
 
         evolutionContext = new EvolutionContextImpl(resource, config);
     }
