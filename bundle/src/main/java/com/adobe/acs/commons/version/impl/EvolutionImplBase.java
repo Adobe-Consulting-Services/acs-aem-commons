@@ -65,13 +65,13 @@ public abstract class EvolutionImplBase implements Evolution {
         return resource.getValueMap();
     }
 
-	protected final void populate(final EvolutionConfig config) {
-		try {
+    protected final void populate(final EvolutionConfig config) {
+        try {
             populate(resource, config, 0);
         } catch (final RepositoryException e) {
             log.warn("Could not populate Evolution", e);
         }
-	}
+    }
 
     private void populate(final Resource resource, final EvolutionConfig config, final int depth) throws PathNotFoundException, RepositoryException {
         final ValueMap map = resource.getValueMap();
@@ -96,13 +96,13 @@ public abstract class EvolutionImplBase implements Evolution {
         }
     }
 
-	protected abstract String getRelativeName(Property property) throws RepositoryException;
+    protected abstract String getRelativeName(Property property) throws RepositoryException;
 
-	protected abstract EvolutionEntry createEntry(Property property)
-			throws AccessDeniedException, ItemNotFoundException, RepositoryException;
+    protected abstract EvolutionEntry createEntry(Property property)
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException;
 
-	protected abstract String getRelativeName(Resource resource);
+    protected abstract String getRelativeName(Resource resource);
 
-	protected abstract EvolutionEntry createEntry(Resource resource);
+    protected abstract EvolutionEntry createEntry(Resource resource);
 
 }

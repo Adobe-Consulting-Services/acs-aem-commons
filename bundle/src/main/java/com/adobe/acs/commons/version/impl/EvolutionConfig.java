@@ -81,8 +81,8 @@ public final class EvolutionConfig {
         if (obj instanceof String) {
             return (String) obj;
         } else if (obj instanceof String[]) {
-        	final String[] values = (String[]) obj;
-        	final StringBuilder result = new StringBuilder();
+            final String[] values = (String[]) obj;
+            final StringBuilder result = new StringBuilder();
             result.append("[");
             for (int i = 0; i < values.length; i++) {
                 result.append(values[i]);
@@ -94,8 +94,8 @@ public final class EvolutionConfig {
             result.append("]");
             return result.toString();
         } else if (obj instanceof Calendar) {
-        	final Calendar value = (Calendar) obj;
-        	final DateFormat dateFormat = DateFormat.getDateTimeInstance();
+            final Calendar value = (Calendar) obj;
+            final DateFormat dateFormat = DateFormat.getDateTimeInstance();
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
             return dateFormat.format(value.getTime());
         } else {
@@ -108,7 +108,7 @@ public final class EvolutionConfig {
             throws RepositoryException {
         // multi-value property: return an array of values
         if (property.isMultiple()) {
-        	final Value[] values = property.getValues();
+            final Value[] values = property.getValues();
             final Object firstValue = values.length > 0 ? valueToJavaObject(values[0]) : null;
             final Object[] result;
             if ( firstValue instanceof Boolean ) {
@@ -128,7 +128,7 @@ public final class EvolutionConfig {
             }
 
             for (int i = 0; i < values.length; i++) {
-            	final Value value = values[i];
+                final Value value = values[i];
                 if (value != null) {
                     result[i] = valueToJavaObject(value);
                 }

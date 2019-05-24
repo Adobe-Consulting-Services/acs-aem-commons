@@ -60,7 +60,7 @@ public final class EvolutionContextImpl implements EvolutionContext {
             final VersionManager versionManager = workspace.get().getVersionManager();
             final VersionHistory history = versionManager.getVersionHistory(versionedResource.getPath());
             @SuppressWarnings("unchecked")
-			final Iterator<Version> iter = history.getAllVersions();
+            final Iterator<Version> iter = history.getAllVersions();
             while (iter.hasNext()) {
                 final Version next = iter.next();
                 final String versionPath = next.getFrozenNode().getPath();
@@ -77,9 +77,9 @@ public final class EvolutionContextImpl implements EvolutionContext {
     
     }
 
-	private String getWarnMessage(final Resource resource) {
-		return String.format("Could not find versions for resource=%s", resource.getPath());
-	}
+    private String getWarnMessage(final Resource resource) {
+        return String.format("Could not find versions for resource=%s", resource.getPath());
+    }
 
     @Override
     public List<Evolution> getEvolutionItems() {

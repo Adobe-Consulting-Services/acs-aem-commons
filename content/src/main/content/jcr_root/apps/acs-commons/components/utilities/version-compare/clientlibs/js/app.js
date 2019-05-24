@@ -27,15 +27,14 @@ angular.module('versionComparator', ['acsCoral'])
             home : '',
             resource : '',
             paintConnections : false,
-            hideVersions : {},
-            hideUnchanged : false
+            hideUnchanged : false,
+            hideVersions : {}
         };
 
         $scope.notifications = [];
         $scope.nodes = [];
         $scope.nodesMap = {};
-        $scope.versions = [];
-        $scope.versionEntryMap = {};
+        $scope.versionsCount = 0;
         $scope.changeStatus = [];
 
         $scope.$watch('app.paintConnections', function(newValue,
@@ -43,16 +42,20 @@ angular.module('versionComparator', ['acsCoral'])
             $scope.refreshConnections(newValue);
         });
 
-        $scope.$watch('app.hideUnchanged', function(newValue,
-                oldValue) {
-            var elements = $('div.unchanged');
-            if (newValue) {
-                elements.hide();
-            } else {
+        var setElementsVisible = function(selector, visible) {
+            var elements = $(selector);
+            if (visible) {
                 elements.show();
+            } else {
+                elements.hide();
             }
 
             $scope.refreshConnections();
+        };
+
+        $scope.$watch('app.hideUnchanged', function(newValue,
+                oldValue) {
+            setElementsVisible('div.unchanged', !newValue);
         });
 
         $scope.addNotification = function(type, title, message) {
@@ -74,20 +77,10 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.addVersion = function(version) {
-            $scope.versions.push(version);
-            var index = version.index;
-            $scope.versionEntryMap[version.index] = {};
-
+            $scope.versionsCount++;
             $scope.$watch('app.hideVersions["' + version.index + '"]', function(newValue,
                     oldValue) {
-                var elements = $('div#' + version.id);
-                if (newValue) {
-                    elements.hide();
-                } else {
-                    elements.show();
-                }
-
-                $scope.refreshConnections();
+                setElementsVisible('div#' + version.id, !newValue);
             });
         };
 
@@ -98,7 +91,6 @@ angular.module('versionComparator', ['acsCoral'])
 
             $scope.nodes.push(node);
             $scope.nodesMap[node.id] = node;
-            $scope.versionEntryMap[node.version][node.name] = node;
         };
 
         $scope.addChangeStatus = function(params) {
@@ -120,7 +112,7 @@ angular.module('versionComparator', ['acsCoral'])
         var findTarget = function(node) {
             var target;
             var i = 1;
-            while (!target && node.version + i < $scope.versions.length) {
+            while (!target && node.version + i < $scope.versionsCount) {
                 var targetId = node.getTargetId(i);
                 target = $scope.nodesMap[targetId];
                 if (target && !isVisible(target)) {

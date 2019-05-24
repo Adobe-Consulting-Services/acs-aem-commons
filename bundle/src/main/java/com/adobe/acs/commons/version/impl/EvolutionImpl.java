@@ -41,7 +41,7 @@ public final class EvolutionImpl extends EvolutionImplBase {
     private final Version version;
 
     public EvolutionImpl(final Version version, final Resource resource, final EvolutionConfig config) {
-    	super(resource);
+        super(resource);
         this.version = version;
         populate(config);
     }
@@ -80,20 +80,20 @@ public final class EvolutionImpl extends EvolutionImplBase {
         return false;
     }
 
-	protected String getRelativeName(final Property property) throws RepositoryException {
-		return EvolutionPathUtil.getRelativePropertyName(property.getPath());
-	}
+    protected String getRelativeName(final Property property) throws RepositoryException {
+        return EvolutionPathUtil.getRelativePropertyName(property.getPath());
+    }
 
-	protected EvolutionEntry createEntry(final Property property)
-			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-		return new EvolutionEntryImpl(property, version);
-	}
+    protected EvolutionEntry createEntry(final Property property)
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+        return new EvolutionEntryImpl(property, version);
+    }
 
-	protected String getRelativeName(final Resource resource) {
-		return EvolutionPathUtil.getRelativeResourceName(resource.getPath());
-	}
+    protected String getRelativeName(final Resource resource) {
+        return EvolutionPathUtil.getRelativeResourceName(resource.getPath());
+    }
 
-	protected EvolutionEntry createEntry(final Resource resource) {
-		return new EvolutionEntryImpl(resource, version);
-	}
+    protected EvolutionEntry createEntry(final Resource resource) {
+        return new EvolutionEntryImpl(resource, version);
+    }
 }

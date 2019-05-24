@@ -27,7 +27,7 @@ public final class EvolutionPathUtil {
 
     private static final String SEP = "/";
 
-	private EvolutionPathUtil() {}
+    private EvolutionPathUtil() {}
 
     public static int getDepthForPath(final String path) {
         return StringUtils.countMatches(StringUtils.substringAfterLast(path, JcrConstants.JCR_FROZENNODE), SEP);

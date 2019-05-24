@@ -29,12 +29,12 @@ import org.apache.sling.api.resource.Resource;
 public final class CurrentEvolutionEntryImpl extends EvolutionEntryImplBase {
 
     public CurrentEvolutionEntryImpl(final Resource resource) {
-    	super(resource, EvolutionPathUtil.getLastDepthForPath(resource.getPath()));
+        super(resource, EvolutionPathUtil.getLastDepthForPath(resource.getPath()));
     }
 
     public CurrentEvolutionEntryImpl(final Property property)
-    		throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-    	super(property,	EvolutionPathUtil.getLastDepthForPath(property.getPath()));
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+        super(property,    EvolutionPathUtil.getLastDepthForPath(property.getPath()));
     }
 
     @Override

@@ -35,7 +35,7 @@ public final class CurrentEvolutionImpl extends EvolutionImplBase {
     public static final String LATEST_VERSION = "Latest";
 
     public CurrentEvolutionImpl(final Resource resource, final EvolutionConfig config) {
-    	super(resource);
+        super(resource);
         populate(config);
     }
 
@@ -54,20 +54,20 @@ public final class CurrentEvolutionImpl extends EvolutionImplBase {
         return new Date();
     }
 
-	protected String getRelativeName(final Property property) throws RepositoryException {
-		return EvolutionPathUtil.getLastRelativePropertyName(property.getPath());
-	}
+    protected String getRelativeName(final Property property) throws RepositoryException {
+        return EvolutionPathUtil.getLastRelativePropertyName(property.getPath());
+    }
 
-	protected EvolutionEntry createEntry(final Property property)
-			throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-		return new CurrentEvolutionEntryImpl(property);
-	}
+    protected EvolutionEntry createEntry(final Property property)
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+        return new CurrentEvolutionEntryImpl(property);
+    }
 
-	protected String getRelativeName(final Resource resource) {
-		return EvolutionPathUtil.getLastRelativeResourceName(resource.getPath());
-	}
+    protected String getRelativeName(final Resource resource) {
+        return EvolutionPathUtil.getLastRelativeResourceName(resource.getPath());
+    }
 
-	protected EvolutionEntry createEntry(final Resource resource) {
-		return new CurrentEvolutionEntryImpl(resource);
-	}
+    protected EvolutionEntry createEntry(final Resource resource) {
+        return new CurrentEvolutionEntryImpl(resource);
+    }
 }

@@ -45,11 +45,11 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
     private final int depth;
 
     protected EvolutionEntryImplBase(
-    		final String name,
-    		final String path,
-    		final EvolutionEntryType type,
-    		final Object value,
-    		final int depth) {
+            final String name,
+            final String path,
+            final EvolutionEntryType type,
+            final Object value,
+            final int depth) {
         this.name = name;
         this.path = path;
         this.type = type;
@@ -58,24 +58,24 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
     }
 
     protected EvolutionEntryImplBase(final Resource resource, final int depth) {
-    	this(
-			resource.getName(),
-			resource.getParent().getName(),
-			EvolutionEntryType.RESOURCE,
-			null,
-			depth
-    	);
+        this(
+            resource.getName(),
+            resource.getParent().getName(),
+            EvolutionEntryType.RESOURCE,
+            null,
+            depth
+        );
     }
 
     protected EvolutionEntryImplBase(final Property property, final int depth)
-    		throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-    	this(
-			property.getName(),
-			property.getParent().getName(),
-			EvolutionEntryType.PROPERTY,
-			EvolutionConfig.printProperty(property),
-			depth
-    	);
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+        this(
+            property.getName(),
+            property.getParent().getName(),
+            EvolutionEntryType.PROPERTY,
+            EvolutionConfig.printProperty(property),
+            depth
+        );
     }
 
     @Override
@@ -88,9 +88,9 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
         return name;
     }
 
-	protected String getUniqueNameBase() {
-		return (name + path).replace(":", "_").replace("/", "_").replace("@", "_");
-	}
+    protected String getUniqueNameBase() {
+        return (name + path).replace(":", "_").replace("/", "_").replace("@", "_");
+    }
 
     @Override
     public EvolutionEntryType getType() {
@@ -104,7 +104,7 @@ public abstract class EvolutionEntryImplBase implements EvolutionEntry {
 
     @Override
     public String getValueStringShort() {
-    	final String fullValueString = getValueString();
+        final String fullValueString = getValueString();
         if (fullValueString.length() > MAX_CHARS) {
             return fullValueString.substring(0, MAX_CHARS) + "...";
         }

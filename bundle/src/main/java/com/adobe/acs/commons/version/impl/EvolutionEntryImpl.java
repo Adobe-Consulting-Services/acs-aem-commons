@@ -39,15 +39,15 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
     private final Property property;
 
     public EvolutionEntryImpl(final Resource resource, final Version version) {
-    	super(resource, EvolutionPathUtil.getDepthForPath(resource.getPath()));
-    	property = null;
+        super(resource, EvolutionPathUtil.getDepthForPath(resource.getPath()));
+        property = null;
         this.version = version;
         relativePath = EvolutionPathUtil.getRelativeResourceName(resource.getPath());
     }
 
     public EvolutionEntryImpl(final Property property, final Version version)
-    		throws AccessDeniedException, ItemNotFoundException, RepositoryException {
-    	super(property, EvolutionPathUtil.getDepthForPath(property.getPath()));
+            throws AccessDeniedException, ItemNotFoundException, RepositoryException {
+        super(property, EvolutionPathUtil.getDepthForPath(property.getPath()));
         this.property = property;
         this.version = version;
         relativePath = EvolutionPathUtil.getRelativePropertyName(property.getPath());
@@ -61,7 +61,7 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
     @Override
     public boolean isCurrent() {
         try {
-        	final Version[] successors = version.getSuccessors();
+            final Version[] successors = version.getSuccessors();
             if (successors == null || successors.length == 0) {
                 return true;
             }
@@ -97,10 +97,10 @@ public final class EvolutionEntryImpl extends EvolutionEntryImplBase {
             }
 
             if (isResource()) {
-            	final Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
+                final Node node = version.getLinearSuccessor().getFrozenNode().getNode(relativePath);
                 return node == null;
             } else {
-            	final Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
+                final Property prop = version.getLinearSuccessor().getFrozenNode().getProperty(relativePath);
                 return prop == null;
             }
         } catch (Exception e) {
