@@ -85,7 +85,7 @@ public interface HttpCacheConfig {
      * @return
      */
     default List<Pattern> getExcludedResponseHeaderPatterns() {
-        return emptyList();
+        return Collections.emptyList();
     }
 
     /**
