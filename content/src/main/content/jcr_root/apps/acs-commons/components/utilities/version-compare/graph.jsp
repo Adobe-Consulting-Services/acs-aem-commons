@@ -9,10 +9,10 @@
             <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
         </div>
         <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
-            <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
-                <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status}"
+            <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}"
+                 data-toggle="popover" data-point-from="right" data-align-from="left">
+                <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} ${versionEntry.status == '' ? 'unchanged' : ''}"
                      id="${versionEntry.uniqueName}-${evoCounter.index}"
-                     ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""}
                      ng-init="addNode({
                          'id': '${versionEntry.uniqueName}-${evoCounter.index}',
                          'version': ${evoCounter.index},
