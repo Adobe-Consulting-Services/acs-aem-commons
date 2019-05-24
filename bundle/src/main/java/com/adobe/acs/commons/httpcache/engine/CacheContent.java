@@ -148,29 +148,7 @@ public class CacheContent {
             headers.put(headerName, values);
         }
 
-        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), headerNames);
-
-        // Extract information from response and populate state of the instance.
-        this.charEncoding = responseWrapper.getCharacterEncoding();
-        this.contentType = responseWrapper.getContentType();
-
-        // Extracting header K,V.
-        List<String> headerNames = new ArrayList<String>();
-        headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName: headerNames) {
-            List<String> values = new ArrayList<String>();
-            values.addAll(responseWrapper.getHeaders(headerName));
-            headers.put(headerName, values);
-        }
-
-        // Get hold of the temp sink.
-        this.tempSink = responseWrapper.getTempSink();
-
-        // Get hold of the response content available in sink.
-        this.dataInputStream = responseWrapper.getTempSink().createInputStream();
-        this.writeMethod = responseWrapper.getWriteMethod();
-
-        return this;
+        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), headers);
     }
 
     /**

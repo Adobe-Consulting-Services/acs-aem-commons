@@ -25,10 +25,9 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessExcept
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static java.util.Collections.emptyList;
 
 /**
  * Configuration for Http cache. Multiple configs can be supplied. Request uri, authentication details, cache store
