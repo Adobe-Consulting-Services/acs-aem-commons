@@ -77,6 +77,18 @@ angular.module('versionComparator', ['acsCoral'])
             $scope.versions.push(version);
             var index = version.index;
             $scope.versionEntryMap[version.index] = {};
+
+            $scope.$watch('app.hideVersions["' + version.index + '"]', function(newValue,
+                    oldValue) {
+                var elements = $('div#' + version.id);
+                if (newValue) {
+                    elements.hide();
+                } else {
+                    elements.show();
+                }
+
+                $scope.refreshConnections();
+            });
         };
 
         $scope.addNode = function(node) {
@@ -166,15 +178,6 @@ angular.module('versionComparator', ['acsCoral'])
             }
 
             jsPlumb.repaintEverything();
-        };
-
-        $scope.showVersion = function(version) {
-            if ($scope.app.hideVersions[version]) {
-                jsPlumb.repaintEverything();
-                return false;
-            }
-
-            return true;
         };
 
         $scope.analyse = function() {
