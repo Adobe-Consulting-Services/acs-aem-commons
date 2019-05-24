@@ -220,7 +220,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
 
     @Property(label = "Config-specific Excluded Response headers",
-            description = "List of headers that should NOT be put in the cached response, to be served to the output.",
+            description = "List of header keys (as regex) that should NOT be put in the cached response, to be served to the output.",
             unbounded = PropertyUnbounded.ARRAY
     )
     static final String PROP_RESPONSE_HEADER_EXCLUSIONS = "httpcache.config.excluded.response.headers";
