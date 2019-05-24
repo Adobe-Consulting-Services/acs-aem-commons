@@ -31,13 +31,17 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import com.adobe.acs.commons.reports.api.ReportExecutor;
+import com.adobe.acs.commons.reports.api.Utils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +62,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private static final long serialVersionUID = 2794836639686938093L;
   private static final Logger log = LoggerFactory.getLogger(ReportCSVExportServlet.class);
+
+  @Reference
+  private DynamicClassLoaderManager dynamicClassLoaderManager;
 
   @Override
   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
@@ -138,8 +145,12 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
       Csv csv, Writer writer) throws ReportException {
-    QueryReportExecutor executor = Optional.ofNullable(request.adaptTo(QueryReportExecutor.class))
-        .orElseThrow(() -> new ReportException("Failed to get report executor"));
+    Class<?> executorClass = Utils.getReportExecutor(dynamicClassLoaderManager, config);
+
+    ReportExecutor executor = Optional.ofNullable(request.adaptTo(executorClass))
+                                      .filter(model -> model instanceof ReportExecutor)
+                                      .map(model -> (ReportExecutor) model)
+                                      .orElseThrow(() -> new ReportException("Failed to get report executor"));
 
     executor.setConfiguration(config);
     log.debug("Retrieved executor {}", executor);

@@ -17,8 +17,8 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package com.adobe.acs.commons.reports.api;
+@org.osgi.annotation.versioning.Version("4.1.0")
+package com.adobe.acs.commons.assets;
 
 
 
