@@ -134,7 +134,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     private List<String> globalCacheHandlingRulesPid;
 
     @Property(label = "Global HttpCacheHandlingRules",
-            description = "List of headers that should NOT be put in the cached response, to be served to the output.",
+            description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
             unbounded = PropertyUnbounded.ARRAY
     )
     static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
