@@ -132,7 +132,7 @@ public class CacheContent {
      * Construct from the custom servlet response wrapper..
      *
      * @param responseWrapper
-     * @deprecated
+     * @deprecated Use build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map<String, List<String>> headers) throws HttpCacheDataStreamException
      * @return
      */
     @Deprecated
