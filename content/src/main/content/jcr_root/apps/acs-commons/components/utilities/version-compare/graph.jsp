@@ -6,8 +6,7 @@
          ng-init="addVersion({
              'id': 'version-${evoCounter.index}',
              'index': ${evoCounter.index}
-         })"
-         ng-show="showVersion('${evoCounter.index}')">
+         })">
         <div class="version-header">
             <div class="name"><c:out value="${evolutionItem.versionName}"/></div>
             <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
