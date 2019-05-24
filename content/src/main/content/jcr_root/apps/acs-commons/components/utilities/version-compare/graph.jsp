@@ -2,13 +2,17 @@
     <h1 acs-coral-heading>No versions could be found for this item.</h1>
 </c:if>
 <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter">
-    <div class="version current-${evolutionItem.current}" id="version-${evolutionItem.versionName}"
-        ng-show="showVersion('version-${evolutionItem.versionName}')">
+    <div class="version current-${evolutionItem.current}" id="version-${evoCounter.index}"
+         ng-init="addVersion({
+             'id': 'version-${evoCounter.index}',
+             'index': ${evoCounter.index}
+         })"
+         ng-show="showVersion('${evoCounter.index}')">
         <div class="version-header">
             <div class="name"><c:out value="${evolutionItem.versionName}"/></div>
             <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
         </div>
-        <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
+        <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}">
             <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}"
                  data-toggle="popover" data-point-from="right" data-align-from="left">
                 <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status} ${versionEntry.status == '' ? 'unchanged' : ''}"

@@ -7,7 +7,7 @@
     <h2 acs-coral-heading>Hide Versions</h2>
     <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter">
         <label acs-coral-checkbox>
-            <input type="checkbox" ng-model="app.hideVersions['version-${evolutionItem.versionName}']"/>
+            <input type="checkbox" ng-model="app.hideVersions['${evoCounter.index}']"/>
             <span>${evolutionItem.versionName}</span>
         </label>
     </c:forEach>
