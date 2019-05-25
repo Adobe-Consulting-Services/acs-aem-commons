@@ -80,12 +80,18 @@ public interface HttpCacheConfig {
 
     /**
      * Get a list of headers (as regex pattern) that should NOT be put in the cached response, to be served to the output.
-     * This is useful for example with systems that put a login cookie in each response.
      * @return
      */
     default List<Pattern> getExcludedResponseHeaderPatterns() {
         return Collections.emptyList();
     }
+
+    /**
+     * Get a list of excluded cookie keys (simple string) of cookies that should NOT be put in the cached response, to be served to the output.
+     * This is useful for example with systems that put a login cookie in each response.
+     * @return
+     */
+    default List<String> getExcludedCookieKeys() { return Collections.emptyList(); };
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension

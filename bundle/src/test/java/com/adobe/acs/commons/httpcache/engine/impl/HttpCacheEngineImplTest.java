@@ -28,10 +28,11 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.feed.StringResponseWrapper;
-import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
 import org.junit.After;
@@ -50,15 +51,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS;
+import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.*;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
@@ -98,7 +95,7 @@ public class HttpCacheEngineImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
 
-        systemUnderTest.activate(Collections.emptyMap());
+        systemUnderTest.activate(mockConfig(Collections.emptyMap()));
 
         sharedMemConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_MEM_CACHE_STORE_TYPE);
         sharedJcrConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_JCR_CACHE_STORE_TYPE);
@@ -216,8 +213,12 @@ public class HttpCacheEngineImplTest {
     @Test
     public void test_cache_response() throws HttpCacheException, IOException {
 
+        Map<String,Object> props = new HashMap<>();
+        props.put(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{"ignoredResponseHeaderGlobal"});
+        props.put(PROP_GLOBAL_RESPONSE_COOKIE_KEYS_EXCLUSIONS, new String[]{"myLoginCookie"});
+
         //prepare and mock
-        systemUnderTest.activate(new SingletonMap(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{"ignoredResponseHeaderGlobal"}));
+        systemUnderTest.activate(mockConfig(props));
 
 
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
@@ -232,6 +233,7 @@ public class HttpCacheEngineImplTest {
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
         when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgumentAt(0, String.class))[0]);
+        when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgumentAt(0, String.class))));
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 
@@ -250,6 +252,12 @@ public class HttpCacheEngineImplTest {
         headers.put("someResponseHeader", new String[]{"SomeValue"});
         headers.put("ignoredResponseHeaderGlobal", new String[]{"SomeValue"});
         headers.put("ignoredResponseHeaderConfigSpecific", new String[]{"SomeValue"});
+        headers.put("Set-Cookie", new String[]{
+                "__Secure-myLoginCookie=123; Secure; Domain=acs-commons.com",
+                "__Host-myLoginCookie=123; Secure; Path=/",
+                "myLoginCookie=38afes7a8; HttpOnly; Path=/",
+                "__Host-myOtherCookie=123; Secure; Path=/"
+        });
 
         CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
@@ -278,15 +286,39 @@ public class HttpCacheEngineImplTest {
         assertEquals("utf-8", capturedContent.getCharEncoding());
         assertEquals("text/html", capturedContent.getContentType());
         assertEquals(200, capturedContent.getStatus());
-        assertTrue(capturedContent.getHeaders().containsKey("someResponseHeader"));
-        assertFalse(capturedContent.getHeaders().containsKey("ignoredResponseHeaderGlobal"));
-        assertFalse(capturedContent.getHeaders().containsKey("ignoredResponseHeaderConfigSpecific"));
+        final Map<String, List<String>> storedHeaders = capturedContent.getHeaders();
+        assertTrue(storedHeaders.containsKey("someResponseHeader"));
+        assertFalse(storedHeaders.containsKey("ignoredResponseHeaderGlobal"));
+        assertFalse(storedHeaders.containsKey("ignoredResponseHeaderConfigSpecific"));
 
+        List<String> storedCookies = storedHeaders.get("Set-Cookie");
+        assertFalse(storedCookies.isEmpty());
+        assertTrue(storedCookies.contains("__Host-myOtherCookie=123; Secure; Path=/"));
+        assertFalse(storedCookies.contains("__Secure-myLoginCookie=123; Secure; Domain=acs-commons.com"));
+        assertFalse(storedCookies.contains("__Host-myLoginCookie=123; Secure; Path=/"));
+        assertFalse(storedCookies.contains("myLoginCookie=38afes7a8; HttpOnly; Path=/"));
 
 
         String cachedHTML = IOUtils.toString(capturedContent.getInputDataStream(), StandardCharsets.UTF_8);
 
         assertEquals("rendered-html", cachedHTML);
+    }
+
+    private HttpCacheEngineImpl.Config mockConfig(Map<String,Object> properties){
+
+        HttpCacheEngineImpl.Config config = mock(HttpCacheEngineImpl.Config.class);
+        ValueMap decorated  = new ValueMapDecorator(properties);
+        when(config.httpcache_engine_cachehandling_rules_global()).thenReturn(decorated.get(PROP_GLOBAL_CACHE_HANDLING_RULES_PID, new String[]{
+                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
+                "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
+                "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
+        }));
+        when(config.httpcache_engine_excluded_response_headers_global()).thenReturn(decorated.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{}));
+
+        when(config.httpcache_engine_excluded_cookie_keys_global()).thenReturn(decorated.get(PROP_GLOBAL_RESPONSE_COOKIE_KEYS_EXCLUSIONS, new String[]{}));
+        return config;
+
     }
 
 }
