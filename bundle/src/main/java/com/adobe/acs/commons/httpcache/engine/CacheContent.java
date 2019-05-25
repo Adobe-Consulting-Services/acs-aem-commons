@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents response content to be cached.
@@ -138,17 +139,13 @@ public class CacheContent {
     @Deprecated
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
           // Extracting HTTP Response Header Names and Values
-         Map<String, List<String>> headers = new HashMap<>();
-        List<String> headerNames = new ArrayList<>();
+        Map<String, List<String>> extractedHeaders = responseWrapper.getHeaderNames().stream().collect(
+                        Collectors.toMap(headerName -> headerName, headerName ->
+                            new ArrayList<>(responseWrapper.getHeaders(headerName)
+                        )
+        ));
 
-        headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName: headerNames) {
-            List<String> values = new ArrayList<>();
-            values.addAll(responseWrapper.getHeaders(headerName));
-            headers.put(headerName, values);
-        }
-
-        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), headers);
+        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), extractedHeaders);
     }
 
     /**
