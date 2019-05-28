@@ -214,7 +214,6 @@
                                         <include>io.jsonwebtoken:jjwt</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
-                                        <include>javax.annotation:javax.annotation-api</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
