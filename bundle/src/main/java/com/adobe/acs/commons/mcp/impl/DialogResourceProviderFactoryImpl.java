@@ -26,6 +26,15 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     private final Map<Class, ServiceRegistration<ResourceProvider>> resourceProviders = Collections.synchronizedMap(new HashMap<>());
     private DialogResourceProviderConfiguration config;
     private final Set<String> allKnownModels = Collections.synchronizedSet(new HashSet<>());
+    private String[] ignoredPackages = new String[]{
+        "com.adobe.cq.",
+        "com.adobe.aemds.",
+        "com.adobe.fd.ccm.",
+        "com.adobe.forms.",
+        "com.adobe.granite.",
+        "com.day.cq.",
+        "we.retail."
+    };
 
     @Reference(
             service = AdapterFactory.class,
@@ -73,23 +82,28 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     }
 
     private Optional<Class> getClassIfAvailable(String className) {
-        LOG.debug(String.format("looking up class %s", className));
+        for (String ignored : ignoredPackages) {
+            if (className.startsWith(ignored)) {
+                return Optional.empty();
+            }
+        }
+//        LOG.debug(String.format("looking up class %s", className));
         Class clazz = null;
         try {
             clazz = Class.forName(className);
-            LOG.debug(String.format("found class %s", className));
+//            LOG.debug(String.format("found class %s", className));
         } catch (ClassNotFoundException e) {
             for (Bundle bundle : FrameworkUtil.getBundle(this.getClass()).getBundleContext().getBundles()) {
                 try {
                     clazz = bundle.loadClass(className);
-                    LOG.debug(String.format("found class %s in bundle %s", className, bundle.getSymbolicName()));
-                    break;
+//                    LOG.debug(String.format("found class %s in bundle %s", className, bundle.getSymbolicName()));
+                    return Optional.of(clazz);
                 } catch (ClassNotFoundException ex) {
                     // Skip
                 }
             }
             if (clazz == null) {
-                LOG.debug(String.format("COULD NOT FIND %s", className));
+                LOG.debug(String.format("COULD NOT RESOLVE CLASS %s", className));
             }
         }
         return Optional.ofNullable(clazz);
