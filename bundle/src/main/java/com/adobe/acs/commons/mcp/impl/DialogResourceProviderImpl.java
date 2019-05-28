@@ -2,11 +2,14 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang.reflect.MethodUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.spi.resource.provider.ResolveContext;
@@ -47,8 +50,16 @@ public class DialogResourceProviderImpl extends ResourceProvider {
         } else {
             // Last-ditch effort is hope that there's a java bean property for it
             try {
-                resourceType = BeanUtils.getProperty(dialog, "resourceType");
-            } catch (InvocationTargetException | NoSuchMethodException ex) {
+                Method getter = MethodUtils.getMatchingAccessibleMethod(dialog.getClass(), "getResourceType", new Class[]{});
+                if (getter != null) {
+                    resourceType = String.valueOf(getter.invoke(dialog));
+                } else {
+                    Field field = FieldUtils.getField(dialog.getClass(), "resourceType", true);
+                    if (field != null) {
+                        resourceType = String.valueOf(field.get(dialog));
+                    }
+                }
+            } catch (InvocationTargetException | IllegalAccessException ex) {
                 LOGGER.debug("Unable to determine sling resource type for model bean: " + dialog.getClass());
             }
         }
