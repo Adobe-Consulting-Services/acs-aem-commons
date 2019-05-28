@@ -6,6 +6,7 @@ import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import java.util.*;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
@@ -24,6 +25,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     private static final String IMPLEMENTATION_CLASS = "models.adapter.implementationClass";
     private final Map<Class, ServiceRegistration<ResourceProvider>> resourceProviders = Collections.synchronizedMap(new HashMap<>());
     private DialogResourceProviderConfiguration config;
+    private final Set<String> allKnownModels = Collections.synchronizedSet(new HashSet<>());
 
     @Reference(
             service = AdapterFactory.class,
@@ -50,8 +52,10 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Activate
     public void activate(DialogResourceProviderConfiguration config) {
         this.config = config;
-        if (!isEnabled() && resourceProviders.size() > 0) {
+        if (!isEnabled()) {
             deactivate();
+        } else {
+            allKnownModels.forEach(this::registerClass);
         }
     }
 
@@ -75,21 +79,30 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
             clazz = Class.forName(className);
             LOG.debug(String.format("found class %s", className));
         } catch (ClassNotFoundException e) {
-            // Skip it.
-            LOG.debug(String.format("COULD NOT FIND %s", className));
+            for (Bundle bundle : FrameworkUtil.getBundle(this.getClass()).getBundleContext().getBundles()) {
+                try {
+                    clazz = bundle.loadClass(className);
+                    LOG.debug(String.format("found class %s in bundle %s", className, bundle.getSymbolicName()));
+                    break;
+                } catch (ClassNotFoundException ex) {
+                    // Skip
+                }
+            }
+            if (clazz == null) {
+                LOG.debug(String.format("COULD NOT FIND %s", className));
+            }
         }
         return Optional.ofNullable(clazz);
     }
 
     @Override
     public void registerClass(String className) {
-        if (isEnabled()) {
-            getClassIfAvailable(className).ifPresent(this::registerClass);
-        }
+        getClassIfAvailable(className).ifPresent(this::registerClass);
     }
 
     @Override
     public void registerClass(Class c) {
+        allKnownModels.add(c.getCanonicalName());
         if (isEnabled()) {
             if (resourceProviders.containsKey(c)) {
                 unregisterClass(c);
@@ -122,10 +135,12 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Override
     public void unregisterClass(String className) {
         getClassIfAvailable(className).ifPresent(this::unregisterClass);
+        allKnownModels.remove(className);
     }
 
     @Override
     public void unregisterClass(Class c) {
+        allKnownModels.remove(c.getCanonicalName());
         synchronized (resourceProviders) {
             if (resourceProviders.containsKey(c)) {
                 ServiceRegistration<ResourceProvider> provider = resourceProviders.get(c);
