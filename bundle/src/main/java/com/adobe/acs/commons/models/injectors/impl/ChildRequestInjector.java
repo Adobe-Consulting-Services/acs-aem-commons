@@ -1,19 +1,21 @@
 /*
- * ***********************************************************************
- * HS2 SOLUTIONS CONFIDENTIAL
- * ___________________
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Copyright 2019 Bounteous
- * All Rights Reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * NOTICE:  All information contained herein is, and remains the property
- * of HS2 Solutions and its suppliers, if any. The intellectual and
- * technical concepts contained herein are proprietary to HS2 Solutions
- * and its suppliers and are protected by trade secret or copyright law.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from HS2 Solutions.
- * ***********************************************************************
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
