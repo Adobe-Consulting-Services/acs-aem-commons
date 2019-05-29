@@ -9,13 +9,6 @@ import org.apache.sling.api.resource.Resource;
 public interface PropertyAggregatorService {
 
     /**
-     * Simple flag for enabling the service and rewriter.
-     *
-     * @return Whether the service is enabled
-     */
-    boolean isEnabled();
-
-    /**
      * Iterates up the content tree to aggregate all the current page properties and inherited
      * page properties. Assigns the appropriate namespace to the properties as well.
      *
