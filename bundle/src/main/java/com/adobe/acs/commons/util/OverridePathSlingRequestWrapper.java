@@ -20,9 +20,13 @@ package com.adobe.acs.commons.util;
 import com.adobe.cq.sightly.WCMBindings;
 import com.day.text.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Request wrapper to get the Resource and SlingBindings objects for a request scoped to a specified path.
@@ -32,11 +36,14 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
  * functionality.
  */
 public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrapper {
-    final String ATTR_SLING_BINDINGS = SlingBindings.class.getName();
+    private final String ATTR_SLING_BINDINGS = SlingBindings.class.getName();
 
-    final SlingBindings myBindings = new SlingBindings();
-    final Resource resource;
-    final String relPath;
+    private final SlingBindings myBindings = new SlingBindings();
+    private final Resource resource;
+    private final String relPath;
+
+    private final AdapterManager adapterManager;
+    private final Map<Class<?>, Object> adaptersCache = new HashMap<>();
 
     /**
      * Constructor.
@@ -46,10 +53,14 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
      */
     public OverridePathSlingRequestWrapper(final SlingHttpServletRequest wrappedRequest, final String relPath) {
         super(wrappedRequest);
+
+        SlingBindings slingBindings = (SlingBindings) getSlingRequest().getAttribute(ATTR_SLING_BINDINGS);
+
         this.relPath = relPath;
+        this.adapterManager = slingBindings.getSling().getService(AdapterManager.class);
         this.resource = getSlingRequest().getResourceResolver().resolve(getSlingRequest(),
                 Text.fullFilePath(getSlingRequest().getRequestPathInfo().getResourcePath(), relPath));
-        this.myBindings.putAll((SlingBindings) getSlingRequest().getAttribute(ATTR_SLING_BINDINGS));
+        this.myBindings.putAll(slingBindings);
         this.myBindings.put(WCMBindings.PROPERTIES, this.resource.getValueMap());
         this.myBindings.put(SlingBindings.RESOURCE, this.resource);
         this.myBindings.put(SlingBindings.REQUEST, this);
@@ -67,5 +78,26 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
     @Override
     public Resource getResource() {
         return this.resource;
+    }
+
+    /**
+     * Overriding `adaptTo` to avoid using the original request as the adaptable.
+     */
+    @Override
+    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+        AdapterType result = null;
+        synchronized(this) {
+            result = (AdapterType) this.adaptersCache.get(type);
+
+            if (result == null) {
+                AdapterManager mgr = this.adapterManager;
+                result = mgr == null ? null : mgr.getAdapter(this, type);
+                if (result != null) {
+                    this.adaptersCache.put(type, result);
+                }
+            }
+
+            return result;
+        }
     }
 }
