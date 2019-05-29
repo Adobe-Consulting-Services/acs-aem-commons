@@ -19,11 +19,11 @@
  */
 package com.adobe.acs.commons.httpcache.config;
 
-import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +80,7 @@ public interface HttpCacheConfig {
 
     /**
      * Get a list of headers (as regex pattern) that should NOT be put in the cached response, to be served to the output.
+     *
      * @return
      */
     default List<Pattern> getExcludedResponseHeaderPatterns() {
@@ -89,9 +90,12 @@ public interface HttpCacheConfig {
     /**
      * Get a list of excluded cookie keys (simple string) of cookies that should NOT be put in the cached response, to be served to the output.
      * This is useful for example with systems that put a login cookie in each response.
+     *
      * @return
      */
-    default List<String> getExcludedCookieKeys() { return Collections.emptyList(); };
+    default List<String> getExcludedCookieKeys() {
+        return Collections.emptyList();
+    }
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension
