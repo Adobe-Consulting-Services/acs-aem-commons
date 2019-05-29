@@ -281,7 +281,9 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
          */
         @AttributeDefinition(
                 name = "Enable Recursion",
-                description = "Check to enable the recursive gathering of properties in custom models.",
+                description = "Check to enable the recursive gathering of properties in custom models." +
+                        " Note: Custom dialog field JavaScript does not support recursive property " +
+                        "aggregation.",
                 type = AttributeType.BOOLEAN
         )
         boolean enable_recursion() default false;
