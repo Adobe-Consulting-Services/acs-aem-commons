@@ -38,7 +38,7 @@ import java.util.Map;
  * functionality.
  */
 public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrapper {
-    private final String ATTR_SLING_BINDINGS = SlingBindings.class.getName();
+    private static final String ATTR_SLING_BINDINGS = SlingBindings.class.getName();
 
     private final SlingBindings myBindings = new SlingBindings();
     private final Resource resource;

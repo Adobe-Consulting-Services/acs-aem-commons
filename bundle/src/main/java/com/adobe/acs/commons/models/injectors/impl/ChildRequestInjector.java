@@ -55,7 +55,7 @@ import java.util.List;
         }
 )
 public class ChildRequestInjector implements Injector {
-    protected static Logger logger = LoggerFactory.getLogger(ChildRequestInjector.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChildRequestInjector.class);
 
     public String getName() {
         return "child-requests";
