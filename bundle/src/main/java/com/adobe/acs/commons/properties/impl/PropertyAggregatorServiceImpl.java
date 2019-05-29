@@ -22,6 +22,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.AttributeType;
 import org.osgi.service.metatype.annotations.Designate;
@@ -29,7 +30,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(service = PropertyAggregatorService.class, immediate = true)
+@Component(service = PropertyAggregatorService.class,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 @Designate(ocd = PropertyAggregatorServiceImpl.Config.class)
 public class PropertyAggregatorServiceImpl implements PropertyAggregatorService {
 
@@ -40,7 +43,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     private final String PAGE_PROP_PREFIX = "page_properties";
     private final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
 
-    private boolean enabled;
     private boolean recursionEnabled;
     private List<Pattern> exclusionList;
     private Map<String, String> additionalData;
@@ -49,7 +51,7 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     public Map<String, Object> getProperties(final Resource resource) {
         Map<String, Object> map = new HashMap<>();
 
-        if (enabled && resource != null) {
+        if (resource != null) {
             PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
             if (pageManager != null) {
                 Page currentPage = pageManager.getContainingPage(resource);
@@ -66,11 +68,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     @Override
     public Map<String, Object> getProperties(final Page page) {
         return getProperties(page.getContentResource());
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.enabled;
     }
 
     /**
@@ -226,7 +223,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
             excludeList.add(Pattern.compile(exclude));
         }
         this.exclusionList = excludeList;
-        this.enabled = config.enabled();
         this.recursionEnabled = config.enable_recursion();
         this.additionalData = getMapFromArray(config.additional_data());
     }
@@ -235,18 +231,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
             name = "Property Aggregator Service Configuration"
     )
     @interface Config {
-
-        /**
-         * The flag for enabling the service and rewriter.
-         *
-         * @return The enabled flag
-         */
-        @AttributeDefinition(
-                name = "Enabled",
-                description = "Check to enable the service and rewriter.",
-                type = AttributeType.BOOLEAN
-        )
-        boolean enabled() default false;
 
         /**
          * The list of patterns or strings to exclude from the property aggregation.
