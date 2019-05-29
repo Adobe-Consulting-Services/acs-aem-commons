@@ -268,8 +268,7 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
         @AttributeDefinition(
                 name = "Additional Data",
                 description = "List of additional data sources. Each class provided should map to a"
-                        + " Sling Model that adapts from the content resource of a page. Each model"
-                        + " has to implement com.bounteous.dialogs.core.model.BaseModel"
+                        + " Sling Model that adapts from the content resource of a page. "
                         + "Format is `prefix|className`",
                 type = AttributeType.STRING
         )
