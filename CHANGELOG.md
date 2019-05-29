@@ -10,15 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
-
-### Fixed
-- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
-
-### Fixed
-- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
+- #1893 - add javax.annotation dependency (removed in JDK 11)
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
+- #1868 - Added support for @Named annotation in MCP Form Field processor
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
+- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 
 ## [4.1.0] - 2019-05-07
 
@@ -30,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
+- #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
@@ -61,6 +60,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1839 - Fixed editing page for system notifications
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
+- #1836 - Allow uniform download links in JCR Compare
 
 ## [4.0.0] - 2019-02-20
 
