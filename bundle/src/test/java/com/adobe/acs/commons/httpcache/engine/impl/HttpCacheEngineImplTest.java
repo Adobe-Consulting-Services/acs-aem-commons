@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
@@ -27,6 +28,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.feed.StringResponseWrapper;
+import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -38,8 +40,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import javax.management.NotCompliantMBeanException;
 import java.io.ByteArrayOutputStream;
@@ -49,7 +53,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
@@ -60,7 +69,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
 
-    HttpCacheEngineImpl systemUnderTest;
+
 
     @Mock
     HttpCacheConfig memCacheConfig;
@@ -74,6 +83,12 @@ public class HttpCacheEngineImplTest {
     @Mock
     HttpCacheStore jcrCacheStore;
 
+    @Mock
+    ThrottledTaskRunner throttledTaskRunner;
+
+    @InjectMocks
+    HttpCacheEngineImpl systemUnderTest;
+
     @Captor
     ArgumentCaptor<CacheContent> cacheContentCaptor;
 
@@ -82,7 +97,6 @@ public class HttpCacheEngineImplTest {
 
     @Before
     public void init() throws NotCompliantMBeanException {
-        systemUnderTest = new HttpCacheEngineImpl();
 
         systemUnderTest.activate(Collections.emptyMap());
 
@@ -94,6 +108,12 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheConfig.getCacheStoreName()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
         when(memCacheStore.getStoreType()).thenReturn(VALUE_MEM_CACHE_STORE_TYPE);
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
+
+        doAnswer((Answer<Void>) invocationOnMock -> {
+             Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+             runnable.run();
+             return null;
+        }).when(throttledTaskRunner).scheduleWork(any(Runnable.class));
 
         systemUnderTest.bindHttpCacheConfig(memCacheConfig, sharedMemConfigProps);
         systemUnderTest.bindHttpCacheConfig(jcrCacheConfig, sharedJcrConfigProps);
@@ -196,45 +216,75 @@ public class HttpCacheEngineImplTest {
     @Test
     public void test_cache_response() throws HttpCacheException, IOException {
 
+        //prepare and mock
+        systemUnderTest.activate(new SingletonMap(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{"ignoredResponseHeaderGlobal"}));
+
+
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
         SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
 
         ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        Map<String,String[]> headers = new HashMap<>();
 
         when(response.getStatus()).thenReturn(200);
         when(response.getCharacterEncoding()).thenReturn("utf-8");
         when(response.getContentType()).thenReturn("text/html");
+        when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+
+        when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgumentAt(0, String.class))[0]);
+
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 
         when(jcrCacheConfig.getFilterScope()).thenReturn(HttpCacheConfig.FilterScope.REQUEST);
         when(jcrCacheConfig.accepts(request)).thenReturn(true);
-        HttpCacheConfig foundConfig = systemUnderTest.getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
-        assertSame(jcrCacheConfig, foundConfig);
+        when(jcrCacheConfig.getExcludedResponseHeaderPatterns()).thenReturn( Arrays.asList(Pattern.compile("ignoredResponseHeaderConfigSpecific")));
 
-        CacheKey mockedCacheKey = mock(CacheKey.class);
+
         CacheContent mockedCacheContent = mock(CacheContent.class);
 
         when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
         when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
         when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
+
+        headers.put("someResponseHeader", new String[]{"SomeValue"});
+        headers.put("ignoredResponseHeaderGlobal", new String[]{"SomeValue"});
+        headers.put("ignoredResponseHeaderConfigSpecific", new String[]{"SomeValue"});
+
+        CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
         when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         when(jcrCacheStore.createTempSink()).thenReturn(new MemTempSinkImpl());
+
+
+        //execute code
+
+
         HttpCacheServletResponseWrapper wrappedResponse = systemUnderTest.wrapResponse(request,response,jcrCacheConfig);
 
         wrappedResponse.getWriter().write("rendered-html");
 
         systemUnderTest.cacheResponse(request, wrappedResponse, jcrCacheConfig);
 
+
+        //assertions
+        HttpCacheConfig foundConfig = systemUnderTest.getCacheConfig(request, HttpCacheConfig.FilterScope.REQUEST);
+        assertSame(jcrCacheConfig, foundConfig);
+
         verify(jcrCacheStore,atLeastOnce()).put(eq(mockedCacheKey), cacheContentCaptor.capture());
 
-        assertEquals("utf-8",cacheContentCaptor.getValue().getCharEncoding());
-        assertEquals("text/html",cacheContentCaptor.getValue().getContentType());
-        assertEquals(200,cacheContentCaptor.getValue().getStatus());
+        final CacheContent capturedContent = cacheContentCaptor.getValue();
+        assertEquals("utf-8", capturedContent.getCharEncoding());
+        assertEquals("text/html", capturedContent.getContentType());
+        assertEquals(200, capturedContent.getStatus());
+        assertTrue(capturedContent.getHeaders().containsKey("someResponseHeader"));
+        assertFalse(capturedContent.getHeaders().containsKey("ignoredResponseHeaderGlobal"));
+        assertFalse(capturedContent.getHeaders().containsKey("ignoredResponseHeaderConfigSpecific"));
 
-        String cachedHTML = IOUtils.toString(cacheContentCaptor.getValue().getInputDataStream(), StandardCharsets.UTF_8);
+
+
+        String cachedHTML = IOUtils.toString(capturedContent.getInputDataStream(), StandardCharsets.UTF_8);
 
         assertEquals("rendered-html", cachedHTML);
     }
