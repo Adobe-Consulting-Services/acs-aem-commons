@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -27,7 +28,9 @@ import org.apache.sling.models.annotations.Model;
 
 /**
  * Simple sling model with a resource type declared via an internal variable.
+ * Uses both dialog provider annotation and extends Generated Dialog.
  */
+@DialogProvider
 @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
 public class SimpleModelThree extends GeneratedDialog {
     public String resourceType = "test/model3";

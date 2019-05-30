@@ -24,7 +24,6 @@ import com.adobe.acs.commons.mcp.model.SimpleModelOne;
 import com.adobe.acs.commons.mcp.model.SimpleModelThree;
 import com.adobe.acs.commons.mcp.model.SimpleModelTwo;
 import java.io.IOException;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.*;
@@ -84,7 +83,6 @@ public class DialogResourceProviderFactoryTest {
     }
 
     private boolean resourceExists(String path) {
-        Resource res = slingContext.resourceResolver().getResource(path);
-        return res != null;
+        return slingContext.resourceResolver().getResource(path) != null;
     }
 }

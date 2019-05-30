@@ -27,6 +27,7 @@ import org.apache.sling.models.annotations.Model;
 
 /**
  * Simple sling model with a resource type declared in the model annotation directly.
+ * This extends GeneratedDialog, so should be detected as a dialog provider.
  */
 @Model(adaptables = {Resource.class, SlingHttpServletRequest.class},
         resourceType = "test/model1"

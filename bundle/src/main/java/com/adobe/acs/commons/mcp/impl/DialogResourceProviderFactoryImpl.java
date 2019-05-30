@@ -21,8 +21,10 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.DialogResourceProviderConfiguration;
 import com.adobe.acs.commons.mcp.DialogResourceProviderFactory;
-import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import com.adobe.acs.commons.mcp.form.DialogProvider;
 import java.util.*;
+import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.framework.Bundle;
@@ -45,7 +47,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     private final Map<String, ServiceRegistration<ResourceProvider>> resourceProviderRegistrations
             = Collections.synchronizedMap(new HashMap<>());
     private final Set<String> allKnownModels = Collections.synchronizedSet(new HashSet<>());
-    private String[] ignoredPackages = new String[]{
+    private final String[] ignoredPackages = new String[]{
         "com.adobe.cq.",
         "com.adobe.aemds.",
         "com.adobe.fd.ccm.",
@@ -68,6 +70,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     volatile BundleContext bundleContext;
 
     private boolean enabled = false;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -142,7 +145,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Override
     public void registerClass(Class c) {
         allKnownModels.add(c.getName());
-        if (isEnabled() && GeneratedDialog.class.isAssignableFrom(c)) {
+        if (isEnabled() && isDialogProvider(c)) {
             unregisterClass(c);
             DialogResourceProviderImpl provider = null;
             try {
@@ -180,5 +183,13 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Override
     public Map<String, ServiceRegistration<ResourceProvider>> getActiveProviders() {
         return Collections.unmodifiableMap(resourceProviderRegistrations);
+    }
+
+    private boolean isDialogProvider(Class c) {
+        return c.isAnnotationPresent(DialogProvider.class)
+                || StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
+                        .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
+                        .findFirst()
+                        .isPresent();
     }
 }

@@ -21,6 +21,7 @@ package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,9 +45,15 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private String root = "";
     private GeneratedDialog dialog;
     private AbstractResourceImpl resource;
+    private Class originalClass;
 
-    public DialogResourceProviderImpl(Class<? extends GeneratedDialog> c) throws InstantiationException, IllegalAccessException {
-        dialog = c.newInstance();
+    public DialogResourceProviderImpl(Class c) throws InstantiationException, IllegalAccessException {
+        originalClass = c;
+        if (GeneratedDialog.class.isAssignableFrom(c)) {
+            dialog = (GeneratedDialog) c.newInstance();
+        } else {
+            dialog = new GeneratedDialogWrapper(c);
+        }
         setResourceTypeFromClass();
         root = "/apps/" + resourceType + "/cq:dialog";
         resource = (AbstractResourceImpl) dialog.getFormResource();
@@ -60,7 +67,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     }
 
     private void setResourceTypeFromClass() throws IllegalAccessException, InstantiationException {
-        Model modelAnnotation = dialog.getClass().getAnnotation(Model.class);
+        Model modelAnnotation = (Model) originalClass.getAnnotation(Model.class);
         // Use the model annotation for resource type if possible
         if (modelAnnotation != null
                 && modelAnnotation.resourceType() != null
@@ -69,17 +76,17 @@ public class DialogResourceProviderImpl extends ResourceProvider {
         } else {
             // Last-ditch effort is hope that there's a java bean property for it
             try {
-                Method getter = MethodUtils.getMatchingAccessibleMethod(dialog.getClass(), "getResourceType", new Class[]{});
+                Method getter = MethodUtils.getMatchingAccessibleMethod(originalClass, "getResourceType", new Class[]{});
                 if (getter != null) {
-                    resourceType = String.valueOf(getter.invoke(dialog));
+                    resourceType = String.valueOf(getter.invoke(originalClass.newInstance()));
                 } else {
-                    Field field = FieldUtils.getField(dialog.getClass(), "resourceType", true);
+                    Field field = FieldUtils.getField(originalClass, "resourceType", true);
                     if (field != null) {
-                        resourceType = String.valueOf(field.get(dialog));
+                        resourceType = String.valueOf(field.get(originalClass.newInstance()));
                     }
                 }
             } catch (InvocationTargetException | IllegalAccessException ex) {
-                LOGGER.debug("Unable to determine sling resource type for model bean: " + dialog.getClass());
+                LOGGER.debug("Unable to determine sling resource type for model bean: " + originalClass);
             }
         }
     }

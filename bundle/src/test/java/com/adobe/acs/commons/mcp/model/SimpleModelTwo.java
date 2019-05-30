@@ -19,17 +19,19 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.FormField;
-import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 
 /**
  * Simple sling model with a resource type declared via a getter function.
+ * This should be detected via the DialogProvider annotation.
  */
 @Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
-public class SimpleModelTwo extends GeneratedDialog {
+@DialogProvider
+public class SimpleModelTwo {
     @FormField(name = "Field 1")
     private String field1;
 
