@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.DialogResourceProviderConfiguration;
@@ -23,8 +42,8 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DialogResourceProviderFactoryImpl.class);
     private static final String IMPLEMENTATION_CLASS = "models.adapter.implementationClass";
-    private final Map<Class, ServiceRegistration<ResourceProvider>> resourceProviders = Collections.synchronizedMap(new HashMap<>());
-    private DialogResourceProviderConfiguration config;
+    private final Map<String, ServiceRegistration<ResourceProvider>> resourceProviderRegistrations
+            = Collections.synchronizedMap(new HashMap<>());
     private final Set<String> allKnownModels = Collections.synchronizedSet(new HashSet<>());
     private String[] ignoredPackages = new String[]{
         "com.adobe.cq.",
@@ -46,8 +65,11 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     )
     volatile List<AdapterFactory> adapterFactory;
 
+    volatile BundleContext bundleContext;
+
+    private boolean enabled = false;
     public boolean isEnabled() {
-        return config != null && config.enabled();
+        return enabled;
     }
 
     public void bind(AdapterFactory adapterFactory, Map<String, ?> properties) {
@@ -59,19 +81,25 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     }
 
     @Activate
-    public void activate(DialogResourceProviderConfiguration config) {
-        this.config = config;
-        if (!isEnabled()) {
-            deactivate();
-        } else {
+    public void activate(BundleContext context, DialogResourceProviderConfiguration config) {
+        this.bundleContext = context;
+        setEnabled(config != null && config.enabled());
+    }
+
+    public void setEnabled(boolean state) {
+        // This was made separate from activation because mock OSGi can't support reconfigration currently.
+        this.enabled = state;
+        if (isEnabled()) {
             allKnownModels.forEach(this::registerClass);
+        } else {
+            deactivate();
         }
     }
 
     @Deactivate
     public void deactivate() {
-        resourceProviders.values().forEach(ServiceRegistration::unregister);
-        resourceProviders.clear();
+        allKnownModels.forEach(this::unregisterClass);
+        resourceProviderRegistrations.clear();
     }
 
     private Optional<String> getModelClass(Map<String, ?> properties) {
@@ -87,16 +115,13 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
                 return Optional.empty();
             }
         }
-//        LOG.debug(String.format("looking up class %s", className));
         Class clazz = null;
         try {
             clazz = Class.forName(className);
-//            LOG.debug(String.format("found class %s", className));
         } catch (ClassNotFoundException e) {
             for (Bundle bundle : FrameworkUtil.getBundle(this.getClass()).getBundleContext().getBundles()) {
                 try {
                     clazz = bundle.loadClass(className);
-//                    LOG.debug(String.format("found class %s in bundle %s", className, bundle.getSymbolicName()));
                     return Optional.of(clazz);
                 } catch (ClassNotFoundException ex) {
                     // Skip
@@ -116,56 +141,44 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
 
     @Override
     public void registerClass(Class c) {
-        allKnownModels.add(c.getCanonicalName());
-        if (isEnabled()) {
-            if (resourceProviders.containsKey(c)) {
-                unregisterClass(c);
-            }
-            if (GeneratedDialog.class.isAssignableFrom(c)) {
-                synchronized (resourceProviders) {
-                    DialogResourceProviderImpl provider = null;
-                    try {
-                        provider = new DialogResourceProviderImpl(c);
-                        resourceProviders.put(c, registerResourceProvider(provider));
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        // TODO: Better error handling
-                    }
-                }
+        allKnownModels.add(c.getName());
+        if (isEnabled() && GeneratedDialog.class.isAssignableFrom(c)) {
+            unregisterClass(c);
+            DialogResourceProviderImpl provider = null;
+            try {
+                provider = new DialogResourceProviderImpl(c);
+                resourceProviderRegistrations.put(c.getName(), registerResourceProvider(provider));
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOG.error("Error when registering resource provider", e);
             }
         }
     }
 
     private ServiceRegistration<ResourceProvider> registerResourceProvider(DialogResourceProviderImpl provider) {
-        BundleContext context = FrameworkUtil.getBundle(DialogResourceProviderFactory.class).getBundleContext();
         Dictionary<String, Object> props = new Hashtable<>();
         props.put(ResourceProvider.PROPERTY_NAME, provider.getRoot());
         props.put(ResourceProvider.PROPERTY_ROOT, provider.getRoot());
 //        props.put(ResourceProvider.PROPERTY_MODIFIABLE, Boolean.FALSE);
         props.put(ResourceProvider.PROPERTY_USE_RESOURCE_ACCESS_SECURITY, Boolean.FALSE);
         LOG.debug(String.format("Registering at path %s", provider.getRoot()));
-        return context.registerService(ResourceProvider.class, provider, props);
-    }
-
-    @Override
-    public void unregisterClass(String className) {
-        getClassIfAvailable(className).ifPresent(this::unregisterClass);
-        allKnownModels.remove(className);
+        return bundleContext.registerService(ResourceProvider.class, provider, props);
     }
 
     @Override
     public void unregisterClass(Class c) {
-        allKnownModels.remove(c.getCanonicalName());
-        synchronized (resourceProviders) {
-            if (resourceProviders.containsKey(c)) {
-                ServiceRegistration<ResourceProvider> provider = resourceProviders.get(c);
-                resourceProviders.remove(c);
-                provider.unregister();
-            }
+        unregisterClass(c.getName());
+    }
+
+    @Override
+    public void unregisterClass(String c) {
+        ServiceRegistration<ResourceProvider> serviceRegistration = resourceProviderRegistrations.remove(c);
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
         }
     }
 
     @Override
-    public Map<Class, ServiceRegistration<ResourceProvider>> getActiveProviders() {
-        return resourceProviders;
+    public Map<String, ServiceRegistration<ResourceProvider>> getActiveProviders() {
+        return Collections.unmodifiableMap(resourceProviderRegistrations);
     }
 }

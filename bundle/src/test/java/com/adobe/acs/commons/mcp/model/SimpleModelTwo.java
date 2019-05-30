@@ -17,21 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.model;
 
-import java.util.Map;
-import org.apache.sling.spi.resource.provider.ResourceProvider;
-import org.osgi.framework.ServiceRegistration;
+import com.adobe.acs.commons.mcp.form.FormField;
+import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
 
-public interface DialogResourceProviderFactory {
+/**
+ * Simple sling model with a resource type declared via a getter function.
+ */
+@Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
+public class SimpleModelTwo extends GeneratedDialog {
+    @FormField(name = "Field 1")
+    private String field1;
 
-    void registerClass(String className);
-
-    void registerClass(Class c);
-
-    void unregisterClass(String className);
-
-    void unregisterClass(Class c);
-
-    Map<String, ServiceRegistration<ResourceProvider>> getActiveProviders();
+    public String getResourceType() {
+        return "test/model2";
+    }
 }
