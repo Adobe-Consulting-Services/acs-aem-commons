@@ -22,7 +22,15 @@ package com.adobe.acs.commons.mcp.impl;
 import com.adobe.acs.commons.mcp.DialogResourceProviderConfiguration;
 import com.adobe.acs.commons.mcp.DialogResourceProviderFactory;
 import com.adobe.acs.commons.mcp.form.DialogProvider;
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.api.adapter.AdapterFactory;
@@ -31,7 +39,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.LoggerFactory;
 
@@ -130,9 +144,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
                     // Skip
                 }
             }
-            if (clazz == null) {
-                LOG.debug(String.format("COULD NOT RESOLVE CLASS %s", className));
-            }
+            LOG.debug(String.format("COULD NOT RESOLVE CLASS %s", className));
         }
         return Optional.ofNullable(clazz);
     }
@@ -157,11 +169,12 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
         }
     }
 
+    @SuppressWarnings("squid:S1149")
     private ServiceRegistration<ResourceProvider> registerResourceProvider(DialogResourceProviderImpl provider) {
+        @SuppressWarnings("UseOfObsoleteCollectionType")
         Dictionary<String, Object> props = new Hashtable<>();
         props.put(ResourceProvider.PROPERTY_NAME, provider.getRoot());
         props.put(ResourceProvider.PROPERTY_ROOT, provider.getRoot());
-//        props.put(ResourceProvider.PROPERTY_MODIFIABLE, Boolean.FALSE);
         props.put(ResourceProvider.PROPERTY_USE_RESOURCE_ACCESS_SECURITY, Boolean.FALSE);
         LOG.debug(String.format("Registering at path %s", provider.getRoot()));
         return bundleContext.registerService(ResourceProvider.class, provider, props);
