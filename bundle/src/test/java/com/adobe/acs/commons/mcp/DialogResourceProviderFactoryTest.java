@@ -26,7 +26,9 @@ import com.adobe.acs.commons.mcp.model.SimpleModelTwo;
 import java.io.IOException;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
