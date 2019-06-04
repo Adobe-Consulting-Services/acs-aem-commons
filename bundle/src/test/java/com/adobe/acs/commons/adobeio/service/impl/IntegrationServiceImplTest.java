@@ -28,6 +28,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import junitx.util.PrivateAccessor;
+
 public final class IntegrationServiceImplTest {
 
     private final static String validkey;
@@ -77,12 +79,13 @@ public final class IntegrationServiceImplTest {
 
     @Test
     public void testJwtToken() {
-         assertNotNull(impl.getJwtToken());
+        assertNotNull(impl.getJwtToken());
     }
 
     @Test
-    public void testConifg() {impl.activate(config);
-        assertEquals(config, impl.jwtServiceConfig);
+    public void testConifg() throws NoSuchFieldException {
+    	impl.activate(config);;
+        assertEquals(config, PrivateAccessor.getField(impl, "jwtServiceConfig"));
     }
 
     @Test

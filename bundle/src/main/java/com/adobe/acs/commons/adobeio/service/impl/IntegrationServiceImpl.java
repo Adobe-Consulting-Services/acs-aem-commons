@@ -65,7 +65,7 @@ import io.jsonwebtoken.Jwts;
         configurationPolicy = ConfigurationPolicy.REQUIRE,
         property = "scheduler.expression=0 0 0/1 1/1 * ? *")
 @Designate(ocd = IntegrationConfiguration.class)
-public class IntegrationServiceImpl implements IntegrationService, Runnable {
+public final class IntegrationServiceImpl implements IntegrationService, Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationServiceImpl.class);
     private static final Base64.Decoder DECODER = Base64.getMimeDecoder();
@@ -73,12 +73,13 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     @Reference
     private AdobeioHelper helper;
 
+    private IntegrationConfiguration jwtServiceConfig;
+
     private String accessToken = null;
-    protected IntegrationConfiguration jwtServiceConfig;
 
     @Activate
     @Modified
-    protected void activate(IntegrationConfiguration config) {
+    protected void activate(final IntegrationConfiguration config) {
         this.jwtServiceConfig = config;
     }
 
@@ -95,6 +96,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         if (StringUtils.isEmpty(accessToken)) {
             accessToken = fetchAccessToken();
         }
+
         return accessToken;
     }
 
@@ -113,7 +115,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         String token = StringUtils.EMPTY;
 
         try(CloseableHttpClient client = helper.getHttpClient(getTimeoutinMilliSeconds())) {
-            HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
+        	final HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
             post.addHeader(CACHE_CONTRL, NO_CACHE);
             post.addHeader(CONTENT_TYPE, CONTENT_TYPE_URL_ENCODED);
 
@@ -124,23 +126,24 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
 
             post.setEntity(new UrlEncodedFormEntity(params));
 
-            HttpResponse response = client.execute(post);
+           final HttpResponse response = client.execute(post);
 
             if (response.getStatusLine().getStatusCode() != 200) {
                 LOGGER.info("response code {} ", response.getStatusLine().getStatusCode());
             }
-            String result = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+
+            final String result = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 
             LOGGER.info("JSON Response : {}", result);
-            JsonParser parser = new JsonParser();
-            JsonObject json = parser.parse(result).getAsJsonObject();
+            final JsonParser parser = new JsonParser();
+            final JsonObject json = parser.parse(result).getAsJsonObject();
 
             if (json.has(JSON_ACCESS_TOKEN)) {
                 token = json.get(JSON_ACCESS_TOKEN).getAsString();
             } else {
                 LOGGER.error("JSON does not contain an access_token");
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getMessage());
         }
 
@@ -156,24 +159,26 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
                     .setClaims(getJwtClaims())
                     .signWith(RS256, getPrivateKey())
                     .compact();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("JWT claims {}", getJwtClaims());
             LOGGER.error(e.getMessage());
         }
+
         LOGGER.info("JWT Token : \n {}", jwtToken);
         return jwtToken;
     }
 
     private PrivateKey getPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
-        KeyFactory kf = KeyFactory.getInstance("RSA");
+    	final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
+    	final KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    protected static byte[] buildPkcs8Key(String privateKey)  {
+    protected static byte[] buildPkcs8Key(final String privateKey)  {
         if (privateKey.contains("--BEGIN PRIVATE KEY--")) {
             return DECODER.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", ""));
         }
+
         if (!privateKey.contains("--BEGIN RSA PRIVATE KEY--")) {
             LOGGER.error("Invalid cert format: {}", privateKey);
             return StringUtils.EMPTY.getBytes();
@@ -188,22 +193,23 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return result;
     }
 
-    private Map getJwtClaims() {
-        Map jwtClaims = new HashMap<>();
+    private Map<String, Object> getJwtClaims() {
+        final Map<String, Object> jwtClaims = new HashMap<>();
 
         jwtClaims.put("iss", jwtServiceConfig.amcOrgId());
         jwtClaims.put("sub", jwtServiceConfig.techAccountId());
         jwtClaims.put("exp", getExpirationDate());
         jwtClaims.put("aud", String.format("%s%s", jwtServiceConfig.loginEndpoint(), jwtServiceConfig.clientId()));
-        String [] claims = jwtServiceConfig.adobeLoginClaimKey();
+
+        final String [] claims = jwtServiceConfig.adobeLoginClaimKey();
         if (claims != null && claims.length > 0) {
-             for( int i=0; i < claims.length; i++) {
-             jwtClaims.put(claims[i], Boolean.TRUE);
+             for(int i = 0; i < claims.length; i++) {
+                 jwtClaims.put(claims[i], Boolean.TRUE);
              }
         }
 
         if (LOGGER.isDebugEnabled()) {
-            Gson gson = new Gson();
+            final Gson gson = new Gson();
             LOGGER.debug(gson.toJson(jwtClaims));
         }
 
@@ -211,7 +217,7 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
     }
 
     private Date getExpirationDate() {
-        Calendar cal = Calendar.getInstance();
+    	final Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
         return cal.getTime();
