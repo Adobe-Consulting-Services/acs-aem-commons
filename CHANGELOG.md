@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
-- #1893 - add javax.annotation dependency (removed in JDK 11)
+- #1893 - Add javax.annotation dependency (removed in JDK 11)
+- #1900 - Tag Report MCP
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
