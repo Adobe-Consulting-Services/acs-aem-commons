@@ -20,36 +20,39 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.management.NotCompliantMBeanException;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import junitx.util.PrivateAccessor;
 
-import static org.junit.Assert.assertEquals;
-
 @RunWith(MockitoJUnitRunner.class)
-public class ErrorPageCacheImplTest {
+public final class ErrorPageCacheImplTest {
+
     private static final int FAR_FUTURE_EXPIRY = Integer.MAX_VALUE;
 
-    @Spy
-    private ConcurrentHashMap<String, CacheEntry> cache;
+    private final ErrorPageCacheImpl errorPageCache;
 
-    private ErrorPageCacheImpl errorPageCache;
+    private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
-    @Before
-    public void setUp() throws Exception {
-        errorPageCache = new ErrorPageCacheImpl(5, false);
+    public ErrorPageCacheImplTest() throws NotCompliantMBeanException {
+		errorPageCache = new ErrorPageCacheImpl(5, false);
+	}
+
+	@Before
+    public void setUp() throws NoSuchFieldException {
         PrivateAccessor.setField(errorPageCache, "cache", cache);
 
         // 1 Miss
         // 2 Hits
-        CacheEntry earth = new CacheEntry();
+        final CacheEntry earth = new CacheEntry();
         earth.setData("hello earth");
         earth.incrementMisses();
         earth.incrementHits();
@@ -60,7 +63,7 @@ public class ErrorPageCacheImplTest {
 
         // 2 Misses
         // 3 Hits
-        CacheEntry mars = new CacheEntry();
+        final CacheEntry mars = new CacheEntry();
         mars.setData("hello mars");
         mars.incrementMisses();
         mars.incrementHits();
@@ -70,56 +73,34 @@ public class ErrorPageCacheImplTest {
         mars.setExpiresIn(FAR_FUTURE_EXPIRY);
 
         cache.put("/content/mars", mars);
-
-        MockitoAnnotations.initMocks(this);
-    }
-
-    public void testGet() throws Exception {
-        /**
-         * Implemented in PowerMockErrorPageCacheImplTest
-         *
-         * Powermock was having problems running with @Spy'ed vars in this Test.
-         */
     }
 
     @Test
-    public void testGetTotalHits() throws Exception {
-        final int expResult = 5;
-
+    public void testGetTotalHits() {
         final int result = errorPageCache.getTotalHits();
-
-        assertEquals(expResult, result);
+        assertEquals(5, result);
     }
 
     @Test
-    public void testGetCacheEntriesCount() throws Exception {
-        final int expResult = 2;
-
+    public void testGetCacheEntriesCount() {
         final int result = errorPageCache.getCacheEntriesCount();
-
-        assertEquals(expResult, result);
+        assertEquals(2, result);
     }
 
     @Test
-    public void testGetTotalMisses() throws Exception {
-        final int expResult = 3;
-
+    public void testGetTotalMisses() {
         final int result = errorPageCache.getTotalMisses();
-
-        assertEquals(expResult, result);
+        assertEquals(3, result);
     }
 
     @Test
-    public void testGetTotalCacheRequests() throws Exception {
-        final int expResult = 8;
-
+    public void testGetTotalCacheRequests() {
         final int result = errorPageCache.getTotalCacheRequests();
-
-        assertEquals(expResult, result);
+        assertEquals(8, result);
     }
 
     @Test
-    public void testGetCacheSizeInKb() throws Exception {
+    public void testGetCacheSizeInKb() {
         final long expResult = ("hello earth".getBytes().length
                 + "hello mars".getBytes().length) / 1000L;
 
@@ -129,36 +110,21 @@ public class ErrorPageCacheImplTest {
     }
 
     @Test
-    public void testGetCacheEntries() throws Exception {
-        // MBean formatting; Skip test
-    }
-
-    @Test
-    public void testClearCache() throws Exception {
-        final int expResult = 0;
-
+    public void testClearCache() {
         errorPageCache.clearCache();
-
         final int result = cache.size();
-
-        assertEquals(expResult, result);
+        assertEquals(0, result);
     }
 
     @Test
-    public void testGetCacheData_earth() throws Exception {
-        final String expResult = "hello earth";
-
+    public void testGetCacheData_earth() {
         final String result = errorPageCache.getCacheData("/content/earth");
-
-        assertEquals(expResult, result);
+        assertEquals("hello earth", result);
     }
 
     @Test
-    public void testGetCacheData_mars() throws Exception {
-        final String expResult = "hello mars";
-
+    public void testGetCacheData_mars() {
         final String result = errorPageCache.getCacheData("/content/mars");
-
-        assertEquals(expResult, result);
+        assertEquals("hello mars", result);
     }
 }

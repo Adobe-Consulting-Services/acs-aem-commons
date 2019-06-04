@@ -20,100 +20,84 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import com.adobe.acs.commons.util.ResourceDataUtil;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+
+import javax.management.NotCompliantMBeanException;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * ErrorPageCacheImpl test using PowerMockRunner.
  *
  * Split out as ErrorPageCacheImplTest was having problems with @Spy'ied vars
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ResourceDataUtil.class)
-public class PowerMockErrorPageCacheImplTest {
+@RunWith(MockitoJUnitRunner.class)
+public final class PowerMockErrorPageCacheImplTest {
 
-    private ErrorPageCacheImpl errorPageCache;
+    private final SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
+    private final SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
+    private final ErrorPageCacheImpl errorPageCache;
 
-    @Before
-    public void setUp() throws Exception {
-        errorPageCache = new ErrorPageCacheImpl(1, false);
+    public PowerMockErrorPageCacheImplTest() throws NotCompliantMBeanException {
+        errorPageCache = Mockito.spy(new ErrorPageCacheImpl(1, false));
+    }
+
+    private void assertData(final String expected) {
+        final String data = errorPageCache.get("/content/world", request, response);
+        assertEquals(expected, data);
+    }
+
+    private void getIncludeAsString(final String toBeReturned) {
+        Mockito.doReturn(toBeReturned).when(errorPageCache)
+            .getIncludeAsString("/content/world", request, response);
     }
 
     @Test
-    public void testGet() throws Exception {
-        mockStatic(ResourceDataUtil.class);
-
-        String data = "";
-
-        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
-        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
-
-        when(ResourceDataUtil.getIncludeAsString("/content/world", request,
-                response)).thenReturn("hello world");
+    public void testGet() throws InterruptedException {
+    	getIncludeAsString("hello world");
 
         assertEquals(0, errorPageCache.getTotalCacheRequests());
 
         // MISS
-        data = errorPageCache.get("/content/world", request, response);
+        assertData("hello world");
 
         assertEquals(0, errorPageCache.getTotalHits());
         assertEquals(1, errorPageCache.getTotalMisses());
         assertEquals(1, errorPageCache.getTotalCacheRequests());
         assertEquals(1, errorPageCache.getCacheEntriesCount());
 
-        assertEquals("hello world", data);
-
-        when(ResourceDataUtil.getIncludeAsString("/content/world", request,
-                response)).thenReturn("hello new world");
+        getIncludeAsString("hello new world");
 
         // HIT
-        data = errorPageCache.get("/content/world", request, response);
+        assertData("hello world");
 
         assertEquals(1, errorPageCache.getTotalHits());
         assertEquals(1, errorPageCache.getTotalMisses());
         assertEquals(2, errorPageCache.getTotalCacheRequests());
         assertEquals(1, errorPageCache.getCacheEntriesCount());
 
-        assertEquals("hello world", data);
-
         // Sleep for > 1 second
         Thread.sleep(1001);
 
         // MISS
-        data = errorPageCache.get("/content/world", request, response);
+        assertData("hello new world");
 
         assertEquals(1, errorPageCache.getTotalHits());
         assertEquals(2, errorPageCache.getTotalMisses());
         assertEquals(3, errorPageCache.getTotalCacheRequests());
         assertEquals(1, errorPageCache.getCacheEntriesCount());
-
-        assertEquals("hello new world", data);
     }
 
 
     @Test
-    public void testGet_Null() throws Exception {
-        mockStatic(ResourceDataUtil.class);
-
-        SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
-        SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
-
-        when(ResourceDataUtil.getIncludeAsString("/content/world", request,
-                response)).thenReturn(null);
-
-        String data = errorPageCache.get("/content/world", request, response);
-
-        assertEquals("", data);
+    public void testGet_Null() {
+    	getIncludeAsString(null);
+        assertData("");
     }
 }

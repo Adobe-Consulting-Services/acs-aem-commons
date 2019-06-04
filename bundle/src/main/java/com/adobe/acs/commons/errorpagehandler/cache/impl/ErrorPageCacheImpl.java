@@ -20,14 +20,13 @@
 
 package com.adobe.acs.commons.errorpagehandler.cache.impl;
 
-import com.adobe.acs.commons.util.ResourceDataUtil;
-import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -38,14 +37,20 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
+import com.adobe.acs.commons.util.BufferedSlingHttpServletResponse;
+import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+
+public class ErrorPageCacheImpl extends AnnotatedStandardMBean implements ErrorPageCache, ErrorPageCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageCacheImpl.class);
 
     private static final int KB_IN_BYTES = 1000;
@@ -72,11 +77,9 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
     public String get(final String path,
                             final SlingHttpServletRequest request,
                             final SlingHttpServletResponse response) {
-
-
         if (!serveAuthenticatedFromCache && !isAnonymousRequest(request)) {
             // For authenticated requests, don't return from cache
-            return ResourceDataUtil.getIncludeAsString(path, request, response);
+            return getIncludeAsString(path, request, response);
         }
 
         final long start = System.currentTimeMillis();
@@ -84,9 +87,8 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         final boolean newEntry = cacheEntry == null;
 
         if (newEntry || cacheEntry.isExpired(new Date())) {
-
             // Cache Miss
-            String data = ResourceDataUtil.getIncludeAsString(path, request, response);
+            String data = getIncludeAsString(path, request, response);
 
             if (data == null) {
                 log.debug("Error page representation to cache is null. Setting to empty string.");
@@ -133,6 +135,22 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         return (request.getAuthType() == null || request.getRemoteUser() == null);
     }
 
+    protected String getIncludeAsString(final String path, final SlingHttpServletRequest slingRequest,
+                                            final SlingHttpServletResponse slingResponse) {
+        try {
+            final BufferedSlingHttpServletResponse responseWrapper = new BufferedSlingHttpServletResponse(slingResponse, new StringWriter(), null);
+            final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
+            requestDispatcher.include(slingRequest, responseWrapper);
+            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            }
+        } catch (final ServletException | IOException ex) {
+            log.error("Error creating the String representation for: " + path, ex);
+        }
+
+        return null;
+    }
+
     /* MBean Attributes */
 
     @Override
@@ -145,7 +163,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         int hits = 0;
 
         for (final CacheEntry entry : this.cache.values()) {
-            hits = hits + entry.getHits();
+            hits += entry.getHits();
         }
 
         return hits;
@@ -161,7 +179,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         int misses = 0;
 
         for (final Map.Entry<String, CacheEntry> entry : this.cache.entrySet()) {
-            misses = misses + entry.getValue().getMisses();
+            misses += entry.getValue().getMisses();
         }
 
         return misses;
@@ -177,7 +195,7 @@ public final class ErrorPageCacheImpl extends AnnotatedStandardMBean implements 
         long bytes = 0;
 
         for (final CacheEntry entry : this.cache.values()) {
-            bytes = bytes + entry.getBytes();
+            bytes += entry.getBytes();
         }
 
         return bytes / KB_IN_BYTES;
