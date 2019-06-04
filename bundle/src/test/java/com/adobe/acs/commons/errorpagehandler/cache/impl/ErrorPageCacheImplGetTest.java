@@ -38,13 +38,13 @@ import org.mockito.runners.MockitoJUnitRunner;
  * Split out as ErrorPageCacheImplTest was having problems with @Spy'ied vars
  */
 @RunWith(MockitoJUnitRunner.class)
-public final class PowerMockErrorPageCacheImplTest {
+public final class ErrorPageCacheImplGetTest {
 
     private final SlingHttpServletRequest request = mock(SlingHttpServletRequest.class);
     private final SlingHttpServletResponse response = mock(SlingHttpServletResponse.class);
     private final ErrorPageCacheImpl errorPageCache;
 
-    public PowerMockErrorPageCacheImplTest() throws NotCompliantMBeanException {
+    public ErrorPageCacheImplGetTest() throws NotCompliantMBeanException {
         errorPageCache = Mockito.spy(new ErrorPageCacheImpl(1, false));
     }
 
