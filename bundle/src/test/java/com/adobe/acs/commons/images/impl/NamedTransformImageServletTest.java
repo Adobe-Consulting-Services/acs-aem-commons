@@ -20,19 +20,14 @@
 
 package com.adobe.acs.commons.images.impl;
 
-import com.adobe.acs.commons.images.ImageTransformer;
-import com.adobe.acs.commons.images.NamedImageTransformer;
-import com.day.image.Layer;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,73 +35,103 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.apache.sling.api.request.RequestPathInfo;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.images.ImageTransformer;
+import com.adobe.acs.commons.images.NamedImageTransformer;
+import com.day.image.Layer;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NamedTransformImageServletTest {
+public final class NamedTransformImageServletTest {
 
-    static final String NAMED_TRANSFORM_FEATURE = "feature";
-    static final String NAMED_TRANSFORM_SMALL = "small";
+    private static final String NAMED_TRANSFORM_FEATURE = "feature";
+    private static final String NAMED_TRANSFORM_SMALL = "small";
 
-    static final String IMAGE_TRANSFORM_RESIZE = "resize";
-    static final String IMAGE_TRANSFORM_GREYSCALE = "greyscale";
-
-    @Spy
-    private FeaturedNamedImageTransformer featureImageTransformer = new FeaturedNamedImageTransformer();
+    private static final String IMAGE_TRANSFORM_RESIZE = "resize";
+    private static final String IMAGE_TRANSFORM_GREYSCALE = "greyscale";
 
     @Spy
-    private SmallNamedImageTransformer smallImageTransformer = new SmallNamedImageTransformer();
+    private final FeaturedNamedImageTransformer featureImageTransformer = new FeaturedNamedImageTransformer();
 
     @Spy
-    private Map<String, NamedImageTransformer> namedImageTransformers = new HashMap<>();
+    private final SmallNamedImageTransformer smallImageTransformer = new SmallNamedImageTransformer();
 
     @Spy
-    private EmptyImageTransformer resizeImageTransformer = new EmptyImageTransformer();
+    private final EmptyImageTransformer resizeImageTransformer = new EmptyImageTransformer();
 
     @Spy
-    private EmptyImageTransformer greyscaleImageTransformer = new EmptyImageTransformer();
+    private final EmptyImageTransformer greyscaleImageTransformer = new EmptyImageTransformer();
 
     @Spy
-    private Map<String, ImageTransformer> imageTransformers = new HashMap<String, ImageTransformer>();
-
-    @InjectMocks
-    private NamedTransformImageServlet servlet;
-
-    private MockSlingHttpServletRequest mockRequest;
-
-    @Before
-    public void setUp() throws Exception {
-        servlet = new NamedTransformImageServlet();
-
-        imageTransformers.put(IMAGE_TRANSFORM_RESIZE, resizeImageTransformer);
-        imageTransformers.put(IMAGE_TRANSFORM_GREYSCALE, greyscaleImageTransformer);
-
-        namedImageTransformers.put(NAMED_TRANSFORM_FEATURE, featureImageTransformer);
-        namedImageTransformers.put(NAMED_TRANSFORM_SMALL, smallImageTransformer);
-
-        mockRequest = new MockSlingHttpServletRequest(
+    private final MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
                 "/path",
                 "",
                 "transform",
                 NAMED_TRANSFORM_FEATURE + "/" + new Random().nextInt() + "/image.png",
                 "");
 
-        MockitoAnnotations.initMocks(this);
+    private final NamedTransformImageServlet servlet = new NamedTransformImageServlet();
+
+    @Before
+    public void setUp() {
+        final Map<Object, Object> props = new HashMap<>();
+        servlet.bindImageTransformers(null, props);
+        servlet.bindNamedImageTransformers(null, props);
+
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
+        servlet.bindImageTransformers(resizeImageTransformer, props);
+
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_GREYSCALE);
+        servlet.bindImageTransformers(greyscaleImageTransformer, props);
+
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
+        servlet.bindNamedImageTransformers(featureImageTransformer, props);
+
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_SMALL);
+        servlet.bindNamedImageTransformers(smallImageTransformer, props);
     }
 
     @Test
-    public void testAccepts() throws Exception {
-        final boolean result = servlet.accepts(mockRequest);
+    public void testBinders() {
+        final Map<Object, Object> props = new HashMap<>();
 
-        assertTrue(result);
+        servlet.bindImageTransformers(null, props);
+        servlet.bindNamedImageTransformers(null, props);
+
+        servlet.unbindImageTransformers(null, props);
+        servlet.unbindNamedImageTransformers(null, props);
+
+        props.put(ImageTransformer.PROP_TYPE, IMAGE_TRANSFORM_RESIZE);
+        servlet.unbindImageTransformers(resizeImageTransformer, props);
+
+        props.put(NamedImageTransformer.PROP_NAME, NAMED_TRANSFORM_FEATURE);
+        servlet.unbindNamedImageTransformers(featureImageTransformer, props);
+
+        assertFalse(servlet.accepts(request));
     }
 
     @Test
-    public void testAccepts_invalidNamedTransform() throws Exception {
+    public void testAccepts() {
+        assertTrue(servlet.accepts(request));
+        assertFalse(servlet.accepts(null));
+
+        final RequestPathInfo rpi = Mockito.mock(RequestPathInfo.class);
+        when(rpi.getSuffix()).thenReturn(null);
+        when(request.getRequestPathInfo()).thenReturn(rpi);
+        assertFalse(servlet.accepts(request));
+    }
+
+    @Test
+    public void testAccepts_invalidNamedTransform() {
         MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
                 "/path",
                 "",
@@ -120,7 +145,7 @@ public class NamedTransformImageServletTest {
     }
 
     @Test
-    public void testAccepts_invalidLastSuffix() throws Exception {
+    public void testAccepts_invalidLastSuffix() {
         MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
                 "/path",
                 "",
@@ -134,8 +159,8 @@ public class NamedTransformImageServletTest {
     }
 
     @Test
-    public void testAccepts_multipleTransforms() throws Exception {
-        MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
+    public void testAccepts_multipleTransforms() {
+        final MockSlingHttpServletRequest request = new MockSlingHttpServletRequest(
                 "/path",
                 "",
                 "transform",
@@ -169,7 +194,7 @@ public class NamedTransformImageServletTest {
     }
 
     @Test
-    public void test_multipleTransforms() throws Exception {
+    public void test_multipleTransforms() {
         List<NamedImageTransformer> selectedNamedImageTransformers = new ArrayList<NamedImageTransformer>();
         selectedNamedImageTransformers.add(featureImageTransformer);
         selectedNamedImageTransformers.add(smallImageTransformer);
@@ -178,12 +203,12 @@ public class NamedTransformImageServletTest {
 
         servlet.transform(mock(Layer.class), imageTransformersWithParams);
 
-        org.mockito.Mockito.verify(resizeImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
-        org.mockito.Mockito.verify(greyscaleImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
+        verify(resizeImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
+        verify(greyscaleImageTransformer, times(1)).transform(any(Layer.class), any(ValueMap.class));
     }
 
     @Test
-    public void test_getQuality() throws Exception {
+    public void test_getQuality() {
         ValueMap qualityTransforms = new ValueMapDecorator(new HashMap<String, Object>());
 
         qualityTransforms.put("quality", 0);
@@ -221,7 +246,7 @@ public class NamedTransformImageServletTest {
     }
 
     @Test
-    public void test_isProgressiveJpeg() throws Exception {
+    public void test_isProgressiveJpeg() {
         ValueMap progressiveTransforms = new ValueMapDecorator(new HashMap<String, Object>());
 
         // Disabled

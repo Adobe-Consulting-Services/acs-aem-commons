@@ -72,8 +72,13 @@ angular.module('acs-commons-audit-log-search-app', ['acsCoral', 'ACS.Commons.not
 				data.time=time;
 				$scope.result = data || {};
 				NotificationsService.running(false);
-				NotificationsService.add('success', 'SUCCESS', 'Found '+data.count+' audit events in '+time+'ms!');
-
+				if(data.succeeded){
+					NotificationsService.add('success', 'SUCCESS', 'Found '+data.count+' audit events in '+time+'ms!');
+				} else if (data.indexOf('The query read or traversed more than ') !== -1){
+					NotificationsService.add('error', 'ERROR', 'Unable to search audit logs due to traversal limits, please ensure you have Oak Indexes installed!');
+				} else {
+					NotificationsService.add('error', 'ERROR', 'Unable to search audit logs, please consult logs for further information!');
+				}
 			}).error(function (data, status, headers, config) {
 				NotificationsService.running(false);
 				NotificationsService.add('error', 'ERROR', 'Unable to search audit logs!');

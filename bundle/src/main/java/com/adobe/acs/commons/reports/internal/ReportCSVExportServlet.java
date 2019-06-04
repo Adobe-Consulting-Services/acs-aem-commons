@@ -25,17 +25,19 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,23 +51,25 @@ import com.day.text.csv.Csv;
 /**
  * Servlet for exporting the results of the report to CSV.
  */
-@SlingServlet(label = "ACS AEM Commons - Report CSV Export Servlet", methods = { "GET" }, resourceTypes = {
-    "acs-commons/components/utilities/report-builder/report-page" }, selectors = {
-        "report" }, extensions = { "csv" }, metatype = false)
+@Component(service = { Servlet.class }, property = {
+    "sling.servlet.resourceTypes=acs-commons/components/utilities/report-builder/report-page",
+    "sling.servlet.selectors=report", "sling.servlet.extensions=csv", "sling.servlet.methods=GET" })
 public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private static final long serialVersionUID = 2794836639686938093L;
   private static final Logger log = LoggerFactory.getLogger(ReportCSVExportServlet.class);
 
+  @Override
   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
       throws ServletException, IOException {
     log.trace("doGet");
 
     // set response parameters
     response.setContentType("text/csv");
-    response.setHeader("Content-disposition", "attachment; filename="
-        + URLEncoder.encode(request.getResource().getValueMap().get(JcrConstants.JCR_TITLE, "report"), "UTF-8")
-        + ".csv");
+    response.setHeader("Content-disposition",
+        "attachment; filename="
+            + URLEncoder.encode(request.getResource().getValueMap().get(JcrConstants.JCR_TITLE, "report"), "UTF-8")
+            + ".csv");
 
     Writer writer = null;
     try {
@@ -97,7 +101,6 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       }
 
     } catch (ReportException e) {
-      log.error("Exception extracting report to CSV", e);
       throw new ServletException("Exception extracting report to CSV", e);
     } finally {
       IOUtils.closeQuietly(writer);
@@ -105,10 +108,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   }
 
-  private List<ReportCellCSVExporter> writeHeaders(SlingHttpServletRequest request, final Csv csv)
-      throws IOException {
-    List<String> row = new ArrayList();
-    List<ReportCellCSVExporter> exporters = new ArrayList();
+  private List<ReportCellCSVExporter> writeHeaders(SlingHttpServletRequest request, final Csv csv) throws IOException {
+    List<String> row = new ArrayList<>();
+    List<ReportCellCSVExporter> exporters = new ArrayList<>();
     for (Resource column : request.getResource().getChild("columns").getChildren()) {
       String className = column.getValueMap().get("exporter", String.class);
       if (!StringUtils.isEmpty(className)) {
@@ -136,7 +138,8 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
       Csv csv, Writer writer) throws ReportException {
-    QueryReportExecutor executor = request.adaptTo(QueryReportExecutor.class);
+    QueryReportExecutor executor = Optional.ofNullable(request.adaptTo(QueryReportExecutor.class))
+        .orElseThrow(() -> new ReportException("Failed to get report executor"));
 
     executor.setConfiguration(config);
     log.debug("Retrieved executor {}", executor);
@@ -146,7 +149,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
     log.debug("Retrieved {} results", results.size());
 
     for (Object result : results) {
-      List<String> row = new ArrayList<String>();
+      List<String> row = new ArrayList<>();
       try {
         for (ReportCellCSVExporter exporter : exporters) {
           row.add(exporter.getValue(result));

@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.wcm.api.WCMMode;
 
 @Component(
@@ -188,13 +189,15 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             }
     
             // Get contents
-            final String contents = capturedResponse.getBufferedServletOutput().getBufferedString();
+            final String contents = capturedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? capturedResponse.getBufferedServletOutput().getBufferedString() : null;
     
             if (doInclude && contents != null && StringUtils.contains(response.getContentType(), "html")) {
     
                 final int bodyIndex = contents.indexOf("</body>");
     
                 if (bodyIndex != -1) {
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    capturedResponse.resetBuffer();
                     final PrintWriter printWriter = response.getWriter();
     
                     printWriter.write(contents.substring(0, bodyIndex));

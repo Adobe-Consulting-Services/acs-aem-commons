@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -127,7 +127,7 @@ public final class ResourceResolverMapTransformerFactory implements TransformerF
         this.attributes = ParameterUtil.toMap(normalizedValue, ":", ",");
     }
 
-    public final class ResourceResolverMapTransformer extends AbstractTransformer {
+    public final class ResourceResolverMapTransformer extends ContentHandlerBasedTransformer {
 
         private SlingHttpServletRequest slingRequest;
 

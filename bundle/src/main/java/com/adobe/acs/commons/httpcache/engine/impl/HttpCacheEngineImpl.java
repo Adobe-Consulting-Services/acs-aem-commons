@@ -19,11 +19,14 @@
  */
 package com.adobe.acs.commons.httpcache.engine.impl;
 
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
-import com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigComparator;
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheEngine;
 import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
+import com.adobe.acs.commons.httpcache.engine.impl.delegate.HttpCacheEngineBindingsDelegate;
+import com.adobe.acs.commons.httpcache.engine.impl.delegate.HttpCacheEngineMBeanDelegate;
+import com.adobe.acs.commons.httpcache.exception.HttpCacheException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheConfigConflictException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
@@ -32,39 +35,43 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessExcept
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
@@ -111,29 +118,11 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     /** Method name that binds cache configs */
     static final String METHOD_NAME_TO_BIND_CONFIG = "httpCacheConfig";
 
-    /** jmx property labels */
-    static final String JMX_PN_ORDER = "Order";
-    static final String JMX_PN_OSGICOMPONENT = "OSGi Component";
-    static final String JMX_PN_HTTPCACHE_CONFIGS = "HTTP Cache Configs";
-    static final String JMX_PN_HTTPCACHE_CONFIG = "HTTP Cache Config";
-    static final String JMX_PN_HTTPCACHE_STORE = "HTTP Cache Store";
-    static final String JMX_PN_HTTPCACHE_STORES = "HTTP Cache Stores";
-    static final String JMX_HTTPCACHE_HANDLING_RULE = "HTTP Cache Handling Rule";
-    static final String JMX_PN_HTTPCACHE_HANDLING_RULES = "HTTP Cache Handling Rules";
-
-    /** Thread safe list to contain the registered HttpCacheConfig references. */
-    private CopyOnWriteArrayList<HttpCacheConfig> cacheConfigs = new CopyOnWriteArrayList<HttpCacheConfig>();
-
     /** Method name that binds cache store */
     static final String METHOD_NAME_TO_BIND_CACHE_STORE = "httpCacheStore";
-    /** Thread safe hash map to contain the registered cache store references. */
-    private static final ConcurrentHashMap<String, HttpCacheStore> cacheStoresMap = new ConcurrentHashMap<String, HttpCacheStore>();
 
     /** Method name that binds cache handling rules */
     static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
-    /** Thread safe map to contain the registered HttpCacheHandlingRule references. */
-    private static final ConcurrentHashMap<String, HttpCacheHandlingRule> cacheHandlingRules = new
-            ConcurrentHashMap<String, HttpCacheHandlingRule>();
 
     // formatter:off
     @Property(label = "Global HttpCacheHandlingRules",
@@ -144,144 +133,34 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                       "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
                       "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
               })
-    // formatter:on
-    private static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
+
+    static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
-    /** Thread safe list containing the OSGi configurations for the registered httpCacheConfigs. Used only for mbean.*/
-    private final ConcurrentHashMap<HttpCacheConfig, Map<String, Object>> cacheConfigConfigs = new
-            ConcurrentHashMap<HttpCacheConfig, Map<String, Object>>();
+    @Property(label = "Global HttpCacheHandlingRules",
+            description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
+    private List<Pattern> globalHeaderExclusions;
+    // formatter:on
 
+    @Reference
+    private ThrottledTaskRunner throttledTaskRunner;
+
+    private final HttpCacheEngineMBeanDelegate mBeanDelegate = new HttpCacheEngineMBeanDelegate();
+    private final HttpCacheEngineBindingsDelegate bindingsDelegate = new HttpCacheEngineBindingsDelegate();
     //-------------------<OSGi specific methods>---------------//
-
-    /**
-     * Binds cache config. Cache config could come and go at run time.
-     *
-     * @param cacheConfig
-     * @param configs
-     */
-    protected void bindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> configs) {
-
-        // Validate cache config object
-        if (!cacheConfig.isValid()) {
-            log.info("Http cache config rejected as the request uri is absent.");
-            return;
-        }
-
-        // Check if the same object is already there in the map.
-        if (cacheConfigs.contains(cacheConfig)) {
-            log.trace("Http cache config object already exists in the cacheConfigs map and hence ignored.");
-            return;
-        }
-
-        // Sort cacheConfigs by order
-        final CopyOnWriteArrayList<HttpCacheConfig> tmp = new CopyOnWriteArrayList<HttpCacheConfig>(this.cacheConfigs);
-        tmp.add(cacheConfig);
-
-        Collections.sort(tmp, new HttpCacheConfigComparator());
-        this.cacheConfigs = tmp;
-
-        this.cacheConfigConfigs.put(cacheConfig, configs);
-
-        log.debug("Total number of cache configs added: {}", cacheConfigs.size());
-    }
-
-    /**
-     * Unbinds cache config.
-     *
-     * @param cacheConfig
-     * @param config
-     */
-    protected void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
-
-        if (cacheConfigs.contains(cacheConfig)) {
-            // Remove the associated cached items from the cache store.
-            if (cacheStoresMap.containsKey(cacheConfig.getCacheStoreName())) {
-                cacheStoresMap.get(cacheConfig.getCacheStoreName()).invalidate(cacheConfig);
-            } else {
-                log.debug("Configured cache store is unavailable and hence nothing to invalidate.");
-            }
-
-            // Remove the entry from the map.
-            cacheConfigs.remove(cacheConfig);
-            cacheConfigConfigs.remove(cacheConfig);
-
-            log.debug("Total number of cache configs after removal: {}", cacheConfigs.size());
-            return;
-        }
-        log.debug("This cache config entry was not bound and hence nothing to unbind.");
-    }
-
-    /**
-     * Binds cache store implementation
-     *
-     * @param cacheStore
-     */
-    protected void bindHttpCacheStore(final HttpCacheStore cacheStore) {
-        final String cacheStoreType = cacheStore.getStoreType();
-        if (cacheStoreType != null && cacheStoresMap.putIfAbsent(cacheStoreType, cacheStore) == null) {
-            log.debug("HTTP Cache Store [ {} -> ADDED ] for a total of [ {} ]", cacheStore.getStoreType(), cacheStoresMap.size());
-        }
-    }
-
-    /**
-     * Unbinds cache store.
-     *
-     * @param cacheStore
-     */
-    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore) {
-        final String cacheStoreType = cacheStore.getStoreType();
-        if (cacheStoreType != null && cacheStoresMap.remove(cacheStoreType) != null) {
-            log.debug("HTTP Cache Store [ {} -> REMOVED ] for a total of [ {} ]", cacheStore.getStoreType(), cacheStoresMap.size());
-        }
-    }
-
-    /**
-     * Binds cache handling rule
-     *
-     * @param cacheHandlingRule
-     * @param properties
-     */
-    protected void bindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
-            properties) {
-
-        // Get the service pid and make it as key.
-        if (cacheHandlingRules.putIfAbsent(getServicePid(properties), cacheHandlingRule) == null) {
-            log.debug("Cache handling rule implementation {} has been added", cacheHandlingRule.getClass().getName());
-            log.debug("Total number of cache handling rule available after addition: {}", cacheHandlingRules.size());
-        }
-    }
-
-    /**
-     * Unbinds handling rule.
-     *
-     * @param cacheHandlingRule
-     * @param configs
-     */
-    protected void unbindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String,
-            Object> configs) {
-
-        if (cacheHandlingRules.remove(getServicePid(configs) ) != null) {
-            log.debug("Cache handling rule removed - {}.", cacheHandlingRule.getClass().getName());
-            log.debug("Total number of cache handling rules available after removal: {}", cacheHandlingRules.size());
-        }
-    }
-
-    private String getServicePid(Map<String, Object> configs) {
-        String servicePid = PropertiesUtil.toString(configs.get("service.pid"), StringUtils.EMPTY);
-
-        if(StringUtils.isBlank(servicePid)){
-            servicePid =PropertiesUtil.toString(configs.get("component.name"), StringUtils.EMPTY);
-        }
-        return servicePid;
-    }
 
     @Activate
     protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalCacheHandlingRulesPid = new ArrayList<String>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
+        globalCacheHandlingRulesPid = new ArrayList<>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
                 PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
+
+        globalHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
             String value = listIterator.next();
@@ -289,6 +168,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 listIterator.remove();
             }
         }
+
         log.info("HttpCacheEngineImpl activated.");
     }
 
@@ -303,7 +183,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             HttpCacheRepositoryAccessException {
 
         // Execute custom rules.
-        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
+        for (final Map.Entry<String, HttpCacheHandlingRule> entry : bindingsDelegate.getCacheHandlingRules().entrySet()) {
             // Apply rule if it's a configured global or cache-config tied rule.
             if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
                 HttpCacheHandlingRule rule = entry.getValue();
@@ -334,7 +214,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         // Get the first accepting cache config based on the cache config order.
         HttpCacheConfig bestCacheConfig = null;
 
-        for (HttpCacheConfig cacheConfig : cacheConfigs) {
+        for (HttpCacheConfig cacheConfig : bindingsDelegate.getCacheConfigs()) {
             if (bestCacheConfig != null) {
                 // A matching HttpCacheConfig has been found, so check for order + acceptance conflicts
                 if (bestCacheConfig.getOrder() == cacheConfig.getOrder()) {
@@ -385,7 +265,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @Override
     public HttpCacheServletResponseWrapper wrapResponse(SlingHttpServletRequest request, SlingHttpServletResponse
             response, HttpCacheConfig cacheConfig) throws HttpCacheDataStreamException,
-            HttpCacheKeyCreationException, HttpCachePersistenceException {
+            HttpCachePersistenceException {
         // Wrap the response to get the copy of the stream.
         // Temp sink for the duplicate stream is chosen based on the cache store configured at cache config.
         try {
@@ -397,42 +277,64 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     @Override
     public void cacheResponse(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig
-            cacheConfig) throws HttpCacheKeyCreationException, HttpCacheDataStreamException,
-            HttpCachePersistenceException {
+            cacheConfig) {
 
-        // TODO - This can be made asynchronous to avoid performance penalty on response cache.
-
-        CacheContent cacheContent = null;
-        try {
-            // Construct the cache content.
-            HttpCacheServletResponseWrapper responseWrapper = null;
-            if (response instanceof HttpCacheServletResponseWrapper) {
-                responseWrapper = (HttpCacheServletResponseWrapper) response;
-            } else {
-                throw new AssertionError("Programming error.");
-            }
-            CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-            cacheContent = new CacheContent().build(responseWrapper);
-
-            // Persist in cache.
-            if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
-                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
-                log.debug("Response for the URI cached - {}", request.getRequestURI());
-            }
-        } finally {
-            // Close the temp sink input stream.
-            if (null != cacheContent) {
-                IOUtils.closeQuietly(cacheContent.getInputDataStream());
-            }
+        final HttpCacheServletResponseWrapper responseWrapper;
+        if (response instanceof HttpCacheServletResponseWrapper) {
+            responseWrapper = (HttpCacheServletResponseWrapper) response;
+        } else {
+            throw new AssertionError("Programming error.");
         }
+        final Map<String, List<String>> extractedHeaders = extractHeaders(responseWrapper, cacheConfig);
+        final int status = responseWrapper.getStatus();
+        final String charEncoding = responseWrapper.getCharacterEncoding();
+        final String contentType = responseWrapper.getContentType();
+
+        throttledTaskRunner.scheduleWork(() -> {
+            CacheContent cacheContent = null;
+            // Construct the cache content.
+            try {
+                CacheKey cacheKey = cacheConfig.buildCacheKey(request);
+                cacheContent = new CacheContent().build(responseWrapper, status, charEncoding, contentType, extractedHeaders);
+
+                // Persist in cache.
+                if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
+                    getCacheStore(cacheConfig).put(cacheKey, cacheContent);
+                    log.debug("Response for the URI cached - {}", request.getRequestURI());
+                }
+            } catch (HttpCacheException e) {
+                log.error("Error storing http response in httpcache", e);
+            } finally {
+                // Close the temp sink input stream.
+                if (null != cacheContent) {
+                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
+                }
+            }
+        });
 
     }
+
+    private Map<String, List<String>> extractHeaders(SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
+
+        List<Pattern> excludedHeaders = Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
+                .collect(Collectors.toList());
+
+        return response.getHeaderNames().stream()
+                .filter(headerName -> excludedHeaders.stream()
+                        .noneMatch(pattern -> pattern.matcher(headerName).matches())
+                ).collect(
+                        Collectors.toMap(headerName -> headerName, headerName ->
+                                new ArrayList<>(response.getHeaders(headerName)
+                                )
+                        ));
+    }
+
 
     @Override
     public boolean isPathPotentialToInvalidate(String path) {
 
         // Check all the configs to see if this path is of interest.
-        for (HttpCacheConfig config : cacheConfigs) {
+        for (HttpCacheConfig config : bindingsDelegate.getCacheConfigs()) {
             if (config.canInvalidate(path)) {
                 return true;
             }
@@ -444,7 +346,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     @Override
     public void invalidateCache(String path) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
         // Find out all the cache config which has this path applicable for invalidation.
-        for (HttpCacheConfig cacheConfig : cacheConfigs) {
+        for (HttpCacheConfig cacheConfig : bindingsDelegate.getCacheConfigs()) {
             if (cacheConfig.canInvalidate(path)) {
                 // Execute custom rules.
                 executeCustomRuleInvalidations(path, cacheConfig);
@@ -462,8 +364,8 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
      * @throws HttpCachePersistenceException
      */
     private HttpCacheStore getCacheStore(HttpCacheConfig cacheConfig) throws HttpCachePersistenceException {
-        if (cacheStoresMap.containsKey(cacheConfig.getCacheStoreName())) {
-            return cacheStoresMap.get(cacheConfig.getCacheStoreName());
+        if (bindingsDelegate.getCacheStoresMap().containsKey(cacheConfig.getCacheStoreName())) {
+            return bindingsDelegate.getCacheStoresMap().get(cacheConfig.getCacheStoreName());
         } else {
             throw new HttpCachePersistenceException("Configured cache store unavailable " + cacheConfig
                     .getCacheStoreName());
@@ -479,94 +381,77 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     @Override
     public TabularData getRegisteredHttpCacheRules() throws OpenDataException {
-        // @formatter:off
-        final CompositeType cacheEntryType = new CompositeType(
-                JMX_HTTPCACHE_HANDLING_RULE,
-                JMX_HTTPCACHE_HANDLING_RULE,
-                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
-                new String[]{JMX_HTTPCACHE_HANDLING_RULE},
-                new OpenType[]{SimpleType.STRING});
-
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType(
-                        JMX_PN_HTTPCACHE_HANDLING_RULES,
-                        JMX_PN_HTTPCACHE_HANDLING_RULES,
-                        cacheEntryType,
-                        new String[]{JMX_HTTPCACHE_HANDLING_RULE}));
-        // @formatter:on
-
-        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
-            final Map<String, Object> row = new HashMap<String, Object>();
-
-            row.put(JMX_HTTPCACHE_HANDLING_RULE, entry.getValue().getClass().getName());
-            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-        }
-
-        return tabularData;
+        return mBeanDelegate.getRegisteredHttpCacheRules(bindingsDelegate.getCacheHandlingRules());
     }
 
     @Override
     public TabularData getRegisteredHttpCacheConfigs() throws OpenDataException {
-        // @formatter:off
-        // Exposing all google guava stats.
-        final CompositeType cacheEntryType = new CompositeType(
-                JMX_PN_HTTPCACHE_CONFIG,
-                JMX_PN_HTTPCACHE_CONFIG,
-                new String[]{JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
-                new String[]{ JMX_PN_ORDER, JMX_PN_OSGICOMPONENT },
-                new OpenType[]{ SimpleType.INTEGER, SimpleType.STRING });
-
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType(
-                        JMX_PN_HTTPCACHE_CONFIGS,
-                        JMX_PN_HTTPCACHE_CONFIGS,
-                        cacheEntryType,
-                        new String[]{ JMX_PN_OSGICOMPONENT }));
-
-        // @formatter:on
-
-        for (HttpCacheConfig cacheConfig : this.cacheConfigs) {
-            final Map<String, Object> row = new HashMap<String, Object>();
-
-            Map<String, Object> osgiConfig = cacheConfigConfigs.get(cacheConfig);
-
-            row.put(JMX_PN_ORDER, cacheConfig.getOrder());
-            row.put(JMX_PN_OSGICOMPONENT, (String) osgiConfig.get(Constants.SERVICE_PID));
-
-            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-        }
-
-        return tabularData;
+        return mBeanDelegate.getRegisteredHttpCacheConfigs(bindingsDelegate.getCacheConfigs(), bindingsDelegate.getCacheConfigConfigs());
     }
 
     @Override
     public TabularData getRegisteredPersistenceStores() throws OpenDataException {
-        // @formatter:off
-        final CompositeType cacheEntryType = new CompositeType(
-                JMX_PN_HTTPCACHE_STORE,
-                JMX_PN_HTTPCACHE_STORE,
-                new String[]{JMX_PN_HTTPCACHE_STORE},
-                new String[]{JMX_PN_HTTPCACHE_STORE},
-                new OpenType[]{ SimpleType.STRING});
+        return mBeanDelegate.getRegisteredPersistenceStores(bindingsDelegate.getCacheStoresMap());
+    }
 
-        final TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType(
-                        JMX_PN_HTTPCACHE_STORES,
-                        JMX_PN_HTTPCACHE_STORES,
-                        cacheEntryType,
-                        new String[]{JMX_PN_HTTPCACHE_STORE}));
-        // @formatter:on
+    /**
+     * Binds cache config. Cache config could come and go at run time.
+     *
+     * @param cacheConfig
+     * @param configs
+     */
+    protected void bindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> configs) {
+        bindingsDelegate.bindHttpCacheConfig(cacheConfig, configs);
+    }
 
-        Enumeration<String> storeNames = cacheStoresMap.keys();
-        while (storeNames.hasMoreElements()) {
-            final String storeName = storeNames.nextElement();
-            final Map<String, Object> row = new HashMap<String, Object>();
+    /**
+     * Unbinds cache config.
+     *
+     * @param cacheConfig
+     * @param config
+     */
+    protected void unbindHttpCacheConfig(final HttpCacheConfig cacheConfig, final Map<String, Object> config) {
+        bindingsDelegate.unbindHttpCacheConfig(cacheConfig);
+    }
 
-            row.put(JMX_PN_HTTPCACHE_STORE, storeName);
-            tabularData.put(new CompositeDataSupport(cacheEntryType, row));
-        }
+    /**
+     * Binds cache store implementation
+     *
+     * @param cacheStore
+     */
+    protected void bindHttpCacheStore(final HttpCacheStore cacheStore) {
+        bindingsDelegate.bindHttpCacheStore(cacheStore);
+    }
 
-        return tabularData;
+    /**
+     * Unbinds cache store.
+     *
+     * @param cacheStore
+     */
+    protected void unbindHttpCacheStore(final HttpCacheStore cacheStore) {
+        bindingsDelegate.unbindHttpCacheStore(cacheStore);
+    }
+
+    /**
+     * Binds cache handling rule
+     *
+     * @param cacheHandlingRule
+     * @param properties
+     */
+    protected void bindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String, Object>
+            properties) {
+        bindingsDelegate.bindHttpCacheHandlingRule(cacheHandlingRule, properties);
+    }
+
+    /**
+     * Unbinds handling rule.
+     *
+     * @param cacheHandlingRule
+     * @param configs
+     */
+    protected void unbindHttpCacheHandlingRule(final HttpCacheHandlingRule cacheHandlingRule, final Map<String,
+            Object> configs) {
+        bindingsDelegate.unbindHttpCacheHandlingRule(cacheHandlingRule, configs);
     }
 
     private boolean isRequestCachableAccordingToHandlingRules(SlingHttpServletRequest request, SlingHttpServletResponse response, HttpCacheConfig cacheConfig, CacheContent cacheContent){
@@ -578,7 +463,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     private boolean checkOnHandlingRule(SlingHttpServletRequest request,  HttpCacheConfig cacheConfig, Function<HttpCacheHandlingRule, Boolean> check,String onFailLogMessage){
-        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
+        for (final Map.Entry<String, HttpCacheHandlingRule> entry : bindingsDelegate.getCacheHandlingRules().entrySet()) {
             // Apply rule if it's a configured global or cache-config tied rule.
             if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
                 HttpCacheHandlingRule rule = entry.getValue();
@@ -607,6 +492,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         response.setContentType(cacheContent.getContentType());
         response.setCharacterEncoding(cacheContent.getCharEncoding());
     }
+
 
     private boolean executeCacheContentDeliver(SlingHttpServletRequest request, SlingHttpServletResponse response, CacheContent cacheContent) throws HttpCacheDataStreamException {
         // Copy the cached data into the servlet output stream.
@@ -637,7 +523,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     }
 
     private void executeCustomRuleInvalidations(String path, HttpCacheConfig cacheConfig) throws HttpCachePersistenceException, HttpCacheKeyCreationException {
-        for (final Map.Entry<String, HttpCacheHandlingRule> entry : cacheHandlingRules.entrySet()) {
+        for (final Map.Entry<String, HttpCacheHandlingRule> entry : bindingsDelegate.getCacheHandlingRules().entrySet()) {
             // Apply rule if it's a configured global or cache-config tied rule.
             if (globalCacheHandlingRulesPid.contains(entry.getKey()) || cacheConfig.acceptsRule(entry.getKey())) {
                 HttpCacheHandlingRule rule = entry.getValue();
@@ -650,4 +536,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             }
         }
     }
+
+
 }
