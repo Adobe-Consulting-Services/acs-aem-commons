@@ -28,11 +28,10 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.feed.StringResponseWrapper;
+import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
 import org.junit.After;
@@ -51,15 +50,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.*;
+import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS;
+import static com.adobe.acs.commons.httpcache.engine.impl.HttpCacheEngineImpl.PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CACHE_STORE_TYPE;
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
@@ -69,8 +69,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
-
-
 
     @Mock
     HttpCacheConfig memCacheConfig;
@@ -99,7 +97,7 @@ public class HttpCacheEngineImplTest {
     @Before
     public void init() throws NotCompliantMBeanException {
 
-        systemUnderTest.activate(mockConfig(Collections.emptyMap()));
+        systemUnderTest.activate(Collections.emptyMap());
 
         sharedMemConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_MEM_CACHE_STORE_TYPE);
         sharedJcrConfigProps.put(HttpCacheStore.KEY_CACHE_STORE_TYPE, VALUE_JCR_CACHE_STORE_TYPE);
@@ -111,9 +109,9 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
 
         doAnswer((Answer<Void>) invocationOnMock -> {
-             Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
-             runnable.run();
-             return null;
+            Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+            runnable.run();
+            return null;
         }).when(throttledTaskRunner).scheduleWork(any(Runnable.class));
 
         systemUnderTest.bindHttpCacheConfig(memCacheConfig, sharedMemConfigProps);
@@ -219,10 +217,10 @@ public class HttpCacheEngineImplTest {
 
         Map<String,Object> props = new HashMap<>();
         props.put(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{"ignoredResponseHeaderGlobal"});
-        props.put(PROP_GLOBAL_RESPONSE_COOKIE_KEYS_EXCLUSIONS, new String[]{"myLoginCookie"});
+        props.put(PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS, new String[]{"myLoginCookie"});
 
         //prepare and mock
-        systemUnderTest.activate(mockConfig(props));
+        systemUnderTest.activate(props);
 
 
         SlingHttpServletRequest request = new MockSlingHttpServletRequest("/content/acs-commons/home", "my-selector", "html", "", "");
@@ -236,7 +234,6 @@ public class HttpCacheEngineImplTest {
         when(response.getContentType()).thenReturn("text/html");
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgumentAt(0, String.class))[0]);
         when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgumentAt(0, String.class))));
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
@@ -306,23 +303,6 @@ public class HttpCacheEngineImplTest {
         String cachedHTML = IOUtils.toString(capturedContent.getInputDataStream(), StandardCharsets.UTF_8);
 
         assertEquals("rendered-html", cachedHTML);
-    }
-
-    private HttpCacheEngineImpl.Config mockConfig(Map<String,Object> properties){
-
-        HttpCacheEngineImpl.Config config = mock(HttpCacheEngineImpl.Config.class);
-        ValueMap decorated  = new ValueMapDecorator(properties);
-        when(config.httpcache_engine_cachehandling_rules_global()).thenReturn(decorated.get(PROP_GLOBAL_CACHE_HANDLING_RULES_PID, new String[]{
-                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-        }));
-        when(config.httpcache_engine_excluded_response_headers_global()).thenReturn(decorated.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS, new String[]{}));
-
-        when(config.httpcache_engine_excluded_cookie_keys_global()).thenReturn(decorated.get(PROP_GLOBAL_RESPONSE_COOKIE_KEYS_EXCLUSIONS, new String[]{}));
-        return config;
-
     }
 
 }
