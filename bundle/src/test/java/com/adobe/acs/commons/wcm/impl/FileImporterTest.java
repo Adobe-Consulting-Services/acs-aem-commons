@@ -53,6 +53,8 @@ public final class FileImporterTest {
 
     private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
 
+    private final Resource resource = mock(Resource.class);
+
     @InjectMocks
     private final FileImporter importer = new FileImporter();
 
@@ -71,6 +73,8 @@ public final class FileImporterTest {
         session = provider.getRepository().loginAdministrative(null);
         folder = session.getRootNode().addNode(RandomStringUtils.randomAlphabetic(10), JcrConstants.NT_FOLDER);
         session.save();
+
+        when(resource.adaptTo(Node.class)).thenReturn(folder);
     }
 
     @After
@@ -85,8 +89,6 @@ public final class FileImporterTest {
 
     @Test
     public void testImportToFolder() throws RepositoryException {
-    	final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -101,9 +103,7 @@ public final class FileImporterTest {
                 earliest);
 
         session.save();
-        
-        final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
+
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -119,9 +119,7 @@ public final class FileImporterTest {
                 latest);
 
         session.save();
-        
-        final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
+
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -140,8 +138,6 @@ public final class FileImporterTest {
 
         session.save();
 
-        final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(file);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -158,8 +154,6 @@ public final class FileImporterTest {
 
         session.save();
 
-        final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(file);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -171,8 +165,6 @@ public final class FileImporterTest {
 
     @Test
     public void testWrongScheme() throws RepositoryException {
-    	final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file2", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -181,8 +173,6 @@ public final class FileImporterTest {
 
     @Test
     public void testNullAdaptation() throws RepositoryException {
-    	final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(null);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -192,8 +182,6 @@ public final class FileImporterTest {
     @Test
     public void testImportNoSuchFile() throws RepositoryException {
     	final File badFile = new File("src/test/resources/NONEXISTING.txt");
-        final Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", badFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
