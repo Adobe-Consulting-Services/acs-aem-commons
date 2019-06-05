@@ -5,7 +5,19 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## Unreleased
+
+### Added
+- #1795 - Added the Asset Content Packager
+- #1880 - Granite Select Filter
+- #1893 - Add javax.annotation dependency (removed in JDK 11)
+- #1900 - Tag Report MCP
+
+### Fixed
+- #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
+- #1868 - Added support for @Named annotation in MCP Form Field processor
+- #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
+- #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 
 ## [4.1.0] - 2019-05-07
 
@@ -17,6 +29,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1783 - Added the possibility to replace the existing host in an attribute
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
+- #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
@@ -25,6 +38,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
 - #1856 - It's now possible to change the locale used for number, date and time handling for Spreadsheet instances, allowing consistent behavior independent of OS defaults.
+- #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
@@ -47,6 +61,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1858 - Fixed issue with legacy dialog type for Shared Component Properties.
 - #1839 - Fixed editing page for system notifications
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
+- #1888 - Fixed issues with Stylesheet Inliner.
+- #1836 - Allow uniform download links in JCR Compare
 
 ## [4.0.0] - 2019-02-20
 

@@ -24,19 +24,19 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
-import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +47,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import com.adobe.acs.commons.rewriter.DelegatingTransformer;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
@@ -54,8 +56,30 @@ import com.adobe.granite.ui.clientlibs.LibraryType;
 import junitx.util.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StylesheetInlinerTransformerFactoryTest {
-    
+public final class StylesheetInlinerTransformerFactoryTest {
+
+    private static final String CDATA = "CDATA";
+    private static final String HTML = "html";
+    private static final String HEAD = "head";
+    private static final String BODY = "body";
+    private static final String STYLE = "style";
+    private static final String DIV = "div";
+    private static final String LINK = "link";
+
+    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
+    private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
+    private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
+
+    private static final String CSS_CONTENTS = "div {display:block;}";
+    private static final String NEWLINE = "\n";
+
+    private static final String TEST_DATA = "some test data";
+
+    private StylesheetInlinerTransformerFactory factory = new StylesheetInlinerTransformerFactory();
+
+    private final Transformer transformer = factory.createTransformer();
+
+    private final Attributes empty = new AttributesImpl();
 
     @Mock
     private HtmlLibraryManager htmlLibraryManager;
@@ -65,213 +89,212 @@ public class StylesheetInlinerTransformerFactoryTest {
 
     @Mock
     private ContentHandler handler;
-    
+
     @Mock
     private ProcessingContext processingContext;
-    
+
     @Mock
     private SlingHttpServletRequest slingRequest;
-    
+
+    @Mock
+    private RequestPathInfo requestPathInfo;
+
     @Mock
     private ResourceResolver resourceResolver;
-    
-    @Mock 
+
+    @Mock
     private Resource resource;
-    
-    
-    private StylesheetInlinerTransformerFactory factory;
-    
-    private Transformer transformer;
-
-    private Attributes empty = new AttributesImpl();
-    
-    private static final String CLIENTLIB_PATH = "/etc/clientlibs/test";
-    private static final String CSS_RESOURCE_PATH = "/etc/assets/somecss";
-    private static final String NON_EXISTING_PATH = "/etc/assets/doesntexist";
-    
-    private static final String CSS_CONTENTS = "div {display:block;}";
-    private static final String NEWLINE = "\n";
-
-    
-    private static final String TEST_DATA = "some test data";
-    
 
     @Before
-    public void setUp() throws Throwable {
-        factory = new StylesheetInlinerTransformerFactory();
+    public void setUp() throws NoSuchFieldException, IOException {
         PrivateAccessor.setField(factory, "htmlLibraryManager", htmlLibraryManager);
 
         when(htmlLibrary.getInputStream()).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), eq(CLIENTLIB_PATH))).thenReturn(htmlLibrary);
         when(htmlLibraryManager.getLibrary(eq(LibraryType.CSS), not(eq(CLIENTLIB_PATH)))).thenReturn(null);
-        when( slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
+        when(slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
         when(resource.adaptTo(eq(InputStream.class))).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(resourceResolver.getResource(eq(CSS_RESOURCE_PATH + ".css" ))).thenReturn(resource);
         when(resourceResolver.getResource(eq(NON_EXISTING_PATH))).thenReturn(null);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(processingContext.getRequest()).thenReturn(slingRequest);
-        
-        transformer = factory.createTransformer();
-        PrivateAccessor.invoke(transformer, "init", 
-                new Class[] {ProcessingContext.class, ProcessingComponentConfiguration.class}, 
-                new Object[] {processingContext, null} );
+        when(slingRequest.getRequestPathInfo()).thenReturn(requestPathInfo);
+        when(requestPathInfo.getSelectors()).thenReturn(new String[] { "inline-css" });
+
+        transformer.init(processingContext, null);
         transformer.setContentHandler(handler);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        reset(htmlLibraryManager, htmlLibrary, handler);
-        transformer = null;
-    }
-
     @Test
-    public void testNoop() throws Exception {
-
-        startHeadSection(empty);
-        startBodySection(empty);
+    public void testNoop() throws SAXException {
+        startHeadSection();
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
-    
     @Test
-    public void testClientLibReferenceInHead() throws Exception {
-
-        startHeadSection(empty);
+    public void testClientLibReferenceInHead() throws SAXException {
+        startHeadSection();
         addStylesheetLink(CLIENTLIB_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
     @Test
-    public void testClientLibReferenceInBody() throws Exception {
-
-        startHeadSection(empty);
-        startBodySection(empty);
-        addDiv(empty);
+    public void testClientLibReferenceInBody() throws SAXException {
+        startHeadSection();
+        startBodySection();
+        addDiv();
         addStylesheetLink(CLIENTLIB_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
-
     @Test
-    public void testResourceReferenceInHead() throws Exception {
-
-        startHeadSection(empty);
+    public void testResourceReferenceInHead() throws SAXException {
+        startHeadSection();
         addStylesheetLink(CSS_RESOURCE_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
     @Test
-    public void testResourceReferenceInBody() throws Exception {
-
-        startHeadSection(empty);
-        startBodySection(empty);
-        addDiv(empty);
+    public void testResourceReferenceInBody() throws SAXException {
+        startHeadSection();
+        startBodySection();
+        addDiv();
         addStylesheetLink(CSS_RESOURCE_PATH);
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
         verifyDiv();
         verifyInlineStyle();
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
-
     @Test
-    public void testNonExistingResource() throws Exception {
-
-        startHeadSection(empty);
+    public void testNonExistingResource() throws SAXException {
+        startHeadSection();
         addStylesheetLink(NON_EXISTING_PATH);
-        startBodySection(empty);
+        startBodySection();
         endBodySection();
 
-        verify(handler).startElement(isNull(String.class), eq("html"), isNull(String.class), eq(empty));
-        verify(handler).startElement(isNull(String.class), eq("head"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("head"), isNull(String.class));
-        verify(handler).startElement(isNull(String.class), eq("body"), isNull(String.class), eq(empty));
-        verify(handler).endElement(isNull(String.class), eq("body"), isNull(String.class));
-        verify(handler).endElement(isNull(String.class), eq("html"), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(HTML), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(HEAD), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(HEAD), isNull(String.class));
+        verify(handler).startElement(isNull(String.class), eq(BODY), isNull(String.class), eq(empty));
+        verify(handler).endElement(isNull(String.class), eq(BODY), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(HTML), isNull(String.class));
     }
 
+    @Test
+    public void testUnsuccessfulInlineSheet() throws SAXException {
+        startHeadSection();
+        startBodySection();
+        addStylesheetLink(CSS_RESOURCE_PATH + "-incorrect");
+        verify(handler).startElement(isNull(String.class), eq(LINK), isNull(String.class), any(Attributes.class));
+    }
+
+    @Test
+    public void testDefaultTransformer() throws IOException {
+        when(requestPathInfo.getSelectors()).thenReturn(new String[] { });
+        if (transformer instanceof DelegatingTransformer) {
+            final DelegatingTransformer transformer = (DelegatingTransformer) this.transformer;
+            transformer.init(processingContext, null);
+            Assert.assertTrue(ContentHandlerBasedTransformer.class.equals(transformer.getDelegate().getClass()));
+        } else {
+            Assert.fail("The transformer should be of a certain inner type.");
+        }
+    }
 
     private void endBodySection() throws SAXException {
-        transformer.endElement(null, "body", null);
-        transformer.endElement(null, "html", null);
+        transformer.endElement(null, BODY, null);
+        transformer.endElement(null, HTML, null);
     }
 
-    private void startBodySection(Attributes atts) throws SAXException {
-        transformer.endElement(null, "head", null);
-        transformer.startElement(null, "body", null, atts);
+    private void startBodySection(final Attributes atts) throws SAXException {
+        transformer.endElement(null, HEAD, null);
+        transformer.startElement(null, BODY, null, atts);
     }
 
-    private void addDiv(Attributes atts) throws SAXException {
-        transformer.startElement(null, "div", null, atts);
+    private void startBodySection() throws SAXException {
+        startBodySection(empty);
+    }
+
+    private void addDiv(final Attributes atts) throws SAXException {
+        transformer.startElement(null, DIV, null, atts);
         transformer.characters( TEST_DATA.toCharArray(), 0, TEST_DATA.length());
-        transformer.endElement(null, "div", null);
+        transformer.endElement(null, DIV, null);
+    }
+
+    private void addDiv() throws SAXException {
+        addDiv(empty);
     }
 
     private void verifyDiv() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq("div"), isNull(String.class), eq(empty));
+        verify(handler).startElement(isNull(String.class), eq(DIV), isNull(String.class), eq(empty));
         verify(handler).characters(TEST_DATA.toCharArray(), 0, TEST_DATA.length());
-        verify(handler).endElement(isNull(String.class), eq("div"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(DIV), isNull(String.class));
     }
 
     private void verifyInlineStyle() throws SAXException {
-        verify(handler).startElement(isNull(String.class), eq("style"), isNull(String.class), any(org.xml.sax.Attributes.class));
+        verify(handler).startElement(isNull(String.class), eq(STYLE), isNull(String.class), any(Attributes.class));
         verify(handler).characters(NEWLINE.toCharArray(), 0, NEWLINE.length());
         verify(handler).characters(CSS_CONTENTS.toCharArray(), 0, CSS_CONTENTS.length());
-        verify(handler).endElement(isNull(String.class), eq("style"), isNull(String.class));
+        verify(handler).endElement(isNull(String.class), eq(STYLE), isNull(String.class));
     }
 
-    private void startHeadSection(Attributes atts) throws SAXException {
-        transformer.startElement(null, "html", null, atts);
-        transformer.startElement(null, "head", null, atts);
+    private void startHeadSection(final Attributes atts) throws SAXException {
+        transformer.startElement(null, HTML, null, atts);
+        transformer.startElement(null, HEAD, null, atts);
     }
 
-    private void addStylesheetLink(String path) throws SAXException {
+    private void startHeadSection() throws SAXException {
+        startHeadSection(empty);
+    }
+
+    private void addStylesheetLink(final String path) throws SAXException {
         final AttributesImpl in = new AttributesImpl();
-        in.addAttribute("", "href", "", "CDATA", path + ".css");
-        in.addAttribute("", "type", "", "CDATA", "text/css");
-        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+        in.addAttribute("", "href", "", CDATA, path + ".css");
+        in.addAttribute("", "type", "", CDATA, "text/css");
+        in.addAttribute("", "rel", "", CDATA, "stylesheet");
 
-        transformer.startElement(null, "link", null, in);
-        transformer.endElement(null, "link", null);
+        transformer.startElement(null, LINK, null, in);
+        transformer.endElement(null, LINK, null);
     }
 }

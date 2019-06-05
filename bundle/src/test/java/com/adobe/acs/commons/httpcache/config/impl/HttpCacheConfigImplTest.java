@@ -40,25 +40,7 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants.ANONYMOUS_REQUEST;
 import static com.adobe.acs.commons.httpcache.config.AuthenticationStatusConfigConstants.AUTHENTICATED_REQUEST;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_AUTHENTICATION_REQUIREMENT;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_CACHE_STORE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_EXPIRY_ON_ACCESS;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_EXPIRY_ON_CREATE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_EXPIRY_ON_UPDATE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_FILTER_SCOPE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.DEFAULT_ORDER;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.FILTER_SCOPE_INCLUDE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_AUTHENTICATION_REQUIREMENT;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_BLACKLISTED_REQUEST_URI_PATTERNS;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_CACHE_HANDLING_RULES_PID;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_CACHE_INVALIDATION_PATH_PATTERNS;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_CACHE_STORE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_EXPIRY_ON_ACCESS;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_EXPIRY_ON_CREATE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_EXPIRY_ON_UPDATE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_FILTER_SCOPE;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_ORDER;
-import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.PROP_REQUEST_URI_PATTERNS;
+import static com.adobe.acs.commons.httpcache.config.impl.HttpCacheConfigImpl.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -109,6 +91,7 @@ public class HttpCacheConfigImplTest {
         properties.put(PROP_EXPIRY_ON_ACCESS,DEFAULT_EXPIRY_ON_ACCESS);
         properties.put(PROP_EXPIRY_ON_UPDATE,DEFAULT_EXPIRY_ON_UPDATE);
         properties.put(PROP_CACHE_HANDLING_RULES_PID,new String[]{});
+        properties.put(PROP_RESPONSE_HEADER_EXCLUSIONS, new String[]{});
 
         properties.putAll(specifiedProps);
         context.registerInjectActivateService(systemUnderTest, properties);
@@ -147,6 +130,8 @@ public class HttpCacheConfigImplTest {
         properties.put(PROP_EXPIRY_ON_ACCESS,10L);
         properties.put(PROP_EXPIRY_ON_UPDATE,15L);
         properties.put(PROP_CACHE_HANDLING_RULES_PID,new String[]{"handling-rule"});
+        properties.put(PROP_RESPONSE_HEADER_EXCLUSIONS, new String[]{"my-login-header"});
+
         context.registerInjectActivateService(systemUnderTest, properties);
 
         assertEquals(22, systemUnderTest.getOrder());
@@ -159,6 +144,7 @@ public class HttpCacheConfigImplTest {
         assertEquals(5L, systemUnderTest.getExpiryOnCreate());
         assertEquals(10L, systemUnderTest.getExpiryForAccess());
         assertEquals(15L, systemUnderTest.getExpiryForUpdate());
+        assertEquals("my-login-header", systemUnderTest.getExcludedResponseHeaderPatterns().get(0).pattern());
         assertFalse( systemUnderTest.acceptsRule("nonexisting"));
         assertTrue( systemUnderTest.acceptsRule("handling-rule"));
     }
