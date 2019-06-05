@@ -78,7 +78,7 @@ public class SpreadsheetTest {
         workbookData.close();
 
         InputStream dataTypesFile = SpreadsheetTest.class.getResourceAsStream("/com/adobe/acs/commons/data/spreadsheet-data-types.xlsx");
-        dataTypesSheet = new Spreadsheet(false, dataTypesFile).setLocale(Locale.US).buildSpreadsheet();
+        dataTypesSheet = new Spreadsheet(false, dataTypesFile).buildSpreadsheet(Locale.US);
     }
 
     /**

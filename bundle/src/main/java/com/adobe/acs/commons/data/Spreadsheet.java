@@ -66,7 +66,6 @@ public class Spreadsheet {
     private boolean enableHeaderNameConversion = true;
     private InputStream inputStream;
     private List<String> caseInsensitiveHeaders;
-    private Locale locale = Locale.getDefault();
 
     /**
      * Simple constructor used for unit testing purposes
@@ -128,31 +127,24 @@ public class Spreadsheet {
     }
     
     /**
-     * Sets the locale to be used for numeric and date/time conversions.
-     * @param locale The new locale to use.
-     * @return This Spreadsheet instance for method chaining.
-     */
-    public Spreadsheet setLocale(Locale locale) {
-        this.locale = locale;
-        return this;
-    }
-    
-    /**
-     * Returns the locale to be used for numeric and date/time conversions.
-     * The default is the system-wide default locale reported by {@code locale.getDefault()}.
-     * @return The locale to be used for numeric and date/time conversions.
-     */
-    public Locale getLocale() {
-        return locale;
-    }
-
-    /**
-     * Parse out the input file synchronously for easier unit test validation
-     *
+     * Parse out the input file synchronously for easier unit test validation.
+     * This overload will implicitly use the default JVM locale for numeric and date/time conversions.
+     * 
      * @return List of files that will be imported, including any renditions
      * @throws IOException if the file couldn't be read
      */
     public Spreadsheet buildSpreadsheet() throws IOException {
+        return buildSpreadsheet(Locale.getDefault());
+    }
+    
+    /**
+     * Parse out the input file synchronously for easier unit test validation
+     *
+     * @param locale The locale to be used for numeric and date/time conversions.
+     * @return List of files that will be imported, including any renditions
+     * @throws IOException if the file couldn't be read
+     */
+    public Spreadsheet buildSpreadsheet(Locale locale) throws IOException {
 
         XSSFWorkbook workbook = new XSSFWorkbook(this.inputStream);
 
@@ -161,10 +153,10 @@ public class Spreadsheet {
         final Iterator<Row> rows = sheet.rowIterator();
 
         Row firstRow = rows.next();
-        headerRow = readRow(firstRow).stream()
+        headerRow = readRow(firstRow, locale).stream()
                 .map(v -> v != null ? convertHeaderName(v.toString()) : null)
                 .collect(Collectors.toList());
-        headerTypes = readRow(firstRow).stream()
+        headerTypes = readRow(firstRow, locale).stream()
                 .map(Variant::toString)
                 .collect(Collectors.toMap(
                         this::convertHeaderName,
@@ -174,7 +166,7 @@ public class Spreadsheet {
 
         Iterable<Row> remainingRows = () -> rows;
         dataRows = StreamSupport.stream(remainingRows.spliterator(), false)
-                .map(this::buildRow)
+                .map(row -> buildRow(row, locale))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -182,7 +174,7 @@ public class Spreadsheet {
         return this;
     }
 
-    private List<Variant> readRow(Row row) {
+    private List<Variant> readRow(Row row, Locale locale) {
         Iterator<Cell> iterator = row.cellIterator();
         List<Variant> rowOut = new ArrayList<>();
         while (iterator.hasNext()) {
@@ -197,10 +189,10 @@ public class Spreadsheet {
     }
 
     @SuppressWarnings("squid:S3776")
-    private Optional<Map<String, CompositeVariant>> buildRow(Row row) {
+    private Optional<Map<String, CompositeVariant>> buildRow(Row row, Locale locale) {
         Map<String, CompositeVariant> out = new LinkedHashMap<>();
         out.put(ROW_NUMBER, new CompositeVariant(row.getRowNum()));
-        List<Variant> data = readRow(row);
+        List<Variant> data = readRow(row, locale);
         boolean empty = true;
         for (int i = 0; i < data.size() && i < getHeaderRow().size(); i++) {
             String colName = getHeaderRow().get(i);
