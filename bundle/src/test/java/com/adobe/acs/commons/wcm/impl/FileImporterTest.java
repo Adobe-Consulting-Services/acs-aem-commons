@@ -27,7 +27,9 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Collections;
 
+import javax.jcr.LoginException;
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -45,14 +47,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FileImporterTest {
+public final class FileImporterTest {
 
-    private RepositoryProvider provider;
+    private final RepositoryProvider provider = RepositoryProvider.instance();
+
+    private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
 
     @InjectMocks
-    private FileImporter importer = new FileImporter();
-
-    private File testFile;
+    private final FileImporter importer = new FileImporter();
 
     @Mock
     private MimeTypeService mimeTypeService;
@@ -62,10 +64,8 @@ public class FileImporterTest {
     private Node folder;
 
     @Before
-    public void setup() throws Exception {
-        provider = RepositoryProvider.instance();
+    public void setUp() throws LoginException, RepositoryException {
         importer.activate(Collections.<String, Object> emptyMap());
-        testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
         when(mimeTypeService.getMimeType("emailTemplate.txt")).thenReturn("text/plain");
 
         session = provider.getRepository().loginAdministrative(null);
@@ -75,15 +75,17 @@ public class FileImporterTest {
 
     @After
     public void teardown() {
-        if (session != null) {
-            session.logout();
-            session = null;
+        if (session == null) {
+        	return;
         }
+
+        session.logout();
+        session = null;
     }
 
     @Test
-    public void testImportToFolder() throws Exception {
-        Resource resource = mock(Resource.class);
+    public void testImportToFolder() throws RepositoryException {
+    	final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -92,7 +94,7 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testImportToFolderHavingFileWhichIsOlder() throws Exception {
+    public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
         final Calendar earliest = Calendar.getInstance();
         earliest.setTimeInMillis(0L);
         final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
@@ -100,7 +102,7 @@ public class FileImporterTest {
 
         session.save();
         
-        Resource resource = mock(Resource.class);
+        final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -110,7 +112,7 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testImportToFolderHavingFileWhichIsNewer() throws Exception {
+    public void testImportToFolderHavingFileWhichIsNewer() throws RepositoryException {
         final Calendar latest = Calendar.getInstance();
         latest.add(Calendar.DATE, 2);
         final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
@@ -118,7 +120,7 @@ public class FileImporterTest {
 
         session.save();
         
-        Resource resource = mock(Resource.class);
+        final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -130,15 +132,15 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testImportToFile() throws Exception {
-        Calendar earliest = Calendar.getInstance();
+    public void testImportToFile() throws RepositoryException {
+    	final Calendar earliest = Calendar.getInstance();
         earliest.setTimeInMillis(0L);
-        Node file = JcrUtils.putFile(folder, "test.txt", "x-text/test", new ByteArrayInputStream("".getBytes()),
+        final Node file = JcrUtils.putFile(folder, "test.txt", "x-text/test", new ByteArrayInputStream("".getBytes()),
                 earliest);
 
         session.save();
 
-        Resource resource = mock(Resource.class);
+        final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(file);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -148,15 +150,15 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testImportToFileWhichIsNewer() throws Exception {
-        Calendar latest = Calendar.getInstance();
+    public void testImportToFileWhichIsNewer() throws RepositoryException {
+    	final Calendar latest = Calendar.getInstance();
         latest.add(Calendar.DATE, 2);
-        Node file = JcrUtils
+        final Node file = JcrUtils
                 .putFile(folder, "test.txt", "x-text/test", new ByteArrayInputStream("".getBytes()), latest);
 
         session.save();
 
-        Resource resource = mock(Resource.class);
+        final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(file);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -168,8 +170,8 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testWrongScheme() throws Exception {
-        Resource resource = mock(Resource.class);
+    public void testWrongScheme() throws RepositoryException {
+    	final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file2", testFile.getAbsolutePath(), resource);
 
@@ -178,8 +180,8 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testNullAdaptation() throws Exception {
-        Resource resource = mock(Resource.class);
+    public void testNullAdaptation() throws RepositoryException {
+    	final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(null);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -188,9 +190,9 @@ public class FileImporterTest {
     }
 
     @Test
-    public void testImportNoSuchFile() throws Exception {
-        File badFile = new File("src/test/resources/NONEXISTING.txt");
-        Resource resource = mock(Resource.class);
+    public void testImportNoSuchFile() throws RepositoryException {
+    	final File badFile = new File("src/test/resources/NONEXISTING.txt");
+        final Resource resource = mock(Resource.class);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", badFile.getAbsolutePath(), resource);
 
