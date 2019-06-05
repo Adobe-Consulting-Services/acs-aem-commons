@@ -119,37 +119,41 @@ public final class FileImporter implements Importer {
 			final Node node,
 			final FileInputStream stream
 		) throws RepositoryException, IOException {
-		final Calendar fileLastMod = Calendar.getInstance();
-		fileLastMod.setTimeInMillis(file.lastModified());
 		final String fileName = file.getName();
 
 		final Node targetParent;
 		final String targetName;
 
+		final Calendar nodeLastMod;
+		final String targetPath;
+
 		if (node.isNodeType(JcrConstants.NT_FILE)) {
 		    // assume that we are intending to replace this file
 		    targetParent = node.getParent();
 		    targetName = node.getName();
-		    final Calendar nodeLastMod = JcrUtils.getLastModified(node);
-		    if (!nodeLastMod.before(fileLastMod)) {
-		        log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-		                dataSource, target);
-		        return;
-		    }
+		    nodeLastMod = JcrUtils.getLastModified(node);
+		    targetPath = target.getPath();
 		} else {
 		    // assume that we are creating a new file under the current node
 		    targetParent = node;
 		    targetName = fileName;
 		    if (targetParent.hasNode(targetName)) {
 		        final Node targetNode = targetParent.getNode(targetName);
-		        final Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
-		        if (!nodeLastMod.before(fileLastMod)) {
-		            log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-		                    dataSource, targetNode.getPath());
-		            return;
-		        }
+		        nodeLastMod = JcrUtils.getLastModified(targetNode);
+		        targetPath = targetNode.getPath();
+		    } else {
+		        nodeLastMod = null;
+		        targetPath = null;
 		    }
 		}
+
+		final Calendar fileLastMod = Calendar.getInstance();
+		fileLastMod.setTimeInMillis(file.lastModified());
+        if (nodeLastMod != null && !nodeLastMod.before(fileLastMod)) {
+            log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+                    dataSource, targetPath);
+            return;
+        }
 
 		final String mimeType = mimeTypeService.getMimeType(fileName);
 		JcrUtils.putFile(targetParent, targetName, mimeType, stream);
