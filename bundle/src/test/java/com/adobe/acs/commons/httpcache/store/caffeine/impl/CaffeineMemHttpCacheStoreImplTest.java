@@ -63,8 +63,8 @@ public class CaffeineMemHttpCacheStoreImplTest {
 
         final Map<String, Object> config = new HashMap<>();
 
-        config.put("httpcache.cachestore.caffeine.ttl", 60l);
-        config.put("httpcache.cachestore.caffeine.maxsize", 10l);
+        config.put("httpcache.cachestore.caffeine.ttl", 60L);
+        config.put("httpcache.cachestore.caffeine.maxsize", 10L);
 
         caffeine.activate(config);
     }

@@ -57,8 +57,8 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 public class RequestPathHttpCacheConfigExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
     @ObjectClassDefinition(
-            name = "ResourcePathCacheExtensionConfig - Configuration OCD object for the RequestPathHttpCacheConfigExtension",
-            description = "Extension for the ACS commons HTTP Cache. Based on resource paths, httpcache_config_extension_selectors_allowed and httpcache_config_extension_extensions_allowed."
+            name = "ACS AEM Commons - HTTP Cache - Extension - Request Path",
+            description = "Extension for the ACS commons HTTP Cache. Based on request path info ( resource path, selectors, extensions )"
     )
     public @interface Config {
 
