@@ -22,7 +22,6 @@ package com.adobe.acs.commons.wcm.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -30,18 +29,13 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Collections;
 
-import javax.jcr.LoginException;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.mime.MimeTypeService;
-import org.apache.sling.commons.testing.jcr.RepositoryProvider;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,42 +46,29 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class FileImporterTest {
 
-    private final RepositoryProvider provider = RepositoryProvider.instance();
-
     private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
 
-    private final Resource resource = mock(Resource.class);
+    @Mock
+    private Resource resource;
 
-    @InjectMocks
-    private final FileImporter importer = new FileImporter();
+    @Mock
+    private Session session;
 
     @Mock
     private MimeTypeService mimeTypeService;
 
-    private Session session;
-
+    @Mock
     private Node folder;
 
+    @InjectMocks
+    private final FileImporter importer = new FileImporter();
+
     @Before
-    public void setUp() throws LoginException, RepositoryException {
+    public void setUp() throws RepositoryException {
         importer.activate(Collections.<String, Object> emptyMap());
         when(mimeTypeService.getMimeType("emailTemplate.txt")).thenReturn("text/plain");
-
-        session = provider.getRepository().loginAdministrative(null);
-        folder = session.getRootNode().addNode(RandomStringUtils.randomAlphabetic(10), JcrConstants.NT_FOLDER);
-        session.save();
-
         when(resource.adaptTo(Node.class)).thenReturn(folder);
-    }
-
-    @After
-    public void teardown() {
-        if (session == null) {
-        	return;
-        }
-
-        session.logout();
-        session = null;
+        when(folder.getSession()).thenReturn(session);
     }
 
     @Test
