@@ -21,7 +21,6 @@ package com.adobe.acs.commons.wcm.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Map;
@@ -29,7 +28,6 @@ import java.util.Map;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -69,74 +67,93 @@ public final class FileImporter implements Importer {
     private String scheme;
 
     @Activate
-    protected void activate(Map<String, Object> properties) {
+    protected void activate(final Map<String, Object> properties) {
         this.scheme = PropertiesUtil.toString(properties.get(PROP_SCHEME), DEFAULT_SCHEME);
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
-    public void importData(String schemeValue, String dataSource, Resource target) {
-        if (scheme.equals(schemeValue)) {
-            final File file = new File(dataSource);
-            if (file.exists()) {
-                Calendar fileLastMod = Calendar.getInstance();
-                fileLastMod.setTimeInMillis(file.lastModified());
-                String fileName = file.getName();
-                String mimeType = mimeTypeService.getMimeType(fileName);
-
-                final Node targetParent;
-                final String targetName;
-
-                Node node = target.adaptTo(Node.class);
-                if (node != null) {
-                    try (FileInputStream stream = new FileInputStream(file)) {
-                        if (node.isNodeType(JcrConstants.NT_FILE)) {
-                            // assume that we are intending to replace this file
-                            targetParent = node.getParent();
-                            targetName = node.getName();
-                            Calendar nodeLastMod = JcrUtils.getLastModified(node);
-                            if (!nodeLastMod.before(fileLastMod)) {
-                                log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-                                        dataSource, target);
-                                return;
-                            }
-                        } else {
-                            // assume that we are creating a new file under the current node
-                            targetParent = node;
-                            targetName = fileName;
-                            if (targetParent.hasNode(targetName)) {
-                                Node targetNode = targetParent.getNode(targetName);
-                                Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
-                                if (!nodeLastMod.before(fileLastMod)) {
-                                    log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
-                                            dataSource, targetNode.getPath());
-                                    return;
-                                }
-                            }
-                        }
-
-                        JcrUtils.putFile(targetParent, targetName, mimeType, stream);
-                        node.getSession().save();
-                    } catch (RepositoryException e) {
-                        throw new ImportException("Unable to import from file '" + dataSource + "' to '"
-                                + target.getPath() + "'", e);
-                    } catch (IOException e) {
-                        throw new ImportException("Unexpected IOException while importing", e);
-                    }
-                } else {
-                    log.warn("Target '{}' is not a JCR node. Skipping import from '{}'.", target.getPath(), dataSource);
-                }
-            } else {
-                log.warn("File at '{}' does not exist. Skipping import.", dataSource);
-            }
-        } else {
-            log.warn("Unrecognized scheme '{}' passed to importData()", schemeValue);
-        }
+    public void importData(
+    		final String schemeValue,
+    		final String dataSource,
+    		final Resource target,
+    		final String login,
+    		final String password
+    	) throws ImportException {
+        importData(schemeValue, dataSource, target);
     }
 
     @Override
-    public void importData(String schemeValue, String dataSource, Resource target, String login, String password) throws ImportException {
-        importData(schemeValue, dataSource, target);
+    @SuppressWarnings("squid:S3776")
+    public void importData(final String schemeValue, final String dataSource, final Resource target) {
+        if (!scheme.equals(schemeValue)) {
+            log.warn("Unrecognized scheme '{}' passed to importData()", schemeValue);
+            return;
+        }
+
+        final File file = new File(dataSource);
+        if (!file.exists()) {
+            log.warn("File at '{}' does not exist. Skipping import.", dataSource);
+            return;
+        }
+
+        final Node node = target.adaptTo(Node.class);
+        if (node == null) {
+            log.warn("Target '{}' is not a JCR node. Skipping import from '{}'.", target.getPath(), dataSource);
+            return;
+        }
+
+        try (final FileInputStream stream = new FileInputStream(file)) {
+            importData(dataSource, target, file, node, stream);
+        } catch (final RepositoryException e) {
+            throw new ImportException("Unable to import from file '" + dataSource + "' to '"
+                    + target.getPath() + "'", e);
+        } catch (final IOException e) {
+            throw new ImportException("Unexpected IOException while importing", e);
+        }
     }
+
+	private void importData(
+			final String dataSource,
+			final Resource target,
+			final File file,
+			final Node node,
+			final FileInputStream stream
+		) throws RepositoryException, IOException {
+		final Calendar fileLastMod = Calendar.getInstance();
+		fileLastMod.setTimeInMillis(file.lastModified());
+		final String fileName = file.getName();
+
+		final Node targetParent;
+		final String targetName;
+
+		if (node.isNodeType(JcrConstants.NT_FILE)) {
+		    // assume that we are intending to replace this file
+		    targetParent = node.getParent();
+		    targetName = node.getName();
+		    final Calendar nodeLastMod = JcrUtils.getLastModified(node);
+		    if (!nodeLastMod.before(fileLastMod)) {
+		        log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+		                dataSource, target);
+		        return;
+		    }
+		} else {
+		    // assume that we are creating a new file under the current node
+		    targetParent = node;
+		    targetName = fileName;
+		    if (targetParent.hasNode(targetName)) {
+		        final Node targetNode = targetParent.getNode(targetName);
+		        final Calendar nodeLastMod = JcrUtils.getLastModified(targetNode);
+		        if (!nodeLastMod.before(fileLastMod)) {
+		            log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
+		                    dataSource, targetNode.getPath());
+		            return;
+		        }
+		    }
+		}
+
+		final String mimeType = mimeTypeService.getMimeType(fileName);
+		JcrUtils.putFile(targetParent, targetName, mimeType, stream);
+		node.getSession().save();
+	}
 
 }
