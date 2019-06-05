@@ -35,23 +35,27 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessExcept
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.util.CacheUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,62 +71,46 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
  * HttpCacheStore} also get bound to this.
  */
 // @formatter:off
-@Component(service = {DynamicMBean.class, HttpCacheEngine.class}, property = {
-        "jmx.objectname" + "=" + "com.adobe.acs.httpcache:type=HTTP Cache Engine",
-        "webconsole.configurationFactory.nameHint" + "=" + "Global handling rules: {httpcache.engine.cache-handling-rules.global}"
-}, reference = {
+@Component(
+        label = "ACS AEM Commons - HTTP Cache - Engine",
+        description = "Controlling service for http cache implementation.",
+        metatype = true
+)
+@Properties({
+        @Property(name = "jmx.objectname",
+                value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - Engine",
+                propertyPrivate = true),
+        @Property(name = "webconsole.configurationFactory.nameHint",
+                value = "Global handling rules: {httpcache.engine.cache-handling-rules.global}",
+                propertyPrivate = true)
+})
+@References({
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CONFIG,
-                service = HttpCacheConfig.class,
-                policy = org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC,
-                cardinality = org.osgi.service.component.annotations.ReferenceCardinality.AT_LEAST_ONE),
+                referenceInterface = HttpCacheConfig.class,
+                policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
+                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-                service = HttpCacheHandlingRule.class,
-                policy = org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC,
-                cardinality = org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE),
+                referenceInterface = HttpCacheHandlingRule.class,
+                policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-                service = HttpCacheStore.class,
+                referenceInterface = HttpCacheStore.class,
                 policy = ReferencePolicy.DYNAMIC,
-                cardinality = ReferenceCardinality.AT_LEAST_ONE)})
-@Designate(ocd = HttpCacheEngineImpl.Config.class)
+                policyOption = ReferencePolicyOption.GREEDY,
+                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
+})
+@Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
 public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpCacheEngine, HttpCacheEngineMBean {
-
-
-    @ObjectClassDefinition(name = "ACS AEM Commons - HTTP Cache - Engine",
-            description = "Controlling service for http cache implementation.")
-    public @interface Config {
-
-        @AttributeDefinition(name = "Global HttpCacheHandlingRules",
-                description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-                defaultValue = {
-                        "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                        "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                        "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                        "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-                })
-        String[] httpcache_engine_cachehandling_rules_global();
-
-        @AttributeDefinition(name = "Globally excluded response headers",
-                description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output."
-        )
-        String[] httpcache_engine_excluded_response_headers_global();
-
-        @AttributeDefinition(name = "Globally excluded cookies",
-                description = "List of cookie keys that should NOT be put in the cached response (Set-Cookie), to be served to the output."
-        )
-        String[] httpcache_engine_excluded_cookie_keys_global();
-    }
-
     private static final Logger log = LoggerFactory.getLogger(HttpCacheEngineImpl.class);
 
     /** Method name that binds cache configs */
@@ -135,13 +123,31 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     static final String METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES = "httpCacheHandlingRule";
 
     // formatter:off
+    @Property(label = "Global HttpCacheHandlingRules",
+            description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
+            unbounded = PropertyUnbounded.ARRAY,
+            value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                    "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
+                    "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
+                    "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
+            })
+
     static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
+    @Property(label = "Globally ignored response headers",
+            description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
     static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
     private List<Pattern> globalHeaderExclusions;
 
-    static final String PROP_GLOBAL_RESPONSE_COOKIE_KEYS_EXCLUSIONS = "httpcache.engine.excluded.cookie.keys.global";
+
+    @Property(label = "Globally ignored cookie keys",
+            description = "List of cookie keys of cookies that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
     private List<String> globalCookieExclusions;
 
     // formatter:on
@@ -154,14 +160,14 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
     //-------------------<OSGi specific methods>---------------//
 
     @Activate
-    protected void activate(HttpCacheEngineImpl.Config config) {
+    protected void activate(Map<String, Object> configs) {
 
         // PIDs of global cache handling rules.
-        globalHeaderExclusions = ParameterUtil.toPatterns(config.httpcache_engine_excluded_response_headers_global());
+        globalCacheHandlingRulesPid = new ArrayList<>(Arrays.asList(PropertiesUtil.toStringArray(configs.get(
+                PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
 
-        globalCacheHandlingRulesPid = new ArrayList<>(Arrays.asList(config.httpcache_engine_cachehandling_rules_global()));
-
-        globalCookieExclusions = new ArrayList<>(Arrays.asList(config.httpcache_engine_excluded_cookie_keys_global()));
+        globalHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+        globalCookieExclusions = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS), new String[]{}));
 
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
@@ -287,7 +293,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         } else {
             throw new AssertionError("Programming error.");
         }
-        final Map<String, List<String>> extractedHeaders = extractHeaders(responseWrapper, cacheConfig);
+        final Map<String, List<String>> extractedHeaders = CacheUtils.extractHeaders(globalHeaderExclusions, globalCookieExclusions,responseWrapper, cacheConfig);
         final int status = responseWrapper.getStatus();
         final String charEncoding = responseWrapper.getCharacterEncoding();
         final String contentType = responseWrapper.getContentType();
@@ -523,44 +529,5 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             }
         }
     }
-
-    private Map<String, List<String>> extractHeaders(SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
-
-        List<Pattern> excludedHeaders = Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
-                .collect(Collectors.toList());
-
-        List<String> excludedCookieKeys = Stream.concat(globalCookieExclusions.stream(), cacheConfig.getExcludedCookieKeys().stream())
-                .collect(Collectors.toList());
-
-        return response.getHeaderNames().stream()
-                .filter(headerName -> excludedHeaders.stream()
-                        .noneMatch(pattern -> pattern.matcher(headerName).matches())
-                ).collect(
-                        Collectors.toMap(headerName -> headerName, headerName -> filterCookieHeaders(response, excludedCookieKeys, headerName)
-                        ));
-    }
-
-    private List<String> filterCookieHeaders(SlingHttpServletResponse response, List<String> excludedCookieKeys, String headerName) {
-        if(!headerName.equals("Set-Cookie")){
-            return new ArrayList<>(response.getHeaders(headerName));
-        }
-        //for set-cookie we apply another exclusion filter.
-        return new ArrayList<>(response.getHeaders(headerName)).stream().filter(
-                header -> {
-                    String key;
-                    if(header.startsWith("__Host-")){
-                        key = StringUtils.removeStart( header,"__Host-");
-                    }else if(header.startsWith("__Secure-")){
-                        key = StringUtils.removeStart( header,"__Secure-");
-                    }else{
-                        key = header;
-                    }
-                    key = StringUtils.substringBefore(key, "=");
-
-                    return !excludedCookieKeys.contains(key);
-                }
-        ).collect(Collectors.toList());
-    }
-
 
 }
