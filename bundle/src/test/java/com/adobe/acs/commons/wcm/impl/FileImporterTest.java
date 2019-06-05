@@ -19,8 +19,11 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -138,6 +141,8 @@ public final class FileImporterTest {
 
         session.save();
 
+        when(resource.adaptTo(Node.class)).thenReturn(file);
+
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -153,6 +158,8 @@ public final class FileImporterTest {
                 .putFile(folder, "test.txt", "x-text/test", new ByteArrayInputStream("".getBytes()), latest);
 
         session.save();
+
+        when(resource.adaptTo(Node.class)).thenReturn(file);
 
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
@@ -173,6 +180,7 @@ public final class FileImporterTest {
 
     @Test
     public void testNullAdaptation() throws RepositoryException {
+        when(resource.adaptTo(Node.class)).thenReturn(null);
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
