@@ -21,8 +21,12 @@ package com.adobe.acs.commons.wcm.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -89,8 +93,13 @@ public final class FileImporterTest {
 		importData("file", testFile);
 	}
 
+	private void verifyImport(final int numberOfInvocations) throws RepositoryException {
+        verify(jcrUtils, times(numberOfInvocations))
+            .putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
+    }
+
 	private void verifyImport() throws RepositoryException {
-        verify(jcrUtils).putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
+		verifyImport(1);
     }
 
     @Test
@@ -100,43 +109,30 @@ public final class FileImporterTest {
         verifyImport();
     }
 
-    @Test
-    public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
-    	when(folder.hasNode(EMAIL_TEMPLATE_TXT)).thenReturn(true);
+	private Node prepareFileInFolder(final long lastModifiedTime) throws RepositoryException {
+		when(folder.hasNode(EMAIL_TEMPLATE_TXT)).thenReturn(true);
         final Node targetNode = mock(Node.class);
         when(folder.getNode(EMAIL_TEMPLATE_TXT)).thenReturn(targetNode);
 
         final Calendar nodeLastMod = Calendar.getInstance();
-        nodeLastMod.setTimeInMillis(0L);
+        nodeLastMod.setTimeInMillis(lastModifiedTime);
         when(jcrUtils.getLastModified(targetNode)).thenReturn(nodeLastMod);
 
-        final Calendar earliest = Calendar.getInstance();
-        earliest.setTimeInMillis(0L);
+        return targetNode;
+	}
 
+    @Test
+    public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
+    	prepareFileInFolder(0);
         importData();
-
-        assertFalse(session.hasPendingChanges());
-        assertTrue(folder.hasNode(testFile.getName()));
-
         verifyImport();
     }
 
     @Test
     public void testImportToFolderHavingFileWhichIsNewer() throws RepositoryException {
-        final Calendar latest = Calendar.getInstance();
-        latest.add(Calendar.DATE, 2);
-        final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
-                latest);
-
-        session.save();
-
+    	prepareFileInFolder(testFile.lastModified() + 1);
         importData();
-
-        assertFalse(session.hasPendingChanges());
-        assertTrue(folder.hasNode(testFile.getName()));
-
-        // this verifies the the file wasn't imported
-        assertEquals("x-text/test", JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
+        verifyImport(0);
     }
 
     @Test
