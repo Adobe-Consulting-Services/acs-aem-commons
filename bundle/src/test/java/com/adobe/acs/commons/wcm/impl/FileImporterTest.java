@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
@@ -48,6 +48,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.util.JcrUtilsWrapper;
+import com.day.cq.polling.importer.ImportException;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class FileImporterTest {
@@ -85,8 +86,13 @@ public final class FileImporterTest {
         when(folder.getSession()).thenReturn(session);
     }
 
+    @Test
+    public void testConstructor() {
+    	new FileImporter();
+    }
+
 	private void importData(final String schemeValue, final File dataSource) {
-		importer.importData(schemeValue, dataSource.getAbsolutePath(), resource);
+		importer.importData(schemeValue, dataSource.getAbsolutePath(), resource, null, null);
 	}
 
 	private void importData() {
@@ -133,9 +139,13 @@ public final class FileImporterTest {
         verifyImport(EMAIL_TEMPLATE_TXT);
     }
 
+	private long newerFileTime() {
+		return testFile.lastModified() + 1;
+	}
+
     @Test
     public void testImportToFolderHavingFileWhichIsNewer() throws RepositoryException {
-    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, testFile.lastModified() + 1);
+    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, newerFileTime());
         importData();
         verifyNoImport();
     }
@@ -150,7 +160,7 @@ public final class FileImporterTest {
 
     @Test
     public void testImportToFileWhichIsNewer() throws RepositoryException {
-        final Node file = prepareFileInFolder(TEST_TXT, testFile.lastModified() + 1);
+        final Node file = prepareFileInFolder(TEST_TXT, newerFileTime());
         when(resource.adaptTo(Node.class)).thenReturn(file);
         importData();
         verifyNoImport();
@@ -159,27 +169,38 @@ public final class FileImporterTest {
     @Test
     public void testWrongScheme() throws RepositoryException {
         importData("file2", testFile);
-
-        assertFalse(session.hasPendingChanges());
-        assertFalse(folder.hasNode(testFile.getName()));
+        verifyNoImport();
     }
 
     @Test
     public void testNullAdaptation() throws RepositoryException {
         when(resource.adaptTo(Node.class)).thenReturn(null);
         importData();
-
-        assertFalse(session.hasPendingChanges());
-        assertFalse(folder.hasNode(testFile.getName()));
+        verifyNoImport();
     }
 
     @Test
     public void testImportNoSuchFile() throws RepositoryException {
     	final File badFile = new File("src/test/resources/NONEXISTING.txt");
         importData("file", badFile);
+        verifyNoImport();
+    }
 
-        assertFalse(session.hasPendingChanges());
-        assertFalse(folder.hasNodes());
+    @SuppressWarnings("unchecked")
+    private void testException(final Class<? extends Exception> exception) throws RepositoryException {
+    	when(jcrUtils.putFile(any(), any(), any(), any())).thenThrow(exception);
+    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
+        importData();
+    }
+
+	@Test(expected = ImportException.class)
+    public void testRepositoryException() throws RepositoryException {
+		testException(RepositoryException.class);
+    }
+
+	@Test(expected = ImportException.class)
+    public void testIOException() throws RepositoryException {
+		testException(IOException.class);
     }
 
 }
