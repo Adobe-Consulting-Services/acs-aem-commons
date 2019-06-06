@@ -22,10 +22,11 @@ package com.adobe.acs.commons.wcm.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collections;
 
@@ -41,12 +42,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.util.JcrUtilsWrapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class FileImporterTest {
 
-    private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
+    private static final String TEXT_PLAIN = "text/plain";
+
+	private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/" + EMAIL_TEMPLATE_TXT);
+
+	private static final String EMAIL_TEMPLATE_TXT = "emailTemplate.txt";
+
+    private final JcrUtilsWrapper jcrUtils = Mockito.mock(JcrUtilsWrapper.class);
 
     @Mock
     private Resource resource;
@@ -61,12 +71,12 @@ public final class FileImporterTest {
     private Node folder;
 
     @InjectMocks
-    private final FileImporter importer = new FileImporter();
+    private final FileImporter importer = new FileImporter(jcrUtils);
 
     @Before
     public void setUp() throws RepositoryException {
         importer.activate(Collections.<String, Object> emptyMap());
-        when(mimeTypeService.getMimeType("emailTemplate.txt")).thenReturn("text/plain");
+        when(mimeTypeService.getMimeType(EMAIL_TEMPLATE_TXT)).thenReturn(TEXT_PLAIN);
         when(resource.adaptTo(Node.class)).thenReturn(folder);
         when(folder.getSession()).thenReturn(session);
     }
@@ -76,7 +86,7 @@ public final class FileImporterTest {
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
-        assertTrue(folder.hasNode(testFile.getName()));
+        verify(jcrUtils).putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
     @Test
@@ -92,7 +102,7 @@ public final class FileImporterTest {
 
         assertFalse(session.hasPendingChanges());
         assertTrue(folder.hasNode(testFile.getName()));
-        assertEquals("text/plain", JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
+        assertEquals(TEXT_PLAIN, JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
     }
 
     @Test
@@ -128,7 +138,7 @@ public final class FileImporterTest {
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
-        assertEquals("text/plain", JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
+        assertEquals(TEXT_PLAIN, JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
     }
 
     @Test
