@@ -88,7 +88,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
     static final String REQ_ATTR_PREVIOUSLY_PROCESSED =
             ComponentErrorHandlerImpl.class.getName() + "_previouslyProcessed";
 
-
     private static final String SERVICE_NAME = "component-error-handler";
     private static final Map<String, Object> AUTH_INFO;
     private static final String DISABLED = "Disabled";
@@ -100,13 +99,6 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private ComponentHelper componentHelper;
-    
-    @Reference
-    private ModeUtil modeHelper;
-   
 
     /* Edit Mode */
 
@@ -206,18 +198,18 @@ public class ComponentErrorHandlerImpl implements ComponentErrorHandler, Filter 
         final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
 
         if (editModeEnabled
-                && (modeHelper.isEdit(request)
-                || modeHelper.isDesign(request)
+                && (ModeUtil.isEdit(request)
+                || ModeUtil.isDesign(request)
                 || ModeUtil.isAnalytics(slingRequest))) {
             // Edit Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, editErrorHTMLPath);
         } else if (previewModeEnabled
-                && (modeHelper.isPreview(request)
-                || modeHelper.isReadOnly(request))) {
+                && (ModeUtil.isPreview(request)
+                || ModeUtil.isReadOnly(request))) {
             // Preview Modes
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, previewErrorHTMLPath);
         } else if (publishModeEnabled
-                && modeHelper.isDisabled(request)
+                && ModeUtil.isDisabled(request)
                 && !this.isFirstInChain(slingRequest)) {
             // Publish Modes; Requires special handling in Published Modes - do not process first filter chain
             this.doFilterWithErrorHandling(slingRequest, slingResponse, chain, publishErrorHTMLPath);
