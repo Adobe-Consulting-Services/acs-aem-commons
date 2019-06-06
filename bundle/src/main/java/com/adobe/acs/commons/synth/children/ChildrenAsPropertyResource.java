@@ -38,19 +38,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Class to wrapper a real resource to facilitate the persistence of children resources in a property (serialized as
@@ -60,18 +49,18 @@ import java.util.TreeSet;
  *
  * To write data:
  *
- * Resource real = resolve.getResource("/content/real");
+ * Resource real = resourceResolver.getResource("/content/real");
  * ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(real);
  * Resource child = wrapper.create("child-1", "nt:unstructured");
  * ModifiableValueMap mvm = child.adaptTo(ModifiableValueMap.class);
  * mvm.put("prop-1", "some data");
  * mvm.put("prop-2", Calendar.getInstance());
  * wrapper.persist();
- * resolver.commit();
+ * resourceResolver.commit();
  *
  * To read data:
  *
- * Resource real = resolve.getResource("/content/real");
+ * Resource real = resourceResolver.getResource("/content/real");
  * ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(real);
  * for(Resource child : wrapper.getChildren()) {
  *     child.getValueMap().get("prop-1", String.class);
@@ -298,6 +287,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
     private List<SyntheticChildAsPropertyResource> deserialize() throws InvalidDataFormatException {
         final long start = System.currentTimeMillis();
 
+
         final String propertyData = this.resource.getValueMap().get(this.propertyName, EMPTY_JSON);
 
         List<SyntheticChildAsPropertyResource> resources;
@@ -325,18 +315,56 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
         final DateTimeFormatter dtf = ISODateTimeFormat.dateTime();
-        final Map<String, Object> serializedData = new HashMap<String, Object>();
+        final Map<String, Object> serializedData = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : resourceToSerialize.getValueMap().entrySet()) {
             if (entry.getValue() instanceof Calendar) {
-                final Calendar cal = (Calendar) entry.getValue();
-                serializedData.put(entry.getKey(), dtf.print(cal.getTimeInMillis()));
-            } else if (entry.getValue() instanceof Date) {
+                final Calendar calendar = (Calendar) entry.getValue();
+                serializedData.put(entry.getKey(), dtf.print(calendar.getTimeInMillis()));
+                continue;
+            }
+
+            if (entry.getValue() instanceof Date) {
                 final Date date = (Date) entry.getValue();
                 serializedData.put(entry.getKey(), dtf.print(date.getTime()));
-            } else {
-                serializedData.put(entry.getKey(), entry.getValue());
+                continue;
             }
+
+            if (entry.getValue() instanceof Calendar[] ) {
+                final Calendar[] calendars = (Calendar[]) entry.getValue();
+                serializedData.put(entry.getKey(),
+                        Arrays.stream(calendars).map(cal -> dtf.print(cal.getTimeInMillis())).toArray());
+                continue;
+            }
+
+            if (entry.getValue() instanceof Date[] ) {
+                final Date[] dates = (Date[]) entry.getValue();
+                serializedData.put(entry.getKey(),
+                        Arrays.stream(dates).map(date -> dtf.print(date.getTime())).toArray());
+                continue;
+            }
+
+            if (entry.getValue() instanceof List<?>) {
+                final List<String> values = new ArrayList<>();
+                final List<?> objectList = (List<?>) entry.getValue();
+
+                for (final Object object : objectList) {
+                    if (object instanceof Calendar) {
+                        values.add(dtf.print(((Calendar)object).getTimeInMillis()));
+                    } else if (object instanceof Date) {
+                        values.add(dtf.print(((Date)object).getTime()));
+                    } else {
+                        values.add(String.valueOf(object));
+                    }
+                }
+
+                if (values.size() > 0) {
+                    serializedData.put(entry.getKey(), values.toArray(new String[values.size()]));
+                    continue;
+                }
+            }
+
+            serializedData.put(entry.getKey(), entry.getValue());
         }
 
         Gson gson = new Gson();
@@ -363,7 +391,17 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
             final ValueMap properties = new ValueMapDecorator(new HashMap<>());
             for (Entry<String, JsonElement> prop : entryJSON.entrySet()) {
                 final String propName = prop.getKey();
-                properties.put(propName, prop.getValue().getAsString());
+
+                if (prop.getValue().isJsonArray()) {
+                    final List<String> strValues = new ArrayList<>();
+
+                    prop.getValue().getAsJsonArray().forEach(
+                            jsonElement -> strValues.add(jsonElement.getAsString()));
+
+                    properties.put(propName, strValues.toArray(new String[strValues.size()]));
+                } else {
+                    properties.put(propName, prop.getValue().getAsString());
+                }
             }
 
             resources.add(new SyntheticChildAsPropertyResource(this.getParent(), nodeName, properties));

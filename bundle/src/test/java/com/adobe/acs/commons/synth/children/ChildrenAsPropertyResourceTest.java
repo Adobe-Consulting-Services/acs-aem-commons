@@ -65,6 +65,8 @@ public class ChildrenAsPropertyResourceTest {
 
     Map<String, Object> entry3 = new HashMap<String, Object>();
 
+    Map<String, Object> entry4 = new HashMap<String, Object>();
+
     Map<String, Object> entry100 = new HashMap<String, Object>();
 
     ChildrenAsPropertyResource childrenAsPropertyResource;
@@ -85,11 +87,12 @@ public class ChildrenAsPropertyResourceTest {
 
         entry2.put("name", "cat");
         entry2.put("sound", "meow");
-        entry1.put("jcr:primaryType", "nt:unstructured");
+        entry2.put("jcr:primaryType", "nt:unstructured");
 
         entry3.put("name", "fish");
         entry3.put("sound", "...");
-        entry1.put("jcr:primaryType", "nt:unstructured");
+        entry3.put("jcr:primaryType", "nt:unstructured");
+
 
         entry100.put("name", "dog");
         entry100.put("sound", "woof");
@@ -108,8 +111,11 @@ public class ChildrenAsPropertyResourceTest {
         entry100.put("boolean", true);
         entry100.put("booleanAsString", "true");
 
-        entry100.put("strArray", new String[]{"one", "two"});
-        entry1.put("jcr:primaryType", "nt:unstructured");
+        entry100.put("strArray", new String[]{"one", "two", "three"});
+        entry100.put("longArray", new Long[]{100l, 200l, 300l, 400l});
+        entry100.put("dateArray", new Date[]{new Date(10000), new Date(20000)});
+
+        entry100.put("jcr:primaryType", "nt:unstructured");
 
         unsortedJSON.put("entry-2", new JSONObject(entry2));
         unsortedJSON.put("entry-1", new JSONObject(entry1));
@@ -152,6 +158,24 @@ public class ChildrenAsPropertyResourceTest {
 
         Assert.assertNotNull(actual.get("calendar", Date.class));
         Assert.assertEquals(expected.get("date", Date.class), actual.get("calendar", Date.class));
+
+        Assert.assertArrayEquals((expected.get("dateArray", Date[].class)), actual.get("dateArray", Date[].class));
+        Assert.assertEquals(2, actual.get("dateArray", Date[].class).length);
+        Assert.assertEquals(new Date(10000), actual.get("dateArray", Date[].class)[0]);
+        Assert.assertEquals(new Date(20000), actual.get("dateArray", Date[].class)[1]);
+
+        Assert.assertArrayEquals((expected.get("strArray", String[].class)), actual.get("strArray", String[].class));
+        Assert.assertEquals(3, actual.get("strArray", String[].class).length);
+        Assert.assertEquals("one", actual.get("strArray", String[].class)[0]);
+        Assert.assertEquals("two", actual.get("strArray", String[].class)[1]);
+        Assert.assertEquals("three", actual.get("strArray", String[].class)[2]);
+
+        Assert.assertArrayEquals((expected.get("longArray", Long[].class)), actual.get("longArray", Long[].class));
+        Assert.assertEquals(4, actual.get("longArray", Long[].class).length);
+        Assert.assertEquals(new Long(100), actual.get("longArray", Long[].class)[0]);
+        Assert.assertEquals(new Long(200), actual.get("longArray", Long[].class)[1]);
+        Assert.assertEquals(new Long(300), actual.get("longArray", Long[].class)[2]);
+        Assert.assertEquals(new Long(400), actual.get("longArray", Long[].class)[3]);
     }
 
     @Test
