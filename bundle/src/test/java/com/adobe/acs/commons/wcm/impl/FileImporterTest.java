@@ -81,11 +81,18 @@ public final class FileImporterTest {
         when(folder.getSession()).thenReturn(session);
     }
 
+	private void importData(final String schemeValue, final File dataSource) {
+		importer.importData(schemeValue, dataSource.getAbsolutePath(), resource);
+	}
+
+	private void importData() {
+		importData("file", testFile);
+	}
+
     @Test
     public void testImportToFolder() throws RepositoryException {
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
-        assertFalse(session.hasPendingChanges());
         verify(jcrUtils).putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
@@ -96,9 +103,7 @@ public final class FileImporterTest {
         final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
                 earliest);
 
-        session.save();
-
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
         assertFalse(session.hasPendingChanges());
         assertTrue(folder.hasNode(testFile.getName()));
@@ -114,7 +119,7 @@ public final class FileImporterTest {
 
         session.save();
 
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
         assertFalse(session.hasPendingChanges());
         assertTrue(folder.hasNode(testFile.getName()));
@@ -134,7 +139,7 @@ public final class FileImporterTest {
 
         when(resource.adaptTo(Node.class)).thenReturn(file);
 
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
@@ -152,7 +157,7 @@ public final class FileImporterTest {
 
         when(resource.adaptTo(Node.class)).thenReturn(file);
 
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
@@ -163,7 +168,7 @@ public final class FileImporterTest {
 
     @Test
     public void testWrongScheme() throws RepositoryException {
-        importer.importData("file2", testFile.getAbsolutePath(), resource);
+        importData("file2", testFile);
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
@@ -172,7 +177,7 @@ public final class FileImporterTest {
     @Test
     public void testNullAdaptation() throws RepositoryException {
         when(resource.adaptTo(Node.class)).thenReturn(null);
-        importer.importData("file", testFile.getAbsolutePath(), resource);
+        importData();
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
@@ -181,7 +186,7 @@ public final class FileImporterTest {
     @Test
     public void testImportNoSuchFile() throws RepositoryException {
     	final File badFile = new File("src/test/resources/NONEXISTING.txt");
-        importer.importData("file", badFile.getAbsolutePath(), resource);
+        importData("file", badFile);
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNodes());
