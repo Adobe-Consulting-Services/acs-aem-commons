@@ -34,13 +34,14 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.JcrUtilsWrapper;
+import com.adobe.acs.commons.util.impl.JcrUtilsWrapperImpl;
 import com.day.cq.polling.importer.ImportException;
 import com.day.cq.polling.importer.Importer;
 
@@ -56,6 +57,8 @@ public final class FileImporter implements Importer {
 
     private static final String DEFAULT_SCHEME = "file";
 
+    private final JcrUtilsWrapper jcrUtils;
+
     @Reference
     private MimeTypeService mimeTypeService;
 
@@ -65,6 +68,14 @@ public final class FileImporter implements Importer {
     private static final String PROP_SCHEME = Importer.SCHEME_PROPERTY;
 
     private String scheme;
+
+    protected FileImporter(final JcrUtilsWrapper jcrUtils) {
+        this.jcrUtils = jcrUtils;
+    }
+
+    public FileImporter() {
+        this(new JcrUtilsWrapperImpl());
+    }
 
     @Activate
     protected void activate(final Map<String, Object> properties) {
@@ -131,7 +142,7 @@ public final class FileImporter implements Importer {
 		    // assume that we are intending to replace this file
 		    targetParent = node.getParent();
 		    targetName = node.getName();
-		    nodeLastMod = JcrUtils.getLastModified(node);
+		    nodeLastMod = jcrUtils.getLastModified(node);
 		    targetPath = target.getPath();
 		} else {
 		    // assume that we are creating a new file under the current node
@@ -139,7 +150,7 @@ public final class FileImporter implements Importer {
 		    targetName = fileName;
 		    if (targetParent.hasNode(targetName)) {
 		        final Node targetNode = targetParent.getNode(targetName);
-		        nodeLastMod = JcrUtils.getLastModified(targetNode);
+		        nodeLastMod = jcrUtils.getLastModified(targetNode);
 		        targetPath = targetNode.getPath();
 		    } else {
 		        nodeLastMod = null;
@@ -156,7 +167,7 @@ public final class FileImporter implements Importer {
         }
 
 		final String mimeType = mimeTypeService.getMimeType(fileName);
-		JcrUtils.putFile(targetParent, targetName, mimeType, stream);
+		jcrUtils.putFile(targetParent, targetName, mimeType, stream);
 		node.getSession().save();
 	}
 
