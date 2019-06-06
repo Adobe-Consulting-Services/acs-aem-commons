@@ -38,6 +38,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.mime.MimeTypeService;
@@ -54,11 +55,13 @@ import com.adobe.acs.commons.util.JcrUtilsWrapper;
 @RunWith(MockitoJUnitRunner.class)
 public final class FileImporterTest {
 
-    private static final String TEXT_PLAIN = "text/plain";
-
-	private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/" + EMAIL_TEMPLATE_TXT);
+	private static final String TEXT_PLAIN = "text/plain";
 
 	private static final String EMAIL_TEMPLATE_TXT = "emailTemplate.txt";
+
+    private static final String TEST_TXT = "test.txt";
+
+	private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/" + EMAIL_TEMPLATE_TXT);
 
     private final JcrUtilsWrapper jcrUtils = Mockito.mock(JcrUtilsWrapper.class);
 
@@ -93,46 +96,47 @@ public final class FileImporterTest {
 		importData("file", testFile);
 	}
 
-	private void verifyImport(final int numberOfInvocations) throws RepositoryException {
-        verify(jcrUtils, times(numberOfInvocations))
-            .putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
+	private void verifyNoImport() throws RepositoryException {
+        verify(jcrUtils, times(0))
+            .putFile(any(Node.class), any(String.class), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
-	private void verifyImport() throws RepositoryException {
-		verifyImport(1);
+	private void verifyImport(final Node parent, final String name) throws RepositoryException {
+        verify(jcrUtils).putFile(eq(parent), eq(name), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
     @Test
     public void testImportToFolder() throws RepositoryException {
         importData();
-
-        verifyImport();
+        verifyImport(folder, EMAIL_TEMPLATE_TXT);
     }
 
-	private Node prepareFileInFolder(final long lastModifiedTime) throws RepositoryException {
-		when(folder.hasNode(EMAIL_TEMPLATE_TXT)).thenReturn(true);
-        final Node targetNode = mock(Node.class);
-        when(folder.getNode(EMAIL_TEMPLATE_TXT)).thenReturn(targetNode);
+	private Node prepareFileInFolder(final String nodeName, final long lastModifiedTime) throws RepositoryException {
+		when(folder.hasNode(nodeName)).thenReturn(true);
+        final Node node = mock(Node.class);
+        when(folder.getNode(nodeName)).thenReturn(node);
+        when(node.isNodeType(JcrConstants.NT_FILE)).thenReturn(true);
+        when(node.getSession()).thenReturn(session);
 
         final Calendar nodeLastMod = Calendar.getInstance();
         nodeLastMod.setTimeInMillis(lastModifiedTime);
-        when(jcrUtils.getLastModified(targetNode)).thenReturn(nodeLastMod);
+        when(jcrUtils.getLastModified(node)).thenReturn(nodeLastMod);
 
-        return targetNode;
+        return node;
 	}
 
     @Test
     public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
-    	prepareFileInFolder(0);
+    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
         importData();
-        verifyImport();
+        verifyImport(folder, EMAIL_TEMPLATE_TXT);
     }
 
     @Test
     public void testImportToFolderHavingFileWhichIsNewer() throws RepositoryException {
-    	prepareFileInFolder(testFile.lastModified() + 1);
+    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, testFile.lastModified() + 1);
         importData();
-        verifyImport(0);
+        verifyNoImport();
     }
 
     @Test
@@ -150,27 +154,14 @@ public final class FileImporterTest {
 
         assertFalse(session.hasPendingChanges());
         assertFalse(folder.hasNode(testFile.getName()));
-        assertEquals(TEXT_PLAIN, JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
-    }
+        assertEquals(TEXT_PLAIN, JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));}
 
     @Test
     public void testImportToFileWhichIsNewer() throws RepositoryException {
-    	final Calendar latest = Calendar.getInstance();
-        latest.add(Calendar.DATE, 2);
-        final Node file = JcrUtils
-                .putFile(folder, "test.txt", "x-text/test", new ByteArrayInputStream("".getBytes()), latest);
-
-        session.save();
-
+        final Node file = prepareFileInFolder(TEST_TXT, testFile.lastModified() + 1);
         when(resource.adaptTo(Node.class)).thenReturn(file);
-
         importData();
-
-        assertFalse(session.hasPendingChanges());
-        assertFalse(folder.hasNode(testFile.getName()));
-
-        // this verifies the the file wasn't imported
-        assertEquals("x-text/test", JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
+        verifyNoImport();
     }
 
     @Test
