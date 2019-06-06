@@ -89,25 +89,36 @@ public final class FileImporterTest {
 		importData("file", testFile);
 	}
 
-    @Test
-    public void testImportToFolder() throws RepositoryException {
-        importData();
-
+	private void verifyImport() throws RepositoryException {
         verify(jcrUtils).putFile(eq(folder), eq(EMAIL_TEMPLATE_TXT), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
     @Test
+    public void testImportToFolder() throws RepositoryException {
+        importData();
+
+        verifyImport();
+    }
+
+    @Test
     public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
+    	when(folder.hasNode(EMAIL_TEMPLATE_TXT)).thenReturn(true);
+        final Node targetNode = mock(Node.class);
+        when(folder.getNode(EMAIL_TEMPLATE_TXT)).thenReturn(targetNode);
+
+        final Calendar nodeLastMod = Calendar.getInstance();
+        nodeLastMod.setTimeInMillis(0L);
+        when(jcrUtils.getLastModified(targetNode)).thenReturn(nodeLastMod);
+
         final Calendar earliest = Calendar.getInstance();
         earliest.setTimeInMillis(0L);
-        final Node file = JcrUtils.putFile(folder, testFile.getName(), "x-text/test", new ByteArrayInputStream("".getBytes()),
-                earliest);
 
         importData();
 
         assertFalse(session.hasPendingChanges());
         assertTrue(folder.hasNode(testFile.getName()));
-        assertEquals(TEXT_PLAIN, JcrUtils.getStringProperty(file, "jcr:content/jcr:mimeType", ""));
+
+        verifyImport();
     }
 
     @Test
