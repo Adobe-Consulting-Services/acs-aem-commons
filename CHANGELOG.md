@@ -10,8 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
-- #1893 - Add javax.annotation dependency (removed in JDK 11)
+- #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1900 - Tag Report MCP
+- #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
 
 ### Fixed
