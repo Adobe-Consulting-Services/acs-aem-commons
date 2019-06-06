@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -38,6 +39,8 @@
                                 Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-Checklist: OAKPAL-INF/checklist/acs-internal.json,\
+                                    OAKPAL-INF/checklist/acs-aem64-content-classifications.json,\
+                                    OAKPAL-INF/checklist/acs-aem65-content-classifications.json,\
                                     OAKPAL-INF/checklist/acs-commons-integrators.json
                                 Export-Package: com.adobe.acs.commons.oakpal.checks
                                 Import-Package: org.json;version="[20090211,20180813]",*
@@ -101,6 +104,87 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>webster-aem64</id>
+            <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
+            your settings.xml file that sets a "webster.segmentStore" property with an absolute path to the
+            crx-quickstart/repository/segmentstore directory of a locally-installed AEM 6.4 server. -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.adamcin.oakpal</groupId>
+                        <artifactId>oakpal-maven-plugin</artifactId>
+                        <configuration>
+                            <websterTargets>
+                                <checklist>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/acs-aem64-content-classifications.json</file>
+                                    <config>
+                                        <selectNodeTypes>
+                                            <type>granite:PublicArea</type>
+                                            <type>granite:FinalArea</type>
+                                            <type>granite:InternalArea</type>
+                                            <type>granite:AbstractArea</type>
+                                        </selectNodeTypes>
+                                        <scopeNodeTypes>
+                                            <nodeType>
+                                                <type>exclude</type>
+                                                <pattern>nt:file</pattern>
+                                            </nodeType>
+                                            <nodeType>
+                                                <type>exclude</type>
+                                                <pattern>nt:resource</pattern>
+                                            </nodeType>
+                                        </scopeNodeTypes>
+                                    </config>
+                                </checklist>
+                            </websterTargets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>webster-aem65</id>
+            <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
+            your settings.xml file that sets a "webster.segmentStore" property with an absolute path to the
+            crx-quickstart/repository/segmentstore directory of a locally-installed AEM 6.5 server. -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.adamcin.oakpal</groupId>
+                        <artifactId>oakpal-maven-plugin</artifactId>
+                        <configuration>
+                            <websterTargets>
+                                <checklist>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/acs-aem65-content-classifications.json</file>
+                                    <config>
+                                        <selectNodeTypes>
+                                            <type>granite:PublicArea</type>
+                                            <type>granite:FinalArea</type>
+                                            <type>granite:InternalArea</type>
+                                            <type>granite:AbstractArea</type>
+                                        </selectNodeTypes>
+                                        <scopeNodeTypes>
+                                            <nodeType>
+                                                <type>exclude</type>
+                                                <pattern>nt:file</pattern>
+                                            </nodeType>
+                                            <nodeType>
+                                                <type>exclude</type>
+                                                <pattern>nt:resource</pattern>
+                                            </nodeType>
+                                        </scopeNodeTypes>
+                                    </config>
+                                </checklist>
+                            </websterTargets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>

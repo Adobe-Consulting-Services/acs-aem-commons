@@ -81,7 +81,6 @@
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-maven-plugin</artifactId>
@@ -90,6 +89,10 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
+                    <websterTargets>
+                        <nodetypes/>
+                        <privileges/>
+                    </websterTargets>
                 </configuration>
                 <executions>
                     <execution>
@@ -99,12 +102,36 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>oakpal-scan-aem65-content-classifications</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/acs-aem65-content-classifications.json</summaryFile>
+                            <checklists>
+                                <checklist>acs-aem65-content-classifications</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-aem64-content-classifications</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/acs-aem64-content-classifications.json</summaryFile>
+                            <checklists>
+                                <checklist>acs-aem64-content-classifications</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>oakpal-scan-min</id>
                         <goals>
                             <goal>scan-many</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
                             <scanArtifacts>
                                 <artifact>
                                     <groupId>${project.groupId}</groupId>
@@ -123,13 +150,15 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/acs-aem64-content-classifications.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/acs-aem65-content-classifications.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>com.cj.jshintmojo</groupId>
                 <artifactId>jshint-maven-plugin</artifactId>
