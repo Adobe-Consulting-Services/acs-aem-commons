@@ -115,7 +115,7 @@ public final class IntegrationServiceImpl implements IntegrationService, Runnabl
         String token = StringUtils.EMPTY;
 
         try(CloseableHttpClient client = helper.getHttpClient(getTimeoutinMilliSeconds())) {
-        	final HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
+            final HttpPost post = new HttpPost(jwtServiceConfig.endpoint());
             post.addHeader(CACHE_CONTRL, NO_CACHE);
             post.addHeader(CONTENT_TYPE, CONTENT_TYPE_URL_ENCODED);
 
@@ -169,8 +169,8 @@ public final class IntegrationServiceImpl implements IntegrationService, Runnabl
     }
 
     private PrivateKey getPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    	final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
-    	final KeyFactory kf = KeyFactory.getInstance("RSA");
+        final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buildPkcs8Key(jwtServiceConfig.privateKey()));
+        final KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
@@ -217,7 +217,7 @@ public final class IntegrationServiceImpl implements IntegrationService, Runnabl
     }
 
     private Date getExpirationDate() {
-    	final Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.SECOND, jwtServiceConfig.expirationTimeInSeconds());
         return cal.getTime();
