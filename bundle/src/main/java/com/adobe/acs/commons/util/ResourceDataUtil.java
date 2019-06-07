@@ -21,22 +21,49 @@ package com.adobe.acs.commons.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.servlet.RequestDispatcher;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.commons.jcr.JcrConstants;
 
 @ProviderType
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1118"})
-public final class ResourceDataUtil {
-
+public class ResourceDataUtil {
     public static final String ENCODING_UTF_8 = "UTF-8";
+    private static final Logger log = LoggerFactory.getLogger(ResourceDataUtil.class);
+
+    public static String getIncludeAsString(final String path, final SlingHttpServletRequest slingRequest,
+                                            final SlingHttpServletResponse slingResponse) {
+        BufferedSlingHttpServletResponse responseWrapper = null;
+
+        try {
+            responseWrapper = new BufferedSlingHttpServletResponse(slingResponse, new StringWriter(), null);
+            final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
+
+            requestDispatcher.include(slingRequest, responseWrapper);
+            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            }
+        } catch (Exception ex) {
+            log.error("Error creating the String representation for: " + path, ex);
+        }
+
+        return null;
+    }
 
     public static InputStream getNTFileAsInputStream(final String path, final ResourceResolver resourceResolver) throws RepositoryException {
         return getNTFileAsInputStream(resourceResolver.resolve(path));
