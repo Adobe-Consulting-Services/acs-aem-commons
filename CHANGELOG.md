@@ -63,6 +63,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
 - #1836 - Allow uniform download links in JCR Compare
+- Adjust IntegrationServiceImplTest to Java 11
 
 ## [4.0.0] - 2019-02-20
 
