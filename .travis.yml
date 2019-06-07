@@ -1,11 +1,25 @@
 language: java
-jdk: oraclejdk8
-env:
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+dist: trusty
+matrix:
+  include:
+    - jdk: oraclejdk8
+      name: Java 8 en_US (Main Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true
+    - jdk: oraclejdk8
+      name: Java 8 de_DE (Lightweight Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+    - jdk: oraclejdk8
+      name: Java 8 es_ES (Lightweight Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+    - jdk: oraclejdk8
+      name: Java 8 fr_FR (Lightweight Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+    - jdk: oraclejdk8
+      name: Java 8 hi_IN (Lightweight Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+    - jdk: openjdk11
+      name: Java 11 en_US (Lightweight Build)
+      env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
 script: mvn verify -B
 before_install:
   - cp .travis.settings.xml $HOME/.m2/settings.xml
@@ -14,9 +28,9 @@ after_success:
 sudo: false
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
 before_cache:
-# don't cache snapshots
+  # don't cache snapshots
   - find $HOME/.m2 -name *SNAPSHOT* -exec rm -r "{}" \;
 notifications:
   slack:

@@ -111,6 +111,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.0.1</version>
                     <configuration>
+                        <source>8</source>
                         <excludePackageNames>
                             *.impl
                         </excludePackageNames>
@@ -245,6 +246,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
                 <version>6.0.0</version>
@@ -360,7 +367,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>1.10.19</version>
+                <version>2.23.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -384,7 +391,7 @@
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock</artifactId>
-                <version>2.3.4</version>
+                <version>2.3.10</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -396,19 +403,19 @@
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.sling-mock-oak</artifactId>
-                <version>2.1.2</version>
+                <version>2.1.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.testing.jcr-mock</artifactId>
-                <version>1.4.0</version>
+                <version>1.4.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.wcm</groupId>
                 <artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
-                <version>2.3.2</version>
+                <version>2.5.0</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
