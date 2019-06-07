@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -215,7 +215,7 @@ public class TwitterAdapterFactoryTest {
             if (registeredFactory != null) {
                 throw new IllegalArgumentException("TwitterAdapterFactory already registered");
             }
-            registeredFactory = i.getArgumentAt(1, TwitterAdapterFactory.class);
+            registeredFactory = i.getArgument(1);
             return null;
         });
     }

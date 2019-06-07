@@ -42,7 +42,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class QueryBuilderViewHandlerTest {
         when(searchResult.getHits()).thenReturn(new ArrayList<>());
         when(query.getResult()).thenReturn(searchResult);
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {
-            PredicateGroup predicates = invocation.getArgumentAt(0, PredicateGroup.class);
+            PredicateGroup predicates = invocation.getArgument(0);
             LOG.info("predicates: {}", predicates);
             return query;
         });

@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,7 +72,7 @@ public class SiteMapServletTest {
 
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
 
-        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
+        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgument(2));
     }
 
     @Test

@@ -20,9 +20,8 @@
 package com.adobe.acs.commons.reports.internal.datasources;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -43,9 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.List;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.wcm.datasources.DataSourceBuilder;

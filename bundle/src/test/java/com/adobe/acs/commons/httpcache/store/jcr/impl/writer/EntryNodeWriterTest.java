@@ -19,38 +19,29 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.jackrabbit.commons.JcrUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.jackrabbit.commons.JcrUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import com.day.cq.commons.jcr.JcrUtil;
-import org.mockito.Matchers;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
-import com.day.cq.commons.jcr.JcrConstants;
+import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
@@ -87,11 +78,11 @@ public class EntryNodeWriterTest
         mocks.getEntryNodeWriter().write();
 
         verify(mocks.getEntryNode(), times(1))
-                .setProperty(Matchers.startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
+                .setProperty(startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
 
         ArgumentCaptor<Binary> argumentCaptor = ArgumentCaptor.forClass(Binary.class);
         verify(mocks.getJcrContentNode(), times(1))
-                .setProperty(Matchers.startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
+                .setProperty(startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
 
         Binary savedBinary = argumentCaptor.getValue();
         IOUtils.contentEquals(inputStream, savedBinary.getStream());

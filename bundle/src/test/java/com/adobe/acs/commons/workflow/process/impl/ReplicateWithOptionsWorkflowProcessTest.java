@@ -41,7 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 
@@ -190,7 +190,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         verifyZeroInteractions(throttledTaskRunner);
     }
 
-    private static class ReplicationOptionsMatcher extends ArgumentMatcher<ReplicationOptions> {
+    private static class ReplicationOptionsMatcher implements ArgumentMatcher<ReplicationOptions> {
 
         private String filterAgentId;
         private boolean brandPortalFilter;
@@ -206,9 +206,9 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matches(ReplicationOptions argument) {
             if (argument instanceof ReplicationOptions) {
-                ReplicationOptions options = (ReplicationOptions) argument;
+                ReplicationOptions options = argument;
                 boolean matches = true;
                 if (filterAgentId != null) {
                     Agent agent = mock(Agent.class);

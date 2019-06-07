@@ -42,7 +42,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import javax.management.NotCompliantMBeanException;
@@ -110,7 +110,7 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
 
         doAnswer((Answer<Void>) invocationOnMock -> {
-             Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+             Runnable runnable = invocationOnMock.getArgument(0);
              runnable.run();
              return null;
         }).when(throttledTaskRunner).scheduleWork(any(Runnable.class));
@@ -231,7 +231,7 @@ public class HttpCacheEngineImplTest {
         when(response.getContentType()).thenReturn("text/html");
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgumentAt(0, String.class))[0]);
+        when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgument(0))[0]);
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 

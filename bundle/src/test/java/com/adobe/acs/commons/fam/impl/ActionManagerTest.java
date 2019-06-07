@@ -98,9 +98,9 @@ public class ActionManagerTest {
             when(mockResolver.isLive()).thenReturn(true);
             when(mockResolver.hasChanges()).thenReturn(true);
             when(mockResolver.create(any(), any(), any())).then((InvocationOnMock invocation) -> {
-                Resource parent = invocation.getArgumentAt(0, Resource.class);
-                String name = invocation.getArgumentAt(1, String.class);
-                Map<String,Object> properties = invocation.getArgumentAt(2, Map.class);
+                Resource parent = invocation.getArgument(0);
+                String name = invocation.getArgument(1);
+                Map<String,Object> properties = invocation.getArgument(2);
                 ResourceMetadata metadata = new ResourceMetadata();
                 metadata.putAll(properties);
 
@@ -218,7 +218,7 @@ public class ActionManagerTest {
       Queue<Runnable> taskQueue = new LinkedList<>();
       ThrottledTaskRunner runner = mock(ThrottledTaskRunner.class);
       Answer<Void> answer = i -> {
-        Runnable r = i.getArgumentAt(0, Runnable.class);
+        Runnable r = i.getArgument(0);
         taskQueue.add(r);
         return null;
       };

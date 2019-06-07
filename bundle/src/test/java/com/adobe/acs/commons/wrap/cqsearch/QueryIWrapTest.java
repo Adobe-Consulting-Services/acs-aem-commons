@@ -41,7 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueryIWrapTest {
@@ -91,8 +91,8 @@ public class QueryIWrapTest {
         final PredicateEvaluator mockPredEval = mock(PredicateEvaluator.class);
 
         doAnswer((invocation) -> {
-            String predTypeArg = invocation.getArgumentAt(0, String.class);
-            PredicateEvaluator predEvalArg = invocation.getArgumentAt(1, PredicateEvaluator.class);
+            String predTypeArg = invocation.getArgument(0);
+            PredicateEvaluator predEvalArg = invocation.getArgument(1);
             assertEquals("expect same predicate type arg", predType, predTypeArg);
             assertSame("expect same PredicateEvaluator instance arg", mockPredEval, predEvalArg);
             return null;

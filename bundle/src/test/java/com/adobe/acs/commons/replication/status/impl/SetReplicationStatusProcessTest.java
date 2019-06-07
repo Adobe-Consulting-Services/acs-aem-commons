@@ -41,7 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -137,7 +137,7 @@ public class SetReplicationStatusProcessTest {
         verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
     }
 
-    private static class CalendarMatcher extends ArgumentMatcher<Calendar> {
+    private static class CalendarMatcher implements ArgumentMatcher<Calendar> {
 
         private Calendar leftCal;
 
@@ -153,7 +153,7 @@ public class SetReplicationStatusProcessTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
+        public boolean matches(Calendar argument) {
             if (argument instanceof Calendar) {
                 Calendar rightCal = (Calendar)argument;
                 return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR)
