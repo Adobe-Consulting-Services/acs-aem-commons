@@ -43,10 +43,10 @@ public final class ErrorPageCacheImplTest {
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
     public ErrorPageCacheImplTest() throws NotCompliantMBeanException {
-		errorPageCache = new ErrorPageCacheImpl(5, false);
-	}
+        errorPageCache = new ErrorPageCacheImpl(5, false);
+    }
 
-	@Before
+    @Before
     public void setUp() throws NoSuchFieldException {
         PrivateAccessor.setField(errorPageCache, "cache", cache);
 

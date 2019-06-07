@@ -60,7 +60,7 @@ public final class ErrorPageCacheImplGetTest {
 
     @Test
     public void testGet() throws InterruptedException {
-    	getIncludeAsString("hello world");
+        getIncludeAsString("hello world");
 
         assertEquals(0, errorPageCache.getTotalCacheRequests());
 
@@ -97,7 +97,7 @@ public final class ErrorPageCacheImplGetTest {
 
     @Test
     public void testGet_Null() {
-    	getIncludeAsString(null);
+        getIncludeAsString(null);
         assertData("");
     }
 }
