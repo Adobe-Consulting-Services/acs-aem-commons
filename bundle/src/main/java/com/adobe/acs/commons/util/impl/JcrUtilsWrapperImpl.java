@@ -13,7 +13,7 @@ import com.adobe.acs.commons.util.JcrUtilsWrapper;
 public final class JcrUtilsWrapperImpl implements JcrUtilsWrapper {
 
     public Calendar getLastModified(final Node node) throws RepositoryException {
-    	return JcrUtils.getLastModified(node);
+        return JcrUtils.getLastModified(node);
     }
 
     public Node putFile(final Node parent, final String name, final String mime, final InputStream data)

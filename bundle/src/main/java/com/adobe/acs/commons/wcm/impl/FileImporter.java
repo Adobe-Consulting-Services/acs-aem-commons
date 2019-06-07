@@ -84,12 +84,12 @@ public final class FileImporter implements Importer {
 
     @Override
     public void importData(
-    		final String schemeValue,
-    		final String dataSource,
-    		final Resource target,
-    		final String login,
-    		final String password
-    	) throws ImportException {
+            final String schemeValue,
+            final String dataSource,
+            final Resource target,
+            final String login,
+            final String password
+        ) throws ImportException {
         importData(schemeValue, dataSource, target);
     }
 
@@ -123,52 +123,52 @@ public final class FileImporter implements Importer {
         }
     }
 
-	private void importData(
-			final String dataSource,
-			final Resource target,
-			final File file,
-			final Node node,
-			final FileInputStream stream
-		) throws RepositoryException, IOException {
-		final String fileName = file.getName();
+    private void importData(
+            final String dataSource,
+            final Resource target,
+            final File file,
+            final Node node,
+            final FileInputStream stream
+        ) throws RepositoryException, IOException {
+        final String fileName = file.getName();
 
-		final Node targetParent;
-		final String targetName;
+        final Node targetParent;
+        final String targetName;
 
-		final Calendar nodeLastMod;
-		final String targetPath;
+        final Calendar nodeLastMod;
+        final String targetPath;
 
-		if (node.isNodeType(JcrConstants.NT_FILE)) {
-		    // assume that we are intending to replace this file
-		    targetParent = node.getParent();
-		    targetName = node.getName();
-		    nodeLastMod = jcrUtils.getLastModified(node);
-		    targetPath = target.getPath();
-		} else {
-		    // assume that we are creating a new file under the current node
-		    targetParent = node;
-		    targetName = fileName;
-		    if (targetParent.hasNode(targetName)) {
-		        final Node targetNode = targetParent.getNode(targetName);
-		        nodeLastMod = jcrUtils.getLastModified(targetNode);
-		        targetPath = targetNode.getPath();
-		    } else {
-		        nodeLastMod = null;
-		        targetPath = null;
-		    }
-		}
+        if (node.isNodeType(JcrConstants.NT_FILE)) {
+            // assume that we are intending to replace this file
+            targetParent = node.getParent();
+            targetName = node.getName();
+            nodeLastMod = jcrUtils.getLastModified(node);
+            targetPath = target.getPath();
+        } else {
+            // assume that we are creating a new file under the current node
+            targetParent = node;
+            targetName = fileName;
+            if (targetParent.hasNode(targetName)) {
+                final Node targetNode = targetParent.getNode(targetName);
+                nodeLastMod = jcrUtils.getLastModified(targetNode);
+                targetPath = targetNode.getPath();
+            } else {
+                nodeLastMod = null;
+                targetPath = null;
+            }
+        }
 
-		final Calendar fileLastMod = Calendar.getInstance();
-		fileLastMod.setTimeInMillis(file.lastModified());
+        final Calendar fileLastMod = Calendar.getInstance();
+        fileLastMod.setTimeInMillis(file.lastModified());
         if (nodeLastMod != null && !nodeLastMod.before(fileLastMod)) {
             log.info("File '{}' does not have a newer timestamp than '{}'. Skipping import.",
                     dataSource, targetPath);
             return;
         }
 
-		final String mimeType = mimeTypeService.getMimeType(fileName);
-		jcrUtils.putFile(targetParent, targetName, mimeType, stream);
-		node.getSession().save();
-	}
+        final String mimeType = mimeTypeService.getMimeType(fileName);
+        jcrUtils.putFile(targetParent, targetName, mimeType, stream);
+        node.getSession().save();
+    }
 
 }

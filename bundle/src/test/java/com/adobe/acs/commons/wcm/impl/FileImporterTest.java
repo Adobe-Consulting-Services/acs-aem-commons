@@ -53,13 +53,13 @@ import com.day.cq.polling.importer.ImportException;
 @RunWith(MockitoJUnitRunner.class)
 public final class FileImporterTest {
 
-	private static final String TEXT_PLAIN = "text/plain";
+    private static final String TEXT_PLAIN = "text/plain";
 
-	private static final String EMAIL_TEMPLATE_TXT = "emailTemplate.txt";
+    private static final String EMAIL_TEMPLATE_TXT = "emailTemplate.txt";
 
     private static final String TEST_TXT = "test.txt";
 
-	private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/" + EMAIL_TEMPLATE_TXT);
+    private final File testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/" + EMAIL_TEMPLATE_TXT);
 
     private final JcrUtilsWrapper jcrUtils = Mockito.mock(JcrUtilsWrapper.class);
 
@@ -88,23 +88,23 @@ public final class FileImporterTest {
 
     @Test
     public void testConstructor() {
-    	new FileImporter();
+        new FileImporter();
     }
 
-	private void importData(final String schemeValue, final File dataSource) {
-		importer.importData(schemeValue, dataSource.getAbsolutePath(), resource, null, null);
-	}
+    private void importData(final String schemeValue, final File dataSource) {
+        importer.importData(schemeValue, dataSource.getAbsolutePath(), resource, null, null);
+    }
 
-	private void importData() {
-		importData("file", testFile);
-	}
+    private void importData() {
+        importData("file", testFile);
+    }
 
-	private void verifyNoImport() throws RepositoryException {
+    private void verifyNoImport() throws RepositoryException {
         verify(jcrUtils, times(0))
             .putFile(any(Node.class), any(String.class), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
-	private void verifyImport(final String name) throws RepositoryException {
+    private void verifyImport(final String name) throws RepositoryException {
         verify(jcrUtils).putFile(eq(folder), eq(name), eq(TEXT_PLAIN), any(InputStream.class));
     }
 
@@ -114,10 +114,10 @@ public final class FileImporterTest {
         verifyImport(EMAIL_TEMPLATE_TXT);
     }
 
-	private Node prepareFileInFolder(final String nodeName, final long lastModifiedTime) throws RepositoryException {
+    private Node prepareFileInFolder(final String nodeName, final long lastModifiedTime) throws RepositoryException {
         final Node node = mock(Node.class);
 
-		when(folder.hasNode(nodeName)).thenReturn(true);
+        when(folder.hasNode(nodeName)).thenReturn(true);
         when(folder.getNode(nodeName)).thenReturn(node);
 
         when(node.getParent()).thenReturn(folder);
@@ -130,22 +130,22 @@ public final class FileImporterTest {
         when(jcrUtils.getLastModified(node)).thenReturn(nodeLastMod);
 
         return node;
-	}
+    }
 
     @Test
     public void testImportToFolderHavingFileWhichIsOlder() throws RepositoryException {
-    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
+        prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
         importData();
         verifyImport(EMAIL_TEMPLATE_TXT);
     }
 
-	private long newerFileTime() {
-		return testFile.lastModified() + 1;
-	}
+    private long newerFileTime() {
+        return testFile.lastModified() + 1;
+    }
 
     @Test
     public void testImportToFolderHavingFileWhichIsNewer() throws RepositoryException {
-    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, newerFileTime());
+        prepareFileInFolder(EMAIL_TEMPLATE_TXT, newerFileTime());
         importData();
         verifyNoImport();
     }
@@ -181,26 +181,26 @@ public final class FileImporterTest {
 
     @Test
     public void testImportNoSuchFile() throws RepositoryException {
-    	final File badFile = new File("src/test/resources/NONEXISTING.txt");
+        final File badFile = new File("src/test/resources/NONEXISTING.txt");
         importData("file", badFile);
         verifyNoImport();
     }
 
     @SuppressWarnings("unchecked")
     private void testException(final Class<? extends Exception> exception) throws RepositoryException {
-    	when(jcrUtils.putFile(any(), any(), any(), any())).thenThrow(exception);
-    	prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
+        when(jcrUtils.putFile(any(), any(), any(), any())).thenThrow(exception);
+        prepareFileInFolder(EMAIL_TEMPLATE_TXT, 0);
         importData();
     }
 
-	@Test(expected = ImportException.class)
+    @Test(expected = ImportException.class)
     public void testRepositoryException() throws RepositoryException {
-		testException(RepositoryException.class);
+        testException(RepositoryException.class);
     }
 
-	@Test(expected = ImportException.class)
+    @Test(expected = ImportException.class)
     public void testIOException() throws RepositoryException {
-		testException(IOException.class);
+        testException(IOException.class);
     }
 
 }
