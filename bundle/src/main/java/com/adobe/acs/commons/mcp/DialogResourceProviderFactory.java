@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,21 @@
  * limitations under the License.
  * #L%
  */
+package com.adobe.acs.commons.mcp;
 
-@org.osgi.annotation.versioning.Version("3.4.0")
-package com.adobe.acs.commons.httpcache.engine;
+import java.util.Map;
+import org.apache.sling.spi.resource.provider.ResourceProvider;
+import org.osgi.framework.ServiceRegistration;
 
+public interface DialogResourceProviderFactory {
+
+    void registerClass(String className);
+
+    void registerClass(Class c);
+
+    void unregisterClass(String className);
+
+    void unregisterClass(Class c);
+
+    Map<String, ServiceRegistration<ResourceProvider>> getActiveProviders();
+}

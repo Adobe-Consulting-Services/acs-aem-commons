@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents response content to be cached.
@@ -41,7 +42,7 @@ public class CacheContent {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    private Map<String, List<String>> headers = new HashMap<String, List<String>>();
+    private Map<String, List<String>> headers = new HashMap<>();
     /** Response content as input stream */
     private InputStream dataInputStream;
     /** Temp sink attached to this cache content */
@@ -132,24 +133,37 @@ public class CacheContent {
      * Construct from the custom servlet response wrapper..
      *
      * @param responseWrapper
+     * @deprecated Use build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map<String, List<String>> headers) throws HttpCacheDataStreamException
      * @return
      */
+    @Deprecated
     public CacheContent build(HttpCacheServletResponseWrapper responseWrapper) throws HttpCacheDataStreamException {
-        this.status = responseWrapper.getStatus();
+          // Extracting HTTP Response Header Names and Values
+        Map<String, List<String>> extractedHeaders = responseWrapper.getHeaderNames().stream().collect(
+                        Collectors.toMap(headerName -> headerName, headerName ->
+                            new ArrayList<>(responseWrapper.getHeaders(headerName)
+                        )
+        ));
+
+        return build(responseWrapper, responseWrapper.getStatus(), responseWrapper.getCharacterEncoding(), responseWrapper. getContentType(), extractedHeaders);
+    }
+
+    /**
+     * Construct from the custom servlet response wrapper..
+     *
+     * @param responseWrapper
+     * @param headers
+     * @return
+     */
+    public CacheContent build(HttpCacheServletResponseWrapper responseWrapper,int status, String charEncoding, String contentType, Map<String, List<String>> headers) throws HttpCacheDataStreamException {
+        this.status = status;
 
         // Extract information from response and populate state of the instance.
-        this.charEncoding = responseWrapper.getCharacterEncoding();
-        this.contentType = responseWrapper.getContentType();
+        this.charEncoding = charEncoding;
+        this.contentType = contentType;
 
         // Extracting header K,V.
-        List<String> headerNames = new ArrayList<String>();
-
-        headerNames.addAll(responseWrapper.getHeaderNames());
-        for (String headerName: headerNames) {
-            List<String> values = new ArrayList<String>();
-            values.addAll(responseWrapper.getHeaders(headerName));
-            headers.put(headerName, values);
-        }
+        this.headers.putAll(headers);
 
         // Get hold of the temp sink.
         this.tempSink = responseWrapper.getTempSink();

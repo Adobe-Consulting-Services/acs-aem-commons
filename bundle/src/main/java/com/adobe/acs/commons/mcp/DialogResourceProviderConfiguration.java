@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2015 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,16 @@
  * limitations under the License.
  * #L%
  */
+package com.adobe.acs.commons.mcp;
 
-@org.osgi.annotation.versioning.Version("3.4.0")
-package com.adobe.acs.commons.httpcache.engine;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+/**
+ *
+ */
+@ObjectClassDefinition(name = "ACS AEM Commons - Dialog Resource Provider Configuration", description = "Service Configuration")
+public @interface DialogResourceProviderConfiguration {
+  @AttributeDefinition(name = "Enable feature", description = "If checked, feature will be enabled")
+  boolean enabled();
+}
