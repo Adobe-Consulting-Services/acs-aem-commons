@@ -18,6 +18,6 @@
  * #L%
  */
 
-@org.osgi.annotation.versioning.Version("2.2.0")
+@org.osgi.annotation.versioning.Version("2.3.0")
 package com.adobe.acs.commons.httpcache.config;
 
