@@ -199,7 +199,7 @@ public final class FileImporterTest {
     }
 
     @Test(expected = ImportException.class)
-    public void testIOException() throws RepositoryException {
+    public void testInputOutputException() throws RepositoryException {
         testException(IOException.class);
     }
 
