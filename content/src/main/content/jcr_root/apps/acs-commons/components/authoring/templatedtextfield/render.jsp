@@ -152,7 +152,8 @@ TextField
     attrs.addClass("templated-textfield");
 
 %>
-<sling:include path="datasource" resourceType="acs-commons/components/authoring/property-datasource" />
+<sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.properties.model.PropertyDatasource" var="datasource"/>
+<div id="property-datasource" data-properties="<%= datasource.getJson() %>"></div>
 <input <%= attrs.build() %> autocomplete="off">
 <script type="text/javascript">
 $(document).trigger('templated-textfield:ready');
