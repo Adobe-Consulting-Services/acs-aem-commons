@@ -30,6 +30,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -66,7 +67,7 @@ public class PropertyDatasource {
     public String getJson() {
         if (properties != null) {
             try {
-                return objectMapper.writeValueAsString(properties);
+                return StringEscapeUtils.escapeHtml4(objectMapper.writeValueAsString(properties));
             } catch (JsonProcessingException e) {
                 LOGGER.error("Error serializing JSON from properties");
             }
