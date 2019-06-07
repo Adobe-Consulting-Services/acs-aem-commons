@@ -62,13 +62,13 @@ public final class PageCompareDataImplTest {
     @Test
     public void shouldInitialize() throws RepositoryException {
         // given
-    	final String path = "/my/path";
-    	final String versionName = "latest";
+        final String path = "/my/path";
+        final String versionName = "latest";
 
-    	final Resource resource = mockResource(path, versionName, new Date());
+        final Resource resource = mockResource(path, versionName, new Date());
 
         // when
-    	final PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        final PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
 
         // then
         assertThat(pageCompareData.getVersions(), not(Collections.<VersionSelection>emptyList()));
@@ -77,10 +77,10 @@ public final class PageCompareDataImplTest {
     @Test
     public void getResource_shouldReturnValue() throws RepositoryException {
         // given
-    	final Resource resource = mockResource("/my/path", "latest", new Date());
+        final Resource resource = mockResource("/my/path", "latest", new Date());
 
         // when
-    	final PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        final PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
         assertThat(pageCompareData.getResource(), is(resource));
@@ -89,12 +89,12 @@ public final class PageCompareDataImplTest {
     @Test
     public void getVersion() throws RepositoryException {
         // given
-    	final String versionName = "latest";
+        final String versionName = "latest";
 
-    	final Resource resource = mockResource("/my/path", versionName, new Date());
+        final Resource resource = mockResource("/my/path", versionName, new Date());
 
         // when
-    	final PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
+        final PageCompareData pageCompareData = new PageCompareDataImpl(resource, versionName);
 
         // then
         assertThat(pageCompareData.getVersion(), is(versionName));
@@ -129,24 +129,24 @@ public final class PageCompareDataImplTest {
     @Test
     public void getVersions() throws RepositoryException {
         // given
-    	final Resource resource = mockResource("/my/path", "latest", new Date());
+        final Resource resource = mockResource("/my/path", "latest", new Date());
 
         // when
-    	final PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
+        final PageCompareData pageCompareData = new PageCompareDataImpl(resource, "latest");
 
         // then
         final List<VersionSelection> versions = pageCompareData.getVersions();
-		assertThat(versions, not(Collections.<VersionSelection>emptyList()));
+        assertThat(versions, not(Collections.<VersionSelection>emptyList()));
         assertThat(versions.get(1).getName(), is("latest"));
     }
 
     @Test
     public void getLines() throws RepositoryException {
         // given
-    	final Resource resource = mockResource("/my/path", "latest", new Date());
+        final Resource resource = mockResource("/my/path", "latest", new Date());
 
-    	final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
-    	final Property a = mockProperty("a", "/my/path/a", "value a");
+        final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
+        final Property a = mockProperty("a", "/my/path/a", "value a");
         when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
         final Property b = mockProperty("b", "/my/path/b", "value b");
         when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
@@ -157,7 +157,7 @@ public final class PageCompareDataImplTest {
 
         // then
         final List<PageCompareDataLine> lines = pageCompareData.getLines();
-		assertThat(lines, not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(lines, not(Collections.<PageCompareDataLine>emptyList()));
         assertThat(lines.get(0).getName(), is("a"));
         assertThat(lines.get(1).getName(), is("b"));
     }
@@ -165,10 +165,10 @@ public final class PageCompareDataImplTest {
     @Test
     public void getRecursiveLines() throws RepositoryException {
         // given
-    	final Resource resource = mockResource("/my/path", "latest", new Date());
+        final Resource resource = mockResource("/my/path", "latest", new Date());
 
-    	final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
-    	final Property a = mockProperty("a", "/my/path/a", "value a");
+        final Set<String> valueMapKeys = Sets.newHashSet("a", "b");
+        final Property a = mockProperty("a", "/my/path/a", "value a");
         when(resource.adaptTo(Node.class).getProperty("a")).thenReturn(a);
         final Property b = mockProperty("b", "/my/path/b", "value b");
         when(resource.adaptTo(Node.class).getProperty("b")).thenReturn(b);
@@ -192,7 +192,7 @@ public final class PageCompareDataImplTest {
 
         // then
         final List<PageCompareDataLine> lines = pageCompareData.getLines();
-		assertThat(lines, not(Collections.<PageCompareDataLine>emptyList()));
+        assertThat(lines, not(Collections.<PageCompareDataLine>emptyList()));
         assertThat(lines.get(0).getName(), is("a"));
         assertThat(lines.get(1).getName(), is("b"));
         assertThat(lines.get(2).getName(), is("c"));
@@ -201,7 +201,7 @@ public final class PageCompareDataImplTest {
     }
 
     private static Property mockProperty(final String name, final String path, final String value) throws RepositoryException {
-    	final Property property = mock(Property.class);
+        final Property property = mock(Property.class);
         when(property.getName()).thenReturn(name);
         when(property.getPath()).thenReturn(path);
         final Value valueMock = mock(Value.class);
@@ -213,7 +213,7 @@ public final class PageCompareDataImplTest {
 
 
     public static Resource mockResource(final String path, final String versionName, final Date date) throws RepositoryException {
-    	final Resource resource = mock(Resource.class);
+        final Resource resource = mock(Resource.class);
         when(resource.getPath()).thenReturn(path);
         when(resource.getValueMap()).thenReturn(mock(ValueMap.class));
         when(resource.getChildren()).thenReturn(Lists.newArrayList());
