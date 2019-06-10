@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import io.wcm.testing.mock.aem.junit.AemContext;
 
 import static org.junit.Assert.assertEquals;
+import static com.adobe.acs.commons.properties.TemplatedDialogUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyAggregatorServiceImplTest {
@@ -52,7 +53,7 @@ public class PropertyAggregatorServiceImplTest {
 
     @Test
     public void testAggregationOfPageResource() {
-        service = defaultService();
+        service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
         Map<String, Object> properties = service.getProperties(lofoten);
@@ -62,7 +63,7 @@ public class PropertyAggregatorServiceImplTest {
 
     @Test
     public void testAggregationOfComponentOnPage() {
-        service = defaultService();
+        service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
         Map<String, Object> properties = service.getProperties(lofoten);
@@ -73,7 +74,7 @@ public class PropertyAggregatorServiceImplTest {
 
     @Test
     public void testAggregationOfPage() {
-        service = defaultService();
+        service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
         Page lofotenPage = lofoten.adaptTo(Page.class);
@@ -84,7 +85,7 @@ public class PropertyAggregatorServiceImplTest {
 
     @Test
     public void testContentInheritanceOverride() {
-        service = defaultService();
+        service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content");
         ModifiableValueMap modifiableValueMap = lofoten.adaptTo(ModifiableValueMap.class);
@@ -136,17 +137,5 @@ public class PropertyAggregatorServiceImplTest {
         map.put("page_properties.sling:resourceType", "weretail/components/structure/page");
         map.put("page_properties.jcr:createdBy", "admin");
         return map;
-    }
-
-    private Map<String, Object> defaultConfigMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("exclude.list", "cq:(.*)");
-        map.put("additional.data", "");
-        return map;
-    }
-
-    private PropertyAggregatorService defaultService() {
-        Map<String, Object> config = defaultConfigMap();
-        return context.registerInjectActivateService(new PropertyAggregatorServiceImpl(), config);
     }
 }
