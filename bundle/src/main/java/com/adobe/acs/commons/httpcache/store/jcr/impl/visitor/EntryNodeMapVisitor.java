@@ -70,12 +70,12 @@ public class EntryNodeMapVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected final CacheContent getCacheContent(final Node node) throws RepositoryException
+    protected CacheContent getCacheContent(final Node node) throws RepositoryException
     {
         return new EntryNodeToCacheContentHandler(node).get();
     }
 
-    protected final CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
+    protected CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
         return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 }
