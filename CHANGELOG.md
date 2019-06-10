@@ -10,14 +10,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
-- #1893 - Add javax.annotation dependency (removed in JDK 11)
+- #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1900 - Tag Report MCP
+- #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
 - #1868 - Added support for @Named annotation in MCP Form Field processor
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
+- #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 
 ## [4.1.0] - 2019-05-07
 

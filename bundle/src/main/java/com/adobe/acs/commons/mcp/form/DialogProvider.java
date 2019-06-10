@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2013 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,17 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Miscellaneous Utilities.
- */
-@Version("1.2.0")
-package com.adobe.acs.commons.mcp;
+package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.Version;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Signifies a bean which gets an automatically-generated dialog
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface DialogProvider {
+}
