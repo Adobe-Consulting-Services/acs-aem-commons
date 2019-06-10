@@ -57,12 +57,9 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    // Set the max recursion depth in case of endless loop reading properties
-    private final int MAX_PROPERTY_DEPTH = 10;
     private final String PAGE_PROP_PREFIX = "page_properties";
     private final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
 
-    private boolean recursionEnabled;
     private List<Pattern> exclusionList;
     private Map<String, String> additionalData;
 
@@ -90,16 +87,14 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     }
 
     /**
-     * Recursively traverse the properties of a bean, as well as the potential beans of those properties until there are
-     * either no properties other that 'class' or the max depth has been reached.  Store all property values in a map
-     * with the key being the nested property names.
+     * Iterate over the properties of a bean and add the property values (retrieved by invoking the
+     * method) to a map with the 'prefix.property' as the key.
      * @param targetPropertyMap the map that should be updated with the properties and their values
      * @param key the current nested name for the property (each call will append the current property name to the parent's separated by a period)
      * @param beanValue the current property's value
-     * @param depth keeps track of the recursion depth to not exceed MAX_PROPERTY_DEPTH
      */
-    private void addBeanToMap(final Map<String,Object> targetPropertyMap, final String key, final Object beanValue, final int depth) {
-        if (targetPropertyMap != null && StringUtils.isNotBlank(key) && beanValue != null && depth < MAX_PROPERTY_DEPTH) {
+    private void addBeanToMap(final Map<String,Object> targetPropertyMap, final String key, final Object beanValue) {
+        if (targetPropertyMap != null && StringUtils.isNotBlank(key) && beanValue != null) {
             try {
                 Class<?> beanClass = Class.forName(beanValue.getClass().getName());
                 BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
@@ -111,9 +106,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
                         Object propertyValue = propertyDescriptor.getReadMethod().invoke(beanValue);
                         if (propertyValue != null) {
                             targetPropertyMap.put(newKey, propertyValue);
-                            if (recursionEnabled) {
-                                addBeanToMap(targetPropertyMap, newKey, propertyValue, depth + 1);
-                            }
                         }
                     }
                 }
@@ -182,7 +174,7 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
                     Class<?> modelClass = Class.forName(additionalData.get(prefix));
                     Object model = contentResource.adaptTo(modelClass);
                     if (model != null) {
-                        addBeanToMap(targetPropertyMap, prefix, model, 1);
+                        addBeanToMap(targetPropertyMap, prefix, model);
                     }
                 } catch (ClassNotFoundException e) {
                     log.error("Error mapping to class " + additionalData.get(prefix), e);
@@ -242,7 +234,6 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
             excludeList.add(Pattern.compile(exclude));
         }
         this.exclusionList = excludeList;
-        this.recursionEnabled = config.enable_recursion();
         this.additionalData = getMapFromArray(config.additional_data());
     }
 
@@ -277,18 +268,5 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
         )
         String[] additional_data() default {""};
 
-        /**
-         * The flag for enabling the recursive grabbing of properties in custom classes.
-         *
-         * @return The enabled flag
-         */
-        @AttributeDefinition(
-                name = "Enable Recursion",
-                description = "Check to enable the recursive gathering of properties in custom models." +
-                        " Note: Custom dialog field JavaScript does not support recursive property " +
-                        "aggregation.",
-                type = AttributeType.BOOLEAN
-        )
-        boolean enable_recursion() default false;
     }
 }
