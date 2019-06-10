@@ -19,12 +19,6 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.mockito.Answers;
-
-import java.util.Date;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -32,23 +26,34 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class PropertiesTest {
+import java.util.Date;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
+@RunWith(MockitoJUnitRunner.class)
+public final class PropertiesTest {
 
     @Test
-    public void lastModified_null_returnNewDate() throws Exception {
-        Date result = Properties.lastModified(null);
+    public void lastModified_null_returnNewDate() {
+        final Date result = Properties.lastModified(null);
         assertNotNull(result);
     }
 
     @Test
-    public void lastModified_hasProperty_Date() throws Exception {
+    public void lastModified_hasProperty_Date() {
         // given
-        Resource resource = mock(Resource.class, Answers.RETURNS_DEEP_STUBS.get());
-        Date d = new Date();
-        when(resource.getValueMap().get(anyString(), any(Date.class))).thenReturn(d);
+        final Resource resource = mock(Resource.class);
+        final ValueMap properties = mock(ValueMap.class);
+        when(resource.getValueMap()).thenReturn(properties);
+        final Date d = new Date();
+        when(properties.get(anyString(), any(Date.class))).thenReturn(d);
 
         // when
-        Date result = Properties.lastModified(resource);
+        final Date result = Properties.lastModified(resource);
 
         // then
         assertNotNull(result);
