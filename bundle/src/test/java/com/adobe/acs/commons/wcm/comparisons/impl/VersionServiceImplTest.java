@@ -126,9 +126,9 @@ public final class VersionServiceImplTest {
         final Session session = mock(Session.class);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
         final Workspace workspace = mock(Workspace.class);
-		when(session.getWorkspace()).thenReturn(workspace);
+        when(session.getWorkspace()).thenReturn(workspace);
         final VersionManager versionManager = mock(VersionManager.class);
-		when(workspace.getVersionManager()).thenReturn(versionManager);
+        when(workspace.getVersionManager()).thenReturn(versionManager);
         final VersionHistory versionHistory = mock(VersionHistory.class);
         when(versionManager.getVersionHistory(anyString())).thenReturn(versionHistory);
         when(versionHistory.getAllVersions()).thenReturn(versionIterator);
