@@ -63,7 +63,6 @@ public class QueryIWrapTest {
         when(query.getHitsPerPage()).thenReturn(42L);
         when(query.getExcerpt()).thenReturn(true);
         when(query.getPredicates()).thenReturn(predicates);
-        when(query.refine(any(Bucket.class))).thenReturn(refinedQuery);
         when(query.getResult()).thenReturn(searchResult);
     }
 

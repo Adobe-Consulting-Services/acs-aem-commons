@@ -77,11 +77,13 @@ public class I18NInjectorTest {
         context.addModelsForClasses(TestModelI18nValueImpl.class);
         when(i18nService.translate("com.acs.commmons.test", context.currentResource())).thenReturn("Translated from english");
         when(i18nService.translate("anotherValidI18nField", context.currentResource())).thenReturn("FromNameValue");
-        when(i18nService.translate("injectField", context.currentResource())).thenReturn("InjectFieldValue");
+        // Unnecessary stubbing
+        //when(i18nService.translate("injectField", context.currentResource())).thenReturn("InjectFieldValue");
 
         when(i18nService.translate("com.acs.commmons.test", context.request())).thenReturn("Translated from english");
         when(i18nService.translate("anotherValidI18nField", context.request())).thenReturn("FromNameValue");
-        when(i18nService.translate("injectField", context.request())).thenReturn("InjectFieldValue");
+        // Unnecessary stubbing
+        //when(i18nService.translate("injectField", context.request())).thenReturn("InjectFieldValue");
 
         when(i18nService.i18n(context.request())).thenReturn(i18n);
         when(i18nService.i18n(context.currentResource())).thenReturn(i18n);

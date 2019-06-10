@@ -200,7 +200,6 @@ public class PageCompareModelTest {
     private PageCompareData mockOne2OneData(String pathA, String version) throws RepositoryException {
         Resource resource = mock(Resource.class);
         when(resolver.resolve(pathA)).thenReturn(resource);
-        when(resource.getResourceResolver()).thenReturn(resolver);
 
         PageCompareData pageCompareData = mock(PageCompareData.class);
         final List<Line<PageCompareDataLine>> lineResult = Lists.newArrayList(
@@ -216,9 +215,7 @@ public class PageCompareModelTest {
 
     private Line<PageCompareDataLine> mockOne2OneDataLine(String left, String right) {
         PageCompareDataLine leftLine = mock(PageCompareDataLine.class);
-        when(leftLine.getUniqueName()).thenReturn(left);
         PageCompareDataLine rightLine = mock(PageCompareDataLine.class);
-        when(rightLine.getUniqueName()).thenReturn(right);
 
         Line<PageCompareDataLine> line = mock(Line.class);
         when(line.getLeft()).thenReturn(leftLine);

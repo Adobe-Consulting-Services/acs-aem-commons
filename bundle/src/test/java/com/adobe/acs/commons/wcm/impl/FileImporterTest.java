@@ -170,7 +170,6 @@ public class FileImporterTest {
     @Test
     public void testWrongScheme() throws Exception {
         Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file2", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -191,7 +190,6 @@ public class FileImporterTest {
     public void testImportNoSuchFile() throws Exception {
         File badFile = new File("src/test/resources/NONEXISTING.txt");
         Resource resource = mock(Resource.class);
-        when(resource.adaptTo(Node.class)).thenReturn(folder);
         importer.importData("file", badFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());

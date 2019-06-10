@@ -131,7 +131,6 @@ public class ResourceResolverMapTransformerFactoryTest extends TestCase {
     @Test
     public void testRebuildAttributes_DoubleEncodingScenario() throws Exception {
         when(resourceResolver.map(request, "/content/site/en/jcr:content/img test.png")).thenReturn("/en/jcr:content/img%20test.png");
-        when(resourceResolver.map(request, "/content/site/en/jcr:content/img%20test.png")).thenReturn("/en/jcr:content/img%2520test.png");
 
         final Map<String, Object> config = new HashMap<String, Object>();
         config.put("attributes", new String[]{"img:src"});

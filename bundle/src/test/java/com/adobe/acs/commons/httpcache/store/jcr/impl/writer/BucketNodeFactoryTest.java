@@ -40,16 +40,16 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BucketNodeFactoryTest
-{
+public class BucketNodeFactoryTest {
 
     @Mock Session session;
     @Mock Node cacheRootNode;
 
     @Before
-    public void setup() throws Exception{
-        when(session.isLive()).thenReturn(true);
-        when(cacheRootNode.getPath()).thenReturn(MockSettings.VALID_ROOT_PATH);
+    public void setup() throws Exception {
+        // Unnecessary stubbing
+        //when(session.isLive()).thenReturn(true);
+        //when(cacheRootNode.getPath()).thenReturn(MockSettings.VALID_ROOT_PATH);
     }
 
     @Test(expected = BucketNodeFactoryException.class)

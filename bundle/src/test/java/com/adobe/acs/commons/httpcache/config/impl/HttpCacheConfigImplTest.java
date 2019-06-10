@@ -76,7 +76,8 @@ public class HttpCacheConfigImplTest {
 
         when(request.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getUserID()).thenReturn("anonymous");
-        when(extension.accepts(request, systemUnderTest)).thenReturn(true);
+        // Unecessary Stubbings
+        // when(extension.accepts(request, systemUnderTest)).thenReturn(true);
     }
 
     private void activateWithDefaultValues(Map<String,Object> specifiedProps){

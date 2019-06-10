@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -107,7 +107,7 @@ public class HealthCheckStatusEmailerTest {
         when(failureExecutionResult.getHealthCheckResult()).thenReturn(failureResult);
 
         results = new ArrayList<>();
-        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), any(String[].class))).thenReturn(results);
+        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), any(String.class))).thenReturn(results);
 
         when(productInfoService.getInfos()).thenReturn(new ProductInfo[]{mock(ProductInfo.class)});
         Set<String> runModes = new HashSet<String>();
@@ -135,7 +135,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), any(String.class));
     }
 
     @Test
@@ -147,7 +147,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), any(String.class));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), any(String.class));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class HealthCheckStatusEmailerTest {
         healthCheckStatusEmailer.activate(config);
 
         Calendar minuteAgo = Calendar.getInstance();
-        // Make sure enough time has "ellapsed" so that the call to send email does something
+        // Make sure enough time has "elapsed" so that the call to send email does something
         minuteAgo.add(Calendar.MINUTE, -1);
         minuteAgo.add(Calendar.SECOND, -1);
         FieldUtils.writeField(healthCheckStatusEmailer, "nextEmailTime",  minuteAgo, true);
@@ -198,7 +198,7 @@ public class HealthCheckStatusEmailerTest {
         healthCheckStatusEmailer.run();
 
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), any(String.class));
     }
 }
 

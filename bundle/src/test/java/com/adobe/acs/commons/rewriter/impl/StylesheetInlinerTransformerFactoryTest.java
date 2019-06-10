@@ -115,7 +115,6 @@ public final class StylesheetInlinerTransformerFactoryTest {
         when(slingRequest.getRequestURL()).thenReturn(new StringBuffer("testing"));
         when(resource.adaptTo(eq(InputStream.class))).thenReturn(new java.io.ByteArrayInputStream(CSS_CONTENTS.getBytes()));
         when(resourceResolver.getResource(eq(CSS_RESOURCE_PATH + ".css" ))).thenReturn(resource);
-        when(resourceResolver.getResource(eq(NON_EXISTING_PATH))).thenReturn(null);
         when(slingRequest.getResourceResolver()).thenReturn(resourceResolver);
         when(processingContext.getRequest()).thenReturn(slingRequest);
         when(slingRequest.getRequestPathInfo()).thenReturn(requestPathInfo);

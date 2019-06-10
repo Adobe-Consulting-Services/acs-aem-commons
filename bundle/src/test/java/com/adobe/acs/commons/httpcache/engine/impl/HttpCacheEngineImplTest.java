@@ -68,9 +68,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
-
-
-
     @Mock
     HttpCacheConfig memCacheConfig;
 
@@ -174,7 +171,8 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
+
+        //when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -201,7 +199,7 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
+        //when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         StringResponseWrapper response = new StringResponseWrapper(new MockSlingHttpServletResponse());
 
@@ -231,7 +229,8 @@ public class HttpCacheEngineImplTest {
         when(response.getContentType()).thenReturn("text/html");
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgument(0))[0]);
+        // Unnecessary stubbing
+        // when(response.getHeader(anyString())).thenAnswer((Answer<String>) invocationOnMock -> headers.get( invocationOnMock.getArgument(0))[0]);
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 
@@ -242,9 +241,10 @@ public class HttpCacheEngineImplTest {
 
         CacheContent mockedCacheContent = mock(CacheContent.class);
 
-        when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
-        when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
-        when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
+        // Unnecessary stubbing
+        //when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
+        //when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
+        //when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
 
         headers.put("someResponseHeader", new String[]{"SomeValue"});
@@ -253,8 +253,9 @@ public class HttpCacheEngineImplTest {
 
         CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
-        when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
+        // Unnecessary stubbing
+        //when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
+        //when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         when(jcrCacheStore.createTempSink()).thenReturn(new MemTempSinkImpl());
 
 

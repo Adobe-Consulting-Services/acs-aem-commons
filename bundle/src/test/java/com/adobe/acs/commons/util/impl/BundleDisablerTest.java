@@ -66,7 +66,6 @@ public class BundleDisablerTest {
     public void setUp() {
         bundles.clear();
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(ownBundle.getSymbolicName()).thenReturn("my.own.bundle");
         when(bundleContext.getBundles()).then(new Answer<Bundle[]>() {
             @Override
             public Bundle[] answer(final InvocationOnMock invocationOnMock) throws Throwable {

@@ -130,11 +130,12 @@ public class GenericListAdapterFactoryTest {
     @Test
     public void test_that_adapting_page_with_null_template_returns_null() {
         Page wrongPage = mock(Page.class);
+        /* Unnecessary stubbing
         when(wrongPage.getProperties()).thenAnswer(new Answer<ValueMap>() {
             public ValueMap answer(InvocationOnMock invocation) throws Throwable {
                 return new ValueMapDecorator(new HashMap<String, Object>());
             }
-        });
+        }); */
 
         GenericList section = adaptToGenericList(wrongPage);
         assertNull(section);

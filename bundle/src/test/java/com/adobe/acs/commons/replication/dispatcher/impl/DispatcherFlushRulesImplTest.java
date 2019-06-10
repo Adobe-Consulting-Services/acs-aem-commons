@@ -70,7 +70,7 @@ public class DispatcherFlushRulesImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(mock(ResourceResolver.class));
+        when(resourceResolverFactory.getServiceResourceResolver(any())).thenReturn(mock(ResourceResolver.class));
     }
 
     @After

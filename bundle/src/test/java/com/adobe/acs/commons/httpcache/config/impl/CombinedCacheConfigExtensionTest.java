@@ -40,7 +40,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class CombinedCacheConfigExtensionTest {
 
-
     @Mock
     private HttpCacheConfigExtension extension1;
     @Mock
@@ -62,7 +61,8 @@ public class CombinedCacheConfigExtensionTest {
     public void init() throws HttpCacheRepositoryAccessException {
 
         when(extension1.accepts(request, config)).thenReturn(false);
-        when(extension2.accepts(request, config)).thenReturn(false);
+        // unnecessary stubbing
+        //when(extension2.accepts(request, config)).thenReturn(false);
         when(extension3.accepts(request, config)).thenReturn(true);
         when(extension4.accepts(request, config)).thenReturn(true);
         

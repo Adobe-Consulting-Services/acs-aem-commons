@@ -76,7 +76,7 @@ public class OnDeployScriptBaseTest {
         nodeContent.addNode("resource-type-missing");
 
         // Create the test class instance
-        onDeployScript = new OnDeployScriptBaseExt();
+        onDeployScript = spy(new OnDeployScriptBaseExt());
         queryBuilder = mock(CloseableQueryBuilder.class);
         doReturn(queryBuilder).when(resourceResolver).adaptTo(CloseableQueryBuilder.class);
         onDeployScript.execute(resourceResolver);
@@ -89,7 +89,6 @@ public class OnDeployScriptBaseTest {
     public void testExecuteException() throws Exception {
         Exception originalException = new Exception("Oops it broke");
 
-        onDeployScript = spy(onDeployScript);
         doThrow(originalException).when(onDeployScript).execute();
 
         try {
@@ -297,7 +296,7 @@ public class OnDeployScriptBaseTest {
         assertNotNull("getWorkspace()", onDeployScript.getWorkspace());
     }
 
-    protected class OnDeployScriptBaseExt extends OnDeployScriptBase {
+    public class OnDeployScriptBaseExt extends OnDeployScriptBase {
         @Override
         protected void execute() throws Exception {
             // no op

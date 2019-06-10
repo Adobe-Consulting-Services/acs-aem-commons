@@ -51,7 +51,7 @@ public class MockDirectoryBuilder {
         when(attrs.getSize()).thenReturn(size);
         LsEntry entry = mock(LsEntry.class);
         when(entry.getFilename()).thenReturn(name);
-        when(entry.getLongname()).thenReturn(longName);
+        //when(entry.getLongname()).thenReturn(longName);
         when(entry.getAttrs()).thenReturn(attrs);
         directory.add(entry);
 
@@ -62,11 +62,11 @@ public class MockDirectoryBuilder {
         String longName = currentDirectory + "/" + name;
 
         SftpATTRS attrs = mock(SftpATTRS.class);
-        when(attrs.isDir()).thenReturn(true);
+        //when(attrs.isDir()).thenReturn(true);
         LsEntry entry = mock(LsEntry.class);
         when(entry.getFilename()).thenReturn(name);
-        when(entry.getLongname()).thenReturn(longName);
-        when(entry.getAttrs()).thenReturn(attrs);
+        //when(entry.getLongname()).thenReturn(longName);
+        //when(entry.getAttrs()).thenReturn(attrs);
         directory.add(entry);
 
         return this;

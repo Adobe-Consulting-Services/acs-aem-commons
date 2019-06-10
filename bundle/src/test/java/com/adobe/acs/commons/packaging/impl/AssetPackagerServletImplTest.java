@@ -46,9 +46,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import io.wcm.testing.mock.aem.junit.AemContext;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssetPackagerServletImplTest {
@@ -60,8 +58,7 @@ public class AssetPackagerServletImplTest {
     Packaging packaging;
 
     @InjectMocks
-    @Spy
-    final AssetPackagerServletImpl assetPackagerServlet = new AssetPackagerServletImpl();
+    final AssetPackagerServletImpl assetPackagerServlet = spy(new AssetPackagerServletImpl());
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
