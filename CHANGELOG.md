@@ -120,6 +120,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1716 - Added short-name to all TLD files.
 - #1730 - MCP Forms Multifield class now handles arrays correctly
 - #1723 - Fix unclosed channel when non exising path provided
+- Adjust EntryNodeMapVisitorTest to Java 11
 
 ### Changed
 - #1726 - Deploy the bundle via the dedicated DAV url
