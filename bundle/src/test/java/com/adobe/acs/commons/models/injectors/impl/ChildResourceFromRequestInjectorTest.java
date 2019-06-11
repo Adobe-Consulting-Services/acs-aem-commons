@@ -42,10 +42,6 @@ public class ChildResourceFromRequestInjectorTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
-    private ResourceResolver resourceResolver;
-
-    private TestModelChildResourceFromRequest testModel;
-
     @Before
     public void setup() throws RepositoryException {
         this.context.registerInjectActivateService(new ChildResourceFromRequestAnnotationProcessorFactory());
@@ -53,7 +49,7 @@ public class ChildResourceFromRequestInjectorTest {
         this.context.addModelsForClasses(TestModelChildResourceFromRequestImpl.class);
         this.context.addModelsForClasses(TestModelChildResourceFromRequestChildImpl.class);
 
-        Resource testResource = this.context.create().resource("/content/child", "prop", "val1");
+        this.context.create().resource("/content/child", "prop", "val1");
         this.context.create().resource("/content/childList/1", "prop", "val2");
         this.context.create().resource("/content/childList/2", "prop", "val3");
 
@@ -62,7 +58,7 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildModelFromRequest() {
-        testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals("val1", testModel.getChildModel().getProp());
         assertEquals("/content/child", testModel.getChildModel().getResource().getPath());
         assertEquals("/content/child", testModel.getChildModel().getRequest().getResource().getPath());
@@ -70,7 +66,7 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildModelFromResource() {
-        testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals("val1", testModel.getChildModel().getProp());
         assertEquals("/content/child", testModel.getChildModel().getResource().getPath());
         assertNull("/content/child", testModel.getChildModel().getRequest());
@@ -78,7 +74,7 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildModelListFromRequest() {
-        testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
 
         assertEquals(2, testModel.getChildModelList().size());
 
@@ -93,7 +89,7 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildModelListFromResource() {
-        testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
 
         assertEquals(2, testModel.getChildModelList().size());
 
@@ -108,19 +104,19 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildResourceFromRequest() {
-        testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals("val1", testModel.getChildResource().getValueMap().get("prop", String.class));
     }
 
     @Test
     public void testInjectedChildResourceFromResource() {
-        testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals("val1", testModel.getChildResource().getValueMap().get("prop", String.class));
     }
 
     @Test
     public void testInjectedChildResourceListFromRequest() {
-        testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.request().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals(2, testModel.getChildResourceList().size());
         assertEquals("val2", testModel.getChildResourceList().get(0).getValueMap().get("prop", String.class));
         assertEquals("val3", testModel.getChildResourceList().get(1).getValueMap().get("prop", String.class));
@@ -128,7 +124,7 @@ public class ChildResourceFromRequestInjectorTest {
 
     @Test
     public void testInjectedChildResourceListFromResource() {
-        testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
+        TestModelChildResourceFromRequest testModel = this.context.currentResource().adaptTo(TestModelChildResourceFromRequest.class);
         assertEquals(2, testModel.getChildResourceList().size());
         assertEquals("val2", testModel.getChildResourceList().get(0).getValueMap().get("prop", String.class));
         assertEquals("val3", testModel.getChildResourceList().get(1).getValueMap().get("prop", String.class));
