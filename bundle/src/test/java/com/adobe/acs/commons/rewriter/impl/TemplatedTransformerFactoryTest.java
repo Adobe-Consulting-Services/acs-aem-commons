@@ -195,7 +195,7 @@ public class TemplatedTransformerFactoryTest {
     }
 
     @Test
-    public void testCustomModelAndOOTBReplacement() throws Exception {
+    public void testCustomModelAndOotbReplacement() throws Exception {
         Map<String, Object> config = defaultConfigMap();
         config.put("additional.data", "test_model|com.adobe.acs.commons.properties.impl.PropertyAggregatorTestModel");
         context.addModelsForClasses(PropertyAggregatorTestModel.class);

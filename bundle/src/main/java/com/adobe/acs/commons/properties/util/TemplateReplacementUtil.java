@@ -27,6 +27,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class TemplateReplacementUtil {
 
+    private TemplateReplacementUtil() {}
+
     private static final String PLACHOLDER_BEGIN = "{{";
     private static final String PLACHOLDER_END = "}}";
 
