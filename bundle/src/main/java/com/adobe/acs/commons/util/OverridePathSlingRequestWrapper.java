@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.util;
 
 import com.adobe.cq.sightly.WCMBindings;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
 import com.day.text.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
@@ -49,21 +51,29 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
     /**
      * Constructor.
      *
-     * @param wrappedRequest SlingHttpServletRequest
-     * @param relPath        String
+     * @param request A valid sling request.
+     * @param path    Path to represent by this request wrapper.  Can be absolute
+     *                or relative to the passed request.
      */
-    public OverridePathSlingRequestWrapper(final SlingHttpServletRequest wrappedRequest, final String relPath) {
-        super(wrappedRequest);
+    public OverridePathSlingRequestWrapper(final SlingHttpServletRequest request, final String path) {
+        super(request);
 
         SlingBindings slingBindings = (SlingBindings) getSlingRequest().getAttribute(ATTR_SLING_BINDINGS);
 
         this.adapterManager = slingBindings.getSling().getService(AdapterManager.class);
         this.resource = getSlingRequest().getResourceResolver().resolve(getSlingRequest(),
-                Text.fullFilePath(getSlingRequest().getRequestPathInfo().getResourcePath(), relPath));
+                Text.fullFilePath(getSlingRequest().getResource().getPath(), path));
         this.myBindings.putAll(slingBindings);
         this.myBindings.put(WCMBindings.PROPERTIES, this.resource.getValueMap());
         this.myBindings.put(SlingBindings.RESOURCE, this.resource);
         this.myBindings.put(SlingBindings.REQUEST, this);
+
+        Page currentPage = null;
+        PageManager pageManager = getSlingRequest().getResourceResolver().adaptTo(PageManager.class);
+        if (pageManager != null) {
+            currentPage = pageManager.getContainingPage(this.resource);
+        }
+        this.myBindings.put(WCMBindings.CURRENT_PAGE, currentPage);
     }
 
     @Override
