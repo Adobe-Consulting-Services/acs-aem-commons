@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Injector implementation for `@ChildRequest`
+ * Injector implementation for `@ChildResourceFromRequest`
  * <p>
  * If the current adaptable is a `SlingHttpServletRequest`, injects a single
  * or list of `SlingHttpServletRequest` instance(s) referencing the child
