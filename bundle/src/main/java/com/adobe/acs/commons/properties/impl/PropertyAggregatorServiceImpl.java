@@ -94,31 +94,32 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
      * @param beanValue the current property's value
      */
     private void addBeanToMap(final Map<String,Object> targetPropertyMap, final String key, final Object beanValue) {
-        if (targetPropertyMap != null && StringUtils.isNotBlank(key) && beanValue != null) {
-            try {
-                Class<?> beanClass = Class.forName(beanValue.getClass().getName());
-                BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
-                PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        if (targetPropertyMap == null || StringUtils.isBlank(key) || beanValue == null) {
+            return;
+        }
+        try {
+            Class<?> beanClass = Class.forName(beanValue.getClass().getName());
+            BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 
-                for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-                    if (!"class".equalsIgnoreCase(propertyDescriptor.getName())) {
-                        String newKey = key + "." + propertyDescriptor.getName();
-                        Object propertyValue = propertyDescriptor.getReadMethod().invoke(beanValue);
-                        if (propertyValue != null) {
-                            targetPropertyMap.put(newKey, propertyValue);
-                        }
+            for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                if (!"class".equalsIgnoreCase(propertyDescriptor.getName())) {
+                    String newKey = key + "." + propertyDescriptor.getName();
+                    Object propertyValue = propertyDescriptor.getReadMethod().invoke(beanValue);
+                    if (propertyValue != null) {
+                        targetPropertyMap.put(newKey, propertyValue);
                     }
                 }
-
-            } catch (ClassNotFoundException e) {
-                log.error("Error mapping to class " + beanValue.getClass().getName(), e);
-            } catch (IntrospectionException e) {
-                log.error("IntrospectionException", e);
-            } catch (IllegalAccessException e) {
-                log.error("IllegalAccessException", e);
-            } catch (InvocationTargetException e) {
-                log.error("InvocationTargetException", e);
             }
+
+        } catch (ClassNotFoundException e) {
+            log.error("Error mapping to class " + beanValue.getClass().getName(), e);
+        } catch (IntrospectionException e) {
+            log.error("IntrospectionException", e);
+        } catch (IllegalAccessException e) {
+            log.error("IllegalAccessException", e);
+        } catch (InvocationTargetException e) {
+            log.error("InvocationTargetException", e);
         }
     }
 
@@ -168,16 +169,16 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
      */
     private void addAdditionalDataToMap(final Map<String,Object> targetPropertyMap, final Page page) {
         if (!additionalData.isEmpty()) {
-            for (String prefix : additionalData.keySet()) {
+            for (Map.Entry<String, String> entry : additionalData.entrySet()) {
                 try {
                     Resource contentResource = page.getContentResource();
-                    Class<?> modelClass = Class.forName(additionalData.get(prefix));
+                    Class<?> modelClass = Class.forName(entry.getValue());
                     Object model = contentResource.adaptTo(modelClass);
                     if (model != null) {
-                        addBeanToMap(targetPropertyMap, prefix, model);
+                        addBeanToMap(targetPropertyMap, entry.getKey(), model);
                     }
                 } catch (ClassNotFoundException e) {
-                    log.error("Error mapping to class " + additionalData.get(prefix), e);
+                    log.error("Error mapping to class " + entry.getValue(), e);
                 } catch (Exception e) {
                     log.error("Unknown error", e);
                 }
