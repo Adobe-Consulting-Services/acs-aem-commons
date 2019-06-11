@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @InjectAnnotation
-@Source("child-requests")
-public @interface ChildRequest {
+@Source("child-resources-from-request")
+public @interface ChildResourceFromRequest {
     String name() default "";
 
     /** @deprecated */

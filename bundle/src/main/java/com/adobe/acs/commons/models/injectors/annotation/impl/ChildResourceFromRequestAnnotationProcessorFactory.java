@@ -19,9 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.ChildRequest;
-import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
-import org.apache.commons.lang3.StringUtils;
+import com.adobe.acs.commons.models.injectors.annotation.ChildResourceFromRequest;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
@@ -32,28 +30,28 @@ import org.apache.sling.models.spi.injectorspecific.StaticInjectAnnotationProces
 import java.lang.reflect.AnnotatedElement;
 
 /**
- * The annotation processor for the {@link ChildRequest} annotation
+ * The annotation processor for the {@link ChildResourceFromRequest} annotation
  *
  * Note: This can only be used together with Sling Models API bundle in version 1.2.0 (due to the dependency on InjectionStrategy)
  */
 @Component
 @Service
-public class ChildRequestAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory {
+public class ChildResourceFromRequestAnnotationProcessorFactory implements StaticInjectAnnotationProcessorFactory {
 
     @Override
     public InjectAnnotationProcessor2 createAnnotationProcessor(final AnnotatedElement element) {
         // check if the element has the expected annotation
-        ChildRequest annotation = element.getAnnotation(ChildRequest.class);
+        ChildResourceFromRequest annotation = element.getAnnotation(ChildResourceFromRequest.class);
         if (annotation != null) {
-            return new ChildRequestAnnotationProcessor(annotation);
+            return new ChildResourceFromRequestAnnotationProcessor(annotation);
         }
         return null;
     }
 
-    private static class ChildRequestAnnotationProcessor extends AbstractInjectAnnotationProcessor2 {
-        private final ChildRequest annotation;
+    private static class ChildResourceFromRequestAnnotationProcessor extends AbstractInjectAnnotationProcessor2 {
+        private final ChildResourceFromRequest annotation;
 
-        public ChildRequestAnnotationProcessor(ChildRequest annotation) {
+        public ChildResourceFromRequestAnnotationProcessor(ChildResourceFromRequest annotation) {
             this.annotation = annotation;
         }
 

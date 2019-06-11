@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.impl;
 
-import com.adobe.acs.commons.models.injectors.annotation.ChildRequest;
+import com.adobe.acs.commons.models.injectors.annotation.ChildResourceFromRequest;
 import com.adobe.acs.commons.util.OverridePathSlingRequestWrapper;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -54,16 +54,16 @@ import java.util.List;
                 Constants.SERVICE_RANKING + "=3000"
         }
 )
-public class ChildRequestInjector implements Injector {
-    private static final Logger logger = LoggerFactory.getLogger(ChildRequestInjector.class);
+public class ChildResourceFromRequestInjector implements Injector {
+    private static final Logger logger = LoggerFactory.getLogger(ChildResourceFromRequestInjector.class);
 
     public String getName() {
-        return "child-requests";
+        return "child-resources-from-request";
     }
 
     public Object getValue(Object adaptable, String name, Type declaredType, AnnotatedElement element, DisposalCallbackRegistry callbackRegistry) {
         // sanity check
-        if (element.getAnnotation(ChildRequest.class) == null) {
+        if (element.getAnnotation(ChildResourceFromRequest.class) == null) {
             return null;
         }
 

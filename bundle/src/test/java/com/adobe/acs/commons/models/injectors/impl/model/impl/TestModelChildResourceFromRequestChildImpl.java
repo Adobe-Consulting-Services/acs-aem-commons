@@ -19,17 +19,16 @@
  */
 package com.adobe.acs.commons.models.injectors.impl.model.impl;
 
-import com.adobe.acs.commons.models.injectors.impl.model.TestModelChildRequestChild;
+import com.adobe.acs.commons.models.injectors.impl.model.TestModelChildResourceFromRequestChild;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
-import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
-@Model(adapters = TestModelChildRequestChild.class, adaptables = {Resource.class, SlingHttpServletRequest.class})
-public class TestModelChildRequestChildImpl implements TestModelChildRequestChild {
+@Model(adapters = TestModelChildResourceFromRequestChild.class, adaptables = {Resource.class, SlingHttpServletRequest.class})
+public class TestModelChildResourceFromRequestChildImpl implements TestModelChildResourceFromRequestChild {
     @SlingObject(injectionStrategy = InjectionStrategy.OPTIONAL)
     protected SlingHttpServletRequest request;
 

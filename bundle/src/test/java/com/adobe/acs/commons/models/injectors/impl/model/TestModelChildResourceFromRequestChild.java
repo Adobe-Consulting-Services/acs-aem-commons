@@ -22,7 +22,7 @@ package com.adobe.acs.commons.models.injectors.impl.model;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 
-public interface TestModelChildRequestChild {
+public interface TestModelChildResourceFromRequestChild {
     SlingHttpServletRequest getRequest();
 
     Resource getResource();

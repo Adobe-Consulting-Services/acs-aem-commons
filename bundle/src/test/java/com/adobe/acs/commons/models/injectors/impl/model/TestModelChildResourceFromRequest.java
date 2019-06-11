@@ -19,15 +19,14 @@
  */
 package com.adobe.acs.commons.models.injectors.impl.model;
 
-import com.adobe.acs.commons.models.injectors.impl.model.impl.TestModelChildRequestImpl;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
 
-public interface TestModelChildRequest {
-    TestModelChildRequestChild getChildModel();
+public interface TestModelChildResourceFromRequest {
+    TestModelChildResourceFromRequestChild getChildModel();
 
-    List<TestModelChildRequestChild> getChildModelList();
+    List<TestModelChildResourceFromRequestChild> getChildModelList();
 
     Resource getChildResource();
 
