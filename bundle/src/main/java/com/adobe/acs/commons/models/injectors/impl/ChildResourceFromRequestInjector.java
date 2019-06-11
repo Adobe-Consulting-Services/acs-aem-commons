@@ -94,16 +94,16 @@ public class ChildResourceFromRequestInjector implements Injector {
 
     private Object getValueForRequest(SlingHttpServletRequest request, String name, Type declaredType) {
         Resource child = request.getResource().getChild(name);
-        return getValueSingleOrList(child, name, declaredType,
+        return getValueSingleOrList(child, declaredType,
                 (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath()); });
     }
 
     private Object getValueForResource(Resource resource, String name, Type declaredType) {
         Resource child = resource.getChild(name);
-        return getValueSingleOrList(child, name, declaredType, (childResource) -> { return childResource; });
+        return getValueSingleOrList(child, declaredType, (childResource) -> { return childResource; });
     }
 
-    private Object getValueSingleOrList(Resource childAdaptable, String name, Type declaredType, Function<Resource, Object> transformer) {
+    private Object getValueSingleOrList(Resource childAdaptable, Type declaredType, Function<Resource, Object> transformer) {
         if (childAdaptable != null) {
             if (declaredType instanceof Class) {
                 return transformer.apply(childAdaptable);
