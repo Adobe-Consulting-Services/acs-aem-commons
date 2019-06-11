@@ -33,6 +33,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 
 import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultService;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyDatasourceTest {
@@ -55,6 +56,7 @@ public class PropertyDatasourceTest {
         MockRequestPathInfo mockRequestPathInfo = (MockRequestPathInfo) request.getRequestPathInfo();
         mockRequestPathInfo.setSuffix("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/responsivegrid/text");
         PropertyDatasource propertyDatasource = request.adaptTo(PropertyDatasource.class);
+        assertNotNull(propertyDatasource);
         String jsonString = propertyDatasource.getJson();
         String expected = StringEscapeUtils.escapeHtml4("{\"inherited_page_properties.inheritedProperty\":\"inheritedValue\",\"page_properties.jcr:primaryType\":\"cq:PageContent\",\"page_properties.jcr:title\":\"Arctic Surfing In Lofoten\",\"page_properties.sling:resourceType\":\"weretail/components/structure/page\",\"page_properties.jcr:createdBy\":\"admin\"}");
         assertEquals(expected, jsonString);
@@ -65,6 +67,7 @@ public class PropertyDatasourceTest {
         MockRequestPathInfo mockRequestPathInfo = (MockRequestPathInfo) request.getRequestPathInfo();
         mockRequestPathInfo.setSuffix("/non-existing");
         PropertyDatasource propertyDatasource = request.adaptTo(PropertyDatasource.class);
+        assertNotNull(propertyDatasource);
         String jsonString = propertyDatasource.getJson();
         String expected = "{}";
         assertEquals(expected, jsonString);
