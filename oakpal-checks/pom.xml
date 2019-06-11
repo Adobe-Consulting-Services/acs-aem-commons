@@ -109,8 +109,8 @@
         <profile>
             <id>webster-aem64</id>
             <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
-            your settings.xml file that sets a "webster.segmentStore" property with an absolute path to the
-            crx-quickstart/repository/segmentstore directory of a locally-installed AEM 6.4 server. -->
+            your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
+            crx-quickstart/repository directory of a locally-installed AEM 6.4 server. -->
             <build>
                 <plugins>
                     <plugin>
@@ -121,22 +121,28 @@
                                 <checklist>
                                     <file>src/main/resources/OAKPAL-INF/checklist/acs-aem64-content-classifications.json</file>
                                     <config>
+                                        <jcrNamespaces>
+                                            <namespace>
+                                                <prefix>granite</prefix>
+                                                <uri>http://www.adobe.com/jcr/granite/1.0</uri>
+                                            </namespace>
+                                        </jcrNamespaces>
                                         <selectNodeTypes>
                                             <type>granite:PublicArea</type>
                                             <type>granite:FinalArea</type>
                                             <type>granite:InternalArea</type>
                                             <type>granite:AbstractArea</type>
                                         </selectNodeTypes>
-                                        <scopeNodeTypes>
-                                            <nodeType>
+                                        <nodeTypeFilters>
+                                            <filter>
                                                 <type>exclude</type>
                                                 <pattern>nt:file</pattern>
-                                            </nodeType>
-                                            <nodeType>
+                                            </filter>
+                                            <filter>
                                                 <type>exclude</type>
                                                 <pattern>nt:resource</pattern>
-                                            </nodeType>
-                                        </scopeNodeTypes>
+                                            </filter>
+                                        </nodeTypeFilters>
                                     </config>
                                 </checklist>
                             </websterTargets>
@@ -148,8 +154,8 @@
         <profile>
             <id>webster-aem65</id>
             <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
-            your settings.xml file that sets a "webster.segmentStore" property with an absolute path to the
-            crx-quickstart/repository/segmentstore directory of a locally-installed AEM 6.5 server. -->
+            your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
+            crx-quickstart/repository directory of a locally-installed AEM 6.5 server. -->
             <build>
                 <plugins>
                     <plugin>
@@ -166,16 +172,16 @@
                                             <type>granite:InternalArea</type>
                                             <type>granite:AbstractArea</type>
                                         </selectNodeTypes>
-                                        <scopeNodeTypes>
-                                            <nodeType>
+                                        <nodeTypeFilters>
+                                            <filter>
                                                 <type>exclude</type>
                                                 <pattern>nt:file</pattern>
-                                            </nodeType>
-                                            <nodeType>
+                                            </filter>
+                                            <filter>
                                                 <type>exclude</type>
                                                 <pattern>nt:resource</pattern>
-                                            </nodeType>
-                                        </scopeNodeTypes>
+                                            </filter>
+                                        </nodeTypeFilters>
                                     </config>
                                 </checklist>
                             </websterTargets>
