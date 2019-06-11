@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1868 - Added support for @Named annotation in MCP Form Field processor
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
+- #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 
 ## [4.1.0] - 2019-05-07
 
@@ -39,6 +40,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1774 - Upgraded oakpal dependency to 1.2.0 to support execution in an AEM OSGi runtime.
 - #1786 - Shade embedded libraries and produce dependency-reduced pom to avoid downstream effects of embedded dependencies.
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
+- #1856 - It's now possible to change the locale used for number, date and time handling for Spreadsheet instances, allowing consistent behavior independent of OS defaults.
 - #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
 
 ### Fixed
