@@ -40,16 +40,16 @@ import org.junit.Test;
 public class ChecklistIT {
     public static final String OAKPAL_MODULE_NAME = "com.adobe.acs.acs-aem-commons-oakpal-checks";
     public static final String OAKPAL_CHECKLIST_INTERNAL = "acs-internal";
-    public static final String OAKPAL_CHECKLIST_AEM64_CONTENT_CLASSIFICATIONS = "acs-aem64-content-classifications";
-    public static final String OAKPAL_CHECKLIST_AEM65_CONTENT_CLASSIFICATIONS = "acs-aem65-content-classifications";
+    public static final String OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64 = "content-class-aem64";
+    public static final String OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65 = "content-class-aem65";
     public static final String OAKPAL_CHECKLIST_PUBLIC = "acs-commons-integrators";
 
     @Test
     public void testLoadChecklists() throws Exception {
         ChecklistPlanner planner = new ChecklistPlanner(Arrays.asList(
                 OAKPAL_CHECKLIST_INTERNAL,
-                OAKPAL_CHECKLIST_AEM64_CONTENT_CLASSIFICATIONS,
-                OAKPAL_CHECKLIST_AEM65_CONTENT_CLASSIFICATIONS,
+                OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64,
+                OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65,
                 OAKPAL_CHECKLIST_PUBLIC));
         planner.discoverChecklists();
 
@@ -68,12 +68,12 @@ public class ChecklistIT {
 
         expectNames.addAll(Stream.of(
                 "content-classifications"
-        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_AEM64_CONTENT_CLASSIFICATIONS + "/" + name)
+        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64 + "/" + name)
                 .collect(Collectors.toList()));
 
         expectNames.addAll(Stream.of(
                 "content-classifications"
-        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_AEM65_CONTENT_CLASSIFICATIONS + "/" + name)
+        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65 + "/" + name)
                 .collect(Collectors.toList()));
 
         expectNames.addAll(Stream.of(
