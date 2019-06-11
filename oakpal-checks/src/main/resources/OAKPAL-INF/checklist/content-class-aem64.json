@@ -1,11 +1,16 @@
 {
-  "name":"acs-aem65-content-classifications",
+  "name":"content-class-aem64",
   "checks":[
     {
       "name":"content-classifications",
       "impl":"com.adobe.acs.commons.oakpal.checks.ContentClassifications",
       "config":{
         "scopePaths":[
+          {
+            "comment":"Known extension of final supertype.",
+            "type":"exclude",
+            "pattern":"/apps/acs-commons/components/workflow/.*"
+          },
           {
             "comment":"Known usages of internal resource types.",
             "type":"exclude",
@@ -26,13 +31,6 @@
     }
   ],
   "forcedRoots":[
-    {
-      "path":"/content/screens/blueprints",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
     {
       "path":"/libs/clientlibs/ckeditor",
       "primaryType":"cq:ClientLibraryFolder",
@@ -1063,49 +1061,49 @@
       "path":"/libs/cq/gui/components/projects/admin/pim",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:PublicArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/pim/clientlibs",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/pim/links",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/pim/taskimage",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/productreviewtd",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/reviewtd",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/gui/components/projects/admin/shotlistpayload",
       "primaryType":"nt:folder",
       "mixinTypes":[
-        "granite:InternalArea"
+        "granite:FinalArea"
       ]
     },
     {
@@ -1557,7 +1555,28 @@
       ]
     },
     {
+      "path":"/libs/cq/personalization/touch-ui/components/ambitcard",
+      "primaryType":"sling:Folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
       "path":"/libs/cq/personalization/touch-ui/components/audience",
+      "primaryType":"sling:Folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/cq/personalization/touch-ui/components/audiencechooser",
+      "primaryType":"sling:Folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/cq/personalization/touch-ui/components/audienceexperiencemapping",
       "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:InternalArea"
@@ -1571,7 +1590,21 @@
       ]
     },
     {
+      "path":"/libs/cq/personalization/touch-ui/components/createofferlibhyperlink",
+      "primaryType":"sling:Folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
       "path":"/libs/cq/personalization/touch-ui/components/datasource",
+      "primaryType":"sling:Folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/cq/personalization/touch-ui/components/experience",
       "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:InternalArea"
@@ -1649,13 +1682,6 @@
     },
     {
       "path":"/libs/cq/personalization/touch-ui/content/v2",
-      "primaryType":"sling:Folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/personalization/touch-ui/content/v2/commons",
       "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:InternalArea"
@@ -1796,13 +1822,6 @@
       ]
     },
     {
-      "path":"/libs/cq/workflow/components/and_split.clientlib",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/cq/workflow/components/collection/definition",
       "primaryType":"cq:Component",
       "mixinTypes":[
@@ -1831,27 +1850,6 @@
       ]
     },
     {
-      "path":"/libs/cq/workflow/components/datatypes",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/workflow/components/datatypes/com.google.gson.JsonObject",
-      "primaryType":"sling:Folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/workflow/components/datatypes/org.w3c.dom.Document",
-      "primaryType":"sling:Folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/cq/workflow/components/engine",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -1863,13 +1861,6 @@
       "primaryType":"nt:folder",
       "mixinTypes":[
         "granite:FinalArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/workflow/components/goto.clientlib",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
       ]
     },
     {
@@ -1904,28 +1895,28 @@
       "path":"/libs/cq/workflow/components/model/container",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/workflow/components/model/dialog",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/workflow/components/model/dynamic_participant",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/workflow/components/model/external_process",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
@@ -1953,18 +1944,11 @@
       "path":"/libs/cq/workflow/components/model/participant",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
       "path":"/libs/cq/workflow/components/model/process",
-      "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:PublicArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/workflow/components/model/set_variable",
       "primaryType":"cq:Component",
       "mixinTypes":[
         "granite:FinalArea"
@@ -1974,7 +1958,7 @@
       "path":"/libs/cq/workflow/components/model/step",
       "primaryType":"cq:Component",
       "mixinTypes":[
-        "granite:PublicArea"
+        "granite:FinalArea"
       ]
     },
     {
@@ -1985,22 +1969,8 @@
       ]
     },
     {
-      "path":"/libs/cq/workflow/components/or_split.clientlib",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/cq/workflow/components/pages/model",
       "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/cq/workflow/components/set_variable.clientlib",
-      "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -2118,13 +2088,6 @@
       ]
     },
     {
-      "path":"/libs/cq/workflow/gui/components/common/schematree",
-      "primaryType":"sling:Folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/cq/workflow/templates",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -2161,13 +2124,6 @@
     },
     {
       "path":"/libs/dam/cfm/admin/clientlibs",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/dam/cfm/admin/components/admin",
       "primaryType":"nt:folder",
       "mixinTypes":[
         "granite:InternalArea"
@@ -2483,13 +2439,6 @@
     },
     {
       "path":"/libs/dam/components/scene7/panoramicmedia",
-      "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
-    {
-      "path":"/libs/dam/components/scene7/video360media",
       "primaryType":"cq:Component",
       "mixinTypes":[
         "granite:FinalArea"
@@ -2887,13 +2836,6 @@
       ]
     },
     {
-      "path":"/libs/dam/gui/content/s7dam/imagepresets/imagepresets/columnpreview",
-      "primaryType":"nt:unstructured",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/dam/gui/content/stock/options",
       "primaryType":"sling:Folder",
       "mixinTypes":[
@@ -3252,13 +3194,6 @@
       ]
     },
     {
-      "path":"/libs/dam/gui/coral/components/admin/customthumb/newdialog",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
-    {
       "path":"/libs/dam/gui/coral/components/admin/customthumb/newsteps",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -3491,13 +3426,6 @@
     },
     {
       "path":"/libs/dam/gui/coral/components/admin/metadataeditor/subassetsreferences",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/dam/gui/coral/components/admin/metadataeditorcollection",
       "primaryType":"nt:folder",
       "mixinTypes":[
         "granite:InternalArea"
@@ -3840,13 +3768,6 @@
       ]
     },
     {
-      "path":"/libs/dam/gui/coral/components/commons/datasource",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/dam/gui/coral/components/s7dam",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -3880,21 +3801,6 @@
       "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:PublicArea"
-      ]
-    },
-    {
-      "path":"/libs/dam/preview",
-      "primaryType":"sling:OrderedFolder",
-      "mixinTypes":[
-        "granite:FinalArea",
-        "rep:AccessControllable"
-      ]
-    },
-    {
-      "path":"/libs/dam/remoteassets/content/configuration",
-      "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
       ]
     },
     {
@@ -4570,6 +4476,13 @@
       ]
     },
     {
+      "path":"/libs/fd/af/coral",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
       "path":"/libs/fd/af/dor/datasource",
       "primaryType":"sling:Folder",
       "mixinTypes":[
@@ -4727,20 +4640,6 @@
     {
       "path":"/libs/fd/af/layouts/gridFluidLayout/granite:data",
       "primaryType":"nt:unstructured",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/fd/af/layouts/gridFluidLayout2",
-      "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:PublicArea"
-      ]
-    },
-    {
-      "path":"/libs/fd/af/layouts/gridFluidLayout2/dialogProperties",
-      "primaryType":"cq:Panel",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -4956,13 +4855,6 @@
       ]
     },
     {
-      "path":"/libs/fd/af/runtime/clientlibs/guideChartReducer",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
-    {
       "path":"/libs/fd/af/runtime/clientlibs/guideD3V3",
       "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
@@ -5089,13 +4981,6 @@
       ]
     },
     {
-      "path":"/libs/fd/channelcore/clientlibs/authorTree",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/fd/channelcore/clientlibs/components",
       "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
@@ -5131,13 +5016,6 @@
       ]
     },
     {
-      "path":"/libs/fd/channelcore/clientlibs/layermanager",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/fd/channelcore/clientlibs/utils",
       "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
@@ -5154,13 +5032,6 @@
     {
       "path":"/libs/fd/channelcore/components/authoring",
       "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/fd/channelcore/components/fdmvariableassignment",
-      "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -5245,13 +5116,6 @@
     {
       "path":"/libs/fd/fm/mcdocument",
       "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/fd/fm/resources",
-      "primaryType":"sling:Folder",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -6549,7 +6413,6 @@
       "path":"/libs/granite/omnisearch/content/metadata/screens",
       "primaryType":"sling:Folder",
       "mixinTypes":[
-        "rep:AccessControllable",
         "granite:InternalArea"
       ]
     },
@@ -6773,13 +6636,6 @@
       ]
     },
     {
-      "path":"/libs/granite/security/clientlibs/permissionbase",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/granite/security/components",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -6788,13 +6644,6 @@
     },
     {
       "path":"/libs/granite/security/content/groupadmin",
-      "primaryType":"nt:unstructured",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/granite/security/content/permissionsadmin",
       "primaryType":"nt:unstructured",
       "mixinTypes":[
         "granite:InternalArea"
@@ -9133,6 +8982,13 @@
       ]
     },
     {
+      "path":"/libs/mcm/components/newsletter/publish",
+      "primaryType":"cq:Component",
+      "mixinTypes":[
+        "granite:FinalArea"
+      ]
+    },
+    {
       "path":"/libs/mcm/components/newsletter/sendwizard",
       "primaryType":"cq:Component",
       "mixinTypes":[
@@ -9162,6 +9018,34 @@
       ]
     },
     {
+      "path":"/libs/mcm/exacttarget/components",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/mcm/exacttarget/widgets",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/mcm/salesforce/components",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/mcm/salesforce/widgets",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
       "path":"/libs/mcm/widgets",
       "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
@@ -9172,7 +9056,6 @@
       "path":"/libs/msm/screens",
       "primaryType":"sling:OrderedFolder",
       "mixinTypes":[
-        "rep:AccessControllable",
         "granite:InternalArea"
       ]
     },
@@ -9197,6 +9080,13 @@
       "mixinTypes":[
         "rep:AccessControllable",
         "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/screens/core/blueprints",
+      "primaryType":"nt:folder",
+      "mixinTypes":[
+        "granite:FinalArea"
       ]
     },
     {
@@ -9333,13 +9223,6 @@
       ]
     },
     {
-      "path":"/libs/screens/dcc/components/clientlibs/validation",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/screens/dcc/components/columnitem",
       "primaryType":"nt:folder",
       "mixinTypes":[
@@ -9363,34 +9246,6 @@
     {
       "path":"/libs/screens/dcc/components/datasources",
       "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/components/fileuploaddrop",
-      "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/components/fileuploaddrop/clientlibs",
-      "primaryType":"cq:ClientLibraryFolder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/components/importreview",
-      "primaryType":"cq:Component",
-      "mixinTypes":[
-        "granite:FinalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/components/importreview/clientlibs",
-      "primaryType":"cq:ClientLibraryFolder",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -9426,13 +9281,6 @@
     {
       "path":"/libs/screens/dcc/components/renderconditions",
       "primaryType":"nt:folder",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/content/activationdialog",
-      "primaryType":"nt:unstructured",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -9515,29 +9363,8 @@
       ]
     },
     {
-      "path":"/libs/screens/dcc/content/editserverdialog",
-      "primaryType":"nt:unstructured",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/content/importwizard",
-      "primaryType":"cq:Page",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
       "path":"/libs/screens/dcc/content/main",
       "primaryType":"cq:Page",
-      "mixinTypes":[
-        "granite:InternalArea"
-      ]
-    },
-    {
-      "path":"/libs/screens/dcc/content/main/jcr:content/rails/references",
-      "primaryType":"nt:unstructured",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -9566,6 +9393,13 @@
     {
       "path":"/libs/screens/dcc/content/screenshotdialog",
       "primaryType":"nt:unstructured",
+      "mixinTypes":[
+        "granite:InternalArea"
+      ]
+    },
+    {
+      "path":"/libs/screens/player",
+      "primaryType":"nt:folder",
       "mixinTypes":[
         "granite:InternalArea"
       ]
@@ -11223,11 +11057,19 @@
         "mix:title",
         "granite:FinalArea"
       ]
+    },
+    {
+      "path":"/libs/workflow/scripts/urlcaller.ecma/jcr:content",
+      "mixinTypes":[
+        "mix:title",
+        "granite:FinalArea"
+      ]
     }
   ],
   "jcrNodetypes":{
     "cq:ClientLibraryFolder":{
       ">":[
+        "nt:base",
         "sling:Folder"
       ],
       "-":[
@@ -11264,6 +11106,7 @@
     "cq:Component":{
       ">":[
         "mix:title",
+        "nt:base",
         "nt:folder",
         "sling:ResourceSuperType"
       ],
@@ -11391,7 +11234,8 @@
     },
     "cq:Dialog":{
       ">":[
-        "cq:Widget"
+        "cq:Widget",
+        "nt:base"
       ],
       "@":[
         "orderable"
@@ -11399,6 +11243,7 @@
     },
     "cq:EditConfig":{
       ">":[
+        "nt:base",
         "nt:hierarchyNode",
         "nt:unstructured"
       ],
@@ -11499,14 +11344,14 @@
         },
         {
           "name":"*",
+          "type":"undefined"
+        },
+        {
+          "name":"*",
           "type":"undefined",
           "@":[
             "multiple"
           ]
-        },
-        {
-          "name":"*",
-          "type":"undefined"
         }
       ],
       "+":[
@@ -11525,6 +11370,7 @@
     },
     "cq:InplaceEditingConfig":{
       ">":[
+        "nt:base",
         "nt:unstructured"
       ],
       "@":[
@@ -11556,6 +11402,7 @@
     },
     "cq:Page":{
       ">":[
+        "nt:base",
         "nt:hierarchyNode"
       ],
       "@":[
@@ -11584,7 +11431,8 @@
     },
     "cq:Panel":{
       ">":[
-        "cq:Widget"
+        "cq:Widget",
+        "nt:base"
       ],
       "@":[
         "orderable"
@@ -11593,6 +11441,7 @@
     "cq:Template":{
       ">":[
         "mix:title",
+        "nt:base",
         "nt:hierarchyNode"
       ],
       "-":[
@@ -11666,6 +11515,7 @@
     },
     "cq:Widget":{
       ">":[
+        "nt:base",
         "nt:unstructured"
       ],
       "@":[
@@ -11697,6 +11547,7 @@
     },
     "cq:WidgetCollection":{
       ">":[
+        "nt:base",
         "nt:unstructured"
       ],
       "@":[

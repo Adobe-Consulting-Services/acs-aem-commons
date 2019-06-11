@@ -39,9 +39,9 @@
                                 Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-Checklist: OAKPAL-INF/checklist/acs-internal.json,\
-                                    OAKPAL-INF/checklist/acs-aem64-content-classifications.json,\
-                                    OAKPAL-INF/checklist/acs-aem65-content-classifications.json,\
-                                    OAKPAL-INF/checklist/acs-commons-integrators.json
+                                    OAKPAL-INF/checklist/acs-commons-integrators.json,\
+                                    OAKPAL-INF/checklist/content-class-aem64.json,\
+                                    OAKPAL-INF/checklist/content-class-aem65.json
                                 Export-Package: com.adobe.acs.commons.oakpal.checks
                                 Import-Package: org.json;version="[20090211,20180813]",*
                             ]]></bnd>
@@ -119,7 +119,7 @@
                         <configuration>
                             <websterTargets>
                                 <checklist>
-                                    <file>src/main/resources/OAKPAL-INF/checklist/acs-aem64-content-classifications.json</file>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/content-class-aem64.json</file>
                                     <config>
                                         <jcrNamespaces>
                                             <namespace>
@@ -164,7 +164,7 @@
                         <configuration>
                             <websterTargets>
                                 <checklist>
-                                    <file>src/main/resources/OAKPAL-INF/checklist/acs-aem65-content-classifications.json</file>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/content-class-aem65.json</file>
                                     <config>
                                         <selectNodeTypes>
                                             <type>granite:PublicArea</type>
