@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
+- #1944 - Added Templated Dialogs feature
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
