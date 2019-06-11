@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Injector implementation for `@ChildRequest`
@@ -93,39 +94,29 @@ public class ChildResourceFromRequestInjector implements Injector {
 
     private Object getValueForRequest(SlingHttpServletRequest request, String name, Type declaredType) {
         Resource child = request.getResource().getChild(name);
-        if (child != null) {
-            if (declaredType instanceof Class) {
-                return new OverridePathSlingRequestWrapper(request, child.getPath());
-            } else if (this.isDeclaredTypeCollection(declaredType)) {
-                List<SlingHttpServletRequest> childRequests = new ArrayList<>();
-                Class type = this.getActualType((ParameterizedType) declaredType);
-                if (type != null) {
-                    Iterator<Resource> children = child.listChildren();
-                    while (children.hasNext()) {
-                        childRequests.add(new OverridePathSlingRequestWrapper(request, children.next().getPath()));
-                    }
-                }
-                return childRequests;
-            }
-        }
-        return null;
+        return getValueSingleOrList(child, name, declaredType,
+                (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath()); });
     }
 
     private Object getValueForResource(Resource resource, String name, Type declaredType) {
         Resource child = resource.getChild(name);
-        if (child != null) {
+        return getValueSingleOrList(child, name, declaredType, (childResource) -> { return childResource; });
+    }
+
+    private Object getValueSingleOrList(Resource childAdaptable, String name, Type declaredType, Function<Resource, Object> transformer) {
+        if (childAdaptable != null) {
             if (declaredType instanceof Class) {
-                return child;
+                return transformer.apply(childAdaptable);
             } else if (this.isDeclaredTypeCollection(declaredType)) {
-                List<Resource> childResources = new ArrayList<>();
+                List<Object> childAdaptables = new ArrayList<>();
                 Class type = this.getActualType((ParameterizedType) declaredType);
                 if (type != null) {
-                    Iterator<Resource> children = child.listChildren();
+                    Iterator<Resource> children = childAdaptable.listChildren();
                     while (children.hasNext()) {
-                        childResources.add(children.next());
+                        childAdaptables.add(transformer.apply(children.next()));
                     }
                 }
-                return childResources;
+                return childAdaptables;
             }
         }
         return null;
