@@ -36,8 +36,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
+import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultConfigMap;
+import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultService;
 import static org.junit.Assert.assertEquals;
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PropertyAggregatorServiceImplTest {
