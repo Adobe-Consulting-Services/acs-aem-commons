@@ -55,10 +55,10 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd = PropertyAggregatorServiceImpl.Config.class)
 public class PropertyAggregatorServiceImpl implements PropertyAggregatorService {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PropertyAggregatorServiceImpl.class);
 
-    private final String PAGE_PROP_PREFIX = "page_properties";
-    private final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
+    private static final String PAGE_PROP_PREFIX = "page_properties";
+    private static final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
 
     private List<Pattern> exclusionList;
     private Map<String, String> additionalData;
@@ -129,12 +129,12 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
      */
     private void addPagePropertiesToMap(final Map<String,Object> targetPropertyMap, final Page page, final String prefix) {
         ValueMap pageProperties = page.getProperties();
-        Set<String> propertyNames = pageProperties.keySet();
-        for (String propertyName : propertyNames) {
-            if (notInMap(targetPropertyMap, propertyName)
-                    && isNotExcluded(propertyName)
-                    && isAllowedType(pageProperties.get(propertyName))) {
-                targetPropertyMap.put(prefix(prefix, propertyName), pageProperties.get(propertyName));
+        Set<Map.Entry<String, Object>> entries = pageProperties.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            if (notInMap(targetPropertyMap, entry.getKey())
+                    && isNotExcluded(entry.getKey())
+                    && isAllowedType(pageProperties.get(entry.getKey()))) {
+                targetPropertyMap.put(prefix(prefix, entry.getKey()), pageProperties.get(entry.getKey()));
             }
         }
     }

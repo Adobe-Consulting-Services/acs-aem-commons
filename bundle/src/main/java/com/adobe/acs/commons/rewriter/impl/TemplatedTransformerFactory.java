@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
         "pipeline.type=templated-transformer"
 })
 public class TemplatedTransformerFactory implements TransformerFactory {
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TemplatedTransformerFactory.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;

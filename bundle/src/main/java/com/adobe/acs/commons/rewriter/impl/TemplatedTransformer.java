@@ -44,7 +44,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(TemplatedTransformer.class);
 
     private Map<String, Object> properties;
     private PropertyAggregatorService localService;
