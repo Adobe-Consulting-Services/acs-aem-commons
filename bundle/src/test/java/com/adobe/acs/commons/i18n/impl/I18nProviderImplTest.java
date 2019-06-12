@@ -19,35 +19,6 @@
  */
 package com.adobe.acs.commons.i18n.impl;
 
-import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
-import com.day.cq.i18n.I18n;
-import com.day.cq.wcm.api.Page;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.i18n.ResourceBundleProvider;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Constants;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
@@ -57,6 +28,32 @@ import static org.mockito.internal.verification.VerificationModeFactory.noMoreIn
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.i18n.ResourceBundleProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Constants;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
+import com.day.cq.i18n.I18n;
+import com.day.cq.wcm.api.Page;
+
 @PrepareForTest({
         I18n.class,
         I18nProviderImpl.class,
@@ -64,6 +61,13 @@ import static org.powermock.api.mockito.PowerMockito.when;
 })
 @RunWith(PowerMockRunner.class)
 public class I18nProviderImplTest {
+
+    private static final String I18N_KEY = "i18nKey";
+
+    private final I18nProviderImpl i18nProvider = new I18nProviderImpl();
+    private final HashMap<String, Object> props = new HashMap<>();
+
+    private final Map<String,String> i18nMap = new HashMap<>();
 
     @Mock
     private Config config;
@@ -80,20 +84,14 @@ public class I18nProviderImplTest {
     @Mock
     private SlingHttpServletRequest request;
 
-    private Map<String,String> i18nMap = new HashMap<>();
-
     @Mock
     private Page resourcePage;
-
-    private final I18nProviderImpl i18nProvider = new I18nProviderImpl();
-    private final HashMap<String, Object> props = new HashMap<>();
 
     public I18nProviderImplTest() throws NotCompliantMBeanException {
     }
 
     @Before
-    public void setUp(){
-
+    public void setUp() {
         props.clear();
         props.put(Constants.SERVICE_ID, 11L);
         props.put(Constants.SERVICE_RANKING, 11);
@@ -101,7 +99,7 @@ public class I18nProviderImplTest {
         when(resourceBundleProvider.getResourceBundle(Locale.US)).thenReturn(resourceBundle);
         when(resource.getPath()).thenReturn("/some/path");
 
-        i18nMap.put("i18nKey", "Translated from English!");
+        i18nMap.put(I18N_KEY, "Translated from English!");
 
         PowerMockito.mockStatic(I18n.class);
         when(I18n.get(any(HttpServletRequest.class), anyString())).thenAnswer(
@@ -124,16 +122,17 @@ public class I18nProviderImplTest {
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         i18nProvider.unbindResourceBundleProvider(resourceBundleProvider, props);
     }
 
-    public void test_get_bytes_length(){
+    @Test
+    public void test_get_bytes_length() {
         assertEquals(0L, i18nProvider.getBytesLength(null));
     }
 
     @Test
-    public void test_secondary_activate(){
+    public void test_secondary_activate() {
         when(config.getTtl()).thenReturn(Config.DEFAULT_TTL);
         when(config.maxSizeCount()).thenReturn(Config.DEFAULT_MAX_SIZE_IN_MB);
 
@@ -142,11 +141,8 @@ public class I18nProviderImplTest {
 
     @Test
     public void test_translate_resource() throws Exception {
-
-        final String key = "i18nKey";
-
-        I18n mocked = mock(I18n.class);
-        when(mocked.get(key)).thenReturn("Translated from English!");
+        final I18n mocked = mock(I18n.class);
+        when(mocked.get(I18N_KEY)).thenReturn("Translated from English!");
 
         PowerMockito.whenNew(I18n.class)
                 .withParameterTypes(ResourceBundle.class)
@@ -157,35 +153,31 @@ public class I18nProviderImplTest {
 
         when(resourceBundleProvider.getResourceBundle(Locale.US)).thenReturn(resourceBundle);
 
-        String translated = i18nProvider.translate(key,resource);
+        final String translated = i18nProvider.translate(I18N_KEY, resource);
         assertEquals("Translated from English!", translated);
     }
 
     @Test
-    public void test_translate_request(){
-
-        final String key = "i18nKey";
-        String translated = i18nProvider.translate(key,request);
+    public void test_translate_request() {
+        final String translated = i18nProvider.translate(I18N_KEY, request);
         assertEquals("Translated from English!", translated);
 
         PowerMockito.verifyStatic(I18n.class, times(1));
-        I18n.get(request, key);
+        I18n.get(request, I18N_KEY);
     }
 
     @Test
-    public void test_translate_locale(){
-
-        final String key = "i18nKey";
-        String translated = i18nProvider.translate(key,Locale.US);
+    public void test_translate_locale() {
+        final String translated = i18nProvider.translate(I18N_KEY, Locale.US);
         assertEquals("Translated from English!", translated);
 
         PowerMockito.verifyStatic(I18n.class, times(1));
-        I18n.get(resourceBundle, key);
+        I18n.get(resourceBundle, I18N_KEY);
     }
 
     @Test
     public void test_i18n_request() throws Exception {
-        I18n mocked = mock(I18n.class);
+        final I18n mocked = mock(I18n.class);
 
         PowerMockito.whenNew(I18n.class)
                 .withParameterTypes(HttpServletRequest.class)
@@ -193,13 +185,13 @@ public class I18nProviderImplTest {
                 .thenReturn(mocked);
 
 
-        I18n actual = i18nProvider.i18n(request);
+        final I18n actual = i18nProvider.i18n(request);
         assertSame(mocked, actual);
     }
 
     @Test
     public void test_i18n_locale() throws Exception {
-        I18n mocked = mock(I18n.class);
+        final I18n mocked = mock(I18n.class);
 
         PowerMockito.whenNew(I18n.class)
                 .withParameterTypes(ResourceBundle.class)
@@ -207,28 +199,27 @@ public class I18nProviderImplTest {
                 .thenReturn(mocked);
 
 
-        I18n actual = i18nProvider.i18n(Locale.US);
+        final I18n actual = i18nProvider.i18n(Locale.US);
         assertSame(mocked, actual);
     }
 
     @Test
     public void test_i18n_resource() throws Exception {
-        I18n mocked = mock(I18n.class);
+        final I18n mocked = mock(I18n.class);
 
         PowerMockito.whenNew(I18n.class)
                 .withParameterTypes(ResourceBundle.class)
                 .withArguments(resourceBundle)
                 .thenReturn(mocked);
 
-        I18n actual = i18nProvider.i18n(resource);
+        final I18n actual = i18nProvider.i18n(resource);
         assertSame(mocked, actual);
     }
 
 
     @Test
     public void test_i18n_resource_withcaching() throws Exception {
-
-        I18n mocked = mock(I18n.class);
+        final I18n mocked = mock(I18n.class);
 
         PowerMockito.whenNew(I18n.class)
                 .withParameterTypes(ResourceBundle.class)
@@ -236,12 +227,12 @@ public class I18nProviderImplTest {
                 .thenReturn(mocked);
 
 
-        I18n actual = i18nProvider.i18n(resource);
+        final I18n actual = i18nProvider.i18n(resource);
         assertSame(mocked, actual);
 
         PowerMockito.verifyNew(I18n.class, times(1)).withArguments(resourceBundle);
 
-        I18n cached = i18nProvider.i18n(resource);
+        final I18n cached = i18nProvider.i18n(resource);
         PowerMockito.verifyNew(I18n.class, noMoreInteractions()).withArguments(resourceBundle);
 
         assertSame(actual, cached);
