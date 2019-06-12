@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -77,7 +78,7 @@ public class SpreadsheetTest {
         workbookData.close();
 
         InputStream dataTypesFile = SpreadsheetTest.class.getResourceAsStream("/com/adobe/acs/commons/data/spreadsheet-data-types.xlsx");
-        dataTypesSheet = new Spreadsheet(false, dataTypesFile).buildSpreadsheet();
+        dataTypesSheet = new Spreadsheet(false, dataTypesFile).buildSpreadsheet(Locale.US);
     }
 
     /**
