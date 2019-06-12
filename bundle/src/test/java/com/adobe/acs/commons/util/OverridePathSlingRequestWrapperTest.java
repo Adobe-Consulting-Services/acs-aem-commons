@@ -114,23 +114,22 @@ public class OverridePathSlingRequestWrapperTest {
     }
 
     @Test
-    public void testRelativePath() {
-        this.context.currentResource("/content");
-
-        OverridePathSlingRequestWrapper resourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), "child");
-        Map<String, Object> resourceWrapperBindings = (Map<String, Object>) resourceWrapper.getAttribute(SlingBindings.class.getName());
-        assertNotNull(resourceWrapperBindings.get(WCMBindings.PROPERTIES));
-        assertEquals("resourceval", ((ValueMap) resourceWrapperBindings.get(WCMBindings.PROPERTIES)).get("prop"));
-    }
-
-    @Test
     public void testResource() {
-        this.context.currentResource(new NonExistingResource(this.context.resourceResolver(), "/content/bogus"));
+        this.context.currentResource(RESOURCE_PATH);
 
         OverridePathSlingRequestWrapper pageResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), PAGE_CHILD_RESOURCE_PATH);
         assertEquals(PAGE_CHILD_RESOURCE_PATH, pageResourceWrapper.getResource().getPath());
 
         OverridePathSlingRequestWrapper resourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), RESOURCE_PATH);
         assertEquals(RESOURCE_PATH, resourceWrapper.getResource().getPath());
+    }
+
+    @Test
+    public void testSupportForNonExistingResource() {
+        this.context.currentResource(new NonExistingResource(this.context.resourceResolver(), "/content/bogus1"));
+
+        OverridePathSlingRequestWrapper bogusResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), "/content/bogus2");
+        assertEquals("/content/bogus2", bogusResourceWrapper.getResource().getPath());
+        assertEquals(Resource.RESOURCE_TYPE_NON_EXISTING, bogusResourceWrapper.getResource().getResourceType());
     }
 }
