@@ -126,6 +126,40 @@
 
     <profiles>
         <profile>
+            <id>extract-bundle-info</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.gmaven</groupId>
+                        <artifactId>groovy-maven-plugin</artifactId>
+                        <version>2.1</version>
+                        <executions>
+                            <execution>
+                                <id>extract-bundle-info</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <defaults>
+                                        <aemVersion>6.3</aemVersion>
+                                    </defaults>
+                                    <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+                                <artifactId>http-builder</artifactId>
+                                <version>0.7</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>webster-aem64</id>
             <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
             your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
@@ -248,41 +282,4 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>extract-bundle-info</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.gmaven</groupId>
-                        <artifactId>groovy-maven-plugin</artifactId>
-                        <version>2.1</version>
-                        <executions>
-                            <execution>
-                                <id>extract-bundle-info</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
-                                <configuration>
-                                    <defaults>
-                                        <aemVersion>6.3</aemVersion>
-                                    </defaults>
-                                    <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.codehaus.groovy.modules.http-builder</groupId>
-                                <artifactId>http-builder</artifactId>
-                                <version>0.7</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
