@@ -62,6 +62,9 @@ import java.util.List;
 })
 @Service
 public class BrandPortalSyncProcess implements WorkflowProcess {
+
+    public static final String PROCESS_ARGS = "PROCESS_ARGS";
+
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
 
     @Reference
@@ -76,12 +79,10 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
     @Reference
     private DAMSyncService damSyncService;
 
-    public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
+    public final void execute(final WorkItem workItem, final WorkflowSession workflowSession, final MetaDataMap metaDataMap) throws WorkflowException {
         final List<String> assetPaths = new ArrayList<String>();
 
-        final ReplicationActionType replicationActionType = getReplicationActionType(metaDataMap);
-
-        try (ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession)) {
+        try (final ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession)) {
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
 
@@ -99,25 +100,36 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
             }
 
             // Based on the WF Process activation/deactivation directive; leverage the DamSyncService to publish the the Asset
-            if (ReplicationActionType.ACTIVATE.equals(replicationActionType)) {
+            final ReplicationActionType replicationActionType = getReplicationActionType(metaDataMap);
+
+            if (replicationActionType == ReplicationActionType.ACTIVATE) {
                 damSyncService.publishResourcesToMP(assetPaths, resourceResolver);
-            } else if (ReplicationActionType.DEACTIVATE.equals(replicationActionType)) {
-                damSyncService.unpublishResourcesFromMP(assetPaths, resourceResolver);
-            } else {
-                log.warn("Unknown replication action type [ {} ] for AEM Assets Brand Portal Sync", replicationActionType);
+                return;
             }
-        } catch (RepositoryException e) {
+
+            if (replicationActionType == ReplicationActionType.DEACTIVATE) {
+                damSyncService.unpublishResourcesFromMP(assetPaths, resourceResolver);
+                return;
+            }
+
+            log.warn("Unknown replication action type [ {} ] for AEM Assets Brand Portal Sync",
+                    replicationActionType);
+        } catch (final RepositoryException e) {
             log.error("Could not find the payload", e);
             throw new WorkflowException("Could not find the payload");
         }
     }
 
     protected final ReplicationActionType getReplicationActionType(final MetaDataMap metaDataMap) {
-        final String processArgs = StringUtils.trim(metaDataMap.get("PROCESS_ARGS", ReplicationActionType.ACTIVATE.getName()));
+        final String activateName = ReplicationActionType.ACTIVATE.getName();
+        String processArgs = metaDataMap.get(PROCESS_ARGS, activateName);
+        processArgs = StringUtils.trim(processArgs);
 
-        if (StringUtils.equalsIgnoreCase(processArgs, ReplicationActionType.ACTIVATE.getName())) {
+        if (StringUtils.equalsIgnoreCase(processArgs, activateName)) {
            return ReplicationActionType.ACTIVATE;
-        } else if (StringUtils.equalsIgnoreCase(processArgs, ReplicationActionType.DEACTIVATE.getName())) {
+        }
+
+        if (StringUtils.equalsIgnoreCase(processArgs, ReplicationActionType.DEACTIVATE.getName())) {
             return ReplicationActionType.DEACTIVATE;
         }
 

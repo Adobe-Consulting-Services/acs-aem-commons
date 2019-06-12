@@ -61,15 +61,13 @@ public final class BrandPortalSyncProcessTest {
 
     private static final String ASSET_PATH = "/content/dam/foo.png";
 
-    private static final String PROCESS_ARGS = "PROCESS_ARGS";
+    private static final String ACTIVATE_CAPITALS = ReplicationActionType.ACTIVATE.getName();
 
-    private static final String ACTIVATE_SMALL = "activate";
+    private static final String ACTIVATE_SMALL = StringUtils.lowerCase(ACTIVATE_CAPITALS);
 
-    private static final String DEACTIVATE_SMALL = "deactivate";
+    private static final String DEACTIVATE_CAPITALS = ReplicationActionType.DEACTIVATE.getName();
 
-    private static final String ACTIVATE_CAPITALS = StringUtils.upperCase(ACTIVATE_SMALL);
-
-    private static final String DEACTIVATE_CAPITALS = StringUtils.upperCase(DEACTIVATE_SMALL);
+    private static final String DEACTIVATE_SMALL = StringUtils.lowerCase(DEACTIVATE_CAPITALS);
 
     @InjectMocks
     private final BrandPortalSyncProcess workflowProcess = new BrandPortalSyncProcess() {
@@ -161,13 +159,28 @@ public final class BrandPortalSyncProcessTest {
     }
 
     @Test
-    public void getReplicationActionType_null() {
+    public void getReplicationActionType_null() throws WorkflowException {
         putProcessArgs("null");
+        execute();
         assertNull(getReplicationActionType());
     }
 
+    @Test
+    public void logNullAsset() throws WorkflowException {
+        asset = null;
+        execute();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expected = WorkflowException.class)
+    public void throwWorkflowException() throws WorkflowException, RepositoryException {
+        when(workflowPackageManager.getPaths(eq(resourceResolver), anyString())).thenThrow(RepositoryException.class);
+        execute();
+    }
+
+
     private void putProcessArgs(final String args) {
-        metadataMap.put(PROCESS_ARGS, args);
+        metadataMap.put(BrandPortalSyncProcess.PROCESS_ARGS, args);
     }
 
     private void execute() throws WorkflowException {
