@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
+- Adjust PageCompareDataImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
 
@@ -65,7 +66,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
 - #1836 - Allow uniform download links in JCR Compare
-- Adjust PageCompareDataImplTest to Java 11
 
 ## [4.0.0] - 2019-02-20
 
