@@ -21,6 +21,7 @@ package com.adobe.acs.commons.models.injectors.impl.model.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.SharedValueMapValue;
 import com.adobe.acs.commons.models.injectors.impl.SharedValueMapValueInjectorTest;
+import com.adobe.acs.commons.models.injectors.impl.model.TestSharedValueMapValueModel;
 import com.adobe.acs.commons.wcm.PageRootProvider;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -33,8 +34,8 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import java.util.Collection;
 import java.util.List;
 
-@Model(adaptables = {Resource.class, SlingHttpServletRequest.class})
-public class SharedValueMapValueTestModel {
+@Model(adapters = TestSharedValueMapValueModel.class, adaptables = {Resource.class, SlingHttpServletRequest.class})
+public class TestSharedValueMapValueModelImpl implements TestSharedValueMapValueModel {
     @SlingObject
     private Resource resource;
 
@@ -101,83 +102,103 @@ public class SharedValueMapValueTestModel {
     @SharedValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = SharedValueMapValueInjectorTest.LONG_PROP)
     private List<Long> longListPropFromNonArray;
 
+    @Override
     public String getGlobalStringProp() {
         return globalStringProp;
     }
 
+    @Override
     public String getSharedStringProp() {
         return sharedStringProp;
     }
 
+    @Override
     public String getMergedStringProp() {
         return mergedStringProp;
     }
 
+    @Override
     public String getStringProp() {
         return stringProp;
     }
 
+    @Override
     public String getStringProp2() {
         return stringProp2;
     }
 
+    @Override
     public String getStringProp3() {
         return stringProp3;
     }
 
+    @Override
     public Long getLongProp() {
         return longProp;
     }
 
+    @Override
     public Long getLongPropFromString() {
         return longPropFromString;
     }
 
+    @Override
     public boolean isBoolPropTrue() {
         return boolPropTrue;
     }
 
+    @Override
     public boolean isBoolPropFalse() {
         return boolPropFalse;
     }
 
+    @Override
     public boolean isBoolPropTrueFromString() {
         return boolPropTrueFromString;
     }
 
+    @Override
     public boolean isBoolPropFalseFromString() {
         return boolPropFalseFromString;
     }
 
 
+    @Override
     public String[] getStringArrayProp() {
         return stringArrayProp;
     }
 
+    @Override
     public List<String> getStringListProp() {
         return stringListProp;
     }
 
+    @Override
     public Collection<String> getStringCollectionProp() {
         return stringCollectionProp;
     }
 
+    @Override
     public Long[] getLongArrayProp() {
         return longArrayProp;
     }
 
+    @Override
     public List<Long> getLongListProp() {
         return longListProp;
     }
 
+    @Override
     public Collection<Long> getLongCollectionProp() {
         return longCollectionProp;
     }
 
+    @Override
     public Long[] getLongArrayPropFromNonArray() {
         return longArrayPropFromNonArray;
     }
 
+    @Override
     public List<Long> getLongListPropFromNonArray() {
         return longListPropFromNonArray;
     }
