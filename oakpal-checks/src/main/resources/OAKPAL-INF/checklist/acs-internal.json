@@ -54,6 +54,12 @@
           }
         ]
       }
+    },
+    {
+      "name": "base-version-compatibility",
+      "impl": "com.adobe.acs.commons.oakpal.checks.ImportedPackages",
+      "config": {
+      }
     }
   ],
   "cndNames": [
