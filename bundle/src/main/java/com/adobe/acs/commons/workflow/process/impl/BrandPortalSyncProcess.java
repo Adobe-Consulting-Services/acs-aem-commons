@@ -37,6 +37,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
@@ -87,7 +88,8 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
             for (final String payload : payloads) {
                 // Convert the payloads to Assets, in preparation for Brand Portal publication
                 // Note that this only supports Assets as payloads and NOT Asset Folders
-                final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(payload));
+                final Resource resource = resourceResolver.getResource(payload);
+                final Asset asset = resolveToAsset(resource);
 
                 if (asset == null) {
                     log.debug("Payload path [ {} ] does not resolve to an asset", payload);
@@ -110,7 +112,7 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         }
     }
 
-    protected final ReplicationActionType getReplicationActionType(MetaDataMap metaDataMap) {
+    protected final ReplicationActionType getReplicationActionType(final MetaDataMap metaDataMap) {
         final String processArgs = StringUtils.trim(metaDataMap.get("PROCESS_ARGS", ReplicationActionType.ACTIVATE.getName()));
 
         if (StringUtils.equalsIgnoreCase(processArgs, ReplicationActionType.ACTIVATE.getName())) {
@@ -120,5 +122,9 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         }
 
         return null;
+    }
+
+    protected Asset resolveToAsset(final Resource resource) {
+        return DamUtil.resolveToAsset(resource);
     }
 }

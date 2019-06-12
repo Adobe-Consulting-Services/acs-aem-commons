@@ -20,6 +20,30 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jcr.RepositoryException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -30,36 +54,9 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.metadata.SimpleMetaDataMap;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.jcr.RepositoryException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DamUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public final class BrandPortalSyncProcessTest {
 
     private static final String ASSET_PATH = "/content/dam/foo.png";
@@ -74,14 +71,14 @@ public final class BrandPortalSyncProcessTest {
 
     private static final String DEACTIVATE_CAPITALS = StringUtils.upperCase(DEACTIVATE_SMALL);
 
-    @Rule
-    public final OsgiContext osgiContext = new OsgiContext();
-
-    @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-
     @InjectMocks
-    private final BrandPortalSyncProcess workflowProcess = new BrandPortalSyncProcess();
+    private final BrandPortalSyncProcess workflowProcess = new BrandPortalSyncProcess() {
+
+        protected Asset resolveToAsset(final Resource resource) {
+            return asset;
+        }
+        
+    };
 
     private final MetaDataMap metadataMap = new SimpleMetaDataMap();
 
@@ -108,33 +105,35 @@ public final class BrandPortalSyncProcessTest {
     @Mock
     private WorkflowSession workflowSession;
 
+    @Mock
+    private ResourceResolver resourceResolver;
+
     @Before
     public void setUp() throws RepositoryException {
-        PowerMockito.mockStatic(DamUtil.class);
-
         paths.add(ASSET_PATH);
 
         when(workItem.getWorkflowData()).thenReturn(workflowData);
         when(workflowData.getPayload()).thenReturn(ASSET_PATH);
 
-        when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(context.resourceResolver());
-        when(workflowPackageManager.getPaths(eq(context.resourceResolver()), anyString())).thenReturn(paths);
+        when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(resourceResolver);
+        when(workflowPackageManager.getPaths(eq(resourceResolver), anyString())).thenReturn(paths);
         when(asset.getPath()).thenReturn(ASSET_PATH);
-        when(DamUtil.resolveToAsset(any(Resource.class))).thenReturn(asset);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void execute_activate() throws WorkflowException {
         putProcessArgs(ACTIVATE_SMALL);
-        workflowProcess.execute(workItem, workflowSession, metadataMap);
-        verify(damSyncService, times(1)).publishResourcesToMP(any(List.class), eq(context.resourceResolver()));
+        execute();
+        verify(damSyncService, times(1)).publishResourcesToMP(any(List.class), eq(resourceResolver));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void execute_deactivate() throws WorkflowException {
         putProcessArgs(DEACTIVATE_SMALL);
-        workflowProcess.execute(workItem, workflowSession, metadataMap);
-        verify(damSyncService, times(1)).unpublishResourcesFromMP(any(List.class), eq(context.resourceResolver()));
+        execute();
+        verify(damSyncService, times(1)).unpublishResourcesFromMP(any(List.class), eq(resourceResolver));
     }
 
     @Test
@@ -151,7 +150,7 @@ public final class BrandPortalSyncProcessTest {
 
     @Test
     public void getReplicationActionType_deactivate() {
-        putProcessArgs(DEACTIVATE_CAPITALS);
+        putProcessArgs(DEACTIVATE_SMALL);
         assertReplicationActionType(ReplicationActionType.DEACTIVATE);
     }
 
@@ -171,8 +170,12 @@ public final class BrandPortalSyncProcessTest {
         metadataMap.put(PROCESS_ARGS, args);
     }
 
+    private void execute() throws WorkflowException {
+        workflowProcess.execute(workItem, workflowSession, metadataMap);
+    }
+
     private void assertReplicationActionType(final ReplicationActionType type) {
-        assertEquals(ReplicationActionType.ACTIVATE, getReplicationActionType());
+        assertEquals(type, getReplicationActionType());
     }
 
     private ReplicationActionType getReplicationActionType() {
