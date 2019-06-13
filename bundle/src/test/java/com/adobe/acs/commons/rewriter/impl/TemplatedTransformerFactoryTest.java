@@ -43,8 +43,8 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultConfigMap;
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultService;
+import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultConfigMap;
+import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;

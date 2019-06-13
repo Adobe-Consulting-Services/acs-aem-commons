@@ -35,13 +35,14 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Model(adaptables = SlingHttpServletRequest.class)
-public class PropertyDatasource {
+public class TemplatedDialogsPropertyDatasource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyDatasource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TemplatedDialogsPropertyDatasource.class);
 
     @Self
     private SlingHttpServletRequest request;

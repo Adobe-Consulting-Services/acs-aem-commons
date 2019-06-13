@@ -36,8 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultConfigMap;
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultService;
+import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultConfigMap;
+import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)

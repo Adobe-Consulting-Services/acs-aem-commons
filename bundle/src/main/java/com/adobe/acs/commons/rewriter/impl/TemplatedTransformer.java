@@ -47,13 +47,13 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
     private static final Logger log = LoggerFactory.getLogger(TemplatedTransformer.class);
 
     private Map<String, Object> properties;
-    private PropertyAggregatorService localService;
+    private PropertyAggregatorService aggregatorService;
 
     public TemplatedTransformer() {
     }
 
     public TemplatedTransformer(PropertyAggregatorService propertyAggregatorService) {
-        this.localService = propertyAggregatorService;
+        this.aggregatorService = propertyAggregatorService;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
         // Get the combined properties via service
         Page page = pageManager.getContainingPage(request.getResource());
         if (page != null) {
-            properties = localService.getProperties(page);
+            properties = aggregatorService.getProperties(page);
         }
     }
 
@@ -123,7 +123,7 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
     }
 
     private boolean shouldRun() {
-        return localService != null && properties != null;
+        return aggregatorService != null && properties != null;
     }
 
     private String decode(String input) {

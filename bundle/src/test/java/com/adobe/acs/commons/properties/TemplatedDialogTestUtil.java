@@ -26,7 +26,7 @@ import com.adobe.acs.commons.properties.impl.PropertyAggregatorServiceImpl;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-public class TemplatedDialogUtil {
+public class TemplatedDialogTestUtil {
 
     public static  Map<String, Object> defaultConfigMap() {
         Map<String, Object> map = new HashMap<>();
