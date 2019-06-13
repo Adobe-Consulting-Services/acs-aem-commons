@@ -17,6 +17,7 @@
  * limitations under the License.
  * #L%
  */
+
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
@@ -25,7 +26,6 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.form.TextareaComponent;
-import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.QueryHelper;
@@ -151,6 +151,8 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
         prepareSyntheticWorkflowModel(manager);
         queryPayloads(manager);
 
+        log.info("Executing synthetic workflow [ {} ] against [ {} ] payloads via Bulk Workflow MCP process.", workflowId, payloads.size());
+
         payloads.stream()
                 .map((resource) -> resource.getPath())
                 .forEach((path) -> manager.deferredWithResolver((ResourceResolver resourceResolver) -> {
@@ -160,9 +162,13 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
 
                     try {
                         syntheticWorkflowRunner.execute(resourceResolver, path, syntheticWorkflowModel, false, true);
-                        record(path, ItemStatus.SUCCESS, System.currentTimeMillis() - start);
+                        final long duration = System.currentTimeMillis() - start;
+                        record(path, ItemStatus.SUCCESS, duration);
+                        log.debug("Successfully processed payload [ {} ] with synthetic workflow [ {} ] in [ {} ] milliseconds.", path, workflowId);
                     } catch (WorkflowException e) {
-                        record(path, ItemStatus.FAILURE, System.currentTimeMillis() - start);
+                        final long duration = System.currentTimeMillis() - start;
+                        record(path, ItemStatus.FAILURE, duration);
+                        log.warn("Failed to process payload [ {} ] with synthetic workflow [ {} ] in [ {} ] milliseconds.", path, workflowId, duration);
                     }
                 }));
     }
