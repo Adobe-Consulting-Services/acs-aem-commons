@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
+- #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
+- #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
@@ -30,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
+- #1797 - Add a OakPal check to ensure that all the required imported packages are satisfied
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 - #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
