@@ -31,12 +31,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogUtil.defaultService;
+import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PropertyDatasourceTest {
+public class TemplatedDialogsPropertyDatasourceTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
@@ -44,9 +44,9 @@ public class PropertyDatasourceTest {
 
     @Before
     public void setup() {
-        context.load().json(getClass().getResourceAsStream("PropertyDatasource.json"), "/content/we-retail/language-masters/en/experience");
+        context.load().json(getClass().getResourceAsStream("TemplatedDialogsPropertyDatasource.json"), "/content/we-retail/language-masters/en/experience");
         defaultService(context);
-        context.addModelsForClasses(PropertyDatasource.class);
+        context.addModelsForClasses(TemplatedDialogsPropertyDatasource.class);
 
         request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext());
     }
@@ -55,9 +55,9 @@ public class PropertyDatasourceTest {
     public void testValidJson() {
         MockRequestPathInfo mockRequestPathInfo = (MockRequestPathInfo) request.getRequestPathInfo();
         mockRequestPathInfo.setSuffix("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/responsivegrid/text");
-        PropertyDatasource propertyDatasource = request.adaptTo(PropertyDatasource.class);
-        assertNotNull(propertyDatasource);
-        String jsonString = propertyDatasource.getJson();
+        TemplatedDialogsPropertyDatasource templatedDialogsPropertyDatasource = request.adaptTo(TemplatedDialogsPropertyDatasource.class);
+        assertNotNull(templatedDialogsPropertyDatasource);
+        String jsonString = templatedDialogsPropertyDatasource.getJson();
         String expected = StringEscapeUtils.escapeHtml4("{\"inherited_page_properties.inheritedProperty\":\"inheritedValue\",\"page_properties.jcr:primaryType\":\"cq:PageContent\",\"page_properties.jcr:title\":\"Arctic Surfing In Lofoten\",\"page_properties.sling:resourceType\":\"weretail/components/structure/page\",\"page_properties.jcr:createdBy\":\"admin\"}");
         assertEquals(expected, jsonString);
     }
@@ -66,9 +66,9 @@ public class PropertyDatasourceTest {
     public void testInvalidResource() {
         MockRequestPathInfo mockRequestPathInfo = (MockRequestPathInfo) request.getRequestPathInfo();
         mockRequestPathInfo.setSuffix("/non-existing");
-        PropertyDatasource propertyDatasource = request.adaptTo(PropertyDatasource.class);
-        assertNotNull(propertyDatasource);
-        String jsonString = propertyDatasource.getJson();
+        TemplatedDialogsPropertyDatasource templatedDialogsPropertyDatasource = request.adaptTo(TemplatedDialogsPropertyDatasource.class);
+        assertNotNull(templatedDialogsPropertyDatasource);
+        String jsonString = templatedDialogsPropertyDatasource.getJson();
         String expected = "{}";
         assertEquals(expected, jsonString);
     }
