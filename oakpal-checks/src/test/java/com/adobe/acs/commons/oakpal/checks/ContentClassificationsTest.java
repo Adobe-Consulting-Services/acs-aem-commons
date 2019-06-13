@@ -39,8 +39,8 @@ public class ContentClassificationsTest extends CheckTestBase {
     public static final String NS_URI_SLING = "http://sling.apache.org/jcr/sling/1.0";
     public static final String NS_URI_GRANITE = "http://www.adobe.com/jcr/granite/1.0";
 
-    public static final URL CND = ContentClassifications.class
-            .getResource("/OAKPAL-INF/nodetypes/content_classifications.cnd");
+    public static final URL CND = ContentClassificationsTest.class
+            .getResource("/nodetypes/content_classifications.cnd");
     public static final InitStage INIT;
 
     static {
