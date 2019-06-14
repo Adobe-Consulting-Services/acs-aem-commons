@@ -179,8 +179,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             if (page != null && page.getContentResource() != null) {
                 final Node node = page.getContentResource().adaptTo(Node.class);
 
-                final ResourceCollection resourceCollection =
-                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+                final ResourceCollection resourceCollection = getResourceCollection(node);
 
                 if (resourceCollection != null) {
                     final List<Node> members = resourceCollection.list(nodeTypes);
@@ -193,6 +192,10 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
             return Arrays.asList(new String[]{ path });
         }
+    }
+
+    protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
+        return ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
     }
 
     /**
