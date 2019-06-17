@@ -110,7 +110,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     public final Page create(final ResourceResolver resourceResolver, String bucketSegment,
                              final String name, final String... paths) throws WCMException,
             RepositoryException {
-
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
@@ -166,32 +165,32 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return Collections.EMPTY_LIST;
-
-        } else if (!isWorkflowPackage(resourceResolver, path)) {
-            log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
-            return Arrays.asList(new String[]{ path });
-
-        } else {
-            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-            final Page page = pageManager.getContainingPage(path);
-
-            if (page != null && page.getContentResource() != null) {
-                final Node node = page.getContentResource().adaptTo(Node.class);
-
-                final ResourceCollection resourceCollection = getResourceCollection(node);
-
-                if (resourceCollection != null) {
-                    final List<Node> members = resourceCollection.list(nodeTypes);
-                    for (final Node member : members) {
-                        collectionPaths.add(member.getPath());
-                    }
-                    return collectionPaths;
-                }
-            }
-
-            return Arrays.asList(new String[]{ path });
+            return Collections.emptyList();
         }
+
+        if (!isWorkflowPackage(resourceResolver, path)) {
+            log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
+            return Arrays.asList(new String[] { path });
+        }
+
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        final Page page = pageManager.getContainingPage(path);
+
+        final Resource contentResource = page == null ? null : page.getContentResource();
+        if (contentResource != null) {
+            final Node node = contentResource.adaptTo(Node.class);
+            final ResourceCollection resourceCollection = getResourceCollection(node);
+            if (resourceCollection != null) {
+                final List<Node> members = resourceCollection.list(nodeTypes);
+                for (final Node member : members) {
+                    collectionPaths.add(member.getPath());
+                }
+
+                return collectionPaths;
+            }
+        }
+
+        return Arrays.asList(new String[]{ path });
     }
 
     protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
@@ -223,7 +222,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final boolean isWorkflowPackage(final ResourceResolver resourceResolver, final String path) {
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
         final Page workflowPackagesPage = pageManager.getPage(path);
         if (workflowPackagesPage == null) {
             return false;

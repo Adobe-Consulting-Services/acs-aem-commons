@@ -52,7 +52,7 @@ import com.day.cq.workflow.collection.ResourceCollection;
 import com.day.cq.workflow.collection.ResourceCollectionManager;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WorkflowPackageManagerImplTest {
+public final class WorkflowPackageManagerImplTest {
 
     private static final String NORMAL_PAGE_PATH = "/content/test";
     private static final String WORKFLOW_PACKAGE_PATH = "/var/workflow/packages/test";
@@ -154,6 +154,25 @@ public class WorkflowPackageManagerImplTest {
 
     @Test
     public void testIsWorkflowPackage_NormalPage() throws Exception {
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, NORMAL_PAGE_PATH));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_workflowPackagesPageIsNull() {
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, null));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_vltDefinitionIsNull() {
+        when(contentResource.getChild("vlt:definition")).thenReturn(null);
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, WORKFLOW_PACKAGE_PATH));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_contentResourceIsNull() {
+        when(workflowPackagePage.getContentResource()).thenReturn(null);
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, WORKFLOW_PACKAGE_PATH));
+        when(normalPage.getContentResource()).thenReturn(null);
         assertFalse(wpm.isWorkflowPackage(resourceResolver, NORMAL_PAGE_PATH));
     }
 
