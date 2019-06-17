@@ -30,13 +30,11 @@ import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
+
+import com.day.crx.JcrConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
@@ -238,13 +236,15 @@ public class DataImporter extends ProcessDefinition {
 
     public void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
         String parentPath = StringUtils.substringBeforeLast(path, "/");
-        Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
+        Map<String, Object> resourceProperties = new HashMap<>();
+        resourceProperties.put(JcrConstants.JCR_PRIMARYTYPE, defaultNodeType);
+        Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, resourceProperties, defaultNodeType, true);
         String nodeName = StringUtils.substringAfterLast(path, "/");
-        if (!row.containsKey(JCR_PRIMARY_TYPE)) {
-            row.put("JCR_TYPE", new CompositeVariant(defaultNodeType));
+        if (!row.containsKey(JCR_PRIMARY_TYPE) && !row.containsKey(JcrConstants.JCR_PRIMARYTYPE)) {
+            row.put(JcrConstants.JCR_PRIMARYTYPE, new CompositeVariant(defaultNodeType));
         }
         Map<String, Object> nodeProps = row.entrySet().stream()
-                .filter(e -> !e.getKey().equals(ROW_NUMBER) && e.getValue() != null)
+                .filter(e -> !e.getKey().equals(ROW_NUMBER) && !e.getKey().equals(PATH) && e.getValue() != null)
                 .collect(
                         Collectors.toMap(
                                 e -> e.getKey(),
