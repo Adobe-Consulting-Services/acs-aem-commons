@@ -24,6 +24,7 @@ import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
@@ -36,8 +37,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.AccessDeniedException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.UnsupportedRepositoryOperationException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
 import java.util.Set;
@@ -174,7 +177,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             }
 
             Session session = resourceResolver.adaptTo(Session.class);
-            User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+            User currentUser = (User) getUserManager(session).getAuthorizable(userId);
             if (currentUser != null && !currentUser.isSystemUser()) {
                 return true;
             } else {
@@ -184,6 +187,11 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             LOG.trace("Avoiding binary sync for admin user");
         }
         return false;
+    }
+
+    protected UserManager getUserManager(final Session session)
+            throws AccessDeniedException, UnsupportedRepositoryOperationException, RepositoryException {
+        return AccessControlUtil.getUserManager(session);
     }
 
     protected boolean isAlreadySyncing(String resourcePath) {

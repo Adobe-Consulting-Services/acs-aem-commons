@@ -19,64 +19,62 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.DamConstants;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.jackrabbit.api.security.user.User;
-import org.apache.jackrabbit.api.security.user.UserManager;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.base.util.AccessControlUtil;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.ValueFactory;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_RETRY_DELAY;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_WHITELISTED_SVC_USER_A;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getRemoteAssetsConfigs;
+import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.setupRemoteAssetsServiceUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(AccessControlUtil.class)
-public class RemoteAssetDecoratorTest {
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.ValueFactory;
+
+import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+
+import com.adobe.acs.commons.testutil.LogTester;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.DamConstants;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
+@RunWith(MockitoJUnitRunner.class)
+public final class RemoteAssetDecoratorTest {
+
     private static String TEST_MOCK_SYNC = "mocksync";
     private static String TEST_REMOTE_ASSET_CONTENT_PATH = "/content/dam/b/test_asset.png/jcr:content";
 
-    private RemoteAssetDecorator remoteAssetDecorator;
-    private RemoteAssetsBinarySyncImpl remoteAssetsBinarySync;
-
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+
+    private final RemoteAssetDecorator remoteAssetDecorator = spy(new RemoteAssetDecorator());
+    private final RemoteAssetsBinarySyncImpl remoteAssetsBinarySync = mock(RemoteAssetsBinarySyncImpl.class);
 
     @Before
     public void setup() throws Exception {
@@ -84,16 +82,12 @@ public class RemoteAssetDecoratorTest {
 
         ResourceResolver resourceResolver = context.resourceResolver();
         Session session = resourceResolver.adaptTo(Session.class);
-        ValueFactory valueFactory = session.getValueFactory();
 
         Node nodeContent = session.getRootNode().addNode("content", DamConstants.NT_SLING_ORDEREDFOLDER);
         Node nodeDam = nodeContent.addNode("dam", DamConstants.NT_SLING_ORDEREDFOLDER);
         setupCreateRemoteAsset(nodeDam, "a", false);
         setupCreateRemoteAsset(nodeDam, "b", true);
         setupCreateRemoteAsset(nodeDam, "z", true);
-
-        remoteAssetDecorator = spy(new RemoteAssetDecorator());
-        remoteAssetsBinarySync = mock(RemoteAssetsBinarySyncImpl.class);
     }
 
     private void setupCreateRemoteAsset(Node nodeDam, String damFolder, boolean isRemoteAsset) throws RepositoryException {
@@ -144,8 +138,7 @@ public class RemoteAssetDecoratorTest {
             creds.put("user.name", username);
             ResourceResolver resourceResolver = context.getService(ResourceResolverFactory.class).getResourceResolver(creds);
 
-            PowerMockito.mockStatic(AccessControlUtil.class);
-            when(AccessControlUtil.getUserManager(resourceResolver.adaptTo(Session.class))).thenReturn(mockUserManager);
+            when(remoteAssetDecorator.getUserManager(resourceResolver.adaptTo(Session.class))).thenReturn(mockUserManager);
 
             return resourceResolver;
         } catch (Exception e) {
@@ -257,7 +250,6 @@ public class RemoteAssetDecoratorTest {
     public void testGetResourceHandlesExceptionCheckingIfResourceIsRemoteAsset() throws RepositoryException {
         setupFinish();
 
-        ResourceResolver userResourceResolver = getUserResourceResolver();
         doThrow(new RuntimeException("test exception")).when(remoteAssetDecorator).accepts(any(Resource.class));
 
         assertResourceDoesNotSync(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
