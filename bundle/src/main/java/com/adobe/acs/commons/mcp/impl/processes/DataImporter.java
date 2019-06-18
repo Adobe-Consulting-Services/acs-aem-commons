@@ -57,6 +57,7 @@ public class DataImporter extends ProcessDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataImporter.class);
     private static final String PATH = "path";
+    private static final String SLASH = "/";
 
     public enum MergeMode {
         CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
@@ -234,17 +235,17 @@ public class DataImporter extends ProcessDefinition {
         }
     }
 
-    public void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
-        String parentPath = StringUtils.substringBeforeLast(path, "/");
+    private void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
+        String parentPath = StringUtils.substringBeforeLast(path, SLASH);
         Map<String, Object> resourceProperties = new HashMap<>();
         resourceProperties.put(JcrConstants.JCR_PRIMARYTYPE, defaultNodeType);
         Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, resourceProperties, defaultNodeType, true);
-        String nodeName = StringUtils.substringAfterLast(path, "/");
+        String nodeName = StringUtils.substringAfterLast(path, SLASH);
         if (!row.containsKey(JCR_PRIMARY_TYPE) && !row.containsKey(JcrConstants.JCR_PRIMARYTYPE)) {
             row.put(JcrConstants.JCR_PRIMARYTYPE, new CompositeVariant(defaultNodeType));
         }
         Map<String, Object> nodeProps = row.entrySet().stream()
-                .filter(e -> !e.getKey().equals(ROW_NUMBER) && !e.getKey().equals(PATH) && e.getValue() != null)
+                .filter(e -> !e.getKey().equals(ROW_NUMBER) && !e.getKey().equals(PATH) && e.getValue() != null && !e.getKey().contains(SLASH))
                 .collect(
                         Collectors.toMap(
                                 e -> e.getKey(),
@@ -252,12 +253,33 @@ public class DataImporter extends ProcessDefinition {
                         )
                 );
         rr.refresh();
-        rr.create(parent, nodeName, nodeProps);
+        Resource main = rr.create(parent, nodeName, nodeProps);
+
+        Map<String, Object> jcrContentProps = row.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(JcrConstants.JCR_CONTENT))
+                .collect(
+                        Collectors.toMap(
+                                e -> e.getKey().replace(JcrConstants.JCR_CONTENT + SLASH, ""),
+                                e -> e.getValue().toPropertyValue()
+                        )
+                );
+        if (!jcrContentProps.isEmpty()) {
+            rr.create(main, JcrConstants.JCR_CONTENT, jcrContentProps);
+        }
     }
 
     private void updateMetadata(ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
         ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH).toString()).adaptTo(ModifiableValueMap.class);
         populateMetadataFromRow(resourceProperties, nodeInfo);
+
+        if (data.getHeaderRow().contains(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
+            Map<String, Object> initialProperty = new HashMap<>();
+            initialProperty.put(JcrConstants.JCR_PRIMARYTYPE, defaultNodeType + "Content");
+            Resource jcrContent = ResourceUtil.getOrCreateResource(rr, nodeInfo.get(PATH).toString() + SLASH + JcrConstants.JCR_CONTENT, initialProperty, defaultNodeType + "Content", true);
+            ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
+            populateContentMetadataFromRow(contentResourceProperties, nodeInfo);
+        }
+
         if (rr.hasChanges()) {
             incrementCount(updatedNodes, 1);
             if (detailedReport) {
@@ -275,7 +297,7 @@ public class DataImporter extends ProcessDefinition {
         }
     }
 
-    public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
+    private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
         for (String prop : data.getHeaderRow()) {
             if (prop != null
                     && !prop.equals(PATH)
@@ -283,8 +305,23 @@ public class DataImporter extends ProcessDefinition {
                 CompositeVariant value = nodeInfo.get(prop);
                 if (value == null || value.isEmpty()) {
                     nodeInfo.remove(prop);
-                } else {
+                } else if (!prop.startsWith(JcrConstants.JCR_CONTENT)){
                     resourceProperties.put(prop, value.toPropertyValue());
+                }
+            }
+        }
+    }
+
+    private void populateContentMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
+        for (String prop : data.getHeaderRow()) {
+            if (prop != null
+                    && !prop.equals(PATH)
+                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
+                CompositeVariant value = nodeInfo.get(prop);
+                if (value == null || value.isEmpty()) {
+                    nodeInfo.remove(prop);
+                } else if (prop.startsWith(JcrConstants.JCR_CONTENT)){
+                    resourceProperties.put(prop.replace(JcrConstants.JCR_CONTENT + SLASH, ""), value.toPropertyValue());
                 }
             }
         }
