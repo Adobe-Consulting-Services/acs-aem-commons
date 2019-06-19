@@ -71,6 +71,7 @@ public final class RemoteAssetDecoratorTest {
     private final RemoteAssetsConfig config = mock(RemoteAssetsConfig.class);
 
     private final Resource resource = mock(Resource.class);
+    private final Resource newResource = mock(Resource.class);
     private final Map<String, Object> properties = new HashMap<>();
     private final ValueMap valueMap = new ValueMapDecorator(properties);
     private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
@@ -91,8 +92,8 @@ public final class RemoteAssetDecoratorTest {
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
 
         when(resourceResolver.getUserID()).thenReturn(TESTUSER);
-
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.getResource(TEST_REMOTE_ASSET_CONTENT_PATH)).thenReturn(newResource);
 
         when(config.getWhitelistedServiceUsers()).thenReturn(whitelistedServiceUsers);
         when(config.getDamSyncPaths()).thenReturn(damSyncPaths);
@@ -125,6 +126,11 @@ public final class RemoteAssetDecoratorTest {
 
     private void verifyAcceptedSameResource() {
         assertSameResourceDecorated();
+        verifyIsAlreadySyncing(1);
+    }
+
+    private void verifyAcceptedNewResource() {
+        assertEquals(newResource, decorate());
         verifyIsAlreadySyncing(1);
     }
 
@@ -207,6 +213,13 @@ public final class RemoteAssetDecoratorTest {
         whitelistedServiceUsers.clear();
         when(user.isSystemUser()).thenReturn(false);
         verifyAcceptedSameResource();
+    }
+
+    @Test
+    public void syncAssetBinaries_syncAsset() throws RepositoryException {
+        allowRetry();
+        when(assetSync.syncAsset(resource)).thenReturn(true);
+        verifyAcceptedNewResource();
     }
 /*
         setupRemoteAssetsServiceUser(context);

@@ -230,18 +230,18 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         return false;
     }
 
-    private boolean syncAssetBinaries(Resource resource) {
+    private boolean syncAssetBinaries(final Resource resource) {
         final String resourcePath = resource.getPath();
         try {
             remoteResourcesSyncing.add(resourcePath);
             LOG.info("Sync'ing remote asset binaries: {}", resourcePath);
-            if (this.assetSync.syncAsset(resource)) {
+            if (assetSync.syncAsset(resource)) {
                 LOG.debug("Sync of remote asset binaries for {} complete", resourcePath);
                 return true;
             } else {
                 LOG.error("Failed to sync binaries for remote asset: {}", resourcePath);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Failed to sync binaries for remote asset: {}", resourcePath, e);
         } finally {
             remoteResourcesSyncing.remove(resourcePath);
