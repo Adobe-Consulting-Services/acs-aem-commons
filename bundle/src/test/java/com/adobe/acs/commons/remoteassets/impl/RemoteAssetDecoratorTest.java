@@ -81,8 +81,15 @@ public final class RemoteAssetDecoratorTest {
     private final UserManager userManager = mock(UserManager.class);
     private final User user = mock(User.class);
 
+    private Set<String> remoteResourcesSyncing;
+
     @Before
+    @SuppressWarnings("unchecked")
     public void setup() throws NoSuchFieldException, RepositoryException {
+        remoteResourcesSyncing = (Set<String>) PrivateAccessor.getField(RemoteAssetDecorator.class, "remoteResourcesSyncing");
+        remoteResourcesSyncing.clear();
+        PrivateAccessor.setField(RemoteAssetDecorator.class, "SYNC_WAIT_SECONDS", 1);
+
         PrivateAccessor.setField(decorator, "assetSync", assetSync);
         PrivateAccessor.setField(decorator, "config", config);
         doReturn(userManager).when(decorator).getUserManager(session);
@@ -224,10 +231,17 @@ public final class RemoteAssetDecoratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void syncAssetBinaries_catchException() throws RepositoryException {
+    public void syncAssetBinaries_catchException() {
         allowRetry();
         when(assetSync.syncAsset(resource)).thenThrow(Exception.class);
         verifyAcceptedSameResource();
+    }
+
+    @Test
+    public void waitForSyncInProgress_giveUpWaiting() {
+        allowRetry();
+        remoteResourcesSyncing.add(TEST_REMOTE_ASSET_CONTENT_PATH);
+        assertSameResourceDecorated();;
     }
 /*
         setupRemoteAssetsServiceUser(context);
