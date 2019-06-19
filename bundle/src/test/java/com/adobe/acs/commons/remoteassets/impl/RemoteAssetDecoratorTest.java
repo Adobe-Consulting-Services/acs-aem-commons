@@ -32,7 +32,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -49,6 +49,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -76,10 +77,13 @@ public final class RemoteAssetDecoratorTest {
     private final RemoteAssetsBinarySync assetSync = mock(RemoteAssetsBinarySync.class);
 
     private final Resource resource = mock(Resource.class);
+    private final ValueMap properties = mock(ValueMap.class);
 
     @Before
     public void setup() throws NoSuchFieldException {
         PrivateAccessor.setField(decorator, "assetSync", assetSync);
+
+        when(resource.getValueMap()).thenReturn(properties);
     }
 
     @SuppressWarnings("deprecation")
@@ -87,10 +91,14 @@ public final class RemoteAssetDecoratorTest {
         return decorator.decorate(resource, null);
     }
 
-    @Test
-    public void doesNotAccept() throws RepositoryException {
-        doReturn(false).when(decorator).accepts(resource);
+    private void verifyDoesNotAccept() {
         assertEquals(resource, decorate());
+        verify(decorator, times(0)).isAlreadySyncing(anyString());
+    }
+
+    @Test
+    public void doesNotAccept() {
+        verifyDoesNotAccept();
     }
 /*
         setupRemoteAssetsServiceUser(context);
