@@ -7,12 +7,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+## [4.1.0] - 2019-06-18
+
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
+- #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
+- #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
 
 ### Fixed
 - #1845 - Fixes issue with ComponentErrorHandler OSGi component never being satisfied due to incorrect dependency on ModeUtil
@@ -20,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
-- Adjust IntegrationServiceImplTest to Java 11
+- #1202 - fix overflow handling in looping iterator
 
 ## [4.1.0] - 2019-05-07
 
@@ -30,6 +34,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1778 - Added folder support to system notifications
 - #1780 - Added a new version of the XSS Taglib to support the sling XSSAPI.
 - #1783 - Added the possibility to replace the existing host in an attribute
+- #1797 - Add a OakPal check to ensure that all the required imported packages are satisfied
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 - #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
@@ -66,6 +71,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
 - #1836 - Allow uniform download links in JCR Compare
+- #1835 - all options work together now and do not break the connections placement anymore
 
 ## [4.0.0] - 2019-02-20
 
