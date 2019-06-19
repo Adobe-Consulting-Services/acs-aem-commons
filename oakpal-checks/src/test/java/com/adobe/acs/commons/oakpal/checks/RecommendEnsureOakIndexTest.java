@@ -32,14 +32,13 @@ import net.adamcin.oakpal.core.InitStage;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 public class RecommendEnsureOakIndexTest extends CheckTestBase {
     private File pack;
-    public static final URL CND = RecommendEnsureOakIndex.class
-            .getResource("/OAKPAL-INF/nodetypes/content_classifications.cnd");
+    public static final URL CND = RecommendEnsureOakIndexTest.class
+            .getResource("/nodetypes/content_classifications.cnd");
 
     @Before
     public void setUp() throws Exception {
