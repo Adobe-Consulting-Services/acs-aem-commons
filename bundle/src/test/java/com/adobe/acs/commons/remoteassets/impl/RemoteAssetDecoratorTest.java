@@ -123,6 +123,11 @@ public final class RemoteAssetDecoratorTest {
         verifyIsAlreadySyncing(0);
     }
 
+    private void verifyAcceptedSameResource() {
+        assertSameResourceDecorated();
+        verifyIsAlreadySyncing(1);
+    }
+
     @Test
     public void doesNotAccept_wrongPrimaryType() {
         verifyDoesNotAccept();
@@ -194,6 +199,14 @@ public final class RemoteAssetDecoratorTest {
         whitelistedServiceUsers.clear();
         when(user.isSystemUser()).thenReturn(true);
         verifyDoesNotAccept();
+    }
+
+    @Test
+    public void isAllowedUser_notSystemUser() throws RepositoryException {
+        allowRetry();
+        whitelistedServiceUsers.clear();
+        when(user.isSystemUser()).thenReturn(false);
+        verifyAcceptedSameResource();
     }
 /*
         setupRemoteAssetsServiceUser(context);
