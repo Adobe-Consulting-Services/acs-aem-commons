@@ -45,6 +45,7 @@ import javax.jcr.ValueFactory;
 
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
+import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -82,6 +83,7 @@ public final class RemoteAssetDecoratorTest {
     private final Resource resource = mock(Resource.class);
     private final Map<String, Object> properties = new HashMap<String, Object>();
     private final ValueMap valueMap = new ValueMapDecorator(properties);
+    private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
     @Before
     public void setup() throws NoSuchFieldException {
@@ -89,6 +91,8 @@ public final class RemoteAssetDecoratorTest {
         PrivateAccessor.setField(decorator, "config", config);
 
         when(resource.getValueMap()).thenReturn(valueMap);
+        when(resource.getPath()).thenReturn(TEST_REMOTE_ASSET_CONTENT_PATH);
+        when(resource.getResourceResolver()).thenReturn(resourceResolver);
     }
 
     @SuppressWarnings("deprecation")
@@ -121,6 +125,14 @@ public final class RemoteAssetDecoratorTest {
         lastFailure.setTimeInMillis(currentTimeMillis);
         properties.put(RemoteAssets.REMOTE_SYNC_FAILED, lastFailure);
         when(config.getRetryDelay()).thenReturn(100);
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void doesNotAccept_loginFailureNull() {
+        doesNotAccept_doNotRetryYet();
+        when(resourceResolver.getUserID()).thenReturn(UserConstants.DEFAULT_ADMIN_ID);
+        properties.put(RemoteAssets.REMOTE_SYNC_FAILED, null);
         verifyDoesNotAccept();
     }
 /*

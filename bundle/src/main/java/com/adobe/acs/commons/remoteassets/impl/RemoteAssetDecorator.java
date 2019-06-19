@@ -147,9 +147,14 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         final boolean isAllowedUser = isAllowedUser(resource);
+        if (!isAllowedUser) {
+            return false;
+        }
+
+        final String path = resource.getPath();
         for (final String syncPath : config.getDamSyncPaths()) {
-            if (resource.getPath().startsWith(syncPath)) {
-                return isAllowedUser;
+            if (path.startsWith(syncPath)) {
+                return true;
             }
         }
 
@@ -174,7 +179,9 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private boolean isAllowedUser(final Resource resource) throws RepositoryException {
         final ResourceResolver resourceResolver = resource.getResourceResolver();
         final String userId = resourceResolver.getUserID();
-        if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+        if (userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+            LOG.trace("Avoiding binary sync for admin user");
+        } else {
             if (this.config.getWhitelistedServiceUsers().contains(userId)) {
                 return true;
             }
@@ -186,8 +193,6 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             } else {
                 LOG.trace("Avoiding binary sync b/c this is a non-whitelisted service user: {}", session.getUserID());
             }
-        } else {
-            LOG.trace("Avoiding binary sync for admin user");
         }
 
         return false;
