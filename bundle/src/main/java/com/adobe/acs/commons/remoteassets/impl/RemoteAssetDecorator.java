@@ -182,7 +182,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         if (userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
             LOG.trace("Avoiding binary sync for admin user");
         } else {
-            if (this.config.getWhitelistedServiceUsers().contains(userId)) {
+            if (config.getWhitelistedServiceUsers().contains(userId)) {
                 return true;
             }
 

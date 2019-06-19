@@ -19,55 +19,37 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_RETRY_DELAY;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_WHITELISTED_SVC_USER_A;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.getRemoteAssetsConfigs;
-import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.setupRemoteAssetsServiceUser;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.ValueFactory;
-
-import org.apache.jackrabbit.api.security.user.User;
-import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 
-import io.wcm.testing.mock.aem.junit.AemContext;
 import junitx.util.PrivateAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,15 +57,18 @@ public final class RemoteAssetDecoratorTest {
 
     private static String TEST_MOCK_SYNC = "mocksync";
     private static String TEST_REMOTE_ASSET_CONTENT_PATH = "/content/dam/b/test_asset.png/jcr:content";
+    private static final String TESTUSER = "testuser";
 
     private final RemoteAssetDecorator decorator = spy(new RemoteAssetDecorator());
     private final RemoteAssetsBinarySync assetSync = mock(RemoteAssetsBinarySync.class);
     private final RemoteAssetsConfig config = mock(RemoteAssetsConfig.class);
 
     private final Resource resource = mock(Resource.class);
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final Map<String, Object> properties = new HashMap<>();
     private final ValueMap valueMap = new ValueMapDecorator(properties);
     private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
+    private final Set<String> whitelistedServiceUsers = new HashSet<>();
+    private final List<String> damSyncPaths = new LinkedList<>();
 
     @Before
     public void setup() throws NoSuchFieldException {
@@ -93,6 +78,14 @@ public final class RemoteAssetDecoratorTest {
         when(resource.getValueMap()).thenReturn(valueMap);
         when(resource.getPath()).thenReturn(TEST_REMOTE_ASSET_CONTENT_PATH);
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
+
+        when(resourceResolver.getUserID()).thenReturn(TESTUSER);
+
+        when(config.getWhitelistedServiceUsers()).thenReturn(whitelistedServiceUsers);
+        when(config.getDamSyncPaths()).thenReturn(damSyncPaths);
+        when(config.getRetryDelay()).thenReturn(0);
+
+        whitelistedServiceUsers.add(TESTUSER);
     }
 
     @SuppressWarnings("deprecation")
@@ -116,14 +109,18 @@ public final class RemoteAssetDecoratorTest {
         verifyDoesNotAccept();
     }
 
-    @Test
-    public void doesNotAccept_doNotRetryYet() {
+    private void allowRetry() {
         doesNotAccept_nonRemoteAsset();
         properties.put(RemoteAssets.IS_REMOTE_ASSET, true);
         final Calendar lastFailure = Calendar.getInstance();
         final long currentTimeMillis = System.currentTimeMillis();
         lastFailure.setTimeInMillis(currentTimeMillis);
         properties.put(RemoteAssets.REMOTE_SYNC_FAILED, lastFailure);
+    }
+
+    @Test
+    public void doesNotAccept_doNotRetryYet() {
+        allowRetry();
         when(config.getRetryDelay()).thenReturn(100);
         verifyDoesNotAccept();
     }
@@ -140,7 +137,12 @@ public final class RemoteAssetDecoratorTest {
     public void doesNotAccept_retryAllowedAlready() {
         doesNotAccept_doNotRetryYet();
         when(resourceResolver.getUserID()).thenReturn(UserConstants.DEFAULT_ADMIN_ID);
-        when(config.getRetryDelay()).thenReturn(0);
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void doesNotAccept_notInDamSyncPaths() {
+        allowRetry();
         verifyDoesNotAccept();
     }
 /*
