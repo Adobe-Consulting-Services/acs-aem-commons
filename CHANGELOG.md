@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+## [4.2.0] - 2019-06-18
+
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
@@ -22,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1885 - WorkflowPackageManager API now supports (and prefers) /var/workflow/packages location.
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
+- #1202 - fix overflow handling in looping iterator
 
 ## [4.1.0] - 2019-05-07
 
@@ -68,6 +71,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
 - #1836 - Allow uniform download links in JCR Compare
+- #1835 - all options work together now and do not break the connections placement anymore
 
 ## [4.0.0] - 2019-02-20
 
