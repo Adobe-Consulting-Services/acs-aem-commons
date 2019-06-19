@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+## [4.1.0] - 2019-06-18
+
 ### Added
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
