@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class RemoteAssetDecorator implements ResourceDecorator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);
+
     private static int SYNC_WAIT_SECONDS = 100;
 
     /**
@@ -67,7 +68,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
      * of being sync'd from the remote server.  This prevents an infinite loop
      * when the RemoteAssetSync service fetches the asset in order to update it.
      */
-    private static Set<String> remoteResourcesSyncing = new ConcurrentSkipListSet<>();
+    private static final Set<String> remoteResourcesSyncing = new ConcurrentSkipListSet<>();
 
     @Reference
     private RemoteAssetsBinarySync assetSync;
@@ -88,7 +89,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             if (!this.accepts(resource)) {
                 return resource;
             }
-        } catch (Exception e) {
+        } catch (final RepositoryException e) {
             // Logging at debug level b/c if this happens it could represent a ton of logging
             LOG.debug("Failed binary sync check for remote asset: {}", resource.getPath());
             return resource;
@@ -100,6 +101,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         } else {
             syncSuccessful = syncAssetBinaries(resource);
         }
+
         if (syncSuccessful) {
             LOG.trace("Refreshing resource after binary sync of {}", resource.getPath());
             resource.getResourceResolver().refresh();
@@ -129,7 +131,8 @@ public class RemoteAssetDecorator implements ResourceDecorator {
      * @param resource Resource to check
      * @return true if resource is remote, else false
      */
-    protected boolean accepts(final Resource resource) throws RepositoryException {ValueMap props = resource.getValueMap();
+    protected boolean accepts(final Resource resource) throws RepositoryException {
+        final ValueMap props = resource.getValueMap();
         if (!DamConstants.NT_DAM_ASSETCONTENT.equals(props.get(JcrConstants.JCR_PRIMARYTYPE))) {
             return false;
         }
@@ -138,19 +141,19 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return false;
         }
 
-        Calendar lastFailure = props.get(RemoteAssets.REMOTE_SYNC_FAILED, (Calendar) null);
+        final Calendar lastFailure = props.get(RemoteAssets.REMOTE_SYNC_FAILED, (Calendar) null);
         if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (this.config.getRetryDelay() * 60000))) {
             return false;
         }
 
-        boolean matchesSyncPath = false;
-        for (String syncPath : this.config.getDamSyncPaths()) {
+        final boolean isAllowedUser = isAllowedUser(resource);
+        for (final String syncPath : this.config.getDamSyncPaths()) {
             if (resource.getPath().startsWith(syncPath)) {
-                matchesSyncPath = true;
+                return isAllowedUser;
             }
         }
 
-        return matchesSyncPath && isAllowedUser(resource);
+        return false;
     }
 
     /**
@@ -168,16 +171,16 @@ public class RemoteAssetDecorator implements ResourceDecorator {
      * @return True if user is allowed to sync binaries, else false.
      * @throws RepositoryException
      */
-    private boolean isAllowedUser(Resource resource) throws RepositoryException {
-        ResourceResolver resourceResolver = resource.getResourceResolver();
-        String userId = resourceResolver.getUserID();
+    private boolean isAllowedUser(final Resource resource) throws RepositoryException {
+        final ResourceResolver resourceResolver = resource.getResourceResolver();
+        final String userId = resourceResolver.getUserID();
         if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
             if (this.config.getWhitelistedServiceUsers().contains(userId)) {
                 return true;
             }
 
-            Session session = resourceResolver.adaptTo(Session.class);
-            User currentUser = (User) getUserManager(session).getAuthorizable(userId);
+            final Session session = resourceResolver.adaptTo(Session.class);
+            final User currentUser = (User) getUserManager(session).getAuthorizable(userId);
             if (currentUser != null && !currentUser.isSystemUser()) {
                 return true;
             } else {
@@ -186,6 +189,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         } else {
             LOG.trace("Avoiding binary sync for admin user");
         }
+
         return false;
     }
 
@@ -194,13 +198,12 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         return AccessControlUtil.getUserManager(session);
     }
 
-    protected boolean isAlreadySyncing(String resourcePath) {
+    protected boolean isAlreadySyncing(final String resourcePath) {
         return remoteResourcesSyncing.contains(resourcePath);
     }
 
-    private boolean waitForSyncInProgress(Resource resource) {
-        String resourcePath = resource.getPath();
-
+    private boolean waitForSyncInProgress(final Resource resource) {
+        final String resourcePath = resource.getPath();
         LOG.debug("Already sync'ing {} - waiting for parallel sync to complete", resourcePath);
         try {
             // Wait for asset already sync'ing
@@ -208,24 +211,25 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             while (isAlreadySyncing(resourcePath) && (System.currentTimeMillis() - originalTime) < (1000 * SYNC_WAIT_SECONDS)) {
                 Thread.sleep(100);
             }
+
             if (isAlreadySyncing(resourcePath)) {
                 LOG.warn("Waited {} seconds for parallel binary sync to complete for: {} - giving up", SYNC_WAIT_SECONDS, resourcePath);
             } else {
                 LOG.debug("Parallel sync of {} complete", resourcePath);
                 return true;
             }
-        } catch (Exception e) {
+        } catch (final InterruptedException e) {
             LOG.error("Failed to wait for parallel binary sync for remote asset: {}", resourcePath, e);
         }
+
         return false;
     }
 
     private boolean syncAssetBinaries(Resource resource) {
-        String resourcePath = resource.getPath();
+        final String resourcePath = resource.getPath();
         try {
             remoteResourcesSyncing.add(resourcePath);
             LOG.info("Sync'ing remote asset binaries: {}", resourcePath);
-
             if (this.assetSync.syncAsset(resource)) {
                 LOG.debug("Sync of remote asset binaries for {} complete", resourcePath);
                 return true;
@@ -237,6 +241,8 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         } finally {
             remoteResourcesSyncing.remove(resourcePath);
         }
+
         return false;
     }
+
 }
