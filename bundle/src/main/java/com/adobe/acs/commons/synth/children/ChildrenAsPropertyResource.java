@@ -136,12 +136,12 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
         this.comparator = comparator;
 
         if (this.comparator == null) {
-            this.orderedCache = new LinkedHashSet<Resource>();
+            this.orderedCache = new LinkedHashSet<>();
         } else {
-            this.orderedCache = new TreeSet<Resource>(this.comparator);
+            this.orderedCache = new TreeSet<>(this.comparator);
         }
 
-        this.lookupCache = new HashMap<String, Resource>();
+        this.lookupCache = new HashMap<>();
 
         for (SyntheticChildAsPropertyResource r : this.deserialize()) {
             this.orderedCache.add(r);
@@ -188,7 +188,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
 
     public final Resource create(String name, String primaryType, Map<String, Object> data) throws RepositoryException {
         if (data == null) {
-            data = new HashMap<String, Object>();
+            data = new HashMap<>();
         }
 
         if (data.containsKey(JcrConstants.JCR_PRIMARYTYPE) && primaryType != null) {
@@ -234,12 +234,12 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
     public final void deleteAll() throws InvalidDataFormatException {
         // Clear the caches; requires serialize
         if (this.comparator == null) {
-            this.orderedCache = new LinkedHashSet<Resource>();
+            this.orderedCache = new LinkedHashSet<>();
         } else {
-            this.orderedCache = new TreeSet<Resource>(this.comparator);
+            this.orderedCache = new TreeSet<>(this.comparator);
         }
 
-        this.lookupCache = new HashMap<String, Resource>();
+        this.lookupCache = new HashMap<>();
     }
 
     /**
@@ -281,11 +281,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
                     this.resource.getPath() + "/" + this.propertyName,
                     System.currentTimeMillis() - start);
 
-        } catch (NoSuchMethodException e) {
-            throw new InvalidDataFormatException(this.resource, this.propertyName, childrenJSON.toString());
-        } catch (IllegalAccessException e) {
-            throw new InvalidDataFormatException(this.resource, this.propertyName, childrenJSON.toString());
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new InvalidDataFormatException(this.resource, this.propertyName, childrenJSON.toString());
         }
     }
@@ -299,8 +295,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
     private List<SyntheticChildAsPropertyResource> deserialize() throws InvalidDataFormatException {
         final long start = System.currentTimeMillis();
 
-
-        final String propertyData = this.resource.getValueMap().get(this.propertyName, EMPTY_JSON);
+        final String propertyData = resource.getValueMap().get(this.propertyName, EMPTY_JSON);
 
         List<SyntheticChildAsPropertyResource> resources;
 
@@ -430,7 +425,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
 
         @Override
         public int compare(final Resource o1, final Resource o2) {
-            return o1.getName().compareTo(o2.getName().toString());
+            return o1.getName().compareTo(o2.getName());
         }
     }
 }

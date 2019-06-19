@@ -19,21 +19,21 @@
  */
 package com.adobe.acs.commons.synth.children;
 
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.jcr.RepositoryException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,16 +44,10 @@ import java.util.Map;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ChildrenAsPropertyResourceTest {
 
-    @Mock
-    private ResourceResolver resourceResolver;
-
-    @Mock
-    private Resource resource;
-
-    ModifiableValueMap valueMap;
+    @Rule
+    public AemContext ctx = new AemContext();
 
     JSONObject unsortedJSON = new JSONObject();
 
@@ -65,21 +59,16 @@ public class ChildrenAsPropertyResourceTest {
 
     Map<String, Object> entry3 = new HashMap<String, Object>();
 
-    Map<String, Object> entry4 = new HashMap<String, Object>();
-
     Map<String, Object> entry100 = new HashMap<String, Object>();
 
     ChildrenAsPropertyResource childrenAsPropertyResource;
 
+    /* Initialized in setup */
+    Resource resource;
+
     @Before
     public void setUp() throws Exception {
-        valueMap = new ModifiableValueMapDecorator(new HashMap<String, Object>());
-
-        when(resource.getPath()).thenReturn("/content/test");
-        when(resource.getValueMap()).thenReturn(valueMap);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
-        when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(valueMap);
-        when(resource.getResourceResolver()).thenReturn(resourceResolver);
+        resource = ctx.create().resource("/content/test");
 
         entry1.put("name", "dog");
         entry1.put("sound", "woof");
@@ -115,6 +104,16 @@ public class ChildrenAsPropertyResourceTest {
         entry100.put("longArray", new Long[]{100L, 200L, 300L, 400L});
         entry100.put("dateArray", new Date[]{new Date(10000), new Date(20000)});
 
+        Calendar calendar1 = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        calendar1.setTime(new Date(10000));
+        calendar2.setTime(new Date(20000));
+        entry100.put("calendarArray", new Calendar[]{
+                calendar1,
+                calendar2
+        });
+
+
         entry100.put("jcr:primaryType", "nt:unstructured");
 
         unsortedJSON.put("entry-2", new JSONObject(entry2));
@@ -132,6 +131,7 @@ public class ChildrenAsPropertyResourceTest {
             new ChildrenAsPropertyResource(resource, "animals");
 
         childrenAsPropertyResource.create("entry-100", "nt:unstructured", entry100);
+        childrenAsPropertyResource.persist();
 
         List<Resource> actuals = IteratorUtils.toList(childrenAsPropertyResource.listChildren());
 
@@ -164,6 +164,16 @@ public class ChildrenAsPropertyResourceTest {
         Assert.assertEquals(new Date(10000), actual.get("dateArray", Date[].class)[0]);
         Assert.assertEquals(new Date(20000), actual.get("dateArray", Date[].class)[1]);
 
+
+        Calendar calendar1 = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
+        calendar1.setTime(new Date(10000));
+        calendar2.setTime(new Date(20000));
+        Assert.assertArrayEquals((expected.get("calendarArray", Calendar[].class)), actual.get("calendarArray", Calendar[].class));
+        Assert.assertEquals(2, actual.get("calendarArray", Calendar[].class).length);
+        Assert.assertEquals(calendar1.getTimeInMillis(), actual.get("calendarArray", Calendar[].class)[0].getTimeInMillis());
+        Assert.assertEquals(calendar2.getTimeInMillis(), actual.get("calendarArray", Calendar[].class)[1].getTimeInMillis());
+
         Assert.assertArrayEquals((expected.get("strArray", String[].class)), actual.get("strArray", String[].class));
         Assert.assertEquals(3, actual.get("strArray", String[].class).length);
         Assert.assertEquals("one", actual.get("strArray", String[].class)[0]);
@@ -180,7 +190,7 @@ public class ChildrenAsPropertyResourceTest {
 
     @Test
     public void testRemove() throws Exception {
-        valueMap.put("animals", sortedJSON.toString());
+        resource.adaptTo(ModifiableValueMap.class).put("animals", sortedJSON.toString());
 
         List<Resource> expected = new ArrayList<Resource>();
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-1", entry1));
@@ -204,7 +214,7 @@ public class ChildrenAsPropertyResourceTest {
 
     @Test
     public void testAdd_Unsorted() throws Exception {
-        valueMap.put("animals", unsortedJSON.toString());
+        resource.adaptTo(ModifiableValueMap.class).put("animals", unsortedJSON.toString());
 
         ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
         properties.put("name", "hyena");
@@ -228,9 +238,9 @@ public class ChildrenAsPropertyResourceTest {
 
     @Test
     public void testAdd_Sorted() throws Exception {
-        valueMap.put("animals", unsortedJSON.toString());
+        resource.adaptTo(ModifiableValueMap.class).put("animals", unsortedJSON.toString());
 
-        ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+        ValueMap properties = new ValueMapDecorator(new HashMap<>());
         properties.put("name", "hyena");
         properties.put("sound", "lolz");
         properties.put("jcr:primaryType", "nt:unstructured");
@@ -254,7 +264,7 @@ public class ChildrenAsPropertyResourceTest {
 
     @Test
     public void testGet_Unsorted() throws Exception {
-        valueMap.put("animals", sortedJSON.toString());
+        resource.adaptTo(ModifiableValueMap.class).put("animals", sortedJSON.toString());
 
         List<Resource> expected = new ArrayList<Resource>();
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-1", new ValueMapDecorator(entry1)));
@@ -274,7 +284,7 @@ public class ChildrenAsPropertyResourceTest {
 
     @Test
     public void testGet_Sorted() throws Exception {
-        valueMap.put("animals", unsortedJSON.toString());
+        resource.adaptTo(ModifiableValueMap.class).put("animals", unsortedJSON.toString());
 
         List<Resource> expected = new ArrayList<Resource>();
         expected.add(new SyntheticChildAsPropertyResource(resource, "entry-1", new ValueMapDecorator(entry1)));
@@ -292,4 +302,35 @@ public class ChildrenAsPropertyResourceTest {
             Assert.assertEquals(expected.get(i).getName(), actual.get(i).getName());
         }
     }
+
+    @Test
+    public void deleteAll() throws RepositoryException, PersistenceException {
+        ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(resource);
+        Resource child = wrapper.create("child-1", "nt:unstructured");
+        ModifiableValueMap mvm = child.adaptTo(ModifiableValueMap.class);
+        mvm.put("prop-1", "some data");
+        mvm.put("prop-2", Calendar.getInstance());
+        wrapper.persist();
+        ctx.resourceResolver().commit();
+
+        Assert.assertTrue(wrapper.listChildren().hasNext());
+
+        wrapper.deleteAll();
+
+        Assert.assertFalse(wrapper.listChildren().hasNext());
+    }
+
+
+    @Test
+    public void getChild() throws RepositoryException, PersistenceException {
+        ChildrenAsPropertyResource wrapper = new ChildrenAsPropertyResource(resource);
+        Resource child = wrapper.create("child-1", "nt:unstructured");
+        wrapper.persist();
+        ctx.resourceResolver().commit();
+
+        Assert.assertEquals(child, wrapper.getChild("child-1"));
+    }
+
+
+
 }
