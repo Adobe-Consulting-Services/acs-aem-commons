@@ -272,13 +272,15 @@ public class DataImporter extends ProcessDefinition {
         ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH).toString()).adaptTo(ModifiableValueMap.class);
         populateMetadataFromRow(resourceProperties, nodeInfo);
 
-        String jcrContentPrimaryType = nodeInfo.get(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE).toString();
-        if (StringUtils.isNotEmpty(jcrContentPrimaryType)) {
-            Map<String, Object> initialProperty = new HashMap<>();
-            initialProperty.put(JcrConstants.JCR_PRIMARYTYPE, jcrContentPrimaryType);
-            Resource jcrContent = ResourceUtil.getOrCreateResource(rr, nodeInfo.get(PATH).toString() + SLASH + JcrConstants.JCR_CONTENT, initialProperty, jcrContentPrimaryType, true);
-            ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
-            populateContentMetadataFromRow(contentResourceProperties, nodeInfo);
+        if (nodeInfo.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
+            String jcrContentPrimaryType = nodeInfo.get(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE).toString();
+            if (StringUtils.isNotEmpty(jcrContentPrimaryType)) {
+                Map<String, Object> initialProperty = new HashMap<>();
+                initialProperty.put(JcrConstants.JCR_PRIMARYTYPE, jcrContentPrimaryType);
+                Resource jcrContent = ResourceUtil.getOrCreateResource(rr, nodeInfo.get(PATH).toString() + SLASH + JcrConstants.JCR_CONTENT, initialProperty, jcrContentPrimaryType, true);
+                ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
+                populateContentMetadataFromRow(contentResourceProperties, nodeInfo);
+            }
         }
 
         if (rr.hasChanges()) {
