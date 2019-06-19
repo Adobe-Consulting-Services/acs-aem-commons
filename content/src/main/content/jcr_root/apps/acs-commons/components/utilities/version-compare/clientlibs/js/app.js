@@ -32,12 +32,27 @@ angular.module('versionComparator', ['acsCoral'])
         };
 
         $scope.notifications = [];
-        $scope.connections = [];
+        $scope.nodes = [];
+        $scope.nodesMap = {};
+        $scope.versions = [];
+        $scope.versionEntryMap = {};
         $scope.changeStatus = [];
 
         $scope.$watch('app.paintConnections', function(newValue,
                 oldValue) {
-            $scope.paintConnections(newValue);
+            $scope.refreshConnections(newValue);
+        });
+
+        $scope.$watch('app.hideUnchanged', function(newValue,
+                oldValue) {
+            var elements = $('div.unchanged');
+            if (newValue) {
+                elements.hide();
+            } else {
+                elements.show();
+            }
+
+            $scope.refreshConnections();
         });
 
         $scope.addNotification = function(type, title, message) {
@@ -58,57 +73,111 @@ angular.module('versionComparator', ['acsCoral'])
             }, timeout);
         };
 
-        $scope.addConnection = function(params) {
-            $scope.connections.push(params);
+        $scope.addVersion = function(version) {
+            $scope.versions.push(version);
+            var index = version.index;
+            $scope.versionEntryMap[version.index] = {};
+
+            $scope.$watch('app.hideVersions["' + version.index + '"]', function(newValue,
+                    oldValue) {
+                var elements = $('div#' + version.id);
+                if (newValue) {
+                    elements.hide();
+                } else {
+                    elements.show();
+                }
+
+                $scope.refreshConnections();
+            });
+        };
+
+        $scope.addNode = function(node) {
+            node.getTargetId = function(indexShift) {
+                return this.name + "-" + (this.version + indexShift);
+            };
+
+            $scope.nodes.push(node);
+            $scope.nodesMap[node.id] = node;
+            $scope.versionEntryMap[node.version][node.name] = node;
         };
 
         $scope.addChangeStatus = function(params) {
             $scope.changeStatus.push(params);
         };
 
-        $scope.paintConnections = function(doPrint) {
-            var i;
-            if (doPrint) {
-                for (i = 0; i < $scope.connections.length; i++) {
-                    jsPlumb.connect({
-                        source : $scope.connections[i].source,
-                        target : $scope.connections[i].target,
-                        anchors : [ "Right", "Left" ],
-                        paintStyle : {
-                            lineWidth : 1,
-                            strokeStyle : 'grey'
-                        },
-                        hoverPaintStyle : {
-                            strokeStyle : "rgb(0, 0, 135)"
-                        },
-                        endpointStyle : {
-                            width : 1,
-                            height : 1
-                        },
-                        endpoint : "Rectangle",
-                        connector : "Straight"
-                    });
-                }
-            } else {
-                // $timeout(jsPlumb.reset, 100);
-                $('*[class^="_jsPlumb"]').remove();
+        var isVisible = function(node) {
+            if ($scope.app.hideVersions[node.version]) {
+                return false;
             }
-            jsPlumb.repaintEverything();
+
+            if ($scope.app.hideUnchanged && !node.changed) {
+                return false;
+            }
+
+            return true;
         };
 
-        $scope.showVersion = function(version) {
-            var property, value;
-            for (property in $scope.app.hideVersions) {
-                if ($scope.app.hideVersions
-                        .hasOwnProperty(property)) {
-                    value = $scope.app.hideVersions[property];
-                    if (version === property && value === true) {
-                        jsPlumb.repaintEverything();
-                        return false;
-                    }
+        var findTarget = function(node) {
+            var target;
+            var i = 1;
+            while (!target && node.version + i < $scope.versions.length) {
+                var targetId = node.getTargetId(i);
+                target = $scope.nodesMap[targetId];
+                if (target && !isVisible(target)) {
+                    target = null;
                 }
+
+                i++;
             }
-            return true;
+
+            return target;
+        };
+
+        var paintConnections = function() {
+            for (var i = 0; i < $scope.nodes.length; i++) {
+                var node = $scope.nodes[i];
+                var target = findTarget(node);
+
+                if (!target) {
+                    continue;
+                }
+
+                if (!isVisible(node) || !isVisible(target)) {
+                    continue;
+                }
+
+                jsPlumb.connect({
+                    source : node.id,
+                    target : target.id,
+                    anchors : [ "Right", "Left" ],
+                    paintStyle : {
+                        lineWidth : 1,
+                        strokeStyle : 'grey'
+                    },
+                    hoverPaintStyle : {
+                        strokeStyle : "rgb(0, 0, 135)"
+                    },
+                    endpointStyle : {
+                        width : 1,
+                        height : 1
+                    },
+                    endpoint : "Rectangle",
+                    connector : "Straight"
+                });
+            }
+        };
+
+        var removeConnections = function() {
+            $('*[class^="_jsPlumb"]').remove();
+        };
+
+        $scope.refreshConnections = function(doPrint) {
+            removeConnections();
+            if (doPrint || (typeof doPrint == 'undefined' && $scope.app.paintConnections)) {
+                paintConnections();
+            }
+
+            jsPlumb.repaintEverything();
         };
 
         $scope.analyse = function() {

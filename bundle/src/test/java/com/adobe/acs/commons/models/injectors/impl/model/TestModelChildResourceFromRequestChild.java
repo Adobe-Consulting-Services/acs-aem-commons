@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2016 Adobe
+ * Copyright (C) 2019 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,15 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("3.4.0")
-package com.adobe.acs.commons.models.injectors.annotation;
+package com.adobe.acs.commons.models.injectors.impl.model;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 
+public interface TestModelChildResourceFromRequestChild {
+    SlingHttpServletRequest getRequest();
 
+    Resource getResource();
+
+    String getProp();
+}
