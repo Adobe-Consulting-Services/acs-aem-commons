@@ -223,7 +223,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
                 LOG.debug("Parallel sync of {} complete", resourcePath);
                 return true;
             }
-        } catch (final InterruptedException e) {
+        } catch (final Exception e) {
             LOG.error("Failed to wait for parallel binary sync for remote asset: {}", resourcePath, e);
         }
 
