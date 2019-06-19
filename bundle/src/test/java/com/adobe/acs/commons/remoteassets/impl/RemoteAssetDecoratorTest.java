@@ -62,7 +62,6 @@ import junitx.util.PrivateAccessor;
 @RunWith(MockitoJUnitRunner.class)
 public final class RemoteAssetDecoratorTest {
 
-    private static String TEST_MOCK_SYNC = "mocksync";
     private static String TEST_REMOTE_ASSET_CONTENT_PATH = "/content/dam/b/test_asset.png/jcr:content";
     private static final String TESTUSER = "testuser";
 
@@ -88,7 +87,6 @@ public final class RemoteAssetDecoratorTest {
     public void setup() throws NoSuchFieldException, RepositoryException {
         remoteResourcesSyncing = (Set<String>) PrivateAccessor.getField(RemoteAssetDecorator.class, "remoteResourcesSyncing");
         remoteResourcesSyncing.clear();
-        PrivateAccessor.setField(RemoteAssetDecorator.class, "SYNC_WAIT_SECONDS", 1);
 
         PrivateAccessor.setField(decorator, "assetSync", assetSync);
         PrivateAccessor.setField(decorator, "config", config);
@@ -118,12 +116,16 @@ public final class RemoteAssetDecoratorTest {
         return decorator.decorate(resource, null);
     }
 
-    private void verifyIsAlreadySyncing(final int times) {
-        verify(decorator, times(times)).isAlreadySyncing(anyString());
-    }
-
     private void assertSameResourceDecorated() {
         assertEquals(resource, decorate());
+    }
+
+    private void assertNewResourceDecorated() {
+        assertEquals(newResource, decorate());
+    }
+
+    private void verifyIsAlreadySyncing(final int times) {
+        verify(decorator, times(times)).isAlreadySyncing(anyString());
     }
 
     private void verifyDoesNotAccept() {
@@ -137,7 +139,7 @@ public final class RemoteAssetDecoratorTest {
     }
 
     private void verifyAcceptedNewResource() {
-        assertEquals(newResource, decorate());
+        assertNewResourceDecorated();
         verifyIsAlreadySyncing(1);
     }
 
@@ -238,256 +240,25 @@ public final class RemoteAssetDecoratorTest {
     }
 
     @Test
-    public void waitForSyncInProgress_giveUpWaiting() {
+    public void waitForSyncInProgress_giveUpWaiting() throws NoSuchFieldException {
+        allowRetry();
+        PrivateAccessor.setField(RemoteAssetDecorator.class, "SYNC_WAIT_SECONDS", 1);
+        remoteResourcesSyncing.add(TEST_REMOTE_ASSET_CONTENT_PATH);
+        assertSameResourceDecorated();
+    }
+
+    @Test
+    public void waitForSyncInProgress_waitTillReady() {
         allowRetry();
         remoteResourcesSyncing.add(TEST_REMOTE_ASSET_CONTENT_PATH);
-        assertSameResourceDecorated();;
-    }
-/*
-        setupRemoteAssetsServiceUser(context);
-
-        ResourceResolver resourceResolver = context.resourceResolver();
-        Session session = resourceResolver.adaptTo(Session.class);
-
-        Node nodeContent = session.getRootNode().addNode("content", DamConstants.NT_SLING_ORDEREDFOLDER);
-        Node nodeDam = nodeContent.addNode("dam", DamConstants.NT_SLING_ORDEREDFOLDER);
-        setupCreateRemoteAsset(nodeDam, "a", false);
-        setupCreateRemoteAsset(nodeDam, "b", true);
-        setupCreateRemoteAsset(nodeDam, "z", true);
-    }
-    private void setupCreateRemoteAsset(Node nodeDam, String damFolder, boolean isRemoteAsset) throws RepositoryException {
-        ValueFactory valueFactory = nodeDam.getSession().getValueFactory();
-
-        Node nodeDamFolder = nodeDam.addNode(damFolder, DamConstants.NT_SLING_ORDEREDFOLDER);
-        Node nodeAsset = nodeDamFolder.addNode("test_asset.png", DamConstants.NT_DAM_ASSET);
-        Node nodeAssetContent = nodeAsset.addNode(JcrConstants.JCR_CONTENT, DamConstants.NT_DAM_ASSETCONTENT);
-        nodeAssetContent.setProperty(IS_REMOTE_ASSET, isRemoteAsset);
-        Node nodeAssetRenditions = nodeAssetContent.addNode(DamConstants.RENDITIONS_FOLDER, JcrConstants.NT_FOLDER);
-        Node nodeRenditionOrig = nodeAssetRenditions.addNode(DamConstants.ORIGINAL_FILE, JcrConstants.NT_FILE);
-        Node nodeRenditionOrigContent = nodeRenditionOrig.addNode(JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
-        nodeRenditionOrigContent.setProperty(JcrConstants.JCR_DATA, valueFactory.createBinary(ClassLoader.getSystemResourceAsStream("remoteassets/remote_asset.png")));
-    }
-
-    private void setupFinish() {
-        // Initialize Remote Assets
-        when(remoteAssetsBinarySync.syncAsset(any(Resource.class))).then(new Answer<Boolean>() {
-            @Override
-            public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Resource resource = (Resource)invocationOnMock.getArguments()[0];
-                ModifiableValueMap resourceProps = resource.adaptTo(ModifiableValueMap.class);
-                resourceProps.remove(IS_REMOTE_ASSET);
-                resourceProps.put(TEST_MOCK_SYNC, true);
-                return true;
-            }
-        });
-
-        context.registerInjectActivateService(new RemoteAssetsConfigImpl(), getRemoteAssetsConfigs());
-        context.registerInjectActivateService(remoteAssetsBinarySync);
-        context.registerInjectActivateService(remoteAssetDecorator);
-
-        LogTester.reset();
-    }
-
-    private ResourceResolver getUserResourceResolver() {
-        return getUserResourceResolver("testuser", false);
-    }
-
-    private ResourceResolver getUserResourceResolver(String username, boolean isServiceUser) {
-        try {
-            User mockUser = mock(User.class);
-            when(mockUser.isSystemUser()).thenReturn(isServiceUser);
-            UserManager mockUserManager = mock(UserManager.class);
-            when(mockUserManager.getAuthorizable(username)).thenReturn(mockUser);
-
-            Map<String, Object> creds = new HashMap<>();
-            creds.put("user.name", username);
-            ResourceResolver resourceResolver = context.getService(ResourceResolverFactory.class).getResourceResolver(creds);
-
-            when(remoteAssetDecorator.getUserManager(resourceResolver.adaptTo(Session.class))).thenReturn(mockUserManager);
-
-            return resourceResolver;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void assertResourceSyncs(ResourceResolver resourceResolver, String path) {
-        // Fetch the resource, triggering the sync
-        Resource resource = resourceResolver.getResource(path);
-
-        assertTrue(resource.getValueMap().get(TEST_MOCK_SYNC, false));
-        LogTester.assertLogText("Sync'ing remote asset binaries: " + path);
-    }
-
-    private void assertResourceDoesNotSync(ResourceResolver resourceResolver, String path) {
-        // Fetch the resource, triggering the sync
-        Resource resource = resourceResolver.getResource(path);
-
-        assertFalse(resource.getValueMap().get(TEST_MOCK_SYNC, false));
-        LogTester.assertNotLogText("Sync'ing remote asset binaries: " + path);
-    }
-
-    @Test
-    public void testGetResourceSyncsRemoteAsset() {
-        setupFinish();
-        assertResourceSyncs(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceSyncsAssetIfUserIsWhitelistedServiceUser() {
-        setupFinish();
-        ResourceResolver serviceResourceResolver = getUserResourceResolver(TEST_WHITELISTED_SVC_USER_A, true);
-        assertResourceSyncs(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceSyncsRemoteAssetThatFailedLongEnoughAgo() {
-        Resource assetContent = context.resourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-        ModifiableValueMap valueMap = assetContent.adaptTo(ModifiableValueMap.class);
-        Calendar lastFailed = Calendar.getInstance();
-        lastFailed.add(Calendar.MINUTE, -TEST_RETRY_DELAY);
-        lastFailed.add(Calendar.SECOND, -1);
-        valueMap.put(RemoteAssets.REMOTE_SYNC_FAILED, lastFailed);
-
-        setupFinish();
-        assertResourceSyncs(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncAssetOutsideOfMappedDamPaths() {
-        setupFinish();
-        assertResourceDoesNotSync(getUserResourceResolver(), "/content/dam/z/test_asset.png/jcr:content");
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncAssetIfFailedTooRecently() {
-        Resource assetContent = context.resourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-        ModifiableValueMap valueMap = assetContent.adaptTo(ModifiableValueMap.class);
-        Calendar lastFailed = Calendar.getInstance();
-        lastFailed.add(Calendar.MINUTE, -TEST_RETRY_DELAY);
-        lastFailed.add(Calendar.SECOND, 2);
-        valueMap.put(RemoteAssets.REMOTE_SYNC_FAILED, lastFailed);
-
-        setupFinish();
-        assertResourceDoesNotSync(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncAssetIfUserIsAdminUser() {
-        setupFinish();
-        ResourceResolver adminResourceResolver = context.resourceResolver();
-        assertEquals("admin", adminResourceResolver.getUserID());
-        assertResourceDoesNotSync(adminResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
-        LogTester.assertLogText("Avoiding binary sync for admin user");
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncAssetIfUserIsServiceUser() {
-        setupFinish();
-        ResourceResolver serviceResourceResolver = getUserResourceResolver("serviceuser", true);
-        assertResourceDoesNotSync(serviceResourceResolver, TEST_REMOTE_ASSET_CONTENT_PATH);
-        LogTester.assertLogText("Avoiding binary sync b/c this is a non-whitelisted service user: serviceuser");
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncAssetNotFlaggedAsRemote() {
-        Resource assetContent = context.resourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-        ModifiableValueMap valueMap = assetContent.adaptTo(ModifiableValueMap.class);
-        valueMap.remove(IS_REMOTE_ASSET);
-
-        setupFinish();
-        assertResourceDoesNotSync(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceDoesNotSyncIfNotAssetContent() {
-        setupFinish();
-
-        ResourceResolver resourceResolver = getUserResourceResolver();
-        Resource asset = resourceResolver.getResource("/content/dam/b/test_asset.png");
-        Resource folder = resourceResolver.getResource("/content/dam/b");
-
-        assertEquals(DamConstants.NT_DAM_ASSET, asset.getResourceType());
-        assertEquals(DamConstants.NT_SLING_ORDEREDFOLDER, folder.getResourceType());
-    }
-
-    @Test
-    public void testGetResourceHandlesExceptionCheckingIfResourceIsRemoteAsset() throws RepositoryException {
-        setupFinish();
-
-        doThrow(new RuntimeException("test exception")).when(remoteAssetDecorator).accepts(any(Resource.class));
-
-        assertResourceDoesNotSync(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-        LogTester.assertLogText("Failed binary sync check for remote asset: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceHandlesSyncException() {
-        setupFinish();
-        doThrow(new RuntimeException("test sync exception")).when(remoteAssetsBinarySync).syncAsset(any(Resource.class));
-
-        // Fetch the resource, triggering the sync
-        Resource resource = getUserResourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-
-        // Validate that the sync is attempted
-        LogTester.assertLogText("Sync'ing remote asset binaries: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-        // But the sync does not succeed
-        assertFalse(resource.getValueMap().get(TEST_MOCK_SYNC, false));
-        LogTester.assertLogText("Failed to sync binaries for remote asset: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceHandlesSyncFailure() {
-        setupFinish();
-        doReturn(false).when(remoteAssetsBinarySync).syncAsset(any(Resource.class));
-
-        // Fetch the resource, triggering the sync
-        Resource resource = getUserResourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-
-        // Validate that the sync is attempted
-        LogTester.assertLogText("Sync'ing remote asset binaries: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-        // But the sync does not succeed
-        assertFalse(resource.getValueMap().get(TEST_MOCK_SYNC, false));
-        LogTester.assertLogText("Failed to sync binaries for remote asset: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-    }
-
-    @Test
-    public void testGetResourceHandlesExceptionWaitingForSyncInProgress() {
-        when(remoteAssetDecorator.isAlreadySyncing(TEST_REMOTE_ASSET_CONTENT_PATH)).thenReturn(true).thenReturn(true).thenThrow(new RuntimeException("test failed waiting"));
-
-        setupFinish();
-        assertResourceDoesNotSync(getUserResourceResolver(), TEST_REMOTE_ASSET_CONTENT_PATH);
-
-        LogTester.assertLogText("Already sync'ing " + TEST_REMOTE_ASSET_CONTENT_PATH + " - waiting for parallel sync to complete");
-        LogTester.assertLogText("Failed to wait for parallel binary sync for remote asset: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-        LogTester.assertNotLogText("Parallel sync of " + TEST_REMOTE_ASSET_CONTENT_PATH + " complete");
-    }
-
-    @Test
-    public void testGetResourceWaitsForSyncInProgress() {
-        Resource assetContent = context.resourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-        when(remoteAssetDecorator.isAlreadySyncing(TEST_REMOTE_ASSET_CONTENT_PATH)).thenReturn(true).thenReturn(true).thenReturn(true)
-                .then(new Answer<Boolean>() {
+        new java.util.Timer().schedule( 
+                new java.util.TimerTask() {
                     @Override
-                    public Boolean answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        ModifiableValueMap resourceProps = assetContent.adaptTo(ModifiableValueMap.class);
-                        resourceProps.remove(IS_REMOTE_ASSET);
-                        resourceProps.put(TEST_MOCK_SYNC, true);
-                        return false;
+                    public void run() {
+                        remoteResourcesSyncing.clear();
                     }
-                }).thenReturn(false);
-
-        setupFinish();
-
-        // Fetch the resource, triggering the sync
-        Resource resource = getUserResourceResolver().getResource(TEST_REMOTE_ASSET_CONTENT_PATH);
-
-        // Validate that the sync is not attempted (it was already in progress)
-        LogTester.assertNotLogText("Sync'ing remote asset binaries: " + TEST_REMOTE_ASSET_CONTENT_PATH);
-        // But the sync does succeed because it waited for the sync in progress
-        assertTrue(resource.getValueMap().get(TEST_MOCK_SYNC, false));
-
-        LogTester.assertLogText("Already sync'ing " + TEST_REMOTE_ASSET_CONTENT_PATH + " - waiting for parallel sync to complete");
-        LogTester.assertLogText("Parallel sync of " + TEST_REMOTE_ASSET_CONTENT_PATH + " complete");
-    }*/
+                }, 500
+        );
+        assertNewResourceDecorated();
+    }
 }
