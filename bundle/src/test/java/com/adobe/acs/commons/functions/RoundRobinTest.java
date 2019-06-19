@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class RoundRobinTest {
     private Iterator<String> iterator;
     private List<String> list;
@@ -78,6 +79,31 @@ public class RoundRobinTest {
         indexField.setAccessible(true);
 
         indexField.set(iterator, new AtomicInteger(0));
+        Assert.assertEquals("a", iterator.next());
+        Assert.assertEquals("b", iterator.next());
+        Assert.assertEquals("c", iterator.next());
+        Assert.assertEquals("a", iterator.next());
+    }
+    
+    @Test
+    public void overflowTest() throws IllegalAccessException {
+        Field[] fields = iterator.getClass().getDeclaredFields();
+        Field indexField = null;
+        for (Field field : fields) {
+            if (field.getName().equals("index")) {
+                indexField = field;
+                break;
+            }
+        }
+        Assert.assertNotNull(indexField);
+        indexField.setAccessible(true);
+        
+        // set the counter near to Integer.MAX_VALUE to test the overflow
+        final int indexCounter = Integer.MAX_VALUE -1 ;
+        Assert.assertEquals(indexCounter % list.size(), 0);
+        AtomicInteger beforeOverflow = new AtomicInteger(indexCounter);
+        indexField.set(iterator, beforeOverflow);
+          
         Assert.assertEquals("a", iterator.next());
         Assert.assertEquals("b", iterator.next());
         Assert.assertEquals("c", iterator.next());

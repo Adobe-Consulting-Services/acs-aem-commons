@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -38,7 +38,9 @@
                                 Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-ModuleName: com.adobe.acs.acs-aem-commons-oakpal-checks
                                 Oakpal-Checklist: OAKPAL-INF/checklist/acs-internal.json,\
-                                    OAKPAL-INF/checklist/acs-commons-integrators.json
+                                    OAKPAL-INF/checklist/acs-commons-integrators.json,\
+                                    OAKPAL-INF/checklist/content-class-aem64.json,\
+                                    OAKPAL-INF/checklist/content-class-aem65.json
                                 Export-Package: com.adobe.acs.commons.oakpal.checks
                                 Import-Package: org.json;version="[20090211,20180813]",*
                             ]]></bnd>
@@ -121,6 +123,127 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>extract-bundle-info</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.gmaven</groupId>
+                        <artifactId>groovy-maven-plugin</artifactId>
+                        <version>2.1</version>
+                        <executions>
+                            <execution>
+                                <id>extract-bundle-info</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <defaults>
+                                        <aemVersion>6.3</aemVersion>
+                                    </defaults>
+                                    <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+                                <artifactId>http-builder</artifactId>
+                                <version>0.7</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>webster-aem64</id>
+            <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
+            your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
+            crx-quickstart/repository directory of a locally-installed AEM 6.4 server. -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.adamcin.oakpal</groupId>
+                        <artifactId>oakpal-maven-plugin</artifactId>
+                        <configuration>
+                            <websterTargets>
+                                <checklist>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/content-class-aem64.json</file>
+                                    <config>
+                                        <jcrNamespaces>
+                                            <namespace>
+                                                <prefix>granite</prefix>
+                                                <uri>http://www.adobe.com/jcr/granite/1.0</uri>
+                                            </namespace>
+                                        </jcrNamespaces>
+                                        <selectNodeTypes>
+                                            <type>granite:PublicArea</type>
+                                            <type>granite:FinalArea</type>
+                                            <type>granite:InternalArea</type>
+                                            <type>granite:AbstractArea</type>
+                                        </selectNodeTypes>
+                                        <nodeTypeFilters>
+                                            <filter>
+                                                <type>exclude</type>
+                                                <pattern>nt:file</pattern>
+                                            </filter>
+                                            <filter>
+                                                <type>exclude</type>
+                                                <pattern>nt:resource</pattern>
+                                            </filter>
+                                        </nodeTypeFilters>
+                                    </config>
+                                </checklist>
+                            </websterTargets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>webster-aem65</id>
+            <!-- to be able to execute oakpal:webster with this profile, first create a profile with the same name in
+            your settings.xml file that sets a "webster.repositoryHome" property with an absolute path to the
+            crx-quickstart/repository directory of a locally-installed AEM 6.5 server. -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.adamcin.oakpal</groupId>
+                        <artifactId>oakpal-maven-plugin</artifactId>
+                        <configuration>
+                            <websterTargets>
+                                <checklist>
+                                    <file>src/main/resources/OAKPAL-INF/checklist/content-class-aem65.json</file>
+                                    <config>
+                                        <selectNodeTypes>
+                                            <type>granite:PublicArea</type>
+                                            <type>granite:FinalArea</type>
+                                            <type>granite:InternalArea</type>
+                                            <type>granite:AbstractArea</type>
+                                        </selectNodeTypes>
+                                        <nodeTypeFilters>
+                                            <filter>
+                                                <type>exclude</type>
+                                                <pattern>nt:file</pattern>
+                                            </filter>
+                                            <filter>
+                                                <type>exclude</type>
+                                                <pattern>nt:resource</pattern>
+                                            </filter>
+                                        </nodeTypeFilters>
+                                    </config>
+                                </checklist>
+                            </websterTargets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>net.adamcin.oakpal</groupId>
@@ -158,41 +281,4 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>extract-bundle-info</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.gmaven</groupId>
-                        <artifactId>groovy-maven-plugin</artifactId>
-                        <version>2.1</version>
-                        <executions>
-                            <execution>
-                                <id>extract-bundle-info</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
-                                <configuration>
-                                    <defaults>
-                                        <aemVersion>6.3</aemVersion>
-                                    </defaults>
-                                    <source>${pom.basedir}/src/main/script/ExtractBundleInfo.groovy</source>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.codehaus.groovy.modules.http-builder</groupId>
-                                <artifactId>http-builder</artifactId>
-                                <version>0.7</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
