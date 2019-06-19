@@ -31,16 +31,17 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Generates a dialog out of @FormField annotations
  * Ideally your sling model should extend this class to inherit its features
+ * but you can also just use the @DialogProvider annotation
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
+@DialogProvider
 public class GeneratedDialog {
     @Inject
     @JsonIgnore
@@ -58,7 +59,7 @@ public class GeneratedDialog {
     private FormComponent form;
 
     @JsonIgnore
-    Map<String, FieldComponent> fieldComponents;
+    protected Map<String, FieldComponent> fieldComponents;
 
     @PostConstruct
     public void init() {

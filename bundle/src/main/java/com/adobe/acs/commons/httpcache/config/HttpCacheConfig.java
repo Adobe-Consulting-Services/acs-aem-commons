@@ -25,6 +25,7 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessExcept
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import org.apache.sling.api.SlingHttpServletRequest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 @ProviderType
 public interface HttpCacheConfig {
 
-    public enum FilterScope {
+    enum FilterScope {
         REQUEST,
         INCLUDE
     }
@@ -76,6 +77,15 @@ public interface HttpCacheConfig {
      * @return
      */
     List<Pattern> getJCRInvalidationPathPatterns();
+
+    /**
+     * Get a list of headers (as regex pattern) that should NOT be put in the cached response, to be served to the output.
+     * This is useful for example with systems that put a login cookie in each response.
+     * @return
+     */
+    default List<Pattern> getExcludedResponseHeaderPatterns() {
+        return Collections.emptyList();
+    }
 
     /**
      * Determine if this cache config is applicable for the given request. Calls <code>HttpCacheConfigExtension

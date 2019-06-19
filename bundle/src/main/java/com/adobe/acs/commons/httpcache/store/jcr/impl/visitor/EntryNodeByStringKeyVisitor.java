@@ -70,7 +70,7 @@ public class EntryNodeByStringKeyVisitor extends AbstractNodeVisitor
         }
     }
 
-    private CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
+    protected CacheKey getCacheKey(final Node node) throws RepositoryException, IOException, ClassNotFoundException {
         return new EntryNodeToCacheKeyHandler(node, dclm).get();
     }
 

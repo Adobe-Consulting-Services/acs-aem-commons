@@ -5,7 +5,7 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <cq:defineObjects />
-<sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.version.model.EvolutionModel" var="model"/>
+<sling:adaptTo var="model" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.version.model.EvolutionModel"/>
 
 <!doctype html>
 <html class="coral-App">
@@ -22,25 +22,7 @@
 </head>
 
 <body class="coral--light">
-    <coral-shell-header
-            class="coral--dark granite-shell-header coral3-Shell-header"
-            role="region"
-            aria-label="Header Bar"
-            aria-hidden="false">
-        <coral-shell-header-home class="globalnav-toggle"
-                                 data-globalnav-toggle-href="/"
-                                 role="heading"
-                                 aria-level="2">
-            <a is="coral-shell-homeanchor"
-               style="display: inline-block; padding-right: 0;"
-               icon="adobeExperienceManagerColor"
-               href="/"
-               class="coral3-Shell-homeAnchor"><coral-icon class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--sizeM coral3-Icon--adobeExperienceManagerColor" icon="adobeExperienceManagerColor" size="M" role="img" aria-label="adobe experience manager color"></coral-icon>
-                <coral-shell-homeanchor-label>Adobe Experience Manager</coral-shell-homeanchor-label>
-            </a>
-            <span style="line-height: 2.375rem;">/ ACS AEM Commons / Version Compare</span>
-        </coral-shell-header-home>
-    </coral-shell-header>
+    <%@include file="page-header.jsp" %>
 
     <div id="acs-commons-version-comparison">
 
@@ -75,60 +57,12 @@
                         
                    <c:if test="${!empty model.resourcePath && !empty model.evolution.evolutionItems}">
                         <section class="coral-Well">
-                            <div class="options">
-                                <h2 acs-coral-heading>Configuration</h2>
-                                <label acs-coral-checkbox><input type="checkbox" ng-model="app.paintConnections"><span>Paint Connections</span></label>
-                                <label acs-coral-checkbox><input type="checkbox" ng-model="app.hideUnchanged"><span>Hide Unchanged</span></label>
-                            </div>
-                            <div class="options">
-                                <h2 acs-coral-heading>Hide Versions</h2>
-                                <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter">
-                                    <label acs-coral-checkbox><input type="checkbox" ng-model="app.hideVersions['version-${evolutionItem.versionName}']"><span>${evolutionItem.versionName}</span></label>
-                                </c:forEach>
-                            </div>
-                            <div class="legend">
-                                <h2 acs-coral-heading>Legend</h2>
-                                <div class="status-added">added</div>
-                                <div class="status-changed">changed</div>
-                                <div class="status-removed">removed in next version</div>
-                                <div class="status-added-removed"><div class="inner-version-entry">added and removed in next version</div></div>
-                                <div class="status-changed-removed"><div class="inner-version-entry">changed and removed in next version</div></div>
-                            </div>
+                            <%@include file="options.jsp" %>
                         </section>
 
                         <section>
                             <div class="content">
-                                <div>
-                                    <c:forEach var="evolutionItem" items="${model.evolution.evolutionItems}" varStatus="evoCounter" >
-                                        <div class="version current-${evolutionItem.current}" id="version-${evolutionItem.versionName}" ng-show="showVersion('version-${evolutionItem.versionName}')">
-                                            <div class="version-header">
-                                                <div class="name"><c:out value="${evolutionItem.versionName}"/></div>
-                                                <div class="date"><fmt:formatDate type="both" value="${evolutionItem.versionDate}" /></div>
-                                            </div>
-                                            <c:forEach var="versionEntry" items="${evolutionItem.versionEntries}" varStatus="entryCounter">
-                                                <a href="#popover-${versionEntry.uniqueName}-${evoCounter.index}" data-toggle="popover" data-point-from="right" data-align-from="left">
-                                                    <div class="version-entry type-${versionEntry.resource} status-${versionEntry.status}"
-                                                         id="${versionEntry.uniqueName}-${evoCounter.index}" 
-                                                         ${versionEntry.status == "" ? "ng-show='!app.hideUnchanged'" : ""} 
-                                                         ng-init="addConnection({'source':'${versionEntry.uniqueName}-${evoCounter.index}', 'target':'${versionEntry.uniqueName}-${evoCounter.index + 1}', 'isCurrent':${evolutionItem.current}})">
-                                                        <div class="inner-version-entry depth-${versionEntry.depth}">
-                                                            <span class="key"><c:out value="${versionEntry.name}"/>:</span>
-                                                            <span class="value"><c:out value="${versionEntry.valueStringShort}"/></span>
-                                                            <div id="popover-${versionEntry.uniqueName}-${evoCounter.index}" class="coral-Popover">
-                                                                <div class="coral-Popover-content u-coral-padding">
-                                                                    <c:out value="${versionEntry.valueString}"/>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </a> 
-                                            </c:forEach>
-                                        </div>
-                                    </c:forEach>
-                                    <c:if test="${empty model.evolution.evolutionItems}">
-                                        <h1 acs-coral-heading>No versions could be found for this item.</h1>
-                                    </c:if>
-                                </div>
+                                <%@include file="graph.jsp" %>
                             </div>
                         </section>
                     </c:if>
