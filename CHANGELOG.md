@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+### Fixed
+
+- #1929 - Children as Property Resource Wrapper API array support
+
 ## [4.1.0] - 2019-06-18
 
 ### Added
@@ -47,7 +51,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1823 - Upgraded oakpal plugin to 1.2.1 to for json serialization fix.
 - #1856 - It's now possible to change the locale used for number, date and time handling for Spreadsheet instances, allowing consistent behavior independent of OS defaults.
 - #1852 - Switched from event-based resource observation to the ResourceChangeListener API wherever possible. In the case of the JCRNodeChangeEventHandler component, reconfiguration is necessary to be able to use the new API.
-- #1929 - Children as Property Resource Wrapper API array support
 
 ### Fixed
 - #1819 - Http Cache - Combined extensions : fixed mechanism to use LDAP syntax to bind factories
