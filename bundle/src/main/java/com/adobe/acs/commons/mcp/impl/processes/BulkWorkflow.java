@@ -164,7 +164,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
                         syntheticWorkflowRunner.execute(resourceResolver, path, syntheticWorkflowModel, false, true);
                         final long duration = System.currentTimeMillis() - start;
                         record(path, ItemStatus.SUCCESS, duration);
-                        log.debug("Successfully processed payload [ {} ] with synthetic workflow [ {} ] in [ {} ] milliseconds.", path, workflowId);
+                        log.debug("Successfully processed payload [ {} ] with synthetic workflow [ {} ] in [ {} ] milliseconds.", path, workflowId, duration);
                     } catch (WorkflowException e) {
                         final long duration = System.currentTimeMillis() - start;
                         record(path, ItemStatus.FAILURE, duration);
