@@ -185,7 +185,14 @@ public final class RemoteAssetDecoratorTest {
         allowRetry();
         whitelistedServiceUsers.clear();
         when(userManager.getAuthorizable(anyString())).thenReturn(null);
-        assertSameResourceDecorated();
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void isAllowedUser_systemUser() throws RepositoryException {
+        allowRetry();
+        whitelistedServiceUsers.clear();
+        when(user.isSystemUser()).thenReturn(true);
         verifyDoesNotAccept();
     }
 /*
