@@ -21,17 +21,16 @@ package com.adobe.acs.commons.synth.children;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.sling.api.resource.*;
-import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.jcr.RepositoryException;
 import java.math.BigDecimal;
@@ -41,8 +40,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.Mockito.when;
 
 public class ChildrenAsPropertyResourceTest {
 
