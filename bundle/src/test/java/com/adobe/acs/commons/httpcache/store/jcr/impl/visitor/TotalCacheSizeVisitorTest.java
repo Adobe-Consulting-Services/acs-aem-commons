@@ -19,19 +19,15 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
-import static org.junit.Assert.assertEquals;
-
 import javax.jcr.Node;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
-@PrepareForTest({EntryNodeMapVisitor.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class TotalCacheSizeVisitorTest
 {
     private static final long TEST_FILE_SIZE_WIN = 63 + 4;
