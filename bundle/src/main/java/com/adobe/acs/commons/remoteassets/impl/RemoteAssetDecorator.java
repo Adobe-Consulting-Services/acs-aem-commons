@@ -104,8 +104,9 @@ public class RemoteAssetDecorator implements ResourceDecorator {
 
         if (syncSuccessful) {
             LOG.trace("Refreshing resource after binary sync of {}", resource.getPath());
-            resource.getResourceResolver().refresh();
-            return resource.getResourceResolver().getResource(resource.getPath());
+            final ResourceResolver resourceResolver = resource.getResourceResolver();
+            resourceResolver.refresh();
+            return resourceResolver.getResource(resource.getPath());
         } else {
             return resource;
         }

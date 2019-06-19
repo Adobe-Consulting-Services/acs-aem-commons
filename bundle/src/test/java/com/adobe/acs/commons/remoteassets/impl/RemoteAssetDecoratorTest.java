@@ -21,11 +21,13 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -39,6 +41,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -74,11 +77,14 @@ public final class RemoteAssetDecoratorTest {
     private final Set<String> whitelistedServiceUsers = new HashSet<>();
     private final List<String> damSyncPaths = new LinkedList<>();
     private final Session session = mock(Session.class);
+    private final UserManager userManager = mock(UserManager.class);
+    private final User user = mock(User.class);
 
     @Before
-    public void setup() throws NoSuchFieldException {
+    public void setup() throws NoSuchFieldException, RepositoryException {
         PrivateAccessor.setField(decorator, "assetSync", assetSync);
         PrivateAccessor.setField(decorator, "config", config);
+        doReturn(userManager).when(decorator).getUserManager(session);
 
         when(resource.getValueMap()).thenReturn(valueMap);
         when(resource.getPath()).thenReturn(TEST_REMOTE_ASSET_CONTENT_PATH);
@@ -95,6 +101,8 @@ public final class RemoteAssetDecoratorTest {
         whitelistedServiceUsers.add(TESTUSER);
         damSyncPaths.add("/just/some/other/path");
         damSyncPaths.add(TEST_REMOTE_ASSET_CONTENT_PATH);
+
+        when(userManager.getAuthorizable(anyString())).thenReturn(user);
     }
 
     @SuppressWarnings("deprecation")
@@ -102,9 +110,17 @@ public final class RemoteAssetDecoratorTest {
         return decorator.decorate(resource, null);
     }
 
-    private void verifyDoesNotAccept() {
+    private void verifyIsAlreadySyncing(final int times) {
+        verify(decorator, times(times)).isAlreadySyncing(anyString());
+    }
+
+    private void assertSameResourceDecorated() {
         assertEquals(resource, decorate());
-        verify(decorator, times(0)).isAlreadySyncing(anyString());
+    }
+
+    private void verifyDoesNotAccept() {
+        assertSameResourceDecorated();
+        verifyIsAlreadySyncing(0);
     }
 
     @Test
@@ -161,6 +177,15 @@ public final class RemoteAssetDecoratorTest {
         allowRetry();
         whitelistedServiceUsers.clear();
         doThrow(RepositoryException.class).when(decorator).getUserManager(session);
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void isAllowedUser_currentUserIsNull() throws RepositoryException {
+        allowRetry();
+        whitelistedServiceUsers.clear();
+        when(userManager.getAuthorizable(anyString())).thenReturn(null);
+        assertSameResourceDecorated();
         verifyDoesNotAccept();
     }
 /*
