@@ -142,12 +142,12 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         }
 
         final Calendar lastFailure = props.get(RemoteAssets.REMOTE_SYNC_FAILED, (Calendar) null);
-        if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (this.config.getRetryDelay() * 60000))) {
+        if (lastFailure != null && System.currentTimeMillis() < (lastFailure.getTimeInMillis() + (config.getRetryDelay() * 60000))) {
             return false;
         }
 
         final boolean isAllowedUser = isAllowedUser(resource);
-        for (final String syncPath : this.config.getDamSyncPaths()) {
+        for (final String syncPath : config.getDamSyncPaths()) {
             if (resource.getPath().startsWith(syncPath)) {
                 return isAllowedUser;
             }

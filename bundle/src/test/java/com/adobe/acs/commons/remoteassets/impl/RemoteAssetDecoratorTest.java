@@ -50,6 +50,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -60,6 +61,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
@@ -75,15 +77,18 @@ public final class RemoteAssetDecoratorTest {
 
     private final RemoteAssetDecorator decorator = spy(new RemoteAssetDecorator());
     private final RemoteAssetsBinarySync assetSync = mock(RemoteAssetsBinarySync.class);
+    private final RemoteAssetsConfig config = mock(RemoteAssetsConfig.class);
 
     private final Resource resource = mock(Resource.class);
-    private final ValueMap properties = mock(ValueMap.class);
+    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final ValueMap valueMap = new ValueMapDecorator(properties);
 
     @Before
     public void setup() throws NoSuchFieldException {
         PrivateAccessor.setField(decorator, "assetSync", assetSync);
+        PrivateAccessor.setField(decorator, "config", config);
 
-        when(resource.getValueMap()).thenReturn(properties);
+        when(resource.getValueMap()).thenReturn(valueMap);
     }
 
     @SuppressWarnings("deprecation")
@@ -103,8 +108,19 @@ public final class RemoteAssetDecoratorTest {
 
     @Test
     public void doesNotAccept_nonRemoteAsset() {
-        when(properties.get(JcrConstants.JCR_PRIMARYTYPE)).thenReturn(DamConstants.NT_DAM_ASSETCONTENT);
-        when(properties.get(RemoteAssets.IS_REMOTE_ASSET, false)).thenReturn(false);
+        properties.put(JcrConstants.JCR_PRIMARYTYPE, DamConstants.NT_DAM_ASSETCONTENT);
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void doesNotAccept_doNotRetryYet() {
+        doesNotAccept_nonRemoteAsset();
+        properties.put(RemoteAssets.IS_REMOTE_ASSET, true);
+        final Calendar lastFailure = Calendar.getInstance();
+        final long currentTimeMillis = System.currentTimeMillis();
+        lastFailure.setTimeInMillis(currentTimeMillis);
+        properties.put(RemoteAssets.REMOTE_SYNC_FAILED, lastFailure);
+        when(config.getRetryDelay()).thenReturn(100);
         verifyDoesNotAccept();
     }
 /*
