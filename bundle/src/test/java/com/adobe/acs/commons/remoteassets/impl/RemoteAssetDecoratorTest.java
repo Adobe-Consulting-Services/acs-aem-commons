@@ -135,6 +135,14 @@ public final class RemoteAssetDecoratorTest {
         properties.put(RemoteAssets.REMOTE_SYNC_FAILED, null);
         verifyDoesNotAccept();
     }
+
+    @Test
+    public void doesNotAccept_retryAllowedAlready() {
+        doesNotAccept_doNotRetryYet();
+        when(resourceResolver.getUserID()).thenReturn(UserConstants.DEFAULT_ADMIN_ID);
+        when(config.getRetryDelay()).thenReturn(0);
+        verifyDoesNotAccept();
+    }
 /*
         setupRemoteAssetsServiceUser(context);
 
