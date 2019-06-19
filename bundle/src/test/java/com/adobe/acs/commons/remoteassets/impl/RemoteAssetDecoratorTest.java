@@ -200,7 +200,7 @@ public final class RemoteAssetDecoratorTest {
     }
 
     @Test
-    public void isAllowedUser_systemUser() throws RepositoryException {
+    public void isAllowedUser_systemUser() {
         allowRetry();
         whitelistedServiceUsers.clear();
         when(user.isSystemUser()).thenReturn(true);
@@ -208,7 +208,7 @@ public final class RemoteAssetDecoratorTest {
     }
 
     @Test
-    public void isAllowedUser_notSystemUser() throws RepositoryException {
+    public void isAllowedUser_notSystemUser() {
         allowRetry();
         whitelistedServiceUsers.clear();
         when(user.isSystemUser()).thenReturn(false);
@@ -216,10 +216,18 @@ public final class RemoteAssetDecoratorTest {
     }
 
     @Test
-    public void syncAssetBinaries_syncAsset() throws RepositoryException {
+    public void syncAssetBinaries_syncAsset() {
         allowRetry();
         when(assetSync.syncAsset(resource)).thenReturn(true);
         verifyAcceptedNewResource();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void syncAssetBinaries_catchException() throws RepositoryException {
+        allowRetry();
+        when(assetSync.syncAsset(resource)).thenThrow(Exception.class);
+        verifyAcceptedSameResource();
     }
 /*
         setupRemoteAssetsServiceUser(context);
