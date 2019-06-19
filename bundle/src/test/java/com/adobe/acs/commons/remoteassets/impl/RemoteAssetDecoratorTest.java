@@ -97,7 +97,14 @@ public final class RemoteAssetDecoratorTest {
     }
 
     @Test
-    public void doesNotAccept() {
+    public void doesNotAccept_wrongPrimaryType() {
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void doesNotAccept_nonRemoteAsset() {
+        when(properties.get(JcrConstants.JCR_PRIMARYTYPE)).thenReturn(DamConstants.NT_DAM_ASSETCONTENT);
+        when(properties.get(RemoteAssets.IS_REMOTE_ASSET, false)).thenReturn(false);
         verifyDoesNotAccept();
     }
 /*
