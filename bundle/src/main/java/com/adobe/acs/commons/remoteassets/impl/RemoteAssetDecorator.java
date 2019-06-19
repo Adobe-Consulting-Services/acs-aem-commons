@@ -19,9 +19,14 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.day.cq.dam.api.DamConstants;
+import java.util.Calendar;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
@@ -37,14 +42,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.AccessDeniedException;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.UnsupportedRepositoryOperationException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import com.day.cq.dam.api.DamConstants;
 
 /**
  * ResourceDecorator that instruments remote assets to sync binaries as needed.
@@ -198,8 +198,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
         return false;
     }
 
-    protected UserManager getUserManager(final Session session)
-            throws AccessDeniedException, UnsupportedRepositoryOperationException, RepositoryException {
+    protected UserManager getUserManager(final Session session) throws RepositoryException {
         return AccessControlUtil.getUserManager(session);
     }
 

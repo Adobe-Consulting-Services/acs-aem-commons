@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -69,6 +73,7 @@ public final class RemoteAssetDecoratorTest {
     private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
     private final Set<String> whitelistedServiceUsers = new HashSet<>();
     private final List<String> damSyncPaths = new LinkedList<>();
+    private final Session session = mock(Session.class);
 
     @Before
     public void setup() throws NoSuchFieldException {
@@ -81,11 +86,15 @@ public final class RemoteAssetDecoratorTest {
 
         when(resourceResolver.getUserID()).thenReturn(TESTUSER);
 
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+
         when(config.getWhitelistedServiceUsers()).thenReturn(whitelistedServiceUsers);
         when(config.getDamSyncPaths()).thenReturn(damSyncPaths);
         when(config.getRetryDelay()).thenReturn(0);
 
         whitelistedServiceUsers.add(TESTUSER);
+        damSyncPaths.add("/just/some/other/path");
+        damSyncPaths.add(TEST_REMOTE_ASSET_CONTENT_PATH);
     }
 
     @SuppressWarnings("deprecation")
@@ -143,6 +152,15 @@ public final class RemoteAssetDecoratorTest {
     @Test
     public void doesNotAccept_notInDamSyncPaths() {
         allowRetry();
+        damSyncPaths.clear();
+        verifyDoesNotAccept();
+    }
+
+    @Test
+    public void doesNotAccept_catchRepositoryException() throws RepositoryException {
+        allowRetry();
+        whitelistedServiceUsers.clear();
+        doThrow(RepositoryException.class).when(decorator).getUserManager(session);
         verifyDoesNotAccept();
     }
 /*
