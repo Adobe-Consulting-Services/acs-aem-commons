@@ -112,7 +112,7 @@ public class ChildrenAsPropertyResourceTest {
         entry100.put("booleanAsString", "true");
 
         entry100.put("strArray", new String[]{"one", "two", "three"});
-        entry100.put("longArray", new Long[]{100l, 200l, 300l, 400l});
+        entry100.put("longArray", new Long[]{100L, 200L, 300L, 400L});
         entry100.put("dateArray", new Date[]{new Date(10000), new Date(20000)});
 
         entry100.put("jcr:primaryType", "nt:unstructured");
