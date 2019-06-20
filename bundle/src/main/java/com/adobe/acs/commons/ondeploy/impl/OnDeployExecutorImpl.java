@@ -24,39 +24,17 @@ import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.felix.scr.annotations.*;
+import org.apache.sling.api.resource.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.management.openmbean.*;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -204,7 +182,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + statusResource.getPath();
                 logger.error(errMsg, e);
-                trackScriptEnd(statusResource, SCRIPT_STATUS_FAIL, e.getCause().getMessage());
+                trackScriptEnd(statusResource, SCRIPT_STATUS_FAIL, ExceptionUtils.getStackTrace(e.getCause()));
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }
         } else if (!status.equals(SCRIPT_STATUS_SUCCESS)) {
