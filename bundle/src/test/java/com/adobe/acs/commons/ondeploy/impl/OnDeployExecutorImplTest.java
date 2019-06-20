@@ -150,7 +150,7 @@ public class OnDeployExecutorImplTest {
         String status1ResourcePath = statusResource.getPath();
         assertEquals(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/" + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
         impl.trackScriptStart(statusResource);
-        impl.trackScriptEnd(statusResource, "fail");
+        impl.trackScriptEnd(statusResource, "fail", "error message");
         Resource originalStatus1 = resourceResolver.getResource(status1ResourcePath);
         assertEquals("fail", originalStatus1.getValueMap().get("status", ""));
         LogTester.reset();
@@ -164,6 +164,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource(status1ResourcePath);
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("error message", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);

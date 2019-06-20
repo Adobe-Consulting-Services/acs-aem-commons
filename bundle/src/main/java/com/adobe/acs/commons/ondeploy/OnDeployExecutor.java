@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.ondeploy.impl;
+package com.adobe.acs.commons.ondeploy;
 
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
