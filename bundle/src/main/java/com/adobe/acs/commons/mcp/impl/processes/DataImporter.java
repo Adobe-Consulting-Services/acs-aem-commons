@@ -270,7 +270,7 @@ public class DataImporter extends ProcessDefinition {
 
     private void updateMetadata(ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
         ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH).toString()).adaptTo(ModifiableValueMap.class);
-        populateMetadataFromRow(resourceProperties, nodeInfo);
+        populateMetadataFromRow(resourceProperties, nodeInfo, false);
 
         if (nodeInfo.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
             String jcrContentPrimaryType = nodeInfo.get(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE).toString();
@@ -279,7 +279,7 @@ public class DataImporter extends ProcessDefinition {
                 initialProperty.put(JcrConstants.JCR_PRIMARYTYPE, jcrContentPrimaryType);
                 Resource jcrContent = ResourceUtil.getOrCreateResource(rr, nodeInfo.get(PATH).toString() + SLASH + JcrConstants.JCR_CONTENT, initialProperty, jcrContentPrimaryType, true);
                 ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
-                populateContentMetadataFromRow(contentResourceProperties, nodeInfo);
+                populateMetadataFromRow(contentResourceProperties, nodeInfo, true);
             }
         }
 
@@ -300,7 +300,7 @@ public class DataImporter extends ProcessDefinition {
         }
     }
 
-    private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
+    private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo, boolean isJcrContent) {
         for (String prop : data.getHeaderRow()) {
             if (prop != null
                     && !prop.equals(PATH)
@@ -308,23 +308,12 @@ public class DataImporter extends ProcessDefinition {
                 CompositeVariant value = nodeInfo.get(prop);
                 if (value == null || value.isEmpty()) {
                     nodeInfo.remove(prop);
-                } else if (!prop.startsWith(JcrConstants.JCR_CONTENT)){
-                    resourceProperties.put(prop, value.toPropertyValue());
-                }
-            }
-        }
-    }
-
-    private void populateContentMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
-        for (String prop : data.getHeaderRow()) {
-            if (prop != null
-                    && !prop.equals(PATH)
-                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
-                CompositeVariant value = nodeInfo.get(prop);
-                if (value == null || value.isEmpty()) {
-                    nodeInfo.remove(prop);
-                } else if (prop.startsWith(JcrConstants.JCR_CONTENT)){
-                    resourceProperties.put(prop.replace(JcrConstants.JCR_CONTENT + SLASH, ""), value.toPropertyValue());
+                } else {
+                    if (isJcrContent && prop.startsWith(JcrConstants.JCR_CONTENT)) {
+                        resourceProperties.put(prop.replace(JcrConstants.JCR_CONTENT + SLASH, ""), value.toPropertyValue());
+                    } else if(!isJcrContent && !prop.startsWith(JcrConstants.JCR_CONTENT)) {
+                        resourceProperties.put(prop, value.toPropertyValue());
+                    }
                 }
             }
         }
