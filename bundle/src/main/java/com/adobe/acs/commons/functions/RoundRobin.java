@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <T> Type being iterated in the list
  */
 public class RoundRobin<T> implements Iterable<T> {
-
     private final List<T> items;
 
     public RoundRobin(final List<T> coll) {
@@ -49,7 +48,14 @@ public class RoundRobin<T> implements Iterable<T> {
 
             @Override
             public synchronized T next() {
-                int idx = index.getAndUpdate(x -> ++x > 0 ? x : 0);
+                int idx = index.getAndUpdate(x -> {
+                    // handle overflow
+                    if (x == Integer.MAX_VALUE) {
+                        return (x % items.size()) + 1;
+                    } else {
+                        return ++x;
+                    }
+                });
                 return items.get(idx % items.size());
             }
 
