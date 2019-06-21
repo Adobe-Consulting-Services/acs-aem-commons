@@ -136,6 +136,7 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         return null;
     }
 
+   /* This is broken out into its own method to allow for easier unit testing */
     protected Asset resolveToAsset(final Resource resource) {
         return DamUtil.resolveToAsset(resource);
     }
