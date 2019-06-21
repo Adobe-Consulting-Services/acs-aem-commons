@@ -20,6 +20,17 @@
 
 package com.adobe.acs.commons.widgets;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.script.Bindings;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -27,33 +38,22 @@ import org.apache.sling.api.scripting.SlingBindings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.script.Bindings;
+@RunWith(MockitoJUnitRunner.class)
+public final class MultiFieldPanelWCMUseTest {
 
-import java.util.List;
-import java.util.Map;
+    private final String path = RandomStringUtils.randomAlphanumeric(10);
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(MultiFieldPanelFunctions.class)
-public class MultiFieldPanelWCMUseTest {
-
-    private String path = RandomStringUtils.randomAlphanumeric(10);
+    private final MultiFieldPanelWCMUse multiFieldPanelWCMUse = spy(new MultiFieldPanelWCMUse());
 
     @Mock
     private Bindings bindings;
 
     @Mock
     private Resource componentResource;
+
     @Mock
     private Resource parameterResource;
 
@@ -62,94 +62,86 @@ public class MultiFieldPanelWCMUseTest {
 
     @Mock
     private List<Map<String, String>> myFirstList;
+
     @Mock
     private List<Map<String, String>> mySecondList;
 
-    @Mock
-    private MultiFieldPanelFunctions multiFieldPanelFunctions;
-
-    private MultiFieldPanelWCMUse multiFieldPanelWCMUse = new MultiFieldPanelWCMUse();
-
 
     @Before
-    public void setUp() throws Exception {
-        PowerMockito.mockStatic(MultiFieldPanelFunctions.class);
+    public void setUp() {
         when(bindings.get(SlingBindings.RESOURCE)).thenReturn(componentResource);
         when(componentResource.getResourceResolver()).thenReturn(resourceResolver);
     }
 
     @Test
-    public void testNullPropertyName() throws Exception {
+    public void testNullPropertyName() {
         when(bindings.get("location")).thenReturn(null);
         when(bindings.get("name")).thenReturn(null);
 
         multiFieldPanelWCMUse.init(bindings);
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(0, actual.size());
     }
 
     @Test
-    public void testEmptyPropertyName() throws Exception {
+    public void testEmptyPropertyName() {
         when(bindings.get("location")).thenReturn(null);
         when(bindings.get("name")).thenReturn("");
 
         multiFieldPanelWCMUse.init(bindings);
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(0, actual.size());
     }
 
     @Test
-    public void testNotFoundPropertyName() throws Exception {
+    public void testNotFoundPropertyName() {
         when(bindings.get("location")).thenReturn(null);
         when(bindings.get("name")).thenReturn("notFoundPropertyName");
 
         multiFieldPanelWCMUse.init(bindings);
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(0, actual.size());
     }
 
     @Test
-    public void testValidPropertyName() throws Exception {
+    public void testValidPropertyName() {
         when(bindings.get("location")).thenReturn(null);
         when(bindings.get("name")).thenReturn("myProperty");
-        BDDMockito
-                .given(MultiFieldPanelFunctions.getMultiFieldPanelValues(componentResource, "myProperty"))
-                .willReturn(myFirstList);
+        doReturn(myFirstList).when(multiFieldPanelWCMUse)
+            .getMultiFieldPanelValues(componentResource, "myProperty");
 
         multiFieldPanelWCMUse.init(bindings);
 
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }
 
     @Test
-    public void testValidResourceName() throws Exception {
+    public void testValidResourceName() {
         when(bindings.get("location")).thenReturn(parameterResource);
         when(bindings.get("name")).thenReturn("myProperty");
-        BDDMockito
-                .given(MultiFieldPanelFunctions.getMultiFieldPanelValues(parameterResource, "myProperty"))
-                .willReturn(myFirstList);
+        doReturn(myFirstList).when(multiFieldPanelWCMUse)
+            .getMultiFieldPanelValues(parameterResource, "myProperty");
 
         multiFieldPanelWCMUse.init(bindings);
 
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }
 
     @Test
-    public void testValidResourcePath() throws Exception {
+    public void testValidResourcePath() {
         when(bindings.get("location")).thenReturn(path);
         when(bindings.get("name")).thenReturn("myProperty");
         when(resourceResolver.getResource(path)).thenReturn(parameterResource);
-        BDDMockito
-                .given(MultiFieldPanelFunctions.getMultiFieldPanelValues(parameterResource, "myProperty"))
-                .willReturn(myFirstList);
+        doReturn(myFirstList).when(multiFieldPanelWCMUse)
+            .getMultiFieldPanelValues(parameterResource, "myProperty");
 
         multiFieldPanelWCMUse.init(bindings);
 
-        List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
+        final List<Map<String, String>> actual = multiFieldPanelWCMUse.getValues();
         assertEquals(myFirstList, actual);
         assertNotEquals(mySecondList, actual);
     }

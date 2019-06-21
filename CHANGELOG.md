@@ -25,7 +25,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 - #1202 - fix overflow handling in looping iterator
-- Adjust WorkflowPackageManagerImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
 
