@@ -83,6 +83,20 @@ public final class IntegrationServiceImplTest {
     }
 
     @Test
+    public void testGetApiKey() {
+        final String value = "api-key";
+        when(config.clientId()).thenReturn(value);
+        assertEquals(value, impl.getApiKey());
+    }
+
+    @Test
+    public void testGetTimeoutinMilliSeconds() {
+        final int value = 12345;
+        when(config.timeoutInMilliSeocnds()).thenReturn(value);
+        assertEquals(value, impl.getTimeoutinMilliSeconds());
+    }
+
+    @Test
     public void testConifg() throws NoSuchFieldException {
         impl.activate(config);;
         assertEquals(config, PrivateAccessor.getField(impl, "jwtServiceConfig"));
