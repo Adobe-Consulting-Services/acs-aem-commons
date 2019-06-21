@@ -166,33 +166,34 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
             return Collections.emptyList();
-        }
 
-        if (!isWorkflowPackage(resourceResolver, path)) {
+        } else if (!isWorkflowPackage(resourceResolver, path)) {
             log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
-            return Arrays.asList(new String[] { path });
-        }
+            return Arrays.asList(new String[]{ path });
 
-        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        final Page page = pageManager.getContainingPage(path);
+        } else {
+            final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+            final Page page = pageManager.getContainingPage(path);
 
-        final Resource contentResource = page == null ? null : page.getContentResource();
-        if (contentResource != null) {
-            final Node node = contentResource.adaptTo(Node.class);
-            final ResourceCollection resourceCollection = getResourceCollection(node);
-            if (resourceCollection != null) {
-                final List<Node> members = resourceCollection.list(nodeTypes);
-                for (final Node member : members) {
-                    collectionPaths.add(member.getPath());
+            if (page != null && page.getContentResource() != null) {
+                final Node node = page.getContentResource().adaptTo(Node.class);
+
+                final ResourceCollection resourceCollection = getResourceCollection(node);
+
+                if (resourceCollection != null) {
+                    final List<Node> members = resourceCollection.list(nodeTypes);
+                    for (final Node member : members) {
+                        collectionPaths.add(member.getPath());
+                    }
+                    return collectionPaths;
                 }
-
-                return collectionPaths;
             }
-        }
 
-        return Arrays.asList(new String[]{ path });
+            return Arrays.asList(new String[]{ path });
+        }
     }
 
+    /* This is broken out into its own method to allow for easier unit testing */
     protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
         return ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
     }
