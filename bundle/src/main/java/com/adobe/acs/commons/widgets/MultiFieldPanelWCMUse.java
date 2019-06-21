@@ -40,25 +40,30 @@ import java.util.Map;
  *  - data-sly-list.value="${ multiField.values }"
  */
 public class MultiFieldPanelWCMUse implements Use {
-
     private static final Logger log = LoggerFactory.getLogger(MultiFieldPanelWCMUse.class);
 
     private List<Map<String, String>> values = Collections.emptyList();
 
+    public List<Map<String, String>> getValues() {
+        return values;
+    }
+
     @Override
-    public void init(final Bindings bindings) {
+    public void init(Bindings bindings) {
         Resource resource = (Resource) bindings.get(SlingBindings.RESOURCE);
 
-        final Object location = bindings.get("location");
+        Object location = bindings.get("location");
         if (location != null) {
             if (location instanceof Resource) {
                 resource = (Resource) location;
-            } else if (location instanceof String) {
-                resource = resource.getResourceResolver().getResource((String) location);
+            } else {
+                if (location instanceof String) {
+                    resource = resource.getResourceResolver().getResource((String) location);
+                }
             }
         }
 
-        final String name = (String) bindings.get("name");
+        String name = (String) bindings.get("name");
         if (StringUtils.isBlank(name)) {
             log.info("Invalid property name");
             return;
@@ -67,10 +72,7 @@ public class MultiFieldPanelWCMUse implements Use {
         values = getMultiFieldPanelValues(resource, name);
     }
 
-    public List<Map<String, String>> getValues() {
-        return values;
-    }
-
+    /* This is broken out into its own method to allow for easier unit testing */
     protected List<Map<String, String>> getMultiFieldPanelValues(Resource resource, final String name) {
         return MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, name);
     }
