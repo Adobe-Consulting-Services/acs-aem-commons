@@ -37,13 +37,14 @@ import junitx.util.PrivateAccessor;
 public final class ErrorPageCacheImplTest {
 
     private static final int FAR_FUTURE_EXPIRY = Integer.MAX_VALUE;
+    private static final int TTL = 5;
 
     private final ErrorPageCacheImpl errorPageCache;
 
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
     public ErrorPageCacheImplTest() throws NotCompliantMBeanException {
-        errorPageCache = new ErrorPageCacheImpl(5, false);
+        errorPageCache = new ErrorPageCacheImpl(TTL, false);
     }
 
     @Before
@@ -126,5 +127,15 @@ public final class ErrorPageCacheImplTest {
     public void testGetCacheData_mars() {
         final String result = errorPageCache.getCacheData("/content/mars");
         assertEquals("hello mars", result);
+    }
+
+    @Test
+    public void testGetTtlInSeconds() {
+        assertEquals(TTL, errorPageCache.getTtlInSeconds());
+    }
+
+    @Test
+    public void testGetCacheData_empty() {
+        assertEquals("", errorPageCache.getCacheData("non-existing"));
     }
 }
