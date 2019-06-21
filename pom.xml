@@ -223,7 +223,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>5.0.0-M3</version>
+                <version>4.0.0</version>
                 <executions>
                     <execution>
                         <id>check-dependencies-for-vulnerabilities</id>
