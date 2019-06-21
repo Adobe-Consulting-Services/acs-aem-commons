@@ -218,8 +218,8 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private List<String> cacheHandlingRulesPid;
 
 
-    @Property(label = "Config-specific HttpCacheHandlingRules",
-            description = "List of Service pid of HttpCacheHandlingRule applicable for this cache config. Optional "
+    @Property(label = "Config-specific Excluded Cookie keys",
+            description = "List of cookie keys that will NOT be put in the cached response, to be served to the output."
                     + "parameter",
             unbounded = PropertyUnbounded.ARRAY)
     static final String PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS = "httpcache.config.excluded.cookie.keys";
