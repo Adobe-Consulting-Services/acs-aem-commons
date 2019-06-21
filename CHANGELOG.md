@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+### Added
+- 1927 - HTTP cache: added cookie exclusion
+- 1905 - HTTP cache: added response header exclusion
+
 ## [4.2.0] - 2019-06-18
 
 ### Added
