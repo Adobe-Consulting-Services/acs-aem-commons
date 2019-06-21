@@ -19,14 +19,27 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
-import com.adobe.acs.commons.fam.ActionManagerFactory;
-import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.mcp.ControlledProcessManager;
-import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
-import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
-import com.adobe.acs.commons.mcp.util.DeserializeException;
-import com.day.cq.dam.api.DamConstants;
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.getActionManager;
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.getFreshMockResolver;
+import static com.adobe.acs.commons.fam.impl.ActionManagerTest.getMockResolver;
+import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +48,14 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
 import javax.jcr.observation.ObservationManager;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -52,17 +67,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.adobe.acs.commons.fam.impl.ActionManagerTest.*;
-import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import com.adobe.acs.commons.fam.ActionManagerFactory;
+import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
+import com.adobe.acs.commons.functions.CheckedConsumer;
+import com.adobe.acs.commons.mcp.ControlledProcessManager;
+import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.impl.ProcessInstanceImpl;
+import com.adobe.acs.commons.mcp.util.DeserializeException;
+import com.day.cq.dam.api.DamConstants;
 
 /**
  * Tests a few cases for folder relocator
  */
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RenovatorTest {
     RenovatorFactory factory = new RenovatorFactory();
     Renovator tool;
