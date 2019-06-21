@@ -30,23 +30,18 @@ import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.config.HttpCacheConfig;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheKeyCreationException;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
-@PrepareForTest({EntryNodeMapVisitor.class,InvalidateByCacheConfigVisitor.class})
-@RunWith(PowerMockRunner.class)
-public class InvalidateByCacheConfigVisitorTest
-{
+@RunWith(MockitoJUnitRunner.class)
+public final class InvalidateByCacheConfigVisitorTest {
+
     @Test
-    public void test() throws Exception
-    {
+    public void test() throws Exception {
         final InvalidateByCacheConfigVisitor visitor = getInvalidateByCacheConfigVisitor(5, true);
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
@@ -58,30 +53,25 @@ public class InvalidateByCacheConfigVisitorTest
         Mockito.verify(rootNode.getSession(), Mockito.times(2)).save();
     }
 
-    private InvalidateByCacheConfigVisitor getInvalidateByCacheConfigVisitor(long delta, boolean knows) throws Exception
-    {
-
+    private InvalidateByCacheConfigVisitor getInvalidateByCacheConfigVisitor(long delta, boolean knows) throws Exception {
         final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
 
-        final CacheKey cacheKey = mockCacheKey();
         final HttpCacheConfig cacheConfig;
 
-        if(knows){
-            cacheConfig = mockCacheStore(cacheKey);
-        }else{
+        if (knows) {
+            cacheConfig = mockCacheStore(mock(CacheKey.class));
+        } else {
             cacheConfig = mockCacheStore();
         }
 
-        final InvalidateByCacheConfigVisitor visitor = new InvalidateByCacheConfigVisitor(11, delta, cacheConfig, dclm);
-        final InvalidateByCacheConfigVisitor spy = spy(visitor);
+        final InvalidateByCacheConfigVisitor visitor = spy(new InvalidateByCacheConfigVisitor(11, delta, cacheConfig, dclm));
 
-        when(spy, "getCacheKey", any(Node.class)).thenReturn(mockCacheKey());
+        when(visitor.getCacheKey(any(Node.class))).thenReturn(mock(CacheKey.class));
 
-        return spy;
+        return visitor;
     }
 
-    private HttpCacheConfig mockCacheStore() throws HttpCacheKeyCreationException
-    {
+    private HttpCacheConfig mockCacheStore() throws HttpCacheKeyCreationException {
         final HttpCacheConfig config = mock(HttpCacheConfig.class);
 
         when(config.knows(any(CacheKey.class))).thenReturn(false);
@@ -89,17 +79,11 @@ public class InvalidateByCacheConfigVisitorTest
         return config;
     }
 
-    private HttpCacheConfig mockCacheStore(final CacheKey key) throws HttpCacheKeyCreationException
-    {
+    private HttpCacheConfig mockCacheStore(final CacheKey key) throws HttpCacheKeyCreationException {
         final HttpCacheConfig config = mock(HttpCacheConfig.class);
 
         when(config.knows(any(CacheKey.class))).thenReturn(true);
 
         return config;
-    }
-
-    private CacheKey mockCacheKey(){
-        final CacheKey key = mock(CacheKey.class);
-        return key;
     }
 }

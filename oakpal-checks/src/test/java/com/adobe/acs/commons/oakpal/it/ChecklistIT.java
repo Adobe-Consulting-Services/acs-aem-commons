@@ -40,15 +40,21 @@ import org.junit.Test;
 public class ChecklistIT {
     public static final String OAKPAL_MODULE_NAME = "com.adobe.acs.acs-aem-commons-oakpal-checks";
     public static final String OAKPAL_CHECKLIST_INTERNAL = "acs-internal";
+    public static final String OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64 = "content-class-aem64";
+    public static final String OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65 = "content-class-aem65";
     public static final String OAKPAL_CHECKLIST_PUBLIC = "acs-commons-integrators";
 
     @Test
     public void testLoadChecklists() throws Exception {
-        ChecklistPlanner planner = new ChecklistPlanner(Arrays.asList(OAKPAL_CHECKLIST_INTERNAL, OAKPAL_CHECKLIST_PUBLIC));
+        ChecklistPlanner planner = new ChecklistPlanner(Arrays.asList(
+                OAKPAL_CHECKLIST_INTERNAL,
+                OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64,
+                OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65,
+                OAKPAL_CHECKLIST_PUBLIC));
         planner.discoverChecklists();
 
-        assertEquals("expect two init stages, representing the two active checklists",
-                2, planner.getInitStages().size());
+        assertEquals("expect four init stages, representing the four active checklists",
+                4, planner.getInitStages().size());
 
         List<CheckSpec> specs = planner.getEffectiveCheckSpecs(Collections.emptyList());
 
@@ -56,9 +62,18 @@ public class ChecklistIT {
         expectNames.addAll(Stream.of(
                 "acHandling-merge-or-better",
                 "enforce-no-libs",
-                "enforce-no-deletes",
-                "content-classifications"
+                "enforce-no-deletes"
         ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_INTERNAL + "/" + name)
+                .collect(Collectors.toList()));
+
+        expectNames.addAll(Stream.of(
+                "content-classifications"
+        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_CONTENT_CLASS_AEM64 + "/" + name)
+                .collect(Collectors.toList()));
+
+        expectNames.addAll(Stream.of(
+                "content-classifications"
+        ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_CONTENT_CLASS_AEM65 + "/" + name)
                 .collect(Collectors.toList()));
 
         expectNames.addAll(Stream.of(
