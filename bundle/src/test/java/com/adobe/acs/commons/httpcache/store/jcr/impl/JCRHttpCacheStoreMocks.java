@@ -17,40 +17,42 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.httpcache.store.jcr.impl.mock;
+package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
-import com.adobe.acs.commons.functions.CheckedConsumer;
-import com.adobe.acs.commons.functions.CheckedFunction;
-import com.adobe.acs.commons.httpcache.engine.CacheContent;
-import com.adobe.acs.commons.httpcache.keys.CacheKey;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
-import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.mockito.invocation.InvocationOnMock;
-import org.powermock.reflect.Whitebox;
-import org.slf4j.Logger;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-import javax.jcr.Node;
-import javax.jcr.Session;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.powermock.api.mockito.PowerMockito.*;
+import javax.jcr.Node;
+import javax.jcr.Session;
+
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.mockito.invocation.InvocationOnMock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.reflect.Whitebox;
+import org.slf4j.Logger;
+
+import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 
 public class JCRHttpCacheStoreMocks {
 
     private final Arguments arguments;
-    private final JCRHttpCacheStoreImpl store = mock(JCRHttpCacheStoreImpl.class);
+    private final JCRHttpCacheStoreImpl store = spy(new JCRHttpCacheStoreImpl());
     private final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
     private final Session session = mock(Session.class);
     private final ResourceResolverFactory resourceResolverFactory = mock(ResourceResolverFactory.class);
@@ -113,16 +115,6 @@ public class JCRHttpCacheStoreMocks {
         Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
         Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
         Whitebox.setInternalState(store, "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
-
-        doCallRealMethod().when(store).put(cacheKey, cacheContent);
-        doCallRealMethod().when(store).contains(cacheKey);
-        doCallRealMethod().when(store).invalidate(cacheKey);
-        doCallRealMethod().when(store).clearCache();
-        doCallRealMethod().when(store).getCacheEntry(any(String.class));
-        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class));
-        doCallRealMethod().when(store).withSession(any(CheckedConsumer.class), any(CheckedConsumer.class));
-        doCallRealMethod().when(store).withSession(any(CheckedFunction.class));
-        doCallRealMethod().when(store).withSession(any(CheckedFunction.class), any(CheckedConsumer.class));
     }
 
     private CacheKeyMock generateCacheKey(Arguments arguments) {
@@ -134,29 +126,23 @@ public class JCRHttpCacheStoreMocks {
         );
     }
 
-    private void mockEntryNodeWriter() throws Exception {
-        whenNew(EntryNodeWriter.class)
-                .withParameterTypes(Session.class, Node.class, CacheKey.class, CacheContent.class, long.class)
-                .withArguments(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class))
-                .thenReturn(entryNodeWriter);
+    private void mockEntryNodeWriter() {
+        doReturn(entryNodeWriter).when(store)
+            .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
     }
 
     private void mockBucketNodeHandler() throws Exception {
         when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
                 .thenReturn(entryNode);
-        whenNew(BucketNodeHandler.class)
-                .withParameterTypes(Node.class, DynamicClassLoaderManager.class)
-                .withArguments(any(Node.class), any(DynamicClassLoaderManager.class))
-                .thenReturn(bucketNodeHandler);
+        doReturn(bucketNodeHandler).when(store)
+                .createBucketNodeHandler(any(Node.class));
 
     }
 
     private void mockBucketNodeFactory() throws Exception {
         when(factory.getBucketNode()).thenReturn(bucketNode);
-        whenNew(BucketNodeFactory.class)
-                .withParameterTypes(Session.class, String.class, CacheKey.class, Integer.class)
-                .withArguments(any(Session.class), any(String.class), any(CacheKey.class), any(Integer.class))
-                .thenReturn(factory);
+        doReturn(factory).when(store)
+                .createBucketNodeFactory(any(Session.class), any(CacheKey.class));
     }
 
     private void generateCacheContent() {
@@ -168,10 +154,11 @@ public class JCRHttpCacheStoreMocks {
         when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
     }
 
+    @SuppressWarnings("unchecked")
     private JCRHttpCacheStoreImpl mockRepository() throws Exception {
         when(resourceResolver.isLive()).thenAnswer((InvocationOnMock invocationOnMock) -> resourceResolverOpen.get());
 
-        when(resourceResolver, "close").then((InvocationOnMock invocationOnMock) -> {
+        PowerMockito.when(resourceResolver, "close").then((InvocationOnMock invocationOnMock) -> {
             resourceResolverOpen.set(false);
             return null;
         });
