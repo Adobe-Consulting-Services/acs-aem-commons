@@ -1,12 +1,12 @@
 <'sling'='http://sling.apache.org/jcr/sling/1.0'>
 <'nt'='http://www.jcp.org/jcr/nt/1.0'>
 <'cq'='http://www.day.com/jcr/cq/1.0'>
-<'jcr'='http://www.jcp.org/jcr/1.0'>
 <'mix'='http://www.jcp.org/jcr/mix/1.0'>
+<'jcr'='http://www.jcp.org/jcr/1.0'>
 
 [sling:Folder] > nt:folder
-  - * (undefined)
   - * (undefined) multiple
+  - * (undefined)
   + * (nt:base) = sling:Folder version
 
 [sling:ResourceSuperType]
@@ -25,26 +25,26 @@
 [cq:EditListenersConfig]
   - afteredit (string)
   - aftermove (string)
-  - afterinsert (string)
-  - * (undefined) multiple
-  - aftercreate (string)
   - afterremove (string)
+  - afterinsert (string)
   - * (undefined)
   - afterdelete (string)
+  - * (undefined) multiple
+  - aftercreate (string)
   + * (nt:base) = nt:base multiple version
 
 [cq:EditConfig] > nt:hierarchyNode, nt:unstructured
   orderable
   - cq:dialogMode (string) < 'auto', 'floating', 'inline'
-  - cq:layout (string) < 'editbar', 'rollover', 'auto'
-  - cq:actions (string) multiple
   - cq:emptyText (string)
+  - cq:layout (string) < 'editbar', 'rollover', 'auto'
   - cq:inherit (boolean)
-  + cq:formParameters (nt:base) = nt:unstructured
-  + cq:actionConfigs (nt:base) = nt:unstructured
-  + cq:dropTargets (nt:base) = nt:unstructured
+  - cq:actions (string) multiple
   + cq:inplaceEditing (cq:InplaceEditingConfig) = cq:InplaceEditingConfig
+  + cq:actionConfigs (nt:base) = nt:unstructured
   + cq:listeners (nt:base) = cq:EditListenersConfig
+  + cq:formParameters (nt:base) = nt:unstructured
+  + cq:dropTargets (nt:base) = nt:unstructured
 
 [cq:Component] > mix:title, nt:folder, sling:ResourceSuperType
   - * (undefined)
@@ -69,9 +69,9 @@
 
 [cq:Widget] > nt:unstructured
   orderable
+  - name (string)
   - xtype (string)
   - title (string)
-  - name (string)
   + items (nt:base) = cq:WidgetCollection
 
 [cq:Dialog] > cq:Widget
@@ -89,10 +89,10 @@
   + parameters (nt:base) = nt:unstructured
 
 [cq:ClientLibraryFolder] > sling:Folder
-  - channels (string) multiple
-  - categories (string) multiple
   - dependencies (string) multiple
+  - categories (string) multiple
   - embed (string) multiple
+  - channels (string) multiple
 
 [cq:Panel] > cq:Widget
   orderable
@@ -131,11 +131,11 @@
 
 [cq:ReplicationStatus]
   mixin
-  - cq:lastPublishedBy (string) ignore
   - cq:lastReplicatedBy (string) ignore
-  - cq:lastReplicationAction (string) ignore
-  - cq:lastReplicationStatus (string) ignore
   - cq:lastPublished (date) ignore
+  - cq:lastReplicationStatus (string) ignore
+  - cq:lastPublishedBy (string) ignore
+  - cq:lastReplicationAction (string) ignore
   - cq:lastReplicated (date) ignore
 
 [cq:Taggable]
