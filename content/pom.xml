@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -81,7 +81,6 @@
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>net.adamcin.oakpal</groupId>
                 <artifactId>oakpal-maven-plugin</artifactId>
@@ -90,6 +89,12 @@
                     <checklists>
                         <checklist>acs-internal</checklist>
                     </checklists>
+                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
+                    nodetypes.cnd and privileges.xml in the package -->
+                    <websterTargets>
+                        <nodetypes />
+                        <privileges />
+                    </websterTargets>
                 </configuration>
                 <executions>
                     <execution>
@@ -99,12 +104,36 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>oakpal-scan-content-class-aem65</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                            <checklists>
+                                <checklist>content-class-aem65</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-content-class-aem64</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                            <checklists>
+                                <checklist>content-class-aem64</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>oakpal-scan-min</id>
                         <goals>
                             <goal>scan-many</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
                             <scanArtifacts>
                                 <artifact>
                                     <groupId>${project.groupId}</groupId>
@@ -123,13 +152,15 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.outputDirectory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>com.cj.jshintmojo</groupId>
                 <artifactId>jshint-maven-plugin</artifactId>
