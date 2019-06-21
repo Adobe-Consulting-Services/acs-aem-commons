@@ -22,30 +22,29 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.httpcache.engine.CacheContent;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
-@PrepareForTest({EntryNodeByStringKeyVisitor.class})
-@RunWith(PowerMockRunner.class)
-public class EntryNodeByStringKeyVisitorTest
-{
+@RunWith(MockitoJUnitRunner.class)
+public final class EntryNodeByStringKeyVisitorTest {
+
     @Test
-    public void testPresent() throws Exception
-    {
+    public void testPresent() throws RepositoryException, IOException, ClassNotFoundException {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
         final Node rootNode = new RootNodeMockFactory(settings).build();
@@ -57,8 +56,7 @@ public class EntryNodeByStringKeyVisitorTest
     }
 
     @Test
-    public void testNotPresent() throws Exception
-    {
+    public void testNotPresent() throws RepositoryException, IOException, ClassNotFoundException {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
         final Node rootNode = new RootNodeMockFactory(settings).build();
@@ -69,23 +67,20 @@ public class EntryNodeByStringKeyVisitorTest
         assertNull(visitor.getCacheContentIfPresent());
     }
 
-    private EntryNodeByStringKeyVisitor getMockedEntryNodeByStringKeyVisitor(String cacheKeyStr, boolean match) throws Exception
-    {
+    private EntryNodeByStringKeyVisitor getMockedEntryNodeByStringKeyVisitor(String cacheKeyStr, boolean match) throws ClassNotFoundException, RepositoryException, IOException {
         final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
-        final EntryNodeByStringKeyVisitor visitor = new EntryNodeByStringKeyVisitor(11, dclm, cacheKeyStr);
-
-        final EntryNodeByStringKeyVisitor spy = spy(visitor);
+        final EntryNodeByStringKeyVisitor visitor = spy(new EntryNodeByStringKeyVisitor(11, dclm, cacheKeyStr));
         final CacheKey cacheKey = mock(CacheKey.class);
 
-        if(match){
+        if (match) {
             when(cacheKey.toString()).thenReturn(cacheKeyStr);
-        }else{
+        } else {
             when(cacheKey.toString()).thenReturn(RandomStringUtils.random(10000));
         }
 
-        when(spy, "getCacheKey", any(Node.class)).thenReturn(cacheKey);
+        when(visitor.getCacheKey(any(Node.class))).thenReturn(cacheKey);
 
-        return spy;
+        return visitor;
     }
 
 }
