@@ -31,7 +31,12 @@ import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
 
@@ -346,12 +351,13 @@ public class DataImporter extends ProcessDefinition {
     private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, Object> nodeInfo) {
         LOG.debug("Start of populateMetadataFromRow");
 
-        for (String prop : nodeInfo.keySet()) {
-            if (prop != null
-                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
-                Object value = nodeInfo.get(prop);
+        for (Map.Entry entry : nodeInfo.entrySet()) {
+            String key = (String)entry.getKey();
+            if (key != null
+                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(key))) {
+                Object value = entry.getValue();
                 if (value != null) {
-                    resourceProperties.put(prop, value);
+                    resourceProperties.put(key, value);
                 }
             }
         }
