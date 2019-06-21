@@ -110,7 +110,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     public final Page create(final ResourceResolver resourceResolver, String bucketSegment,
                              final String name, final String... paths) throws WCMException,
             RepositoryException {
-
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
@@ -166,7 +165,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         } else if (!isWorkflowPackage(resourceResolver, path)) {
             log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
@@ -179,8 +178,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             if (page != null && page.getContentResource() != null) {
                 final Node node = page.getContentResource().adaptTo(Node.class);
 
-                final ResourceCollection resourceCollection =
-                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+                final ResourceCollection resourceCollection = getResourceCollection(node);
 
                 if (resourceCollection != null) {
                     final List<Node> members = resourceCollection.list(nodeTypes);
@@ -193,6 +191,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
             return Arrays.asList(new String[]{ path });
         }
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
+        return ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
     }
 
     /**
@@ -220,7 +223,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final boolean isWorkflowPackage(final ResourceResolver resourceResolver, final String path) {
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
         final Page workflowPackagesPage = pageManager.getPage(path);
         if (workflowPackagesPage == null) {
             return false;
