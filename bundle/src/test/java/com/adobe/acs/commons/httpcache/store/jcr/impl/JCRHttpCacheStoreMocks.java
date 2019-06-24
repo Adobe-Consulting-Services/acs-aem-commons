@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.jcr.Node;
 import javax.jcr.Session;
@@ -37,8 +35,6 @@ import javax.jcr.Session;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.mockito.invocation.InvocationOnMock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 
@@ -60,7 +56,6 @@ public class JCRHttpCacheStoreMocks {
 
     private final Node rootNode = mock(Node.class);
     private final Node bucketNode = mock(Node.class);
-    private final Node entryNode = mock(Node.class);
 
     private final CacheKey cacheKey;
     private final CacheContent cacheContent = mock(CacheContent.class);
@@ -69,8 +64,6 @@ public class JCRHttpCacheStoreMocks {
     private EntryNodeWriter entryNodeWriter = mock(EntryNodeWriter.class);
     private BucketNodeHandler bucketNodeHandler = mock(BucketNodeHandler.class);
     private BucketNodeFactory factory = mock(BucketNodeFactory.class);
-
-    private final AtomicBoolean resourceResolverOpen = new AtomicBoolean(true);
 
     public static class Arguments {
 
@@ -138,13 +131,9 @@ public class JCRHttpCacheStoreMocks {
     private void mockBucketNodeHandler() throws Exception {
         doReturn(bucketNodeHandler).when(store)
                 .createBucketNodeHandler(any(Node.class));
-        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
-                .thenReturn(entryNode);
-
     }
 
     private void mockBucketNodeFactory() throws Exception {
-        when(factory.getBucketNode()).thenReturn(bucketNode);
         doReturn(factory).when(store)
                 .createBucketNodeFactory(any(Session.class), any(CacheKey.class));
     }
@@ -160,13 +149,6 @@ public class JCRHttpCacheStoreMocks {
 
     @SuppressWarnings("unchecked")
     private JCRHttpCacheStoreImpl mockRepository() throws Exception {
-        when(resourceResolver.isLive()).thenAnswer((InvocationOnMock invocationOnMock) -> resourceResolverOpen.get());
-
-        PowerMockito.when(resourceResolver, "close").then((InvocationOnMock invocationOnMock) -> {
-            resourceResolverOpen.set(false);
-            return null;
-        });
-
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
         Whitebox.setInternalState(store, "resourceResolverFactory", resourceResolverFactory);
         Whitebox.setInternalState(store, "dclm", dclm);
