@@ -61,14 +61,13 @@ public final class JCRHttpCacheStoreMocks {
     private final BucketNodeFactory factory = mock(BucketNodeFactory.class);
 
     public JCRHttpCacheStoreMocks() throws Exception {
-        mockRepository();
-        mockBucketNodeHandler();
-        mockBucketNodeFactory();
-        mockEntryNodeWriter();
-
-        cacheKey = generateCacheKey();
-        mockStore();
         mockLogger();
+        cacheKey = generateCacheKey();
+        mockRepository();
+        mockStore();
+        mockBucketNodeFactory();
+        mockBucketNodeHandler();
+        mockEntryNodeWriter();
     }
 
     private void mockLogger() {
@@ -76,6 +75,9 @@ public final class JCRHttpCacheStoreMocks {
     }
 
     private void mockStore() throws Exception {
+        Whitebox.setInternalState(store, "resourceResolverFactory", resourceResolverFactory);
+        Whitebox.setInternalState(store, "dclm", dclm);
+        Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
         Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
         Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
         Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
@@ -91,9 +93,9 @@ public final class JCRHttpCacheStoreMocks {
         );
     }
 
-    private void mockEntryNodeWriter() {
-        doReturn(entryNodeWriter).when(store)
-            .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
+    private void mockBucketNodeFactory() throws Exception {
+        doReturn(factory).when(store)
+                .createBucketNodeFactory(any(Session.class), any(CacheKey.class));
     }
 
     private void mockBucketNodeHandler() {
@@ -101,23 +103,17 @@ public final class JCRHttpCacheStoreMocks {
                 .createBucketNodeHandler(any(Node.class));
     }
 
-    private void mockBucketNodeFactory() throws Exception {
-        doReturn(factory).when(store)
-                .createBucketNodeFactory(any(Session.class), any(CacheKey.class));
+    private void mockEntryNodeWriter() {
+        doReturn(entryNodeWriter).when(store)
+            .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
     }
 
     @SuppressWarnings("unchecked")
-    private JCRHttpCacheStoreImpl mockRepository() throws Exception {
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        Whitebox.setInternalState(store, "resourceResolverFactory", resourceResolverFactory);
-        Whitebox.setInternalState(store, "dclm", dclm);
-        Whitebox.setInternalState(store, "cacheRootPath", JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH);
-
+    private void mockRepository() throws Exception {
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
         when(session.getNode(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(rootNode);
         when(session.nodeExists(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(true);
-
-        return store;
     }
 
     public JCRHttpCacheStoreImpl getStore() {
