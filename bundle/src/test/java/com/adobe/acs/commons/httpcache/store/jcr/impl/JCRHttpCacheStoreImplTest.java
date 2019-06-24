@@ -29,18 +29,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
+
 @RunWith(MockitoJUnitRunner.class)
 public final class JCRHttpCacheStoreImplTest {
 
     private final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks();
     private final JCRHttpCacheStoreImpl store = mocks.getStore();
+    private final CacheKey cacheKey = mocks.getCacheKey();
     
     public JCRHttpCacheStoreImplTest() throws Exception {
     }
 
     @Test
     public void testPutIntoCache() throws Exception {
-        store.put(mocks.getCacheKey(), mocks.getCacheContent());
+        store.put(cacheKey, mocks.getCacheContent());
         verify(JCRHttpCacheStoreMocks.getLog(), never()).error(anyString(), any(Exception.class));
         verify(mocks.getResourceResolver(), times(1)).close();
         verify(mocks.getSession(), times(1)).save();
@@ -49,12 +52,12 @@ public final class JCRHttpCacheStoreImplTest {
 
     @Test
     public void testContains() throws Exception {
-        store.contains(mocks.getCacheKey());
+        store.contains(cacheKey);
     }
 
     @Test
     public void testInvalidate() throws Exception {
-        store.invalidate(mocks.getCacheKey());
+        store.invalidate(cacheKey);
     }
 
 }
