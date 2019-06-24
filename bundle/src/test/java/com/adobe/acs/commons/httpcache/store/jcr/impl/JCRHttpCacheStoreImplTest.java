@@ -25,6 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,11 +35,15 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 @RunWith(MockitoJUnitRunner.class)
 public final class JCRHttpCacheStoreImplTest {
 
-    private final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks();
-    private final JCRHttpCacheStoreImpl store = mocks.getStore();
-    private final CacheKey cacheKey = mocks.getCacheKey();
-    
-    public JCRHttpCacheStoreImplTest() throws Exception {
+    private JCRHttpCacheStoreMocks mocks;
+    private JCRHttpCacheStoreImpl store;
+    private CacheKey cacheKey;
+
+    @Before
+    public void setUp() throws Exception {
+        mocks = new JCRHttpCacheStoreMocks();
+        store = mocks.getStore();
+        cacheKey = mocks.getCacheKey();
     }
 
     @Test

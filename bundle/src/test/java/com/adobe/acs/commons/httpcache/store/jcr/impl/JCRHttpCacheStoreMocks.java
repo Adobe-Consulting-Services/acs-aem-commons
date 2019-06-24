@@ -52,7 +52,7 @@ public final class JCRHttpCacheStoreMocks {
 
     private final Node rootNode = mock(Node.class);
 
-    private final CacheKey cacheKey;
+    private final CacheKey cacheKey = generateCacheKey();
     private final CacheContent cacheContent = mock(CacheContent.class);
 
     private static final Logger log = mock(Logger.class);
@@ -62,7 +62,6 @@ public final class JCRHttpCacheStoreMocks {
 
     public JCRHttpCacheStoreMocks() throws Exception {
         mockLogger();
-        cacheKey = generateCacheKey();
         mockRepository();
         mockStore();
         mockBucketNodeFactory();
@@ -70,8 +69,25 @@ public final class JCRHttpCacheStoreMocks {
         mockEntryNodeWriter();
     }
 
+    private CacheKeyMock generateCacheKey() {
+        return new CacheKeyMock(
+                "https://adobe-consulting-services.github.io/acs-aem-commons/",
+                "some/random/string",
+                1234567890,
+                "/content/some/resource/path"
+        );
+    }
+
     private void mockLogger() {
         Whitebox.setInternalState(JCRHttpCacheStoreImpl.class, "log", log);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void mockRepository() throws Exception {
+        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(session.getNode(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(rootNode);
+        when(session.nodeExists(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(true);
     }
 
     private void mockStore() throws Exception {
@@ -82,15 +98,6 @@ public final class JCRHttpCacheStoreMocks {
         Whitebox.setInternalState(store, "bucketTreeDepth", JCRHttpCacheStoreImpl.DEFAULT_BUCKETDEPTH);
         Whitebox.setInternalState(store, "deltaSaveThreshold", JCRHttpCacheStoreImpl.DEFAULT_SAVEDELTA);
         Whitebox.setInternalState(store, "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
-    }
-
-    private CacheKeyMock generateCacheKey() {
-        return new CacheKeyMock(
-                "https://adobe-consulting-services.github.io/acs-aem-commons/",
-                "some/random/string",
-                1234567890,
-                "/content/some/resource/path"
-        );
     }
 
     private void mockBucketNodeFactory() throws Exception {
@@ -106,14 +113,6 @@ public final class JCRHttpCacheStoreMocks {
     private void mockEntryNodeWriter() {
         doReturn(entryNodeWriter).when(store)
             .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
-    }
-
-    @SuppressWarnings("unchecked")
-    private void mockRepository() throws Exception {
-        when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        when(session.getNode(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(rootNode);
-        when(session.nodeExists(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(true);
     }
 
     public JCRHttpCacheStoreImpl getStore() {
