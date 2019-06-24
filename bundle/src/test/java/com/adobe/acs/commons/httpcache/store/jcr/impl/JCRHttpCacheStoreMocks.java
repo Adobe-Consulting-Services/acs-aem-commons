@@ -101,6 +101,10 @@ public class JCRHttpCacheStoreMocks {
         mockLogger();
     }
 
+    public JCRHttpCacheStoreMocks() throws Exception {
+        this(new Arguments());
+    }
+
     private void mockNodeNames() {
         when(rootNode.toString()).thenReturn("rootnode");
         when(bucketNode.toString()).thenReturn("bucketnode");

@@ -32,13 +32,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class JCRHttpCacheStoreImplTest {
 
-    private JCRHttpCacheStoreMocks prepareMocks() throws Exception {
-        return new JCRHttpCacheStoreMocks(new JCRHttpCacheStoreMocks.Arguments());
-    }
-
     @Test
     public void testPutIntoCache() throws Exception {
-        final JCRHttpCacheStoreMocks mocks = prepareMocks();
+        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks();
         final JCRHttpCacheStoreImpl store = mocks.getStore();
         store.put(mocks.getCacheKey(), mocks.getCacheContent());
         verify(JCRHttpCacheStoreMocks.getLog(), never()).error(anyString(), any(Exception.class));
@@ -49,14 +45,14 @@ public final class JCRHttpCacheStoreImplTest {
 
     @Test
     public void testContains() throws Exception {
-        final JCRHttpCacheStoreMocks mocks = prepareMocks();
+        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks();
         final JCRHttpCacheStoreImpl store = mocks.getStore();
         store.contains(mocks.getCacheKey());
     }
 
     @Test
     public void testInvalidate() throws Exception {
-        final JCRHttpCacheStoreMocks mocks = prepareMocks();
+        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks();
         final JCRHttpCacheStoreImpl store = mocks.getStore();
         store.invalidate(mocks.getCacheKey());
     }
