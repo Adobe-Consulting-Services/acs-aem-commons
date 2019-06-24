@@ -25,8 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 import javax.jcr.Node;
@@ -43,11 +41,9 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.BucketNodeFactory;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.writer.EntryNodeWriter;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 
-public class JCRHttpCacheStoreMocks {
+public final class JCRHttpCacheStoreMocks {
 
-    private final Arguments arguments;
     private final JCRHttpCacheStoreImpl store = spy(new JCRHttpCacheStoreImpl());
     private final DynamicClassLoaderManager dclm = mock(DynamicClassLoaderManager.class);
     private final Session session = mock(Session.class);
@@ -55,52 +51,24 @@ public class JCRHttpCacheStoreMocks {
     private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
 
     private final Node rootNode = mock(Node.class);
-    private final Node bucketNode = mock(Node.class);
 
     private final CacheKey cacheKey;
     private final CacheContent cacheContent = mock(CacheContent.class);
 
     private static final Logger log = mock(Logger.class);
-    private EntryNodeWriter entryNodeWriter = mock(EntryNodeWriter.class);
-    private BucketNodeHandler bucketNodeHandler = mock(BucketNodeHandler.class);
-    private BucketNodeFactory factory = mock(BucketNodeFactory.class);
+    private final EntryNodeWriter entryNodeWriter = mock(EntryNodeWriter.class);
+    private final BucketNodeHandler bucketNodeHandler = mock(BucketNodeHandler.class);
+    private final BucketNodeFactory factory = mock(BucketNodeFactory.class);
 
-    public static class Arguments {
-
-        InputStream contents;
-        Map<String, List<String>> headers;
-
-        String cacheKeyUri = "https://adobe-consulting-services.github.io/acs-aem-commons/";
-        String cacheKeyString = "some/random/string";
-        String cacheKeyHierarchyResourcePath = "/content/some/resource/path";
-        String cacheContentCharEncoding = "utf-8";
-        String cacheContentType = "text/html";
-
-        int cacheKeyHashCode = 1234567890;
-        int cacheContentStatus = 200;
-    }
-
-    public JCRHttpCacheStoreMocks(final Arguments arguments) throws Exception {
-        this.arguments = arguments;
-        generateCacheContent();
+    public JCRHttpCacheStoreMocks() throws Exception {
         mockRepository();
         mockBucketNodeHandler();
         mockBucketNodeFactory();
         mockEntryNodeWriter();
-        mockNodeNames();
 
-        cacheKey = generateCacheKey(arguments);
+        cacheKey = generateCacheKey();
         mockStore();
         mockLogger();
-    }
-
-    public JCRHttpCacheStoreMocks() throws Exception {
-        this(new Arguments());
-    }
-
-    private void mockNodeNames() {
-        when(rootNode.toString()).thenReturn("rootnode");
-        when(bucketNode.toString()).thenReturn("bucketnode");
     }
 
     private void mockLogger() {
@@ -114,12 +82,12 @@ public class JCRHttpCacheStoreMocks {
         Whitebox.setInternalState(store, "expireTimeInSeconds", JCRHttpCacheStoreImpl.DEFAULT_EXPIRETIMEINSECONDS);
     }
 
-    private CacheKeyMock generateCacheKey(Arguments arguments) {
+    private CacheKeyMock generateCacheKey() {
         return new CacheKeyMock(
-                arguments.cacheKeyUri,
-                arguments.cacheKeyHierarchyResourcePath,
-                arguments.cacheKeyHashCode,
-                arguments.cacheKeyString
+                "https://adobe-consulting-services.github.io/acs-aem-commons/",
+                "some/random/string",
+                1234567890,
+                "/content/some/resource/path"
         );
     }
 
@@ -128,7 +96,7 @@ public class JCRHttpCacheStoreMocks {
             .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
     }
 
-    private void mockBucketNodeHandler() throws Exception {
+    private void mockBucketNodeHandler() {
         doReturn(bucketNodeHandler).when(store)
                 .createBucketNodeHandler(any(Node.class));
     }
@@ -136,15 +104,6 @@ public class JCRHttpCacheStoreMocks {
     private void mockBucketNodeFactory() throws Exception {
         doReturn(factory).when(store)
                 .createBucketNodeFactory(any(Session.class), any(CacheKey.class));
-    }
-
-    private void generateCacheContent() {
-        when(cacheContent.getCharEncoding()).thenReturn(arguments.cacheContentCharEncoding);
-        when(cacheContent.getContentType()).thenReturn(arguments.cacheContentType);
-        when(cacheContent.getInputDataStream()).thenReturn(arguments.contents);
-        when(cacheContent.getStatus()).thenReturn(arguments.cacheContentStatus);
-        when(cacheContent.getHeaders()).thenReturn(arguments.headers);
-        when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
     }
 
     @SuppressWarnings("unchecked")
