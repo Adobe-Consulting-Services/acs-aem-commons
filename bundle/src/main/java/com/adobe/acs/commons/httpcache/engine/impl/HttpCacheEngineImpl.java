@@ -35,6 +35,7 @@ import com.adobe.acs.commons.httpcache.exception.HttpCacheRepositoryAccessExcept
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.rule.HttpCacheHandlingRule;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.util.CacheUtils;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import org.apache.commons.io.IOUtils;
@@ -70,8 +71,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Default implementation for {@link HttpCacheEngine}. Binds multiple {@link HttpCacheConfig}. Multiple {@link
@@ -99,16 +98,16 @@ import java.util.stream.Stream;
                 cardinality = ReferenceCardinality.MANDATORY_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_HANDLING_RULES,
-               referenceInterface = HttpCacheHandlingRule.class,
-               policy = ReferencePolicy.DYNAMIC,
+                referenceInterface = HttpCacheHandlingRule.class,
+                policy = ReferencePolicy.DYNAMIC,
                 policyOption = ReferencePolicyOption.GREEDY,
-               cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 
         @Reference(name = HttpCacheEngineImpl.METHOD_NAME_TO_BIND_CACHE_STORE,
-               referenceInterface = HttpCacheStore.class,
-               policy = ReferencePolicy.DYNAMIC,
-               policyOption = ReferencePolicyOption.GREEDY,
-               cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
+                referenceInterface = HttpCacheStore.class,
+                policy = ReferencePolicy.DYNAMIC,
+                policyOption = ReferencePolicyOption.GREEDY,
+                cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 })
 @Service(value = {DynamicMBean.class, HttpCacheEngine.class})
 // @formatter:on
@@ -126,23 +125,32 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     // formatter:off
     @Property(label = "Global HttpCacheHandlingRules",
-              description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
-              unbounded = PropertyUnbounded.ARRAY,
-              value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
-                      "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
-                      "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
-                      "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
-              })
+            description = "List of Service pid of HttpCacheHandlingRule applicable for all cache configs.",
+            unbounded = PropertyUnbounded.ARRAY,
+            value = {"com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyGetRequest",
+                    "com.adobe.acs.commons.httpcache.rule.impl.CacheOnlyResponse200",
+                    "com.adobe.acs.commons.httpcache.rule.impl.HonorCacheControlHeaders",
+                    "com.adobe.acs.commons.httpcache.rule.impl.DoNotCacheZeroSizeResponse"
+            })
 
     static final String PROP_GLOBAL_CACHE_HANDLING_RULES_PID = "httpcache.engine.cache-handling-rules.global";
     private List<String> globalCacheHandlingRulesPid;
 
-    @Property(label = "Global HttpCacheHandlingRules",
+    @Property(label = "Globally ignored response headers",
             description = "List of header keys (as regex statements) that should NOT be put in the cached response, to be served to the output.",
             unbounded = PropertyUnbounded.ARRAY
     )
     static final String PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS = "httpcache.engine.excluded.response.headers.global";
     private List<Pattern> globalHeaderExclusions;
+
+
+    @Property(label = "Globally ignored cookie keys",
+            description = "List of cookie keys of cookies that should NOT be put in the cached response, to be served to the output.",
+            unbounded = PropertyUnbounded.ARRAY
+    )
+    static final String PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS = "httpcache.engine.excluded.response.cookies.global";
+    private List<String> globalCookieExclusions;
+
     // formatter:on
 
     @Reference
@@ -160,6 +168,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 PROP_GLOBAL_CACHE_HANDLING_RULES_PID), new String[]{})));
 
         globalHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
+        globalCookieExclusions = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_GLOBAL_RESPONSE_COOKIE_EXCLUSIONS), new String[]{}));
 
         ListIterator<String> listIterator = globalCacheHandlingRulesPid.listIterator();
         while (listIterator.hasNext()) {
@@ -285,7 +294,7 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         } else {
             throw new AssertionError("Programming error.");
         }
-        final Map<String, List<String>> extractedHeaders = extractHeaders(responseWrapper, cacheConfig);
+        final Map<String, List<String>> extractedHeaders = CacheUtils.extractHeaders(globalHeaderExclusions, globalCookieExclusions,responseWrapper, cacheConfig);
         final int status = responseWrapper.getStatus();
         final String charEncoding = responseWrapper.getCharacterEncoding();
         final String contentType = responseWrapper.getContentType();
@@ -312,21 +321,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             }
         });
 
-    }
-
-    private Map<String, List<String>> extractHeaders(SlingHttpServletResponse response, HttpCacheConfig cacheConfig) {
-
-        List<Pattern> excludedHeaders = Stream.concat(globalHeaderExclusions.stream(), cacheConfig.getExcludedResponseHeaderPatterns().stream())
-                .collect(Collectors.toList());
-
-        return response.getHeaderNames().stream()
-                .filter(headerName -> excludedHeaders.stream()
-                        .noneMatch(pattern -> pattern.matcher(headerName).matches())
-                ).collect(
-                        Collectors.toMap(headerName -> headerName, headerName ->
-                                new ArrayList<>(response.getHeaders(headerName)
-                                )
-                        ));
     }
 
 
@@ -536,6 +530,5 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
             }
         }
     }
-
 
 }
