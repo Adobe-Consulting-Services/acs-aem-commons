@@ -20,5 +20,5 @@
 /**
  * JSP Functions for working with custom widgets.
  */
-@org.osgi.annotation.versioning.Version("1.1.1")
+@org.osgi.annotation.versioning.Version("1.2.0")
 package com.adobe.acs.commons.widgets;
