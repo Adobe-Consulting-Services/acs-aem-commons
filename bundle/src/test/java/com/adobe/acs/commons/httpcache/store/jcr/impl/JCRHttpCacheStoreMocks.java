@@ -136,10 +136,10 @@ public class JCRHttpCacheStoreMocks {
     }
 
     private void mockBucketNodeHandler() throws Exception {
-        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
-                .thenReturn(entryNode);
         doReturn(bucketNodeHandler).when(store)
                 .createBucketNodeHandler(any(Node.class));
+        when(bucketNodeHandler.createOrRetrieveEntryNode(any(CacheKey.class), anyLong()))
+                .thenReturn(entryNode);
 
     }
 
