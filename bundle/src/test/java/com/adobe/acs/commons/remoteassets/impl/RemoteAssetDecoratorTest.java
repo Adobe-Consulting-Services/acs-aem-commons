@@ -71,11 +71,12 @@ public final class RemoteAssetDecoratorTest {
 
     private final Resource resource = mock(Resource.class);
     private final Resource newResource = mock(Resource.class);
+
     private final Map<String, Object> properties = new HashMap<>();
-    private final ValueMap valueMap = new ValueMapDecorator(properties);
-    private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
     private final Set<String> whitelistedServiceUsers = new HashSet<>();
     private final List<String> damSyncPaths = new LinkedList<>();
+
+    private final ResourceResolver resourceResolver = mock(ResourceResolver.class);
     private final Session session = mock(Session.class);
     private final UserManager userManager = mock(UserManager.class);
     private final User user = mock(User.class);
@@ -92,6 +93,7 @@ public final class RemoteAssetDecoratorTest {
         PrivateAccessor.setField(decorator, "config", config);
         doReturn(userManager).when(decorator).getUserManager(session);
 
+        final ValueMap valueMap = new ValueMapDecorator(properties);
         when(resource.getValueMap()).thenReturn(valueMap);
         when(resource.getPath()).thenReturn(TEST_REMOTE_ASSET_CONTENT_PATH);
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
