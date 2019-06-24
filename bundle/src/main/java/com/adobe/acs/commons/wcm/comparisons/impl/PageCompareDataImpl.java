@@ -119,17 +119,18 @@ class PageCompareDataImpl implements PageCompareData {
         return lines;
     }
 
-    private void populate(Resource resource, String basePath, int depth) throws RepositoryException {
-        ValueMap map = resource.getValueMap();
-        List<String> keys = new ArrayList<String>(map.keySet());
+    private void populate(final Resource resource, final String basePath, final int depth) throws RepositoryException {
+        final ValueMap map = resource.getValueMap();
+        final List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
-        for (String key : keys) {
-            Property property = resource.adaptTo(Node.class).getProperty(key);
+        for (final String key : keys) {
+            final Property property = resource.adaptTo(Node.class).getProperty(key);
             lines.add(new PageCompareDataLineImpl(property, basePath, depth + 1));
         }
-        Iterator<Resource> iter = resource.getChildren().iterator();
+
+        final Iterator<Resource> iter = resource.getChildren().iterator();
         while (iter.hasNext()) {
-            Resource child = iter.next();
+            final Resource child = iter.next();
             lines.add(new PageCompareDataLineImpl(child, basePath, depth + 1));
             populate(child, basePath, depth + 1);
         }

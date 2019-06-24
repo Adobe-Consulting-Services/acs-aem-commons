@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased
 
+### Added
+- 1927 - HTTP cache: added cookie exclusion
+- 1905 - HTTP cache: added response header exclusion
+
+### Changed
+- #1945 - Added support for jcr:content creation and update to the Data Importer
+
 ## [4.2.0] - 2019-06-18
 
 ### Added
@@ -25,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 - #1202 - fix overflow handling in looping iterator
+- Adjust PageCompareDataImplTest to Java 11
 - Adjust IntegrationServiceImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
