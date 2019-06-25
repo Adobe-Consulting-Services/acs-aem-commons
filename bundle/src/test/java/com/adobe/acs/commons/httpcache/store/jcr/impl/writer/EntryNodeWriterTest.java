@@ -20,8 +20,12 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.startsWith;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,24 +36,22 @@ import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
-import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @RunWith(MockitoJUnitRunner.class)
-@PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
 public final class EntryNodeWriterTest {
 
     private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
 
     private EntryNodeWriterMocks.MockArguments arguments;
+    private final InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
 
     @Before
     public void setUp() {
@@ -57,7 +59,6 @@ public final class EntryNodeWriterTest {
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
         arguments.entryNode = mock(Node.class);
-        final InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
         arguments.cacheContent = inputStream;
 
         final List<String> header1Value = Arrays.asList("header-value");
@@ -72,18 +73,14 @@ public final class EntryNodeWriterTest {
         mocks.getEntryNodeWriter().write();
 
         verify(mocks.getEntryNode(), times(1))
-                .setProperty(Matchers.startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
+                .setProperty(startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
 
-        /*
-        ArgumentCaptor<Binary> argumentCaptor = ArgumentCaptor.forClass(Binary.class);
-        verify(mocks.getJcrContentNode(), times(1))
-                .setProperty(Matchers.startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
-
-        Binary savedBinary = argumentCaptor.getValue();
-        IOUtils.contentEquals(inputStream, savedBinary.getStream());
-        verify(mocks.getJcrContentNode(), times(1))
+        final Node jcrContentNode = mocks.getJcrContentNode();
+        final ArgumentCaptor<Binary> argumentCaptor = ArgumentCaptor.forClass(Binary.class);
+        verify(jcrContentNode, times(1))
+               .setProperty(startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
+        verify(jcrContentNode, times(1))
                 .setProperty(JcrConstants.JCR_MIMETYPE, arguments.cacheContentType);
-        */
     }
 
     @Test

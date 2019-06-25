@@ -66,6 +66,8 @@ public final class EntryNodeWriterMocks
 
     private final Node jcrContentNode = mock(Node.class);
 
+    private final Node headersNode = mock(Node.class);
+
     private final MockArguments arguments;
 
     public static final class MockArguments {
@@ -119,8 +121,8 @@ public final class EntryNodeWriterMocks
     private void mockJCRUtil() throws RepositoryException
     {
         doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, JcrConstants.NT_FILE, JcrConstants.NT_FILE);
-        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE);
-        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED);
+        doReturn(jcrContentNode).when(entryNodeWriter).getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE);
+        doReturn(headersNode).when(entryNodeWriter).getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED);
     }
 
     private void mockSession() throws RepositoryException
