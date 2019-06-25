@@ -99,9 +99,9 @@ public class EntryNodeWriter
      */
     private void populateBinaryContent() throws RepositoryException
     {
-        final Node contents = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+        final Node contents = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, JcrConstants.NT_FILE, JcrConstants.NT_FILE);
 
-        final Node jcrContent = getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
+        final Node jcrContent = getOrCreateByPath(contents, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE);
         //save input stream to node
         final Binary binary = session.getValueFactory().createBinary(cacheContent.getInputDataStream());
         jcrContent.setProperty(JcrConstants.JCR_DATA, binary);
@@ -114,7 +114,7 @@ public class EntryNodeWriter
      */
     private void populateHeaders() throws RepositoryException
     {
-        final Node headers = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false);
+        final Node headers = getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED);
 
         for(Iterator<Map.Entry<String, List<String>>> entryIterator = cacheContent.getHeaders().entrySet().iterator(); entryIterator.hasNext();){
             Map.Entry<String, List<String>> entry = entryIterator.next();
@@ -127,11 +127,9 @@ public class EntryNodeWriter
     Node getOrCreateByPath(
             final Node baseNode,
             final String path,
-            final boolean createUniqueLeaf,
             final String intermediateNodeType,
-            final String nodeType,
-            final boolean autoSave) throws RepositoryException {
-        return JcrUtils.getOrCreateByPath(baseNode, path, createUniqueLeaf, intermediateNodeType, nodeType, autoSave);
+            final String nodeType) throws RepositoryException {
+        return JcrUtils.getOrCreateByPath(baseNode, path, false, intermediateNodeType, nodeType, false);
     }
 
     private void populateCacheKey() throws RepositoryException, IOException

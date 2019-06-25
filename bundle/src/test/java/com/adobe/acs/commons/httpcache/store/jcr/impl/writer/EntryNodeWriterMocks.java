@@ -118,9 +118,9 @@ public final class EntryNodeWriterMocks
 
     private void mockJCRUtil() throws RepositoryException
     {
-        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
-        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
-        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false);
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, JcrConstants.NT_FILE, JcrConstants.NT_FILE);
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE);
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED);
     }
 
     private void mockSession() throws RepositoryException
