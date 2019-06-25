@@ -52,7 +52,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 public final class EntryNodeWriterMocks
 {
 
-    private final Session session = mock(Session.class);;
+    private final Session session = mock(Session.class);
 
     private CacheKey cacheKey;
 
