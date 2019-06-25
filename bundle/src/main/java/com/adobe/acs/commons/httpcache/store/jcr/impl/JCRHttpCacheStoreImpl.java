@@ -219,18 +219,18 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     }
 
     /* This is broken out into its own method to allow for easier unit testing */
-    BucketNodeFactory createBucketNodeFactory(final Session session, final CacheKey key)
+    protected BucketNodeFactory createBucketNodeFactory(final Session session, final CacheKey key)
             throws RepositoryException, BucketNodeFactoryException {
         return new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
     }
 
     /* This is broken out into its own method to allow for easier unit testing */
-    BucketNodeHandler createBucketNodeHandler(final Node bucketNode) {
+    protected BucketNodeHandler createBucketNodeHandler(final Node bucketNode) {
         return new BucketNodeHandler(bucketNode, dclm);
     }
 
     /* This is broken out into its own method to allow for easier unit testing */
-    EntryNodeWriter createEntryNodeWriter(final Session session, final Node entryNode, final CacheKey key,
+    protected EntryNodeWriter createEntryNodeWriter(final Session session, final Node entryNode, final CacheKey key,
             final CacheContent content, long expiryTime) {
         return new EntryNodeWriter(session, entryNode, key, content, expiryTime);
     }
