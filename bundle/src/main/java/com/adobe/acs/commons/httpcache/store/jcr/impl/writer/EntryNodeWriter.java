@@ -124,6 +124,8 @@ public class EntryNodeWriter
         }
     }
 
+
+    /* This is broken out into its own method to allow for easier unit testing */
     protected Node getOrCreateByPath(
             final Node baseNode,
             final String path,
