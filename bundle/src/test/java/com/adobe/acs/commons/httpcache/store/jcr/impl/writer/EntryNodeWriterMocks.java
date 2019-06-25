@@ -21,10 +21,10 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
 import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -37,24 +37,22 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.ValueFactory;
 
-import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
-import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.value.BinaryImpl;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.adobe.acs.commons.httpcache.engine.CacheContent;
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.CacheKeyMock;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
+import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
 
 public class EntryNodeWriterMocks
 {
 
-    private Session session;
+    private final Session session = mock(Session.class);;
 
     private CacheKey cacheKey;
 
@@ -64,15 +62,13 @@ public class EntryNodeWriterMocks
 
     private Node entryNode;
 
-    private Node contentNode;
+    private final Node contentNode = mock(Node.class);
 
-    private Node jcrContentNode;
-
-    private Node headersNode;
+    private final Node jcrContentNode = mock(Node.class);
 
     private final MockArguments arguments;
 
-    public static class MockArguments{
+    public static class MockArguments {
         Node entryNode;
         int cacheKeyHashCode;
         int status;
@@ -90,43 +86,14 @@ public class EntryNodeWriterMocks
     {
         this.arguments = arguments;
         entryNode = arguments.entryNode;
-        mockContentNode();
-        mockHeadersNode();
         mockSession();
         mockCacheKey();
         mockCacheContent();
 
-        mockStatic(JcrUtil.class);
-        mockJCRUtil();
-
         final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, 1000L);
         entryNodeWriter = spy(writer);
-    }
 
-    private void mockHeadersNode()
-    {
-        headersNode = mock(Node.class);
-    }
-
-    private void mockContentNode()
-    {
-        contentNode = mock(Node.class);
-        jcrContentNode = mock(Node.class);
-    }
-
-    public Session getSession()
-    {
-        return session;
-    }
-
-    public CacheKey getCacheKey()
-    {
-        return cacheKey;
-    }
-
-    public CacheContent getCacheContent()
-    {
-        return cacheContent;
+        mockJCRUtil();
     }
 
     public EntryNodeWriter getEntryNodeWriter()
@@ -139,45 +106,20 @@ public class EntryNodeWriterMocks
         return entryNode;
     }
 
-    public Node getContentNode()
-    {
-        return contentNode;
-    }
-
     public Node getJcrContentNode()
     {
         return jcrContentNode;
     }
 
-    public Node getHeadersNode()
-    {
-        return headersNode;
-    }
-
     private void mockJCRUtil() throws RepositoryException
     {
-
-        when(
-                JcrUtils.getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false))
-                .thenAnswer(
-                        (Answer<Node>) invocationOnMock -> contentNode
-                );
-
-        when(
-                JcrUtils.getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false))
-                .thenAnswer((Answer<Node>) invocationOnMock -> jcrContentNode
-                );
-
-        when(
-                JcrUtils.getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false))
-                .thenAnswer((Answer<Node>) invocationOnMock -> headersNode
-                );
-
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(arguments.entryNode, JCRHttpCacheStoreConstants.PATH_CONTENTS, false, JcrConstants.NT_FILE, JcrConstants.NT_FILE, false);
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(contentNode, JcrConstants.JCR_CONTENT, false, JcrConstants.NT_RESOURCE, JcrConstants.NT_RESOURCE, false);
+        doReturn(contentNode).when(entryNodeWriter).getOrCreateByPath(entryNode, JCRHttpCacheStoreConstants.PATH_HEADERS, false, OAK_UNSTRUCTURED, OAK_UNSTRUCTURED, false);
     }
 
     private void mockSession() throws RepositoryException
     {
-        session = mock(Session.class);
         final ValueFactory valueFactory = mock(ValueFactory.class);
         when(valueFactory.createBinary(any(InputStream.class))).thenAnswer(new Answer<Binary>()
         {
@@ -203,7 +145,6 @@ public class EntryNodeWriterMocks
                 arguments.cacheKeyHashCode,
                 arguments.cacheKeyString
         );
-
     }
 
     private void mockCacheContent()
