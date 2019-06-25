@@ -34,6 +34,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.jackrabbit.commons.JcrUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -46,22 +47,28 @@ import com.day.cq.commons.jcr.JcrUtil;
 @RunWith(MockitoJUnitRunner.class)
 @PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
 public class EntryNodeWriterTest {
+
     private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
 
-    @Test
-    public void testValid() throws IOException, RepositoryException {
-        final EntryNodeWriterMocks.MockArguments arguments = new EntryNodeWriterMocks.MockArguments();
+    private EntryNodeWriterMocks.MockArguments arguments;
+
+    @Before
+    public void setUp() throws IOException, RepositoryException {
+        arguments = new EntryNodeWriterMocks.MockArguments();
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
         arguments.entryNode = mock(Node.class);
-        InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
+        final InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
         arguments.cacheContent = inputStream;
-        List<String> header1Value = Arrays.asList("header-value");
-        List<String> header2Value = Arrays.asList("another-header-value");
 
+        final List<String> header1Value = Arrays.asList("header-value");
+        final List<String> header2Value = Arrays.asList("another-header-value");
         arguments.cacheContentHeaders.put("some-header", header1Value);
         arguments.cacheContentHeaders.put("another-header", header2Value);
+    }
 
+    @Test
+    public void testValid() throws IOException, RepositoryException {
         final EntryNodeWriterMocks mocks = new EntryNodeWriterMocks(arguments);
         mocks.getEntryNodeWriter().write();
 
