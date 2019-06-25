@@ -21,8 +21,7 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,14 +45,14 @@ import com.day.cq.commons.jcr.JcrUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 @PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
-public class EntryNodeWriterTest {
+public final class EntryNodeWriterTest {
 
     private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
 
     private EntryNodeWriterMocks.MockArguments arguments;
 
     @Before
-    public void setUp() throws IOException, RepositoryException {
+    public void setUp() {
         arguments = new EntryNodeWriterMocks.MockArguments();
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
@@ -85,6 +84,16 @@ public class EntryNodeWriterTest {
         verify(mocks.getJcrContentNode(), times(1))
                 .setProperty(JcrConstants.JCR_MIMETYPE, arguments.cacheContentType);
         */
+    }
+
+    @Test
+    public void skip_setExpireTime_populateCacheKey() throws IOException, RepositoryException {
+        when(arguments.entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY)).thenReturn(true);
+        final EntryNodeWriterMocks mocks = new EntryNodeWriterMocks(arguments, 0);
+        mocks.getEntryNodeWriter().write();
+
+        verify(mocks.getEntryNode(), times(0))
+                .setProperty(anyString(), any(Binary.class));
     }
 
 }

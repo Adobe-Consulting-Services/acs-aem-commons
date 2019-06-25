@@ -49,7 +49,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants
 import com.adobe.acs.commons.httpcache.store.mem.impl.MemTempSinkImpl;
 import com.day.cq.commons.jcr.JcrConstants;
 
-public class EntryNodeWriterMocks
+public final class EntryNodeWriterMocks
 {
 
     private final Session session = mock(Session.class);;
@@ -68,7 +68,7 @@ public class EntryNodeWriterMocks
 
     private final MockArguments arguments;
 
-    public static class MockArguments {
+    public static final class MockArguments {
         Node entryNode;
         int cacheKeyHashCode;
         int status;
@@ -82,7 +82,7 @@ public class EntryNodeWriterMocks
         InputStream cacheContent;
     }
 
-    public EntryNodeWriterMocks(MockArguments arguments) throws RepositoryException
+    public EntryNodeWriterMocks(final MockArguments arguments, final long expireTimeInMilliSeconds) throws RepositoryException
     {
         this.arguments = arguments;
         entryNode = arguments.entryNode;
@@ -90,10 +90,15 @@ public class EntryNodeWriterMocks
         mockCacheKey();
         mockCacheContent();
 
-        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, 1000L);
+        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, expireTimeInMilliSeconds);
         entryNodeWriter = spy(writer);
 
         mockJCRUtil();
+    }
+
+    public EntryNodeWriterMocks(final MockArguments arguments) throws RepositoryException
+    {
+        this(arguments, 1000L);
     }
 
     public EntryNodeWriter getEntryNodeWriter()

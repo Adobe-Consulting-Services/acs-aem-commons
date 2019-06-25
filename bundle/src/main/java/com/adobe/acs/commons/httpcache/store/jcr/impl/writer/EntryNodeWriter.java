@@ -71,7 +71,7 @@ public class EntryNodeWriter
         populateBinaryContent();
 
         //if we the expire time is set, set it on the node
-        if(expireTimeInMilliSeconds > 0){
+        if(expireTimeInMilliSeconds > 0) {
             setExpireTime();
         }
 
