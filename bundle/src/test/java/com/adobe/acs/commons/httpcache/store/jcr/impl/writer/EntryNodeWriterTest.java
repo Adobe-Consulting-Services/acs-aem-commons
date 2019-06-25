@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.startsWith;
@@ -91,6 +92,17 @@ public final class EntryNodeWriterTest {
 
         verify(mocks.getEntryNode(), times(0))
                 .setProperty(anyString(), any(Binary.class));
+    }
+
+    @Test
+    public void testGetOrCreateByPath() throws RepositoryException {
+        final EntryNodeWriter writer = new EntryNodeWriter(null, null, null, null, 0);
+        final String path = "/some/path";
+        final Node baseNode = mock(Node.class);
+        when(baseNode.hasNode(path)).thenReturn(true);
+        final Node childNode = mock(Node.class);
+        when(baseNode.getNode(path)).thenReturn(childNode);
+        assertEquals(childNode, writer.getOrCreateByPath(baseNode, path, null, null));
     }
 
 }
