@@ -124,7 +124,7 @@ public class EntryNodeWriter
         }
     }
 
-    Node getOrCreateByPath(
+    protected Node getOrCreateByPath(
             final Node baseNode,
             final String path,
             final String intermediateNodeType,
