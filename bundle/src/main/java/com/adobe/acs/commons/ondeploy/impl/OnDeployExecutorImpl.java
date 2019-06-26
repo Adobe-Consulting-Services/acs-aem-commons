@@ -82,8 +82,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         metatype = false, policy = ConfigurationPolicy.REQUIRE)
 @Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
         value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
-@Service(value = {DynamicMBean.class, OnDeployExecutor.class})
-public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutor {
+@Service(value = {DynamicMBean.class, OnDeployExecutorMBean.class, OnDeployExecutor.class})
+public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutorMBean, OnDeployExecutor {
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
 
     private static final String SCRIPT_DATE_END = "endDate";
@@ -126,7 +126,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
     }
 
     public OnDeployExecutorImpl() throws NotCompliantMBeanException {
-        super(OnDeployExecutor.class);
+        super(OnDeployExecutorMBean.class);
     }
 
     protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
@@ -200,7 +200,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             try {
                 script.execute(resourceResolver);
                 logger.info("On-deploy script completed successfully: {}", statusResource.getPath());
-                trackScriptEnd(statusResource, SCRIPT_STATUS_SUCCESS, null);
+                trackScriptEnd(statusResource, SCRIPT_STATUS_SUCCESS, "");
                 return true;
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + statusResource.getPath();
@@ -234,9 +234,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             ModifiableValueMap properties = statusResource.adaptTo(ModifiableValueMap.class);
             properties.put(SCRIPT_STATUS, status);
             properties.put(SCRIPT_DATE_END, Calendar.getInstance());
-            if (output != null) {
-                properties.put(SCRIPT_OUTPUT, output);
-            }
+            properties.put(SCRIPT_OUTPUT, output);
             statusResource.getResourceResolver().commit();
         } catch (PersistenceException e) {
             logger.error("On-deploy script status node could not be updated: {} - status: {}", statusResource.getPath(), status);

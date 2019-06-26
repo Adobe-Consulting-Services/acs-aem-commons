@@ -19,20 +19,18 @@
  */
 package com.adobe.acs.commons.ondeploy;
 
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularDataSupport;
-
-import com.adobe.granite.jmx.annotation.Description;
-import com.adobe.granite.jmx.annotation.Name;
-
-@Description("ACS AEM Commons - On Deploy Script Executor MBean")
+/**
+ * OnDeploy Provider to execute scripts.
+ */
 public interface OnDeployExecutor {
 
-    @Description("Scripts")
-    TabularDataSupport getScripts() throws OpenDataException;
-
-    @Description("Execute the script, given it's fully-qualified class name.  If force==true, script is executed even if it has previously succeeded.")
-    boolean executeScript(@Name(value = "scriptName") String scriptName,
-            @Name(value = "force") boolean force);
+    /**
+     * Execute scripts
+     *
+     * @param scriptName className of the script
+     * @param force true to run if the script ran already.
+     * @return true if executed, false if failed.
+     */
+    boolean executeScript(String scriptName, boolean force);
 
 }

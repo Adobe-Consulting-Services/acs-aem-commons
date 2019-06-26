@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ConsumerType;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
- * An on-deploy script that can be run via the OnDeployExecutor.
+ * An on-deploy script that can be run via the OnDeployExecutorMBean.
  */
 @ConsumerType
 public interface OnDeployScript {
