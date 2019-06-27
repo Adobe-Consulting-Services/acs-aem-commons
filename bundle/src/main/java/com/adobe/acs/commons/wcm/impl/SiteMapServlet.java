@@ -239,6 +239,22 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         return allAssetFolders;
     }
 
+    private String applyUrlRewrites(String url) {
+        for (String rewrite : urlRewrites) {
+            if (!rewrite.contains(":") || rewrite.startsWith(":")) {
+                continue;
+            }
+            String[] tokens = rewrite.split(":");
+            String path = tokens[0];
+            String replacement = tokens.length > 1 ? tokens[1] : "";
+            if (url.contains(path)) {
+                url = url.replaceFirst(path, replacement);
+                break;
+            }
+        }
+        return url;
+    }
+
     @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
         if (isHidden(page)) {
@@ -256,16 +272,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format(urlFormat, page.getPath()));
         }
 
-        for (String rewrite : urlRewrites) {
-            if (!rewrite.contains(":") || rewrite.startsWith(":")) continue;
-            String[] tokens = rewrite.split(":");
-            String path = tokens[0];
-            String replacement = tokens.length > 1 ? tokens[1] : "";
-            if (loc.contains(path)) {
-                loc = loc.replaceFirst(path, replacement);
-                break;
-            }
-        }
+        loc = applyUrlRewrites(loc);
 
         writeElement(stream, "loc", loc);
 
