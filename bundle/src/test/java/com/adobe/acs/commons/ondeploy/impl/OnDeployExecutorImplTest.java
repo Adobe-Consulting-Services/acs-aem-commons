@@ -222,10 +222,12 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
         assertEquals("success", status2.getValueMap().get("status", ""));
+        assertEquals("", status2.getValueMap().get("output", ""));
     }
 
     @Test
@@ -258,6 +260,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("running", status1.getValueMap().get("status", ""));
+        assertFalse(status1.getValueMap().containsKey("output"));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status2);
@@ -293,6 +296,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotNull(status2);

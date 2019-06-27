@@ -249,6 +249,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             properties.put(SCRIPT_STATUS, SCRIPT_STATUS_RUNNING);
             properties.put(SCRIPT_DATE_START, Calendar.getInstance());
             properties.remove(SCRIPT_DATE_END);
+            properties.remove(SCRIPT_OUTPUT);
             statusResource.getResourceResolver().commit();
         } catch (PersistenceException e) {
             logger.error("On-deploy script cannot be run because the system could not write to the script status node: {}", statusResource.getPath());
