@@ -19,17 +19,17 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.startsWith;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,70 +37,72 @@ import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import com.day.cq.commons.jcr.JcrUtil;
-import org.mockito.Matchers;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 import com.day.cq.commons.jcr.JcrConstants;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({EntryNodeWriter.class,JcrUtil.class, JcrUtils.class})
-public class EntryNodeWriterTest
-{
+@RunWith(MockitoJUnitRunner.class)
+public final class EntryNodeWriterTest {
+
     private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
 
-    /**
-     * Ignore this test for the moment, until I have figured out to make it work again ...
-     */
+    private EntryNodeWriterMocks.MockArguments arguments;
+    private final InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
 
     @Before
-    public void setUp(){
-        mockStatic(JcrUtil.class);
-        mockStatic(JcrUtils.class);
-    }
-
-    @Test
-    public void testValid() throws IOException, RepositoryException
-    {
-        final EntryNodeWriterMocks.MockArguments arguments = new EntryNodeWriterMocks.MockArguments();
+    public void setUp() {
+        arguments = new EntryNodeWriterMocks.MockArguments();
         arguments.cacheContentCharEncoding = "UTF-8";
         arguments.cacheContentType = "text/html";
         arguments.entryNode = mock(Node.class);
-        InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
         arguments.cacheContent = inputStream;
-        List<String> header1Value = Arrays.asList("header-value");
-        List<String> header2Value = Arrays.asList("another-header-value");
 
+        final List<String> header1Value = Arrays.asList("header-value");
+        final List<String> header2Value = Arrays.asList("another-header-value");
         arguments.cacheContentHeaders.put("some-header", header1Value);
         arguments.cacheContentHeaders.put("another-header", header2Value);
+    }
 
+    @Test
+    public void testValid() throws IOException, RepositoryException {
         final EntryNodeWriterMocks mocks = new EntryNodeWriterMocks(arguments);
         mocks.getEntryNodeWriter().write();
 
         verify(mocks.getEntryNode(), times(1))
-                .setProperty(Matchers.startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
+                .setProperty(startsWith(JCRHttpCacheStoreConstants.PN_CACHEKEY), any(Binary.class));
 
-        ArgumentCaptor<Binary> argumentCaptor = ArgumentCaptor.forClass(Binary.class);
-        verify(mocks.getJcrContentNode(), times(1))
-                .setProperty(Matchers.startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
-
-        Binary savedBinary = argumentCaptor.getValue();
-        IOUtils.contentEquals(inputStream, savedBinary.getStream());
-        verify(mocks.getJcrContentNode(), times(1))
+        final Node jcrContentNode = mocks.getJcrContentNode();
+        final ArgumentCaptor<Binary> argumentCaptor = ArgumentCaptor.forClass(Binary.class);
+        verify(jcrContentNode, times(1))
+               .setProperty(startsWith(JcrConstants.JCR_DATA), argumentCaptor.capture());
+        verify(jcrContentNode, times(1))
                 .setProperty(JcrConstants.JCR_MIMETYPE, arguments.cacheContentType);
-
-        //verify(mocks.getHeadersNode().setProperty("some-header", header1Value))
     }
 
+    @Test
+    public void skip_setExpireTime_populateCacheKey() throws IOException, RepositoryException {
+        when(arguments.entryNode.hasProperty(JCRHttpCacheStoreConstants.PN_CACHEKEY)).thenReturn(true);
+        final EntryNodeWriterMocks mocks = new EntryNodeWriterMocks(arguments, 0);
+        mocks.getEntryNodeWriter().write();
 
+        verify(mocks.getEntryNode(), times(0))
+                .setProperty(anyString(), any(Binary.class));
+    }
+
+    @Test
+    public void testGetOrCreateByPath() throws RepositoryException {
+        final EntryNodeWriter writer = new EntryNodeWriter(null, null, null, null, 0);
+        final String path = "/some/path";
+        final Node baseNode = mock(Node.class);
+        when(baseNode.hasNode(path)).thenReturn(true);
+        final Node childNode = mock(Node.class);
+        when(baseNode.getNode(path)).thenReturn(childNode);
+        assertEquals(childNode, writer.getOrCreateByPath(baseNode, path, null, null));
+    }
 
 }
