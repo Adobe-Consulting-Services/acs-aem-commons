@@ -29,14 +29,18 @@ import com.adobe.acs.commons.mcp.form.FileUploadComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.jcr.RepositoryException;
+
+import com.day.crx.JcrConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
@@ -59,6 +63,7 @@ public class DataImporter extends ProcessDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataImporter.class);
     private static final String PATH = "path";
+    private static final String SLASH = "/";
 
     public enum MergeMode {
         CREATE_AND_OVERWRITE_PROPERTIES(true, true, true),
@@ -97,10 +102,24 @@ public class DataImporter extends ProcessDefinition {
 
     @FormField(
             name = "Structure node type",
-            description = "Type assigned to new nodes (ignored if spreadsheet has a jcr:primayType column) -- for ordered folders use sling:OrderedFolder",
+            description = "Type assigned to new nodes (ignored if spreadsheet has a jcr:primaryType column) -- for ordered folders use sling:OrderedFolder",
             options = {"default=sling:Folder"}
     )
     private String defaultNodeType = "sling:Folder";
+
+    @FormField(
+            name = "Include jcr:content nodes",
+            description = "If checked, jcr:content nodes are created/updated under nodes",
+            component = CheckboxComponent.class
+    )
+    private boolean includeJcrContent = false;
+
+    @FormField(
+            name = "jcr:content node type",
+            description = "Type assigned to new jcr:content child nodes (ignored if spreadsheet has a jcr:content/jcr:primaryType column)",
+            options = {"default=nt:unstructured"}
+    )
+    private String defaultJcrContentType = "nt:unstructured";
 
     @FormField(
             name = "Convert header names",
@@ -208,7 +227,7 @@ public class DataImporter extends ProcessDefinition {
                 if (r == null) {
                     handleMissingNode(path, rr, row);
                 } else if (mergeMode.update) {
-                    updateMetadata(rr, row);
+                    updateMetadata(path, rr, row);
                 } else {
                     incrementCount(skippedNodes, 1);
                     if (detailedReport) {
@@ -236,32 +255,78 @@ public class DataImporter extends ProcessDefinition {
         }
     }
 
-    public void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
-        String parentPath = StringUtils.substringBeforeLast(path, "/");
-        Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, defaultNodeType, defaultNodeType, true);
-        String nodeName = StringUtils.substringAfterLast(path, "/");
-        if (!row.containsKey(JCR_PRIMARY_TYPE)) {
-            row.put("JCR_TYPE", new CompositeVariant(defaultNodeType));
+    /**
+     * Create missing node at the given path with the properties from the passed row.
+     * If properties are pre-appended with "jcr:content/", create jcr:content node.
+     *
+     * @param path Path of node.
+     * @param rr   ResourceResolver.
+     * @param row  Row from XLSX file.
+     * @throws PersistenceException PersistenceException
+     */
+    private void createMissingNode(String path, ResourceResolver rr, Map<String, CompositeVariant> row) throws PersistenceException {
+        LOG.debug("Start of createMissingNode for node {}", path);
+
+        String parentPath = StringUtils.substringBeforeLast(path, SLASH);
+        Map<String, Object> resourceProperties = new HashMap<>();
+        resourceProperties.put(JcrConstants.JCR_PRIMARYTYPE, defaultNodeType);
+        Resource parent = ResourceUtil.getOrCreateResource(rr, parentPath, resourceProperties, defaultNodeType, true);
+
+        String nodeName = StringUtils.substringAfterLast(path, SLASH);
+        if (!row.containsKey(JCR_PRIMARY_TYPE) && !row.containsKey(JcrConstants.JCR_PRIMARYTYPE)) {
+            row.put(JcrConstants.JCR_PRIMARYTYPE, new CompositeVariant(defaultNodeType));
         }
-        Map<String, Object> nodeProps = row.entrySet().stream()
-                .filter(e -> !e.getKey().equals(ROW_NUMBER) && e.getValue() != null)
-                .collect(
-                        Collectors.toMap(
-                                e -> e.getKey(),
-                                e -> e.getValue().toPropertyValue()
-                        )
-                );
+        Map<String, Object> nodeProps = createPropertyMap(row);
         rr.refresh();
-        rr.create(parent, nodeName, nodeProps);
+        Resource main = rr.create(parent, nodeName, nodeProps);
+
+        if (includeJcrContent) {
+            if (!row.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
+                row.put(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE, new CompositeVariant(defaultJcrContentType));
+            }
+            Map<String, Object> jcrContentProps = createJcrContentPropertyMap(row);
+            if (!jcrContentProps.isEmpty()) {
+                rr.create(main, JcrConstants.JCR_CONTENT, jcrContentProps);
+            }
+        }
+
+        LOG.debug("End of createMissingNode for node {}", path);
     }
 
-    private void updateMetadata(ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
-        ModifiableValueMap resourceProperties = rr.getResource(nodeInfo.get(PATH).toString()).adaptTo(ModifiableValueMap.class);
-        populateMetadataFromRow(resourceProperties, nodeInfo);
+    /**
+     * Get the ModifiableValueMap of the resource and update with the properties from the row.
+     * If jcr:content/jcr:primaryType is provided, get the jcr:content resource and update.
+     *
+     * @param path     Path of node.
+     * @param rr       ResourceResolver
+     * @param nodeInfo Map of properties from the row.
+     * @throws PersistenceException PersistenceException
+     */
+    private void updateMetadata(String path, ResourceResolver rr, Map<String, CompositeVariant> nodeInfo) throws PersistenceException {
+        LOG.debug("Start of updateMetaData");
+
+        Resource node = rr.getResource(path);
+        ModifiableValueMap resourceProperties = node.adaptTo(ModifiableValueMap.class);
+        populateMetadataFromRow(resourceProperties, createPropertyMap(nodeInfo));
+
+        if (includeJcrContent) {
+            Map<String, Object> jcrContentProps = createJcrContentPropertyMap(nodeInfo);
+            Resource jcrContent = node.getChild(JcrConstants.JCR_CONTENT);
+            if (jcrContent == null) {
+                if (!jcrContentProps.containsKey(JcrConstants.JCR_CONTENT + SLASH + JcrConstants.JCR_PRIMARYTYPE)) {
+                    jcrContentProps.put(JcrConstants.JCR_PRIMARYTYPE, defaultJcrContentType);
+                }
+                rr.create(node, JcrConstants.JCR_CONTENT, jcrContentProps);
+            } else {
+                ModifiableValueMap contentResourceProperties = jcrContent.adaptTo(ModifiableValueMap.class);
+                populateMetadataFromRow(contentResourceProperties, jcrContentProps);
+            }
+        }
+
         if (rr.hasChanges()) {
             incrementCount(updatedNodes, 1);
             if (detailedReport) {
-                trackActivity(nodeInfo.get(PATH).toString(), "Updated Properties", null);
+                trackActivity(path, "Updated Properties", null);
             }
             if (!dryRunMode) {
                 rr.commit();
@@ -269,24 +334,68 @@ public class DataImporter extends ProcessDefinition {
             rr.refresh();
         } else {
             if (detailedReport) {
-                trackActivity(nodeInfo.get(PATH).toString(), "No Change", null);
+                trackActivity(path, "No Change", null);
             }
             incrementCount(noChangeNodes, 1);
         }
+
+        LOG.debug("End of updateMetadata");
     }
 
-    public void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, CompositeVariant> nodeInfo) {
-        for (String prop : data.getHeaderRow()) {
-            if (prop != null
-                    && !prop.equals(PATH)
-                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(prop))) {
-                CompositeVariant value = nodeInfo.get(prop);
-                if (value == null || value.isEmpty()) {
-                    nodeInfo.remove(prop);
-                } else {
-                    resourceProperties.put(prop, value.toPropertyValue());
+    /**
+     * Update the resourceProperties with the properties from the row.
+     *
+     * @param resourceProperties ModifiableValueMap of resource.
+     * @param nodeInfo           Map of properties from the row.
+     */
+    private void populateMetadataFromRow(ModifiableValueMap resourceProperties, Map<String, Object> nodeInfo) {
+        LOG.debug("Start of populateMetadataFromRow");
+
+        for (Map.Entry entry : nodeInfo.entrySet()) {
+            String key = (String)entry.getKey();
+            if (key != null
+                    && (mergeMode.overwriteProps || !resourceProperties.containsKey(key))) {
+                Object value = entry.getValue();
+                if (value != null) {
+                    resourceProperties.put(key, value);
                 }
             }
         }
+
+        LOG.debug("End of populateMetadataFromRow");
+    }
+
+    /**
+     * Create map of properties for node.
+     *
+     * @param row Row of data from XLSX.
+     * @return Map of property names and values.
+     */
+    private Map<String, Object> createPropertyMap(Map<String, CompositeVariant> row) {
+        return row.entrySet().stream()
+                .filter(e -> !e.getKey().equals(ROW_NUMBER) && !e.getKey().equals(PATH) && e.getValue() != null && !e.getKey().contains(SLASH))
+                .collect(
+                        Collectors.toMap(
+                                e -> e.getKey(),
+                                e -> e.getValue().toPropertyValue()
+                        )
+                );
+    }
+
+    /**
+     * Create map of properties for jcr:content node.
+     *
+     * @param row Row of data from XLSX.
+     * @return Map of property names and values.
+     */
+    private Map<String, Object> createJcrContentPropertyMap(Map<String, CompositeVariant> row) {
+        return row.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(JcrConstants.JCR_CONTENT))
+                .collect(
+                        Collectors.toMap(
+                                e -> e.getKey().replace(JcrConstants.JCR_CONTENT + SLASH, ""),
+                                e -> e.getValue().toPropertyValue()
+                        )
+                );
     }
 }
