@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ParameterUtil;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -146,7 +149,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean extensionlessUrls;
 
-    private String[] urlRewrites;
+    private Map<String, String> urlRewrites;
 
     private boolean removeTrailingSlash;
 
@@ -169,7 +172,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
-        this.urlRewrites = PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]);
+        this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
     }
@@ -240,16 +243,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private String applyUrlRewrites(String url) {
-        for (String rewrite : urlRewrites) {
-            if (!rewrite.contains(":") || rewrite.startsWith(":")) {
-                continue;
-            }
-            String[] tokens = rewrite.split(":");
-            String path = tokens[0];
-            String replacement = tokens.length > 1 ? tokens[1] : "";
-            if (url.contains(path)) {
-                url = url.replaceFirst(path, replacement);
-                break;
+        String path = URI.create(url).getPath();
+        for (Map.Entry<String, String> rewrite : urlRewrites.entrySet()) {
+            if (path.startsWith(rewrite.getKey())) {
+                return url.replaceFirst(rewrite.getKey(), rewrite.getValue());
             }
         }
         return url;
