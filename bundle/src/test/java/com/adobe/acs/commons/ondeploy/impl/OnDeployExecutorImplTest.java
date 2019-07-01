@@ -150,9 +150,10 @@ public class OnDeployExecutorImplTest {
         String status1ResourcePath = statusResource.getPath();
         assertEquals(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/" + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
         impl.trackScriptStart(statusResource);
-        impl.trackScriptEnd(statusResource, "fail");
+        impl.trackScriptEnd(statusResource, "fail", "error message");
         Resource originalStatus1 = resourceResolver.getResource(status1ResourcePath);
         assertEquals("fail", originalStatus1.getValueMap().get("status", ""));
+        assertEquals("error message", originalStatus1.getValueMap().get("output", ""));
         LogTester.reset();
 
         // Here's where the real test begins
@@ -164,6 +165,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource(status1ResourcePath);
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
@@ -220,10 +222,12 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
         assertEquals("success", status2.getValueMap().get("status", ""));
+        assertEquals("", status2.getValueMap().get("output", ""));
     }
 
     @Test
@@ -256,6 +260,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("running", status1.getValueMap().get("status", ""));
+        assertFalse(status1.getValueMap().containsKey("output"));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status2);
@@ -291,10 +296,12 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotNull(status2);
         assertEquals("fail", status2.getValueMap().get("status", ""));
+        assertTrue(status2.getValueMap().get("output", "").startsWith("java.lang.RuntimeException: Oops, this script failed"));
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
