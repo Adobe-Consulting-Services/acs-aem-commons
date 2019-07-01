@@ -69,6 +69,11 @@ public class MultiFieldPanelWCMUse implements Use {
             return;
         }
 
-        values = MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, name);
+        values = getMultiFieldPanelValues(resource, name);
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected List<Map<String, String>> getMultiFieldPanelValues(Resource resource, final String name) {
+        return MultiFieldPanelFunctions.getMultiFieldPanelValues(resource, name);
     }
 }
