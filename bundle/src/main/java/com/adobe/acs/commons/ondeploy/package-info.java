@@ -20,5 +20,5 @@
 /**
  * On-Deploy Scripts Framework.
  */
-@org.osgi.annotation.versioning.Version("1.0.2")
+@org.osgi.annotation.versioning.Version("1.1.0")
 package com.adobe.acs.commons.ondeploy;
