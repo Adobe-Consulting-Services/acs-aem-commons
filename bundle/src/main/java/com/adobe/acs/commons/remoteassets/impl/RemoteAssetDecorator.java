@@ -89,7 +89,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             if (!this.accepts(resource)) {
                 return resource;
             }
-        } catch (final RepositoryException e) {
+        } catch (final Exception e) {
             // Logging at debug level b/c if this happens it could represent a ton of logging
             LOG.debug("Failed binary sync check for remote asset: {}", resource.getPath());
             return resource;
@@ -147,15 +147,10 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             return false;
         }
 
-        final boolean isAllowedUser = isAllowedUser(resource);
-        if (!isAllowedUser) {
-            return false;
-        }
-
         final String path = resource.getPath();
         for (final String syncPath : config.getDamSyncPaths()) {
             if (path.startsWith(syncPath)) {
-                return true;
+                return isAllowedUser(resource);
             }
         }
 
