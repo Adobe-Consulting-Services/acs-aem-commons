@@ -243,13 +243,17 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private String applyUrlRewrites(String url) {
-        String path = URI.create(url).getPath();
-        for (Map.Entry<String, String> rewrite : urlRewrites.entrySet()) {
-            if (path.startsWith(rewrite.getKey())) {
-                return url.replaceFirst(rewrite.getKey(), rewrite.getValue());
+        try {
+            String path = URI.create(url).getPath();
+            for (Map.Entry<String, String> rewrite : urlRewrites.entrySet()) {
+                if (path.startsWith(rewrite.getKey())) {
+                    return url.replaceFirst(rewrite.getKey(), rewrite.getValue());
+                }
             }
+            return url;
+        } catch (IllegalArgumentException e) {
+            return url;
         }
-        return url;
     }
 
     @SuppressWarnings("squid:S1192")
