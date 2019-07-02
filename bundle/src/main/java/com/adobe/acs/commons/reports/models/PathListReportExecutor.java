@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Model(adaptables = SlingHttpServletRequest.class)
@@ -63,7 +64,7 @@ public class PathListReportExecutor implements ReportExecutor {
 
     private List<String> extractPaths() throws ReportException {
         try {
-            Template template = new Handlebars().compileInline(config.getPathsArea());
+            Template template = new Handlebars().compileInline(config.getPathArea());
             String pathsArea = template.apply(getParamPatternMap(request));
 
             if (StringUtils.isNotEmpty(pathsArea)) {
@@ -90,6 +91,7 @@ public class PathListReportExecutor implements ReportExecutor {
 
     private List<Object> getResources(final List<String> paths) {
         return paths.stream().map(path -> resourceResolver.getResource(path))
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
     }
 

@@ -30,5 +30,5 @@ public interface PathListReportConfig {
     int getPageSize();
 
     @Inject
-    String getPathsArea();
+    String getPathArea();
 }

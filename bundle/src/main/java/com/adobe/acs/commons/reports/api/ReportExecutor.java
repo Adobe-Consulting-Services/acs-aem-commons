@@ -22,6 +22,7 @@ package com.adobe.acs.commons.reports.api;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Enumeration;
@@ -34,6 +35,8 @@ import java.util.Map;
  * of results based on the supplied configuration.
  */
 public interface ReportExecutor {
+
+   Logger log = LoggerFactory.getLogger(ReportExecutor.class);
 
   /**
    * Gets the details for this report executor
@@ -91,7 +94,7 @@ public interface ReportExecutor {
       String key = paramNames.nextElement();
       parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
     }
-    LoggerFactory.getLogger(this.getClass()).trace("Loading parameters from request: {}", parameters);
+    log.debug("Loading parameters from request: {}", parameters);
     return parameters;
   }
 }

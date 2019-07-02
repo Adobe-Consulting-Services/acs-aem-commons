@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.reports.api;
+package com.adobe.acs.commons.reports.internal;
 
+import com.adobe.acs.commons.reports.api.ReportException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -27,14 +28,15 @@ import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.reports.models.ReportRunner.PN_EXECUTOR;
 
-public final class Utils {
+public final class ReportExecutorProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+    public static final ReportExecutorProvider INSTANCE = new ReportExecutorProvider();
 
-    private Utils() {
-    }
+    private static final Logger log = LoggerFactory.getLogger(ReportExecutorProvider.class);
 
-    public static Class<?> getReportExecutor(DynamicClassLoaderManager dynamicClassLoaderManager, Resource config)
+    private ReportExecutorProvider() {}
+
+    public Class<?> getReportExecutor(DynamicClassLoaderManager dynamicClassLoaderManager, Resource config)
             throws ReportException {
         String reportExecutorClass = config.getValueMap().get(PN_EXECUTOR, String.class);
         if (StringUtils.isBlank(reportExecutorClass)) {
@@ -42,7 +44,7 @@ public final class Utils {
         }
 
         try {
-            LOG.debug("Loading class for: {}", reportExecutorClass);
+            log.debug("Loading class for: {}", reportExecutorClass);
             return Class.forName(reportExecutorClass, true, dynamicClassLoaderManager.getDynamicClassLoader());
         } catch (ClassNotFoundException ex) {
             throw new ReportException("Unable to find class for " + reportExecutorClass, ex);

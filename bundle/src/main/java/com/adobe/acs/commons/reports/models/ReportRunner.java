@@ -22,11 +22,9 @@ package com.adobe.acs.commons.reports.models;
 import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
-import javax.jcr.RepositoryException;
 
 import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.Utils;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.acs.commons.reports.internal.ReportExecutorProvider;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -77,7 +75,7 @@ public class ReportRunner {
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
     log.trace("executeConfig");
     try {
-      Class<?> exClass = Utils.getReportExecutor(dynamicClassLoaderManager, config);
+      Class<?> exClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
       Object model = request.adaptTo(exClass);
       if (model instanceof ReportExecutor) {
         ReportExecutor ex = (ReportExecutor) model;
