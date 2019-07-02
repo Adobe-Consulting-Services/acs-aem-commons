@@ -36,8 +36,6 @@ import java.util.Map;
  */
 public interface ReportExecutor {
 
-   Logger log = LoggerFactory.getLogger(ReportExecutor.class);
-
   /**
    * Gets the details for this report executor
    * 
@@ -94,7 +92,7 @@ public interface ReportExecutor {
       String key = paramNames.nextElement();
       parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
     }
-    log.debug("Loading parameters from request: {}", parameters);
+    LoggerFactory.getLogger(this.getClass()).debug("Loading parameters from request: {}", parameters);
     return parameters;
   }
 }
