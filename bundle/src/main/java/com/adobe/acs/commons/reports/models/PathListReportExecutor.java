@@ -24,6 +24,7 @@ import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -34,23 +35,26 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class PathListReportExecutor implements ReportExecutor {
 
-    private int currentPage;
+    int currentPage;
 
-    private PathListReportConfig config;
+    PathListReportConfig config;
 
     @Self
     private SlingHttpServletRequest request;
 
     @SlingObject
-    private ResourceResolver resourceResolver;
+    ResourceResolver resourceResolver;
 
     @Override
     public String getDetails() throws ReportException {
@@ -62,7 +66,7 @@ public class PathListReportExecutor implements ReportExecutor {
         return StringUtils.EMPTY;
     }
 
-    private List<String> extractPaths() throws ReportException {
+    List<String> extractPaths() throws ReportException {
         try {
             Template template = new Handlebars().compileInline(config.getPathArea());
             String pathsArea = template.apply(getParamPatternMap(request));
@@ -89,10 +93,13 @@ public class PathListReportExecutor implements ReportExecutor {
         return new ResultsPage(getResources(sublistPaths), config.getPageSize(), currentPage);
     }
 
-    private List<Object> getResources(final List<String> paths) {
-        return paths.stream().map(path -> resourceResolver.getResource(path))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+    List<Object> getResources(final List<String> paths) {
+        return Optional.ofNullable(paths)
+                       .map(Collection::stream)
+                       .orElseGet(Stream::empty)
+                       .map(path -> resourceResolver.getResource(path))
+                       .filter(Objects::nonNull)
+                       .collect(Collectors.toList());
     }
 
     private int getFrom(final int page) {
