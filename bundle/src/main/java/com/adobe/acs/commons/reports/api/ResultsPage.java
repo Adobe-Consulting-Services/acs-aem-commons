@@ -59,12 +59,19 @@ public final class ResultsPage {
 
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ResultsPage)) return false;
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof ResultsPage)) {
+      return false;
+    }
+
     final ResultsPage that = (ResultsPage) o;
-    return pageSize == that.pageSize &&
-           page == that.page &&
-           Objects.equals(results, that.results);
+
+    return pageSize == that.pageSize
+           && page == that.page
+           && Objects.equals(results, that.results);
   }
 
   @Override
