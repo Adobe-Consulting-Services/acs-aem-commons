@@ -142,6 +142,7 @@ public class PathListReportExecutorTest {
         ArrayList<Object> expectedResult = new ArrayList<>();
         for (String path : TEST_PATHS) {
             final Resource resource = mock(Resource.class);
+            doReturn(resource).when(rr).getResource(path);
             expectedResult.add(resource);
         }
         executor.resourceResolver = rr;
@@ -164,7 +165,6 @@ public class PathListReportExecutorTest {
     }
 
     private class ResultsTestObject {
-        private final List<Object> expectedResources;
         private final List<String> providedPaths;
         private final List<String> expectedPaths;
         private ResultsPage resultsPage;
@@ -178,18 +178,8 @@ public class PathListReportExecutorTest {
             this.expectedCurrentPage = expectedCurrentPage;
             this.providedPaths = providedPaths;
             this.expectedPaths = expectedPaths;
-            this.expectedResources = generateExpectedResources(expectedPaths);
         }
 
-        private List<Object> generateExpectedResources(final List<String> expectedPaths) {
-            List<Object> expectedResources = new ArrayList<>();
-            for (String path : expectedPaths) {
-                final Resource resource = mock(Resource.class);
-                expectedResources.add(resource);
-            }
-
-            return expectedResources;
-        }
 
         ResultsPage getResultsPage() {
             return resultsPage;
@@ -202,14 +192,24 @@ public class PathListReportExecutorTest {
         ResultsTestObject configure() throws ReportException {
             PathListReportConfig config = mock(PathListReportConfig.class);
             doReturn(pageSize).when(config).getPageSize();
-            resultsPage = new ResultsPage(expectedResources, pageSize, expectedCurrentPage);
+
+            List<Object> expectedResources = new ArrayList<>();
+
+            final ResourceResolver rr = mock(ResourceResolver.class);
+            for (String path : expectedPaths) {
+                final Resource resource = mock(Resource.class);
+                doReturn(resource).when(rr).getResource(path);
+                expectedResources.add(resource);
+            }
 
             reportExecutor = spy(new PathListReportExecutor());
             reportExecutor.config = config;
             reportExecutor.currentPage = expectedCurrentPage;
+            reportExecutor.resourceResolver = rr;
+
+            resultsPage = new ResultsPage(expectedResources, pageSize, expectedCurrentPage);
 
             doReturn(providedPaths).when(reportExecutor).extractPaths();
-            doReturn(expectedResources).when(reportExecutor).getResources(expectedPaths);
             return this;
         }
     }
