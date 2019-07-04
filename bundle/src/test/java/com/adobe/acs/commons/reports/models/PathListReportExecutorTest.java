@@ -34,9 +34,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.mockito.Mockito.spy;
 
 public class PathListReportExecutorTest {
 
@@ -189,7 +189,7 @@ public class PathListReportExecutorTest {
             return reportExecutor;
         }
 
-        ResultsTestObject configure() throws ReportException {
+        ResultsTestObject configure() {
             PathListReportConfig config = mock(PathListReportConfig.class);
             doReturn(pageSize).when(config).getPageSize();
 
@@ -202,14 +202,19 @@ public class PathListReportExecutorTest {
                 expectedResources.add(resource);
             }
 
-            reportExecutor = spy(new PathListReportExecutor());
+            resultsPage = new ResultsPage(expectedResources, pageSize, expectedCurrentPage);
+
+            reportExecutor = new PathListReportExecutor() {
+                @Override
+                List<String> extractPaths() {
+                    return providedPaths;
+                }
+            };
+
             reportExecutor.config = config;
             reportExecutor.currentPage = expectedCurrentPage;
             reportExecutor.resourceResolver = rr;
 
-            resultsPage = new ResultsPage(expectedResources, pageSize, expectedCurrentPage);
-
-            doReturn(providedPaths).when(reportExecutor).extractPaths();
             return this;
         }
     }
