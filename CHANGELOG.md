@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
 
+### Fixed
+- #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
+
 ## [4.2.0] - 2019-06-18
 
 ### Added
@@ -49,6 +52,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 - #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
+- #1973 - Added Vanity URL support to SiteMap and the ability to specify URL rewrites so the output matches dispatcher
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
