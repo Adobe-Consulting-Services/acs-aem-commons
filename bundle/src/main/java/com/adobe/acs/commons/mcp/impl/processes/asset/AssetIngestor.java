@@ -46,7 +46,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -138,28 +137,28 @@ public abstract class AssetIngestor extends ProcessDefinition {
             name = "Ignore folders",
             description = "List of folder names to be ignored",
             hint = "tmp,.DS_STORE",
-            options = {"default=tmp,ds_store,.ds_store,.thumbs,.appledouble"}
+            options = {"default=-tmp,-ds_store,-.ds_store,-.thumbs,-.appledouble"}
     )
-    String ignoreFolders = "tmp,ds_store,.ds_store,.thumbs,.appledouble";
-    List<String> ignoreFolderList;
+    String foldersFilterExpression = "-tmp,-ds_store,-.ds_store,-.thumbs,-.appledouble";
+    NamesFilter folderFilter;
 
     @FormField(
             name = "Ignore files",
             description = "List of file names to ignore",
             hint = "full file names, comma separated",
-            options = {"default=ds_store,.ds_store"}
+            options = {"default=-ds_store,-.ds_store"}
     )
-    String ignoreFiles = "ds_store,.ds_store";
-    List<String> ignoreFileList;
+    String filesFilterExpression = "-ds_store,-.ds_store";
+    NamesFilter fileFilter;
 
     @FormField(
             name = "Ignore extensions",
             description = "List of file extensions to ignore",
             hint = "mp4,txt, etc.",
-            options = {"default=txt,html,css,js,thm,exe,db"}
+            options = {"default=-txt,-html,-css,-js,-thm,-exe,-db"}
     )
-    String ignoreExtensions = "txt,html,css,js,thm,exe,db";
-    List<String> ignoreExtensionList;
+    String extensionsFilterExpression = "-txt,-html,-css,-js,-thm,-exe,-db";
+    NamesFilter extensionFilter;
 
     @FormField(
             name = "Existing action",
@@ -247,20 +246,20 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @Override
     public void init() throws RepositoryException {
-        if (ignoreFolders == null) {
-            ignoreFolders = "";
+        if (foldersFilterExpression == null) {
+            foldersFilterExpression = "";
         }
-        ignoreFolderList = Arrays.asList(ignoreFolders.trim().toLowerCase().split(","));
+        folderFilter = new NamesFilter(foldersFilterExpression);
 
-        if (ignoreFiles == null) {
-            ignoreFiles = "";
+        if (filesFilterExpression == null) {
+            filesFilterExpression = "";
         }
-        ignoreFileList = Arrays.asList(ignoreFiles.trim().toLowerCase().split(","));
+        fileFilter = new NamesFilter(filesFilterExpression);
 
-        if (ignoreExtensions == null) {
-            ignoreExtensions = "";
+        if (extensionsFilterExpression == null) {
+            extensionsFilterExpression = "";
         }
-        ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
+        extensionFilter = new NamesFilter(extensionsFilterExpression);
 
         if (this.retries <= 0) {
             this.retries = DEFAULT_RETRIES;
@@ -456,13 +455,13 @@ public abstract class AssetIngestor extends ProcessDefinition {
         if (maximumSize > 0 && source.getLength() > maximumSize) {
             return false;
         }
-        if (name.startsWith(".") || ignoreFileList.contains(name)) {
+        if (name.startsWith(".") || fileFilter.isNotValidName(name)) {
             return false;
         }
         if (name.contains(".")) {
             int extPos = name.lastIndexOf('.');
             String ext = name.substring(extPos + 1);
-            if (ignoreExtensionList.contains(ext)) {
+            if (extensionFilter.isNotValidName(ext)) {
                 return false;
             }
         }
@@ -471,7 +470,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     protected boolean canImportFolder(HierarchicalElement element) {
         String name = element.getName();
-        if (ignoreFolderList.contains(name.toLowerCase())) {
+        if (folderFilter.isNotValidName(name.toLowerCase())) {
             return false;
         } else {
             HierarchicalElement parent = element.getParent();
