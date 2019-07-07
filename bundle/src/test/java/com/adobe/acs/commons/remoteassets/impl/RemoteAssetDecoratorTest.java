@@ -37,9 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.rmi.runtime.Log;
@@ -66,8 +63,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(AccessControlUtil.class)
 public class RemoteAssetDecoratorTest {
     private static String TEST_MOCK_SYNC = "mocksync";
     private static String TEST_REMOTE_ASSET_CONTENT_PATH = "/content/dam/b/test_asset.png/jcr:content";
@@ -144,8 +139,7 @@ public class RemoteAssetDecoratorTest {
             creds.put("user.name", username);
             ResourceResolver resourceResolver = context.getService(ResourceResolverFactory.class).getResourceResolver(creds);
 
-            PowerMockito.mockStatic(AccessControlUtil.class);
-            when(AccessControlUtil.getUserManager(resourceResolver.adaptTo(Session.class))).thenReturn(mockUserManager);
+            doReturn(mockUserManager).when(remoteAssetDecorator).getUserManager(resourceResolver.adaptTo(Session.class));
 
             return resourceResolver;
         } catch (Exception e) {

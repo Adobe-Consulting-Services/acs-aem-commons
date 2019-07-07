@@ -38,7 +38,7 @@ import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.util.HashMap;
