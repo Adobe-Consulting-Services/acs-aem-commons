@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
+- #1644 - Asset Ingestor | Add include section
 
 ### Fixed
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
