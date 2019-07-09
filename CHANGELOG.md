@@ -18,7 +18,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
-- Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and page refreshes due to Edit Config Listener ( Shared Component Properties )
 
 ## [4.2.0] - 2019-06-18
 

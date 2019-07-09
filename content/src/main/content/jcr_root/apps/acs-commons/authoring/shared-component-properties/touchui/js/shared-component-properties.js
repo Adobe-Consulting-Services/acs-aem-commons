@@ -117,13 +117,4 @@
         }
     });
 
-    // we listen to the editables to reset the Shared Component Properties Registered flag so that the Shared and
-    // Global properties are loaded as page refreshes due to Edit Config Listeners
-    channel.on('cq-editables-updated', function (ev) {
-        // reset the flag so that the shared and global icons are loaded again after page refresh
-        if (ev.editables){
-            ns.acsSharedComponentPropertiesIsRegistered = false;
-        }
-    });
-
 }(jQuery, Granite.author, jQuery(document), this));
