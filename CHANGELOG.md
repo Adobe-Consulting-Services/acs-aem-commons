@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1945 - Added support for jcr:content creation and update to the Data Importer
 
 ### Fixed
+- #1980 - Fixing error when not using redirect map file
 - #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
 
