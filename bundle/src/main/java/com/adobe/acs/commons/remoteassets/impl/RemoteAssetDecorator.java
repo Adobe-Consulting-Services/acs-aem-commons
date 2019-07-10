@@ -24,6 +24,7 @@ import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
@@ -174,7 +175,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             }
 
             Session session = resourceResolver.adaptTo(Session.class);
-            User currentUser = (User) AccessControlUtil.getUserManager(session).getAuthorizable(userId);
+            User currentUser = (User) getUserManager(session).getAuthorizable(userId);
             if (currentUser != null && !currentUser.isSystemUser()) {
                 return true;
             } else {
@@ -230,5 +231,9 @@ public class RemoteAssetDecorator implements ResourceDecorator {
             remoteResourcesSyncing.remove(resourcePath);
         }
         return false;
+    }
+
+    protected UserManager getUserManager(Session session) throws RepositoryException {
+        return AccessControlUtil.getUserManager(session);
     }
 }

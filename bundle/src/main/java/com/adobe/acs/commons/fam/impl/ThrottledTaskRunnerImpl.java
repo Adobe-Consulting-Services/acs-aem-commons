@@ -73,7 +73,7 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private int maxThreads;
     private double maxCpu;
     private double maxHeap;
-    private boolean isPaused;
+    private volatile boolean isPaused;
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ObjectName osBeanName;
     private ObjectName memBeanName;
