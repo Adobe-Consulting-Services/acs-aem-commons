@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
+import com.adobe.acs.commons.util.ParameterUtil;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -106,6 +109,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
     private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
 
+    @Property(label = "URL Rewrites", unbounded = PropertyUnbounded.ARRAY, description = "Colon separated URL rewrites to adjust the <loc> to match your dispatcher's apache rewrites")
+    private static final String PROP_URL_REWRITES = "url.rewrites";
+
     @Property(boolValue = DEFAULT_INCLUDE_INHERITANCE_VALUE, label = "Include Inherit Value", description = "If true searches for the frequency and priority attribute in the current page if null looks in the parent.")
     private static final String PROP_INCLUDE_INHERITANCE_VALUE = "include.inherit";
 
@@ -143,6 +149,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean extensionlessUrls;
 
+    private Map<String, String> urlRewrites;
+
     private boolean removeTrailingSlash;
 
     @Activate
@@ -164,7 +172,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
-        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH), 
+        this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
+        this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
     }
 
@@ -233,6 +242,20 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         return allAssetFolders;
     }
 
+    private String applyUrlRewrites(String url) {
+        try {
+            String path = URI.create(url).getPath();
+            for (Map.Entry<String, String> rewrite : urlRewrites.entrySet()) {
+                if (path.startsWith(rewrite.getKey())) {
+                    return url.replaceFirst(rewrite.getKey(), rewrite.getValue());
+                }
+            }
+            return url;
+        } catch (IllegalArgumentException e) {
+            return url;
+        }
+    }
+
     @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
         if (isHidden(page)) {
@@ -241,12 +264,16 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeStartElement(NS, "url");
         String loc = "";
 
-        if (!extensionlessUrls) {
+        if (!StringUtils.isEmpty(page.getVanityUrl())) {
+            loc = externalizer.externalLink(resolver, externalizerDomain, page.getVanityUrl());
+        } else if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
         } else {
             String urlFormat = removeTrailingSlash ? "%s" : "%s/";
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format(urlFormat, page.getPath()));
         }
+
+        loc = applyUrlRewrites(loc);
 
         writeElement(stream, "loc", loc);
 
@@ -322,7 +349,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName,
-            final String[] propertyNames, final ValueMap properties) throws XMLStreamException {
+                                         final String[] propertyNames, final ValueMap properties) throws XMLStreamException {
         for (String prop : propertyNames) {
             String value = properties.get(prop, String.class);
             if (value != null) {
@@ -334,7 +361,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @SuppressWarnings("squid:S1144")
     private void writeFirstPropertyValue(final XMLStreamWriter stream, final String elementName,
-            final String[] propertyNames, final InheritanceValueMap properties) throws XMLStreamException {
+                                         final String[] propertyNames, final InheritanceValueMap properties) throws XMLStreamException {
         for (String prop : propertyNames) {
             String value = properties.get(prop, String.class);
             if (value == null) {
