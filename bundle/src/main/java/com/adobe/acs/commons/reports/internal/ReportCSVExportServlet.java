@@ -31,11 +31,13 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +58,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private static final long serialVersionUID = 2794836639686938093L;
   private static final Logger log = LoggerFactory.getLogger(ReportCSVExportServlet.class);
+
+  @Reference
+  private DynamicClassLoaderManager dynamicClassLoaderManager;
 
   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
       throws ServletException, IOException {
@@ -115,8 +120,8 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
         try {
           log.debug("Finding ReportCellCSVExporter for {}", className);
           @SuppressWarnings("unchecked")
-          Class<ReportCellCSVExporter> clazz = (Class<ReportCellCSVExporter>) getClass().getClassLoader()
-              .loadClass(className);
+          Class<ReportCellCSVExporter> clazz =
+                  (Class<ReportCellCSVExporter>) Class.forName(className, true, dynamicClassLoaderManager.getDynamicClassLoader());
           ReportCellCSVExporter exporter = column.adaptTo(clazz);
           log.debug("Loaded ReportCellCSVExporter {}", exporter);
           if (exporter != null) {
