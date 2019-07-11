@@ -121,7 +121,10 @@
     // Global properties are loaded as page refreshes due to Edit Config Listeners
     channel.on('cq-editables-updated', function (ev) {
         // reset the flag so that the shared and global icons are loaded again after page refresh
-        if (ev.editables){
+        if (ns.acsSharedComponentPropertiesIsRegistered
+            && ns.EditorFrame
+            && ns.EditorFrame.editableToolbar
+            && ns.EditorFrame.editableToolbar._customActions) {
             ns.acsSharedComponentPropertiesIsRegistered = false;
         }
     });
