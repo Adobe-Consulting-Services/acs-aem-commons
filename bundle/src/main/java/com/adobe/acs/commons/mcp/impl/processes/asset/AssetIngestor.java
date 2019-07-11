@@ -135,8 +135,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
     String jcrBasePath = "/content/dam";
     @FormField(
             name = "Folders filter",
-            description = "List of folder names to be ignored. If you want to exclude folder name add '-' sign before name."
-                          + "If you want to include name, just write folder name or add '+' sign before name",
+            description = "Comma-delimited list of folders to filter, useful for bypassing thumnail folders and such. If you want to exclude folder name add '-' sign before name."
+                          + "If you want to include name, just write folder name or add '+' sign before name.",
             hint = "tmp,.DS_STORE",
             options = {"default=-tmp,-ds_store,-.ds_store,-.thumbs,-.appledouble"}
     )
@@ -145,8 +145,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @FormField(
             name = "Files Filter",
-            description = "List of file names to ignore If you want to exclude file name add '-' sign before name."
-                          + "If you want to include name, just write file name or add '+' sign before name",
+            description = "Comma-delimited list of files to filter, also useful for bypassing additional metadata files which might not be useful in a DAM setting. If you want to exclude file name add '-' sign before name."
+                          + "If you want to include name, just write file name or add '+' sign before name.",
             hint = "full file names, comma separated",
             options = {"default=-ds_store,-.ds_store"}
     )
@@ -155,7 +155,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @FormField(
             name = "Extensions filter",
-            description = "List of file extensions to ignore. If you want to exclude extension add '-' sign before name."
+            description = "Comma-delimited list of file extensions to filter. If you want to exclude extension add '-' sign before name."
                           + "If you want to include extension, just write extension or add '+' sign before name",
             hint = "mp4,txt, etc.",
             options = {"default=-txt,-html,-css,-js,-thm,-exe,-db"}
