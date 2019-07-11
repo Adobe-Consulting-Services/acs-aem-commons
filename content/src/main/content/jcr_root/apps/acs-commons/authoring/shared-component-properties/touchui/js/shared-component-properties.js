@@ -116,7 +116,7 @@
             ns.EditorFrame.editableToolbar.registerAction('GLOBAL-COMPONENT-PROPS', initDialog("global"));
         }
     });
-
+    // AEM 6.3 Bug Fix for #1982
     // we listen to the editables to reset the Shared Component Properties Registered flag so that the Shared and
     // Global properties are loaded as page refreshes due to Edit Config Listeners
     channel.on('cq-editables-updated', function (ev) {
