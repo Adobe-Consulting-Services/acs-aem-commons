@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1644 - Asset Ingestor | Add include section
 
 ### Fixed
+- #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
 
 ## [4.2.0] - 2019-06-18
