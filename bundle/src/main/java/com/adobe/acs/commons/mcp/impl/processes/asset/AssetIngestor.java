@@ -134,7 +134,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     )
     String jcrBasePath = "/content/dam";
     @FormField(
-            name = "Ignore folders",
+            name = "Folders filter",
             description = "List of folder names to be ignored. If you want to exclude folder name add '-' sign before name."
                           + "If you want to include name, just write folder name or add '+' sign before name",
             hint = "tmp,.DS_STORE",
@@ -144,7 +144,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     NamesFilter folderFilter;
 
     @FormField(
-            name = "Ignore files",
+            name = "Files Filter",
             description = "List of file names to ignore If you want to exclude file name add '-' sign before name."
                           + "If you want to include name, just write file name or add '+' sign before name",
             hint = "full file names, comma separated",
@@ -154,7 +154,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     NamesFilter fileFilter;
 
     @FormField(
-            name = "Ignore extensions",
+            name = "Extensions filter",
             description = "List of file extensions to ignore. If you want to exclude extension add '-' sign before name."
                           + "If you want to include extension, just write extension or add '+' sign before name",
             hint = "mp4,txt, etc.",
