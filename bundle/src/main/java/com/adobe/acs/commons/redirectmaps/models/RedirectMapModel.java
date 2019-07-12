@@ -57,200 +57,204 @@ import com.day.cq.commons.jcr.JcrConstants;
 @Model(adaptables = Resource.class)
 public class RedirectMapModel {
 
-    private static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
+  private static final Logger log = LoggerFactory.getLogger(RedirectMapModel.class);
 
-    private static final String NO_TARGET_MSG = "No target found in entry %s";
-    private static final String SOURCE_WHITESPACE_MSG = "Source path %s for content %s contains whitespace";
-    private static final String WHITESPACE_MSG = "Extra whitespace found in entry %s";
+  private static final String NO_TARGET_MSG = "No target found in entry %s";
+  private static final String SOURCE_WHITESPACE_MSG = "Source path %s for content %s contains whitespace";
+  private static final String WHITESPACE_MSG = "Extra whitespace found in entry %s";
 
-    public static final String MAP_FILE_NODE = "redirectMap.txt";
+  public static final String MAP_FILE_NODE = "redirectMap.txt";
 
-    @Inject
-    @Optional
-    @Named(MAP_FILE_NODE)
-    private Resource redirectMap;
+  @Inject
+  @Optional
+  @Named(MAP_FILE_NODE)
+  private Resource redirectMap;
 
-    @Inject
-    @Optional
-    private List<RedirectConfigModel> redirects;
+  @Inject
+  @Optional
+  private List<RedirectConfigModel> redirects;
 
-    @Inject
-    @Source("sling-object")
-    private ResourceResolver resourceResolver;
+  @Inject
+  @Source("sling-object")
+  private ResourceResolver resourceResolver;
 
-    private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, String suffix) {
-        List<MapEntry> entries = new ArrayList<>();
-        while (items.hasNext()) {
-            Resource item = items.next();
-            String path = item.getPath();
-            ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
-            Resource child = item.getChild(JcrConstants.JCR_CONTENT);
-            if (child != null) {
-                properties = child.getValueMap();
-            }
-            FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver,
-                    config.getProtocol(), config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
-            String pageUrl = config.getProtocol() + "://" + config.getDomain()
-                    + resourceResolver.map(mockRequest, item.getPath() + suffix);
+  private List<MapEntry> addItems(RedirectConfigModel config, Iterator<Resource> items, String suffix) {
+    List<MapEntry> entries = new ArrayList<>();
+    while (items.hasNext()) {
+      Resource item = items.next();
+      String path = item.getPath();
+      ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
+      Resource child = item.getChild(JcrConstants.JCR_CONTENT);
+      if (child != null) {
+        properties = child.getValueMap();
+      }
+      FakeSlingHttpServletRequest mockRequest = new FakeSlingHttpServletRequest(resourceResolver, config.getProtocol(),
+          config.getDomain(), (config.getProtocol().equals("https") ? 443 : 80));
+      String pageUrl = config.getProtocol() + "://" + config.getDomain()
+          + resourceResolver.map(mockRequest, item.getPath() + suffix);
 
-            String[] sources = properties.get(config.getProperty(), String[].class);
-            int i = 0;
-            for (String source : sources) {
-                MapEntry entry = new MapEntry(i++, source, pageUrl, item.getPath());
-                if (source.matches(".*\\s+.*")) {
-                    String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
-                    log.warn(msg);
-                    entry.setStatus(msg);
-                    entry.setValid(false);
-                }
-                entries.add(entry);
-            }
+      String[] sources = properties.get(config.getProperty(), String[].class);
+      int i = 0;
+      for (String source : sources) {
+        MapEntry entry = new MapEntry(i++, source, pageUrl, item.getPath());
+        if (source.matches(".*\\s+.*")) {
+          String msg = String.format(SOURCE_WHITESPACE_MSG, entry.getSource(), path);
+          log.warn(msg);
+          entry.setStatus(msg);
+          entry.setValid(false);
         }
-        return entries;
+        entries.add(entry);
+      }
+    }
+    return entries;
+  }
+
+  private List<MapEntry> gatherEntries(RedirectConfigModel config) {
+    log.trace("gatherEntries");
+
+    log.debug("Getting all of the entries for {}", config.getResource());
+
+    List<MapEntry> entries = new ArrayList<>();
+
+    String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
+        + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath() + "')";
+    log.debug("Finding pages with redirects with query: {}", pageQuery);
+    entries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), ".html"));
+    String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
+        + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath() + "')";
+    log.debug("Finding assets with redirects with query: {}", assetQuery);
+    entries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), ""));
+    return entries;
+  }
+
+  public List<MapEntry> getEntries() throws IOException {
+    log.trace("getEntries");
+
+    List<MapEntry> entries = new ArrayList<>();
+    if (redirectMap != null) {
+      InputStream is = redirectMap.adaptTo(InputStream.class);
+      if (is != null) {
+        int i = 0;
+        for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
+          MapEntry entry = toEntry(i++, line);
+          if (entry != null) {
+            entries.add(entry);
+          }
+        }
+      }
     }
 
-    private List<MapEntry> gatherEntries(RedirectConfigModel config) {
-        log.trace("gatherEntries");
-
-        log.debug("Getting all of the entries for {}", config.getResource());
-
-        List<MapEntry> entries = new ArrayList<>();
-
-        String pageQuery = "SELECT * FROM [cq:Page] WHERE [jcr:content/" + config.getProperty()
-                + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
-                + "')";
-        log.debug("Finding pages with redirects with query: {}", pageQuery);
-        entries.addAll(addItems(config, resourceResolver.findResources(pageQuery, Query.JCR_SQL2), ".html"));
-        String assetQuery = "SELECT * FROM [dam:Asset] WHERE [jcr:content/" + config.getProperty()
-                + "] IS NOT NULL AND (ISDESCENDANTNODE([" + config.getPath() + "]) OR [jcr:path]='" + config.getPath()
-                + "')";
-        log.debug("Finding assets with redirects with query: {}", assetQuery);
-        entries.addAll(addItems(config, resourceResolver.findResources(assetQuery, Query.JCR_SQL2), ""));
-        return entries;
+    if (redirects != null) {
+      redirects.forEach(r -> entries.addAll(gatherEntries(r)));
+    } else {
+      log.debug("No redirect configurations specified");
     }
 
-    public List<MapEntry> getEntries() throws IOException {
-        log.trace("getEntries");
+    Map<String, Integer> sources = new HashMap<>();
 
-        List<MapEntry> entries = new ArrayList<>();
-        if (redirectMap != null) {
-            InputStream is = redirectMap.adaptTo(InputStream.class);
-            int i = 0;
-            for (String line : IOUtils.readLines(is, StandardCharsets.UTF_8)) {
-                MapEntry entry = toEntry(i++, line);
-                if (entry != null) {
-                    entries.add(entry);
-                }
-            }
-        }
+    for (MapEntry entry : entries) {
+      if (!sources.containsKey(entry.getSource())) {
+        sources.put(entry.getSource(), 1);
+      } else {
+        log.trace("Found duplicate entry for {}", entry.getSource());
+        sources.put(entry.getSource(), sources.get(entry.getSource()) + 1);
+      }
+    }
+    sources.entrySet().removeIf(e -> e.getValue() <= 1);
+    log.debug("Found {} duplicate entries", sources.keySet().size());
 
-        if (redirects != null) {
-            redirects.forEach(r -> entries.addAll(gatherEntries(r)));
-        } else {
-            log.debug("No redirect configurations specified");
-        }
+    entries.stream().filter(e -> sources.containsKey(e.getSource())).forEach(e -> {
+      e.setValid(false);
+      e.setStatus("Duplicate entry for " + e.getSource() + ", found redirect to " + e.getTarget());
+    });
 
-        Map<String, Integer> sources = new HashMap<>();
+    return entries;
+  }
 
-        for (MapEntry entry : entries) {
-            if (!sources.containsKey(entry.getSource())) {
-                sources.put(entry.getSource(), 1);
-            } else {
-                log.trace("Found duplicate entry for {}", entry.getSource());
-                sources.put(entry.getSource(), sources.get(entry.getSource()) + 1);
-            }
-        }
-        sources.entrySet().removeIf(e -> e.getValue() <= 1);
-        log.debug("Found {} duplicate entries", sources.keySet().size());
+  /**
+   * Get all of the entries from the cq:Pages and dam:Assets which contain
+   * whitespace in their vanity URL.
+   *
+   * @return
+   * @throws IOException
+   */
+  public List<MapEntry> getInvalidEntries() throws IOException {
+    log.trace("getInvalidEntries");
+    List<MapEntry> invalidEntries = new ArrayList<>();
+    if (redirects != null) {
+      List<MapEntry> entries = getEntries();
 
-        entries.stream().filter(e -> sources.containsKey(e.getSource())).forEach(e -> {
-            e.setValid(false);
-            e.setStatus("Duplicate entry for " + e.getSource() + ", found redirect to " + e.getTarget());
-        });
+      invalidEntries.addAll(entries.stream().filter(e -> !e.isValid()).collect(Collectors.toList()));
+      log.debug("Found {} invalid entries", invalidEntries.size());
+    }
+    return invalidEntries;
+  }
 
-        return entries;
+  /**
+   * Get the contents of the RedirectMap as a String
+   *
+   * @return
+   * @throws IOException
+   */
+  public String getRedirectMap() throws IOException {
+    log.debug("Retrieving redirect map from {}", redirectMap);
+
+    StringBuilder sb = new StringBuilder();
+
+    if (redirectMap != null) {
+      log.debug("Loading RedirectMap file from {}", redirectMap);
+      InputStream is = redirectMap.adaptTo(InputStream.class);
+      if (is != null) {
+        sb.append("# Redirect Map File\n");
+        sb.append(IOUtils.toString(is, StandardCharsets.UTF_8));
+      } else {
+        log.debug("Unable to get input stream from redirect file: {}", redirectMap);
+      }
+    } else {
+      log.debug("No redirect map specified");
     }
 
-    /**
-     * Get all of the entries from the cq:Pages and dam:Assets which contain
-     * whitespace in their vanity URL.
-     *
-     * @return
-     * @throws IOException
-     */
-    public List<MapEntry> getInvalidEntries() throws IOException {
-        log.trace("getInvalidEntries");
-        List<MapEntry> invalidEntries = new ArrayList<>();
-        if (redirects != null) {
-            List<MapEntry> entries = getEntries();
-
-            invalidEntries.addAll(entries.stream().filter(e -> !e.isValid()).collect(Collectors.toList()));
-            log.debug("Found {} invalid entries", invalidEntries.size());
-        }
-        return invalidEntries;
+    if (redirects != null) {
+      for (RedirectConfigModel config : redirects) {
+        writeEntries(config, sb);
+      }
+    } else {
+      log.debug("No redirect configurations specified");
     }
+    return sb.toString();
+  }
 
-    /**
-     * Get the contents of the RedirectMap as a String
-     *
-     * @return
-     * @throws IOException
-     */
-    public String getRedirectMap() throws IOException {
-        log.debug("Retrieving redirect map from {}", redirectMap);
+  private MapEntry toEntry(int id, String l) {
+    String[] seg = l.split("\\s+");
 
-        StringBuilder sb = new StringBuilder();
-
-        if (redirectMap != null) {
-            log.debug("Loading RedirectMap file from {}", redirectMap);
-            sb.append("# Redirect Map File\n");
-            InputStream is = redirectMap.adaptTo(InputStream.class);
-            sb.append(IOUtils.toString(is, StandardCharsets.UTF_8));
-        } else {
-            log.debug("No redirect map specified");
-        }
-
-        if (redirects != null) {
-            for (RedirectConfigModel config : redirects) {
-                writeEntries(config, sb);
-            }
-        } else {
-            log.debug("No redirect configurations specified");
-        }
-        return sb.toString();
+    MapEntry entry = null;
+    if (StringUtils.isBlank(l) || l.startsWith("#")) {
+      // Skip as the line is empty or a comment
+    } else if (seg.length == 2) {
+      entry = new MapEntry(id, seg[0], seg[1], "File");
+    } else if (seg.length > 2) {
+      entry = new MapEntry(id, seg[0], seg[1], "File");
+      entry.setValid(false);
+      entry.setStatus(String.format(WHITESPACE_MSG, l));
+    } else {
+      entry = new MapEntry(id, seg[0], "", "File");
+      entry.setValid(false);
+      entry.setStatus(String.format(NO_TARGET_MSG, l));
     }
+    return entry;
+  }
 
-    private MapEntry toEntry(int id, String l) {
-        String[] seg = l.split("\\s+");
+  private void writeEntries(RedirectConfigModel config, StringBuilder sb) {
+    log.trace("writeEntries");
 
-        MapEntry entry = null;
-        if (StringUtils.isBlank(l) || l.startsWith("#")) {
-            // Skip as the line is empty or a comment
-        } else if (seg.length == 2) {
-            entry = new MapEntry(id, seg[0], seg[1], "File");
-        } else if (seg.length > 2) {
-            entry = new MapEntry(id, seg[0], seg[1], "File");
-            entry.setValid(false);
-            entry.setStatus(String.format(WHITESPACE_MSG, l));
-        } else {
-            entry = new MapEntry(id, seg[0], "", "File");
-            entry.setValid(false);
-            entry.setStatus(String.format(NO_TARGET_MSG, l));
-        }
-        return entry;
+    List<MapEntry> entries = this.gatherEntries(config);
+
+    sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
+    for (MapEntry entry : entries) {
+      if (entry.isValid()) {
+        sb.append(entry.getSource() + " " + entry.getTarget() + "\n");
+      }
     }
-
-    private void writeEntries(RedirectConfigModel config, StringBuilder sb) {
-        log.trace("writeEntries");
-
-        List<MapEntry> entries = this.gatherEntries(config);
-
-        sb.append("\n# Dynamic entries for " + config.getResource().getPath() + "\n");
-        for (MapEntry entry : entries) {
-            if (entry.isValid()) {
-                sb.append(entry.getSource() + " " + entry.getTarget() + "\n");
-            }
-        }
-    }
+  }
 
 }
