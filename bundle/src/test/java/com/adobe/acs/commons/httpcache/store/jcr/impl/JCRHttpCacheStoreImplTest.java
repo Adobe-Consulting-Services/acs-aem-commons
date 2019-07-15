@@ -25,48 +25,44 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.adobe.acs.commons.httpcache.store.jcr.impl.mock.JCRHttpCacheStoreMocks;
+import com.adobe.acs.commons.httpcache.keys.CacheKey;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = {
-        "com.adobe.acs.commons.httpcache.store.jcr.impl.*",
-        "com.adobe.acs.commons.util.impl.*"
-})
-public class JCRHttpCacheStoreImplTest
-{
+@RunWith(MockitoJUnitRunner.class)
+public final class JCRHttpCacheStoreImplTest {
+
+    private JCRHttpCacheStoreMocks mocks;
+    private JCRHttpCacheStoreImpl store;
+    private CacheKey cacheKey;
+
+    @Before
+    public void setUp() throws Exception {
+        mocks = new JCRHttpCacheStoreMocks();
+        store = mocks.getStore();
+        cacheKey = mocks.getCacheKey();
+    }
+
     @Test
-    public void testPutIntoCache() throws Exception
-    {
-        JCRHttpCacheStoreMocks.Arguments arguments = new JCRHttpCacheStoreMocks.Arguments();
-        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks(arguments);
-        final JCRHttpCacheStoreImpl store = mocks.getStore();
-        store.put(mocks.getCacheKey(), mocks.getCacheContent());
-        verify(mocks.getLog(), never()).error(anyString(), any(Exception.class));
+    public void testPutIntoCache() throws Exception {
+        store.put(cacheKey, mocks.getCacheContent());
+        verify(JCRHttpCacheStoreMocks.getLog(), never()).error(anyString(), any(Exception.class));
         verify(mocks.getResourceResolver(), times(1)).close();
         verify(mocks.getSession(), times(1)).save();
         verify(mocks.getEntryNodeWriter(), times(1)).write();
     }
 
     @Test
-    public void testContains() throws Exception{
-        JCRHttpCacheStoreMocks.Arguments arguments = new JCRHttpCacheStoreMocks.Arguments();
-        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks(arguments);
-        final JCRHttpCacheStoreImpl store = mocks.getStore();
-        store.contains(mocks.getCacheKey());
+    public void testContains() throws Exception {
+        store.contains(cacheKey);
     }
 
     @Test
-    public void testInvalidate() throws Exception{
-        JCRHttpCacheStoreMocks.Arguments arguments = new JCRHttpCacheStoreMocks.Arguments();
-        final JCRHttpCacheStoreMocks mocks = new JCRHttpCacheStoreMocks(arguments);
-        final JCRHttpCacheStoreImpl store = mocks.getStore();
-        store.invalidate(mocks.getCacheKey());
+    public void testInvalidate() throws Exception {
+        store.invalidate(cacheKey);
     }
-
 
 }
