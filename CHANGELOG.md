@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 - #1202 - fix overflow handling in looping iterator
+- Adjust JCRHttpCacheStoreImplTest to Java 11
 - Adjust PageCompareDataImplTest to Java 11
 - Adjust EntryNodeWriterTest to Java 11
 
