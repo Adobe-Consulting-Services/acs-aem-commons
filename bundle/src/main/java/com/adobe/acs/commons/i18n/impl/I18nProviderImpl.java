@@ -80,91 +80,103 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
         super(CacheMBean.class);
     }
 
-    protected void activate(Config config)
-    {
-        long size = config.maxSizeCount();
-        long ttl = config.getTtl();
+    protected void bindResourceBundleProvider(final ResourceBundleProvider resourceBundleProvider, final Map<String, Object> props) {
+        resourceBundleProviders.bind(resourceBundleProvider, props);
+    }
 
+    protected void unbindResourceBundleProvider(final ResourceBundleProvider resourceBundleProvider, final Map<String, Object> props) {
+        resourceBundleProviders.unbind(resourceBundleProvider, props);
+    }
+
+    protected void activate(final Config config) {
+        final long size = config.maxSizeCount();
+        final CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+                .maximumSize(size)
+                .recordStats();
+
+        final long ttl = config.getTtl();
         if (ttl != Config.DEFAULT_TTL) {
             // If ttl is present, attach it to guava cache configuration.
-            cache = CacheBuilder.newBuilder()
-                    .maximumSize(size )
-                    .expireAfterWrite(ttl, TimeUnit.SECONDS)
-                    .recordStats()
-                    .build();
-        } else {
-            // If ttl is absent, go only with the maximum weight condition.
-            cache = CacheBuilder.newBuilder()
-                    .maximumSize(size)
-                    .recordStats()
-                    .build();
+            cacheBuilder.expireAfterWrite(ttl, TimeUnit.SECONDS);
         }
+
+        cache = cacheBuilder
+                .build();
     }
 
     @Override
-    public String translate(String key, Resource resource) {
-        I18n i18n = i18n(resource);
+    public String translate(final String key, final Resource resource) {
+        final I18n i18n = i18n(resource);
         if (i18n != null) {
             return i18n.get(key);
         }
+
         return null;
     }
 
     @Override
-    public String translate(String key, Locale locale) {
+    public String translate(final String key, final Locale locale) {
         return I18n.get(getResourceBundle(locale), key);
     }
 
     @Override
-    public String translate(String key, HttpServletRequest request) {
+    public String translate(final String key, final HttpServletRequest request) {
         return I18n.get(request, key);
     }
 
     @Override
-    public I18n i18n(Resource resource) {
-        I18n cached = cache.getIfPresent(resource.getPath());
+    public I18n i18n(final Resource resource) {
+        final I18n cached = cache.getIfPresent(resource.getPath());
         if (cached != null) {
             return cached;
-        }else{
-            I18n i18n = new I18n(getResourceBundleFromPageLocale(resource));
-            cache.put(resource.getPath(), i18n);
-            return i18n;
         }
+
+        final I18n i18n = i18n(getResourceBundleFromPageLocale(resource));
+        cache.put(resource.getPath(), i18n);
+        return i18n;
     }
 
     @Override
-    public I18n i18n(Locale locale) {
-        return new I18n(getResourceBundle(locale));
+    public I18n i18n(final Locale locale) {
+        return i18n(getResourceBundle(locale));
     }
 
     @Override
-    public I18n i18n(HttpServletRequest request) {
+    public I18n i18n(final HttpServletRequest request) {
         return new I18n(request);
     }
 
-    private ResourceBundle getResourceBundleFromPageLocale(Resource resource) {
-        final Locale locale = getLocaleFromResource(resource);
-        return getResourceBundle(locale);
+    protected I18n i18n(final ResourceBundle resourceBundle) {
+        return new I18n(resourceBundle);
     }
 
-    private Locale getLocaleFromResource(Resource resource) {
-        final Page page = InjectorUtils.getResourcePage(resource);
+    private ResourceBundle getResourceBundleFromPageLocale(final Resource resource) {
+        return getResourceBundle(getLocaleFromResource(resource));
+    }
+
+    private Locale getLocaleFromResource(final Resource resource) {
+        final Page page = getResourcePage(resource);
         if (page != null) {
             return page.getLanguage(false);
         }
+
         return null;
     }
 
-    private ResourceBundle getResourceBundle(Locale locale) {
-        for(ResourceBundleProvider provider : resourceBundleProviders){
-            ResourceBundle resourceBundle = provider.getResourceBundle(locale);
-            if(resourceBundle != null){
+    protected Page getResourcePage(final Resource resource) {
+        return InjectorUtils.getResourcePage(resource);
+    }
+
+    private ResourceBundle getResourceBundle(final Locale locale) {
+        for (ResourceBundleProvider provider : resourceBundleProviders){
+            final ResourceBundle resourceBundle = provider.getResourceBundle(locale);
+            if (resourceBundle != null) {
                 return resourceBundle;
             }
         }
+
         return null;
     }
-
 
     @Override
     protected Cache<String, I18n> getCache() {
@@ -172,17 +184,17 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
     }
 
     @Override
-    protected long getBytesLength(I18n cacheObj) {
+    protected long getBytesLength(final I18n cacheObj) {
         return 0L;
     }
 
     @Override
-    protected void addCacheData(Map<String, Object> data, I18n cacheObj) {
-        data.put(JMX_PN_I18N,cacheObj.toString());
+    protected void addCacheData(final Map<String, Object> data, final I18n cacheObj) {
+        data.put(JMX_PN_I18N, cacheObj.toString());
     }
 
     @Override
-    protected String toString(I18n cacheObj) throws CacheMBeanException {
+    protected String toString(final I18n cacheObj) throws CacheMBeanException {
         return cacheObj.toString();
     }
 
@@ -195,11 +207,4 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
 
     }
 
-    protected void bindResourceBundleProvider(ResourceBundleProvider resourceBundleProvider, Map<String,Object> props){
-        resourceBundleProviders.bind(resourceBundleProvider, props);
-    }
-
-    protected void unbindResourceBundleProvider(ResourceBundleProvider resourceBundleProvider, Map<String,Object> props){
-        resourceBundleProviders.unbind(resourceBundleProvider, props);
-    }
 }

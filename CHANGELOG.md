@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - Adjust JCRHttpCacheStoreImplTest to Java 11
 - Adjust PageCompareDataImplTest to Java 11
 - Adjust EntryNodeWriterTest to Java 11
+- Adjust I18nProviderImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
 
