@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
+- #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
 
 ### Fixed
 - #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
