@@ -5,7 +5,7 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## Unreleased
+## [4.2.2] - 2019-07-15
 
 ### Added
 - #1967 - Expose On-Deploy Script Executor for external script triggering
