@@ -5,6 +5,11 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
+## [Unreleased]
+
+### Fixed
+- #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
+
 ## [4.2.2] - 2019-07-15
 
 ### Added
