@@ -74,7 +74,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Reference(
             service = AdapterFactory.class,
             cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.STATIC,
+            policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY,
             bind = "bind",
             unbind = "unbind"
