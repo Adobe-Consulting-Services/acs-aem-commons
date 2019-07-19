@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import com.adobe.acs.commons.mcp.form.DialogProvider.DialogStyle;
+import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +32,7 @@ import org.apache.sling.api.resource.Resource;
  * it is added.
  */
 public abstract class AbstractGroupingContainerComponent extends ContainerComponent {
+
     public static String GENERIC_GROUP = "Misc";
 
     private String layout = "";
@@ -38,7 +41,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
     public ContainerComponent getOrCreateGroup(String groupName) {
         if (StringUtils.isBlank(groupName)) {
-            groupName = GENERIC_GROUP;
+            groupName = getPropertiesTabName() == null ? GENERIC_GROUP : getPropertiesTabName();
         }
         if (!groups.containsKey(groupName)) {
             ContainerComponent tab = new ContainerComponent();
@@ -60,12 +63,13 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
     public Resource buildComponentResource() {
         getComponentMetadata().put("margin", isMargin());
         AbstractResourceImpl res = (AbstractResourceImpl) super.buildComponentResource();
-        AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath()+"/layout", getLayout(), null, null);
+        AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath() + "/layout", getLayout(), null, null);
         res.addChild(layoutResource);
         return res;
     }
 
     public static class TabsComponent extends AbstractGroupingContainerComponent {
+
         // See also: https://helpx.adobe.com/experience-manager/6-3/sites/developing/using/reference-materials/granite-ui/api/jcr_root/libs/granite/ui/components/coral/foundation/tabs/index.html
         private String orientation = "horizontal";
         private String size = "M";
@@ -76,9 +80,36 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
         @Override
         public Resource buildComponentResource() {
+            if (getDialogStyle() == DialogStyle.COMPONENT) {
+                setResourceType("granite/ui/components/coral/foundation/tabs");
+                getComponentMetadata().put("maximized", true);
+            }
             getComponentMetadata().put("orientation", getOrientation());
             getComponentMetadata().put("size", getSize());
             return super.buildComponentResource();
+        }
+
+        @Override
+        protected AbstractResourceImpl generateItemsResource(String path, boolean useFieldSet) {
+            AbstractResourceImpl items = super.generateItemsResource(path, useFieldSet);
+            if (getDialogStyle() == DialogStyle.COMPONENT) {
+                SyntheticResourceBuilder rb = new SyntheticResourceBuilder("items", null);
+                items.children.forEach(tab -> {
+                    rb.createChild(tab.getName(), tab.getResourceType())
+                            .withAttributes(tab.getResourceMetadata())
+                            .withAttributes("margin", true);
+                    rb.createChild("items")
+                            .createChild("columns", "granite/ui/components/coral/foundation/fixedcolumns")
+                            .withAttributes("margin", true)
+                            .createChild("items")
+                            .createChild("column", "granite/ui/components/coral/foundation/container");
+                    tab.getChildren().forEach(rb::withChild);
+                    rb.up(5);
+                });
+                return rb.build();
+            } else {
+                return items;
+            }
         }
 
         /**

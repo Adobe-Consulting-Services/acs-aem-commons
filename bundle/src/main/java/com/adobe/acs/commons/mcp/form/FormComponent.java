@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import java.util.Collection;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
@@ -132,6 +133,11 @@ public final class FormComponent extends AbstractContainerComponent {
 
         res.addChild(generateItemsResource(getPath() + "/items", true));
         return res;
+    }
+
+    @Override
+    public boolean hasCategories(Collection<FieldComponent> values) {
+        return getDialogStyle() == DialogProvider.DialogStyle.COMPONENT || super.hasCategories(values);
     }
 
     /**

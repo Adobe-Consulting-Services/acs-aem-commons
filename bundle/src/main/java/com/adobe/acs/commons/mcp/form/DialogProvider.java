@@ -30,4 +30,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface DialogProvider {
+    static enum DialogStyle{COMPONENT, PAGE, UNKNOWN}
+    String title() default "";
+    String propertiesTab() default "Properties";
+    DialogStyle style() default DialogStyle.COMPONENT;
 }
