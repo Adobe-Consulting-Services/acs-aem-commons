@@ -34,6 +34,8 @@ import org.apache.sling.api.resource.Resource;
 public abstract class AbstractGroupingContainerComponent extends ContainerComponent {
 
     public static String GENERIC_GROUP = "Misc";
+    public static final String MARGIN = "margin";
+    public static final String ITEMS = "items";
 
     private String layout = "";
     private boolean margin = true;
@@ -61,7 +63,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
     @Override
     public Resource buildComponentResource() {
-        getComponentMetadata().put("margin", isMargin());
+        getComponentMetadata().put(MARGIN, isMargin());
         AbstractResourceImpl res = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath() + "/layout", getLayout(), null, null);
         res.addChild(layoutResource);
@@ -93,15 +95,15 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
         protected AbstractResourceImpl generateItemsResource(String path, boolean useFieldSet) {
             AbstractResourceImpl items = super.generateItemsResource(path, useFieldSet);
             if (getDialogStyle() == DialogStyle.COMPONENT) {
-                SyntheticResourceBuilder rb = new SyntheticResourceBuilder("items", null);
+                SyntheticResourceBuilder rb = new SyntheticResourceBuilder(ITEMS, null);
                 items.children.forEach(tab -> {
                     rb.createChild(tab.getName(), tab.getResourceType())
                             .withAttributes(tab.getResourceMetadata())
-                            .withAttributes("margin", true);
-                    rb.createChild("items")
+                            .withAttributes(MARGIN, true);
+                    rb.createChild(ITEMS)
                             .createChild("columns", "granite/ui/components/coral/foundation/fixedcolumns")
-                            .withAttributes("margin", true)
-                            .createChild("items")
+                            .withAttributes(MARGIN, true)
+                            .createChild(ITEMS)
                             .createChild("column", "granite/ui/components/coral/foundation/container");
                     tab.getChildren().forEach(rb::withChild);
                     rb.up(5);

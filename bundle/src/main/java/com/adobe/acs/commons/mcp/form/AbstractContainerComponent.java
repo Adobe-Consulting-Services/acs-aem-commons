@@ -124,17 +124,14 @@ public class AbstractContainerComponent extends FieldComponent {
             AbstractGroupingContainerComponent groups = getGroupingContainer();
             groups.setPath(path + "/tabs");
             fieldComponents.forEach((name, component) -> groups.addComponent(component.getCategory(), name, component));
-            rb.withAttributes("attr1","val1");
             rb.withChild(groups.buildComponentResource());
         } else if (useFieldSet) {
             FieldsetComponent fieldset = new FieldsetComponent();
             fieldComponents.forEach((name, comp) -> fieldset.addComponent(name, comp));
             fieldset.setPath(path + "/fields");
             fieldset.setHelper(getHelper());
-            rb.withAttributes("attr1","val2");
             rb.withChild(fieldset.buildComponentResource());
         } else {
-            rb.withAttributes("attr1","val3");
             for (FieldComponent component : fieldComponents.values()) {
                 if (getHelper() != null) {
                     component.setHelper(getHelper());
