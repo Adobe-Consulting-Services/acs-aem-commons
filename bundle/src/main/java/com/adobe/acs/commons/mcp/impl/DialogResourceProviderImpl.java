@@ -50,7 +50,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private final GeneratedDialog dialog;
     private final AbstractResourceImpl resource;
     private final Class originalClass;
-    boolean final isComponent;
+    private final boolean isComponent;
 
     public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException {
         originalClass = c;
