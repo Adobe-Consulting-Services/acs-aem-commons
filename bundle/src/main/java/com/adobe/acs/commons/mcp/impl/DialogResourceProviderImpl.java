@@ -47,10 +47,10 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DialogResourceProviderImpl.class);
     private String resourceType = "/unknown/type";
     private String root = "";
-    final private GeneratedDialog dialog;
-    final private AbstractResourceImpl resource;
-    final private Class originalClass;
-    final boolean isComponent;
+    private final GeneratedDialog dialog;
+    private final AbstractResourceImpl resource;
+    private final Class originalClass;
+    boolean final isComponent;
 
     public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException {
         originalClass = c;

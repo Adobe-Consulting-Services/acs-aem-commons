@@ -161,7 +161,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
             unregisterClass(c);
             DialogResourceProviderImpl provider = null;
             try {
-                provider = new DialogResourceProviderImpl(c, getDialogProviderAnnotation(c).get());
+                provider = new DialogResourceProviderImpl(c, getDialogProviderAnnotation(c).orElse(null));
                 resourceProviderRegistrations.put(c.getName(), registerResourceProvider(provider));
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.error("Error when registering resource provider", e);
