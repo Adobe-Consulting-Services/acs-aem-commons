@@ -203,13 +203,9 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     }
 
     private Optional<DialogProvider> getDialogProviderAnnotation(Class c) {
-        if (!c.isAnnotationPresent(DialogProvider.class)) {
-            return Optional.empty();
-        } else {
-            return StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
-                    .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
-                    .findFirst()
-                    .map(clazz -> clazz.getAnnotation(DialogProvider.class));
-        }
+        return StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
+                .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
+                .findFirst()
+                .map(clazz -> clazz.getAnnotation(DialogProvider.class));
     }
 }
