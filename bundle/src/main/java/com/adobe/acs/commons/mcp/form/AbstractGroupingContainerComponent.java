@@ -34,7 +34,7 @@ import org.apache.sling.api.resource.Resource;
 public abstract class AbstractGroupingContainerComponent extends ContainerComponent {
 
     public static String GENERIC_GROUP = "Misc";
-    public static final String MARGIN = "margin";
+    public static final String MARGIN_PROPERTY = "margin";
     public static final String ITEMS = "items";
 
     private String layout = "";
@@ -63,7 +63,7 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
 
     @Override
     public Resource buildComponentResource() {
-        getComponentMetadata().put(MARGIN, isMargin());
+        getComponentMetadata().put(MARGIN_PROPERTY, isMargin());
         AbstractResourceImpl res = (AbstractResourceImpl) super.buildComponentResource();
         AbstractResourceImpl layoutResource = new AbstractResourceImpl(res.getPath() + "/layout", getLayout(), null, null);
         res.addChild(layoutResource);
@@ -99,10 +99,10 @@ public abstract class AbstractGroupingContainerComponent extends ContainerCompon
                 items.children.forEach(tab -> {
                     rb.createChild(tab.getName(), tab.getResourceType())
                             .withAttributes(tab.getResourceMetadata())
-                            .withAttributes(MARGIN, true);
+                            .withAttributes(MARGIN_PROPERTY, true);
                     rb.createChild(ITEMS)
                             .createChild("columns", "granite/ui/components/coral/foundation/fixedcolumns")
-                            .withAttributes(MARGIN, true)
+                            .withAttributes(MARGIN_PROPERTY, true)
                             .createChild(ITEMS)
                             .createChild("column", "granite/ui/components/coral/foundation/container");
                     tab.getChildren().forEach(rb::withChild);
