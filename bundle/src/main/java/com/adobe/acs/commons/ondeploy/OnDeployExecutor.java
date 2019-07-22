@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 Adobe
+ * Copyright (C) 2016 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,20 @@
  * limitations under the License.
  * #L%
  */
-/**
- * Form components for MCP
- */
-@Version("4.3.0")
-package com.adobe.acs.commons.mcp.form;
+package com.adobe.acs.commons.ondeploy;
 
-import org.osgi.annotation.versioning.Version;
+/**
+ * OnDeploy Provider to execute scripts.
+ */
+public interface OnDeployExecutor {
+
+    /**
+     * Execute scripts
+     *
+     * @param scriptName className of the script
+     * @param force true to run if the script ran already.
+     * @return true if executed, false if failed.
+     */
+    boolean executeScript(String scriptName, boolean force);
+
+}

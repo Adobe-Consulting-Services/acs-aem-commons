@@ -5,18 +5,37 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## Unreleased
-
-### Added
-
-- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
+## [Unreleased]
 
 ### Fixed
-
+- #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
+- #1980 - Fixing error when not using redirect map file
+- #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
+- #1993 - DialogProvider now supports styles for Dialog and Page dialogs
 - #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 
+### Added
+- #1993 - New components for autocomplete and rich text editor
+- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 
-## [4.1.0] - 2019-06-18
+## [4.2.2] - 2019-07-15
+
+### Added
+- #1967 - Expose On-Deploy Script Executor for external script triggering
+- #1967 - Write On-Deploy Script exception statement to the result node
+- #1927 - HTTP cache: added cookie exclusion
+- #1905 - HTTP cache: added response header exclusion
+
+### Changed
+- #1945 - Added support for jcr:content creation and update to the Data Importer
+- #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
+
+### Fixed
+- #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
+- #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
+- #1982 - Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and page refreshes due to Edit Config Listener ( Shared Component Properties )
+
+## [4.2.0] - 2019-06-18
 
 ### Added
 - #1795 - Added the Asset Content Packager
@@ -34,6 +53,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 - #1202 - fix overflow handling in looping iterator
+- Adjust JCRHttpCacheStoreImplTest to Java 11
+- Adjust PageCompareDataImplTest to Java 11
+- Adjust EntryNodeWriterTest to Java 11
+- Adjust I18nProviderImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
 
@@ -47,6 +70,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1806 - Http Cache: Added RequestPath extension
 - #1825 - Added sql2scorer JSON servlet to provide oak:scoreExplanation details for JCR-SQL2 queries.
 - #1899 - Added page inheritance respected in Named Transform Image Servlet for cq:Page
+- #1973 - Added Vanity URL support to SiteMap and the ability to specify URL rewrites so the output matches dispatcher
 
 ### Changed
 - #1539 - Removed unused references to the QueryBuilder API.
@@ -80,6 +104,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1881 - Fixed issue where ReflectionUtil.isAssignableFrom() returned false positive result.
 - #1888 - Fixed issues with Stylesheet Inliner.
 - #1836 - Allow uniform download links in JCR Compare
+- #1835 - all options work together now and do not break the connections placement anymore
 
 ## [4.0.0] - 2019-02-20
 

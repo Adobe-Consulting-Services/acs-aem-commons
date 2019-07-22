@@ -218,6 +218,13 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     private List<String> cacheHandlingRulesPid;
 
 
+    @Property(label = "Config-specific Excluded Cookie keys",
+            description = "List of cookie keys that will NOT be put in the cached response, to be served to the output."
+                    + "parameter",
+            unbounded = PropertyUnbounded.ARRAY)
+    static final String PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS = "httpcache.config.excluded.cookie.keys";
+    private List<String> excludedCookieKeys;
+
 
     @Property(label = "Config-specific Excluded Response headers",
             description = "List of header keys (as regex) that should NOT be put in the cached response, to be served to the output.",
@@ -225,6 +232,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     )
     static final String PROP_RESPONSE_HEADER_EXCLUSIONS = "httpcache.config.excluded.response.headers";
     private List<Pattern> responseHeaderExclusions;
+
 
     @Property(label = "Expiry on create",
         description = "Specifies a custom expiry on create. Overrules the global expiry, unless the value is 0.")
@@ -260,7 +268,7 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
         requestUriPatternsAsRegEx = compileToPatterns(requestUriPatterns);
 
         responseHeaderExclusions = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_HEADER_EXCLUSIONS), new String[]{}));
-
+        excludedCookieKeys = Arrays.asList(PropertiesUtil.toStringArray(configs.get(PROP_RESPONSE_COOKIE_KEY_EXCLUSIONS), new String[]{}));
 
         // Request URIs - Blacklisted.
         blacklistedRequestUriPatterns = Arrays.asList(PropertiesUtil.toStringArray(configs
@@ -469,5 +477,10 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
     @Override
     public List<Pattern> getExcludedResponseHeaderPatterns() {
         return responseHeaderExclusions;
+    }
+
+    @Override
+    public List<String> getExcludedCookieKeys() {
+        return excludedCookieKeys;
     }
 }

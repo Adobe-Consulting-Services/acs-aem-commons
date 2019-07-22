@@ -19,51 +19,54 @@
  */
 package com.adobe.acs.commons.i18n.impl;
 
-import com.adobe.acs.commons.models.injectors.impl.InjectorUtils;
-import com.day.cq.i18n.I18n;
-import com.day.cq.wcm.api.Page;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.i18n.ResourceBundleProvider;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Constants;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-import javax.management.NotCompliantMBeanException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.internal.verification.VerificationModeFactory.noMoreInteractions;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.powermock.api.mockito.PowerMockito.when;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.OpenDataException;
+import javax.servlet.http.HttpServletRequest;
 
-@PrepareForTest({
-        I18n.class,
-        I18nProviderImpl.class,
-        InjectorUtils.class
-})
-@RunWith(PowerMockRunner.class)
-public class I18nProviderImplTest {
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.i18n.ResourceBundleProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Constants;
+
+import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
+import com.day.cq.i18n.I18n;
+import com.day.cq.wcm.api.Page;
+
+@RunWith(MockitoJUnitRunner.class)
+public final class I18nProviderImplTest {
+
+    private static final Locale LOCALE = Locale.US;
+    private static final String I18N_KEY = "i18nKey";
+    private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!";
+
+    private final I18nProviderImpl i18nProvider = spy(new I18nProviderImpl());
+    private final HashMap<String, Object> resourceBundleProviderProps = new HashMap<>();
+
+    private final Map<String, String> i18nMap = new HashMap<>();
 
     @Mock
     private Config config;
@@ -80,60 +83,50 @@ public class I18nProviderImplTest {
     @Mock
     private SlingHttpServletRequest request;
 
-    private Map<String,String> i18nMap = new HashMap<>();
-
     @Mock
     private Page resourcePage;
-
-    private final I18nProviderImpl i18nProvider = new I18nProviderImpl();
-    private final HashMap<String, Object> props = new HashMap<>();
 
     public I18nProviderImplTest() throws NotCompliantMBeanException {
     }
 
     @Before
-    public void setUp(){
+    public void setUp() {
+        resourceBundleProviderProps.put(Constants.SERVICE_ID, 11L);
+        resourceBundleProviderProps.put(Constants.SERVICE_RANKING, 11);
 
-        props.clear();
-        props.put(Constants.SERVICE_ID, 11L);
-        props.put(Constants.SERVICE_RANKING, 11);
-        i18nProvider.bindResourceBundleProvider(resourceBundleProvider, props);
-        when(resourceBundleProvider.getResourceBundle(Locale.US)).thenReturn(resourceBundle);
+        when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
         when(resource.getPath()).thenReturn("/some/path");
 
-        i18nMap.put("i18nKey", "Translated from English!");
+        i18nMap.put(I18N_KEY, TRANSLATED_FROM_ENGLISH);
 
-        PowerMockito.mockStatic(I18n.class);
-        when(I18n.get(any(HttpServletRequest.class), anyString())).thenAnswer(
-                (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1])
-        );
+        final Answer<String> answer = (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1]);
+        doAnswer(answer).when(i18nProvider).translate(anyString(), any(HttpServletRequest.class));
+        doAnswer(answer).when(i18nProvider).translate(anyString(), any(Locale.class));
 
-        when(I18n.get(any(ResourceBundle.class), anyString())).thenAnswer(
-                (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1])
-        );
+        doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
-
-        PowerMockito.mockStatic(InjectorUtils.class);
-        when(InjectorUtils.getResourcePage(resource)).thenReturn(resourcePage);
-        when(resourcePage.getLanguage(false)).thenReturn(Locale.US);
+        when(resourcePage.getLanguage(false)).thenReturn(LOCALE);
 
         when(config.getTtl()).thenReturn(10L);
         when(config.maxSizeCount()).thenReturn(10L);
 
+        i18nProvider.bindResourceBundleProvider(resourceBundleProvider, resourceBundleProviderProps);
         i18nProvider.activate(config);
     }
 
     @After
-    public void tearDown(){
-        i18nProvider.unbindResourceBundleProvider(resourceBundleProvider, props);
+    public void tearDown() {
+        i18nProvider.unbindResourceBundleProvider(resourceBundleProvider, resourceBundleProviderProps);
+        resourceBundleProviderProps.clear();
     }
 
-    public void test_get_bytes_length(){
+    @Test
+    public void test_get_bytes_length() {
         assertEquals(0L, i18nProvider.getBytesLength(null));
     }
 
     @Test
-    public void test_secondary_activate(){
+    public void test_secondary_activate() {
         when(config.getTtl()).thenReturn(Config.DEFAULT_TTL);
         when(config.maxSizeCount()).thenReturn(Config.DEFAULT_MAX_SIZE_IN_MB);
 
@@ -141,110 +134,73 @@ public class I18nProviderImplTest {
     }
 
     @Test
-    public void test_translate_resource() throws Exception {
+    public void test_translate_resource() {
+        final I18n mocked = mock(I18n.class);
+        when(mocked.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_ENGLISH);
+        doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
 
-        final String key = "i18nKey";
+        doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
-        I18n mocked = mock(I18n.class);
-        when(mocked.get(key)).thenReturn("Translated from English!");
+        when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
 
-        PowerMockito.whenNew(I18n.class)
-                .withParameterTypes(ResourceBundle.class)
-                .withArguments(resourceBundle)
-                .thenReturn(mocked);
-
-        when(InjectorUtils.getResourcePage(resource)).thenReturn(resourcePage);
-
-        when(resourceBundleProvider.getResourceBundle(Locale.US)).thenReturn(resourceBundle);
-
-        String translated = i18nProvider.translate(key,resource);
-        assertEquals("Translated from English!", translated);
+        final String translated = i18nProvider.translate(I18N_KEY, resource);
+        assertEquals(TRANSLATED_FROM_ENGLISH, translated);
     }
 
     @Test
-    public void test_translate_request(){
+    public void test_i18n_locale() {
+        final I18n mocked = mock(I18n.class);
 
-        final String key = "i18nKey";
-        String translated = i18nProvider.translate(key,request);
-        assertEquals("Translated from English!", translated);
+        doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
 
-        PowerMockito.verifyStatic(I18n.class, times(1));
-        I18n.get(request, key);
-    }
-
-    @Test
-    public void test_translate_locale(){
-
-        final String key = "i18nKey";
-        String translated = i18nProvider.translate(key,Locale.US);
-        assertEquals("Translated from English!", translated);
-
-        PowerMockito.verifyStatic(I18n.class, times(1));
-        I18n.get(resourceBundle, key);
-    }
-
-    @Test
-    public void test_i18n_request() throws Exception {
-        I18n mocked = mock(I18n.class);
-
-        PowerMockito.whenNew(I18n.class)
-                .withParameterTypes(HttpServletRequest.class)
-                .withArguments(request)
-                .thenReturn(mocked);
-
-
-        I18n actual = i18nProvider.i18n(request);
+        final I18n actual = i18nProvider.i18n(LOCALE);
         assertSame(mocked, actual);
     }
 
     @Test
-    public void test_i18n_locale() throws Exception {
-        I18n mocked = mock(I18n.class);
+    public void test_i18n_resource() {
+        final I18n mocked = mock(I18n.class);
 
-        PowerMockito.whenNew(I18n.class)
-                .withParameterTypes(ResourceBundle.class)
-                .withArguments(resourceBundle)
-                .thenReturn(mocked);
+        doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
 
-
-        I18n actual = i18nProvider.i18n(Locale.US);
+        final I18n actual = i18nProvider.i18n(resource);
         assertSame(mocked, actual);
     }
 
     @Test
-    public void test_i18n_resource() throws Exception {
-        I18n mocked = mock(I18n.class);
+    public void test_i18n_resource_withcaching() {
+        final I18n mocked = mock(I18n.class);
 
-        PowerMockito.whenNew(I18n.class)
-                .withParameterTypes(ResourceBundle.class)
-                .withArguments(resourceBundle)
-                .thenReturn(mocked);
+        doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
 
-        I18n actual = i18nProvider.i18n(resource);
-        assertSame(mocked, actual);
-    }
-
-
-    @Test
-    public void test_i18n_resource_withcaching() throws Exception {
-
-        I18n mocked = mock(I18n.class);
-
-        PowerMockito.whenNew(I18n.class)
-                .withParameterTypes(ResourceBundle.class)
-                .withArguments(resourceBundle)
-                .thenReturn(mocked);
-
-
-        I18n actual = i18nProvider.i18n(resource);
+        final I18n actual = i18nProvider.i18n(resource);
         assertSame(mocked, actual);
 
-        PowerMockito.verifyNew(I18n.class, times(1)).withArguments(resourceBundle);
-
-        I18n cached = i18nProvider.i18n(resource);
-        PowerMockito.verifyNew(I18n.class, noMoreInteractions()).withArguments(resourceBundle);
+        final I18n cached = i18nProvider.i18n(resource);
 
         assertSame(actual, cached);
+    }
+
+    @Test
+    public void test_translate_resource_null()  {
+        doReturn(null).when(i18nProvider).i18n(resource);
+        assertNull(i18nProvider.translate(null, resource));
+    }
+
+    @Test
+    public void test_i18n_getLocaleFromResource_page_null() {
+        doReturn(null).when(i18nProvider).getResourcePage(resource);
+        assertNotNull(i18nProvider.i18n(resource));
+    }
+
+    @Test
+    public void test_AbstractGuavaCacheMBean() throws CacheMBeanException, OpenDataException {
+        final I18n cacheObj = mock(I18n.class);
+        assertNotNull(i18nProvider.getCache());
+        assertNotNull(i18nProvider.getBytesLength(cacheObj));
+        i18nProvider.addCacheData(resourceBundleProviderProps, cacheObj);
+        assertNotNull(i18nProvider.toString(cacheObj));
+        assertNotNull(i18nProvider.getCacheEntryType());
     }
 
 }

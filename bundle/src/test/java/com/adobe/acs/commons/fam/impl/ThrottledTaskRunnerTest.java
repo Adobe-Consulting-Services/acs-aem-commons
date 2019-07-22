@@ -66,6 +66,8 @@ public class ThrottledTaskRunnerTest {
 
         ttr.resumeExecution();
 
+        // Allow the threadpool to start in the background
+        Thread.sleep(100);
         while (ttr.getActiveCount() > 0) {
             Thread.sleep(1000);
         }
@@ -109,6 +111,8 @@ public class ThrottledTaskRunnerTest {
 
         ttr.resumeExecution();
 
+        // Allow the threadpool to start in the background
+        Thread.sleep(100);
         while (ttr.getActiveCount() > 0) {
             Thread.sleep(1000);
         }
@@ -143,8 +147,11 @@ public class ThrottledTaskRunnerTest {
             }, Integer.MIN_VALUE);
         }
 
+
         ttr.resumeExecution();
 
+        // Allow the threadpool to start in the background
+        Thread.sleep(100);
         while (ttr.getActiveCount() > 0) {
             Thread.sleep(1000);
         }

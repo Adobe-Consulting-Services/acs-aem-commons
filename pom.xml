@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.2.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -223,7 +223,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>4.0.0</version>
+                <version>5.1.1</version>
                 <executions>
                     <execution>
                         <id>check-dependencies-for-vulnerabilities</id>

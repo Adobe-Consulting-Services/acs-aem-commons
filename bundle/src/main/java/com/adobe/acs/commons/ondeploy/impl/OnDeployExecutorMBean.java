@@ -26,7 +26,7 @@ import com.adobe.granite.jmx.annotation.Description;
 import com.adobe.granite.jmx.annotation.Name;
 
 @Description("ACS AEM Commons - On Deploy Script Executor MBean")
-public interface OnDeployExecutor {
+public interface OnDeployExecutorMBean {
 
     @Description("Scripts")
     TabularDataSupport getScripts() throws OpenDataException;
