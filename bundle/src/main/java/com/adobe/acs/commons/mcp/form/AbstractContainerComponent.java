@@ -41,10 +41,12 @@ public class AbstractContainerComponent extends FieldComponent {
 
     private DialogProvider.DialogStyle dialogStyle = DialogProvider.DialogStyle.UNKNOWN;
     private String propertiesTabName = null;
+    private boolean forceDotSlashPrefix = true;
 
     public void applyDialogProviderSettings(DialogProvider providerAnnotation) {
         setDialogStyle(providerAnnotation.style());
         setPropertiesTabName(providerAnnotation.propertiesTab());
+        setForceDotSlashPrefix(providerAnnotation.forceDotSlashPrefix());
         if (groupingContainer != null) {
             groupingContainer.applyDialogProviderSettings(providerAnnotation);
         }
@@ -203,5 +205,19 @@ public class AbstractContainerComponent extends FieldComponent {
      */
     public void setPropertiesTabName(String propertiesTabName) {
         this.propertiesTabName = propertiesTabName;
+    }
+
+    /**
+     * @return the forceDotSlashPrefix
+     */
+    public boolean isForceDotSlashPrefix() {
+        return forceDotSlashPrefix;
+    }
+
+    /**
+     * @param forceDotSlashPrefix the forceDotSlashPrefix to set
+     */
+    public void setForceDotSlashPrefix(boolean forceDotSlashPrefix) {
+        this.forceDotSlashPrefix = forceDotSlashPrefix;
     }
 }

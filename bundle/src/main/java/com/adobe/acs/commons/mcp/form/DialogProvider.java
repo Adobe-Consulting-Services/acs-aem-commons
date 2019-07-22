@@ -35,9 +35,23 @@ public @interface DialogProvider {
         COMPONENT, PAGE, UNKNOWN
     }
 
+    /**
+     * @return Dialog title
+     */
     String title() default "";
 
+    /**
+     * @return Name used for properties tab for uncategorized form elements
+     */
     String propertiesTab() default "Properties";
 
+    /**
+     * @return Style used (component is default and uses a dialog component, page is more generic)
+     */
     DialogStyle style() default DialogStyle.COMPONENT;
+
+    /**
+     * @return If true (default) all form fields are prefixed with "./"
+     */
+    boolean forceDotSlashPrefix() default true;
 }

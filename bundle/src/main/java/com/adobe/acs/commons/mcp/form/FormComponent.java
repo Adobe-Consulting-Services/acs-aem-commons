@@ -132,7 +132,24 @@ public final class FormComponent extends AbstractContainerComponent {
         }
 
         res.addChild(generateItemsResource(getPath() + "/items", true));
+
+        if (isForceDotSlashPrefix()) {
+            correctNameAttribute(res);
+        }
+
         return res;
+    }
+
+    /**
+     * In order to keep the sling post handler happy, form field names have to start with "./" otherwise the values don't go to the right places.
+     * @param res
+     */
+    private void correctNameAttribute(Resource res) {
+        String name = (res.getValueMap() != null) ? (String) res.getValueMap().get("name") : null;
+        if (name != null && !name.startsWith("./")) {
+            res.getValueMap().put("name", "./" + name);
+        }
+        res.getChildren().forEach(this::correctNameAttribute);
     }
 
     @Override
