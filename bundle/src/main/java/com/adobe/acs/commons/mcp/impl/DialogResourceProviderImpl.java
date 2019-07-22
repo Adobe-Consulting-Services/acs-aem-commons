@@ -20,14 +20,18 @@
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
+import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper;
+import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Iterator;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.apache.sling.api.resource.Resource;
@@ -43,27 +47,32 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DialogResourceProviderImpl.class);
     private String resourceType = "/unknown/type";
     private String root = "";
-    private GeneratedDialog dialog;
-    private AbstractResourceImpl resource;
-    private Class originalClass;
+    private final GeneratedDialog dialog;
+    private final AbstractResourceImpl resource;
+    private final Class originalClass;
+    private final boolean isComponent;
 
-    public DialogResourceProviderImpl(Class c) throws InstantiationException, IllegalAccessException {
+    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException {
         originalClass = c;
+        isComponent = annotation != null && annotation.style() == DialogProvider.DialogStyle.COMPONENT;
         if (GeneratedDialog.class.isAssignableFrom(c)) {
             dialog = (GeneratedDialog) c.newInstance();
         } else {
             dialog = new GeneratedDialogWrapper(c);
         }
+        dialog.initAnnotationValues(annotation);
         setResourceTypeFromClass();
         root = "/apps/" + resourceType + "/cq:dialog";
-        resource = (AbstractResourceImpl) dialog.getFormResource();
+        AbstractResourceImpl formResource = (AbstractResourceImpl) dialog.getFormResource();
+        AbstractResourceImpl formItems = ((AbstractResourceImpl) formResource.getChild("items")).cloneResource();
+        SyntheticResourceBuilder rb = new SyntheticResourceBuilder(root, isComponent ? "cq/gui/components/authoring/dialog" : formResource.getResourceType());
+        if (StringUtils.isNotBlank(dialog.getFormTitle())) {
+            rb.withAttributes("jcr:title", dialog.getFormTitle());
+        }
+        rb.createChild("content", "granite/ui/components/coral/foundation/container");
+        rb.withChild(formItems);
+        resource = rb.build();
         resource.disableMergeResourceProvider();
-        resource.setPath(root);
-        AbstractResourceImpl items = ((AbstractResourceImpl) resource.getChild("items")).cloneResource();
-        items.setPath("items");
-        AbstractResourceImpl content = new AbstractResourceImpl("content", "granite/ui/components/coral/foundation/fixedcolumns", null, null);
-        content.addChild(items);
-        resource.addChild(content);
     }
 
     private void setResourceTypeFromClass() throws IllegalAccessException, InstantiationException {
@@ -122,7 +131,12 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     @Override
     public Iterator<Resource> listChildren(@Nonnull ResolveContext resolveContext, @Nonnull Resource parent) {
         LOGGER.debug("List children of " + parent.getPath());
-        return parent.listChildren();
+        if (parent instanceof AbstractResourceImpl) {
+            AbstractResourceImpl res = (AbstractResourceImpl) parent;
+            return res.listChildren();
+        } else {
+            return Collections.emptyIterator();
+        }
     }
 
     public String getRoot() {
