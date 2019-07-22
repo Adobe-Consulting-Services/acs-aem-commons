@@ -161,7 +161,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
             unregisterClass(c);
             DialogResourceProviderImpl provider = null;
             try {
-                provider = new DialogResourceProviderImpl(c);
+                provider = new DialogResourceProviderImpl(c, getDialogProviderAnnotation(c).orElse(null));
                 resourceProviderRegistrations.put(c.getName(), registerResourceProvider(provider));
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.error("Error when registering resource provider", e);
@@ -199,10 +199,13 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     }
 
     private boolean isDialogProvider(Class c) {
-        return c.isAnnotationPresent(DialogProvider.class)
-                || StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
-                        .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
-                        .findFirst()
-                        .isPresent();
+        return getDialogProviderAnnotation(c).isPresent();
+    }
+
+    private Optional<DialogProvider> getDialogProviderAnnotation(Class c) {
+        return StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
+                .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
+                .findFirst()
+                .map(clazz -> clazz.getAnnotation(DialogProvider.class));
     }
 }

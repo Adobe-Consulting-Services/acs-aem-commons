@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
+- #1993 - DialogProvider now supports styles for Dialog and Page dialogs
+
+### Added
+- #1993 - New components for autocomplete and rich text editor
 
 ## [4.2.2] - 2019-07-15
 
