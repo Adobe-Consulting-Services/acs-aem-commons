@@ -131,11 +131,11 @@ public final class FormComponent extends AbstractContainerComponent {
             res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
 
-        res.addChild(generateItemsResource(getPath() + "/items", true));
-
+        AbstractResourceImpl items = generateItemsResource(getPath() + "/items", true);
         if (isForceDotSlashPrefix()) {
-            correctNameAttribute(res);
+            correctNameAttribute(items);
         }
+        res.addChild(items);
 
         return res;
     }
