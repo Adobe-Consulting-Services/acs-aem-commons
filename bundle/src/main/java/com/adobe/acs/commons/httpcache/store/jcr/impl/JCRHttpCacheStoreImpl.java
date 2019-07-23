@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.CompositeType;
@@ -60,6 +61,7 @@ import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
 import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
 import com.adobe.acs.commons.httpcache.store.TempSink;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.exceptions.BucketNodeFactoryException;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.BucketNodeHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.handler.EntryNodeToCacheContentHandler;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.AllEntryNodesCountVisitor;
@@ -198,14 +200,14 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
         withSession((Session session) -> {
             final long expireTimeInMilliSeconds = expireTimeInSeconds * 1000;
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = createBucketNodeFactory(session, key);
             final Node bucketNode = factory.getBucketNode();
 
-            final Node entryNode = new BucketNodeHandler(bucketNode, dclm).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
+            final Node entryNode = createBucketNodeHandler(bucketNode).createOrRetrieveEntryNode(key, expireTimeInMilliSeconds);
 
             long expiryTime = (key.getExpiryForCreation() > 0) ? key.getExpiryForCreation() : expireTimeInMilliSeconds;
 
-            new EntryNodeWriter(session, entryNode, key, content, expiryTime).write();
+            createEntryNodeWriter(session, entryNode, key, content, expiryTime).write();
 
             session.save();
 
@@ -216,17 +218,34 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         });
     }
 
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected BucketNodeFactory createBucketNodeFactory(final Session session, final CacheKey key)
+            throws RepositoryException, BucketNodeFactoryException {
+        return new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected BucketNodeHandler createBucketNodeHandler(final Node bucketNode) {
+        return new BucketNodeHandler(bucketNode, dclm);
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected EntryNodeWriter createEntryNodeWriter(final Session session, final Node entryNode, final CacheKey key,
+            final CacheContent content, long expiryTime) {
+        return new EntryNodeWriter(session, entryNode, key, content, expiryTime);
+    }
+
     @Override
     public boolean contains(final CacheKey key) {
         final long currentTime = System.currentTimeMillis();
         incrementRequestCount();
 
         return withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = createBucketNodeFactory(session, key);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
-                Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 if (entryNode != null) {
                     incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
                     incrementHitCount();
@@ -248,11 +267,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
         incrementRequestCount();
 
         return withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = createBucketNodeFactory(session, key);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
-                final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
 
                 if (content != null) {
@@ -282,11 +301,11 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     @Override
     public void invalidate(final CacheKey key) {
         withSession((Session session) -> {
-            final BucketNodeFactory factory = new BucketNodeFactory(session, cacheRootPath, key, bucketTreeDepth);
+            final BucketNodeFactory factory = createBucketNodeFactory(session, key);
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
-                final Node entryNode = new BucketNodeHandler(bucketNode, dclm).getEntryIfExists(key);
+                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 if (entryNode != null) {
                     entryNode.remove();
                     session.save();
