@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
+- #1644 - Asset Ingestor | Add include section
 - #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
 
 ### Fixed
