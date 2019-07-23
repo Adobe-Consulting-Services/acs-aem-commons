@@ -20,13 +20,13 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
+import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 
 /**
@@ -38,6 +38,19 @@ public class AbstractContainerComponent extends FieldComponent {
     private boolean composite;
     private AbstractGroupingContainerComponent groupingContainer;
     private Class<? extends FieldComponent> defaultChildComponent = TextfieldComponent.class;
+
+    private DialogProvider.DialogStyle dialogStyle = DialogProvider.DialogStyle.UNKNOWN;
+    private String propertiesTabName = null;
+    private boolean forceDotSlashPrefix = true;
+
+    public void applyDialogProviderSettings(DialogProvider providerAnnotation) {
+        setDialogStyle(providerAnnotation.style());
+        setPropertiesTabName(providerAnnotation.propertiesTab());
+        setForceDotSlashPrefix(providerAnnotation.forceDotSlashPrefix());
+        if (groupingContainer != null) {
+            groupingContainer.applyDialogProviderSettings(providerAnnotation);
+        }
+    }
 
     @Override
     public void init() {
@@ -108,28 +121,28 @@ public class AbstractContainerComponent extends FieldComponent {
     }
 
     protected AbstractResourceImpl generateItemsResource(String path, boolean useFieldSet) {
-        AbstractResourceImpl items = new AbstractResourceImpl(path + "/items", "", "", new ResourceMetadata());
+        SyntheticResourceBuilder rb = new SyntheticResourceBuilder(path + "/items", null);
         if (hasCategories(fieldComponents.values())) {
             AbstractGroupingContainerComponent groups = getGroupingContainer();
             groups.setPath(path + "/tabs");
             fieldComponents.forEach((name, component) -> groups.addComponent(component.getCategory(), name, component));
-            items.addChild(groups.buildComponentResource());
+            rb.withChild(groups.buildComponentResource());
         } else if (useFieldSet) {
             FieldsetComponent fieldset = new FieldsetComponent();
             fieldComponents.forEach((name, comp) -> fieldset.addComponent(name, comp));
             fieldset.setPath(path + "/fields");
             fieldset.setHelper(getHelper());
-            items.addChild(fieldset.buildComponentResource());
+            rb.withChild(fieldset.buildComponentResource());
         } else {
             for (FieldComponent component : fieldComponents.values()) {
                 if (getHelper() != null) {
                     component.setHelper(getHelper());
                 }
                 component.setPath(path + "/items/" + component.getName());
-                Resource child = component.buildComponentResource();
-                items.addChild(child);
+                rb.withChild(component.buildComponentResource());
             }
         }
+        AbstractResourceImpl items = rb.build();
         if (getHelper() != null) {
             items.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
@@ -151,7 +164,7 @@ public class AbstractContainerComponent extends FieldComponent {
         return composite;
     }
 
-    private boolean hasCategories(Collection<FieldComponent> values) {
+    public boolean hasCategories(Collection<FieldComponent> values) {
         return values.stream()
                 .map(FieldComponent::getCategory)
                 .filter(s -> s != null && !s.isEmpty())
@@ -164,5 +177,47 @@ public class AbstractContainerComponent extends FieldComponent {
      */
     public void setDefaultChildComponent(Class<? extends FieldComponent> defaultChildComponent) {
         this.defaultChildComponent = defaultChildComponent;
+    }
+
+    /**
+     * @return the dialogStyle
+     */
+    public DialogProvider.DialogStyle getDialogStyle() {
+        return dialogStyle;
+    }
+
+    /**
+     * @param dialogStyle the dialogStyle to set
+     */
+    public void setDialogStyle(DialogProvider.DialogStyle dialogStyle) {
+        this.dialogStyle = dialogStyle;
+    }
+
+    /**
+     * @return the propertiesTabName
+     */
+    public String getPropertiesTabName() {
+        return propertiesTabName;
+    }
+
+    /**
+     * @param propertiesTabName the propertiesTabName to set
+     */
+    public void setPropertiesTabName(String propertiesTabName) {
+        this.propertiesTabName = propertiesTabName;
+    }
+
+    /**
+     * @return the forceDotSlashPrefix
+     */
+    public boolean isForceDotSlashPrefix() {
+        return forceDotSlashPrefix;
+    }
+
+    /**
+     * @param forceDotSlashPrefix the forceDotSlashPrefix to set
+     */
+    public void setForceDotSlashPrefix(boolean forceDotSlashPrefix) {
+        this.forceDotSlashPrefix = forceDotSlashPrefix;
     }
 }
