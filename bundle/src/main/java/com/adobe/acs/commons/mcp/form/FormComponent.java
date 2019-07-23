@@ -146,7 +146,9 @@ public final class FormComponent extends AbstractContainerComponent {
      */
     private void correctNameAttribute(Resource res) {
         String name = (res.getValueMap() != null) ? (String) res.getValueMap().get("name") : null;
-        if (name != null && !name.startsWith("./")) {
+        // If we replace all name attibutes it causes issues with stuff like the RTE configration
+        boolean hasResourceType = StringUtils.isNotBlank(res.getResourceType());
+        if (name != null && !name.startsWith("./") && hasResourceType) {
             res.getValueMap().put("name", "./" + name);
         }
         res.getChildren().forEach(this::correctNameAttribute);

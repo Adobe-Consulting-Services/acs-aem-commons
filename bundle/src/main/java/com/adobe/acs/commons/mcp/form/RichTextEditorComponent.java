@@ -49,7 +49,7 @@ public class RichTextEditorComponent extends FieldComponent {
                 .withAttributes("features", "bold,italic,underline")
                 .createSibling("justify")
                 .withAttributes("features", "*")
-                .createSibling("liks")
+                .createSibling("links")
                 .withAttributes("features", "modifylink,unlink")
                 .createSibling("lists")
                 .withAttributes("features", "*")
