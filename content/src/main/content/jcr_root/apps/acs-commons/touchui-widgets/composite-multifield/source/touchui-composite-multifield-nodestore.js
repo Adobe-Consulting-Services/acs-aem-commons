@@ -214,6 +214,22 @@
                 });
             });
 
+            function checkboxPrimativeType(value){
+                if (typeof value != "string") {
+                    return value;
+                }
+                switch(value){
+                    case true:
+                    case "true":
+                        return true;
+                    case false:
+                    case "false":
+                        return false;
+                    default:
+                        return value;
+                }
+            }
+
             function fillValue($form, fieldSetName, $field, counter){
                 var name = $field.attr("name"), value;
 
@@ -229,7 +245,8 @@
                 value = $field.val();
 
                 if (cmf.isCheckbox($field)) {
-                    value = $field.prop("checked") ? $field.val() : "";
+                    var defaultVal = $field.parent().find("[name='./" + name + "@DefaultValue']").attr('value');
+                    value = checkboxPrimativeType($field.prop("checked") ? $field.val() : (defaultVal ? defaultVal : ""));
                 }
 
                 if (cmf.isAutocomplete($field) || cmf.isTagsField($field)) {
