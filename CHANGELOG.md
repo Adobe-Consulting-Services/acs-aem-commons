@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
 - #1993 - DialogProvider now supports styles for Dialog and Page dialogs
 - #1997 - MCP Forms fixes for RTE configuration and NPE issue with AbstractResourceImpl when resource type is not set
+- #1998 - Coral3 checkbox storing json value as string instead of boolean when using Json Store in multifields
 
 ### Added
 - #1993 - New components for autocomplete and rich text editor
