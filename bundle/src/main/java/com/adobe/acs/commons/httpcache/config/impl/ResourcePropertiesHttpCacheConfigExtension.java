@@ -112,10 +112,15 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         // No valid resource property could be found.
         return false;
     }
-
+    
+    @Override
+    protected String getActualValue(String key, SlingHttpServletRequest request) {
+        return request.getResource().getValueMap().get(key, String.class);
+    }
+    
     @Override
     public String getCacheKeyId() {
-        return "[Resource Property: " + cacheKeyId + "]";
+        return "[Resource Property]";
     }
 
     @Activate

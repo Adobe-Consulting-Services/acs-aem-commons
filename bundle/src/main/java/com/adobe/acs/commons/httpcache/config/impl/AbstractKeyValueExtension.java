@@ -24,8 +24,10 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
@@ -43,9 +45,26 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
 
     @Override
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
-        return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
+        return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues(), getActualValues(request));
     }
 
+    protected Map<String, String> getActualValues(SlingHttpServletRequest request) {
+    
+        HashMap<String,String> foundValues = new HashMap<>();
+        for (final Map.Entry<String, String[]> entry : getAllowedKeyValues().entrySet()) {
+            final String key = entry.getKey();
+            final String value = getActualValue(key, request);
+            
+            if(StringUtils.isNotBlank(value)){
+                foundValues.put(key, value);
+            }
+        }
+        
+        return foundValues;
+    }
+    
+    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
+    
     @Override
     public CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) {
         return new KeyValueCacheKey(resourcePath, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
