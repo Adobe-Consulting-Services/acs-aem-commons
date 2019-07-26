@@ -306,25 +306,28 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         
             // Persist in cache.
             if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
-                throttledTaskRunner.scheduleWork(() -> {
-                    try {
-                        getCacheStore(cacheConfig).put(cacheKey, cacheContent);
-                    } catch (HttpCacheException e) {
-                        log.error("Error storing http response in httpcache", e);
-                    } finally {
-                        // Close the temp sink input stream.
-                        if (null != cacheContent) {
-                            IOUtils.closeQuietly(cacheContent.getInputDataStream());
-                        }
-                    }
-                });
-               
+                throttledTaskRunner.scheduleWork(putToStore(cacheConfig, cacheKey, cacheContent));
                 log.debug("Response for the URI cached - {}", request.getRequestURI());
             }
         } catch (HttpCacheException e) {
             log.error("Error creating http cache content", e);
         }
 
+    }
+
+    private Runnable putToStore(final HttpCacheConfig cacheConfig, final CacheKey cacheKey, final CacheContent cacheContent) {
+        return () -> {
+            try {
+                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
+            } catch (HttpCacheException e) {
+                log.error("Error storing http response in httpcache", e);
+            } finally {
+                // Close the temp sink input stream.
+                if (null != cacheContent) {
+                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
+                }
+            }
+        };
     }
 
 
