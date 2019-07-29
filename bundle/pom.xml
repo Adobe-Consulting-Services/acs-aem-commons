@@ -58,7 +58,7 @@
                             com.github.benmanes.caffeine*;resolution:=optional,
                             com.fasterxml.jackson.core;version="[2.8,3)";resolution:=optional,
                             com.fasterxml.jackson.databind;version="[2.8,3)";resolution:=optional,
-                            com.fasterxml.jackson.databind;version="[2.8,3)";resolution:=optional,
+                            javax.xml.bind;version="[2.2,3)";resolution:=optional,
                             <!-- this explicit import can be removed when we no longer support a version of AEM that supports java versions before 11 -->
                             javax.annotation;version=0.0.0,
                             !com.google.errorprone.annotations,
