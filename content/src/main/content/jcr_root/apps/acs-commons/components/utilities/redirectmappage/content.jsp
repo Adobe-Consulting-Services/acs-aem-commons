@@ -147,7 +147,7 @@
                                                 <button is="coral-button" icon="delete" iconsize="S" ng-click="removeAlert(entry.id)"></button>
                                             </div>
                                             <div ng-switch-default>
-                                                <button is="coral-button" icon="edit" iconsize="S" ng-click="openEditor(entry.id)"></button>
+                                                <button is="coral-button" icon="edit" iconsize="S" ng-click="openEditor(entry.origin)"></button>
                                             </div>
                                         </div>
                                     </td>

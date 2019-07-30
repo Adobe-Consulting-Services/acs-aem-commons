@@ -19,8 +19,10 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
+import com.adobe.acs.commons.mcp.form.AutocompleteComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
+import com.adobe.acs.commons.mcp.form.RichTextEditorComponent;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -35,4 +37,10 @@ import org.apache.sling.models.annotations.Model;
 public class SimpleModelOne extends GeneratedDialog {
     @FormField(name = "Field 1")
     private String field1;
+
+    @FormField(name = "Rich Text", component = RichTextEditorComponent.class)
+    private String field2;
+
+    @FormField(name = "Tags", component = AutocompleteComponent.class)
+    private String[] field3;
 }
