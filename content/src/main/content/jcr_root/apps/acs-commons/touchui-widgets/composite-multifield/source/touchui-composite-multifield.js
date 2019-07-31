@@ -216,6 +216,22 @@
             $.ajax(actionUrl).done(postProcess);
         },
 
+        checkboxPrimativeType: function (value){
+            if (typeof value != "string") {
+                return value;
+            }
+            switch(value){
+                case true:
+                case "true":
+                    return true;
+                case false:
+                case "false":
+                    return false;
+                default:
+                    return value;
+            }
+        },
+
         fillValue: function ($field, record) {
             var name = $field.attr("name"), value;
 
@@ -231,12 +247,12 @@
             value = $field.val();
 
             if (this.isCheckbox($field)) {
-				if ($field.prop("checked"))
-					value = $field.val();
-				else {
-					var uncheckedValue = $field.attr('name')+'@DefaultValue';
-					value = $field.parent().find('[name="'+uncheckedValue+'"]') ? $field.parent().find('[name="'+uncheckedValue+'"]').val() : "";
-				}
+                if ($field.prop("checked"))
+                    value = $field.val();
+                else {
+                    var defaultVal = $field.parent().find("[name='./" + name + "@DefaultValue']").attr('value');
+                    value = this.checkboxPrimativeType($field.prop("checked") ? $field.val() : (defaultVal ? defaultVal : ""));
+                }
             }
 
             if (this.isAutocomplete($field) || this.isTagsField($field)) {
