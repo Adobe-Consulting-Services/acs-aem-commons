@@ -12,11 +12,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1980 - Fixing error when not using redirect map file
 - #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
 - #1993 - DialogProvider now supports styles for Dialog and Page dialogs
+- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 - #1997 - MCP Forms fixes for RTE configuration and NPE issue with AbstractResourceImpl when resource type is not set
 - #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
 
 ### Added
 - #1993 - New components for autocomplete and rich text editor
+- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 
 ## [4.2.2] - 2019-07-15
 
