@@ -20,12 +20,18 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 
 /**
  * Implements the Granite UI Autocomplete component. Docs here:
  * https://helpx.adobe.com/experience-manager/6-4/sites/developing/using/reference-materials/granite-ui/api/jcr_root/libs/granite/ui/components/coral/foundation/form/autocomplete/index.html
+ *
+ * If displayProperty and predicates are set (e.g. via options) then the ACS
+ * query autocomplete will be used:
+ * https://adobe-consulting-services.github.io/acs-aem-commons/features/ui-widgets/query-autocomplete-datasource/index.html
+ * Note: You still have to first enable this extension manually to use it.
  */
 public class AutocompleteComponent extends FieldComponent {
 
@@ -39,11 +45,15 @@ public class AutocompleteComponent extends FieldComponent {
 
     private String datasource = "cq/gui/components/common/datasources/tags";
 
+    private String displayProperty = null;
+
     private String values = "granite/ui/components/coral/foundation/form/autocomplete/tags";
 
     private String options = "granite/ui/components/coral/foundation/form/autocomplete/list";
 
     private String optionsQuery = null;
+
+    private String[] predicates = null;
 
     @Override
     public void init() {
@@ -56,6 +66,13 @@ public class AutocompleteComponent extends FieldComponent {
         getOption("values").ifPresent(this::setValues);
         getOption("options").ifPresent(this::setOptions);
         getOption("query").ifPresent(this::setOptionsQuery);
+        getOption("displayProperty").ifPresent(this::setDisplayProperty);
+        setPredicatesFromOptions();
+
+        if (displayProperty != null && predicates != null) {
+            addClientLibrary("acs-commons.widgets.search-based-path-browser");
+            datasource = "acs-commons/granite/ui/components/form/queryautocomplete/datasource";
+        }
     }
 
     @Override
@@ -67,6 +84,9 @@ public class AutocompleteComponent extends FieldComponent {
                         "disabled", isDisabled(),
                         "forceSelection", isForceSelection(),
                         "icon", getIcon());
+        if (StringUtils.isNotBlank(displayProperty) && getPredicates() != null) {
+            builder.withAttributes("displayProperty", getDisplayProperty(), "predicates", getPredicates());
+        }
         if (StringUtils.isNotBlank(datasource)) {
             builder.createChild("datasource", datasource)
                     .up();
@@ -195,6 +215,43 @@ public class AutocompleteComponent extends FieldComponent {
      */
     public void setOptionsQuery(String optionsQuery) {
         this.optionsQuery = optionsQuery;
+    }
+
+    /**
+     * @return the displayProperty
+     */
+    public String getDisplayProperty() {
+        return displayProperty;
+    }
+
+    /**
+     * @param displayProperty the displayProperty to set
+     */
+    public void setDisplayProperty(String displayProperty) {
+        this.displayProperty = displayProperty;
+    }
+
+    /**
+     * @return the predicates
+     */
+    public String[] getPredicates() {
+        return predicates;
+    }
+
+    /**
+     * @param predicates the predicate to set
+     */
+    public void setPredicates(String[] predicates) {
+        this.predicates = predicates;
+    }
+
+    private void setPredicatesFromOptions() {
+        String[] optionPredicates = getOptionNames().stream()
+                .filter(s->s.startsWith("predicate_"))
+                .map(s->s.substring("predicate_".length()) + "=" + getOption(s).get())
+                .collect(Collectors.toList())
+                .toArray(new String[]{});
+        setPredicates(optionPredicates);
     }
 
 }
