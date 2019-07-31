@@ -17,8 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
 
 ### Added
-- #1993 - New components for autocomplete and rich text editor
 - #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
+- #1993 - New components for autocomplete and rich text editor
+- #2012 - Added support for query autocomplete widget
 
 ## [4.2.2] - 2019-07-15
 
