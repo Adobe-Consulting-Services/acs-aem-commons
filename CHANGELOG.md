@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1993 - DialogProvider now supports styles for Dialog and Page dialogs
 - #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 - #1997 - MCP Forms fixes for RTE configuration and NPE issue with AbstractResourceImpl when resource type is not set
+- #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
 
 ### Added
 - #1993 - New components for autocomplete and rich text editor
