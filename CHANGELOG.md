@@ -7,7 +7,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+## [4.3.0] - 2019-07-31
+
 ### Fixed
+- #1644 - Asset Ingestor | Add include section
+- #1914 - java.lang.ClassNotFoundException: com.fasterxml.jackson.core.JsonProcessingException
+- #1942 - Renovator issues moving folder in AEM 6.3.3.3
 - #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
 - #1980 - Fixing error when not using redirect map file
 - #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
