@@ -43,6 +43,8 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
 
     public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
 
+    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
+
     @Override
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues(), getActualValues(request));
@@ -62,9 +64,7 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         
         return foundValues;
     }
-    
-    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
-    
+
     @Override
     public CacheKey build(String resourcePath, HttpCacheConfig cacheConfig) {
         return new KeyValueCacheKey(resourcePath, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
