@@ -69,9 +69,9 @@
 
         if( predicates.length > 0 ){
             Map<String, String> predicateMap = new HashMap<String, String>();
-            for(String predicate : predicates){
+            for(String predicate : predicates){                
                 String[] parts = predicate.split("=");
-                if(parts != null && parts.length >0){
+                if(parts != null && parts.length > 1){
                     predicateMap.put(parts[0],parts[1]);
                 }
             }
