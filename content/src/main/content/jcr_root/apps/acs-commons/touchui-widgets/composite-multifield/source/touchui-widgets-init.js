@@ -110,14 +110,14 @@
 
 		    // To support coral 3 UI checkbox, add property granite:class=coral-Form-fieldwrapper to the field in dialog.
         isCheckbox: function ($field) {
-            return !_.isEmpty($field) && ($field.prop("type") === "checkbox" || $field.hasClass("coral-Checkbox"));
+            return !_.isEmpty($field) && ($field.prop("type") === "checkbox" || $field.hasClass("coral-Checkbox") || $field.hasClass("coral3-Checkbox"));
         },
 
         setCheckBox: function ($field, value) {
             if($field.parent().hasClass("coral-Checkbox")){
-                $field.parent().prop("checked", $field.attr("value") === value);
+                $field.parent().prop("checked", $field.attr("value") === value.toString());
             }else {
-            	$field.prop("checked", $field.attr("value") === value);
+                $field.prop("checked", $field.attr("value") === value.toString());
             }
         },
 
