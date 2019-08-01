@@ -32,37 +32,14 @@ import java.util.Map;
 
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
-    public abstract Map<String, String[]> getAllowedKeyValues();
-
-    public abstract String getCacheKeyId();
-
     @Override
     public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         return accepts(request, cacheConfig, getAllowedKeyValues());
     }
 
-    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
-
-    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
-
     @Override
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
         return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues(), getActualValues(request));
-    }
-
-    protected Map<String, String> getActualValues(SlingHttpServletRequest request) {
-    
-        HashMap<String,String> foundValues = new HashMap<>();
-        for (final Map.Entry<String, String[]> entry : getAllowedKeyValues().entrySet()) {
-            final String key = entry.getKey();
-            final String value = getActualValue(key, request);
-            
-            if(StringUtils.isNotBlank(value)){
-                foundValues.put(key, value);
-            }
-        }
-        
-        return foundValues;
     }
 
     @Override
@@ -79,4 +56,28 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         // Validate if key request uri can be constructed out of uri patterns in cache config.
         return new KeyValueCacheKey(key.getUri(), cacheConfig, getCacheKeyId(), getAllowedKeyValues()).equals(key);
     }
+
+    public abstract Map<String, String[]> getAllowedKeyValues();
+
+    public abstract String getCacheKeyId();
+
+    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
+
+    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
+
+    protected Map<String, String> getActualValues(SlingHttpServletRequest request) {
+
+        HashMap<String,String> foundValues = new HashMap<>();
+        for (final Map.Entry<String, String[]> entry : getAllowedKeyValues().entrySet()) {
+            final String key = entry.getKey();
+            final String value = getActualValue(key, request);
+
+            if(StringUtils.isNotBlank(value)){
+                foundValues.put(key, value);
+            }
+        }
+
+        return foundValues;
+    }
+
 }
