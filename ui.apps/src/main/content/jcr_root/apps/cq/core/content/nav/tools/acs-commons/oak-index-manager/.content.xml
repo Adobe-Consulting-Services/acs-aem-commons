@@ -4,6 +4,6 @@
     jcr:title="Oak Index Manager (Deprecated)"
     jcr:description="Use AEM's Oak Index Manager instead."
     icon="data"
-    href="/etc/acs-commons/oak-index-manager.html"
+    href="/apps/acs-commons/content/oak-index-manager.html"
     id="acs-commons__oak-index-manager"
     target="_blank"/>

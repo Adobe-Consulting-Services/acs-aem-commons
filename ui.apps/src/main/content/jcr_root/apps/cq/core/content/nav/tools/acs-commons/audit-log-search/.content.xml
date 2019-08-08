@@ -4,6 +4,6 @@
     jcr:title="Audit Log Search"
     jcr:description="Search for audit log events."
     icon="alertCheck"
-    href="/etc/acs-commons/audit-log-search.html"
+    href="/apps/acs-commons/content/audit-log-search.html"
     id="acs-commons__audit-log-search"
     target="_blank"/>

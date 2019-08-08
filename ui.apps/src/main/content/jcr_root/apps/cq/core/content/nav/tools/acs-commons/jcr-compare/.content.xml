@@ -4,6 +4,6 @@
     jcr:title="JCR Compare"
     jcr:description="Compare JCR content trees across AEM instances."
     icon="compare"
-    href="/etc/acs-commons/jcr-compare.html"
+    href="/apps/acs-commons/content/jcr-compare.html"
     id="acs-commons__jcr-compare"
     target="_blank"/>

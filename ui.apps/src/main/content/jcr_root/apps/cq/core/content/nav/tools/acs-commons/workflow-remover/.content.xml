@@ -4,6 +4,6 @@
     jcr:title="Workflow Remover"
     jcr:description="Power tooling for Workflow instance removal."
     icon="delete"
-    href="/etc/acs-commons/workflow-remover.html"
+    href="/apps/acs-commons/content/workflow-remover.html"
     id="acs-commons__workflow-remover"
     target="_blank"/>
