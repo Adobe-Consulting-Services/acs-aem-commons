@@ -183,6 +183,11 @@
                     <artifactId>oakpal-maven-plugin</artifactId>
                     <version>${oakpal.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <version>1.5</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -214,6 +219,9 @@
                                     <excludes>
                                         <exclude>*:*:*:*:compile</exclude>
                                     </excludes>
+                                    <includes>
+                                        <include>com.adobe.acs:acs-aem-commons-*</include>
+                                    </includes>
                                 </bannedDependencies>
                             </rules>
                         </configuration>
