@@ -45,6 +45,17 @@
         <include pattern="/etc/acs-commons/instant-package/jcr:content"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/instant-package-image.png"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
+
+        <!-- Remove legacy /etc pages from prior version installs -->
+        <include pattern="/etc/acs-commons/audit-log-search"/>
+        <include pattern="/etc/acs-commons/jcr-compare"/>
+        <include pattern="/etc/acs-commons/manage-controlled-processes"/>
+        <include pattern="/etc/acs-commons/oak-index-manager"/>
+        <include pattern="/etc/acs-commons/page-compare"/>
+        <include pattern="/etc/acs-commons/reports"/>
+        <include pattern="/etc/acs-commons/version-compare"/>
+        <include pattern="/etc/acs-commons/version-replicator"/>
+        <include pattern="/etc/acs-commons/workflow-remover"/>
     </filter>
     <filter root="/etc/clientlibs/acs-commons"/>
     <filter root="/etc/cloudservices/dtm">
