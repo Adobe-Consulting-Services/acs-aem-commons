@@ -14,8 +14,8 @@
     <!-- P R O J E C T D E S C R I P T I O N -->
     <!-- ====================================================================== -->
 
-    <artifactId>acs-aem-commons-content</artifactId>
-    <name>ACS AEM Commons Package</name>
+    <artifactId>acs-aem-commons-ui.content</artifactId>
+    <name>ACS AEM Commons UI.Content Package</name>
     <packaging>content-package</packaging>
 
     <build>
@@ -60,24 +60,99 @@
                 <extensions>true</extensions>
                 <configuration>
                     <group>adobe/consulting</group>
-                    <properties>
-                        <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps and acs-aem-commons-ui.content.</description>
-                    </properties>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <subPackages>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.apps</artifactId>
-                            <filter>true</filter>
-                        </subPackage>
-                        <subPackage>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-ui.content</artifactId>
-                            <filter>true</filter>
-                        </subPackage>
-                    </subPackages>
+                    <properties>
+                        <description>ACS AEM Commons content package containing content and configuration.</description>
+                        <acHandling>merge</acHandling>
+                    </properties>
+                    <dependencies>
+                        <dependency>
+                            <group>adobe/consulting</group>
+                            <name>acs-aem-commons-ui.apps</name>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
                     <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-maven-plugin</artifactId>
+                <configuration>
+                    <deferBuildFailure>true</deferBuildFailure>
+                    <checklists>
+                        <checklist>acs-internal</checklist>
+                    </checklists>
+                    <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
+                    nodetypes.cnd and privileges.xml in the package -->
+                    <websterTargets>
+                        <nodetypes />
+                        <privileges />
+                    </websterTargets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>oakpal-scan</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-content-class-aem65</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                            <checklists>
+                                <checklist>content-class-aem65</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-content-class-aem64</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                            <checklists>
+                                <checklist>content-class-aem64</checklist>
+                            </checklists>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-scan-min</id>
+                        <goals>
+                            <goal>scan-many</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <scanArtifacts>
+                                <artifact>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>min</classifier>
+                                    <type>zip</type>
+                                </artifact>
+                            </scanArtifacts>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>oakpal-verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFiles>
+                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            </summaryFiles>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -103,12 +178,11 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
-                            <source>${pom.basedir}/src/main/script/CreateMinPackage.groovy</source>
+                            <source>${pom.basedir}/../content/src/main/script/CreateMinPackage.groovy</source>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -132,18 +206,21 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>uber-jar</artifactId>
             <classifier>apis</classifier>
         </dependency>
     </dependencies>
-
     <profiles>
         <profile>
             <id>autoInstallPackage</id>
