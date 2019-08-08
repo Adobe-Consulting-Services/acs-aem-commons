@@ -222,7 +222,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>autoInstallPackage</id>
+            <id>autoInstallUiContentPackage</id>
             <build>
                 <plugins>
                     <plugin>

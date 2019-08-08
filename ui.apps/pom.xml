@@ -314,7 +314,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>autoInstallPackage</id>
+            <id>autoInstallUiAppsPackage</id>
             <build>
                 <plugins>
                     <plugin>
