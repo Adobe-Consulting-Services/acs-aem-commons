@@ -85,6 +85,27 @@
                     </checklists>
                     <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
                     nodetypes.cnd and privileges.xml in the package -->
+
+                    <!-- Enforce separation of content and code (CONTENT ONLY) -->
+                    <checks>
+                        <check>
+                            <name>basic/paths</name>
+                            <config>
+                                <rules>
+                                    <rule>
+                                        <pattern>.*</pattern>
+                                        <type>allow</type>
+                                    </rule>
+                                    <rule>
+                                        <pattern>/apps(/.*)?</pattern>
+                                        <type>deny</type>
+                                    </rule>
+                                </rules>
+                                <severity>severe</severity>
+                            </config>
+                        </check>
+                    </checks>
+
                     <websterTargets>
                         <nodetypes />
                         <privileges />
