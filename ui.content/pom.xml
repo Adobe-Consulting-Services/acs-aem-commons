@@ -93,15 +93,10 @@
                             <config>
                                 <rules>
                                     <rule>
-                                        <pattern>.*</pattern>
-                                        <type>allow</type>
-                                    </rule>
-                                    <rule>
                                         <pattern>/apps(/.*)?</pattern>
                                         <type>deny</type>
                                     </rule>
                                 </rules>
-                                <severity>severe</severity>
                             </config>
                         </check>
                     </checks>
