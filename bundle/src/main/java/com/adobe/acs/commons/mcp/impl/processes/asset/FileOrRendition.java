@@ -185,6 +185,8 @@ public class FileOrRendition implements HierarchicalElement {
             if (connection == null) {
                 URL theUrl = new URL(url);
                 connection = theUrl.openConnection();
+                connection.setConnectTimeout(60000);
+                connection.setReadTimeout(60000);
             }
             return connection;
         }

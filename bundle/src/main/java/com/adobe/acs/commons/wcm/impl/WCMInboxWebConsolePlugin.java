@@ -58,8 +58,8 @@ public class WCMInboxWebConsolePlugin extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        PrintWriter pw = resp.getWriter();
-        pw.println("This web console plugin has been removed as it is specific to the Classic UI.");
+        try (PrintWriter pw = resp.getWriter()) {
+            pw.println("This web console plugin has been removed as it is specific to the Classic UI.");
+        }
     }
 }

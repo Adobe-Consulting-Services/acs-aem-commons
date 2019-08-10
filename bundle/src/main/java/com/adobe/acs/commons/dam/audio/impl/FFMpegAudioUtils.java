@@ -27,14 +27,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
-public class FFMpegAudioUtils {
+class FFMpegAudioUtils {
 
     private static final Logger log = LoggerFactory.getLogger(FFMpegAudioUtils.class);
 
     private FFMpegAudioUtils() {
     }
 
-    public static File resolveWorkingDir(String slingHome, String path) {
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN") // path sources are trusted
+    static File resolveWorkingDir(String slingHome, String path) {
         if (path == null) {
             path = "";
         }
@@ -65,7 +66,7 @@ public class FFMpegAudioUtils {
         return workingDir;
     }
 
-    public static final File createTempDir(File parentDir) throws IOException {
+    static File createTempDir(File parentDir) throws IOException {
         return Files.createTempDirectory(parentDir.toPath(), "cqdam").toFile();
     }
 }
