@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.oakpal.checks;
 
 import net.adamcin.oakpal.core.CheckReport;
@@ -17,13 +36,15 @@ import javax.jcr.Session;
 import javax.json.JsonObject;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static net.adamcin.oakpal.core.JavaxJson.*;
-import static org.junit.Assert.*;
+import static net.adamcin.oakpal.core.JavaxJson.arr;
+import static net.adamcin.oakpal.core.JavaxJson.obj;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class CompositeStoreAlignmentTest extends CheckTestBase {
@@ -75,12 +96,12 @@ public class CompositeStoreAlignmentTest extends CheckTestBase {
     }
 
     final PackageId root = PackageId.fromString("my_packages:simple-mixed:1.0");
-    final PackageId subA = PackageId.fromString("my_packages:simple-mixed-sub-a:1.0");
-    final PackageId subAA = PackageId.fromString("my_packages:simple-mixed-sub-a-a:1.0");
-    final PackageId subB = PackageId.fromString("my_packages:simple-mixed-sub-b:1.0");
-    final PackageId subC = PackageId.fromString("my_packages:simple-mixed-sub-c:1.0");
-    final PackageId subCC = PackageId.fromString("my_packages:simple-mixed-sub-c-c:1.0");
-    final PackageId subD = PackageId.fromString("my_packages:simple-mixed-old-d:1.0");
+    final PackageId sub_a = PackageId.fromString("my_packages:simple-mixed-sub-a:1.0");
+    final PackageId sub_a_a = PackageId.fromString("my_packages:simple-mixed-sub-a-a:1.0");
+    final PackageId sub_b = PackageId.fromString("my_packages:simple-mixed-sub-b:1.0");
+    final PackageId sub_c = PackageId.fromString("my_packages:simple-mixed-sub-c:1.0");
+    final PackageId sub_c_c = PackageId.fromString("my_packages:simple-mixed-sub-c-c:1.0");
+    final PackageId sub_d = PackageId.fromString("my_packages:simple-mixed-old-d:1.0");
 
     private List<Violation> virtualSubpackageScan(final JsonObject checkConfig) throws Exception {
         final ProgressCheck check = new CompositeStoreAlignment().newInstance(checkConfig);
@@ -95,50 +116,50 @@ public class CompositeStoreAlignmentTest extends CheckTestBase {
         check.importedPath(root, "/", node);
         check.importedPath(root, "/etc", node);
         check.importedPath(root, JcrPackageRegistry.DEFAULT_PACKAGE_ROOT_PATH, node);
-        check.importedPath(root, getInstallationPath(subA), node);
-        check.importedPath(root, getInstallationPath(subB), node);
-        check.importedPath(root, getInstallationPath(subC), node);
-        check.deletedPath(root, getInstallationPath(subD), session);
+        check.importedPath(root, getInstallationPath(sub_a), node);
+        check.importedPath(root, getInstallationPath(sub_b), node);
+        check.importedPath(root, getInstallationPath(sub_c), node);
+        check.deletedPath(root, getInstallationPath(sub_d), session);
         check.afterExtract(root, session);
-        check.identifySubpackage(subA, root);
-        check.beforeExtract(subA, session, rootProps, rootMeta, Collections.emptyList());
-        check.importedPath(subA, "/", node);
-        check.importedPath(subA, "/etc", node);
-        check.importedPath(subA, JcrPackageRegistry.DEFAULT_PACKAGE_ROOT_PATH, node);
-        check.importedPath(subA, getInstallationPath(subAA), node);
-        check.importedPath(subA, "/apps", node);
-        check.importedPath(subA, "/apps/example-a", node);
-        check.afterExtract(subA, session);
-        check.identifySubpackage(subAA, subA);
-        check.beforeExtract(subAA, session, rootProps, rootMeta, Collections.emptyList());
-        check.importedPath(subAA, "/", node);
-        check.importedPath(subAA, "/apps", node);
-        check.importedPath(subAA, "/apps/example-a-a", node);
-        check.afterExtract(subAA, session);
-        check.identifySubpackage(subB, root);
-        check.beforeExtract(subB, session, rootProps, rootMeta, Collections.emptyList());
-        check.importedPath(subB, "/", node);
-        check.importedPath(subB, "/etc", node);
-        check.importedPath(subB, "/etc/clientlibs", node);
-        check.importedPath(subB, "/etc/clientlibs/example-b", node);
-        check.importedPath(subB, "/apps", node);
-        check.importedPath(subB, "/apps/example-b", node);
-        check.afterExtract(subB, session);
-        check.identifySubpackage(subC, root);
-        check.beforeExtract(subC, session, rootProps, rootMeta, Collections.emptyList());
-        check.importedPath(subC, "/", node);
-        check.importedPath(subC, "/etc", node);
-        check.importedPath(subC, JcrPackageRegistry.DEFAULT_PACKAGE_ROOT_PATH, node);
-        check.importedPath(subC, getInstallationPath(subCC), node);
-        check.importedPath(subC, "/apps", node);
-        check.importedPath(subC, "/apps/example-c", node);
-        check.afterExtract(subC, session);
-        check.identifySubpackage(subCC, subC);
-        check.beforeExtract(subCC, session, rootProps, rootMeta, Collections.emptyList());
-        check.importedPath(subCC, "/", node);
-        check.importedPath(subCC, "/content", node);
-        check.importedPath(subCC, "/content/example-c-c", node);
-        check.afterExtract(subCC, session);
+        check.identifySubpackage(sub_a, root);
+        check.beforeExtract(sub_a, session, rootProps, rootMeta, Collections.emptyList());
+        check.importedPath(sub_a, "/", node);
+        check.importedPath(sub_a, "/etc", node);
+        check.importedPath(sub_a, JcrPackageRegistry.DEFAULT_PACKAGE_ROOT_PATH, node);
+        check.importedPath(sub_a, getInstallationPath(sub_a_a), node);
+        check.importedPath(sub_a, "/apps", node);
+        check.importedPath(sub_a, "/apps/example-a", node);
+        check.afterExtract(sub_a, session);
+        check.identifySubpackage(sub_a_a, sub_a);
+        check.beforeExtract(sub_a_a, session, rootProps, rootMeta, Collections.emptyList());
+        check.importedPath(sub_a_a, "/", node);
+        check.importedPath(sub_a_a, "/apps", node);
+        check.importedPath(sub_a_a, "/apps/example-a-a", node);
+        check.afterExtract(sub_a_a, session);
+        check.identifySubpackage(sub_b, root);
+        check.beforeExtract(sub_b, session, rootProps, rootMeta, Collections.emptyList());
+        check.importedPath(sub_b, "/", node);
+        check.importedPath(sub_b, "/etc", node);
+        check.importedPath(sub_b, "/etc/clientlibs", node);
+        check.importedPath(sub_b, "/etc/clientlibs/example-b", node);
+        check.importedPath(sub_b, "/apps", node);
+        check.importedPath(sub_b, "/apps/example-b", node);
+        check.afterExtract(sub_b, session);
+        check.identifySubpackage(sub_c, root);
+        check.beforeExtract(sub_c, session, rootProps, rootMeta, Collections.emptyList());
+        check.importedPath(sub_c, "/", node);
+        check.importedPath(sub_c, "/etc", node);
+        check.importedPath(sub_c, JcrPackageRegistry.DEFAULT_PACKAGE_ROOT_PATH, node);
+        check.importedPath(sub_c, getInstallationPath(sub_c_c), node);
+        check.importedPath(sub_c, "/apps", node);
+        check.importedPath(sub_c, "/apps/example-c", node);
+        check.afterExtract(sub_c, session);
+        check.identifySubpackage(sub_c_c, sub_c);
+        check.beforeExtract(sub_c_c, session, rootProps, rootMeta, Collections.emptyList());
+        check.importedPath(sub_c_c, "/", node);
+        check.importedPath(sub_c_c, "/content", node);
+        check.importedPath(sub_c_c, "/content/example-c-c", node);
+        check.afterExtract(sub_c_c, session);
         check.finishedScan();
 
         return new ArrayList<>(check.getReportedViolations());
@@ -150,37 +171,37 @@ public class CompositeStoreAlignmentTest extends CheckTestBase {
         assertFalse("reports not contains root (container): " + reports,
                 reports.stream().anyMatch(violation -> violation.getPackages().contains(root)));
         assertFalse("reports not contains subA: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subA)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_a)));
         assertFalse("reports not contains subAA: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subAA)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_a_a)));
         assertTrue("reports contains subB: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subB)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_b)));
         assertTrue("reports contains subC: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subC)
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_c)
                         && violation.getDescription().startsWith("recursive")));
         assertFalse("reports not contains subCC: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subCC)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_c_c)));
     }
 
     @Test
     public void testIgnoredSubpackages() throws Exception {
         final List<Violation> reports = virtualSubpackageScan(obj()
                 .key(CompositeStoreAlignment.CONFIG_SCOPE_PACKAGE_IDS, arr()
-                        .val(new Rule(Rule.RuleType.EXCLUDE, Pattern.compile(subB.toString()))))
+                        .val(new Rule(Rule.RuleType.EXCLUDE, Pattern.compile(sub_b.toString()))))
                 .get());
         assertFalse("reports not contains root (container): " + reports,
                 reports.stream().anyMatch(violation -> violation.getPackages().contains(root)));
         assertFalse("reports not contains subA: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subA)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_a)));
         assertFalse("reports not contains subAA: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subAA)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_a_a)));
         assertFalse("reports not contains subB (ignored): " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subB)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_b)));
         assertTrue("reports contains subC: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subC)
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_c)
                         && violation.getDescription().startsWith("recursive")));
         assertFalse("reports not contains subCC: " + reports,
-                reports.stream().anyMatch(violation -> violation.getPackages().contains(subCC)));
+                reports.stream().anyMatch(violation -> violation.getPackages().contains(sub_c_c)));
 
     }
 

@@ -1,6 +1,29 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2013 - 2019 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.oakpal.checks;
 
-import net.adamcin.oakpal.core.*;
+import net.adamcin.oakpal.core.JavaxJson;
+import net.adamcin.oakpal.core.ProgressCheck;
+import net.adamcin.oakpal.core.ProgressCheckFactory;
+import net.adamcin.oakpal.core.SimpleProgressCheck;
+import net.adamcin.oakpal.core.Violation;
 import net.adamcin.oakpal.core.checks.Rule;
 import org.apache.jackrabbit.oak.spi.mount.Mount;
 import org.apache.jackrabbit.oak.spi.mount.MountInfoProvider;
@@ -15,7 +38,14 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
@@ -112,12 +142,12 @@ public final class CompositeStoreAlignment implements ProgressCheckFactory {
         /**
          * Always ignore:
          * 1. the root path because every package potentially marks it as imported
-         * 2. paths that start with /etc/packages/, because this is the facility for installing subpackages
+         * 2. /etc, /etc/packages, or paths that start with /etc/packages/, because packages with subpackages will import
+         * these paths, even if they are installed to a different JcrPackageRegistry.
          *
-         * @param packageId
-         * @param path
+         * @param path the imported or deleted path to handle
          */
-        private void handlePath(final PackageId packageId, final String path) {
+        private void handlePath(final String path) {
             if (!mounts.hasNonDefaultMounts()
                     || path.equals("/")
                     || path.equals("/etc")
@@ -132,14 +162,14 @@ public final class CompositeStoreAlignment implements ProgressCheckFactory {
         public void importedPath(final PackageId packageId,
                                  final String path,
                                  final Node node) throws RepositoryException {
-            handlePath(packageId, path);
+            handlePath(path);
         }
 
         @Override
         public void deletedPath(final PackageId packageId,
                                 final String path,
                                 final Session inspectSession) throws RepositoryException {
-            handlePath(packageId, path);
+            handlePath(path);
         }
 
         private Set<Mount> getMountsAffectedByPackage(final PackageId packageId) {
@@ -147,11 +177,11 @@ public final class CompositeStoreAlignment implements ProgressCheckFactory {
         }
 
         private Set<Mount> getMountsAffectedByPackageGraph(final PackageId root) {
-            Set<Mount> mounts = new HashSet<>(getMountsAffectedByPackage(root));
+            Set<Mount> affectedMounts = new HashSet<>(getMountsAffectedByPackage(root));
             for (PackageId subPackageId : subPackages.getOrDefault(root, Collections.emptyList())) {
-                mounts.addAll(getMountsAffectedByPackageGraph(subPackageId));
+                affectedMounts.addAll(getMountsAffectedByPackageGraph(subPackageId));
             }
-            return mounts;
+            return affectedMounts;
         }
 
         @Override
