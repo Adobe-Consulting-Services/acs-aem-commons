@@ -177,11 +177,11 @@ public final class CompositeStoreAlignment implements ProgressCheckFactory {
         }
 
         private Set<Mount> getMountsAffectedByPackageGraph(final PackageId root) {
-            Set<Mount> affectedMounts = new HashSet<>(getMountsAffectedByPackage(root));
+            Set<Mount> allAffectedMounts = new HashSet<>(getMountsAffectedByPackage(root));
             for (PackageId subPackageId : subPackages.getOrDefault(root, Collections.emptyList())) {
-                affectedMounts.addAll(getMountsAffectedByPackageGraph(subPackageId));
+                allAffectedMounts.addAll(getMountsAffectedByPackageGraph(subPackageId));
             }
-            return affectedMounts;
+            return allAffectedMounts;
         }
 
         @Override
