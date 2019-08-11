@@ -182,6 +182,13 @@
                     <groupId>net.adamcin.oakpal</groupId>
                     <artifactId>oakpal-maven-plugin</artifactId>
                     <version>${oakpal.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmaven</groupId>

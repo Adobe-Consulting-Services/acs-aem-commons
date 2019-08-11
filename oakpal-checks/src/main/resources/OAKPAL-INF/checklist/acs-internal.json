@@ -32,6 +32,10 @@
       "impl": "com.adobe.acs.commons.oakpal.checks.ImportedPackages",
       "config": {
       }
+    },
+    {
+      "name": "apps-composite-store-alignment",
+      "impl": "com.adobe.acs.commons.oakpal.checks.CompositeStoreAlignment"
     }
   ]
 }

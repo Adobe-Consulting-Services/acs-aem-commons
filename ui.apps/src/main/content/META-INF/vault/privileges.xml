@@ -14,6 +14,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
---><privileges xmlns:crx="http://www.day.com/crx/1.0">
+--><privileges xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:crx="http://www.day.com/crx/1.0" xmlns:social="http://www.adobe.com/social/1.0">
+<privilege abstract="false" name="social:scormRead"/>
+<privilege abstract="false" name="cq:storeUGC"/>
 <privilege abstract="false" name="crx:replicate"/>
 </privileges>
