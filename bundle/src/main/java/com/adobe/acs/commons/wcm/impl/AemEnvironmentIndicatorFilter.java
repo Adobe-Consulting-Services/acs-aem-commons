@@ -124,6 +124,25 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private static final String DEFAULT_TITLE_PREFIX = "";
 
     private String titlePrefix = DEFAULT_TITLE_PREFIX;
+    
+    /* Property: Always Include Base CSS */
+    
+    private boolean alwaysIncludeBaseCss;
+    
+    @Property(label = "Always Include Base CSS",
+        description = "Always include the base CSS scoped to #" + DIV_ID + " { .. }",
+        boolValue = false)
+    public static final String PROP_ALWAYS_INCLUDE_BASE_CSS = "always-include-base-css";
+    
+    /* Property: Always Include Color CSS */
+    
+    private boolean alwaysIncludeColorCss;
+    
+    @Property(label = "Always Include Color CSS",
+        description = "Always include the color CSS scoped to #" + DIV_ID + " { .. }",
+        boolValue = false)
+    public static final String PROP_ALWAYS_INCLUDE_COLOR_CSS = "always-include-color-css";
+    
 
     @Property(label = "Browser Title",
             description = "A prefix to add to the browser tab/window title; <THIS VALUE> | <ORIGINAL DOC TITLE>",
@@ -248,11 +267,27 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         }
         return true;
     }
+    
+    private String createBaseCss() {
+      return "#" + DIV_ID + " { "
+          + BASE_DEFAULT_STYLE
+          + " }";
+    }
 
-    private String createCss(final String providedColor) {
+    private String createColorCss(final String providedColor) {
         return "#" + DIV_ID + " { "
-                + "background-color:" + providedColor + BASE_DEFAULT_STYLE
+                + "background-color:" + providedColor
                 + " }";
+    }
+    
+    private boolean shouldWriteBaseCss() {
+        return alwaysIncludeBaseCss || 
+            StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
+    }
+    
+    private boolean shouldWriteColorCss() {
+        return alwaysIncludeColorCss ||
+            StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
     }
 
     @Activate
@@ -264,12 +299,19 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         cssOverride = PropertiesUtil.toString(config.get(PROP_CSS_OVERRIDE), "");
         innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), "");
         innerHTML = new StrSubstitutor(StrLookup.systemPropertiesLookup()).replace(innerHTML);
-
-        // Only write CSS variable if cssOverride or color is provided
+        
+        StringBuilder cssSB = new StringBuilder();
+        
+        if (shouldWriteBaseCss()) {
+            cssSB.append(createBaseCss());
+        }
+        
+        if (shouldWriteColorCss()) {
+            cssSB.append(createColorCss(color));
+        }
+        
         if (StringUtils.isNotBlank(cssOverride)) {
-            css = cssOverride;
-        } else if (StringUtils.isNotBlank(color)) {
-            css = createCss(color);
+            cssSB.append(cssOverride);
         }
 
         titlePrefix = xss.encodeForJSString(
