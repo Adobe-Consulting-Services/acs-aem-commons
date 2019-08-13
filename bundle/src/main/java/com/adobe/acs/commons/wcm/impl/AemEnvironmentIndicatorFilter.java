@@ -281,13 +281,13 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
     
     private boolean shouldWriteBaseCss() {
-        return alwaysIncludeBaseCss || 
-            StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
+        return alwaysIncludeBaseCss
+            ||  StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
     }
     
     private boolean shouldWriteColorCss() {
-        return alwaysIncludeColorCss ||
-            StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
+        return alwaysIncludeColorCss
+            || StringUtils.isBlank(cssOverride) && StringUtils.isNotBlank(color);
     }
 
     @Activate
@@ -300,18 +300,18 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         innerHTML = PropertiesUtil.toString(config.get(PROP_INNER_HTML), "");
         innerHTML = new StrSubstitutor(StrLookup.systemPropertiesLookup()).replace(innerHTML);
         
-        StringBuilder cssSB = new StringBuilder();
+        StringBuilder cssSb = new StringBuilder();
         
         if (shouldWriteBaseCss()) {
-            cssSB.append(createBaseCss());
+            cssSb.append(createBaseCss());
         }
         
         if (shouldWriteColorCss()) {
-            cssSB.append(createColorCss(color));
+            cssSb.append(createColorCss(color));
         }
         
         if (StringUtils.isNotBlank(cssOverride)) {
-            cssSB.append(cssOverride);
+            cssSb.append(cssOverride);
         }
 
         titlePrefix = xss.encodeForJSString(
