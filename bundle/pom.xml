@@ -66,7 +66,7 @@
                             !org.bouncycastle.jce.*,
                             !org.checkerframework.checker.nullness.qual,
                             !android.util.*,
-                            <!-- shaded libraries -->
+                                                                                                                <!-- shaded libraries -->
                             !com.google.common.*,
                             !com.google.thirdparty.*,
                             !com.jcraft.*,
@@ -528,8 +528,8 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-        </dependency>        
-        
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -605,11 +605,11 @@
             <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency> 
-            <artifactId>jackrabbit-api</artifactId> 
-            <version>2.16.3</version> 
-            <groupId>org.apache.jackrabbit</groupId> 
-            <scope>test</scope> 
+        <dependency>
+            <artifactId>jackrabbit-api</artifactId>
+            <version>2.16.3</version>
+            <groupId>org.apache.jackrabbit</groupId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -730,7 +730,7 @@
             <version>2.8.4</version>
             <scope>provided</scope>
         </dependency>
-        <!--  Build Dependencies -->        
+        <!--  Build Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.annotation</artifactId>
@@ -741,6 +741,11 @@
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
