@@ -152,11 +152,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
-    private static final String[] REJECT_PATH_PREFIXES = new String[]{};
-
     private String css = "";
 
-    private ServiceRegistration filterRegistration;
+    private ServiceRegistration<Filter> filterRegistration;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -165,8 +163,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     @Override
     @SuppressWarnings("squid:S3776")
-    public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
-                               final FilterChain filterChain) throws IOException, ServletException {
+    public final void doFilter(final ServletRequest servletRequest,
+            final ServletResponse servletResponse,
+            final FilterChain filterChain) throws IOException, ServletException {
 
         if (!(servletRequest instanceof HttpServletRequest)
                 || !(servletResponse instanceof HttpServletResponse)) {
@@ -317,7 +316,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/");
             filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
                     "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
-            filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(),
+            filterRegistration = ctx.getBundleContext().registerService(Filter.class,
                     this, filterProps);
         }
 
