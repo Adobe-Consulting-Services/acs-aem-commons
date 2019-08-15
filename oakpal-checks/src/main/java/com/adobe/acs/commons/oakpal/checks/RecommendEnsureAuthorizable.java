@@ -21,6 +21,7 @@ package com.adobe.acs.commons.oakpal.checks;
 
 import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -52,7 +53,7 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public final class RecommendEnsureAuthorizable extends CompatBaseFactory implements ProgressCheckFactory {
+public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -76,7 +77,7 @@ public final class RecommendEnsureAuthorizable extends CompatBaseFactory impleme
         Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopeIds) {
             this.severity = severity;
             this.recommendation = recommendation;
-            this.scopeIds = scopeIds;
+            this.scopeIds = new ArrayList<>(scopeIds);
         }
 
         @Override

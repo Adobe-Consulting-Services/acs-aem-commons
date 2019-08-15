@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="Oak Index Manager (Deprecated)"
-    jcr:description="Use AEM's Oak Index Manager instead."
-    icon="data"
-    href="/etc/acs-commons/oak-index-manager.html"
-    id="acs-commons__oak-index-manager"
-    target="_blank"/>

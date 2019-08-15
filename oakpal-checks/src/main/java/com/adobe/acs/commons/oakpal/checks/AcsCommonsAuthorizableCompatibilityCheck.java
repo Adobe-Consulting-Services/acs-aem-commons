@@ -21,6 +21,7 @@ package com.adobe.acs.commons.oakpal.checks;
 
 import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -46,7 +47,7 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
  * compatibility check.</dd>
  * </dl>
  */
-public final class AcsCommonsAuthorizableCompatibilityCheck extends CompatBaseFactory implements ProgressCheckFactory {
+public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressCheckFactory {
     public static final String NT_REP_AUTHORIZABLE = "rep:Authorizable";
     public static final String CONFIG_SCOPE_IDS = "scopeIds";
 
@@ -60,7 +61,7 @@ public final class AcsCommonsAuthorizableCompatibilityCheck extends CompatBaseFa
         private final List<Rule> scopeIds;
 
         Check(final List<Rule> scopeIds) {
-            this.scopeIds = scopeIds;
+            this.scopeIds = new ArrayList<>(scopeIds);
         }
 
         @Override
