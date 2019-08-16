@@ -6,9 +6,14 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.0...HEAD
 
 ### Fixed
 - #1975 - Split application content from mutable content
+
+### Added
+- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service uwer
 
 ## [4.3.0] - 2019-07-31
 
@@ -314,8 +319,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
-
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
 
 ## [3.16.0] - 2018-05-10
 
