@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="nt:unstructured"
-    jcr:title="Manage Controlled Processes"
-    jcr:description="Execute and monitor a suite of provided tasks."
-    href="/etc/acs-commons/manage-controlled-processes.html"
-    id="acs-commons__manage-controlled-processes"
-    target="_blank"/>

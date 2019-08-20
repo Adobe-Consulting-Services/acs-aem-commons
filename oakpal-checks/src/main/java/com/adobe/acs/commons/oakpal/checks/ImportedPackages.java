@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.ProgressCheckFactory;
 import net.adamcin.oakpal.core.SimpleProgressCheck;
+import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.vault.fs.config.MetaInf;
 import org.apache.jackrabbit.vault.packaging.PackageId;
@@ -125,7 +126,7 @@ public final class ImportedPackages implements ProgressCheckFactory {
 
         @Override
         public void importedPath(PackageId packageId, String path, Node node) throws RepositoryException {
-            if (node.isNodeType("nt:file") && path.endsWith(".jar")) {
+            if (node.isNodeType(JcrConstants.NT_FILE) && path.endsWith(".jar")) {
                 try (InputStream stream = JcrUtils.readFile(node)) {
                     ZipInputStream zipInputStream = new ZipInputStream(stream);
                     ZipEntry entry = zipInputStream.getNextEntry();

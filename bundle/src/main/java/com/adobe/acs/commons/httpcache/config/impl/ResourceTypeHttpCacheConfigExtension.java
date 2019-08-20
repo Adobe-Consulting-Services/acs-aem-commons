@@ -174,7 +174,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         pathPatterns = ParameterUtil.toPatterns(PropertiesUtil.toStringArray(configs.get(PROP_PATHS), new String[]{}));
         checkContentResourceType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_CONTENT_RESOURCE_TYPE), false);
         checkResourceSuperType = PropertiesUtil.toBoolean(configs.get(PROP_CHECK_RESOURCE_SUPER_TYPE), false);
-
+        configName = PropertiesUtil.toString(configs.get(PROP_CONFIG_NAME), "");
         log.info("ResourceHttpCacheConfigExtension activated/modified.");
     }
 }

@@ -79,9 +79,9 @@ public class DialogResourceProviderFactoryTest {
         assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
         assertTrue("Should resolve model two dialog", resourceExists("/apps/test/model2/cq:dialog"));
         assertTrue("Should resolve model three dialog", resourceExists("/apps/test/model3/cq:dialog"));
-        assertTrue("Should resolve model one dialog items", resourceExists("/apps/test/model1/cq:dialog/items"));
-        assertTrue("Should resolve model two dialog items", resourceExists("/apps/test/model2/cq:dialog/items"));
-        assertTrue("Should resolve model three dialog items", resourceExists("/apps/test/model3/cq:dialog/items"));
+        assertTrue("Should resolve model one dialog items", resourceExists("/apps/test/model1/cq:dialog/content/items"));
+        assertTrue("Should resolve model two dialog items", resourceExists("/apps/test/model2/cq:dialog/content/items"));
+        assertTrue("Should resolve model three dialog items", resourceExists("/apps/test/model3/cq:dialog/content/items"));
     }
 
     private boolean resourceExists(String path) {

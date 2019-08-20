@@ -28,7 +28,6 @@ import com.google.common.io.Files;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -111,9 +110,9 @@ public class FileAssetIngestorTest {
         ingestor = new FileAssetIngestor(context.getService(MimeTypeService.class));
         ingestor.timeout = 1;
         ingestor.jcrBasePath = "/content/dam";
-        ingestor.ignoreFileList = Collections.emptyList();
-        ingestor.ignoreExtensionList = Collections.emptyList();
-        ingestor.ignoreFolderList = Arrays.asList(".ds_store");
+        ingestor.fileFilter = new NamesFilter();
+        ingestor.extensionFilter = new NamesFilter();
+        ingestor.folderFilter = new NamesFilter("-.ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
         ingestor.fileBasePath = tempDirectory.getAbsolutePath();
 

@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import java.util.Collection;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
@@ -130,8 +131,32 @@ public final class FormComponent extends AbstractContainerComponent {
             res.setResourceResolver(getHelper().getRequest().getResourceResolver());
         }
 
-        res.addChild(generateItemsResource(getPath() + "/items", true));
+        AbstractResourceImpl items = generateItemsResource(getPath() + "/items", true);
+        if (isForceDotSlashPrefix()) {
+            correctNameAttribute(items);
+        }
+        res.addChild(items);
+
         return res;
+    }
+
+    /**
+     * In order to keep the sling post handler happy, form field names have to start with "./" otherwise the values don't go to the right places.
+     * @param res
+     */
+    private void correctNameAttribute(Resource res) {
+        String name = (res.getValueMap() != null) ? (String) res.getValueMap().get("name") : null;
+        // If we replace all name attibutes it causes issues with stuff like the RTE configration
+        boolean hasResourceType = StringUtils.isNotBlank(res.getResourceType());
+        if (name != null && !name.startsWith("./") && hasResourceType) {
+            res.getValueMap().put("name", "./" + name);
+        }
+        res.getChildren().forEach(this::correctNameAttribute);
+    }
+
+    @Override
+    public boolean hasCategories(Collection<FieldComponent> values) {
+        return getDialogStyle() == DialogProvider.DialogStyle.COMPONENT || super.hasCategories(values);
     }
 
     /**

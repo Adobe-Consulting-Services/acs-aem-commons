@@ -53,9 +53,9 @@ public class QueryHelperImpl implements QueryHelper {
     @Reference
     private CloseableQueryBuilder queryBuilder;
 
-    private static final String QUERY_BUILDER = "queryBuilder";
+    public static final String QUERY_BUILDER = "queryBuilder";
 
-    private static final String LIST = "list";
+    public static final String LIST = "list";
 
     /**
      * Find all the resources needed for the package definition.
@@ -78,7 +78,7 @@ public class QueryHelperImpl implements QueryHelper {
         final String[] lines = StringUtils.split(statement, '\n');
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            return getResourcesFromQueryBuilder(resourceResolver, lines);
+            return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
         } else if (LIST.equalsIgnoreCase(language)) {
             return getResourcesFromList(resourceResolver, lines, relPath);
         } else {
@@ -119,7 +119,7 @@ public class QueryHelperImpl implements QueryHelper {
         return resources;
     }
 
-    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines) throws RepositoryException {
+    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines, String relPath) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
@@ -131,7 +131,12 @@ public class QueryHelperImpl implements QueryHelper {
         try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
             final List<Hit> hits = query.getResult().getHits();
             for (final Hit hit : hits) {
-                resources.add(resourceResolver.getResource(hit.getPath()));
+                final Resource resource = resourceResolver.getResource(hit.getPath());
+                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                if (relativeAwareResource != null) {
+                    resources.add(relativeAwareResource);
+                }
             }
         }
 

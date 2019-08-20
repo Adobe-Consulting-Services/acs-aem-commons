@@ -95,7 +95,7 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
 
     @Override
     public Node read(JsonReader reader) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("JcrJsonAdaper.read(JsonReader) is not supported yet.");
     }
 
 }
