@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #1975 - Split application content from mutable content
 
+### Added
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
+
 ## [4.3.0] - 2019-07-31
 
 ### Fixed
