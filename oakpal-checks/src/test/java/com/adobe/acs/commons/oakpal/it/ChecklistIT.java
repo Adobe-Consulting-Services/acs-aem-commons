@@ -62,7 +62,9 @@ public class ChecklistIT {
         expectNames.addAll(Stream.of(
                 "acHandling-merge-or-better",
                 "enforce-no-libs",
-                "enforce-no-deletes"
+                "enforce-no-deletes",
+                "base-version-compatibility",
+                "apps-composite-store-alignment"
         ).map(name -> OAKPAL_MODULE_NAME + "/" + OAKPAL_CHECKLIST_INTERNAL + "/" + name)
                 .collect(Collectors.toList()));
 

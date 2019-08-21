@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.AbstractResource;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -162,7 +163,7 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public boolean isResourceType(String type) {
-        return getResourceType().equals(type);
+        return Objects.equals(getResourceType(), type);
     }
 
     public void setPath(String path) {

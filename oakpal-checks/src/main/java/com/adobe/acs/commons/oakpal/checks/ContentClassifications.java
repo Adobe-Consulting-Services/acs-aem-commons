@@ -23,6 +23,7 @@ import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
 import static net.adamcin.oakpal.core.JavaxJson.optArray;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -65,13 +66,16 @@ import org.apache.jackrabbit.vault.util.Text;
  * default applies.</dd>
  * </dl>
  */
-public final class ContentClassifications extends CompatBaseFactory implements ProgressCheckFactory {
+public final class ContentClassifications implements ProgressCheckFactory {
     private static final String P_SLING_RESOURCE_TYPE = "{http://sling.apache.org/jcr/sling/1.0}resourceType";
     private static final String P_SLING_RESOURCE_SUPER_TYPE = "{http://sling.apache.org/jcr/sling/1.0}resourceSuperType";
     private static final String T_GRANITE_PUBLIC_AREA = "{http://www.adobe.com/jcr/granite/1.0}PublicArea";
     private static final String T_GRANITE_ABSTRACT_AREA = "{http://www.adobe.com/jcr/granite/1.0}AbstractArea";
     private static final String T_GRANITE_FINAL_AREA = "{http://www.adobe.com/jcr/granite/1.0}FinalArea";
     private static final String T_GRANITE_INTERNAL_AREA = "{http://www.adobe.com/jcr/granite/1.0}InternalArea";
+    @SuppressWarnings("CQRules:CQBP-71")
+    private static final String APPS_PATH_PREFIX = "/apps";
+    @SuppressWarnings("CQRules:CQBP-71")
     private static final String LIBS_PATH_PREFIX = "/libs";
 
     private static final String CONFIG_LIBS_PATH_PREFIX = "libsPathPrefix";
@@ -86,7 +90,7 @@ public final class ContentClassifications extends CompatBaseFactory implements P
                 Violation.Severity.MAJOR.name()).toUpperCase());
         final List<Rule> scopePaths = Rule.fromJsonArray(arrayOrEmpty(jsonObject, CONFIG_SCOPE_PATHS));
         final List<String> searchPaths = optArray(jsonObject, CONFIG_SEARCH_PATHS)
-                .map(JavaxJson::mapArrayOfStrings).orElse(Arrays.asList("/apps", "/libs"));
+                .map(JavaxJson::mapArrayOfStrings).orElse(Arrays.asList(APPS_PATH_PREFIX, LIBS_PATH_PREFIX));
 
         return new Check(libsPathPrefix, severity, scopePaths, searchPaths);
     }
@@ -240,10 +244,12 @@ public final class ContentClassifications extends CompatBaseFactory implements P
             this.mixinType = mixinType;
         }
 
-        public static Set<AreaType> ALLOWED_FOR_RESOURCE_TYPE = new HashSet<>(Arrays.asList(PUBLIC, FINAL));
-        public static Set<AreaType> ALLOWED_FOR_RESOURCE_SUPER_TYPE = new HashSet<>(Arrays.asList(PUBLIC, ABSTRACT));
+        protected static final Set<AreaType> ALLOWED_FOR_RESOURCE_TYPE =
+                Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PUBLIC, FINAL)));
+        protected static final Set<AreaType> ALLOWED_FOR_RESOURCE_SUPER_TYPE =
+                Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PUBLIC, ABSTRACT)));
 
-        public static final AreaType fromNode(final Node node) throws RepositoryException {
+        public static AreaType fromNode(final Node node) throws RepositoryException {
             for (AreaType value : values()) {
                 if (node.isNodeType(value.mixinType)) {
                     return value;
