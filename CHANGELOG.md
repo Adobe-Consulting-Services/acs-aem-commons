@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #1975 - Split application content from mutable content
+- #1916 - Adjust BrandPortalSyncProcessTest to Java 11
 
 ## [4.3.0] - 2019-07-31
 
@@ -69,7 +70,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - Adjust JCRHttpCacheStoreImplTest to Java 11
 - Adjust PageCompareDataImplTest to Java 11
 - Adjust EntryNodeWriterTest to Java 11
-- Adjust BrandPortalSyncProcessTest to Java 11
 - Adjust I18nProviderImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
