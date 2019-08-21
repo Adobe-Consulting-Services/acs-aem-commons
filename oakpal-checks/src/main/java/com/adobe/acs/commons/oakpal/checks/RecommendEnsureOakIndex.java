@@ -21,6 +21,7 @@ package com.adobe.acs.commons.oakpal.checks;
 
 import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -49,7 +50,7 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
  * <dd>(default: {@link #DEFAULT_RECOMMENDATION}) provide a recommendation message.</dd>
  * </dl>
  */
-public final class RecommendEnsureOakIndex extends CompatBaseFactory implements ProgressCheckFactory {
+public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
     public static final String NN_OAK_INDEX = "oak:index";
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
@@ -73,7 +74,7 @@ public final class RecommendEnsureOakIndex extends CompatBaseFactory implements 
         Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopePaths) {
             this.severity = severity;
             this.recommendation = recommendation;
-            this.scopePaths = scopePaths;
+            this.scopePaths = new ArrayList<>(scopePaths);
         }
 
         @Override
