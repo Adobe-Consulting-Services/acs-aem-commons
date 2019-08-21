@@ -1,3 +1,4 @@
 /nb-configuration.xml
 *.factorypath
 /dependency-reduced-pom.xml
+/nbactions-autoInstallBundle.xml

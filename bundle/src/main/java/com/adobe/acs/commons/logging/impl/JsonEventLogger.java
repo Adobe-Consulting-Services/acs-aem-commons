@@ -104,6 +104,7 @@ public class JsonEventLogger implements EventHandler {
     @Property(label = "Logger Name", description = "The Sling SLF4j Logger Name or Category to send the JSON messages to. Leave empty to disable the logger.")
     static final String OSGI_CATEGORY = "event.logger.category";
 
+    @SuppressWarnings("AEM Rules:AEM-1")
     @Property(label = "Logger Level", value = DEFAULT_LEVEL, options = {
         @PropertyOption(name = "TRACE", value = "Trace"),
         @PropertyOption(name = "DEBUG", value = "Debug"),

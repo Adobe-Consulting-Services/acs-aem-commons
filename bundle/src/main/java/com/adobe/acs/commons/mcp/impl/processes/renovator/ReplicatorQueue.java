@@ -83,7 +83,7 @@ public class ReplicatorQueue implements Replicator {
 
     @Override
     public Iterator<String> getActivatedPaths(Session session, String s) throws ReplicationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getActivateOperations().keySet().iterator();
     }
 
     /**
@@ -92,8 +92,8 @@ public class ReplicatorQueue implements Replicator {
     @Override
     @Deprecated
     public List<ReplicationContentFilter> createContentFilterChain(ReplicationAction action) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
+        throw new UnsupportedOperationException("ReplicatorQueue.createContentFilterChain not supported and is deprecated.");
+    }
 
     /**
      * @return the deactivateOperations

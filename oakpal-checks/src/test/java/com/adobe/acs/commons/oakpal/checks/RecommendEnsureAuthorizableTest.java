@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.OrgJson.arr;
-import static net.adamcin.oakpal.core.OrgJson.key;
-import static net.adamcin.oakpal.core.OrgJson.obj;
+import static net.adamcin.oakpal.core.JavaxJson.arr;
+import static net.adamcin.oakpal.core.JavaxJson.key;
+import static net.adamcin.oakpal.core.JavaxJson.obj;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
