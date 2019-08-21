@@ -161,6 +161,7 @@ public class SystemNotificationsImpl extends AbstractHtmlRequestInjector impleme
     }
 
     @Override
+    @SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
     public String getNotificationId(final Page notificationPage) {
         final String path = notificationPage.getPath();
         final String lastModified = String.valueOf(notificationPage.getLastModified().getTimeInMillis());

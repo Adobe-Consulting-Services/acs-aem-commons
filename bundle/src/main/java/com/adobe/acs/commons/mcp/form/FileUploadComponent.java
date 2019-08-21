@@ -21,6 +21,8 @@ package com.adobe.acs.commons.mcp.form;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+import java.util.Optional;
+
 /**
  * File upload component
  */
@@ -36,7 +38,7 @@ public final class FileUploadComponent extends FieldComponent {
         getComponentMetadata().put("autoStart", false);
 
         if (hasOption(OPTION_MIME_TYPES)) {
-            getComponentMetadata().put(OPTION_MIME_TYPES, getOption(OPTION_MIME_TYPES).get());
+            getOption(OPTION_MIME_TYPES).ifPresent(s -> getComponentMetadata().put(OPTION_MIME_TYPES, s));
         }
     }
 }

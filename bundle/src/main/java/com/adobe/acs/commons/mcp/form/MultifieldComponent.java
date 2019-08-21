@@ -46,6 +46,7 @@ public final class MultifieldComponent extends AbstractContainerComponent {
         setResourceType("granite/ui/components/coral/foundation/form/multifield");
     }
 
+    @SuppressWarnings({"unchecked", "squid:S2658"}) // class name is from a trusted source
     public void init() {
         if (hasOption(NODE_PATH)) {
             setDefaultChildComponent(NodeSelectComponent.class);

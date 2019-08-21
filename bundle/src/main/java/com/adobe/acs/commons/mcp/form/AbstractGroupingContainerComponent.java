@@ -33,6 +33,7 @@ import org.apache.sling.api.resource.Resource;
  */
 public abstract class AbstractGroupingContainerComponent extends ContainerComponent {
 
+    @SuppressWarnings({"squid:S1444", "squid:ClassVariableVisibilityCheck"}) // can't be fixed for backwards compatibility reasons
     public static String GENERIC_GROUP = "Misc";
     public static final String MARGIN_PROPERTY = "margin";
     public static final String ITEMS = "items";

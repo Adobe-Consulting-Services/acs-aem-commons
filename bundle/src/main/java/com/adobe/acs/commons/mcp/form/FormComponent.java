@@ -145,7 +145,7 @@ public final class FormComponent extends AbstractContainerComponent {
      * @param res
      */
     private void correctNameAttribute(Resource res) {
-        String name = (res.getValueMap() != null) ? (String) res.getValueMap().get("name") : null;
+        String name = res.getValueMap().get("name", String.class);
         // If we replace all name attibutes it causes issues with stuff like the RTE configration
         boolean hasResourceType = StringUtils.isNotBlank(res.getResourceType());
         if (name != null && !name.startsWith("./") && hasResourceType) {
