@@ -105,6 +105,7 @@ public class FileAssetIngestor extends AssetIngestor {
         instance.defineCriticalAction("Import Assets", rr, this::importAssets);
     }
 
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN") // url comes from trusted source
     HierarchicalElement getBaseFolder(final String url) throws RepositoryException {
         HierarchicalElement baseHierarchicalElement;
         if (url.toLowerCase().startsWith("sftp://")) {

@@ -70,12 +70,12 @@ public class UrlAssetImport extends AssetIngestor {
     private static final String ACTION_SKIPPED = "Skipped";
     private static final String ACTION_UNMATCHED = "Unmatched";
     private static final String ACTION_IMPORT = "Import";
-    public static String SOURCE = "source";
-    public static String TARGET_FOLDER = "target";
-    public static String ORIGINAL_FILE_NAME = "original";
-    public static String RENDITION_NAME = "rendition";
-    public static String CONTENT_BASE = "/content";
-    public static String UNKNOWN_TARGET_FOLDER = "/content/dam/unsorted";
+    public static final String SOURCE = "source";
+    public static final String TARGET_FOLDER = "target";
+    public static final String ORIGINAL_FILE_NAME = "original";
+    public static final String RENDITION_NAME = "rendition";
+    public static final String CONTENT_BASE = "/content";
+    public static final String UNKNOWN_TARGET_FOLDER = "/content/dam/unsorted";
 
     private static final Logger LOG = LoggerFactory.getLogger(UrlAssetImport.class);
     private HttpClientBuilderFactory httpFactory;

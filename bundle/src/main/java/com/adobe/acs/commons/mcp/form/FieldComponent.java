@@ -213,7 +213,7 @@ public abstract class FieldComponent {
 
     public final Collection<String> getOptionNames() {
         if (formField == null || formField.options() == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptySet();
         }
         return Stream.of(formField.options())
                 .map(s -> StringUtils.substringBefore(s, "="))

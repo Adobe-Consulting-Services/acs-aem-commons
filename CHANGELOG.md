@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Fixed
+- #1975 - Split application content from mutable content
+
 ## [4.3.0] - 2019-07-31
 
 ### Fixed

@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -476,11 +477,11 @@ public class HttpCacheConfigImpl implements HttpCacheConfig {
 
     @Override
     public List<Pattern> getExcludedResponseHeaderPatterns() {
-        return responseHeaderExclusions;
+        return Collections.unmodifiableList(responseHeaderExclusions);
     }
 
     @Override
     public List<String> getExcludedCookieKeys() {
-        return excludedCookieKeys;
+        return Collections.unmodifiableList(excludedCookieKeys);
     }
 }

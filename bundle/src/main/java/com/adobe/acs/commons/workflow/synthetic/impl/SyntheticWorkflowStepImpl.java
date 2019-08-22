@@ -26,17 +26,17 @@ import java.util.Map;
 
 public class SyntheticWorkflowStepImpl implements com.adobe.acs.commons.workflow.synthetic.SyntheticWorkflowStep {
     private final String id;
-    public Map<String, Object> metadataMap;
-    public SyntheticWorkflowRunner.WorkflowProcessIdType idType;
+    private final Map<String, Object> metadataMap;
+    private final SyntheticWorkflowRunner.WorkflowProcessIdType idType;
 
 
-    public SyntheticWorkflowStepImpl(String id, Map<String, Object> metadataMap) {
+    SyntheticWorkflowStepImpl(String id, Map<String, Object> metadataMap) {
         this.idType = SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_NAME;
         this.id = id;
         this.metadataMap = metadataMap;
     }
 
-    public SyntheticWorkflowStepImpl(String id, SyntheticWorkflowRunner.WorkflowProcessIdType type, Map<String, Object> metadataMap) {
+    SyntheticWorkflowStepImpl(String id, SyntheticWorkflowRunner.WorkflowProcessIdType type, Map<String, Object> metadataMap) {
         this.idType = type;
         this.id = id;
         this.metadataMap = metadataMap;

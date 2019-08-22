@@ -296,7 +296,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             log.debug("Using replication action type: {}", repActionType.name());
             return repActionType;
         } catch (IllegalArgumentException ex) {
-            log.debug("Using replication action type: {}", OPTION_INHERIT);
+            log.warn("Illegal action type configured: {}. Falling back to default: {}", replicationActionTypeName, OPTION_INHERIT);
             return null;
         }
     }

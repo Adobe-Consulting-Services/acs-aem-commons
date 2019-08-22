@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.OrgJson.arr;
-import static net.adamcin.oakpal.core.OrgJson.key;
-import static net.adamcin.oakpal.core.OrgJson.obj;
+import static net.adamcin.oakpal.core.JavaxJson.arr;
+import static net.adamcin.oakpal.core.JavaxJson.key;
+import static net.adamcin.oakpal.core.JavaxJson.obj;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -30,7 +30,6 @@ import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.ProgressCheck;
 import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
