@@ -191,7 +191,7 @@ public abstract class AbstractWorkflowRunner implements BulkWorkflowRunner {
         // Remove active payload
         workspace.removeActivePayload(payload);
 
-        // Increment the complete count
+        // Increment the fail count
         workspace.incrementFailCount();
 
         // Track the failure details
