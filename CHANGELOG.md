@@ -6,11 +6,10 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
-#1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
-
 
 ### Fixed
 - #1975 - Split application content from mutable content
+- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
 
 ## [4.3.0] - 2019-07-31
 
