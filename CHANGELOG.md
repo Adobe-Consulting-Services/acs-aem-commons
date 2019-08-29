@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+## [4.3.2] - 2019-08-29
+
 ### Fixed
 - #1975 - Split application content from mutable content
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
