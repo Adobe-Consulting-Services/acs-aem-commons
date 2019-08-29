@@ -21,6 +21,7 @@
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.TransientWorkflowUtil;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.SyntheticWorkflowRunnerImpl;
@@ -100,7 +101,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
             final WorkflowModel[] workflowModels = workflowSession.getModels();
 
             for (final WorkflowModel workflowModel : workflowModels) {
-                boolean transientWorkflow = isTransient(request.getResourceResolver(), workflowModel.getId());
+                boolean transientWorkflow = TransientWorkflowUtil.isTransient(request.getResourceResolver(), workflowModel.getId());
                 String workflowLabel = workflowModel.getTitle();
                 if (transientWorkflow) {
                     workflowLabel += " ( Transient )";
@@ -120,10 +121,6 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         }
     }
 
-    protected boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
-        Resource resource = resourceResolver.getResource(workflowModelId).getParent();
-        return resource.getValueMap().get("transient", false);
-    }
 
     private JsonObject withLabelValue(String label, String value) {
         JsonObject obj = new JsonObject();
