@@ -95,7 +95,7 @@
             pattern="/etc/acs-commons/reports(.*)?"
             mode="merge"/>
         <include pattern="/var/acs-commons/httpcache"/>
-        <include pattern="/var/acs-commons/rep:policy"/>
-        <include pattern="/var/workflow/instances/rep:policy"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
     </filter>
+    <include pattern="/var/workflow/instances/rep:policy"/>
 </workspaceFilter>
