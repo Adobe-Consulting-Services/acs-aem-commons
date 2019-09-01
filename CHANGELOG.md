@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+- #2032 - Fixed filter.xml on /var/acs-commons
+
 ## [4.3.2] - 2019-08-29
 
 ### Fixed
