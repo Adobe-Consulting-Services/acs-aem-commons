@@ -97,5 +97,5 @@
         <include pattern="/var/acs-commons/httpcache"/>
         <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
     </filter>
-    <include pattern="/var/workflow/instances/rep:policy"/>
+    <filter root="/var/workflow/instances/rep:policy"/>
 </workspaceFilter>
