@@ -45,7 +45,7 @@ public class ContentClassificationsTest extends CheckTestBase {
 
     static {
         INIT = new InitStage.Builder()
-                .withOrderedCndUrls(CND)
+                .withOrderedCndUrl(CND)
                 .withNs("sling", NS_URI_SLING)
                 .withNs("granite", NS_URI_GRANITE)
                 .withForcedRoot("/libs/acs/internal", "sling:Folder",
