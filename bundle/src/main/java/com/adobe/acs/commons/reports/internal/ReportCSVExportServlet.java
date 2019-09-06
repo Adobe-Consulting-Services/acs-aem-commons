@@ -121,7 +121,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       if (!StringUtils.isEmpty(className)) {
         try {
           log.debug("Finding ReportCellCSVExporter for {}", className);
-          @SuppressWarnings("unchecked")
+          @SuppressWarnings({"unchecked", "squid:S2658"}) // class name is from a trusted source
           Class<ReportCellCSVExporter> clazz =
                   (Class<ReportCellCSVExporter>) Class.forName(className, true, dynamicClassLoaderManager.getDynamicClassLoader());
           ReportCellCSVExporter exporter = column.adaptTo(clazz);

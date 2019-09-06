@@ -202,7 +202,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
         item, action, description, count, @FieldFormat(ValueFormat.storageSize) bytes
     }
 
-    List<EnumMap<ReportColumns, Object>> reportRows;
+    private List<EnumMap<ReportColumns, Object>> reportRows;
 
     private synchronized EnumMap<ReportColumns, Object> trackActivity(String item, String action, String description, Long bytes) {
         if (reportRows == null) {
@@ -503,7 +503,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
     private transient GenericReport report = new GenericReport();
 
     @Override
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
+    public synchronized void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         report.setRows(reportRows, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }

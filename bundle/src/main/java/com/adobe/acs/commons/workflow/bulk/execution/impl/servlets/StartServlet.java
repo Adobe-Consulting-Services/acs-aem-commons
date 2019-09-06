@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
 import com.adobe.acs.commons.workflow.bulk.execution.BulkWorkflowEngine;
+import com.adobe.acs.commons.workflow.bulk.execution.impl.TransientWorkflowUtil;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMTransientWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.AEMWorkflowRunnerImpl;
 import com.adobe.acs.commons.workflow.bulk.execution.impl.runners.FastActionManagerRunnerImpl;
@@ -63,7 +64,7 @@ public class StartServlet extends SlingAllMethodsServlet {
     private BulkWorkflowEngine bulkWorkflowEngine;
     
     @Override
-    @SuppressWarnings("squid:S1192")
+    @SuppressWarnings({"squid:S1192", "squid:S1872"})
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
@@ -93,7 +94,7 @@ public class StartServlet extends SlingAllMethodsServlet {
             properties.put("autoThrottle", getBoolean(params, "autoThrottle", true));
 
             if (AEMWorkflowRunnerImpl.class.getName().equals(properties.get("runnerType", String.class))
-                    && isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {
+                    && TransientWorkflowUtil.isTransient(request.getResourceResolver(), properties.get("workflowModel", String.class))) {
                 properties.put("runnerType", AEMTransientWorkflowRunnerImpl.class.getName());
             }
 
@@ -133,10 +134,5 @@ public class StartServlet extends SlingAllMethodsServlet {
                     "Could not start Bulk Workflow.",
                     e.getMessage());
         }
-    }
-
-    private boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
-        Resource resource = resourceResolver.getResource(workflowModelId).getParent();
-        return resource.getValueMap().get("transient", false);
     }
 }

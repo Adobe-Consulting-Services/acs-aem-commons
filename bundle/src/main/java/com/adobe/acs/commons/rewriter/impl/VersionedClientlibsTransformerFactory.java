@@ -314,6 +314,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         });
     }
 
+
+    @SuppressWarnings("squid:S2070") // MD5 not used cryptographically
     @Nonnull private String calculateMd5(@Nonnull final HtmlLibrary htmlLibrary, boolean isMinified) throws IOException {
         // make sure that the minified version is being request in case minification is globally enabled
         // as this will reset the dirty flag on the clientlib

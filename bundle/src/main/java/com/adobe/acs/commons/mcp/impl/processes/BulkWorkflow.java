@@ -177,10 +177,6 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
         return report;
     }
 
-    public List<EnumMap<ReportColumns, Object>> getReportRows() {
-        return reportRows;
-    }
-
     @Override
     public void init() throws RepositoryException {
         // nothing to do here
