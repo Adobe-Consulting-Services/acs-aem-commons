@@ -119,7 +119,7 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
                             <checklists>
                                 <checklist>content-class-aem65</checklist>
                             </checklists>
@@ -131,7 +131,7 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
                             <checklists>
                                 <checklist>content-class-aem64</checklist>
                             </checklists>
@@ -143,7 +143,7 @@
                             <goal>scan-many</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             <scanArtifacts>
                                 <artifact>
                                     <groupId>${project.groupId}</groupId>
@@ -162,9 +162,9 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>

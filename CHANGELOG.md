@@ -7,8 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
-### Fixed
-- #2033 - Upgraded oakpal to 1.4.0
+### Changed
+- #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
 
 ## [4.3.2] - 2019-08-29
 
