@@ -9,9 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [4.3.2] - 2019-08-29
 
+### Added
+- #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
+
 ### Fixed
 - #1975 - Split application content from mutable content
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
+- #986 - Rewrote Generic Lists to use Touch UI
 
 ## [4.3.0] - 2019-07-31
 
