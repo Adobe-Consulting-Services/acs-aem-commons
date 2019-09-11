@@ -42,7 +42,7 @@ public class RecommendEnsureOakIndexTest extends CheckTestBase {
 
     @Before
     public void setUp() throws Exception {
-        initStages.add(new InitStage.Builder().withOrderedCndUrls(CND).build());
+        initStages.add(new InitStage.Builder().withOrderedCndUrl(CND).build());
         pack = TestPackageUtil.prepareTestPackageFromFolder("oak-index-pack.zip",
                 new File("src/test/resources/oak-index-filevault"));
     }
