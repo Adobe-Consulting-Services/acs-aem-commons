@@ -130,8 +130,7 @@
                                     for (var idx in policyPaths) {
                                         var path = policyPaths[idx] + "/rep:policy";
                                         if (!session.itemExists(path)) {
-                                            // change this to major when missing paths are resolved.
-                                            oakpal.minorViolation("expected path creation: " + path, packageId);
+                                            oakpal.majorViolation("expected path creation: " + path, packageId);
                                         }
                                     }
                                 }

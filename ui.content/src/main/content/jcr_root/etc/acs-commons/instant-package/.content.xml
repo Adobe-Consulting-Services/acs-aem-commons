@@ -10,10 +10,7 @@
         jcr:title="Instant Package"
         jcr:uuid="512d8079-4cdc-49fe-ae92-eba91859faf1"
         sling:resourceType="acs-commons/components/utilities/instant-package">
-        <config
-            jcr:primaryType="nt:unstructured"
-            sling:resourceType="acs-commons/components/utilities/qr-code/config"
-            enabled="{Boolean}false"/>
+        <config/>
         <instant-package-image.png/>
         <clientlib-authoring/>
     </jcr:content>

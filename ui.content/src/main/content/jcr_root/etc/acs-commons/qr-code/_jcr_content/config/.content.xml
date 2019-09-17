@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- due to https://issues.apache.org/jira/browse/JCRVLT-255 this node needs to be in a separate .content.xml file -->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+    xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:mix="http://www.jcp.org/jcr/mix/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured" 
+    enabled="{Boolean}false" 
+    sling:resourceType="acs-commons/components/utilities/qr-code/config"/>
