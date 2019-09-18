@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
+- #2047 - Fixing issue where on-deploy-script was broken due to missing paths in filter.xml (Based on PR #2045 by kwin (Konrad Windszus))
 
 ## [4.3.2] - 2019-08-29
 
