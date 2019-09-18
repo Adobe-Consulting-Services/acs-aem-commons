@@ -96,6 +96,9 @@
             mode="merge"/>
         <include pattern="/var/acs-commons/httpcache"/>
         <include pattern="/var/acs-commons/rep:policy"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status/rep:policy(/.*)?"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status/README.txt"/>
         <include pattern="/var/workflow/instances/rep:policy"/>
     </filter>
 </workspaceFilter>
