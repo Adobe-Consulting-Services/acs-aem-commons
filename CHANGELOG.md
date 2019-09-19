@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
 
+### Fixed
+- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
+
 ## [4.3.2] - 2019-08-29
 
 ### Fixed
