@@ -117,7 +117,7 @@
                                         "/etc/cloudservices/sharethis",
                                         "/etc/cloudservices/typekit",
                                         "/etc/packages",
-                                        "/etc/notifications/email",
+                                        "/etc/notification/email",
                                         "/etc/workflow/instances",
                                         "/home/groups",
                                         "/home/users",
@@ -125,7 +125,6 @@
                                         "/var/acs-commons",
                                         "/var/acs-commons/httpcache",
                                         "/var/acs-commons/mcp",
-                                        "/var/acs-commons/reports",
                                         "/var/acs-commons/on-deploy-scripts-status"
                                     ];
                                     for (var idx in policyPaths) {
