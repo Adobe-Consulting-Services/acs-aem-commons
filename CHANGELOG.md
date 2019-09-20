@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 
+### Fixed
+- #2053 - ETag header not properly delivered from the servlet (missing quotes)
+
 ## [4.3.2] - 2019-08-29
 
 ### Added
