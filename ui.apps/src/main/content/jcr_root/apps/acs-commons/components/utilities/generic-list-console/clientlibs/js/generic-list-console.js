@@ -75,6 +75,8 @@
                 "./jcr:content/jcr:primaryType" : "nt:unstructured",
                 "./jcr:content/sling:resourceType" : "acs-commons/components/utilities/genericlist",
                 "./jcr:content/jcr:title" : title,
+                "./jcr:content/image/jcr:primaryType" : "nt:unstructured",
+                "./jcr:content/image/fileReference" : "/apps/acs-commons/components/utilities/genericlist/generic-list.png",
                 "./jcr:content/list/jcr:primaryType" : "nt:unstructured"
             },
             success : () => finishCreation(listPath),
