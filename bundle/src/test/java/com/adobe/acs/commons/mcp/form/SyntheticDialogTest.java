@@ -175,6 +175,7 @@ public class SyntheticDialogTest {
         String textArea;
 
         String beanProperty;
+
         @FormField(name = "Bean property", category="4")
         public String getBeanProperty() {
             return beanProperty;
