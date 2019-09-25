@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2046 - /var/acs-commons/on-deploy-scripts-status never gets created
 - #2044 - filter.xml below ui.content not containing all relevant entries
+- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 
 ## [4.3.2] - 2019-08-29
 
