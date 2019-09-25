@@ -258,7 +258,7 @@
                     variant="actionBar">
                     <data
                         jcr:primaryType="nt:unstructured"
-                        href.uritemplate="/mnt/overlay/acs-commons/components/utilities/generic-list-console/movepagewizard.html{+item}"/>
+                        href.uritemplate="/mnt/overlay/wcm/core/content/sites/movepagewizard.html{+item}"/>
                 </movepage>
                 <deletepage
                     granite:rel="cq-siteadmin-admin-actions-delete-activator"
