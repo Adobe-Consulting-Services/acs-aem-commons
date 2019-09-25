@@ -53,6 +53,7 @@ public class SyntheticDialogTest {
         assertFieldExists("tags");
         assertFieldExists("textArea");
         assertFieldExists("beanProperty");
+        assertFieldExists("booleanProperty");
     }
 
     public void assertFieldExists(String name) {
@@ -179,6 +180,13 @@ public class SyntheticDialogTest {
         @FormField(name = "Bean property", category="4")
         public String getBeanProperty() {
             return beanProperty;
+        }
+
+        boolean booleanProperty;
+
+        @FormField(component = CheckboxComponent.class, name = "Boolean property", category="4")
+        public boolean isBooleanProperty() {
+            return booleanProperty;
         }
     }
 
