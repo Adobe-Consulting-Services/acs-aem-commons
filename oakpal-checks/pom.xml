@@ -42,7 +42,6 @@
                                     OAKPAL-INF/checklist/content-class-aem64.json,\
                                     OAKPAL-INF/checklist/content-class-aem65.json
                                 Export-Package: com.adobe.acs.commons.oakpal.checks
-                                Import-Package: org.json;version="[20090211,20180813]",*
                             ]]></bnd>
                         </configuration>
                     </execution>
@@ -57,6 +56,28 @@
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.adamcin.oakpal</groupId>
+                <artifactId>oakpal-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>opear-package</id>
+                        <goals>
+                            <goal>opear-plan</goal>
+                            <goal>opear-package</goal>
+                        </goals>
+                        <configuration>
+                            <planParams>
+                                <checklists>
+                                    <checklist>basic</checklist>
+                                    <checklist>acs-commons-integrators</checklist>
+                                    <checklist>content-class-aem65</checklist>
+                                </checklists>
+                            </planParams>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -252,10 +273,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -278,6 +301,7 @@
         <dependency>
             <groupId>net.adamcin.oakpal</groupId>
             <artifactId>oakpal-testing</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
