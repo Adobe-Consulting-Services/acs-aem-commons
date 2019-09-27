@@ -24,26 +24,17 @@ import com.adobe.acs.commons.httpcache.config.HttpCacheConfigExtension;
 import com.adobe.acs.commons.httpcache.config.impl.keys.KeyValueCacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 import com.adobe.acs.commons.httpcache.keys.CacheKeyFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtension, CacheKeyFactory {
 
-    public abstract Map<String, String[]> getAllowedKeyValues();
-
-    public abstract String getCacheKeyId();
-
-    @Override
-    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
-        return accepts(request, cacheConfig, getAllowedKeyValues());
-    }
-
-    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
-
     @Override
     public CacheKey build(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
-        return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues());
+        return new KeyValueCacheKey(request, cacheConfig, getCacheKeyId(), getAllowedKeyValues(), getActualValues(request));
     }
 
     @Override
@@ -60,4 +51,33 @@ public abstract class AbstractKeyValueExtension implements HttpCacheConfigExtens
         // Validate if key request uri can be constructed out of uri patterns in cache config.
         return new KeyValueCacheKey(key.getUri(), cacheConfig, getCacheKeyId(), getAllowedKeyValues()).equals(key);
     }
+
+    @Override
+    public boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig) {
+        return accepts(request, cacheConfig, getAllowedKeyValues());
+    }
+
+    public abstract boolean accepts(SlingHttpServletRequest request, HttpCacheConfig cacheConfig, Map<String, String[]> allowedKeyValues);
+
+    public abstract Map<String, String[]> getAllowedKeyValues();
+
+    public abstract String getCacheKeyId();
+
+    protected abstract String getActualValue(String key, SlingHttpServletRequest request);
+
+    protected Map<String, String> getActualValues(SlingHttpServletRequest request) {
+
+        HashMap<String,String> foundValues = new HashMap<>();
+        for (final Map.Entry<String, String[]> entry : getAllowedKeyValues().entrySet()) {
+            final String key = entry.getKey();
+            final String value = getActualValue(key, request);
+
+            if(StringUtils.isNotBlank(value)){
+                foundValues.put(key, value);
+            }
+        }
+
+        return foundValues;
+    }
+
 }

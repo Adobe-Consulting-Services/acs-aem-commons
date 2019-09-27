@@ -86,8 +86,8 @@
                     <!-- use mvn oakpal:webster -Dwebster.repositoryHome=/path/to/crx-quickstart/repository to update
                     nodetypes.cnd and privileges.xml in the package -->
 
-                    <!-- Enforce separation of content and code (CONTENT ONLY) -->
                     <checks>
+                        <!-- Enforce separation of content and code (CONTENT ONLY) -->
                         <check>
                             <name>basic/paths</name>
                             <config>
@@ -97,9 +97,91 @@
                                         <type>deny</type>
                                     </rule>
                                 </rules>
+                                <denyAllDeletes>true</denyAllDeletes>
                             </config>
                         </check>
+                        <!-- check that rep:policy nodes are actually created by the package -->
+                        <check>
+                            <name>check-expected-policy-paths</name>
+                            <inlineScript>
+                                function afterExtract(packageId, session) {
+                                    var policyPaths = [
+                                        "/oak:index",
+                                        "/content",
+                                        "/content/dam",
+                                        "/etc",
+                                        "/etc/acs-commons/bulk-workflow-manager",
+                                        "/etc/acs-commons/notifications",
+                                        "/etc/acs-commons/redirect-maps",
+                                        "/etc/cloudservices/dtm",
+                                        "/etc/cloudservices/sharethis",
+                                        "/etc/cloudservices/typekit",
+                                        "/etc/packages",
+                                        "/etc/notification/email",
+                                        "/etc/workflow/instances",
+                                        "/home/groups",
+                                        "/home/users",
+                                        "/var/workflow/instances",
+                                        "/var/acs-commons",
+                                        "/var/acs-commons/httpcache",
+                                        "/var/acs-commons/mcp",
+                                        "/var/acs-commons/on-deploy-scripts-status"
+                                    ];
+                                    for (var idx in policyPaths) {
+                                        var path = policyPaths[idx] + "/rep:policy";
+                                        if (!session.itemExists(path)) {
+                                            // change this to major when missing paths are resolved.
+                                            oakpal.minorViolation("expected path creation: " + path, packageId);
+                                        }
+                                    }
+                                }
+                            </inlineScript>
+                        </check>
                     </checks>
+
+                    <!-- assume that we are installing into an instance where utility pages and configs have already
+                    been created for prior versions -->
+                    <forcedRoots>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/automatic-package-replication/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/bulk-workflow-manager/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/dispatcher-flush/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/exporters/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/instant-package/jcr:content/config/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/lists/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/notifications/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/packagers/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/qr-code/jcr:content/config/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/acs-commons/redirect-maps/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/cloudservices/dtm/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/cloudservices/sharethis/default</path>
+                        </forcedRoot>
+                        <forcedRoot>
+                            <path>/etc/cloudservices/typekit/default</path>
+                        </forcedRoot>
+                    </forcedRoots>
 
                     <websterTargets>
                         <nodetypes />
@@ -119,7 +201,7 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
                             <checklists>
                                 <checklist>content-class-aem65</checklist>
                             </checklists>
@@ -131,7 +213,7 @@
                             <goal>scan</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
                             <checklists>
                                 <checklist>content-class-aem64</checklist>
                             </checklists>
@@ -143,7 +225,7 @@
                             <goal>scan-many</goal>
                         </goals>
                         <configuration>
-                            <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                            <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             <scanArtifacts>
                                 <artifact>
                                     <groupId>${project.groupId}</groupId>
@@ -162,9 +244,9 @@
                         </goals>
                         <configuration>
                             <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-reports/oakpal-summary-min.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
                             </summaryFiles>
                         </configuration>
                     </execution>
