@@ -58,7 +58,7 @@ var ScriptRunner = {
                     }
                 });
                 ScriptRunner.startDialog.fullscreen = true;
-                window.top.document.body.appendChild(ScriptRunner.startDialog);
+//                window.top.document.body.appendChild(ScriptRunner.startDialog);
                 ScriptRunner.startDialog.show();
             }
         });
@@ -298,7 +298,7 @@ var ScriptRunner = {
                     closable: true,
                     variant: "info"
                 });
-                window.top.document.body.appendChild(diag);
+//                window.top.document.body.appendChild(diag);
                 diag.show();                
                 diag.on('click', '#haltButton', function () {
                     diag.hide();
@@ -322,7 +322,7 @@ var ScriptRunner = {
             closable: true,
             variant: "warning"
         });
-        window.top.document.body.appendChild(haltDialog);
+//        window.top.document.body.appendChild(haltDialog);
         haltDialog.show();
         haltDialog.on('click', '#haltButton', function () {
             jQuery.ajax({
