@@ -31,44 +31,67 @@ import com.adobe.acs.commons.mcp.model.FieldFormat;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ValueFormat;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class AssetIngestor extends ProcessDefinition {
 
-    public static final String ALL_ASSETS = "All Assets";
+    private static final String ALL_ASSETS = "All Assets";
+    private static final int DEFAULT_TIMEOUT = 200;
+    private static final int DEFAULT_RETRIES = 10;
+
+
     static final String[] AUTHORIZED_GROUPS = new String[]{
             "administrators",
             "asset-ingest",
             "dam-administrators"
     };
+    public static final String PN_MIGRATED_FROM = "migratedFrom";
 
     protected final transient MimeTypeService mimetypeService;
 
     @SuppressWarnings("squid:S00115")
-    public static enum AssetAction {
+    public enum AssetAction {
         skip, version, replace
     }
 
     public AssetIngestor(MimeTypeService mimeTypeService) {
         this.mimetypeService = mimeTypeService;
     }
+
+    @FormField(
+            name = "Retry pause",
+            description = "Used as retry pause between createFolder, createAsset actions and etc...",
+            options = ("default=200")
+    )
+    int retryPause = DEFAULT_TIMEOUT;
+
+    @FormField(
+            name = "Retries",
+            description = "Actions to attempt",
+            options = ("default=10")
+    )
+    int retries = DEFAULT_RETRIES;
 
     @FormField(
             name = "Dry run",
@@ -95,7 +118,7 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @FormField(
             name = "Preserve Filename",
-            description = "If checked, file name is preserved as asset name.  If unchecked, asset name is converted to a JCR-friendly name.",
+            description = "If checked, file name is preserved as asset name.  If unchecked, asset name will support only the following characters: letters, digits, hyphens, underscores, another chars will be replaced with hyphens",
             component = CheckboxComponent.class,
             options = "checked"
     )
@@ -111,31 +134,34 @@ public abstract class AssetIngestor extends ProcessDefinition {
     )
     String jcrBasePath = "/content/dam";
     @FormField(
-            name = "Ignore folders",
-            description = "List of folder names to be ignored",
+            name = "Folders filter",
+            description = "Comma-delimited list of folders to filter, useful for bypassing thumnail folders and such. If you want to exclude folder name add '-' sign before name."
+                          + "If you want to include name, just write folder name or add '+' sign before name.",
             hint = "tmp,.DS_STORE",
-            options = {"default=tmp,ds_store,.ds_store,.thumbs,.appledouble"}
+            options = {"default=-tmp,-ds_store,-.ds_store,-.thumbs,-.appledouble"}
     )
-    String ignoreFolders = "tmp,ds_store,.ds_store,.thumbs,.appledouble";
-    List<String> ignoreFolderList;
+    String foldersFilterExpression = "-tmp,-ds_store,-.ds_store,-.thumbs,-.appledouble";
+    NamesFilter folderFilter;
 
     @FormField(
-            name = "Ignore files",
-            description = "List of file names to ignore",
+            name = "Files Filter",
+            description = "Comma-delimited list of files to filter, also useful for bypassing additional metadata files which might not be useful in a DAM setting. If you want to exclude file name add '-' sign before name."
+                          + "If you want to include name, just write file name or add '+' sign before name.",
             hint = "full file names, comma separated",
-            options = {"default=ds_store,.ds_store"}
+            options = {"default=-ds_store,-.ds_store"}
     )
-    String ignoreFiles = "ds_store,.ds_store";
-    List<String> ignoreFileList;
+    String filesFilterExpression = "-ds_store,-.ds_store";
+    NamesFilter fileFilter;
 
     @FormField(
-            name = "Ignore extensions",
-            description = "List of file extensions to ignore",
+            name = "Extensions filter",
+            description = "Comma-delimited list of file extensions to filter. If you want to exclude extension add '-' sign before name."
+                          + "If you want to include extension, just write extension or add '+' sign before name",
             hint = "mp4,txt, etc.",
-            options = {"default=txt,html,css,js,thm,exe,db"}
+            options = {"default=-txt,-html,-css,-js,-thm,-exe,-db"}
     )
-    String ignoreExtensions = "txt,html,css,js,thm,exe,db";
-    List<String> ignoreExtensionList;
+    String extensionsFilterExpression = "-txt,-html,-css,-js,-thm,-exe,-db";
+    NamesFilter extensionFilter;
 
     @FormField(
             name = "Existing action",
@@ -172,11 +198,11 @@ public abstract class AssetIngestor extends ProcessDefinition {
             = trackActivity(ALL_ASSETS, "Data imported", "Count of bytes imported", 0L);
 
     @SuppressWarnings("squid:S00115")
-    public static enum ReportColumns {
+    public enum ReportColumns {
         item, action, description, count, @FieldFormat(ValueFormat.storageSize) bytes
     }
 
-    List<EnumMap<ReportColumns, Object>> reportRows;
+    private List<EnumMap<ReportColumns, Object>> reportRows;
 
     private synchronized EnumMap<ReportColumns, Object> trackActivity(String item, String action, String description, Long bytes) {
         if (reportRows == null) {
@@ -223,18 +249,32 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     @Override
     public void init() throws RepositoryException {
-        if (ignoreFolders == null) {
-            ignoreFolders = "";
+        if (foldersFilterExpression == null) {
+            foldersFilterExpression = "";
         }
-        ignoreFolderList = Arrays.asList(ignoreFolders.trim().toLowerCase().split(","));
-        if (ignoreFiles == null) {
-            ignoreFiles = "";
+        folderFilter = new NamesFilter(foldersFilterExpression);
+
+        if (filesFilterExpression == null) {
+            filesFilterExpression = "";
         }
-        ignoreFileList = Arrays.asList(ignoreFiles.trim().toLowerCase().split(","));
-        if (ignoreExtensions == null) {
-            ignoreExtensions = "";
+        fileFilter = new NamesFilter(filesFilterExpression);
+
+        if (extensionsFilterExpression == null) {
+            extensionsFilterExpression = "";
         }
-        ignoreExtensionList = Arrays.asList(ignoreExtensions.trim().toLowerCase().split(","));
+        extensionFilter = new NamesFilter(extensionsFilterExpression);
+
+        if (this.retries <= 0) {
+            this.retries = DEFAULT_RETRIES;
+        }
+
+        if (this.retryPause <= 0) {
+            this.retryPause = DEFAULT_TIMEOUT;
+        }
+
+        if (!preserveFileName) {
+            jcrBasePath = NameUtil.createValidDamPath(jcrBasePath);
+        }
     }
 
     @SuppressWarnings("squid:S00112")
@@ -255,7 +295,15 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     r.refresh();
                     //once version is committed we are safe to create, which only replaces the original version
                 }
-                assetManager.createAsset(assetPath, source.getStream(), type, false);
+                Asset asset = assetManager.createAsset(assetPath, source.getStream(), type, false);
+
+                if (asset == null) {
+                    AssetIngestorException ex = new AssetIngestorException("Cannot create asset: asset is null on path  " + assetPath);
+                    Logger.getLogger(AssetIngestor.class.getName()).log(Level.SEVERE, null, ex);
+                    throw ex;
+                }
+                saveMigrationInfo(source, asset);
+
                 r.commit();
                 r.refresh();
             }
@@ -271,6 +319,26 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    void saveMigrationInfo(final Source source, final Asset asset) {
+        Resource assetResource = asset.adaptTo(Resource.class);
+
+        if (assetResource != null) {
+            assetResource = assetResource.getChild(JcrConstants.JCR_CONTENT);
+        }
+
+        if (assetResource != null) {
+            ValueMap assetProperties = assetResource.adaptTo(ModifiableValueMap.class);
+
+            if (assetProperties != null) {
+                if (!StringUtils.equals(asset.getName(), source.getName())) {
+                    assetProperties.put(JcrConstants.JCR_TITLE, source.getName());
+                }
+
+                assetProperties.put(PN_MIGRATED_FROM, source.getElement().getItemName());
+            }
+        }
+    }
+
     protected void handleExistingAsset(Source source, String assetPath, ResourceResolver r) throws Exception {
         switch (existingAssetAction) {
             case skip:
@@ -279,7 +347,9 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     createAsset(source, assetPath, r, false);
                 } else {
                     incrementCount(skippedFiles, 1L);
-                    trackDetailedActivity(assetPath, "Skip", "Skipped existing asset", 0L);
+
+                    trackDetailedActivity(source.getElement().getSourcePath() + " -> " + assetPath,
+                                          "Skip", "Skipped existing asset", 0L);
                 }
                 break;
             case replace:
@@ -292,15 +362,24 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
+    final Set<String> alreadyCreatedFolders = Collections.synchronizedSet(new TreeSet<>());
+    
     @SuppressWarnings("squid:S3776")
-    protected boolean createFolderNode(HierarchialElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
+    protected boolean createFolderNode(HierarchicalElement el, ResourceResolver r) throws RepositoryException, PersistenceException {
         if (el == null || !el.isFolder()) {
             return false;
         }
         if (dryRunMode) {
             return true;
         }
-        String folderPath = el.getNodePath();
+        String folderPath = el.getNodePath(preserveFileName);
+        synchronized (alreadyCreatedFolders) {
+            if (alreadyCreatedFolders.contains(folderPath)) {
+                return false;
+            } else {
+                alreadyCreatedFolders.add(folderPath);
+            }
+        }
         String name = el.getName();
         Session s = r.adaptTo(Session.class);
         if (s.nodeExists(folderPath)) {
@@ -311,36 +390,40 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
             } else {
-                if (folderContentNode == null) {
-                    folderContentNode = folderNode.addNode(JcrConstants.JCR_CONTENT,JcrConstants.NT_UNSTRUCTURED);
-                }
-                folderContentNode.setProperty(JcrConstants.JCR_TITLE, name);
+                setFolderTitle(folderNode, name);
                 r.commit();
                 r.refresh();
                 return true;
             }
-        }
-        HierarchialElement parent = el.getParent();
-        String parentPath;
-        if (parent == null) {
-            parentPath = jcrBasePath;
         } else {
-            parentPath = parent.getNodePath();
+            HierarchicalElement parent = el.getParent();
+            String parentPath;
+            String nodeName;
+
+            if (parent != null) {
+                parentPath = parent.getNodePath(preserveFileName);
+                nodeName = el.getNodeName(preserveFileName);
+                if (!jcrBasePath.equals(parentPath)) {
+                    createFolderNode(parent, r);
+                }
+            } else {
+                parentPath = StringUtils.substringBeforeLast(el.getNodePath(preserveFileName),"/");
+                nodeName = StringUtils.substringAfterLast(el.getNodePath(preserveFileName),"/");
+            }
+            Node child = s.getNode(parentPath).addNode(nodeName, DEFAULT_FOLDER_TYPE);
+
+            setFolderTitle(child, name);
+
+            trackDetailedActivity(el.getNodePath(preserveFileName), "Create Folder", "Create folder", 0L);
+            incrementCount(createdFolders, 1L);
+            r.commit();
+            r.refresh();
+            return true;
         }
-        if (!jcrBasePath.equals(parentPath)) {
-            createFolderNode(parent, r);
-        }
-        Node child = s.getNode(parentPath).addNode(el.getNodeName(), DEFAULT_FOLDER_TYPE);
-        trackDetailedActivity(el.getNodePath(), "Create Folder", "Create folder", 0L);
-        setFolderTitle(child,folderPath,name);
-        incrementCount(createdFolders, 1L);
-        r.commit();
-        r.refresh();
-        return true;
     }
 
-    private void setFolderTitle(Node child,String folderPath,String title) throws RepositoryException{
-        if (!folderPath.equals(jcrBasePath)) {
+    private void setFolderTitle(Node child, String title) throws RepositoryException{
+        if (!child.getPath().equals(jcrBasePath)) {
             if(child.hasNode(JcrConstants.JCR_CONTENT)){
                 child.getNode(JcrConstants.JCR_CONTENT).setProperty(JcrConstants.JCR_TITLE, title);
             }else{
@@ -356,18 +439,14 @@ public abstract class AssetIngestor extends ProcessDefinition {
 
     protected CheckedConsumer<ResourceResolver> importAsset(final Source source, ActionManager actionManager) {
         return (ResourceResolver r) -> {
-            createFolderNode(source.getElement().getParent(), r);
-            actionManager.setCurrentItem(source.getElement().getItemName());
-            HierarchialElement el = source.getElement();
-            String path = source.getElement().getNodePath();
-            if(null != el && el.isFile() && el.getName().contains(".") && !preserveFileName){
-                String baseName = StringUtils.substringBeforeLast(el.getName(), ".");
-                String extension = StringUtils.substringAfterLast(el.getName(), ".");
-                path = (el.getParent() == null ? el.getJcrBasePath() : el.getParent().getNodePath()) + "/"
-                        + JcrUtil.createValidName(baseName,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-")
-                        + "." + JcrUtil.createValidName(extension,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
+            HierarchicalElement el = source.getElement();
+            if (null != el) {
+                createFolderNode(el.getParent(), r);
+                actionManager.setCurrentItem(el.getSourcePath());
+
+                String path = el.getNodePath(preserveFileName);
+                handleExistingAsset(source, path, r);
             }
-            handleExistingAsset(source, path, r);
         };
     }
 
@@ -379,25 +458,25 @@ public abstract class AssetIngestor extends ProcessDefinition {
         if (maximumSize > 0 && source.getLength() > maximumSize) {
             return false;
         }
-        if (name.startsWith(".") || ignoreFileList.contains(name)) {
+        if (name.startsWith(".") || fileFilter.isNotValidName(name)) {
             return false;
         }
         if (name.contains(".")) {
             int extPos = name.lastIndexOf('.');
             String ext = name.substring(extPos + 1);
-            if (ignoreExtensionList.contains(ext)) {
+            if (extensionFilter.isNotValidName(ext)) {
                 return false;
             }
         }
         return true;
     }
 
-    protected boolean canImportFolder(HierarchialElement element) {
+    protected boolean canImportFolder(HierarchicalElement element) {
         String name = element.getName();
-        if (ignoreFolderList.contains(name.toLowerCase())) {
+        if (folderFilter.isNotValidName(name.toLowerCase())) {
             return false;
         } else {
-            HierarchialElement parent = element.getParent();
+            HierarchicalElement parent = element.getParent();
             if (parent == null) {
                 return true;
             } else {
@@ -406,8 +485,8 @@ public abstract class AssetIngestor extends ProcessDefinition {
         }
     }
 
-    protected boolean canImportContainingFolder(HierarchialElement element) {
-        HierarchialElement parent = element.getParent();
+    protected boolean canImportContainingFolder(HierarchicalElement element) {
+        HierarchicalElement parent = element.getParent();
         if (parent == null) {
             return true;
         } else {
@@ -424,55 +503,10 @@ public abstract class AssetIngestor extends ProcessDefinition {
     private transient GenericReport report = new GenericReport();
 
     @Override
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
+    public synchronized void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         report.setRows(reportRows, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }
 
-    protected interface Source {
 
-        String getName();
-
-        InputStream getStream() throws IOException;
-
-        long getLength() throws IOException;
-
-        HierarchialElement getElement();
-
-        void close() throws IOException;
-
-    }
-
-    protected interface HierarchialElement {
-
-        boolean isFile();
-
-        boolean isFolder();
-
-        HierarchialElement getParent();
-
-        String getName();
-
-        String getItemName();
-
-        Source getSource();
-
-        String getJcrBasePath();
-
-        default String getNodePath() {
-            HierarchialElement parent = getParent();
-            return (parent == null ? getJcrBasePath() : parent.getNodePath()) + "/" + getNodeName();
-        }
-
-        default String getNodeName() {
-            String name = getName();
-            if (isFile() && name.contains(".")) {
-                return name;
-            } else if (JcrUtil.isValidName(name)) {
-                return name;
-            } else {
-                return JcrUtil.createValidName(name,JcrUtil.HYPHEN_LABEL_CHAR_MAPPING,"-");
-            }
-        }
-    }
 }

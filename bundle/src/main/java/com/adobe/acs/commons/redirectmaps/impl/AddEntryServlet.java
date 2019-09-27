@@ -42,6 +42,7 @@ public class AddEntryServlet extends SlingAllMethodsServlet {
     private static final long serialVersionUID = -1704915461516132101L;
     private static final Logger log = LoggerFactory.getLogger(AddEntryServlet.class);
 
+    @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doPost");

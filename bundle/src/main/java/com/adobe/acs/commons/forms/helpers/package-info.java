@@ -20,5 +20,5 @@
 /**
  * Forms System - Helpers.
  */
-@aQute.bnd.annotation.Version("1.1.0")
+@org.osgi.annotation.versioning.Version("1.1.1")
 package com.adobe.acs.commons.forms.helpers;

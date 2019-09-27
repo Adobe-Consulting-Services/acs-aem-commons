@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.data;
 
-import com.adobe.acs.commons.data.CompositeVariant;
-import com.adobe.acs.commons.data.Spreadsheet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,6 +27,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -48,11 +47,15 @@ public class SpreadsheetTest {
     public SpreadsheetTest() {
     }
 
+    private static List<String> CASE_INSENSITIVE_HEADERS = Arrays.asList("Source", "Rendition", "Target",
+                                                                               "Original");
     static XSSFWorkbook testWorkbook;
     static String[] header = new String[]{"path", "title", "someOtherCol", "int-val@integer", "string-list1@string[]", "string-list2@string[;]",
         "double-val@double", "array", "array", "array", "date-val@date"};
+    static String[] headerNames = new String[]{"path", "title", "someOtherCol", "int-val", "string-list1", "string-list2",
+        "double-val", "array", "array", "array", "date-val"};
     static ByteArrayOutputStream workbookData = new ByteArrayOutputStream();
-    static Date testDate = new Date();
+    static Calendar testDate = Calendar.getInstance();
     static Spreadsheet dataTypesSheet;
 
     @BeforeClass
@@ -75,7 +78,7 @@ public class SpreadsheetTest {
         workbookData.close();
 
         InputStream dataTypesFile = SpreadsheetTest.class.getResourceAsStream("/com/adobe/acs/commons/data/spreadsheet-data-types.xlsx");
-        dataTypesSheet = new Spreadsheet(false, dataTypesFile);
+        dataTypesSheet = new Spreadsheet(false, dataTypesFile).buildSpreadsheet(Locale.US);
     }
 
     /**
@@ -83,7 +86,7 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetFileName() throws IOException {
-        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
+        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray())).buildSpreadsheet();
         String expResult = "unknown";
         String result = instance.getFileName();
         assertEquals(expResult, result);
@@ -94,7 +97,7 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetRowCount() throws IOException {
-        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
+        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray())).buildSpreadsheet();
         int expResult = 5;
         int result = instance.getRowCount();
         assertEquals(expResult, result);
@@ -105,8 +108,9 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetHeaderRow() throws IOException {
-        Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()));
-        List<String> expResult = Arrays.asList(header);
+        Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()))
+                .buildSpreadsheet();
+        List<String> expResult = Arrays.asList(headerNames);
         List<String> result = instance.getHeaderRow();
         assertTrue("Header row should match", result.containsAll(expResult));
     }
@@ -116,7 +120,7 @@ public class SpreadsheetTest {
      */
     @Test
     public void testGetDataRows() throws IOException {
-        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray()));
+        Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray())).buildSpreadsheet();
         List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
         assertEquals("/test/a1", result.get(0).get("path").toPropertyValue());
         assertEquals("/test/a3/a3a", result.get(3).get("path").toString());
@@ -127,7 +131,8 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsNoConversion() throws IOException {
-        Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
+        Spreadsheet instance = new Spreadsheet(false, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol")
+                .buildSpreadsheet();
         List<String> required = instance.getRequiredColumns();
         assertEquals("someOtherCol", required.get(0));
         List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
@@ -139,7 +144,8 @@ public class SpreadsheetTest {
      */
     @Test
     public void testRequiredColumnsWithConversion() throws IOException {
-        Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol");
+        Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()), "someOtherCol")
+                .buildSpreadsheet();
         List<String> required = instance.getRequiredColumns();
         assertEquals("someothercol", required.get(0));
         List<Map<String, CompositeVariant>> result = instance.getDataRowsAsCompositeVariants();
@@ -148,8 +154,11 @@ public class SpreadsheetTest {
 
     @Test
     public void testVariantTypes() throws IOException {
-        Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()));
+        Spreadsheet instance = new Spreadsheet(true, new ByteArrayInputStream(workbookData.toByteArray()))
+                .buildSpreadsheet();
         Map<String, CompositeVariant> values = instance.getDataRowsAsCompositeVariants().get(4);
+        assertNotNull("Should have a row of data", values);
+        assertNotNull("Should have a column int-val", values.get("int-val"));
         assertEquals((Integer) 12345, values.get("int-val").toPropertyValue());
         assertArrayEquals(new String[]{"one", "two", "three"}, (Object[]) values.get("string-list1").toPropertyValue());
         assertArrayEquals(new String[]{"four", "five", "six"}, (Object[]) values.get("string-list2").toPropertyValue());
@@ -172,6 +181,10 @@ public class SpreadsheetTest {
             assertEquals("9:00:00 AM", row.get("Time").toString());
             assertEquals("110.00%", row.get("Percent").toString());
             assertEquals("This is just a regular string", row.get("String").toString());
+            assertEquals("1/1/2000", row.get("date1").toString());
+            assertEquals("1/1/00 12:00 AM", row.get("date2").toString());
+            assertEquals("Saturday, January 01, 2000", row.get("date3").toString());
+            assertEquals("2000-01-01T14:47:41.922-05:00", row.get("date4").toString());
         }
     }
 
@@ -209,7 +222,43 @@ public class SpreadsheetTest {
             assertEquals(someTime, row.get("Time").getValueAs(Date.class));
             assertEquals(1.1, (double) row.get("Percent").getValueAs(Double.class), 0.0001);
             assertEquals("This is just a regular string", row.get("String").toPropertyValue());
+
+            // According to JCR 2.0 spec 3.6.1.8, Dates are stored as Calendar objects
+            Calendar date1 = (Calendar) row.get("date1").toPropertyValue();
+            assertEquals(Calendar.JANUARY, date1.get(Calendar.MONTH));
+            assertEquals(2000L, date1.get(Calendar.YEAR));
+            Calendar date2 = (Calendar) row.get("date2").toPropertyValue();
+            assertEquals(Calendar.JANUARY, date2.get(Calendar.MONTH));
+            assertEquals(2000L, date2.get(Calendar.YEAR));
+            Calendar date3 = (Calendar) row.get("date3").toPropertyValue();
+            assertEquals(Calendar.JANUARY, date3.get(Calendar.MONTH));
+            assertEquals(2000L, date3.get(Calendar.YEAR));
+            Calendar date4 = (Calendar) row.get("date4").toPropertyValue();
+            assertEquals(Calendar.JANUARY, date4.get(Calendar.MONTH));
+            assertEquals(2000L, date4.get(Calendar.YEAR));
         }
+    }
+
+    @Test
+    public void testHeadersWithCaseInsensitivityList() {
+        Spreadsheet spreadsheet = new Spreadsheet(true, CASE_INSENSITIVE_HEADERS);
+
+        assertEquals("source", spreadsheet.convertHeaderName("SoUrCe"));
+        assertEquals("rendition", spreadsheet.convertHeaderName("RenDiTion"));
+        assertEquals("target", spreadsheet.convertHeaderName("TarGeT"));
+        assertEquals("original", spreadsheet.convertHeaderName("OrIgInal"));
+        assertEquals("camelCaseProperty", spreadsheet.convertHeaderName("camelCaseProperty"));
+    }
+
+    @Test
+    public void testHeadersWithoutCaseInsensitivityList() {
+        Spreadsheet spreadsheet = new Spreadsheet(true);
+
+        assertEquals("source", spreadsheet.convertHeaderName("SoUrCe"));
+        assertEquals("rendition", spreadsheet.convertHeaderName("RenDiTion"));
+        assertEquals("target", spreadsheet.convertHeaderName("TarGeT"));
+        assertEquals("original", spreadsheet.convertHeaderName("OrIgInal"));
+        assertEquals("test:camelcase", spreadsheet.convertHeaderName("test:camelCase"));
     }
 
     private static XSSFRow createRow(XSSFSheet sheet, String... values) {

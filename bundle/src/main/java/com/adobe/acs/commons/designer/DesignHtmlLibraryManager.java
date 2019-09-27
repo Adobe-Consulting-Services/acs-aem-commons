@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.designer;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.designer.Design;
 

@@ -35,7 +35,8 @@ import javax.jcr.ValueFormatException;
 import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 
-import com.adobe.acs.commons.users.impl.AbstractAuthorizable;
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -53,8 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
 
 @Component
 @Service(EnsureAce.class)
@@ -63,7 +62,7 @@ public class EnsureAce {
     private static final Logger log = LoggerFactory.getLogger(EnsureAce.class);
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
 
     /**
      * Ensures the ACEs for the Service User exists. Any extra ACEs for the Service User will be removed.
@@ -234,10 +233,9 @@ public class EnsureAce {
      * @param accessControlManager
      *            Jackrabbit access control manager
      * @return a list of ACLs that principal participates in.
-     * @throws RepositoryException
      */
     private List<JackrabbitAccessControlList> findAcls(ResourceResolver resourceResolver, String principalName,
-            JackrabbitAccessControlManager accessControlManager) throws RepositoryException {
+            JackrabbitAccessControlManager accessControlManager) {
         final Set<String> paths = new HashSet<String>();
         final List<JackrabbitAccessControlList> acls = new ArrayList<JackrabbitAccessControlList>();
 
@@ -248,40 +246,29 @@ public class EnsureAce {
         params.put("property.value", principalName);
         params.put("p.limit", "-1");
 
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
+            for (final Hit hit : query.getResult().getHits()) {
+                try {
+                    final Resource aceResource = resourceResolver.getResource(hit.getPath());
 
-        // Handle leaking resource resolver in AEM QueryBuilder
-        ResourceResolver leakingResourceResolver = null;
-        for (final Hit hit : query.getResult().getHits()) {
-            try {
-                // Handle leaking resource resolver in AEM QueryBuilder
-                if (leakingResourceResolver == null) {
-                    leakingResourceResolver = hit.getResource().getResourceResolver();
-                }
+                    // first parent is the rep:policy node
+                    // second parent (grand-parent) is the content node this ACE controls
+                    // that is the node we need to use the JackrabbitAccessControlManager api
+                    final Resource contentResource = aceResource.getParent().getParent();
 
-                final Resource aceResource = resourceResolver.getResource(hit.getPath());
-
-                // first parent is the rep:policy node
-                // second parent (grand-parent) is the content node this ACE controls
-                // that is the node we need to use the JackrabbitAccessControlManager api
-                final Resource contentResource = aceResource.getParent().getParent();
-
-                if (!paths.contains(contentResource.getPath())) {
-                    for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
-                        if (policy instanceof JackrabbitAccessControlList) {
-                            acls.add((JackrabbitAccessControlList) policy);
-                            break;
+                    if (!paths.contains(contentResource.getPath())) {
+                        paths.add(contentResource.getPath());
+                        for (AccessControlPolicy policy : accessControlManager.getPolicies(contentResource.getPath())) {
+                            if (policy instanceof JackrabbitAccessControlList) {
+                                acls.add((JackrabbitAccessControlList) policy);
+                                break;
+                            }
                         }
                     }
+                } catch (RepositoryException e) {
+                    log.error("Failed to get resource for query result.", e);
                 }
-            } catch (RepositoryException e) {
-                log.error("Failed to get resource for query result.", e);
             }
-        }
-
-        // Handle leaking resource resolver in AEM QueryBuilder
-        if (leakingResourceResolver != null) {
-            leakingResourceResolver.close();
         }
 
         return acls;

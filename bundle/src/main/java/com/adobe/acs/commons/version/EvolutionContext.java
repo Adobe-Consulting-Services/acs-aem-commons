@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.version;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import java.util.List;
 

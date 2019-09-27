@@ -20,6 +20,5 @@
 /**
  * XSS JSP Functions.
  */
-@aQute.bnd.annotation.Version("3.0.0")
-@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/xss", descriptorFile = "xss.tld")
+@org.osgi.annotation.versioning.Version("4.1.0")
 package com.adobe.acs.commons.xss;

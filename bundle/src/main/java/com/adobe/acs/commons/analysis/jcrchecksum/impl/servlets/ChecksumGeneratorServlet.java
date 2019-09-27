@@ -60,7 +60,7 @@ public class ChecksumGeneratorServlet extends BaseChecksumServlet {
     public static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorServlet.class);
 
     @Reference
-    private ChecksumGenerator checksumGenerator;
+    private transient ChecksumGenerator checksumGenerator;
 
     public static final String SERVLET_PATH =  ServletConstants.SERVLET_PATH  + "."
             + ServletConstants.CHECKSUM_SERVLET_SELECTOR + "."
@@ -72,21 +72,18 @@ public class ChecksumGeneratorServlet extends BaseChecksumServlet {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
-        } catch (IOException e) {
-            throw new ServletException(e);
-        } catch (RepositoryException e) {
+        } catch (IOException|RepositoryException e) {
             throw new ServletException(e);
         }
     }
 
+    @Override
     public final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             ServletException {
         try {
             this.handleCORS(request, response);
             this.handleRequest(request, response);
-        } catch (IOException e) {
-            throw new ServletException(e);
-        } catch (RepositoryException e) {
+        } catch (IOException|RepositoryException e) {
             throw new ServletException(e);
         }
     }

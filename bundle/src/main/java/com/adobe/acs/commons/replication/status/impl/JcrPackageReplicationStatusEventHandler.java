@@ -23,7 +23,6 @@ package com.adobe.acs.commons.replication.status.impl;
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.ParameterUtil;
-import com.day.cq.jcrclustersupport.ClusterAware;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationEvent;
 import com.day.cq.replication.ReplicationStatus;
@@ -68,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.sling.discovery.TopologyEvent;
+import org.apache.sling.discovery.TopologyEventListener;
 
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
@@ -98,7 +99,7 @@ import java.util.stream.Collectors;
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, ClusterAware {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, TopologyEventListener {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
@@ -159,7 +160,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Reference
     private JobManager jobManager;
 
-    private boolean isMaster = false;
+    private boolean isLeader = false;
 
     // Previously "Package Replication"
     private static final String DEFAULT_REPLICATED_BY_OVERRIDE = "";
@@ -197,20 +198,18 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Override
     @SuppressWarnings("squid:S3776")
     public final void handleEvent(final Event event) {
-        if (this.isMaster) {
+        if (this.isLeader) {
             // Only run on master
             final Map<String, Object> jobConfig = getInfoFromEvent(event);
             final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
 
-            ResourceResolver resourceResolver = null;
-            try {
+            try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO))  {
+            
                 for (String path : paths) {
                     if (!this.containsJcrPackagePath(path)) {
                         continue;
                     }
-                    if (resourceResolver == null) {
-                        resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
-                    }
+                    
                     final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
                     if (jcrPackage != null) {
                         // Close jcrPackages after they've been used to check if a Job should be invoked.
@@ -222,11 +221,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
                 }
             } catch (LoginException e) {
                 log.error("Could not obtain a resource resolver.", e);
-            } finally {
-                if (resourceResolver != null) {
-                    resourceResolver.close();
-                }
-            }
+            } 
         }
     }
 
@@ -238,9 +233,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
 
         log.debug("Processing Replication Status Update for JCR Package: {}", path);
 
-        ResourceResolver resourceResolver = null;
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             final JcrPackage jcrPackage = this.getJcrPackage(resourceResolver, path);
             if (jcrPackage == null) {
@@ -261,10 +254,6 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         } catch (RepositoryException e) {
             logJobError(job, "Could not update replication metadata", e);
             return JobResult.FAILED;
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return JobResult.OK;
@@ -393,6 +382,10 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     private JcrPackage getJcrPackage(final ResourceResolver resourceResolver, final String path) {
 
         final Resource eventResource = resourceResolver.getResource(path);
+        if (eventResource == null) {
+            log.warn("Could not find resource at path [ {} ] with the mapped service user. Either the resource has been removed meanwhile or the service user does not have the necessary rights.", path);
+            return null;
+        }
         JcrPackage jcrPackage = null;
 
         try {
@@ -506,12 +499,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     }
 
     @Override
-    public final void bindRepository(String repositoryId, String clusterId, boolean newIsMaster) {
-        this.isMaster = newIsMaster;
-    }
-
-    @Override
-    public final void unbindRepository() {
-        this.isMaster = false;
+    public void handleTopologyEvent(TopologyEvent te) {
+        this.isLeader = te.getNewView().getLocalInstance().isLeader();
     }
 }

@@ -19,10 +19,8 @@
  */
 package com.adobe.acs.commons.wcm.tags;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.apache.sling.api.scripting.SlingBindings;
-import tldgen.BodyContentType;
-import tldgen.Tag;
 
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
@@ -34,7 +32,6 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
  * com.adobe.acs.commons.wcm.properties.shared.impl.SharedComponentPropertiesBindingsValuesProvider
  */
 @ProviderType
-@Tag(bodyContentType = BodyContentType.JSP, value = "defineObjects")
 public class DefineObjects extends BodyTagSupport {
 
     @Override

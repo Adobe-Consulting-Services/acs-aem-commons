@@ -22,8 +22,6 @@ package com.adobe.acs.commons.packaging.impl;
 
 import com.adobe.acs.commons.packaging.PackageHelper;
 import com.adobe.acs.commons.util.QueryHelper;
-import com.day.cq.search.QueryBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.vault.fs.io.AccessControlHandling;
@@ -37,7 +35,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +89,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
 
     @Reference
     private PackageHelper packageHelper;
-
-    @Reference
-    private QueryBuilder queryBuilder;
 
     @Reference
     private QueryHelper queryHelper;
@@ -159,9 +153,6 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         } catch (IOException ex) {
             log.error("IO error while creating Query Package", ex);
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (JSONException ex) {
-            log.error("JSON error while creating Query Package response", ex);
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
         }
     }

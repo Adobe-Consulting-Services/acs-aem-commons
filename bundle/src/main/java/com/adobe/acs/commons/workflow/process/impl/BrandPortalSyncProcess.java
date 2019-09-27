@@ -76,13 +76,11 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
     private DAMSyncService damSyncService;
 
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
-        ResourceResolver resourceResolver = null;
         final List<String> assetPaths = new ArrayList<String>();
 
         final ReplicationActionType replicationActionType = getReplicationActionType(metaDataMap);
 
-        try {
-            resourceResolver = workflowHelper.getResourceResolver(workflowSession);
+        try (ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession)) {
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
 
@@ -109,10 +107,6 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
         } catch (RepositoryException e) {
             log.error("Could not find the payload", e);
             throw new WorkflowException("Could not find the payload");
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
     }
 

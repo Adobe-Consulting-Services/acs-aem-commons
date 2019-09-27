@@ -21,12 +21,7 @@ package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
@@ -39,12 +34,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Named;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.getCollectionComponentType;
 import static com.adobe.acs.commons.mcp.util.IntrospectionUtil.hasMultipleValues;
 import static com.adobe.acs.commons.mcp.util.ValueMapSerializer.serializeToStringArray;
-import java.io.IOException;
-import org.apache.sling.api.request.RequestParameter;
 
 /**
  * Processing routines for handing ProcessInput within a FormProcessor
@@ -73,17 +73,15 @@ public class AnnotatedFieldDeserializer {
         FormField inputAnnotation = field.getAnnotation(FormField.class);
         Object value;
         if (input.get(field.getName()) == null) {
-            if (inputAnnotation != null && inputAnnotation.required()) {
-                if (field.getType() == Boolean.class || field.getType() == Boolean.TYPE) {
-                    value = false;
-                } else {
-                    throw new NullPointerException("Required field missing: " + field.getName());
-                }
+            if (field.getType() == Boolean.class || field.getType() == Boolean.TYPE) {
+                value = false;
+            } else if (inputAnnotation != null && inputAnnotation.required()) {
+                throw new NullPointerException("Required field missing: " + field.getName());
             } else {
                 return;
             }
         } else {
-            value = input.get(field.getName());            
+            value = input.get(field.getName());
         }
 
         if (hasMultipleValues(field.getType())) {
@@ -95,7 +93,10 @@ public class AnnotatedFieldDeserializer {
             }
 
             if (val instanceof RequestParameter) {
-                /** Special case handling uploaded files; Method call ~ copied from parseInputValue(..) **/
+                /**
+                 * Special case handling uploaded files; Method call ~ copied
+                 * from parseInputValue(..)
+                 */
                 if (field.getType() == RequestParameter.class) {
                     FieldUtils.writeField(field, target, val, true);
                 } else {
@@ -105,7 +106,7 @@ public class AnnotatedFieldDeserializer {
                         LOG.error("Unable to get InputStream for uploaded file [ {} ]", ((RequestParameter) val).getName(), ex);
                     }
                 }
-            } else{
+            } else {
                 parseInputValue(target, String.valueOf(val), field);
             }
         }
@@ -186,18 +187,34 @@ public class AnnotatedFieldDeserializer {
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
         return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
                 .stream()
-                .collect(Collectors.toMap(Field::getName, f -> {
+                .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst)
+                .collect(Collectors.toMap(AnnotatedFieldDeserializer::getFieldName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
                         component = fieldDefinition.component().newInstance();
-                        component.setup(f.getName(), f, fieldDefinition, sling);
+                        component.setup(getFieldName(f), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
                         LOG.error("Unable to instantiate field component for " + f.getName(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private static String getFieldName(Field f) {
+        Named named = f.getAnnotation(Named.class);
+        return named == null ? f.getName() : named.value();
+    }
+
+    private static int superclassFieldsFirst(Field a, Field b) {
+        if (a.getDeclaringClass() == b.getDeclaringClass()) {
+            return 0;
+        } else if (a.getDeclaringClass().isAssignableFrom(b.getDeclaringClass())) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 
     private AnnotatedFieldDeserializer() {

@@ -25,6 +25,7 @@ import static org.mockserver.model.HttpRequest.*;
 import static org.mockserver.model.HttpResponse.*;
 
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import com.google.gson.JsonObject;
 import junitx.util.PrivateAccessor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
@@ -34,11 +35,10 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
-import org.apache.sling.commons.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import java.util.HashMap;
@@ -110,9 +110,9 @@ public class HttpClientFactoryImplTest {
 
         Request get = impl.get("/anonJson");
         Executor exec = impl.getExecutor();
-        JSONObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler());
+        JsonObject jsonObject = exec.execute(get).handleResponse(new JsonObjectResponseHandler()).getAsJsonObject();
         assertThat(jsonObject.has("foo"), is(true));
-        assertThat(jsonObject.getString("foo"), is("bar"));
+        assertThat(jsonObject.get("foo").getAsString(), is("bar"));
     }
 
     @Test

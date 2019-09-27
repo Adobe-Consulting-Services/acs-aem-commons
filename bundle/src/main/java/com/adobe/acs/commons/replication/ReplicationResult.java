@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.replication;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The result of a replication.

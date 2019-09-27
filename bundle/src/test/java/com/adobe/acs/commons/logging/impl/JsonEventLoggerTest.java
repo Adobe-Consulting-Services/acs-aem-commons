@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,27 @@
  */
 package com.adobe.acs.commons.logging.impl;
 
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.junit.Test;
-import org.osgi.service.event.Event;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import com.google.common.collect.ImmutableMap;
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+import org.junit.Test;
+import org.osgi.service.event.Event;
 
 public class JsonEventLoggerTest {
 
@@ -100,6 +110,48 @@ public class JsonEventLoggerTest {
         assertNotNull("complex event, string set not null", jStringSet.optJSONArray("resourceChangedAttributes"));
         assertEquals("complex event, string set props", "first", jStringSet.getJSONArray("resourceChangedAttributes").getString(0));
         assertEquals("complex event, string set props", "second", jStringSet.getJSONArray("resourceChangedAttributes").getString(1));
+    }
+
+    Map<String, Object> constructConfig(final String category, final String level, final String filter, final String... eventTopics) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(JsonEventLogger.OSGI_CATEGORY, category);
+        map.put(JsonEventLogger.OSGI_LEVEL, level);
+        map.put(JsonEventLogger.OSGI_FILTER, filter);
+        map.put(JsonEventLogger.OSGI_TOPICS, eventTopics);
+        return map;
+    }
+
+    @Test
+    public void testActivate() {
+        for (String logLevel : Arrays.asList("ERROR", "WARN", "INFO", "DEBUG", "TRACE", null)) {
+            JsonEventLogger eventLogger = new JsonEventLogger();
+            eventLogger.activate(constructConfig("test", logLevel, null, "some/topic"));
+            Event event = new Event("my/simple/topic", Collections.emptyMap());
+            eventLogger.handleEvent(event);
+            eventLogger.deactivate();
+        }
+
+        JsonEventLogger eventLogger = new JsonEventLogger();
+        eventLogger.activate(constructConfig(null, "INFO", null, "some/topic"));
+        Event event = new Event("my/simple/topic", Collections.emptyMap());
+        eventLogger.handleEvent(event);
+        eventLogger.deactivate();
+
+    }
+
+    @Test
+    public void testConvertValue() {
+        assertNull("null should convert to null", JsonEventLogger.convertValue(null));
+        assertEquals("string should convert to string", "foo", JsonEventLogger.convertValue("foo"));
+        final Calendar curCalendar = Calendar.getInstance();
+        assertEquals("calendar should convert to ISO8601", ISO8601.format(curCalendar),
+                JsonEventLogger.convertValue(curCalendar));
+
+        final Date curDate = new Date();
+        final Calendar curDateAsCalendar = Calendar.getInstance();
+        curDateAsCalendar.setTime(curDate);
+        assertEquals("date should convert to ISO8601", ISO8601.format(curDateAsCalendar),
+                JsonEventLogger.convertValue(curDate));
 
     }
 }

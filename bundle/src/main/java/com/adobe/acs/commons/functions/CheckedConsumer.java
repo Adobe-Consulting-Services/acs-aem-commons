@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.functions;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Created work-alike for functionality not introduced until Java 8
@@ -33,6 +33,9 @@ import aQute.bnd.annotation.ConsumerType;
 @FunctionalInterface
 @SuppressWarnings("squid:S00112")
 public interface CheckedConsumer<T> {
+    static <T> CheckedConsumer<T> from(java.util.function.Consumer<T> consumer) {
+        return consumer == null ? null : t -> consumer.accept(t);
+    }
 
     void accept(T t) throws Exception;
 

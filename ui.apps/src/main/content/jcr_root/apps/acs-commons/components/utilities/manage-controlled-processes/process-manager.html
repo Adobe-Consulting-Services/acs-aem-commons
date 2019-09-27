@@ -1,0 +1,35 @@
+ <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientlib.css @ categories='acs-commons.manage-controlled-processes.app'}"
+     />
+ <sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+      data-sly-call="${clientlib.all @ categories='coralui3,granite.ui.coral.foundation'}"
+      />
+<div id="processListing">
+    <table is="coral-table" selectable>
+        <colgroup>
+            <col is="coral-table-column" sortable sortabledirection="ascending">
+            <col is="coral-table-column" sortable>
+            <col is="coral-table-column" sortable sortabletype="date">
+            <col is="coral-table-column" sortable sortabletype="date">
+            <col is="coral-table-column" sortable sortabletype="number">
+            <col is="coral-table-column" sortable sortabletype="number">
+        </colgroup>
+        <thead is="coral-table-head" sticky>
+        <tr is="coral-table-row">
+            <th is="coral-table-headercell">Process</th>
+            <th is="coral-table-headercell">Description</th>
+            <th is="coral-table-headercell">Started</th>
+            <th is="coral-table-headercell">Completed</th>
+            <th is="coral-table-headercell">Tasks completed</th>
+            <th is="coral-table-headercell">Errors</th>
+        </tr>
+        </thead>
+         <tbody is="coral-table-body">
+        </tbody>
+    </table>
+</div>
+<div id="right-action-bar-contents"><button id="startProcess" is="coral-Button" variant="primary" title="Start Process">Start Process</button></div>
+
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientlib.js @ categories='acs-commons.manage-controlled-processes.app'}"
+     />

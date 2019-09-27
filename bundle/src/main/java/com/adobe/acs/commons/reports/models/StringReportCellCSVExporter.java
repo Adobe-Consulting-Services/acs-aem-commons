@@ -48,7 +48,7 @@ public class StringReportCellCSVExporter implements ReportCellCSVExporter {
   public String getValue(Object result) {
     Resource resource = (Resource) result;
     ReportCellValue val = new ReportCellValue(resource, property);
-    List<String> values = new ArrayList<String>();
+    List<String> values = new ArrayList<>();
     if (val.getValue() != null) {
       if (val.isArray()) {
         for (String value : val.getMultipleValues()) {

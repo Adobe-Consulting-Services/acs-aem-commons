@@ -42,7 +42,7 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.jcr.resource.JcrResourceConstants;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,6 +185,9 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
      * @throws IllegalArgumentException
      */
     private String parseAssetFolderCell(final Cell cell, final String previousAssetFolderPath) throws IllegalArgumentException {
+        // #1791 - Cannot read from non-String type fields.
+        cell.setCellType(Cell.CELL_TYPE_STRING);
+
         final String cellValue = StringUtils.trimToNull(cell.getStringCellValue());
 
         if (StringUtils.isNotBlank(cellValue)) {

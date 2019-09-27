@@ -19,11 +19,11 @@
  */
 package com.adobe.acs.commons.data;
 
-import aQute.bnd.annotation.ProviderType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a value which could be either a list of variants or a single variant. The idea is that this supports a
@@ -40,13 +40,17 @@ public final class CompositeVariant<T> {
     /**
      * Create a variant either as a preferred type (set value later with addValue) or
      * with an initial value and the preferred type is assumed by the value provided.
-     * @param initial 
+     * @param initial
      */
     public CompositeVariant(T initial) {
         if (initial instanceof Class) {
             this.type = (Class) initial;
         } else {
-            this.type = initial.getClass();
+            if (initial instanceof Variant) {
+                this.type = ((Variant) initial).getBaseType();
+            } else {
+                this.type = initial.getClass();
+            }
             addValue(initial);
         }
     }
@@ -90,7 +94,7 @@ public final class CompositeVariant<T> {
     public <U> List<U> getValuesAs(Class<U> otherType) {
         return values.stream().map(v -> getValueAsType(v, otherType)).collect(Collectors.toList());
     }
-    
+
     private <U> U getValueAsType(Variant v, Class<U> type) {
         // This shouldn't be necessary but it helps disambiguate a runtime lambda issue
         return v.asType(type);

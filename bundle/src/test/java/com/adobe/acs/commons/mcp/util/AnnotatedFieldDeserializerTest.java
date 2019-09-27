@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.mcp.util;
 
 import com.adobe.acs.commons.mcp.form.FormField;
-
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,7 @@ public class AnnotatedFieldDeserializerTest {
         float floatValue;
         @FormField(name = "long")
         long longValue;
-        @FormField(name = "boolean")
+        @FormField(name = "boolean", required = true)
         boolean booleanValue;
     }
 
@@ -115,7 +114,7 @@ public class AnnotatedFieldDeserializerTest {
     }
 
     /**
-     * Check if booleans are assumed false if missing.
+     * Check if booleans are assumed false if missing, only for required boolean fields.
      *
      * @throws java.lang.Exception
      */
@@ -136,5 +135,5 @@ public class AnnotatedFieldDeserializerTest {
         assertEquals(false, target.booleanValue);
     }
 
-    
+
 }

@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum.impl.options;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGeneratorOptions;
 import com.adobe.acs.commons.util.InfoWriter;
@@ -35,13 +35,18 @@ import java.util.Set;
 @ProviderType
 public abstract class AbstractChecksumGeneratorOptions implements ChecksumGeneratorOptions {
 
-    protected Set<String> includedNodeTypes = new HashSet<String>();
+    protected Set<String> includedNodeTypes = new HashSet<>();
 
-    protected Set<String> excludedNodeTypes = new HashSet<String>();
+    protected Set<String> excludedNodeTypes = new HashSet<>();
 
-    protected Set<String> excludedProperties = new HashSet<String>();
+    protected Set<String> excludedProperties = new HashSet<>();
 
-    protected Set<String> sortedProperties = new HashSet<String>();
+    protected Set<String> sortedProperties = new HashSet<>();
+
+    protected Set<String> excludedNodeNames = new HashSet<String>();
+
+    protected Set<String> excludedSubTrees = new HashSet<String>();
+
 
     public void addIncludedNodeTypes(String... data) {
         if (data != null) {
@@ -83,6 +88,27 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         return this.sortedProperties;
     }
 
+
+    public Set<String> getExcludedNodeNames() {
+        return this.excludedNodeNames;
+    }
+
+    public void addExcludedNodeNames(String... data) {
+        if (data != null) {
+            this.excludedNodeNames.addAll(Arrays.asList(data));
+        }
+    }
+
+    public Set<String> getExcludedSubTrees() {
+        return this.excludedSubTrees;
+    }
+
+    public void addExcludedSubTrees(String... data) {
+        if (data != null) {
+            this.excludedSubTrees.addAll(Arrays.asList(data));
+        }
+    }
+
     public String toString() {
         InfoWriter iw = new InfoWriter();
 
@@ -90,6 +116,8 @@ public abstract class AbstractChecksumGeneratorOptions implements ChecksumGenera
         iw.message("Node Type Includes: {}", this.getIncludedNodeTypes());
         iw.message("Node Type Excludes: {}", this.getExcludedNodeTypes());
         iw.message("Property Excludes: {}", this.getExcludedProperties());
+        iw.message("Node Name Excludes: {}", this.getExcludedNodeNames());
+        iw.message("Sub Tree Excludes: {}", this.getExcludedSubTrees());
         iw.message("Sorted Properties: {}", this.getSortedProperties());
 
         return iw.toString();

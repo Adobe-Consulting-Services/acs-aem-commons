@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.adobeio.service;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service to communicate to Adobe I/O with regards to authentication. 

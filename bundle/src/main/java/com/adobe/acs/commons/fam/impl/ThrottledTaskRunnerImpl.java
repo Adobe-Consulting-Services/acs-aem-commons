@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
+import com.adobe.acs.commons.fam.ActionManagerConstants;
 import com.adobe.acs.commons.fam.CancelHandler;
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.fam.mbean.ThrottledTaskRunnerMBean;
@@ -49,9 +50,8 @@ import java.lang.management.ManagementFactory;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Component(metatype = true, immediate = true,
@@ -61,8 +61,8 @@ import java.util.concurrent.TimeUnit;
 @Properties({
     @Property(name = "jmx.objectname", value = "com.adobe.acs.commons.fam:type=Throttled Task Runner", propertyPrivate = true),
     @Property(name = "max.threads", label = "Max threads", description = "Default is 4, recommended not to exceed the number of CPU cores",value = "4"),
-    @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", value = "0.75"),
-    @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", value = "0.85"),
+    @Property(name = "max.cpu", label = "Max cpu %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.75),
+    @Property(name = "max.heap", label = "Max heap %", description = "Range is 0..1; -1 means disable this check", doubleValue = 0.85),
     @Property(name = "cooldown.wait.time", label = "Cooldown time", description="Time to wait for cpu/mem cooldown between checks", value = "100"),
     @Property(name = "task.timeout", label = "Watchdog time", description="Maximum time allowed (in ms) per action before it is interrupted forcefully. Defaults to 1 hour.", value = "3600000"),})
 public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements ThrottledTaskRunner, ThrottledTaskRunnerStats {
@@ -73,11 +73,11 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     private int maxThreads;
     private double maxCpu;
     private double maxHeap;
-    private boolean isPaused;
+    private volatile boolean isPaused;
     private final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     private ObjectName osBeanName;
     private ObjectName memBeanName;
-    private ThreadPoolExecutor workerPool;
+    private PriorityThreadPoolExecutor workerPool;
     private BlockingQueue<Runnable> workQueue;
 
     public ThrottledTaskRunnerImpl() throws NotCompliantMBeanException {
@@ -86,14 +86,33 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
 
     @Override
     public void scheduleWork(Runnable work) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS);
-        workerPool.submit(r);
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
+        submitWork(r);
+    }
+
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, ActionManagerConstants.DEFAULT_ACTION_PRIORITY);
+        submitWork(r);
+    }
+
+    @Override
+    public void scheduleWork(Runnable work, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, priority);
+        submitWork(r);
     }
     
-    public void scheduleWork(Runnable work, CancelHandler cancelHandler) {
-        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler);
-        workerPool.submit(r);
-    }    
+    public void scheduleWork(Runnable work, CancelHandler cancelHandler, int priority) {
+        TimedRunnable r = new TimedRunnable(work, this, taskTimeout, TimeUnit.MILLISECONDS, cancelHandler, priority);
+        submitWork(r);
+    }
+
+    private void submitWork(TimedRunnable r) {
+        if (isPaused) {
+            resumeList.add(r);
+        } else {
+            workerPool.submit(r);
+        }
+    }
 
     RunningStatistic waitTime = new RunningStatistic("Queue wait time");
     RunningStatistic throttleTime = new RunningStatistic("Throttle time");
@@ -272,20 +291,22 @@ public class ThrottledTaskRunnerImpl extends AnnotatedStandardMBean implements T
     @SuppressWarnings("squid:S2142")
     private void initThreadPool() {
         if (workQueue == null) {
-            workQueue = new LinkedBlockingDeque<>();
+            workQueue = new PriorityBlockingQueue<>();
         }
 
         // Terminate pool if the thread size has changed
         if (workerPool != null && workerPool.getMaximumPoolSize() != maxThreads) {
             try {
+                workerPool.shutdown();
                 workerPool.awaitTermination(taskTimeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOG.error("Timeout occurred when waiting to terminate worker pool", ex);
+                workerPool.shutdownNow();
             }
             workerPool = null;
         }
         if (!isRunning()) {
-            workerPool = new ThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
+            workerPool = new PriorityThreadPoolExecutor(maxThreads, maxThreads, taskTimeout, TimeUnit.MILLISECONDS, workQueue);
         }
     }
 

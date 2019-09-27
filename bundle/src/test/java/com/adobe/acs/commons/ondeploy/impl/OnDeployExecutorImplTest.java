@@ -19,37 +19,10 @@
  */
 package com.adobe.acs.commons.ondeploy.impl;
 
-import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
-import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
-import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.search.QueryBuilder;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import javax.jcr.RepositoryException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import static com.adobe.acs.commons.testutil.LogTester.assertLogText;
 import static com.adobe.acs.commons.testutil.LogTester.assertNotLogText;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -66,14 +39,35 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 
+import java.util.Calendar;
+import java.util.Collections;
+import javax.jcr.RepositoryException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+
+import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
+import com.adobe.acs.commons.testutil.LogTester;
+import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
 public class OnDeployExecutorImplTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     @Before
     public void setup() throws RepositoryException {
-        context.registerService(QueryBuilder.class, mock(QueryBuilder.class));
-
         context.build().resource(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER).commit();
 
         LogTester.reset();
@@ -87,12 +81,8 @@ public class OnDeployExecutorImplTest {
         doReturn(resourceResolver).when(impl).logIn();
         doNothing().when(impl).runScripts(same(resourceResolver), anyList());
 
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
         context.registerInjectActivateService(impl);
 
         verify(resourceResolver).close();
@@ -106,17 +96,18 @@ public class OnDeployExecutorImplTest {
         doReturn(resourceResolver).when(impl).logIn();
         doNothing().when(impl).runScripts(same(resourceResolver), anyList());
 
-        doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
+        if (resourceResolver.isLive()) {
+            doThrow(new RuntimeException("resolver close failed")).when(resourceResolver).close();
+        }
 
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
         context.registerInjectActivateService(impl);
 
-        assertLogText("Failed resourceResolver.close()");
+        if (resourceResolver.isLive()) {
+            assertLogText("Failed resourceResolver.close()");
+        }
     }
 
     @Test
@@ -127,12 +118,8 @@ public class OnDeployExecutorImplTest {
         doReturn(resourceResolver).when(impl).logIn();
         doThrow(new RuntimeException("Scripts broke!")).when(impl).runScripts(same(resourceResolver), anyList());
 
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
 
         try {
             context.registerInjectActivateService(impl);
@@ -146,12 +133,7 @@ public class OnDeployExecutorImplTest {
     public void testExecuteNoScripts() throws NotCompliantMBeanException {
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
 
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Collections.emptyList();
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class, Collections::emptyList);
         context.registerInjectActivateService(impl);
 
         assertLogText("No on-deploy scripts found.");
@@ -168,23 +150,22 @@ public class OnDeployExecutorImplTest {
         String status1ResourcePath = statusResource.getPath();
         assertEquals(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER + "/" + OnDeployScriptTestExampleSuccess1.class.getName(), status1ResourcePath);
         impl.trackScriptStart(statusResource);
-        impl.trackScriptEnd(statusResource, "fail");
+        impl.trackScriptEnd(statusResource, "fail", "error message");
         Resource originalStatus1 = resourceResolver.getResource(status1ResourcePath);
         assertEquals("fail", originalStatus1.getValueMap().get("status", ""));
+        assertEquals("error message", originalStatus1.getValueMap().get("output", ""));
         LogTester.reset();
 
         // Here's where the real test begins
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2()));
+
         context.registerInjectActivateService(new OnDeployExecutorImpl());
 
         Resource status1 = resourceResolver.getResource(status1ResourcePath);
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
@@ -193,12 +174,8 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteSuccessfulScripts() throws NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccessWithPause());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccessWithPause()));
         context.registerInjectActivateService(new OnDeployExecutorImpl());
 
         assertLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
@@ -228,22 +205,14 @@ public class OnDeployExecutorImplTest {
     @Test
     public void testExecuteSkipsAlreadySucccessfulScripts() throws RepositoryException, NotCompliantMBeanException {
         // Run the script successfully the first time
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
         context.registerInjectActivateService(new OnDeployExecutorImpl());
         LogTester.reset();
 
         // Here's where the real test begins
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2()));
 
         assertLogText("Skipping on-deploy script, as it is already complete: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotLogText("Starting on-deploy script: /var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
@@ -253,10 +222,12 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNotNull(status2);
         assertEquals("success", status2.getValueMap().get("status", ""));
+        assertEquals("", status2.getValueMap().get("output", ""));
     }
 
     @Test
@@ -271,12 +242,8 @@ public class OnDeployExecutorImplTest {
 
         // Here's where the real test begins
 
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2()));
 
         try {
             context.registerInjectActivateService(impl);
@@ -293,6 +260,7 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("running", status1.getValueMap().get("status", ""));
+        assertFalse(status1.getValueMap().containsKey("output"));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status2);
@@ -300,12 +268,11 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteTerminatesWhenScriptFails() {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleFailExecute(), new OnDeployScriptTestExampleSuccess2());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(
+                        new OnDeployScriptTestExampleSuccess1(),
+                        new OnDeployScriptTestExampleFailExecute(),
+                        new OnDeployScriptTestExampleSuccess2()));
 
         try {
             context.registerInjectActivateService(new OnDeployExecutorImpl());
@@ -329,10 +296,12 @@ public class OnDeployExecutorImplTest {
         Resource status1 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess1.class.getName());
         assertNotNull(status1);
         assertEquals("success", status1.getValueMap().get("status", ""));
+        assertEquals("", status1.getValueMap().get("output", ""));
 
         Resource status2 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleFailExecute.class.getName());
         assertNotNull(status2);
         assertEquals("fail", status2.getValueMap().get("status", ""));
+        assertTrue(status2.getValueMap().get("output", "").startsWith("java.lang.RuntimeException: Oops, this script failed"));
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
@@ -340,12 +309,8 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteScriptSuccess() throws NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
         context.registerInjectActivateService(onDeployExecutor);
@@ -357,12 +322,8 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteScriptFail() throws NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleFlipFlop());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleFlipFlop()));
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
         try {
@@ -378,12 +339,8 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteScriptSuccessForce() throws NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
         context.registerInjectActivateService(onDeployExecutor);
@@ -394,12 +351,8 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testExecuteScriptDoesNotExist() throws NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> singletonList(new OnDeployScriptTestExampleSuccess1()));
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
         context.registerInjectActivateService(onDeployExecutor);
@@ -410,12 +363,12 @@ public class OnDeployExecutorImplTest {
 
     @Test
     public void testTabularData() throws OpenDataException, NotCompliantMBeanException {
-        context.registerService(OnDeployScriptProvider.class, new OnDeployScriptProvider() {
-            @Override
-            public List<OnDeployScript> getScripts() {
-                return Arrays.asList(new OnDeployScriptTestExampleSuccess1(), new OnDeployScriptTestExampleSuccess2(), new OnDeployScriptTestExampleSuccessWithPause(), new OnDeployScriptTestExampleFailExecute());
-            }
-        });
+        context.registerService(OnDeployScriptProvider.class,
+                () -> asList(
+                        new OnDeployScriptTestExampleSuccess1(),
+                        new OnDeployScriptTestExampleSuccess2(),
+                        new OnDeployScriptTestExampleSuccessWithPause(),
+                        new OnDeployScriptTestExampleFailExecute()));
 
         OnDeployExecutorImpl onDeployExecutor = new OnDeployExecutorImpl();
         try {
@@ -427,11 +380,11 @@ public class OnDeployExecutorImplTest {
 
         TabularData scriptsData = onDeployExecutor.getScripts();
         assertEquals("wrong number of scripts registered in JXM data", 4, scriptsData.size());
-        for(Object o : scriptsData.values()) {
-            CompositeData row = (CompositeData)o;
+        for (Object o : scriptsData.values()) {
+            CompositeData row = (CompositeData) o;
             String status = (String) row.get("status");
             String script = (String) row.get("_script");
-            if(script.contains("Success")) {
+            if (script.contains("Success")) {
                 assertEquals("fail", "success", status);
             }
         }

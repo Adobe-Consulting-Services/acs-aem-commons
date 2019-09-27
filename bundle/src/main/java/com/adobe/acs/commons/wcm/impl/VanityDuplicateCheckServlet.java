@@ -32,24 +32,24 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.day.cq.wcm.api.NameConstants;
-
+import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Class used by the vanity URL check validation javascript. It determines if the vanity URL entered by the user is
- * already in use already and returns the list of pages in which the vanity path is used.
+ * Class used by the vanity URL check validation javascript. It determines if
+ * the vanity URL entered by the user is already in use already and returns the
+ * list of pages in which the vanity path is used.
  */
-
 @SuppressWarnings("serial")
 @SlingServlet(
         metatype = false,
-        paths = { "/bin/wcm/duplicateVanityCheck" },
-        methods = { "GET" }
+        paths = {"/bin/wcm/duplicateVanityCheck"},
+        methods = {"GET"}
 )
 public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
 
@@ -59,36 +59,31 @@ public final class VanityDuplicateCheckServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 
-        try {
-            final ResourceResolver resolver = request.getResourceResolver();
-            final String vanityPath = request.getParameter("vanityPath");
-            final String pagePath = request.getParameter("pagePath");
-            log.debug("vanity path parameter passed is {}; page path parameter passed is {}", vanityPath, pagePath);
+        final ResourceResolver resolver = request.getResourceResolver();
+        final String vanityPath = request.getParameter("vanityPath");
+        final String pagePath = request.getParameter("pagePath");
+        log.debug("vanity path parameter passed is {}; page path parameter passed is {}", vanityPath, pagePath);
 
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-            JSONWriter jsonWriter = new JSONWriter(response.getWriter());
-            jsonWriter.array();
+        List<String> paths = new ArrayList<>();
 
-            if (StringUtils.isNotBlank(vanityPath)) {
-                String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='" + vanityPath + "']";
-                @SuppressWarnings("deprecation")
-                Iterator<Resource> resources = resolver.findResources(xpath, Query.XPATH);
-                while (resources.hasNext()) {
-                    Resource resource = resources.next();
-                    String path = resource.getPath();
-                    if (path.startsWith("/content") && !path.equals(pagePath)) {
-                        jsonWriter.value(path);
-                    }
+        if (StringUtils.isNotBlank(vanityPath)) {
+            String xpath = "//element(*)[" + NameConstants.PN_SLING_VANITY_PATH + "='" + vanityPath + "']";
+            @SuppressWarnings("deprecation")
+            Iterator<Resource> resources = resolver.findResources(xpath, Query.XPATH);
+            while (resources.hasNext()) {
+                Resource resource = resources.next();
+                String path = resource.getPath();
+                if (path.startsWith("/content") && !path.equals(pagePath)) {
+                    paths.add(path);
                 }
-
             }
-            jsonWriter.endArray();
-        } catch (JSONException e) {
-            throw new ServletException("Unable to generate JSON result", e);
         }
-    }
 
+        Gson gson = new Gson();
+        gson.toJson(paths, response.getWriter());
+    }
 
 }

@@ -24,7 +24,6 @@ checks:
 plugins:
   sonar-java:
     enabled: true
-    channel: "beta"
     exclude_patterns:
       - "**/src/test/"
     config:
@@ -56,6 +55,7 @@ exclude_patterns:
 - "**/vendor/"
 - "**/extensions/contentfinder/"
 - "*/target/"
+- "**/org/apache/jackrabbit/oak/**"
 
 
 # Common exclusions

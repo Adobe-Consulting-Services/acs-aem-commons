@@ -19,23 +19,29 @@
  */
 package com.adobe.acs.commons.fam.impl;
 
-import com.adobe.acs.commons.fam.CancelHandler;
-import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.fam.CancelHandler;
+import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 
 /**
  * Runnable task that has a time limit
  */
-public class TimedRunnable implements Runnable {
+public class TimedRunnable implements Runnable, Comparable<TimedRunnable> {
+    private static AtomicLong taskCounter = new AtomicLong();
+    private Long createOrder = taskCounter.getAndAdd(1);
 
     long created = System.currentTimeMillis();
     long started = -1;
     long executed = -1;
     long finished = -1;
+    int priority;
     Runnable work;
     ThrottledTaskRunner runner;
     int timeout;
@@ -43,16 +49,17 @@ public class TimedRunnable implements Runnable {
     Optional<CancelHandler> cancelHandler = Optional.empty();
     private static final Logger LOG = LoggerFactory.getLogger(TimedRunnable.class);
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit) {
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, int priority) {
         this.work = work;
         this.runner = runner;
         this.timeout = timeout;
         this.timeoutUnit = timeoutUnit;
+        this.priority = priority;
         LOG.debug("Task created");
     }
 
-    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler) {
-        this(work, runner, timeout, timeoutUnit);
+    public TimedRunnable(Runnable work, ThrottledTaskRunner runner, int timeout, TimeUnit timeoutUnit, CancelHandler cancelHandler, int priority) {
+        this(work, runner, timeout, timeoutUnit, priority);
         this.cancelHandler = Optional.of(cancelHandler);
     }
 
@@ -94,7 +101,7 @@ public class TimedRunnable implements Runnable {
         runner.logCompletion(created, started, executed, finished, successful, error);
     }
 
-    @SuppressWarnings("squid:S2142")
+    @SuppressWarnings({"squid:S2142", "CQRules:CWE-676"})
     private Runnable watchThread(Thread workThread, Semaphore timerSemaphore) {
         return () -> {
             boolean finished1 = false;
@@ -108,5 +115,16 @@ public class TimedRunnable implements Runnable {
                 workThread.interrupt();
             }
         };
+    }
+
+    @Override
+    public int compareTo(TimedRunnable other) {
+        int compareResult = Integer.compare(other.priority, this.priority);
+
+        if (compareResult == 0) {
+            compareResult = createOrder.compareTo(other.createOrder);
+        }
+
+        return compareResult;
     }
 }

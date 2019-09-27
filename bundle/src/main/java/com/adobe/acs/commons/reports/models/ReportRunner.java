@@ -30,7 +30,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
-import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,6 @@ public class ReportRunner {
 
   private ReportExecutor reportExecutor;
 
-  @Self
   private SlingHttpServletRequest request;
 
   private boolean succeeded = true;
@@ -74,6 +72,7 @@ public class ReportRunner {
     this.dynamicClassLoaderManager = dynamicClassLoaderManager;
   }
 
+  @SuppressWarnings("squid:S2658") // class name is from a trusted source
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
     log.trace("executeConfig");
     String reportExecutorClass = config.getValueMap().get(PN_EXECUTOR, String.class);
@@ -116,7 +115,7 @@ public class ReportRunner {
   }
 
   @PostConstruct
-  protected void init() throws RepositoryException {
+  protected void init() {
     log.trace("init");
 
     try {

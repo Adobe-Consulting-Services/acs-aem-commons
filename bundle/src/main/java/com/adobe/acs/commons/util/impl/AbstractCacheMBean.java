@@ -36,7 +36,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
-public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements  CacheMBean
+public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean implements CacheMBean
 {
     /** jmx labels **/
     protected static final String JMX_PN_CACHESTATS = "Cache Stats";
@@ -51,16 +51,11 @@ public abstract class AbstractCacheMBean<K,V> extends AnnotatedStandardMBean imp
     protected static final String JMX_PN_HITS = "Hits";
     protected static final String JMX_PN_TOTALSIZESERVED = "Total Size Served from Cache";
 
-
-
-
-    public <T> AbstractCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException
-    {
+    public <T> AbstractCacheMBean(T implementation, Class<T> mbeanInterface) throws NotCompliantMBeanException {
         super(implementation, mbeanInterface);
     }
 
-    protected AbstractCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException
-    {
+    protected AbstractCacheMBean(Class<?> mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
     }
 

@@ -21,7 +21,7 @@ package com.adobe.acs.commons.wcm;
 
 import org.apache.commons.lang.StringUtils;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This is a wrapper class that allows the "canned" list to be extends to include

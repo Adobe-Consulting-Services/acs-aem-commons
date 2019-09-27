@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.fam;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.fam.mbean.ActionManagerMBean;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -29,6 +29,7 @@ import org.apache.sling.api.resource.ResourceResolver;
  */
 @ProviderType
 public interface ActionManagerFactory extends ActionManagerMBean {
+
     /**
      * Creates an ActionManager instead with the provided name and JCR context provided bu the resourceResolver.
      * @param name the name of the ActionManager. This method guarantee uniqueness of the action manager name.
@@ -38,6 +39,17 @@ public interface ActionManagerFactory extends ActionManagerMBean {
      * @throws LoginException
      */
     public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval) throws LoginException;
+
+    /**
+     * Creates an ActionManager instead with the provided name and JCR context provided bu the resourceResolver.
+     * @param name the name of the ActionManager. This method guarantee uniqueness of the action manager name.
+     * @param resourceResolver the resourceResolver used to perform
+     * @param saveInterval the number of changed that must incur on the resourceResolver before commit() is called (in support of batch saves)
+     * @param priority the priority of execution for the tasks in this action manager
+     * @return the created ActionManager
+     * @throws LoginException
+     */
+    public ActionManager createTaskManager(String name, ResourceResolver resourceResolver, int saveInterval, int priority) throws LoginException;
 
     /**
      * Gets the named ActionManager from the ActionManagerFactory.

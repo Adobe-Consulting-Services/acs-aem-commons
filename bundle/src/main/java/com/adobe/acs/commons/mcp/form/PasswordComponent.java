@@ -19,15 +19,19 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Text field component
  */
 @ProviderType
-public class PasswordComponent extends FieldComponent {
+public final class PasswordComponent extends FieldComponent {
+    public PasswordComponent() {
+        setResourceType("granite/ui/components/coral/foundation/form/password");
+    }
+
     @Override
     public void init() {
-        setResourceType("granite/ui/components/coral/foundation/form/password");
+        // Nothing special happens here
     }
 }

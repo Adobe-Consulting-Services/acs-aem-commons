@@ -20,5 +20,5 @@
 /**
  * Miscellaneous WCM Utilities.
  */
-@aQute.bnd.annotation.Version("2.0.0")
+@org.osgi.annotation.versioning.Version("3.0.0")
 package com.adobe.acs.commons.wcm;

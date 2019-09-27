@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -128,7 +129,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
 
-    @Reference
+    @Reference(policyOption = ReferencePolicyOption.GREEDY)
     private DispatcherFlusher dispatcherFlusher;
 
     @Reference
@@ -159,10 +160,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
         final ReplicationActionType flushActionType =
                 replicationActionType == null ? replicationAction.getType() : replicationActionType;
 
-        ResourceResolver resourceResolver = null;
-
-        try {
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             // Flush full content hierarchies
             for (final Map.Entry<Pattern, String[]> entry : this.hierarchicalFlushRules.entrySet()) {
@@ -199,12 +197,11 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 }
             }
 
+        } catch (ReplicationException e) {
+            // ReplicationException must be caught here, as otherwise this will prevent the replication at all
+            log.error("Error issuing dispatcher flush rules, some downstream replication exception occurred: {}", e.getMessage(), e);
         } catch (LoginException e) {
-            log.error("Error issuing  dispatcher flush rules do to repository login exception: {}", e.getMessage());
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
+            log.error("Error issuing dispatcher flush rules due to a repository login exception: {}", e.getMessage(), e);
         }
     }
 
@@ -299,7 +296,7 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
             log.debug("Using replication action type: {}", repActionType.name());
             return repActionType;
         } catch (IllegalArgumentException ex) {
-            log.debug("Using replication action type: {}", OPTION_INHERIT);
+            log.warn("Illegal action type configured: {}. Falling back to default: {}", replicationActionTypeName, OPTION_INHERIT);
             return null;
         }
     }

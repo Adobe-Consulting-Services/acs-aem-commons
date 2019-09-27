@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.Externalizer;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -30,8 +32,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,24 +44,25 @@ import java.io.IOException;
         immediate = true
 )
 @Properties({
-        @Property(
-                name = "sling.servlet.methods",
-                value = "GET",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "sling.servlet.resourceTypes",
-                value = "acs-commons/components/utilities/qr-code/config",
-                propertyPrivate = true
-        ),
-        @Property(
-                name = "sling.servlet.extensions",
-                value = "json",
-                propertyPrivate = true
-        )
+    @Property(
+            name = "sling.servlet.methods",
+            value = "GET",
+            propertyPrivate = true
+    ),
+    @Property(
+            name = "sling.servlet.resourceTypes",
+            value = "acs-commons/components/utilities/qr-code/config",
+            propertyPrivate = true
+    ),
+    @Property(
+            name = "sling.servlet.extensions",
+            value = "json",
+            propertyPrivate = true
+    )
 })
 @Service
 public class QrCodeServlet extends SlingSafeMethodsServlet {
+
     private static final Logger log = LoggerFactory.getLogger(QrCodeServlet.class);
 
     private static final String PN_ENABLED = "enabled";
@@ -82,7 +83,7 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
             response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
         } else if (request.getResource().getValueMap().get(PN_ENABLED, false)) {
-            final JSONObject json = new JSONObject();
+            final JsonObject json = new JsonObject();
             final String publishUrl = externalizer.publishLink(request.getResourceResolver(), request.getRequestPathInfo().getSuffix());
 
             log.debug("Externalized path [ {} ] for QR Code generation to [ {} ]",
@@ -90,15 +91,10 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
                     publishUrl);
 
             if (StringUtils.isNotBlank(publishUrl)) {
-                try {
-                    json.put(JSON_KEY_ENABLED, true);
-                    json.put(JSON_KEY_PUBLISH_URL, publishUrl);
-                } catch (JSONException e) {
-                    log.error("Could not construct the QR Code Servlet JSON response", e);
-                    throw new ServletException(e);
-                }
-
-                response.getWriter().write(json.toString());
+                json.addProperty(JSON_KEY_ENABLED, true);
+                json.addProperty(JSON_KEY_PUBLISH_URL, publishUrl);
+                Gson gson = new Gson();
+                gson.toJson(json, response.getWriter());
                 response.getWriter().flush();
             } else {
                 log.warn("Externalizer configuration for AEM Publish did not yield a valid URL");

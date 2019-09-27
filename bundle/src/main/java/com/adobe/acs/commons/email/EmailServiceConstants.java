@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.email;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines special keys for the replacement variable map
@@ -51,4 +51,8 @@ public final class EmailServiceConstants {
      */
     public static final String SUBJECT = "subject";
 
+    /**
+     * Variable used to specify the bounce address. Also referred to as the envelope FROM address.
+     */
+    public static final String BOUNCE_ADDRESS = "bounceAddress";
 }

@@ -20,7 +20,7 @@
 /**
  * Miscellaneous Utilities.
  */
-@Version("3.15.0")
+@Version("4.2.0")
 
 package com.adobe.acs.commons.util;
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

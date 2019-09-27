@@ -184,7 +184,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
                 }
             });
             visitor.accept(tree);
-        } catch (LoginException ex) {
+        } catch (Exception ex) {
             LOG.error("Error getting inactive process list", ex);
         }
         return processes;

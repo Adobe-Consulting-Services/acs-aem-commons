@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<workspaceFilter version="1.0">
+    <filter root="/apps/acs"/>
+    <filter root="/libs/out_of_bounds"/>
+    <filter root="/content/acs"/>
+</workspaceFilter>

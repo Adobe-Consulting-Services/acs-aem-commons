@@ -29,7 +29,6 @@ import com.day.cq.commons.PathInfo;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
 import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.search.QueryBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -244,9 +243,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
-    private QueryBuilder queryBuilder;
 
     @Reference
     private Authenticator authenticator;
@@ -908,10 +904,8 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
 
         // Absolute path
         if (StringUtils.startsWith(this.errorImagePath, "/")) {
-            ResourceResolver serviceResourceResolver = null;
-            try {
-                Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo)) {
                 final Resource resource = serviceResourceResolver.resolve(this.errorImagePath);
 
                 if (resource != null && resource.isResourceType(JcrConstants.NT_FILE)) {
@@ -926,10 +920,6 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
                 }
             } catch (LoginException e) {
                 log.error("Could not get admin resource resolver to inspect validity of absolute errorImagePath");
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
-                }
             }
         }
 

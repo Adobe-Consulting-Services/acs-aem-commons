@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
 import com.adobe.acs.commons.contentfinder.querybuilder.impl.ContentFinderHitBuilder;
-import com.day.cq.search.Query;
+import com.adobe.acs.commons.search.CloseableQuery;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.core.contentfinder.ViewQuery;
@@ -36,31 +36,38 @@ import java.util.Map;
 public final class QueryBuilderViewQuery implements ViewQuery {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewQuery.class);
 
-    private final Query query;
+    private final CloseableQuery query;
+    private List<com.day.cq.wcm.core.contentfinder.Hit> hits = null;
 
-    public QueryBuilderViewQuery(final Query query) {
+    public QueryBuilderViewQuery(final CloseableQuery query) {
         this.query = query;
     }
 
     @Override
     public Collection<com.day.cq.wcm.core.contentfinder.Hit> execute() {
-        final List<com.day.cq.wcm.core.contentfinder.Hit> hits = new ArrayList<com.day.cq.wcm.core.contentfinder.Hit>();
+        if (hits == null) {
+            hits = new ArrayList<>();
 
-        if (this.query == null) {
-            return hits;
-        }
+            if (this.query == null) {
+                return hits;
+            }
 
-        final SearchResult result = this.query.getResult();
-
-        // iterating over the results
-        for (Hit hit : result.getHits()) {
             try {
-                hits.add(createHit(hit));
-            } catch (RepositoryException e) {
-                log.error("Could not return required information for Content Finder result: {}", hit.toString());
+                final SearchResult result = this.query.getResult();
+
+                // iterating over the results
+                for (Hit hit : result.getHits()) {
+                    try {
+                        hits.add(createHit(hit));
+                    } catch (RepositoryException e) {
+                        log.error("Could not return required information for Content Finder result: {}", hit.toString());
+                    }
+                }
+
+            } finally {
+                query.close();
             }
         }
-
         return hits;
     }
 

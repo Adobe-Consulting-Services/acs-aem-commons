@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.redirectmaps.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -75,10 +78,7 @@ public class TestServlets {
     @Mock
     private Resource mockMapContentResource;
 
-    @Mock
-    private ModifiableValueMap contentProperties;
-
-    private String value = null;
+    private Map<String, String> value = new HashMap<>();
 
     private ModifiableValueMap mvm = new ModifiableValueMap() {
 
@@ -126,16 +126,14 @@ public class TestServlets {
 
         @Override
         public Object put(String key, Object v) {
-            if (key.equals(JcrConstants.JCR_DATA)) {
-                if (v instanceof InputStream) {
-                    try {
-                        value = IOUtils.toString((InputStream) v);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    value = String.valueOf(v);
+            if (v instanceof InputStream) {
+                try {
+                    value.put(key, IOUtils.toString((InputStream) v));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
+            } else {
+                value.put(key, String.valueOf(v));
             }
             return v;
         }
@@ -181,6 +179,16 @@ public class TestServlets {
         @Override
         public void write(int b) throws IOException {
 
+        }
+
+        @Override
+        public boolean isReady() {
+            return false;
+        }
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            // No need to do anything
         }
 
     };
@@ -241,13 +249,10 @@ public class TestServlets {
         };
         mockResolver.addResource(mockResource);
 
-        doReturn(contentProperties).when(mockResource).adaptTo(ModifiableValueMap.class);
-        doReturn(null).when(contentProperties).put(org.mockito.Matchers.anyString(), org.mockito.Matchers.any());
-
         log.debug("Setting up the request...");
         doReturn(mockResource).when(mockSlingRequest).getResource();
         doReturn(mockResolver).when(mockResource).getResourceResolver();
-        doReturn("0").when(mockSlingRequest).getParameter("idx");
+        doReturn("1").when(mockSlingRequest).getParameter("idx");
         doReturn("/source").when(mockSlingRequest).getParameter("source");
         doReturn("/target").when(mockSlingRequest).getParameter("target");
         doReturn("1").when(mockSlingRequest).getParameter("edit-id");
@@ -262,11 +267,12 @@ public class TestServlets {
 
         doReturn(mockFileResource).when(mockResource).getChild(RedirectMapModel.MAP_FILE_NODE);
         doReturn(model).when(mockResource).adaptTo(RedirectMapModel.class);
+        doReturn(mvm).when(mockResource).adaptTo(ModifiableValueMap.class);
 
         log.debug("Seetting up the resource /etc/redirectMap.txt");
         doReturn("/etc/redirectMap.txt").when(mockFileResource).getPath();
         mockResolver.addResource(mockFileResource);
-        doReturn(IOUtils.toInputStream("/source1 /target1\n/source2 /target2")).when(mockFileResource)
+        doReturn(IOUtils.toInputStream("# A Comment\n/source1 /target1\n/source2 /target2")).when(mockFileResource)
                 .adaptTo(InputStream.class);
 
         log.debug("Setting up the resource /etc/redirectMap.txt/jcr:content");
@@ -279,6 +285,8 @@ public class TestServlets {
         PrivateAccessor.setField(model, "redirects", redirectConfigs);
         PrivateAccessor.setField(model, "redirectMap", mockFileResource);
         PrivateAccessor.setField(model, "resourceResolver", mockResolver);
+
+        value.clear();
     }
 
     @Test
@@ -287,31 +295,30 @@ public class TestServlets {
         AddEntryServlet servlet = new AddEntryServlet();
         servlet.doPost(mockSlingRequest, mockSlingResponse);
 
-        assertTrue(value.contains("/source /target"));
-        log.info(value);
+        log.info("REDIRECT MAP:\n" + value.get(JcrConstants.JCR_DATA));
+        assertTrue(value.get(JcrConstants.JCR_DATA).contains("/source /target"));
+        log.info("Test successful!");
+    }
+
+    @Test
+    public void testEditServlet() throws ServletException, IOException {
+        log.info("testEditEntryServlet");
+        UpdateEntryServlet updateEntryServlet = new UpdateEntryServlet();
+        updateEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
+
+        log.info("REDIRECT MAP:\n" + value.get(JcrConstants.JCR_DATA));
+        assertEquals("# A Comment\n/edit-source /edit-target\n/source2 /target2", value.get(JcrConstants.JCR_DATA));
         log.info("Test successful!");
     }
 
     @Test
     public void testRemoveEntryServlet() throws ServletException, IOException {
         log.info("testRemoveEntryServlet");
-        RemoveEntryServlet servlet = new RemoveEntryServlet();
-        servlet.doPost(mockSlingRequest, mockSlingResponse);
+        RemoveEntryServlet removeEntryServlet = new RemoveEntryServlet();
+        removeEntryServlet.doPost(mockSlingRequest, mockSlingResponse);
 
-        assertFalse(value.contains("/source1 /target1"));
-        log.info(value);
-        log.info("Test successful!");
-    }
-    
-    @Test
-    public void testUpdateServlet() throws ServletException, IOException {
-        log.info("testRemoveEntryServlet");
-        UpdateEntryServlet servlet = new UpdateEntryServlet();
-        servlet.doPost(mockSlingRequest, mockSlingResponse);
-
-        assertFalse(value.contains("/source2 /target2"));
-        assertTrue(value.contains("/edit-source /edit-target"));
-        log.info(value);
+        log.info("REDIRECT MAP:\n" + value.get(JcrConstants.JCR_DATA));
+        assertEquals("# A Comment\n/source2 /target2",value.get(JcrConstants.JCR_DATA));
         log.info("Test successful!");
     }
 }

@@ -18,6 +18,6 @@
  * #L%
  */
 
-@aQute.bnd.annotation.Version("2.1.0")
+@org.osgi.annotation.versioning.Version("2.4.0")
 package com.adobe.acs.commons.httpcache.config;
 

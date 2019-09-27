@@ -22,8 +22,7 @@ package com.adobe.acs.commons.wcm.tags.wcmmode;
 import javax.servlet.ServletRequest;
 import javax.servlet.jsp.PageContext;
 
-import tldgen.Function;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.WCMMode;
 
@@ -42,7 +41,6 @@ public final class WCMModeFunctions {
      * @param pageContext the current page context
      * @return true if the WCMMode is design
      */
-    @Function
     public static boolean isDesign(PageContext pageContext) {
         if (pageContext == null) {
             return false;
@@ -60,7 +58,6 @@ public final class WCMModeFunctions {
      * @param pageContext the current page context
      * @return true if the WCMMode is disabled
      */
-    @Function
     public static boolean isDisabled(PageContext pageContext) {
         if (pageContext == null) {
             return true;
@@ -78,7 +75,6 @@ public final class WCMModeFunctions {
      * @param pageContext the current page context
      * @return true if the WCMMode is edit
      */
-    @Function
     public static boolean isEdit(PageContext pageContext) {
         if (pageContext == null) {
             return false;
@@ -96,7 +92,6 @@ public final class WCMModeFunctions {
      * @param pageContext the current page context
      * @return true if the WCMMode is preview
      */
-    @Function
     public static boolean isPreview(PageContext pageContext) {
         if (pageContext == null) {
             return false;

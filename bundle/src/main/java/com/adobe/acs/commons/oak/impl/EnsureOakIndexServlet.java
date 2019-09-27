@@ -26,12 +26,13 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -59,7 +60,7 @@ import java.io.IOException;
 })
 @Service(Servlet.class)
 //@formatter:on
-public class EnsureOakIndexServlet extends HttpServlet {
+public class EnsureOakIndexServlet extends SlingAllMethodsServlet {
     //@formatter:off
 
     private static final Logger log = LoggerFactory.getLogger(EnsureOakIndexServlet.class);
@@ -72,8 +73,8 @@ public class EnsureOakIndexServlet extends HttpServlet {
     //@formatter:on
 
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) {
+    protected void doGet(SlingHttpServletRequest request,
+                         SlingHttpServletResponse response) {
 
         try {
 
@@ -100,7 +101,7 @@ public class EnsureOakIndexServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
 
         String forceParam = StringUtils.defaultIfEmpty(request.getParameter(PARAM_FORCE), "false");
         boolean force = Boolean.parseBoolean(forceParam);

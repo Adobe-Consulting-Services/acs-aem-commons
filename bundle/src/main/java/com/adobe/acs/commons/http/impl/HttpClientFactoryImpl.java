@@ -31,20 +31,17 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Map;
-
 
 @Component(
         label = "ACS AEM Commons - Http Components Fluent Executor Factory",
@@ -54,6 +51,7 @@ import java.util.Map;
 @Service
 @Property(label = "Factory Name", description = "Name of this factory", name = "factory.name")
 public class HttpClientFactoryImpl implements HttpClientFactory {
+
     public static final boolean DEFAULT_USE_SSL = false;
 
     public static final boolean DEFAULT_DISABLE_CERT_CHECK = false;
@@ -123,12 +121,12 @@ public class HttpClientFactoryImpl implements HttpClientFactory {
         boolean disableCertCheck = PropertiesUtil.toBoolean(config.get(PROP_DISABLE_CERT_CHECK), DEFAULT_DISABLE_CERT_CHECK);
 
         if (useSSL && disableCertCheck) {
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    return true;
-                }
-            }).build();
-            builder.setHostnameVerifier(new AllowAllHostnameVerifier()).setSslcontext(sslContext);
+            // Disable hostname verification and allow self-signed certificates
+            SSLContextBuilder sslbuilder = new SSLContextBuilder();
+            sslbuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                    sslbuilder.build(), NoopHostnameVerifier.INSTANCE);
+            builder.setSSLSocketFactory(sslsf);
         }
         httpClient = builder.build();
         executor = Executor.newInstance(httpClient);

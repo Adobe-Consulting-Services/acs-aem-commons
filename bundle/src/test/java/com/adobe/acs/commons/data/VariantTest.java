@@ -21,7 +21,9 @@ package com.adobe.acs.commons.data;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -68,11 +70,21 @@ public class VariantTest {
         assertEquals(nowInstant, Variant.convert(now, Instant.class));
         assertEquals(nowInstant, Variant.convert(nowDate, Instant.class));
 
-        String nowStringShort = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.LONG).format(nowDate);
-        String nowStringLong = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.LONG, SimpleDateFormat.LONG).format(nowDate);
+        // Locale.getDefault() and Locale.getDefault(Locale.Category.FORMAT) may return different values in certain OS settings.
+        // Variant uses the former, SimpleDateFormat uses the latter by default.
+        // To make things consistent, pass Locale.getDefault() to SimpleDateFormat explicitly.
+        String nowStringShort = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.LONG, Locale.getDefault()).format(nowDate);
+        String nowStringLong = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.LONG, SimpleDateFormat.LONG, Locale.getDefault()).format(nowDate);
         assertNotNull(Variant.convert(nowStringLong, Date.class).getTime());
         assertNotNull(Variant.convert(nowStringShort, Date.class).getTime());
         assertNotNull(Variant.convert("12:00 AM", Date.class).getTime());
+    }
+
+    @Test
+    public void databaseDateFormatConversion() {
+        Calendar cal = Variant.convert("2016-02-12T14:47:41.922-05:00", Calendar.class);
+        assertNotNull(cal);
+        assertEquals(2016L, cal.get(Calendar.YEAR));
     }
 
     @Test

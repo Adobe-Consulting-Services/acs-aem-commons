@@ -20,8 +20,9 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
+import java.util.Collections;
 import java.util.Set;
 
 @ProviderType
@@ -42,6 +43,10 @@ public interface ChecksumGeneratorOptions {
     String PROPERTY_EXCLUDES = "excludeProperties";
 
     String SORTED_PROPERTIES = "sortedProperties";
+
+    String SUB_TREE_EXCLUDES = "excludeSubTrees";
+
+    String NODE_NAME_EXCLUDES = "excludeNodeNames";
 
     /**
      * For a node to be checksumable, its primaryType must exists in getIncludedNodesTypes() and not exist in
@@ -66,4 +71,18 @@ public interface ChecksumGeneratorOptions {
      * @return the property names whose multi-value order as defined in the JCR should be respected.
      */
     Set<String> getSortedProperties();
+
+    /**
+     * @return the named node subTrees to exclude (the matching node and any sub-nodes will NOT be traversed/checksumed)
+     */
+    default Set<String> getExcludedSubTrees() {
+        return  Collections.EMPTY_SET;
+    }
+
+    /**
+     * @return the nodeNames to exclude (sub-nodes WILL be traverse/checksumed)
+     */
+    default Set<String> getExcludedNodeNames() {
+        return  Collections.EMPTY_SET;
+    }
 }

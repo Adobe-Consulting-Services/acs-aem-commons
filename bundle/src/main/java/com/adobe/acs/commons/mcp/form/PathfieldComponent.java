@@ -19,14 +19,13 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Provisions for path fields Accepts the following options: base=[path] -- Root
  * of tree shown to user multiple -- If added it indicates the user can make
  * multiple selections and values are stored in a multi-value field
  */
-@ProviderType
 public abstract class PathfieldComponent extends FieldComponent {
 
     private static final String OPTION_PREDICATE = "predicate";
@@ -35,11 +34,12 @@ public abstract class PathfieldComponent extends FieldComponent {
     public void init() {
         setResourceType("granite/ui/components/coral/foundation/form/pathbrowser");
         getComponentMetadata().put("pickerMultiselect", hasOption("multiple"));
-        getOption("base").ifPresent(path->getComponentMetadata().put("rootPath", path));
+        getOption("base").ifPresent(path -> getComponentMetadata().put("rootPath", path));
         getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
     }
 
-    public static class AssetSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class AssetSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
@@ -48,7 +48,18 @@ public abstract class PathfieldComponent extends FieldComponent {
         }
     }
 
-    public static class PageSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class NodeSelectComponent extends PathfieldComponent {
+
+        @Override
+        public void init() {
+            super.init();
+            getComponentMetadata().put(OPTION_PREDICATE, "nosystem");
+        }
+    }
+
+    @ProviderType
+    public static final class PageSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {
@@ -57,7 +68,8 @@ public abstract class PathfieldComponent extends FieldComponent {
         }
     }
 
-    public static class FolderSelectComponent extends PathfieldComponent {
+    @ProviderType
+    public static final class FolderSelectComponent extends PathfieldComponent {
 
         @Override
         public void init() {

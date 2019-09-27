@@ -37,6 +37,7 @@ public class JCRHttpCacheStoreConstants
     public static final String PN_CONTENT_TYPE = "content-type";
 
     public static final String OAK_UNSTRUCTURED = "oak:Unstructured";
+    public static final String PN_WRITEMETHOD = "responseWriteMethod";
 
     private JCRHttpCacheStoreConstants(){
 

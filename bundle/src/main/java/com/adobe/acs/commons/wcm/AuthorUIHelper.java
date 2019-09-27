@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.wcm;
 
 import org.apache.sling.api.resource.ResourceResolver;
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * A Service that provides centralized logic for generating links to edit Pages

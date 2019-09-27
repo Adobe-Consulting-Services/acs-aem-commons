@@ -55,7 +55,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             COLORANTS,
             LOCATION
         })
-    public static String PROP_COMPONENTS = "components";
+    public static final String PROP_COMPONENTS = "components";
 
     private JsonObject json;
 

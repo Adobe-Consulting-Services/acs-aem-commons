@@ -19,20 +19,22 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Radio button selector component
  */
 @ProviderType
-public class CheckboxComponent extends FieldComponent {
+public final class CheckboxComponent extends FieldComponent {
     @Override
     public void init() {
         setResourceType("granite/ui/components/foundation/form/checkbox");
-        getComponentMetadata().put("text", getFieldDefinition().name());        
+        getComponentMetadata().put("text", getFieldDefinition().name());
         getComponentMetadata().put("value", "true");
         getComponentMetadata().put("uncheckedValue", "false");
         getComponentMetadata().put("required", false);
-        getComponentMetadata().put("checked", hasOption("checked"));
-    }    
+        if (hasOption("checked")) {
+            getComponentMetadata().put("checked", "true");
+        }
+    }
 }

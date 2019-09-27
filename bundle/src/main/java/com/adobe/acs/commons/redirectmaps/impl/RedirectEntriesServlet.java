@@ -40,6 +40,7 @@ public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
     private static final long serialVersionUID = -2825679173210628699L;
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);
 
+    @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doGet");

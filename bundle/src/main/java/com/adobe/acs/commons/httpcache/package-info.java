@@ -23,6 +23,6 @@
  * are cached on first request and served from cache for subsequent requests. This caching layer shall be availed for
  * requests for which responses are expensive to compute and can be cached.
  */
-@aQute.bnd.annotation.Version("1.0.0")
+@org.osgi.annotation.versioning.Version("1.0.0")
 package com.adobe.acs.commons.httpcache;
 

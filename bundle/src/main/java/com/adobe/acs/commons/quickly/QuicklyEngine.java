@@ -22,10 +22,9 @@ package com.adobe.acs.commons.quickly;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
+import com.google.gson.JsonObject;
 
 @ProviderType
 @SuppressWarnings("squid:S1214")
@@ -40,7 +39,7 @@ public interface QuicklyEngine {
      * @return
      * @throws JSONException
      */
-    JSONObject execute(SlingHttpServletRequest slingRequest,
+    JsonObject execute(SlingHttpServletRequest slingRequest,
                        SlingHttpServletResponse slingResponse,
-                       Command cmd) throws JSONException;
+                       Command cmd);
 }

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.fam.actions;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.functions.CheckedBiFunction;
 import com.adobe.acs.commons.functions.CheckedFunction;
 import com.day.cq.dam.commons.util.DamUtil;

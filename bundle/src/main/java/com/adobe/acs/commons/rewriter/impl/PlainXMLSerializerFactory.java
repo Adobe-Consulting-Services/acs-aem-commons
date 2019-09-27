@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 @Component
 @Service
-@Property(name = "pipeline.type", value = "xml-serializer")
+@Property(name = "pipeline.type", value = "acs-aem-commons-xml-serializer")
 public class PlainXMLSerializerFactory implements SerializerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(PlainXMLSerializerFactory.class);

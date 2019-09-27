@@ -32,6 +32,19 @@
     <appender name="LogTester" class="com.adobe.acs.commons.testutil.LogTester">
     </appender>
 
+    <logger name="com.adobe.acs.commons.remoteassets.impl.RemoteAssetDecorator">
+        <level value="TRACE"/>
+    </logger>
+    <logger name="org.mockserver.mockserver.MockServerHandler">
+        <level value="WARN"/>
+    </logger>
+    <logger name="org.mockserver.matchers.HttpRequestMatcher">
+        <level value="WARN"/>
+    </logger>
+    <logger name="org.mockserver.mock.HttpStateHandler">
+        <level value="WARN"/>
+    </logger>
+
     <root level="debug">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="LogTester" />

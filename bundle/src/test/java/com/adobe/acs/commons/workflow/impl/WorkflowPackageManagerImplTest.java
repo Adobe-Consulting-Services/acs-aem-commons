@@ -20,13 +20,23 @@
 
 package com.adobe.acs.commons.workflow.impl;
 
-import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.commons.jcr.JcrUtil;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.day.cq.workflow.collection.ResourceCollection;
-import com.day.cq.workflow.collection.ResourceCollectionManager;
-import com.day.cq.workflow.collection.ResourceCollectionUtil;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -34,30 +44,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import java.util.ArrayList;
-import java.util.List;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.workflow.collection.ResourceCollection;
+import com.day.cq.workflow.collection.ResourceCollectionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+@RunWith(MockitoJUnitRunner.class)
+public final class WorkflowPackageManagerImplTest {
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ResourceCollectionUtil.class, JcrUtil.class})
-public class WorkflowPackageManagerImplTest {
     private static final String NORMAL_PAGE_PATH = "/content/test";
-    private static final String WORKFLOW_PACKAGE_PATH = "/etc/packages/test";
+    private static final String WORKFLOW_PACKAGE_PATH = "/var/workflow/packages/test";
     private static final String[] PAYLOAD_PATHS = {"/content/one", "/content/two"};
+
+    @InjectMocks
+    private final WorkflowPackageManagerImpl wpm = spy(new WorkflowPackageManagerImpl());
 
     @Mock
     ResourceCollectionManager resourceCollectionManager;
@@ -78,6 +80,8 @@ public class WorkflowPackageManagerImplTest {
     Resource workflowPackageResource;
 
     @Mock
+    Resource workflowPackageRootResource;
+    @Mock
     Node workflowPackageNode;
 
     @Mock
@@ -89,13 +93,11 @@ public class WorkflowPackageManagerImplTest {
     @Mock
     Resource normalPageContentResource;
 
-    @InjectMocks
-    WorkflowPackageManager wpm = new WorkflowPackageManagerImpl();
-
     @Before
     public void setUp() throws Exception {
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        when(resourceResolver.getResource("/var/workflow/packages")).thenReturn(workflowPackageRootResource);
         when(resourceResolver.getResource(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackageResource);
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);
@@ -114,17 +116,9 @@ public class WorkflowPackageManagerImplTest {
         when(normalPageContentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(false);
     }
 
-
-    @Test
-    public void testCreate() throws Exception {
-        // Create method requires complete mocking of impl; No point.
-    }
-
     @Test
     public void testGetPaths() throws Exception {
-        PowerMockito.mockStatic(ResourceCollectionUtil.class);
-        when(ResourceCollectionUtil.getResourceCollection(workflowPackageNode,
-                resourceCollectionManager)).thenReturn(testResourceCollection);
+        doReturn(testResourceCollection).when(wpm).getResourceCollection(workflowPackageNode);
 
         final String[] expected = PAYLOAD_PATHS;
 
@@ -160,6 +154,25 @@ public class WorkflowPackageManagerImplTest {
 
     @Test
     public void testIsWorkflowPackage_NormalPage() throws Exception {
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, NORMAL_PAGE_PATH));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_workflowPackagesPageIsNull() {
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, null));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_vltDefinitionIsNull() {
+        when(contentResource.getChild("vlt:definition")).thenReturn(null);
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, WORKFLOW_PACKAGE_PATH));
+    }
+
+    @Test
+    public void testIsWorkflowPackage_contentResourceIsNull() {
+        when(workflowPackagePage.getContentResource()).thenReturn(null);
+        assertFalse(wpm.isWorkflowPackage(resourceResolver, WORKFLOW_PACKAGE_PATH));
+        when(normalPage.getContentResource()).thenReturn(null);
         assertFalse(wpm.isWorkflowPackage(resourceResolver, NORMAL_PAGE_PATH));
     }
 

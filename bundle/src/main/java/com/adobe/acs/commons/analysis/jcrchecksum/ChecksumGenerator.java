@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.analysis.jcrchecksum;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;

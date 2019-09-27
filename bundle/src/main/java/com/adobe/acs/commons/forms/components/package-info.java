@@ -20,5 +20,5 @@
 /**
  * Forms System - Components.
  */
-@aQute.bnd.annotation.Version("1.0.1")
+@org.osgi.annotation.versioning.Version("1.0.2")
 package com.adobe.acs.commons.forms.components;

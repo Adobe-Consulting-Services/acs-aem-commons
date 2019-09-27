@@ -19,39 +19,37 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
-import com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestor.HierarchialElement;
+import java.util.stream.Stream;
 
 /**
  * Represents a folder to be imported
  */
-public class Folder implements HierarchialElement {
-    HierarchialElement parent;
+public class Folder implements HierarchicalElement {
+    HierarchicalElement parent;
+    // Note: in this implementation this is the url of the requested asset that generated this folder
+    String sourcePath;
     String name;
     String basePath;
 
-    public Folder(String name, Folder parent) {
+    public Folder(String name, Folder parent, String requestedPath) {
         this.name = name;
         this.parent = parent;
+        this.sourcePath = requestedPath;
     }
     
-    public Folder(String name, String basePath) {
+    public Folder(String name, String basePath, String requestedPath) {
         this.name = name;
         this.basePath = basePath;
+        this.sourcePath = requestedPath;
     }
-    
-    
+
     @Override
     public boolean isFile() {
         return false;
     }
 
     @Override
-    public boolean isFolder() {
-        return true;
-    }
-
-    @Override
-    public HierarchialElement getParent() {
+    public HierarchicalElement getParent() {
         return parent;
     }
 
@@ -66,7 +64,7 @@ public class Folder implements HierarchialElement {
     }
 
     @Override
-    public AssetIngestor.Source getSource() {
+    public Source getSource() {
         throw new UnsupportedOperationException("This implementation of folder does not provide a source.");
     }
 
@@ -74,5 +72,14 @@ public class Folder implements HierarchialElement {
     public String getJcrBasePath() {
         return basePath;
     }
-    
+
+    @Override
+    public Stream<HierarchicalElement> getChildren() {
+        throw new UnsupportedOperationException("Folder does not support child navigation at the moment");
+    }
+
+    @Override
+    public String getSourcePath() {
+        return sourcePath;
+    }
 }

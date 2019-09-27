@@ -19,13 +19,13 @@
  */
 package com.adobe.acs.commons.ondeploy;
 
-import aQute.bnd.annotation.ConsumerType;
+import org.osgi.annotation.versioning.ConsumerType;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
 
 import java.util.List;
 
 /**
- * Provider interface to supply a list of scripts to be run by the OnDeployExecutor.
+ * Provider interface to supply a list of scripts to be run by the OnDeployExecutorMBean.
  */
 @ConsumerType
 public interface OnDeployScriptProvider {

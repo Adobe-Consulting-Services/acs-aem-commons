@@ -65,7 +65,7 @@ public class FileImporterTest {
     public void setup() throws Exception {
         provider = RepositoryProvider.instance();
         importer.activate(Collections.<String, Object> emptyMap());
-        testFile = new File("src/test/resources/emailTemplate.txt");
+        testFile = new File("src/test/resources/com/adobe/acs/commons/email/impl/emailTemplate.txt");
         when(mimeTypeService.getMimeType("emailTemplate.txt")).thenReturn("text/plain");
 
         session = provider.getRepository().loginAdministrative(null);

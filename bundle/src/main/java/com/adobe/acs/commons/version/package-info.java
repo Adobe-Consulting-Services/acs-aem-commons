@@ -20,7 +20,7 @@
 /**
  * Version services and helpers.
  */
-@Version("1.1.0")
+@Version("1.1.1")
 package com.adobe.acs.commons.version;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

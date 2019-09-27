@@ -20,5 +20,5 @@
 /**
  * Packaging utilities.
  */
-@aQute.bnd.annotation.Version("2.0.0")
+@org.osgi.annotation.versioning.Version("2.0.1")
 package com.adobe.acs.commons.packaging;

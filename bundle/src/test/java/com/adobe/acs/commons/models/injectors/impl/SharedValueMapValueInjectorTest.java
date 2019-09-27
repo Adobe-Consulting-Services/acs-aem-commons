@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.impl.SharedValueMapValueAnnotationProcessorFactory;
+import com.adobe.acs.commons.models.injectors.impl.model.TestSharedValueMapValueModel;
+import com.adobe.acs.commons.models.injectors.impl.model.impl.TestSharedValueMapValueModelImpl;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderConfig;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderMultiImpl;
 import com.adobe.acs.commons.wcm.properties.shared.SharedComponentProperties;
@@ -38,7 +40,6 @@ import org.junit.Test;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -65,7 +66,7 @@ public class SharedValueMapValueInjectorTest {
 
     private ResourceResolver resourceResolver;
 
-    private SharedValueMapValueTestModel model;
+    private TestSharedValueMapValueModel model;
 
     private Resource modelResource;
 
@@ -75,7 +76,7 @@ public class SharedValueMapValueInjectorTest {
         this.context.registerInjectActivateService(new PageRootProviderMultiImpl());
         this.context.registerInjectActivateService(new SharedValueMapValueAnnotationProcessorFactory());
         this.context.registerInjectActivateService(new SharedValueMapValueInjector());
-        this.context.addModelsForClasses(SharedValueMapValueTestModel.class);
+        this.context.addModelsForClasses(TestSharedValueMapValueModelImpl.class);
 
         this.resourceResolver = this.context.resourceResolver();
         Session session = this.resourceResolver.adaptTo(Session.class);
@@ -112,7 +113,7 @@ public class SharedValueMapValueInjectorTest {
         sharedPropertiesNode.setProperty(LONG_ARRAY_PROP, new String[] {"345", "456"});
 
         modelResource = this.resourceResolver.getResource("/content/mysite/en/mypage/jcr:content/mycomponent");
-        model = modelResource.adaptTo(SharedValueMapValueTestModel.class);
+        model = modelResource.adaptTo(TestSharedValueMapValueModel.class);
     }
 
     @Test
@@ -186,7 +187,7 @@ public class SharedValueMapValueInjectorTest {
     public void testModelAdaptedFromRequest() {
         MockSlingHttpServletRequest mockRequest = new MockSlingHttpServletRequest(this.resourceResolver, this.context.bundleContext());
         mockRequest.setResource(this.modelResource);
-        SharedValueMapValueTestModel modelFromRequest = mockRequest.adaptTo(SharedValueMapValueTestModel.class);
+        TestSharedValueMapValueModel modelFromRequest = mockRequest.adaptTo(TestSharedValueMapValueModel.class);
 
         assertEquals("sharedValue2", modelFromRequest.getStringProp2());
     }

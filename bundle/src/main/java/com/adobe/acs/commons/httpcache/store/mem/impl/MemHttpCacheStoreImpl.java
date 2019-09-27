@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * In-memory cache store implementation. Uses Google Guava Cache.
  */
-@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store.",
+@Component(label = "ACS AEM Commons - HTTP Cache - In-Memory cache store",
            description = "Cache data store implementation for in-memory storage.",
            metatype = true)
 @Properties({
@@ -68,14 +68,14 @@ import java.util.concurrent.TimeUnit;
                     value = HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE,
                     propertyPrivate = true),
         @Property(name = "jmx.objectname",
-                    value = "com.adobe.acs.httpcache:type=In Memory HTTP Cache Store",
+                    value = "com.adobe.acs.commons.httpcache:type=HTTP Cache - In-Memory Cache Store",
                     propertyPrivate = true),
         @Property(name = "webconsole.configurationFactory.nameHint",
                     value = "TTL: {httpcache.cachestore.memcache.ttl}, "
                             + "Max size in MB: {httpcache.cachestore.memcache.maxsize}",
                     propertyPrivate = true)
 })
-@Service(value = {DynamicMBean.class, HttpCacheStore.class})
+@Service(HttpCacheStore.class)
 public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, MemCachePersistenceObject> implements HttpCacheStore, MemCacheMBean {
     private static final Logger log = LoggerFactory.getLogger(MemHttpCacheStoreImpl.class);
 
@@ -95,6 +95,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
               longValue = MemHttpCacheStoreImpl.DEFAULT_MAX_SIZE_IN_MB)
     private static final String PROP_MAX_SIZE_IN_MB = "httpcache.cachestore.memcache.maxsize";
     private static final long DEFAULT_MAX_SIZE_IN_MB = 10L; // Defaults to 10MB.
+
     private long maxSizeInMb;
 
     /** Cache - Uses Google Guava's cache */
@@ -170,8 +171,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
         cache.put(key, new MemCachePersistenceObject().buildForCaching(content.getStatus(), content.getCharEncoding(),
-                content.getContentType(), content.getHeaders(), content.getInputDataStream()));
-
+                content.getContentType(), content.getHeaders(), content.getInputDataStream(), content.getWriteMethod()));
     }
 
     @Override
@@ -193,7 +193,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         value.incrementHitCount();
 
         return new CacheContent(value.getStatus(), value.getCharEncoding(), value.getContentType(), value.getHeaders(), new
-                ByteArrayInputStream(value.getBytes()));
+                ByteArrayInputStream(value.getBytes()), value.getWriteMethod());
     }
 
     @Override
@@ -239,12 +239,16 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
         return new MemTempSinkImpl();
     }
 
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
+    }
+
     //-------------------------<Mbean specific implementation>
 
     public MemHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(MemCacheMBean.class);
     }
-
 
     @Override
     public long getTtl() {

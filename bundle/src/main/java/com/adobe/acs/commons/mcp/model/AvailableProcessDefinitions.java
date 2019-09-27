@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.model;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;

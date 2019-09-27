@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.dam;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;

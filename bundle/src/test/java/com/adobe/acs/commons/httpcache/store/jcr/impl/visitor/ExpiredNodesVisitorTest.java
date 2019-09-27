@@ -26,13 +26,11 @@ import javax.jcr.Node;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
-@PrepareForTest({EntryNodeMapVisitor.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ExpiredNodesVisitorTest
 {
     @Test public void test() throws Exception
@@ -45,9 +43,9 @@ public class ExpiredNodesVisitorTest
         final ExpiredNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
         visitor.visit(rootNode);
         visitor.close();
-        assertEquals(20, visitor.getEvictionCount());
+        assertEquals(30, visitor.getEvictionCount());
 
-        Mockito.verify(rootNode.getSession(), Mockito.times(3)).save();
+        Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
     }
 
     @Test public void testEmptyBucketNodes() throws Exception
@@ -61,9 +59,9 @@ public class ExpiredNodesVisitorTest
         final ExpiredNodesVisitor visitor = getMockedExpiredNodesVisitor(8);
         visitor.visit(rootNode);
         visitor.close();
-            assertEquals(30, visitor.getEvictionCount());
+            assertEquals(40, visitor.getEvictionCount());
 
-        Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
+        Mockito.verify(rootNode.getSession(), Mockito.times(5)).save();
     }
 
     public ExpiredNodesVisitor getMockedExpiredNodesVisitor(int deltaSaveThreshold)

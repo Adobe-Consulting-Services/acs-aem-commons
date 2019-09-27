@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.mcp.mbean.CPMBean;
 import java.util.Collection;
