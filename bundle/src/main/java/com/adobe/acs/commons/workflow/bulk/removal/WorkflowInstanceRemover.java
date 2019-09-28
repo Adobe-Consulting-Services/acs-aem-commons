@@ -36,6 +36,7 @@ public interface WorkflowInstanceRemover {
     @Deprecated
     String WORKFLOW_INSTANCES_PATH = "/etc/workflow/instances";
 
+    @SuppressWarnings("squid:S2386") // cannot be moved for backwards compatibility
     String[] WORKFLOW_INSTANCES_PATHS = {
             "/etc/workflow/instances",
             "/var/workflow/instances"

@@ -72,7 +72,7 @@ public class StatusServlet extends SlingAllMethodsServlet {
     private ActionManagerFactory actionManagerFactory;
 
     @Override
-    @SuppressWarnings({"squid:S3776", "squid:S1192"})
+    @SuppressWarnings({"squid:S3776", "squid:S1192", "squid:S1872"})
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
 

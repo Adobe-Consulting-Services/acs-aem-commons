@@ -9,8 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.0...HEAD
 
+### Changed
+- #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
+- #2045 added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+
+### Fixed
+- #2032 - Fixed filter.xml on /var/acs-commons
+- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
+
+## [4.3.2] - 2019-08-29
+
 ### Fixed
 - #1975 - Split application content from mutable content
+- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
 
 ### Added
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service uwer

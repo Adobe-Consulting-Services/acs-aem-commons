@@ -20,6 +20,8 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
+
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -235,14 +237,14 @@ public class AutocompleteComponent extends FieldComponent {
      * @return the predicates
      */
     public String[] getPredicates() {
-        return predicates;
+        return predicates == null ? null : Arrays.copyOf(predicates, predicates.length);
     }
 
     /**
      * @param predicates the predicate to set
      */
     public void setPredicates(String[] predicates) {
-        this.predicates = predicates;
+        this.predicates = predicates == null ? null : Arrays.copyOf(predicates, predicates.length);
     }
 
     private void setPredicatesFromOptions() {

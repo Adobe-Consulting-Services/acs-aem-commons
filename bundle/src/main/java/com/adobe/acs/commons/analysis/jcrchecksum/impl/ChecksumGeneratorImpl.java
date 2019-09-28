@@ -58,6 +58,7 @@ import java.util.TreeMap;
  */
 @Component
 @Service
+@SuppressWarnings("squid:S2070") // SHA1 not used cryptographically
 public class ChecksumGeneratorImpl implements ChecksumGenerator {
     private static final Logger log = LoggerFactory.getLogger(ChecksumGeneratorImpl.class);
 
