@@ -16,14 +16,15 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   #L%
-  --%>
-<%@page import="com.adobe.acs.commons.genericlists.GenericList, com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper"%>
+--%>
+<%@page import="com.adobe.acs.commons.genericlists.GenericList, com.adobe.acs.commons.mcp.form.*, java.lang.annotation.Annotation"%>
 <%@include file="/libs/foundation/global.jsp"%>
-
+<ui:includeClientLib categories="coralui3,granite.ui.coral.foundation" />
 <%
     GeneratedDialogWrapper dialog = new GeneratedDialogWrapper(GenericList.class);
-%>
+    AbstractResourceImpl formResource = (AbstractResourceImpl) dialog.getFormResource();
+    // MobileUtil will crash with a NPE if the resource resolver is not defined
+    formResource.setResourceResolver(resourceResolver);    
 
-<body>
-    <sling:include resource="<%=dialog.getFormResource()%>"/>
-</body>
+%>
+<sling:include resource="<%=formResource%>"/>

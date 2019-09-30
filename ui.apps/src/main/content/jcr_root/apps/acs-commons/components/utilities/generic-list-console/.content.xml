@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:mixinTypes="[sling:VanityPath]"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS Commons - Generic Lists"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        sling:vanityOrder="{Long}301"
+        sling:vanityPath="/generic-lists"
+        consoleId="cq-sites-pages-pages"
+        modeGroup="cq-siteadmin-admin-childpages"
+        omnisearchLocationPath="/libs/granite/omnisearch/content/metadata/site"
+        pageURITemplate="/generic-lists.html{+id}"
+        targetCollection=".cq-siteadmin-admin-childpages">
+        <redirector
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/admin/contentchecker"
+            allowed="^(/etc/acs-commons/lists|/etc/acs-commons/lists/(.*))$"
+            path="${requestPathInfo.suffix}"
+            redirectWhenEmpty="/generic-lists.html/etc/acs-commons/lists"/>
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[cq.common.wcm,cq.sites.collectionpage,cq.siteadmin.admin.page.row,cq.wcm.sites,cq.sites.validations,acs-commons.genericlist.console]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <column
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Column View"
+                sling:resourceType="granite/ui/components/coral/foundation/columnview"
+                icon="viewColumn"
+                limit="{Long}40"
+                loadAncestors="{Boolean}true"
+                metaResourceType="acs-commons/components/utilities/generic-list-console/meta"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                previewSrc="/mnt/overlay/acs-commons/components/utilities/generic-list-console/pagecolumnpreview.html{+id}"
+                rootPath="/etc/acs-commons/lists"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/acs-commons/components/utilities/generic-list-console/jcr:content/views/column{.offset,limit}.html{+id}">
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
+                    itemResourceType="cq/gui/components/coral/admin/page/columnitem"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${requestPathInfo.suffix}"/>
+            </column>
+            <card
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Card View"
+                sling:resourceType="granite/ui/components/coral/foundation/masonry"
+                icon="viewCard"
+                limit="{Long}20"
+                metaResourceType="acs-commons/components/utilities/generic-list-console/meta"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/acs-commons/components/utilities/generic-list-console/jcr:content/views/card{.offset,limit}.html{+id}">
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
+                    applyWeighting="{Boolean}true"
+                    itemResourceType="cq/gui/components/coral/admin/page/card"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;21&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${requestPathInfo.suffix}"/>
+            </card>
+            <list
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="List View"
+                sling:resourceType="granite/ui/components/coral/foundation/table"
+                icon="viewList"
+                limit="{Long}40"
+                metaResourceType="acs-commons/components/utilities/generic-list-console/meta"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                rowReorderAction="/bin/wcmcommand?cmd=movePage&amp;srcPath={item}&amp;destPath={item}&amp;before={before}&amp;_charset_=utf-8&amp;"
+                selectionMode="row"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                sortMode="remote"
+                src="/mnt/overlay/acs-commons/components/utilities/generic-list-console/jcr:content/views/list{.offset,limit}.html{+id}{?sortName,sortDir}">
+                <granite:data
+                    jcr:primaryType="nt:unstructured"
+                    columns-state-id="aem.sites.listview.columns"/>
+                <columnsdatasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/listview/coral/columns/datasources/columnsdatasource"
+                    availableColumns="/mnt/overlay/wcm/core/content/common/availablecolumns"
+                    stateId="aem.sites.listview.columns"/>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
+                    itemResourceType="cq/gui/components/coral/admin/page/row"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"
+                    path="${requestPathInfo.suffix}"
+                    sortDir="${param.sortDir}"
+                    sortName="${param.sortName}"/>
+            </list>
+        </views>
+        <breadcrumbs
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="wcm/commons/ui/shell/datasources/breadcrumbs"
+            path="${requestPathInfo.suffix}"
+            rootTitle="Configuration"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <secondary jcr:primaryType="nt:unstructured">
+                <pastepage
+                    granite:class="cq-wcm-paste-activator foundation-collection-action"
+                    granite:hidden="{Boolean}true"
+                    granite:rel="cq-siteadmin-admin-pastepage"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    actionConfigName="granite/ui/shell/actions/paste"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        cq-wcm-paste-activator-target=".cq-siteadmin-admin-childpages"
+                        foundation-collection-action="\{&quot;target&quot;: &quot;.cq-siteadmin-admin-childpages&quot;, &quot;activeSelectionCount&quot;: &quot;none&quot;, &quot;relScope&quot;: &quot;collection&quot;}"/>
+                </pastepage>
+                <create
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                    text="Create"
+                    variant="primary">
+                    <items jcr:primaryType="nt:unstructured">
+                        <createlist
+                            granite:comment="The actionlink uses the URI derived from the `href.uritemplate` value on the `data` node. The `href` attribute is  only used externally (e.g. HApi tests), not by the actionlink itself"
+                            granite:rel="cq-siteadmin-admin-createlist"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                            action="foundation.dialog"
+                            icon="textRomanLowercase"
+                            rel="cq-siteadmin-admin-createlist"
+                            relScope="collection"
+                            target=".cq-siteadmin-admin-childpages"
+                            text="Generic List">
+                        </createlist>
+                        <createfolder
+                            granite:comment="The actionlink uses the URI derived from the `href.uritemplate` value on the `data` node. The `href` attribute is  only used externally (e.g. HApi tests), not by the actionlink itself"
+                            granite:rel="cq-siteadmin-admin-createfolder"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                            action="foundation.dialog"
+                            href="/mnt/overlay/wcm/core/content/coral/common/createfolderdialog.html${requestPathInfo.suffix}"
+                            icon="folder"
+                            rel="cq-siteadmin-admin-createfolder"
+                            relScope="collection"
+                            target=".cq-siteadmin-admin-childpages"
+                            text="Folder">
+                            <data
+                                jcr:primaryType="nt:unstructured"
+                                nesting="hide"
+                                src.uritemplate="/mnt/overlay/wcm/core/content/coral/common/createfolderdialog.html{+id}"/>
+                        </createfolder>
+                    </items>
+                </create>
+            </secondary>
+            <selection jcr:primaryType="nt:unstructured">
+                <create
+                    granite:class="foundation-collection-action"
+                    granite:rel="cq-siteadmin-admin-actions-create-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/pulldown"
+                    icon="addCircle"
+                    text="Create"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-collection-action="\{&quot;target&quot;: &quot;.cq-siteadmin-admin-childpages&quot;, &quot;activeSelectionCount&quot;: &quot;multiple&quot;}"/>
+                    <items jcr:primaryType="nt:unstructured">
+                        <createlist
+                            granite:comment="The actionlink uses the URI derived from the `href.uritemplate` value on the `data` node. The `href` attribute is  only used externally (e.g. HApi tests), not by the actionlink itself"
+                            granite:rel="cq-siteadmin-admin-createlist"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                            action="foundation.dialog"
+                            icon="textRomanLowercase"
+                            rel="cq-siteadmin-admin-createlist"
+                            relScope="collection"
+                            target=".cq-siteadmin-admin-childpages"
+                            text="Generic List">
+                        </createlist>
+                        <createfolder
+                            granite:comment="The actionlink uses the URI derived from the `href.uritemplate` value on the `data` node. The `href` attribute is  only used externally (e.g. HApi tests), not by the actionlink itself"
+                            granite:rel="cq-siteadmin-admin-createfolder"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
+                            action="foundation.dialog"
+                            activeSelectionCount="single"
+                            href="/mnt/overlay/wcm/core/content/coral/common/createfolderdialog.html${requestPathInfo.suffix}"
+                            icon="folder"
+                            rel="cq-siteadmin-admin-createfolder"
+                            relScope="collection"
+                            target=".cq-siteadmin-admin-childpages"
+                            text="Folder">
+                            <data
+                                jcr:primaryType="nt:unstructured"
+                                nesting="hide"
+                                src.uritemplate="/mnt/overlay/wcm/core/content/coral/common/createfolderdialog.html{+id}"/>
+                        </createfolder>
+                    </items>
+                </create>
+                <viewproperties
+                    granite:class="cq-siteadmin-admin-actions-properties-activator"
+                    granite:comment="This button requires custom logic to show/hide, hence `activeSelectionCount` is not used"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    actionConfigName="granite/ui/shell/actions/properties"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/acs-commons/components/utilities/genericlist.html?item={+item}"/>
+                </viewproperties>
+                <viewfolderproperties
+                    granite:rel="cq-siteadmin-admin-actions-folderproperties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    actionConfigName="granite/ui/shell/actions/properties"
+                    activeSelectionCount="single"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/acs-commons/components/utilities/generic-list-console/folderproperties.html{+item}"/>
+                </viewfolderproperties>
+                <copypage
+                    granite:rel="cq-siteadmin-admin-actions-copy-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.copy"
+                    actionConfigName="granite/ui/shell/actions/copy"
+                    activeSelectionCount="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <granite:data
+                        jcr:primaryType="nt:unstructured"
+                        foundation-mode-group="cq-siteadmin-admin-childpages"
+                        foundation-mode-value="default"/>
+                </copypage>
+                <movepage
+                    granite:rel="cq-siteadmin-admin-actions-move-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    actionConfigName="granite/ui/shell/actions/move"
+                    activeSelectionCount="single"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/wcm/core/content/sites/movepagewizard.html{+item}"/>
+                </movepage>
+                <deletepage
+                    granite:rel="cq-siteadmin-admin-actions-delete-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="cq.wcm.delete"
+                    actionConfigName="granite/ui/shell/actions/delete"
+                    activeSelectionCount="multiple"
+                    target=".cq-siteadmin-admin-childpages"
+                    variant="actionBar"/>
+            </selection>
+        </actions>
+        <rails jcr:primaryType="nt:unstructured">
+            <omnisearchfilter
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Filter"
+                sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel"/>
+        </rails>
+    </jcr:content>
+    <createlistwizard/>
+    <pagecolumnpreview
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="cq/gui/components/coral/admin/page/columnpreview"
+        path="${requestPathInfo.suffix}"/>
+    <meta/>
+</jcr:root>
