@@ -126,7 +126,7 @@ public class CombinedCacheKey extends AbstractCacheKey implements CacheKey, Seri
 
     @Override
     public String toString() {
-        return this.resourcePath + " [CombinedCacheKey]";
+        return this.resourcePath + "[CombinedCacheKey]" + this.cacheKeys.stream().map(CacheKey::toString).collect(Collectors.joining(";")).replaceAll(this.resourcePath, "");
     }
 
     /**

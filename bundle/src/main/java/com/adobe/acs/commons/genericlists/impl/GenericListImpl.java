@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
+import com.adobe.acs.commons.genericlists.GenericList;
+import com.day.cq.wcm.api.NameConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,12 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-
-import com.adobe.acs.commons.genericlists.GenericList;
-import com.day.cq.wcm.api.NameConstants;
 
 public final class GenericListImpl implements GenericList {
 
@@ -71,7 +69,7 @@ public final class GenericListImpl implements GenericList {
 
             String localizedTitle = null;
 
-            // try property name like jcr:title.de_ch 
+            // try property name like jcr:title.de_ch
             if (locale.getCountry().length() > 0) {
                 localizedTitle = getLocalizedTitle(locale);
             }
@@ -85,7 +83,7 @@ public final class GenericListImpl implements GenericList {
                 return localizedTitle;
             }
         }
-        
+
         private String getLocalizedTitle(Locale locale) {
             return props.get(TITLE_PREFIX + locale.toString().toLowerCase(), String.class);
         }
@@ -102,8 +100,8 @@ public final class GenericListImpl implements GenericList {
     private final Map<String, Item> valueMapping;
 
     public GenericListImpl(Resource listParsys) {
-        List<Item> tempItems = new ArrayList<Item>();
-        Map<String, Item> tempValueMapping = new HashMap<String, Item>();
+        List<Item> tempItems = new ArrayList<>();
+        Map<String, Item> tempValueMapping = new HashMap<>();
         Iterator<Resource> children = listParsys.listChildren();
         while (children.hasNext()) {
             Resource res = children.next();
@@ -120,10 +118,12 @@ public final class GenericListImpl implements GenericList {
         valueMapping = Collections.unmodifiableMap(tempValueMapping);
     }
 
+    @Override
     public List<Item> getItems() {
         return items;
     }
 
+    @Override
     public String lookupTitle(String value) {
         Item item = valueMapping.get(value);
         if (item != null) {
