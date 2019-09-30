@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Annotation used to declare process inputs.
  */
 @ProviderType
-@Target(ElementType.FIELD)
+@Target(value={ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FormField {
 

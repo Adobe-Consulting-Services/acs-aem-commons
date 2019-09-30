@@ -19,20 +19,19 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.jcr.JcrUtil;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Radio button selector component
@@ -45,7 +44,7 @@ public abstract class RadioComponent extends FieldComponent {
 
         @Override
         public Map<String, String> getOptions() {
-            return Stream.of((Enum[]) getField().getType().getEnumConstants())
+            return Stream.of((Enum[]) AccessibleObjectUtil.getType(getAccessibleObject()).getEnumConstants())
                     .collect(Collectors.toMap(Enum::name,
                                               this::getName,
                                               (k, v)-> { throw new IllegalArgumentException("cannot merge"); },

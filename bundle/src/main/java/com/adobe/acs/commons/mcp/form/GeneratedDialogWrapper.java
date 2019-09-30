@@ -17,12 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.form.impl;
+package com.adobe.acs.commons.mcp.form;
 
-import com.adobe.acs.commons.mcp.form.FieldComponent;
-import com.adobe.acs.commons.mcp.form.GeneratedDialog;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import java.util.Map;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 
 /**
  * Provides a generated dialog for annotated model classes that do not already extend GeneratedDialog
@@ -32,6 +31,11 @@ public class GeneratedDialogWrapper extends GeneratedDialog {
 
     public GeneratedDialogWrapper(Class c) {
         wrappedClass = c;
+    }
+
+    public GeneratedDialogWrapper(Class c, SlingScriptHelper slingHelper) {
+        wrappedClass = c;
+        sling = slingHelper;
     }
 
     @Override

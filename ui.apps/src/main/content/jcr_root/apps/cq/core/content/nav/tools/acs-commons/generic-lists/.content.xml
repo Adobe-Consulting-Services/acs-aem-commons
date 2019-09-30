@@ -4,6 +4,6 @@
     jcr:title="Generic Lists"
     jcr:description="Create custom lists."
     icon="viewList"
-    href="/miscadmin#/etc/acs-commons/lists"
+    href="/generic-lists.html"
     id="acs-commons__generic-lists"
     target="_blank"/>
