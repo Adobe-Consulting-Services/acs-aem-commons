@@ -14,9 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
-
-### Fixed
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
+- #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
+- #2058 - Fixed MCP JS errors in Firefox
+- #2063 - Fixed regression in MCP user interface following split of apps/content packages
 
 ## [4.3.2] - 2019-08-29
 

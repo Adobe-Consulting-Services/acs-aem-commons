@@ -17,7 +17,7 @@
 /* global Coral, Granite */
 
 var ScriptRunner = {
-    SERVLET_URL: "/etc/acs-commons/manage-controlled-processes/jcr:content",
+    SERVLET_URL: "/apps/acs-commons/content/manage-controlled-processes/jcr:content",
     init: function () {
         if (document.getElementById("processListing")) {
             ScriptRunner.processTable = document.getElementById("processListing");
