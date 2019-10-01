@@ -7,11 +7,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [Unreleased]
 
+### Changed
+- #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
+- #2045 added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+
+### Fixed
+- #2032 - Fixed filter.xml on /var/acs-commons
+- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
+- #2053 - ETag header not properly delivered from the servlet (missing quotes)
+- #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
+- #2058 - Fixed MCP JS errors in Firefox
+- #2063 - Fixed regression in MCP user interface following split of apps/content packages
+
 ## [4.3.2] - 2019-08-29
+
+### Added
+- #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
 
 ### Fixed
 - #1975 - Split application content from mutable content
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
+- #986 - Rewrote Generic Lists to use Touch UI
 
 ### Added
 - #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
