@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import javax.jcr.RepositoryException;
@@ -36,8 +37,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -64,7 +63,7 @@ public class WorkflowRemover extends ProcessDefinition {
     private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     @FormField(name = "Workflow Payload Paths", description = "Payload path regex", hint = "/content/dam/.*",
-            component = MultifieldComponent.class, required = true)
+            component = MultifieldComponent.class)
     public List<String> payloadPaths;
 
     @FormField(name = "Workflows Older Than", description = "only remove workflows older than the specified date",
@@ -74,18 +73,17 @@ public class WorkflowRemover extends ProcessDefinition {
     @FormField(
             name = "Workflow Models",
             description = "If no Workflow Models are selected, Workflow Instances will not be filtered by Workflow Model.",
-            component = MultifieldComponent.class,
-            options = { MultifieldComponent.USE_CLASS + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowModelSelector"})
+            component = MultifieldComponent.class, options = { MultifieldComponent.USE_CLASS
+                    + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowModelSelector" })
     public List<String> modelIds = new ArrayList<>();
 
     private List<Pattern> payloads = new ArrayList<>();
     private Calendar olderThan;
 
-    @FormField(
-            name = "Workflow Statuses",
-            component = MultifieldComponent.class,
-            options = { MultifieldComponent.USE_CLASS + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowStatusSelector" })
-    private List<String> statuses = new ArrayList<>();
+    @FormField(name = "Workflow Statuses", component = MultifieldComponent.class, required = true,
+            options = { MultifieldComponent.USE_CLASS
+                    + "=com.adobe.acs.commons.mcp.form.workflow.WorkflowStatusSelector" })
+    public List<String> statuses = new ArrayList<>();
 
     public WorkflowRemover(WorkflowInstanceRemover workflowInstanceRemover) {
         super();
@@ -117,7 +115,12 @@ public class WorkflowRemover extends ProcessDefinition {
         // No init needed, do nothing.
     }
 
-    private void performCleanupActivity(ActionManager manager) throws Exception {
+    /**
+     * Cleanup the old workflows.  Package scoped for unit test purposes.
+     * @param manager the action manager to handle removal.
+     * @throws Exception if an error occurs
+     */
+    void performCleanupActivity(ActionManager manager) throws Exception {
         manager.withResolver(rr -> {
 
             parseParameters();
@@ -126,21 +129,40 @@ public class WorkflowRemover extends ProcessDefinition {
                     MAX_DURATION_MINS);
 
             WorkflowRemovalStatus status = workflowInstanceRemover.getStatus();
-            final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
-
-            row.put(ReportColumns.STARTED, status.getStartedAt());
-            row.put(ReportColumns.CHECKED, status.getChecked());
-            row.put(ReportColumns.REMOVED, status.getRemoved());
-
-            row.put(ReportColumns.COMPLETED, status.getCompletedAt());
-            row.put(ReportColumns.ERRED, status.getErredAt());
-            row.put(ReportColumns.INITIATED_BY, status.getInitiatedBy());
-
-            reportRows.add(row);
+            EnumMap<ReportColumns, Object> reportRow = report(status);
+            reportRows.add(reportRow);
         });
     }
 
-    private void parseParameters() throws ParseException {
+    /**
+     * Collect and return a report row for the workflow status.  Method is package scope for unit tests.
+     * @param status the status to report upon.
+     * @return the row of data
+     */
+    EnumMap<ReportColumns, Object> report(WorkflowRemovalStatus status) {
+        final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+        row.put(ReportColumns.STARTED, status.getStartedAt());
+        row.put(ReportColumns.CHECKED, status.getChecked());
+        row.put(ReportColumns.REMOVED, status.getRemoved());
+
+        row.put(ReportColumns.COMPLETED, status.getCompletedAt());
+        row.put(ReportColumns.ERRED, status.getErredAt());
+        row.put(ReportColumns.INITIATED_BY, status.getInitiatedBy());
+
+        return row;
+    }
+
+    /**
+     * Parse the input parameters into the form needed to call workflowInstanceRemover. The results are set into
+     * instance variables.  Method is package scope for unit testing.
+     *
+     * @throws ParseException
+     *             if the date is in an invalid format.
+     * @throws PatternSyntaxException
+     *          if the payloads contain illegal patterns
+     */
+    void parseParameters() throws ParseException {
         if (payloadPaths != null) {
             payloads = payloadPaths.stream().map(Pattern::compile).collect(Collectors.toList());
         }
@@ -151,6 +173,22 @@ public class WorkflowRemover extends ProcessDefinition {
             olderThan = Calendar.getInstance();
             olderThan.setTime(d);
         }
+    }
+
+    public List<String> getModelIds() {
+        return modelIds;
+    }
+
+    public List<Pattern> getPayloads() {
+        return payloads;
+    }
+
+    public Calendar getOlderThan() {
+        return olderThan;
+    }
+
+    public List<String> getStatuses() {
+        return statuses;
     }
 
     public enum ReportColumns {

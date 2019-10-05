@@ -20,6 +20,95 @@
 
 package com.adobe.acs.commons.mcp.form;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+import java.lang.reflect.Field;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingScriptHelper;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
+@RunWith(MockitoJUnitRunner.class)
 public class DatePickerComponentTest {
 
+    @Rule
+    public AemContext ctx = new AemContext(ResourceResolverType.JCR_MOCK);
+
+    private Field field;
+
+    @Mock
+    private FormField formField;
+
+    @Mock
+    private SlingScriptHelper slingScriptHelper;
+
+    @Before
+    public void setup() {
+        when(slingScriptHelper.getRequest()).thenReturn(ctx.request());
+    }
+
+    @Test
+    public void normalDateField() {
+        DatePickerComponent dateComponent = new DatePickerComponent();
+        when(formField.name()).thenReturn("Start Date");
+        when(formField.description()).thenReturn("Select the start date.");
+        dateComponent.setup("startDate", field, formField, slingScriptHelper);
+
+        Resource resource = dateComponent.buildComponentResource();
+        ValueMap map = resource.getValueMap();
+
+        assertEquals("wrong component resource type.", "granite/ui/components/coral/foundation/form/datepicker",
+                resource.getResourceType());
+
+        assertEquals("wrong field label", "Start Date", map.get("fieldLabel"));
+        assertEquals("wrong field description", "Select the start date.", map.get("fieldDescription"));
+    }
+
+    @Test
+    public void dateTimeField() {
+        DatePickerComponent dateComponent = new DatePickerComponent();
+
+        String[] opts = new String[1];
+        opts[0] = DatePickerComponent.TYPE_OPT_DATETIME;
+        when(formField.options()).thenReturn(opts);
+
+        when(formField.name()).thenReturn("Start Date");
+        when(formField.description()).thenReturn("Select the start date.");
+        dateComponent.setup("startDate", field, formField, slingScriptHelper);
+
+        Resource resource = dateComponent.buildComponentResource();
+        ValueMap map = resource.getValueMap();
+
+        assertEquals("wrong component type.", DatePickerComponent.TYPE_OPT_DATETIME,
+                map.get(DatePickerComponent.TYPE));
+    }
+
+    @Test
+    public void timeField() {
+        DatePickerComponent dateComponent = new DatePickerComponent();
+
+        String[] opts = new String[1];
+        opts[0] = DatePickerComponent.TYPE_OPT_TIME;
+        when(formField.options()).thenReturn(opts);
+
+        when(formField.name()).thenReturn("Start Date");
+        when(formField.description()).thenReturn("Select the start date.");
+        dateComponent.setup("startDate", field, formField, slingScriptHelper);
+
+        Resource resource = dateComponent.buildComponentResource();
+        ValueMap map = resource.getValueMap();
+
+        assertEquals("wrong component type.", DatePickerComponent.TYPE_OPT_TIME,
+                map.get(DatePickerComponent.TYPE));
+    }
 }
