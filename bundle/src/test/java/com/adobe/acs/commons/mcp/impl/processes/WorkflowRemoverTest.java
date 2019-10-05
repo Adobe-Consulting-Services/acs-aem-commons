@@ -88,10 +88,10 @@ public class WorkflowRemoverTest {
     public void parseParametersNone() throws Exception {
         remover.parseParameters();
 
-        List<String> modelIds = remover.getModelIds();
-        Calendar olderThan = remover.getOlderThan();
-        List<Pattern> payloads = remover.getPayloads();
-        List<String> statuses = remover.getStatuses();
+        final List<String> modelIds = remover.getModelIds();
+        final Calendar olderThan = remover.getOlderThan();
+        final List<Pattern> payloads = remover.getPayloads();
+        final List<String> statuses = remover.getStatuses();
 
         assertTrue("Models should be null or empty",modelIds==null || modelIds.size()==0);
         assertNull("Calendar must be null", olderThan);

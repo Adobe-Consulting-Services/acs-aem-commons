@@ -59,7 +59,7 @@ public class DatePickerComponentTest {
 
     @Test
     public void normalDateField() {
-        DatePickerComponent dateComponent = new DatePickerComponent();
+        final DatePickerComponent dateComponent = new DatePickerComponent();
         when(formField.name()).thenReturn("Start Date");
         when(formField.description()).thenReturn("Select the start date.");
         dateComponent.setup("startDate", field, formField, slingScriptHelper);
@@ -76,7 +76,7 @@ public class DatePickerComponentTest {
 
     @Test
     public void dateTimeField() {
-        DatePickerComponent dateComponent = new DatePickerComponent();
+        final DatePickerComponent dateComponent = new DatePickerComponent();
 
         String[] opts = new String[1];
         opts[0] = DatePickerComponent.TYPE_OPT_DATETIME;
@@ -95,7 +95,7 @@ public class DatePickerComponentTest {
 
     @Test
     public void timeField() {
-        DatePickerComponent dateComponent = new DatePickerComponent();
+        final DatePickerComponent dateComponent = new DatePickerComponent();
 
         String[] opts = new String[1];
         opts[0] = DatePickerComponent.TYPE_OPT_TIME;
