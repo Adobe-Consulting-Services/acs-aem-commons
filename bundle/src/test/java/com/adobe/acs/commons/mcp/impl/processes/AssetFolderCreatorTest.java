@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.fam.ActionManager;
@@ -47,7 +66,7 @@ import static org.mockito.Mockito.doAnswer;
 public class AssetFolderCreatorTest {
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext();
 
     @Mock
     private ActionManager actionManager;
@@ -88,7 +107,8 @@ public class AssetFolderCreatorTest {
         assetFolderCreator.parseAssetFolderDefinitions(actionManager);
         final int expected = 9 // Col 3
                 + 2 // Col 2
-                + 2; // Col 1
+                + 2 // Col 1
+                + 3; // Numeric folders 2019/9/16
 
         assertEquals(expected, assetFolderCreator.assetFolderDefinitions.size());
     }
@@ -103,7 +123,6 @@ public class AssetFolderCreatorTest {
 
         assertTrue(context.resourceResolver().hasChanges());
 
-
         assertEquals("Michigan",
                 context.resourceResolver().getResource("/content/dam/mi/jcr:content").getValueMap().get("jcr:title", String.class));
 
@@ -112,6 +131,10 @@ public class AssetFolderCreatorTest {
 
         assertEquals("West Michigan",
                 context.resourceResolver().getResource("/content/dam/mi/west-mi/jcr:content").getValueMap().get("jcr:title", String.class));
+
+        assertEquals("16",
+                context.resourceResolver().getResource("/content/dam/2019/9/16/jcr:content").getValueMap().get("jcr:title", String.class));
+
     }
 
     @Test
@@ -127,7 +150,7 @@ public class AssetFolderCreatorTest {
 
         assertTrue(context.resourceResolver().hasChanges());
 
-        assertEquals("Massachusettes",
+        assertEquals("Massachusetts",
                 context.resourceResolver().getResource("/content/dam/ma/jcr:content").getValueMap().get("jcr:title", String.class));
     }
 }

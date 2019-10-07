@@ -88,7 +88,7 @@ public class SendTemplatedEmailProcessTest {
     private static final String WCM_PAYLOAD_PATH = "/content/mypage";
     private static final String EMAIL_TEMPLATE = "/apps/acs-commons/content/template.txt";
     private static final String GROUP_PATH = "/home/groups/samplegroup";
-    private String[] GROUP_MEMBERS;
+    private static final String[] GROUP_MEMBERS = new String[] { "user1@adobe.com", "user2@adobe.com" };
 
     @SuppressWarnings("unchecked")
     @Before
@@ -97,8 +97,6 @@ public class SendTemplatedEmailProcessTest {
 
         when(workflowSession.getSession()).thenReturn(session);
         when(resourceResolverFactory.getResourceResolver(any(Map.class))).thenReturn(resourceResolver);
-
-        GROUP_MEMBERS = new String[] { "user1@adobe.com", "user2@adobe.com" };
 
     }
 

@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.images.transformers.impl;
 
-import com.adobe.acs.commons.images.transformers.impl.CropImageTransformerImpl;
 import com.day.image.Layer;
 
 import org.apache.sling.api.resource.ValueMap;
@@ -32,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 

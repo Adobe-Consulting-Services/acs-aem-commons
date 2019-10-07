@@ -137,9 +137,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
     public static final String RT_REMOTE_SOCIAL_IMAGE = "nt:adobesocialtype";
 
-    @Reference
-    private MimeTypeService mimeTypeService;
-
     private static final ValueMap EMPTY_PARAMS = new ValueMapDecorator(new LinkedHashMap<String, Object>());
 
     private static final String MIME_TYPE_PNG = "image/png";
@@ -149,13 +146,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     private static final String TYPE_PROGRESSIVE = "progressive";
 
     private static final String PROP_ADD_URL_PARAMETERS = "addUrlParams";
-
-    private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
-
-    private Map<String, NamedImageTransformer> namedImageTransformers =
-            new ConcurrentHashMap<String, NamedImageTransformer>();
-
-    private Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
 
     /* Asset Rendition Pattern Picker */
 
@@ -168,6 +158,16 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                     + " [ Default: cq5dam.web.(.*) ]",
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
+
+    private final Map<String, NamedImageTransformer> namedImageTransformers =
+            new ConcurrentHashMap<String, NamedImageTransformer>();
+
+    private final Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
+
+    @Reference
+    private MimeTypeService mimeTypeService;
+
+    private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
     private RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
@@ -183,7 +183,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @return true if the Servlet should handle the request
      */
     @Override
-    public final boolean accepts(SlingHttpServletRequest request) {
+    public final boolean accepts(final SlingHttpServletRequest request) {
         if (request == null) {
             return false;
         }
@@ -210,7 +210,6 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
             ServletException, IOException {
-
         // Get the transform names from the suffix
         final List<NamedImageTransformer> selectedNamedImageTransformers = getNamedImageTransformers(request);
 
@@ -270,11 +269,11 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
 
             final ImageTransformer imageTransformer = this.imageTransformers.get(type);
             if (imageTransformer == null) {
-                log.warn("Skipping transform. Missing ImageTransformer for type: {}");
+                log.warn("Skipping transform. Missing ImageTransformer for type: {}", type);
                 continue;
             }
 
-            ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
+             ValueMap transformParams = imageTransformersWithParams.get(type, EMPTY_PARAMS);
 
             if (transformParams != null) {
                 if (Boolean.valueOf(transformParams.get(PROP_ADD_URL_PARAMETERS, false))) {
@@ -402,55 +401,74 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      */
     protected final Image resolveImage(final SlingHttpServletRequest request) {
         final Resource resource = request.getResource();
-        final ResourceResolver resourceResolver = request.getResourceResolver();
-
-        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        final Page page = pageManager.getContainingPage(resource);
-
         if (DamUtil.isAsset(resource)) {
             // For assets, pick the configured rendition if it exists
             // If rendition does not exist, use original
+            return resolveImageAsAsset(resource);
+        }
 
-            final Asset asset = DamUtil.resolveToAsset(resource);
-            Rendition rendition = asset.getRendition(renditionPatternPicker);
-
-            if (rendition == null) {
-                log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker.toString(),
-                        resource.getPath());
-                rendition = asset.getOriginal();
-            }
-
-            final Resource renditionResource = request.getResourceResolver().getResource(rendition.getPath());
-
-            final Image image = new Image(resource);
-            image.set(Image.PN_REFERENCE, renditionResource.getPath());
-            return image;
-
-        } else if (DamUtil.isRendition(resource)
-                || resourceResolver.isResourceType(resource, JcrConstants.NT_FILE)
-                || resourceResolver.isResourceType(resource, JcrConstants.NT_RESOURCE)) {
+        if (DamUtil.isRendition(resource)
+                || resource.isResourceType(JcrConstants.NT_FILE)
+                || resource.isResourceType(JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
             image.set(Image.PN_REFERENCE, resource.getPath());
             return image;
+        }
 
-        } else if (page != null) {
-            if (resourceResolver.isResourceType(resource, NameConstants.NT_PAGE)
-                    || StringUtils.equals(resource.getPath(), page.getContentResource().getPath())) {
-                // Is a Page or Page's Content Resource; use the Page's image resource
-                return new Image(page.getContentResource(), NAME_IMAGE);
-            } else {
-                return new Image(resource);
+        final ResourceResolver resourceResolver = request.getResourceResolver();
+        final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+        final Page page = pageManager.getContainingPage(resource);
+        if (page != null) {
+            return resolveImageAsPage(page, resource);
+        }
+
+        if (resource.isResourceType(RT_LOCAL_SOCIAL_IMAGE)
+                && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
+            // Is a UGC image
+            return new SocialImageImpl(resource, NAME_IMAGE);
+        }
+
+        if (resource.isResourceType(RT_REMOTE_SOCIAL_IMAGE)) {
+            // Is a UGC image
+            return new SocialRemoteImageImpl(resource, NAME_IMAGE);
+        }
+
+        return new Image(resource);
+    }
+
+    private Image resolveImageAsAsset(final Resource resource) {
+        final Asset asset = DamUtil.resolveToAsset(resource);
+        Rendition rendition = asset.getRendition(renditionPatternPicker);
+
+        if (rendition == null) {
+            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker.toString(),
+                    resource.getPath());
+            rendition = asset.getOriginal();
+        }
+
+        final Resource renditionResource = resource.getResourceResolver().getResource(rendition.getPath());
+
+        final Image image = new Image(resource);
+        image.set(Image.PN_REFERENCE, renditionResource.getPath());
+        return image;
+    }
+
+    private Image resolveImageAsPage(final Page page, final Resource resource) {
+        Resource contentResource = page.getContentResource();
+        if (resource.isResourceType(NameConstants.NT_PAGE)
+                || StringUtils.equals(resource.getPath(), contentResource.getPath())) {
+            // Is a Page or Page's Content Resource; use the Page's image resource
+            Page current = page;
+            while (current != null && current.getContentResource(NAME_IMAGE) == null) {
+                current = current.getParent();
             }
-        } else {
-            if (resourceResolver.isResourceType(resource, RT_LOCAL_SOCIAL_IMAGE)
-                    && resource.getValueMap().get("mimetype", StringUtils.EMPTY).startsWith("image/")) {
-                // Is a UGC image
-                return new SocialImageImpl(resource, NAME_IMAGE);
-            } else if (resourceResolver.isResourceType(resource, RT_REMOTE_SOCIAL_IMAGE)) {
-                // Is a UGC image
-                return new SocialRemoteImageImpl(resource, NAME_IMAGE);
+
+            if (current != null) {
+                contentResource = current.getContentResource();
             }
+
+            return new Image(contentResource, NAME_IMAGE);
         }
 
         return new Image(resource);
@@ -583,14 +601,15 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
     }
 
     @Activate
-    protected final void activate(final Map<String, String> properties) throws Exception {
+    protected final void activate(final Map<String, String> properties) {
         final String regex = PropertiesUtil.toString(properties.get(PROP_ASSET_RENDITION_PICKER_REGEX),
                 DEFAULT_ASSET_RENDITION_PICKER_REGEX);
         final String fileNameRegex = PropertiesUtil.toString(properties.get(NAMED_IMAGE_FILENAME_PATTERN),
                 DEFAULT_FILENAME_PATTERN);
-        if(StringUtils.isNotEmpty(fileNameRegex)) {
+        if (StringUtils.isNotEmpty(fileNameRegex)) {
             lastSuffixPattern = Pattern.compile(fileNameRegex);
         }
+
         try {
             renditionPatternPicker = new RenditionPatternPicker(regex);
             log.info("Asset Rendition Pattern Picker: {}", regex);

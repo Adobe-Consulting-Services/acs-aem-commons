@@ -128,13 +128,11 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
         public void run() {
             log.debug("Running Bulk AEM Transient Workflow job [ {} ]", jobName);
 
-            ResourceResolver serviceResourceResolver = null;
             Resource configResource = null;
             Config config = null;
             Workspace workspace = null;
 
-            try {
-                serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver serviceResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
                 configResource = serviceResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
@@ -221,10 +219,6 @@ public class AEMTransientWorkflowRunnerImpl extends AbstractAEMWorkflowRunner im
                     stop(workspace);
                 } catch (PersistenceException e1) {
                     log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
-                }
-            } finally {
-                if (serviceResourceResolver != null) {
-                    serviceResourceResolver.close();
                 }
             }
         }

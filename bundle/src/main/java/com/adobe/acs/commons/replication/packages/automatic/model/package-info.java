@@ -20,4 +20,4 @@
 @Version("3.10.0")
 package com.adobe.acs.commons.replication.packages.automatic.model;
 
-import aQute.bnd.annotation.Version;
+import org.osgi.annotation.versioning.Version;

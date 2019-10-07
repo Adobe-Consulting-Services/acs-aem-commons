@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!--
+Copyright 2017 Adobe.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<sly data-sly-use.processes="${'com.adobe.acs.commons.mcp.model.AvailableProcessDefinitions'}">
+    <form class="coral-Form coral-Form--aligned u-columnLarge">
+        <section class="coral-Form-fieldset">
+            <h3 class="coral-Form-fieldset-legend" id="processName">Process Inputs</h3>
+            <input type="hidden" id="process" name="definition">
+            <sly data-sly-list.field="${processes.fieldComponents}">
+                ${processes.fieldComponents[field].html}
+            </sly>
+        </section>
+    </form>
+</sly>

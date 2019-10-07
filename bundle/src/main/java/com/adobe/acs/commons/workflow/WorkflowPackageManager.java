@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.workflow;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.WCMException;

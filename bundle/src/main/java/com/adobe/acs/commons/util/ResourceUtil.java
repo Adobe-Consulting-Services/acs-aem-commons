@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 

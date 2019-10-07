@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Dispatcher Flush"
+    jcr:description="Manually flush the AEM Dispatcher cache."
+    icon="dataRefresh"
+    href="/miscadmin#/etc/acs-commons/dispatcher-flush"
+    id="acs-commons__dispatcher-flush"
+    target="_blank"/>

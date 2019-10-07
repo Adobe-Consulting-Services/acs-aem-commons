@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:Group"
+          jcr:uuid="f13f0ed4-cc01-3e17-adc0-47ebb5764122"
+          rep:authorizableId="developers"
+          rep:principalName="developers"
+/>

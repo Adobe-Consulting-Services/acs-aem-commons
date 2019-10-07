@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 - Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet", methods = { "GET" }, resourceTypes = {
-"acs-commons/components/utilities/audit-log-search" }, selectors = {
-"auditlogsearch" }, extensions = { "json" }, metatype = true)
+@SlingServlet(label = "ACS AEM Commons - Audit Log Search Servlet",
+        methods = {"GET"},
+        resourceTypes = {"acs-commons/components/utilities/audit-log-search"},
+        selectors = {"auditlogsearch"},
+        extensions = {"json"}, metatype = false)
 @SuppressWarnings("serial")
 public class AuditLogSearchServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(AuditLogSearchServlet.class);
-
 
     @Override
     @SuppressWarnings("squid:S1141")

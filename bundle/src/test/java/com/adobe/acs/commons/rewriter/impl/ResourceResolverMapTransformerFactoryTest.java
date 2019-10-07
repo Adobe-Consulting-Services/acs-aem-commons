@@ -129,6 +129,36 @@ public class ResourceResolverMapTransformerFactoryTest extends TestCase {
     }
 
     @Test
+    public void testRebuildAttributes_DoubleEncodingScenario() throws Exception {
+        when(resourceResolver.map(request, "/content/site/en/jcr:content/img test.png")).thenReturn("/en/jcr:content/img%20test.png");
+        when(resourceResolver.map(request, "/content/site/en/jcr:content/img%20test.png")).thenReturn("/en/jcr:content/img%2520test.png");
+
+        final Map<String, Object> config = new HashMap<String, Object>();
+        config.put("attributes", new String[]{"img:src"});
+
+        ResourceResolverMapTransformerFactory factory = new ResourceResolverMapTransformerFactory();
+
+        factory.activate(config);
+        Transformer transformer = factory.createTransformer();
+        transformer.init(processingContext, null);
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "src", null, "CDATA", "/content/site/en/jcr:content/img%20test.png");
+
+        /* Execute */
+
+        transformer.startElement(null, "img", null, in);
+
+        /* Verify */
+
+        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+                                             attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/en/jcr:content/img%20test.png", out.getValue(0));
+    }
+
+    @Test
     public void testActivate_Array() throws NoSuchFieldException, IllegalAccessException {
         ResourceResolverMapTransformerFactory factory = new ResourceResolverMapTransformerFactory();
 

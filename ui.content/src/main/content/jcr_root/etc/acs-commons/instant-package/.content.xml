@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:mix="http://www.jcp.org/jcr/mix/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2018-10-26T09:52:48.051Z"
+        cq:lastModifiedBy="admin"
+        jcr:isCheckedOut="{Boolean}true"
+        jcr:mixinTypes="[mix:versionable]"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Instant Package"
+        jcr:uuid="512d8079-4cdc-49fe-ae92-eba91859faf1"
+        sling:resourceType="acs-commons/components/utilities/instant-package">
+        <config
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="acs-commons/components/utilities/qr-code/config"
+            enabled="{Boolean}false"/>
+        <instant-package-image.png/>
+        <clientlib-authoring/>
+    </jcr:content>
+</jcr:root>

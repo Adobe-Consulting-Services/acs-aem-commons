@@ -78,8 +78,9 @@ public class SiteMapServletTest {
     @Test
     public void testDefaultPageSetup() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-        }});
+                put("externalizer.domain", "external");
+            }
+        });
 
         servlet.doGet(request, response);
 
@@ -93,9 +94,10 @@ public class SiteMapServletTest {
     @Test
     public void testExtensionlessPages() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-            put("extensionless.urls", true);
-        }});
+                put("externalizer.domain", "external");
+                put("extensionless.urls", true);
+            }
+        });
 
         servlet.doGet(request, response);
 
@@ -109,10 +111,11 @@ public class SiteMapServletTest {
     @Test
     public void testExtensionlessAndSlashlessPages() throws Exception {
         servlet.activate(new HashMap<String, Object>() {{
-            put("externalizer.domain", "external");
-            put("extensionless.urls", true);
-            put("remove.slash", true);
-        }});
+                put("externalizer.domain", "external");
+                put("extensionless.urls", true);
+                put("remove.slash", true);
+            }
+        });
 
         servlet.doGet(request, response);
 

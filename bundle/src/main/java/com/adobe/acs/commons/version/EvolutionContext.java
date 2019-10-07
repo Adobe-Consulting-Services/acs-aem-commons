@@ -19,12 +19,23 @@
  */
 package com.adobe.acs.commons.version;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 import java.util.List;
 
 /**
  * Stored context for a version history.
  */
+@ProviderType
 public interface EvolutionContext {
 
+    /**
+     * @return List of resource evolutions with artificial "Latest" evolution.
+     */
     List<Evolution> getEvolutionItems();
+
+    /**
+     * @return List of resource evolutions.
+     */
+    List<Evolution> getVersions();
 }

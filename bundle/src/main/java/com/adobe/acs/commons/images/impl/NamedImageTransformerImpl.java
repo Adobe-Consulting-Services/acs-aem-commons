@@ -103,7 +103,7 @@ public class NamedImageTransformerImpl implements NamedImageTransformer {
         for (final Map.Entry<String, ValueMap> entry : this.transforms.entrySet()) {
             final ImageTransformer imageTransformer = this.imageTransformers.get(entry.getKey());
             if (imageTransformer == null) {
-                log.warn("Skipping transform. Missing ImageTransformer for type: {}");
+                log.warn("Skipping transform. Missing ImageTransformer for type: {}", entry.getKey());
                 continue;
             }
 

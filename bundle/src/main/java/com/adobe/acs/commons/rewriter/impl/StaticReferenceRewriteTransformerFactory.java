@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -45,7 +46,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.AbstractTransformer;
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 
 /**
@@ -69,7 +70,7 @@ import com.adobe.acs.commons.util.ParameterUtil;
 
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
 
-    public final class StaticReferenceRewriteTransformer extends AbstractTransformer {
+    public final class StaticReferenceRewriteTransformer extends ContentHandlerBasedTransformer {
 
         public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
@@ -106,6 +107,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             description = "Path prefixes to rewrite.")
     private static final String PROP_PREFIXES = "prefixes";
 
+    @Property(label = "Override existing host", description = "This property allows you to override the existing host in the attribute that has to be rewritten", boolValue = false)
+    private static final String PROP_REPLACE_HOST = "replaceHost";
+
     private Map<String, String[]> attributes;
 
     private Map<String, Pattern> matchingPatterns;
@@ -115,6 +119,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private int staticHostCount;
 
     private String[] staticHostPattern;
+
+    private boolean replaceHost;
 
     public Transformer createTransformer() {
         return new StaticReferenceRewriteTransformer();
@@ -224,14 +230,24 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 if (url.startsWith(prefix)) {
                     // prepend host
                     url = prependHostName(url);
-                    m.appendReplacement(sb, Matcher.quoteReplacement(url));
-                    // First prefix match wins
+                    // Added check to determine whether the existing host has to be replaced
+                    if (this.replaceHost) {
+                        int index = attrValue.indexOf("://");
+                        sb.setLength(0);
+                        sb.append(attrValue,0, index + 1);
+                        sb.append(url);
+                    } else {
+                        m.appendReplacement(sb, Matcher.quoteReplacement(url));
+                        // First prefix match wins
+                    }
                     break;
                 }
             }
-
         }
-        m.appendTail(sb);
+
+        if (!this.replaceHost) {
+            m.appendTail(sb);
+        }
 
         return sb.toString();
     }
@@ -250,6 +266,11 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
+        this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
+
+        if (!this.replaceHost && !matchingPatterns.values().stream().anyMatch(str -> str.toString().startsWith("^"))) {
+            log.warn("BEWARE! Replace host is false and your regex is not anchored to the start of the string, this may result in a double host.");
+        }
     }
 
     private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {

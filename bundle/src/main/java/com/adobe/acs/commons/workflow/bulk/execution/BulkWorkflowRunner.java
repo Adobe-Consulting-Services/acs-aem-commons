@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.workflow.bulk.execution;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.adobe.acs.commons.workflow.bulk.execution.model.SubStatus;
 import com.adobe.acs.commons.workflow.bulk.execution.model.Config;

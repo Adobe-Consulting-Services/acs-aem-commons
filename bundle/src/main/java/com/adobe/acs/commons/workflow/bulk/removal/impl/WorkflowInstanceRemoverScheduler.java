@@ -153,9 +153,7 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
     @SuppressWarnings("squid:S2142")
     public final void run() {
 
-        ResourceResolver adminResourceResolver = null;
-        try {
-            adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+        try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)){
 
             final long start = System.currentTimeMillis();
 
@@ -182,10 +180,6 @@ public class WorkflowInstanceRemoverScheduler implements Runnable {
             log.error("Interrupted Exception during Workflow Removal", e);
         } catch (WorkflowRemovalForceQuitException e) {
             log.info("Workflow Removal force quit", e);
-        } finally {
-            if (adminResourceResolver != null) {
-                adminResourceResolver.close();
-            }
         }
     }
 

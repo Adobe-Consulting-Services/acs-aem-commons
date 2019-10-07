@@ -21,19 +21,19 @@ package com.adobe.acs.commons.dam.audio.watson.impl;
 
 import com.adobe.acs.commons.http.HttpClientFactory;
 import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.http.client.fluent.Request;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.Map;
 
 @Component
 @Service
@@ -53,11 +53,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 .bodyStream(stream);
 
         try {
-            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
-
-            log.trace("content: {}", json.toString(2));
-            return json.getString("id");
-        } catch (Exception e) {
+            JsonObject json = (JsonObject) httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
+            Gson gson = new Gson();
+            log.trace("content: {}", gson.toJson(json));
+            return json.get("id").getAsString();
+        } catch (IOException e) {
             log.error("error submitting job", e);
             return null;
         }
@@ -68,19 +68,20 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         log.debug("getting result for {}", jobId);
         Request request = httpClientFactory.get("/speech-to-text/api/v1/recognitions/" + jobId);
         try {
-            JSONObject json = httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
+            JsonObject json = (JsonObject) httpClientFactory.getExecutor().execute(request).handleResponse(HANDLER);
 
-            log.trace("content: {}", json.toString(2));
-            if (json.getString("status").equals("completed")) {
-                JSONArray results = json.getJSONArray("results").getJSONObject(0).getJSONArray("results");
+            Gson gson = new Gson();
+            log.trace("content: {}", gson.toJson(json));
+            if (json.has("status") && json.get("status").getAsString().equals("completed")) {
+                JsonArray results = json.get("results").getAsJsonArray().get(0).getAsJsonObject().get("results").getAsJsonArray();
                 StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < results.length(); i++) {
-                    JSONObject result = results.getJSONObject(i);
-                    if (result.getBoolean("final")) {
-                        JSONObject firstAlternative = result.getJSONArray("alternatives").getJSONObject(0);
-                        String line = firstAlternative.getString("transcript");
+                for (int i = 0; i < results.size(); i++) {
+                    JsonObject result = results.get(i).getAsJsonObject();
+                    if (result.get("final").getAsBoolean()) {
+                        JsonObject firstAlternative = result.get("alternatives").getAsJsonArray().get(0).getAsJsonObject();
+                        String line = firstAlternative.get("transcript").getAsString();
                         if (StringUtils.isNotBlank(line)) {
-                            double firstTimestamp = firstAlternative.getJSONArray("timestamps").getJSONArray(0).getDouble(1);
+                            double firstTimestamp = firstAlternative.get("timestamps").getAsJsonArray().get(0).getAsJsonArray().get(1).getAsDouble();
                             builder.append("[").append(firstTimestamp).append("s]: ").append(line).append("\n");
                         }
                     }
@@ -93,7 +94,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             } else {
                 return new ResultImpl(false, null);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Unable to get result. assuming failure.", e);
             return new ResultImpl(true, "error");
         }

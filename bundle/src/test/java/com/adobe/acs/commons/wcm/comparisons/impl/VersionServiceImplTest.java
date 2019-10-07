@@ -1,52 +1,55 @@
 /*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  * #%L
- *  * ACS AEM Commons Bundle
- *  * %%
- *  * Copyright (C) 2016 Adobe
- *  * %%
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  * #L%
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
 
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.VersionService;
-import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.version.Version;
-import javax.jcr.version.VersionIterator;
-import java.util.Iterator;
-
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-@RunWith(MockitoJUnitRunner.class)
-public class VersionServiceImplTest {
+import java.util.Iterator;
 
-    VersionService underTest = new VersionServiceImpl();
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionHistory;
+import javax.jcr.version.VersionIterator;
+import javax.jcr.version.VersionManager;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.adobe.acs.commons.wcm.comparisons.VersionService;
+
+@RunWith(MockitoJUnitRunner.class)
+public final class VersionServiceImplTest {
+
+    private final VersionService underTest = new VersionServiceImpl();
 
     @Test
     public void lastVersion_oneVersion_returnVersion() throws Exception {
@@ -116,11 +119,19 @@ public class VersionServiceImplTest {
         assertNull(result);
     }
 
-    private Resource mockResource(VersionIterator versionIterator) throws RepositoryException {
-        Resource resource = mock(Resource.class, RETURNS_DEEP_STUBS.get());
-        Session session = mock(Session.class, RETURNS_DEEP_STUBS.get());
-        when(resource.getResourceResolver().adaptTo(Session.class)).thenReturn(session);
-        when(session.getWorkspace().getVersionManager().getVersionHistory(anyString()).getAllVersions()).thenReturn(versionIterator);
+    private Resource mockResource(final VersionIterator versionIterator) throws RepositoryException {
+        final Resource resource = mock(Resource.class);
+        final ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        when(resource.getResourceResolver()).thenReturn(resourceResolver);
+        final Session session = mock(Session.class);
+        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
+        final Workspace workspace = mock(Workspace.class);
+        when(session.getWorkspace()).thenReturn(workspace);
+        final VersionManager versionManager = mock(VersionManager.class);
+        when(workspace.getVersionManager()).thenReturn(versionManager);
+        final VersionHistory versionHistory = mock(VersionHistory.class);
+        when(versionManager.getVersionHistory(anyString())).thenReturn(versionHistory);
+        when(versionHistory.getAllVersions()).thenReturn(versionIterator);
         return resource;
     }
 

@@ -19,23 +19,21 @@
  */
 package com.adobe.acs.commons.version.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.adobe.acs.commons.version.Evolution;
+import com.adobe.acs.commons.version.EvolutionContext;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.jcr.UnsupportedRepositoryOperationException;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionHistory;
 import javax.jcr.version.VersionManager;
-
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.version.Evolution;
-import com.adobe.acs.commons.version.EvolutionContext;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class EvolutionContextImpl implements EvolutionContext {
     private static final Logger log = LoggerFactory.getLogger(EvolutionContext.class);
@@ -45,6 +43,7 @@ public class EvolutionContextImpl implements EvolutionContext {
     private ResourceResolver resolver = null;
     private VersionManager versionManager = null;
     private List<Evolution> versions = new ArrayList<Evolution>();
+    private List<Evolution> evolutionItems = new ArrayList<Evolution>();
     private EvolutionConfig config;
 
     public EvolutionContextImpl(Resource resource, EvolutionConfig config) {
@@ -55,6 +54,11 @@ public class EvolutionContextImpl implements EvolutionContext {
 
     @Override
     public List<Evolution> getEvolutionItems() {
+        return evolutionItems;
+    }
+
+    @Override
+    public List<Evolution> getVersions() {
         return versions;
     }
 
@@ -76,7 +80,8 @@ public class EvolutionContextImpl implements EvolutionContext {
         } catch (Exception e) {
             log.error("Could not find versions", e);
         }
-        versions.add(new CurrentEvolutionImpl(this.resource, this.config));
+        evolutionItems = new ArrayList<>(versions);
+        evolutionItems.add(new CurrentEvolutionImpl(this.resource, this.config));
     }
 
 }

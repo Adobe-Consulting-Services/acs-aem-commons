@@ -28,8 +28,8 @@ import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.RestartWork
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.SetDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.TerminateDataWorkflowProcess;
 import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.UpdateWorkflowDataWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFArgsWorkflowProcess;
-import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WFDataWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfArgsWorkflowProcess;
+import com.adobe.acs.commons.workflow.synthetic.impl.cqtestprocesses.WfDataWorkflowProcess;
 import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.metadata.MetaDataMap;
@@ -72,11 +72,11 @@ public class SyntheticCqWorkflowRunnerImplTest {
     }
 
     @Test
-    public void testExecute_WFData() throws Exception {
+    public void testExecute_WfData() throws Exception {
         Map<Object, Object> map = new HashMap<Object, Object>();
 
         map.put("process.label", "test");
-        swr.bindCqWorkflowProcesses(new WFDataWorkflowProcess(), map);
+        swr.bindCqWorkflowProcesses(new WfDataWorkflowProcess(), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("test",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL));
@@ -134,7 +134,7 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "wf-args");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("wf-args",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,
@@ -246,10 +246,10 @@ public class SyntheticCqWorkflowRunnerImplTest {
 
         final Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("process.label", "multi1");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs1), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs1), map);
 
         map.put("process.label", "multi2");
-        swr.bindCqWorkflowProcesses(new WFArgsWorkflowProcess(wfArgs2), map);
+        swr.bindCqWorkflowProcesses(new WfArgsWorkflowProcess(wfArgs2), map);
 
         workflowSteps.add(swr.getSyntheticWorkflowStep("multi1",
                 SyntheticWorkflowRunner.WorkflowProcessIdType.PROCESS_LABEL,

@@ -170,6 +170,15 @@ public class PagesReferenceProviderTest {
 
     }
 
+    @Test
+    public void testPageReferenceResourcePath() throws Exception {
+        // The references resource should point to the cq:Page and not the [cq:Pages]/jcr:content per https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1283
+        List<Reference> actual = instance.findReferences(context.resourceResolver().getResource("/content/geometrixx/oneref/jcr:content"));
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertEquals("/content/geometrixx/en", actual.get(0).getResource().getPath());
+    }
+
     private Page registerPage(String path, String name) {
         Page result = mock(Page.class, path);
         when(pageManager.getContainingPage(path)).thenReturn(result);

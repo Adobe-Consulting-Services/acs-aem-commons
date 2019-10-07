@@ -1,6 +1,9 @@
 /*
- * Copyright 2017 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.fam.ActionManager;
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.Failure;
+import com.adobe.acs.commons.fam.actions.ActionBatch;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
@@ -32,7 +37,6 @@ import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
@@ -49,6 +53,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,8 +63,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- * Abstraction of a Process which runs using FAM and consists of one or more
- * actions.
+ * Abstraction of a Process which runs using FAM and consists of one or more actions.
  */
 public class ProcessInstanceImpl implements ProcessInstance, Serializable {
 
@@ -74,7 +78,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     private transient ControlledProcessManager manager = null;
     private final transient ProcessDefinition definition;
     private transient boolean completedNormally = false;
-    private static final transient Random RANDOM = new Random();
+    private static final transient Random RANDOM = new SecureRandom();
 
     @Override
     public String getId() {
@@ -101,7 +105,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         infoBean.getResult().setTasksCompleted(
                 Math.max(infoBean.getResult().getTasksCompleted(), countCompleted)
         );
-        actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
+        infoBean.setReportedErrors(actions.stream().flatMap(a -> a.manager.getFailureList().stream()).map(ArchivedProcessFailure::adapt).collect(Collectors.toList()));
 
         return progress;
     }
@@ -147,9 +151,19 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
 
     @Override
     public void init(ResourceResolver resourceResolver, Map<String, Object> parameterMap) throws DeserializeException, RepositoryException {
-        ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
-        infoBean.setRequestInputs(inputs);
-        definition.parseInputs(inputs);
+        try {
+            ValueMap inputs = new ModifiableValueMapDecorator(parameterMap);
+            infoBean.setRequestInputs(inputs);
+            definition.parseInputs(inputs);
+        } catch (DeserializeException | RepositoryException ex) {
+            LOG.error("Error starting managed process " + getName(), ex);
+            Failure f = new Failure();
+            f.setException(ex);
+            f.setNodePath(getPath());
+            recordErrors(-1, Arrays.asList(f), resourceResolver);
+            halt();
+            throw ex;
+        }
     }
 
     @Override
@@ -185,12 +199,15 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
             definition.buildProcess(this, rr);
             infoBean.setIsRunning(true);
             runStep(0);
-        } catch (LoginException | RepositoryException ex) {
+        } catch (LoginException | RepositoryException | RuntimeException ex) {
+            LOG.error("Error starting managed process " + getName(), ex);
             Failure f = new Failure();
             f.setException(ex);
             f.setNodePath(getPath());
-            recordErrors(-1, Arrays.asList(f), rr);
-            LOG.error("Error starting managed process " + getName(), ex);
+            asServiceUser(serviceResolver -> {
+                persistStatus(serviceResolver);
+                recordErrors(-1, Arrays.asList(f), serviceResolver);
+            });
             halt();
         }
     }
@@ -220,26 +237,32 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         }
     }
 
-    private void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
+    public void recordErrors(int step, List<Failure> failures, ResourceResolver rr) {
         if (failures.isEmpty()) {
             return;
         }
-        failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toCollection(infoBean::getReportedErrors));
+        List<ArchivedProcessFailure> archivedFailures = failures.stream().map(ArchivedProcessFailure::adapt).collect(Collectors.toList());
+        infoBean.setReportedErrors(archivedFailures);
         try {
             String errFolder = getPath() + "/jcr:content/failures/step" + (step + 1);
             JcrUtil.createPath(errFolder, "nt:unstructured", rr.adaptTo(Session.class));
             if (rr.hasChanges()) {
                 rr.commit();
-                rr.refresh();
             }
+            rr.refresh();
+            ActionManager errorManager = getActionManagerFactory().createTaskManager("Record errors", rr, 1);
+            ActionBatch batch = new ActionBatch(errorManager, 50);
             for (int i = 0; i < failures.size(); i++) {
                 String errPath = errFolder + "/err" + i;
-                Map<String, Object> values = new HashMap<>();
-                ValueMapSerializer.serializeToMap(values, failures.get(i));
-                ResourceUtil.getOrCreateResource(rr, errPath, values, null, false);
+                Failure failure = failures.get(i);
+                batch.add(rr2 -> {
+                    Map<String, Object> values = new HashMap<>();
+                    ValueMapSerializer.serializeToMap(values, failure);
+                    ResourceUtil.getOrCreateResource(rr2, errPath, values, null, false);
+                });
             }
-            rr.commit();
-        } catch (RepositoryException | PersistenceException ex) {
+            batch.commitBatch();
+        } catch (RepositoryException | PersistenceException | LoginException | NullPointerException ex) {
             LOG.error("Unable to record errors", ex);
         }
     }
@@ -265,24 +288,18 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
         infoBean.setStatus("Aborted");
     }
 
-    private void asServiceUser(CheckedConsumer<ResourceResolver> action) {
-        ResourceResolver rr = null;
-        try {
-            rr = manager.getServiceResourceResolver();
+    public void asServiceUser(CheckedConsumer<ResourceResolver> action) {
+        try (ResourceResolver rr = manager.getServiceResourceResolver()){
             action.accept(rr);
             if (rr.hasChanges()) {
                 rr.commit();
             }
         } catch (Exception ex) {
             LOG.error("Error while performing JCR operations", ex);
-        } finally {
-            if (rr != null) {
-                rr.close();
-            }
         }
     }
 
-    private void persistStatus(ResourceResolver rr) throws PersistenceException {
+    public void persistStatus(ResourceResolver rr) throws PersistenceException {
         try {
             Map<String, Object> props = new HashMap<>();
             props.put(JcrConstants.JCR_PRIMARYTYPE, JcrConstants.NT_FOLDER);

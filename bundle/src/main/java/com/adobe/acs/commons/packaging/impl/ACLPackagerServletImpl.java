@@ -20,8 +20,21 @@
 
 package com.adobe.acs.commons.packaging.impl;
 
-import com.adobe.acs.commons.packaging.PackageHelper;
-import com.adobe.acs.commons.util.AemCapabilityHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.query.Query;
+
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.jackrabbit.api.security.user.Authorizable;
@@ -34,21 +47,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.query.Query;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.adobe.acs.commons.packaging.PackageHelper;
 
 /**
  * ACS AEM Commons - ACL Packager Servlet
@@ -80,10 +80,6 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
     private static final String QUERY_LANG = Query.JCR_SQL2;
 
-    private static final String CQ5_QUERY = "SELECT * FROM [rep:ACL]";
-
-    private static final String[] CQ5_QUERIES = new String[] {CQ5_QUERY};
-
     // rep:ACE covers rep:GrantACE and rep:DenyACE
     private static final String AEM6_QUERY_ACE = "SELECT * FROM [rep:ACE] where [rep:principalName] is not null";
 
@@ -94,9 +90,6 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
     @Reference
     private PackageHelper packageHelper;
-
-    @Reference
-    private AemCapabilityHelper aemCapabilityHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -123,24 +116,9 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
             doPackaging(request, response, preview, properties, packageResources);
 
 
-        } catch (RepositoryException ex) {
+        } catch (RepositoryException | IOException ex) {
             log.error(ex.getMessage());
             response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        } catch (JSONException ex) {
-            log.error(ex.getMessage());
-            response.getWriter().print(packageHelper.getErrorJSON(ex.getMessage()));
-        }
-    }
-
-    private ValueMap getProperties(final SlingHttpServletRequest request) {
-        if (request.getResource().getChild("configuration") == null) {
-            log.warn("ACL Packager Configuration node could not be found for: {}", request.getResource());
-            return new ValueMapDecorator(new HashMap<String, Object>());
-        } else {
-            return request.getResource().getChild("configuration").adaptTo(ValueMap.class);
         }
     }
 
@@ -157,37 +135,23 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
     private List<PathFilterSet> findResources(final ResourceResolver resourceResolver,
                                               final List<String> principalNames,
                                               final List<Pattern> includePatterns) {
-        boolean isOak = true;
-        try {
-            isOak = aemCapabilityHelper.isOak();
-        } catch (RepositoryException e) {
-            isOak = true;
-        }
 
         final Set<Resource> resources = new TreeSet<Resource>(resourceComparator);
         final List<PathFilterSet> pathFilterSets = new ArrayList<PathFilterSet>();
 
-        String[] queries = CQ5_QUERIES;
-        if (isOak) {
-            queries = AEM6_QUERIES;
-        }
-
-        for (final String query : queries) {
+        for (final String query : AEM6_QUERIES) {
             final Iterator<Resource> hits = resourceResolver.findResources(query, QUERY_LANG);
 
             while (hits.hasNext()) {
                 final Resource hit = hits.next();
                 Resource repPolicy = null;
 
-                if (isOak) {
-                    // If Oak, get the parent node since the query is for the Grant/Deny nodes
-                    if (hit.getParent() != null) {
-                        repPolicy = hit.getParent();
-                    }
-                } else {
-                    // If not Oak, then the rep:ACL is the hit
-                    repPolicy = hit;
+
+                // get the parent node since the query is for the Grant/Deny nodes
+                if (hit.getParent() != null) {
+                    repPolicy = hit.getParent();
                 }
+
 
                 if (this.isIncluded(repPolicy, includePatterns)) {
                     log.debug("Included by pattern [ {} ]", repPolicy.getPath());

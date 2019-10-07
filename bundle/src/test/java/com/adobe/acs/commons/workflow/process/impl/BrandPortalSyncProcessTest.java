@@ -92,6 +92,7 @@ public class BrandPortalSyncProcessTest {
     List<String> paths;
 
     String assetPath = "/content/dam/foo.png";
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(DamUtil.class);

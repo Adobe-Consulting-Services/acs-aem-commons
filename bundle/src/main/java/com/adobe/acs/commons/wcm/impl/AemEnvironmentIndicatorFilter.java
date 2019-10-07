@@ -1,7 +1,40 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.wcm.impl;
 
-import com.adobe.acs.commons.util.BufferingResponse;
-import com.day.cq.wcm.api.WCMMode;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
@@ -19,19 +52,9 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Map;
+import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
+import com.day.cq.wcm.api.WCMMode;
 
 @Component(
         label = "ACS AEM Commons - AEM Environment Indicator",
@@ -144,55 +167,54 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             return;
         }
 
-        final BufferingResponse capturedResponse = new BufferingResponse(response);
+        try (BufferedHttpServletResponse capturedResponse = new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
-        filterChain.doFilter(request, capturedResponse);
-
-        boolean doInclude = true;
-        if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
-            // Test for configured WCM modes, where the indicators are not displayed
-            WCMMode wcmmode = extractFromRequest(request);
-
-            if (wcmmode != null) {
-                for (String m : excludedWCMModes) {
-                    if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
-                        doInclude = false;
-                        break;
+            filterChain.doFilter(request, capturedResponse);
+    
+            boolean doInclude = true;
+            if (ArrayUtils.isNotEmpty(excludedWCMModes)) {
+                // Test for configured WCM modes, where the indicators are not displayed
+                WCMMode wcmmode = extractFromRequest(request);
+    
+                if (wcmmode != null) {
+                    for (String m : excludedWCMModes) {
+                        if (StringUtils.equalsIgnoreCase(wcmmode.name(), m)) {
+                            doInclude = false;
+                            break;
+                        }
                     }
+                } else {
+                    // No wcmmode could be extracted from the request
                 }
-            } else {
-                // No wcmmode could be extracted from the request
             }
-        }
-
-        // Get contents
-        final String contents = capturedResponse.getContents();
-
-        if (doInclude && contents != null && StringUtils.contains(response.getContentType(), "html")) {
-
-            final int bodyIndex = contents.indexOf("</body>");
-
-            if (bodyIndex != -1) {
-                final PrintWriter printWriter = response.getWriter();
-
-                printWriter.write(contents.substring(0, bodyIndex));
-
-                if (StringUtils.isNotBlank(css)) {
-                    printWriter.write("<style>" + css + " </style>");
-                    printWriter.write("<div id=\"" + DIV_ID + "\">" + innerHTML + "</div>");
+    
+            // Get contents
+            final String contents = capturedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? capturedResponse.getBufferedServletOutput().getBufferedString() : null;
+    
+            if (doInclude && contents != null && StringUtils.contains(response.getContentType(), "html")) {
+    
+                final int bodyIndex = contents.indexOf("</body>");
+    
+                if (bodyIndex != -1) {
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    capturedResponse.resetBuffer();
+                    final PrintWriter printWriter = response.getWriter();
+    
+                    printWriter.write(contents.substring(0, bodyIndex));
+    
+                    if (StringUtils.isNotBlank(css)) {
+                        printWriter.write("<style>" + css + " </style>");
+                        printWriter.write("<div id=\"" + DIV_ID + "\">" + innerHTML + "</div>");
+                    }
+    
+                    if (StringUtils.isNotBlank(titlePrefix)) {
+                        printWriter.printf(TITLE_UPDATE_SCRIPT, titlePrefix);
+                    }
+    
+                    printWriter.write(contents.substring(bodyIndex));
+                    return;
                 }
-
-                if (StringUtils.isNotBlank(titlePrefix)) {
-                    printWriter.printf(TITLE_UPDATE_SCRIPT, titlePrefix);
-                }
-
-                printWriter.write(contents.substring(bodyIndex));
-                return;
             }
-        }
-
-        if (contents != null) {
-            response.getWriter().write(contents);
         }
     }
 
@@ -202,7 +224,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     @SuppressWarnings("squid:S3923")
-    private boolean accepts(final HttpServletRequest request) {
+    protected boolean accepts(final HttpServletRequest request) {
         if (StringUtils.isBlank(css) && StringUtils.isBlank(titlePrefix)) {
             // Only accept is properly configured
             log.warn("AEM Environment Indicator is not properly configured; If this feature is unwanted, "

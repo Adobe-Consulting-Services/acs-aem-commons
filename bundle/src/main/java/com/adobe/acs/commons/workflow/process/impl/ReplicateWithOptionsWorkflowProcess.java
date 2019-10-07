@@ -144,14 +144,14 @@ public class ReplicateWithOptionsWorkflowProcess implements WorkflowProcess {
      * ProcessArgs parsed from the WF metadata map
      */
     protected static class ProcessArgs {
-        private ReplicationActionType replicationActionType = null;
+        private ReplicationActionType replicationActionType;
         private ReplicationOptions replicationOptions = new ReplicationOptions();
-        private boolean traverseTree = false;
-        private boolean throttle = false;
-        private List<String> agents = new ArrayList<String>();
+        private boolean traverseTree;
+        private boolean throttle;
+        private List<String> agents;
 
         public ProcessArgs(MetaDataMap map) throws WorkflowException {
-            String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
+            final String[] lines = StringUtils.split(map.get(WorkflowHelper.PROCESS_ARGS, ""), System.lineSeparator());
             final Map<String, String> data = ParameterUtil.toMap(lines, "=");
 
             throttle = Boolean.parseBoolean(data.get(ARG_THROTTLE));

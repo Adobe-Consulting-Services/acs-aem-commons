@@ -1,5 +1,28 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2017 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package com.adobe.acs.commons.synth.children;
 
+import com.adobe.acs.commons.json.JsonObjectUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -7,8 +30,6 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -27,6 +48,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -238,15 +260,15 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
         final long start = System.currentTimeMillis();
 
         final ModifiableValueMap modifiableValueMap = this.resource.adaptTo(ModifiableValueMap.class);
-        JSONObject childrenJSON = new JSONObject();
+        JsonObject childrenJSON = new JsonObject();
 
         try {
             // Add the new entries to the JSON
             for (Resource childResource : this.orderedCache) {
-                childrenJSON.put(childResource.getName(), this.serializeToJSON(childResource));
+                childrenJSON.add(childResource.getName(), this.serializeToJSON(childResource));
             }
 
-            if (childrenJSON.length() > 0) {
+            if (childrenJSON.entrySet().size() > 0) {
                 // Persist the JSON back to the Node
                 modifiableValueMap.put(this.propertyName, childrenJSON.toString());
             } else {
@@ -258,8 +280,6 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
                     this.resource.getPath() + "/" + this.propertyName,
                     System.currentTimeMillis() - start);
 
-        } catch (JSONException e) {
-            throw new InvalidDataFormatException(this.resource, this.propertyName, childrenJSON.toString());
         } catch (NoSuchMethodException e) {
             throw new InvalidDataFormatException(this.resource, this.propertyName, childrenJSON.toString());
         } catch (IllegalAccessException e) {
@@ -282,11 +302,7 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
 
         List<SyntheticChildAsPropertyResource> resources;
 
-        try {
-            resources = deserializeToSyntheticChildResources(new JSONObject(propertyData));
-        } catch (JSONException e) {
-            throw new InvalidDataFormatException(this.resource, this.propertyName, propertyData);
-        }
+        resources = deserializeToSyntheticChildResources(JsonObjectUtil.toJsonObject(propertyData));
 
         if (this.comparator != null) {
             Collections.sort(resources, this.comparator);
@@ -304,10 +320,9 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      *
      * @param resourceToSerialize the resource to serialize to JSON.
      * @return the JSONObject representing the resources.
-     * @throws JSONException
      */
-    protected final JSONObject serializeToJSON(final Resource resourceToSerialize)
-            throws JSONException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    protected final JsonObject serializeToJSON(final Resource resourceToSerialize)
+            throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
         final DateTimeFormatter dtf = ISODateTimeFormat.dateTime();
         final Map<String, Object> serializedData = new HashMap<String, Object>();
@@ -324,7 +339,8 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
             }
         }
 
-        return new JSONObject(serializedData);
+        Gson gson = new Gson();
+        return gson.toJsonTree(serializedData).getAsJsonObject();
     }
 
     /**
@@ -332,29 +348,22 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
      *
      * @param jsonObject the JSONObject to deserialize.
      * @return the list of SyntheticChildAsPropertyResources the jsonObject represents.
-     * @throws JSONException
      */
-    protected final List<SyntheticChildAsPropertyResource> deserializeToSyntheticChildResources(JSONObject jsonObject)
-            throws JSONException {
-        final List<SyntheticChildAsPropertyResource> resources = new ArrayList<SyntheticChildAsPropertyResource>();
+    protected final List<SyntheticChildAsPropertyResource> deserializeToSyntheticChildResources(JsonObject jsonObject) {
+        final List<SyntheticChildAsPropertyResource> resources = new ArrayList<>();
 
-        final Iterator<String> keys = jsonObject.keys();
-
-        while (keys.hasNext()) {
-            final String nodeName = keys.next();
-
-            JSONObject entryJSON = jsonObject.optJSONObject(nodeName);
+        for (Entry<String, JsonElement> elem : jsonObject.entrySet()) {
+            final String nodeName = elem.getKey();
+            JsonObject entryJSON = elem.getValue().getAsJsonObject();
 
             if (entryJSON == null) {
                 continue;
             }
 
-            final ValueMap properties = new ValueMapDecorator(new HashMap<String, Object>());
-            final Iterator<String> propertyNames = entryJSON.keys();
-
-            while (propertyNames.hasNext()) {
-                final String propName = propertyNames.next();
-                properties.put(propName, entryJSON.optString(propName));
+            final ValueMap properties = new ValueMapDecorator(new HashMap<>());
+            for (Entry<String, JsonElement> prop : entryJSON.entrySet()) {
+                final String propName = prop.getKey();
+                properties.put(propName, prop.getValue().getAsString());
             }
 
             resources.add(new SyntheticChildAsPropertyResource(this.getParent(), nodeName, properties));

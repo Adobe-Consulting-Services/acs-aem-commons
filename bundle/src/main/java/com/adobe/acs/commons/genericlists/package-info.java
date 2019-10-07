@@ -20,5 +20,5 @@
 /**
  * Service for viewing generic list of key/value pairs.
  */
-@aQute.bnd.annotation.Version("1.0.1")
+@org.osgi.annotation.versioning.Version("1.0.2")
 package com.adobe.acs.commons.genericlists;

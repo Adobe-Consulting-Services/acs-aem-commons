@@ -255,6 +255,10 @@ public final class EmailServiceImpl implements EmailService {
             email.setSubject(params.get(EmailServiceConstants.SUBJECT));
         }
 
+        if (params.containsKey(EmailServiceConstants.BOUNCE_ADDRESS)) {
+            email.setBounceAddress(params.get(EmailServiceConstants.BOUNCE_ADDRESS));
+        }
+
         return email;
     }
 
@@ -264,10 +268,8 @@ public final class EmailServiceImpl implements EmailService {
 
     private MailTemplate getMailTemplate(String templatePath) throws IllegalArgumentException {
         MailTemplate mailTemplate = null;
-        ResourceResolver resourceResolver = null;
-        try {
-            Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo);
+        Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(authInfo) ){
             mailTemplate = MailTemplate.create(templatePath, resourceResolver.adaptTo(Session.class));
 
             if (mailTemplate == null) {
@@ -277,10 +279,6 @@ public final class EmailServiceImpl implements EmailService {
         } catch (LoginException e) {
             log.error("Unable to obtain an administrative resource resolver to get the Mail Template at [ "
                     + templatePath + " ]", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-            }
         }
 
         return mailTemplate;

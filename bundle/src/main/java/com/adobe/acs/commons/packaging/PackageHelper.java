@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.packaging;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -28,7 +28,6 @@ import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Version;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -163,7 +162,7 @@ public interface PackageHelper {
      * @param jcrPackage the successfully created jcr package
      * @return a string representation of JSON to write to response
      */
-    String getSuccessJSON(JcrPackage jcrPackage) throws JSONException, RepositoryException;
+    String getSuccessJSON(JcrPackage jcrPackage) throws RepositoryException;
 
 
     /**
@@ -171,9 +170,8 @@ public interface PackageHelper {
      *
      * @param resources the resources that represent the filterSet roots
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPreviewJSON(final Collection<Resource> resources) throws JSONException;
+    String getPreviewJSON(final Collection<Resource> resources);
 
 
     /**
@@ -181,9 +179,8 @@ public interface PackageHelper {
      *
      * @param pathFilterSets the pathFilterSets of the package
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets) throws JSONException;
+    String getPathFilterSetPreviewJSON(final Collection<PathFilterSet> pathFilterSets);
 
 
     /**
@@ -199,9 +196,8 @@ public interface PackageHelper {
      *
      * @param paths the paths that represent the filterSet roots
      * @return a string representation of JSON to write to response
-     * @throws JSONException
      */
-    String getPreviewJSONForPaths(Collection<String> paths) throws JSONException;
+    String getPreviewJSONForPaths(Collection<String> paths);
 
     /**
     *
