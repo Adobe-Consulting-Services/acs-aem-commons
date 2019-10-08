@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
 - #2045 added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+- #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
 - #2032 - Fixed filter.xml on /var/acs-commons

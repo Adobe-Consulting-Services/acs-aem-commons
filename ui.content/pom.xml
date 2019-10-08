@@ -103,39 +103,66 @@
                         <!-- check that rep:policy nodes are actually created by the package -->
                         <check>
                             <name>check-expected-policy-paths</name>
-                            <inlineScript>
-                                function afterExtract(packageId, session) {
-                                    var policyPaths = [
-                                        "/oak:index",
-                                        "/content",
-                                        "/content/dam",
-                                        "/etc",
-                                        "/etc/acs-commons/bulk-workflow-manager",
-                                        "/etc/acs-commons/notifications",
-                                        "/etc/acs-commons/redirect-maps",
-                                        "/etc/cloudservices/dtm",
-                                        "/etc/cloudservices/sharethis",
-                                        "/etc/cloudservices/typekit",
-                                        "/etc/packages",
-                                        "/etc/notification/email",
-                                        "/etc/workflow/instances",
-                                        "/home/groups",
-                                        "/home/users",
-                                        "/var/workflow/instances",
-                                        "/var/acs-commons",
-                                        "/var/acs-commons/httpcache",
-                                        "/var/acs-commons/mcp",
-                                        "/var/acs-commons/on-deploy-scripts-status"
-                                    ];
-                                    for (var idx in policyPaths) {
-                                        var path = policyPaths[idx] + "/rep:policy";
-                                        if (!session.itemExists(path)) {
-                                            // change this to major when missing paths are resolved.
-                                            oakpal.minorViolation("expected path creation: " + path, packageId);
-                                        }
-                                    }
-                                }
-                            </inlineScript>
+                            <template>basic/expectPaths</template>
+                            <config>
+                                <severity>minor</severity>
+                                <expectedPaths>
+                                    <path>/oak:index/rep:policy</path>
+                                    <path>/content/rep:policy</path>
+                                    <path>/content/dam/rep:policy</path>
+                                    <path>/etc/rep:policy</path>
+                                    <path>/etc/acs-commons/bulk-workflow-manager/rep:policy</path>
+                                    <path>/etc/acs-commons/notifications/rep:policy</path>
+                                    <path>/etc/acs-commons/redirect-maps/rep:policy</path>
+                                    <path>/etc/cloudservices/dtm/rep:policy</path>
+                                    <path>/etc/cloudservices/sharethis/rep:policy</path>
+                                    <path>/etc/cloudservices/typekit/rep:policy</path>
+                                    <path>/etc/packages/rep:policy</path>
+                                    <path>/etc/notification/email/rep:policy</path>
+                                    <path>/etc/workflow/instances/rep:policy</path>
+                                    <path>/home/groups/rep:policy</path>
+                                    <path>/home/users/rep:policy</path>
+                                    <path>/var/workflow/instances/rep:policy</path>
+                                    <path>/var/acs-commons/rep:policy</path>
+                                    <path>/var/acs-commons/httpcache/rep:policy</path>
+                                    <path>/var/acs-commons/mcp/rep:policy</path>
+                                    <path>/var/acs-commons/on-deploy-scripts-status/rep:policy</path>
+                                </expectedPaths>
+                            </config>
+                        </check>
+                        <check>
+                            <name>verify-acls-on-root</name>
+                            <template>basic/expectAces</template>
+                            <!-- since the root rep:policy node will obviously exist regardless, we should be more
+                            specific for these acl entries -->
+                            <config>
+                                <expectedAces>
+                                    <expectedAce>
+                                        principal=acs-commons-ensure-oak-index-service
+                                        ;type=allow;path=/;privileges=jcr:read,rep:write,rep:indexDefinitionManagement
+                                    </expectedAce>
+                                    <expectedAce>
+                                        principal=acs-commons-dispatcher-flush-service
+                                        ;type=allow;path=/;privileges=jcr:read,crx:replicate,jcr:removeNode
+                                    </expectedAce>
+                                    <expectedAce>
+                                        principal=acs-commons-package-replication-status-event-service
+                                        ;type=allow;path=/;privileges=jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl
+                                    </expectedAce>
+                                    <expectedAce>
+                                        principal=acs-commons-ensure-service-user-service
+                                        ;type=allow;path=/;privileges=jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl
+                                    </expectedAce>
+                                    <expectedAce>
+                                        principal=acs-commons-automatic-package-replicator-service
+                                        ;type=allow;path=/;privileges=jcr:read
+                                    </expectedAce>
+                                    <expectedAce>
+                                        principal=acs-commons-on-deploy-scripts-service
+                                        ;type=allow;path=/;privileges=jcr:read
+                                    </expectedAce>
+                                </expectedAces>
+                            </config>
                         </check>
                     </checks>
 
