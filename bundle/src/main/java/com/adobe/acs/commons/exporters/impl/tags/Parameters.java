@@ -29,7 +29,7 @@ public class Parameters {
   private Boolean localized;
   private String defaultLocalization;
 
-  public Parameters (SlingHttpServletRequest request) {
+  public Parameters(SlingHttpServletRequest request) {
     this.path = Optional.ofNullable(request.getParameter("path"))
         .orElse(StringUtils.EMPTY);
     this.localized = Optional.ofNullable(request.getParameter("localized"))
