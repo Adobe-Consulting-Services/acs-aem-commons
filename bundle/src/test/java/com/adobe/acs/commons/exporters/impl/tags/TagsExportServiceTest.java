@@ -1,0 +1,84 @@
+package com.adobe.acs.commons.exporters.impl.tags;
+
+
+import static org.junit.Assert.*;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+public class TagsExportServiceTest {
+
+  @Rule
+  public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+
+  private static final String PATH = "/etc";
+
+  private static final String EXPECTED_OUTPUT_BRAND_TEST_NON_LOCALIZED = "root {{root}},brandTest {{brandTest}},Products {{products}},,,\n"
+      + "root {{root}},brandTest {{brandTest}},Products {{products}},Milk {{milk}},,\n"
+      + "root {{root}},brandTest {{brandTest}},Products {{products}},Cereals {{cereals}},,\n"
+      + "root {{root}},brandTest {{brandTest}},Products {{products}},Cereals {{cereals}},Other {{other}},\n"
+      + "root {{root}},brandTest {{brandTest}},Products {{products}},Cereals {{cereals}},Oat {{oat}},\n";
+
+
+  private static final String EXPECTED_OUTPUT_BRAND_TEST_LOCALIZED = "en[root] {{root}},en[brandTest] {{brandTest}},es[Produtos] fr[Products in french] en[Products] {{products}},,,\n"
+      + "en[root] {{root}},en[brandTest] {{brandTest}},es[Produtos] fr[Products in french] en[Products] {{products}},en[Milk] {{milk}},,\n"
+      + "en[root] {{root}},en[brandTest] {{brandTest}},es[Produtos] fr[Products in french] en[Products] {{products}},en[Cereals] {{cereals}},,\n"
+      + "en[root] {{root}},en[brandTest] {{brandTest}},es[Produtos] fr[Products in french] en[Products] {{products}},en[Cereals] {{cereals}},ru[овсяной] en[Other] {{other}},\n"
+      + "en[root] {{root}},en[brandTest] {{brandTest}},es[Produtos] fr[Products in french] en[Products] {{products}},en[Cereals] {{cereals}},be[belarussian oat] en[Oat] {{oat}},\n";
+
+  private static final String EXPECTED_OUTPUT_COMMA_IN_TITLE_LOCALIZED = "en[root] {{root}},en[commaInTitles] {{commaInTitles}},es[Produtos] fr[Products in french] en[Products] {{products}},\n";
+
+  private static final String EXPECTED_OUTPUT_UNLOCALIZED_TO_LOCALIZED_DEFAULT = "en[root] {{root}},en[Zero Localized Title] {{zeroLocalizedTitle}},en[Products] {{products}},\n";
+
+  private static final String EXPECTED_OUTPUT_UNLOCALIZED_TO_LOCALIZED_PL = "en[root] {{root}},pl[Zero Localized Title] {{zeroLocalizedTitle}},pl[Products] {{products}},\n";
+
+  private TagsExportService tagsExportService;
+
+  @Before
+  public void setUp() {
+    context.load()
+        .json(getClass().getResourceAsStream("brandTestTags.json"), PATH);
+    tagsExportService = new TagsExportService();
+  }
+
+  @Test
+  public void checkIsStructureExpected_toNonLocalized() {
+    String result = tagsExportService.exportNonLocalizedTagsForPath("/etc/tags/root/brandTest", context.resourceResolver());
+    assertEquals(EXPECTED_OUTPUT_BRAND_TEST_NON_LOCALIZED, result);
+  }
+
+  @Test
+  public void checkIsStructureExpected_toLocalized() {
+    String result = tagsExportService.exportLocalizedTagsForPath("/etc/tags/root/brandTest", context.resourceResolver());
+    assertEquals(EXPECTED_OUTPUT_BRAND_TEST_LOCALIZED, result);
+  }
+
+  @Test
+  public void commasAreRemovedFromTitles_toLocalized() {
+    String result = tagsExportService.exportLocalizedTagsForPath("/etc/tags/root/commaInTitles", context.resourceResolver());
+    assertEquals(EXPECTED_OUTPUT_COMMA_IN_TITLE_LOCALIZED, result);
+  }
+
+  @Test
+  public void wrongPathDoNotExportAnything_toLocalized() {
+    String result = tagsExportService.exportLocalizedTagsForPath("/etc/wrong_tags/root/brandTest", context.resourceResolver());
+    assertEquals(StringUtils.EMPTY, result);
+  }
+
+  @Test
+  public void tagsWithoutLocalization_defaultLanguageWillBeUsed_toLocalized() {
+    String result = tagsExportService.exportLocalizedTagsForPath("/etc/tags/root/zeroLocalizedTitle", context.resourceResolver());
+    assertEquals(EXPECTED_OUTPUT_UNLOCALIZED_TO_LOCALIZED_DEFAULT, result);
+  }
+
+  @Test
+  public void tagsWithoutLocalization_chosenLanguageWillBeUsed_toLocalized() {
+    String result = tagsExportService.exportLocalizedTagsForPath("/etc/tags/root/zeroLocalizedTitle", context.resourceResolver(),"pl");
+    assertEquals(EXPECTED_OUTPUT_UNLOCALIZED_TO_LOCALIZED_PL, result);
+  }
+
+}

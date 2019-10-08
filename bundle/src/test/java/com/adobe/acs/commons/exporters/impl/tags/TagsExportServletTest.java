@@ -1,0 +1,128 @@
+package com.adobe.acs.commons.exporters.impl.tags;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.ImmutableMap;
+import io.wcm.testing.mock.aem.junit.AemContext;
+import java.lang.reflect.Field;
+import java.util.Map;
+import org.apache.http.HttpStatus;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+public class TagsExportServletTest {
+
+  private static final String BRAND_TAGS_ROOT = "/etc/tags/root/brandTest";
+
+  private static final String PARAMETER_PATH = "path";
+
+  private static final String PARAMETER_LOCALIZED = "localized";
+
+  private static final String PARAMETER_DEFAULT_LOCALIZATION = "defaultLocalization";
+  
+  @Rule
+  public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
+
+  private TagsExportServlet servlet;
+
+  private TagsExportService service;
+
+  @Before
+  public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    service = new TagsExportService();
+    context.load()
+        .json(getClass().getResourceAsStream("brandTestTags.json"), "/etc");
+    context.registerService(TagsExportService.class, service);
+    servlet = new TagsExportServlet();
+    mockExportServiceInServlet();
+  }
+
+  @Test
+  public void testCorrectParameters_defaultLocalizationAppliedOnlyToTagWithoutLocalization() throws Exception {
+    Map<String, Object> params = ImmutableMap.of(
+        PARAMETER_PATH, "/etc/tags/root/zeroLocalizedTitle",
+        PARAMETER_LOCALIZED,"true",
+        PARAMETER_DEFAULT_LOCALIZATION,"pl");
+
+    context.request().setParameterMap(params);
+    servlet.doGet(context.request(), context.response());
+
+    assertEquals(HttpStatus.SC_OK, context.response().getStatus());
+    String output = context.response().getOutputAsString();
+    assertTrue(output.contains("en[root] {{root}}"));
+    assertTrue(output.contains("pl[Zero Localized Title] {{zeroLocalizedTitle}}"));
+  }
+
+  @Test
+  public void testWrongPath_emptyOutput() throws Exception {
+    Map<String, Object> params = ImmutableMap.of(
+        PARAMETER_PATH, "/wrong/Path",
+        PARAMETER_LOCALIZED,"true",
+        PARAMETER_DEFAULT_LOCALIZATION,"pl");
+
+    context.request().setParameterMap(params);
+    servlet.doGet(context.request(), context.response());
+
+    assertEquals(HttpStatus.SC_OK, context.response().getStatus());
+    String output = context.response().getOutputAsString();
+    assertTrue(output.isEmpty());
+  }
+
+  @Test
+  public void testMissingPath_emptyOutput() throws Exception {
+    Map<String, Object> params = ImmutableMap.of(
+        PARAMETER_LOCALIZED,"true",
+        PARAMETER_DEFAULT_LOCALIZATION,"pl");
+
+    context.request().setParameterMap(params);
+    servlet.doGet(context.request(), context.response());
+
+    assertEquals(HttpStatus.SC_OK, context.response().getStatus());
+    String output = context.response().getOutputAsString();
+    assertTrue(output.isEmpty());
+  }
+
+  @Test
+  public void testCorrectParameters_nonLocalizedOutput() throws Exception {
+    Map<String, Object> params = ImmutableMap.of(
+        PARAMETER_PATH, BRAND_TAGS_ROOT,
+        PARAMETER_LOCALIZED,"false",
+        PARAMETER_DEFAULT_LOCALIZATION,"pl");
+
+    context.request().setParameterMap(params);
+    servlet.doGet(context.request(), context.response());
+
+    assertEquals(HttpStatus.SC_OK, context.response().getStatus());
+    String output = context.response().getOutputAsString();
+    assertTrue(output.contains("Products {{products}}"));
+    assertFalse(output.contains("pl["));
+    assertFalse(output.contains("en["));
+  }
+
+  @Test
+  public void missingLocalizationParams_defaultParamsApplied_nonLocalizedOutput() throws Exception {
+    Map<String, Object> params = ImmutableMap.of(
+        PARAMETER_PATH, BRAND_TAGS_ROOT);
+
+    context.request().setParameterMap(params);
+    servlet.doGet(context.request(), context.response());
+
+    assertEquals(HttpStatus.SC_OK, context.response().getStatus());
+    String output = context.response().getOutputAsString();
+    assertTrue(output.contains("Products {{products}}"));
+    assertFalse(output.contains("pl["));
+    assertFalse(output.contains("en["));
+  }
+
+  private void mockExportServiceInServlet()
+      throws NoSuchFieldException, IllegalAccessException {
+    Field serviceField = servlet.getClass().getDeclaredField("tagsExportService");
+    serviceField.setAccessible(true);
+    serviceField.set(servlet, service);
+  }
+}

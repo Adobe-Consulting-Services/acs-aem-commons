@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Tags to CSV Exporter"
+    jcr:description="Export tags to CSV."
+    icon="tags"
+    href="/etc/acs-commons/exporters/tag-to-csv-exporter.html"
+    id="acs-commons__exporters-tags"
+    target="_blank"/>
