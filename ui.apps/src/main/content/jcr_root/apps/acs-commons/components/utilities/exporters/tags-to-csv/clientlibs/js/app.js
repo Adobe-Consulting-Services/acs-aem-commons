@@ -32,9 +32,9 @@ angular.module('acs-commons-tags-to-csv-app', ['acsCoral', 'ACS.Commons.notifica
 
             $scope.download = function () {
                 window.open($scope.app.resource + '/tags.export.csv' +
-                    '?path=' + encodeURIComponent($scope.tagPath || "") +
-                    '&localized=' + $scope.localized || "" +
-                    '&defaultLocalization=' + $scope.defaultLocalization || "");
+                    '?path=' + encodeURIComponent($scope.tagPath || " ") +
+                    '&localized=' + ($scope.localized || " ") +
+                    '&defaultLocalization=' + encodeURIComponent($scope.defaultLocalization || " "));
             };
 
 }]);

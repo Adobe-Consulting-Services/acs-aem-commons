@@ -53,6 +53,6 @@ public class Parameters {
   }
 
   public boolean containsPath() {
-    return !path.isEmpty();
+    return StringUtils.isNotBlank(path);
   }
 }
