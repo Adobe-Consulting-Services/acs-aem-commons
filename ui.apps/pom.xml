@@ -109,15 +109,19 @@
                             </config>
                         </check>
                         <check>
-                            <name>verify-acls</name>
+                            <name>verify-acls-on-apps</name>
+                            <template>basic/expectAces</template>
                             <!-- enforces resolution of issue #2048 -->
-                            <inlineScript>
-                                function afterExtract(packageId, session) {
-                                    if (!session.itemExists("/apps/rep:policy")) {
-                                        oakpal.majorViolation("expected /apps/rep:policy node to be created", packageId);
-                                    }
-                                }
-                            </inlineScript>
+                            <config>
+                                <principals>
+                                    <principal>acs-commons-ensure-oak-index-service</principal>
+                                    <principal>acs-commons-component-error-handler-service</principal>
+                                    <principal>acs-commons-shared-component-props-service</principal>
+                                </principals>
+                                <expectedAces>
+                                    <expectedAce>type=allow;path=/apps;privileges=jcr:read</expectedAce>
+                                </expectedAces>
+                            </config>
                         </check>
                     </checks>
 
