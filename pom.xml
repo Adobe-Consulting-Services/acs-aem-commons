@@ -45,7 +45,7 @@
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
-        <oakpal.version>1.4.2</oakpal.version>
+        <oakpal.version>1.5.1</oakpal.version>
     </properties>
 
     <build>
