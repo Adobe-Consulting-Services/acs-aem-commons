@@ -62,6 +62,8 @@
                     <group>adobe/consulting</group>
                     <properties>
                         <description>ACS AEM Commons content package containing code (/apps).</description>
+                        <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
+                        <acHandling>merge</acHandling>
                     </properties>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                     <embeddeds>
@@ -104,6 +106,21 @@
                                         <type>allow</type>
                                     </rule>
                                 </rules>
+                            </config>
+                        </check>
+                        <check>
+                            <name>verify-acls-on-apps</name>
+                            <template>basic/expectAces</template>
+                            <!-- enforces resolution of issue #2048 -->
+                            <config>
+                                <principals>
+                                    <principal>acs-commons-ensure-oak-index-service</principal>
+                                    <principal>acs-commons-component-error-handler-service</principal>
+                                    <principal>acs-commons-shared-component-props-service</principal>
+                                </principals>
+                                <expectedAces>
+                                    <expectedAce>type=allow;path=/apps;privileges=jcr:read</expectedAce>
+                                </expectedAces>
                             </config>
                         </check>
                     </checks>

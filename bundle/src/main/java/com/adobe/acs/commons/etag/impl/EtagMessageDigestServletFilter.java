@@ -151,7 +151,7 @@ public class EtagMessageDigestServletFilter implements Filter {
                 } 
                 String digest = calculateDigestFromResponse(bufferedResponse);
                 slingHttpServletRequest.getRequestProgressTracker().log("ETag from digest calculated with {0}: {1}", configuration.messageDigestAlgorithm(), digest);
-                slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, digest);
+                slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, "\"" + digest +"\"");
                 if (isUnmodified(slingHttpServletRequest.getHeaders(HttpHeaders.IF_NONE_MATCH), digest)) {
                     log.debug("Digest is equal to one of the given ETags in the If-None-Match request header, returning empty response with a 304");
                     bufferedResponse.resetBuffer();

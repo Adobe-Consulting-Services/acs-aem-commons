@@ -103,7 +103,13 @@ public class RequestHeaderHttpCacheConfigExtension extends AbstractKeyValueExten
         // No valid request headers could be found.
         return false;
     }
-
+    
+    @Override
+    protected String getActualValue(String key, SlingHttpServletRequest request) {
+        return request.getHeader(key);
+    }
+    
+    
     @Override
     public String getCacheKeyId() {
         return "[Request Header: " + cacheKeyId + "]";
