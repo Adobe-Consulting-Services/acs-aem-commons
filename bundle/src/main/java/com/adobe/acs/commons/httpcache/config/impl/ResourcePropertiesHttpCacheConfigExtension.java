@@ -34,6 +34,8 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -84,6 +86,10 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         String webconsole_configurationFactory_nameHint() default "Properties: [ {httpcache.config.extension.property} ] Property values: [ {httpcache.config.extension.property.values} ] Config name: [ {config.name} ]";
     }
 
+    private static final Logger log = LoggerFactory.getLogger(ResourcePropertiesHttpCacheConfigExtension.class);
+
+    private String configName;
+
     private Map<String, String[]> allowedProperties;
 
     private String cacheKeyId;
@@ -98,10 +104,13 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         for (final Map.Entry<String, String[]> entry : allowedKeyValues.entrySet()) {
             final ValueMap properties = request.getResource().getValueMap();
 
-            if (properties.containsKey(entry.getKey())) {
-                final String[] propertyValues = properties.get(entry.getKey(), String[].class);
+            final String key = entry.getKey();
+            if (properties.containsKey(key)) {
+                log.debug("{} - passed contains key with key {} for resource {}", configName, key, request.getResource().getPath());
+                final String[] propertyValues = properties.get(key, String[].class);
 
                 if (ArrayUtils.isEmpty(propertyValues) || CollectionUtils.containsAny(Arrays.asList(entry.getValue()), Arrays.asList(propertyValues))) {
+                    log.debug("{} - passed value check with value {} for resource {}", configName, entry.getValue(), request.getResource().getPath());
                     // If no values were specified, then assume ANY and ALL values are acceptable, and were are merely looking for the existence of the property
                     return true;
                 }
@@ -112,7 +121,12 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         // No valid resource property could be found.
         return false;
     }
-
+    
+    @Override
+    protected String getActualValue(String key, SlingHttpServletRequest request) {
+        return request.getResource().getValueMap().get(key, String.class);
+    }
+    
     @Override
     public String getCacheKeyId() {
         return "[Resource Property: " + cacheKeyId + "]";
@@ -123,5 +137,6 @@ public class ResourcePropertiesHttpCacheConfigExtension extends AbstractKeyValue
         allowedProperties = new HashMap<>();
         allowedProperties.put(config.httpcache_config_extension_property(), config.httpcache_config_extension_property_values());
         cacheKeyId = UUID.randomUUID().toString();
+        configName = config.config_name();
     }
 }

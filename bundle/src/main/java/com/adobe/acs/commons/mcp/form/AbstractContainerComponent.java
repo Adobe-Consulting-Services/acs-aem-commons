@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.lang.reflect.ParameterizedType;
@@ -54,19 +55,20 @@ public class AbstractContainerComponent extends FieldComponent {
 
     @Override
     public void init() {
-        if (getField() != null) {
-            if (getField().getType().isArray()) {
-                extractFieldComponents(getField().getType().getComponentType());
-            } else if (Collection.class.isAssignableFrom(getField().getType())) {
-                ParameterizedType type = (ParameterizedType) getField().getGenericType();
+        if (getAccessibleObject()!= null) {
+            Class<?> fieldType = AccessibleObjectUtil.getType(getAccessibleObject());
+            if (fieldType.isArray()) {
+                extractFieldComponents(fieldType.getComponentType());
+            } else if (Collection.class.isAssignableFrom(fieldType)) {
+                ParameterizedType type = (ParameterizedType) AccessibleObjectUtil.getGenericType(getAccessibleObject());
                 Class clazz = (Class) type.getActualTypeArguments()[0];
                 extractFieldComponents(clazz);
             } else {
-                extractFieldComponents(getField().getType());
+                extractFieldComponents(fieldType);
                 fieldComponents.values().forEach(comp -> {
                     ResourceMetadata meta = comp.getComponentMetadata();
                     String currentName = String.valueOf(meta.get("name"));
-                    meta.put("name", getField().getName() + "/" + currentName);
+                    meta.put("name", AccessibleObjectUtil.getFieldName(getAccessibleObject()) + "/" + currentName);
                 });
             }
         }

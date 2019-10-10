@@ -34,9 +34,9 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 
 /**
- * Generates a dialog out of @FormField annotations
- * Ideally your sling model should extend this class to inherit its features
- * but you can also just use the @DialogProvider annotation
+ * Generates a dialog out of @FormField annotations Ideally your sling model
+ * should extend this class to inherit its features but you can also just use
+ * the @DialogProvider annotation
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class},
@@ -44,6 +44,7 @@ import org.apache.sling.models.annotations.Model;
 )
 @DialogProvider
 public class GeneratedDialog {
+
     @Inject
     @JsonIgnore
     private Resource resource;
@@ -54,7 +55,7 @@ public class GeneratedDialog {
 
     @Inject
     @JsonIgnore
-    private SlingScriptHelper sling;
+    SlingScriptHelper sling;
 
     @JsonIgnore
     private FormComponent form;
