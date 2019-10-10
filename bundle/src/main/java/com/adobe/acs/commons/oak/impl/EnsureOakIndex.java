@@ -87,7 +87,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     public static final String PROP_IMMEDIATE = "immediate";
     
     private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
-    private String[] additionalIgnoreProperties = DEFAULT_ADDITIONAL_IGNORE_PROPERTIES;
     @Property(label = "Additional ignore properties",
             description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.",
             cardinality = Integer.MAX_VALUE,
