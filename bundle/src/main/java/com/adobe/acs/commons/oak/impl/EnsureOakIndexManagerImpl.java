@@ -21,6 +21,7 @@ package com.adobe.acs.commons.oak.impl;
 
 import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -161,7 +162,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
         if (index != null && !this.ensureIndexes.contains(index)) {
-            index.setIgnoreProperties(this.additionalIgnoreProperties);
             this.ensureIndexes.add(index);
         }
     }
@@ -214,5 +214,12 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Activate
     protected void activate(Map<String, Object> config) {
         additionalIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+        log.debug("Activated with additional ignore properties: {}", Joiner.on(',').join(additionalIgnoreProperties));
     }
+
+    @Override
+    public String[] getAdditionalIgnoreProperties() {
+        return this.additionalIgnoreProperties;
+    }
+
 }

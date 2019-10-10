@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
+- #1966 - Fixed properties.ignore not being honored on Ensure Oak Index
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)

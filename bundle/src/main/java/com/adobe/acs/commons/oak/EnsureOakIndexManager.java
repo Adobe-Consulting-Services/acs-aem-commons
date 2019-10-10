@@ -44,4 +44,7 @@ public interface EnsureOakIndexManager {
     @Description("Ensure select Ensure Oak Index Definitions")
     int ensure(@Name(value="force") boolean force,
                 @Name(value="ensureDefinitionsPath") String ensureDefinitionsPath);
+
+    @Description("The properties to ignore when checking for differences")
+    String[] getAdditionalIgnoreProperties();
 }

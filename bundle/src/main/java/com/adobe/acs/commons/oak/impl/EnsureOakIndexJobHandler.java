@@ -136,15 +136,15 @@ public class EnsureOakIndexJobHandler implements Runnable {
         this.ignoreProperties.addAll(Arrays.asList(MANDATORY_IGNORE_PROPERTIES));
         this.excludeSubTrees.addAll(Arrays.asList(MANDATORY_EXCLUDE_SUB_TREES));
         this.excludeNodeNames.addAll(Arrays.asList(MANDATORY_EXCLUDE_NODE_NAMES));
-
-        if (ensureOakIndex != null) {
-            this.ignoreProperties.addAll(ensureOakIndex.getIgnoreProperties());
-        }
     }
 
     @Override
     @SuppressWarnings("squid:S1141")
     public void run() {
+        this.ignoreProperties.addAll(ensureOakIndex.getIgnoreProperties());
+        log.debug("Will be ignoring these properties: {} for index {}",
+                this.ignoreProperties, this.oakIndexesPath);
+
         Map<String, Object> authInfo = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
         try (ResourceResolver resourceResolver = this.ensureOakIndex.getResourceResolverFactory().getServiceResourceResolver(authInfo)) {
 

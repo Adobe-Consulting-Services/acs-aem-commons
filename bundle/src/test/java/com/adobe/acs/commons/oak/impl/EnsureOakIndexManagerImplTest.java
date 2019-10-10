@@ -32,6 +32,7 @@ import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
 
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.sling.commons.scheduler.ScheduleOptions;
 import org.apache.sling.commons.scheduler.Scheduler;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -55,13 +56,15 @@ public class EnsureOakIndexManagerImplTest {
     
     @Mock
     Scheduler scheduler;
-    
+
+    @Mock
+    EnsureOakIndexManager indexManager;
     
     private static final String OAK_INDEX = "/oak:index";
     
     Map<String,Object> ensureOakIndexManagerProperties;
 
-    
+
     
     @Before
     public void setup() {
@@ -76,7 +79,7 @@ public class EnsureOakIndexManagerImplTest {
             handler.run();
             return true;
         });
-        
+
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
        
         ensureOakIndexManagerProperties = new HashMap<>();
@@ -111,9 +114,9 @@ public class EnsureOakIndexManagerImplTest {
     
     @Test
     public void testWithIndexRegistrations() throws NotCompliantMBeanException {
-        EnsureOakIndex eoi1 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index1", "abc");
         EnsureOakIndexManagerImpl impl = new EnsureOakIndexManagerImpl();
         context.registerInjectActivateService(impl,ensureOakIndexManagerProperties);
+        EnsureOakIndex eoi1 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index1", "abc");
         assertEquals(1,impl.ensureAll(true));
         assertTrue(eoi1.isApplied());
         assertEquals(0,impl.ensureAll(false));

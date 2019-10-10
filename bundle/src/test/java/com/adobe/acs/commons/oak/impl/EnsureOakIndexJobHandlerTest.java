@@ -22,10 +22,12 @@ package com.adobe.acs.commons.oak.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.scheduler.Scheduler;
@@ -82,6 +84,9 @@ public class EnsureOakIndexJobHandlerTest {
     
     @Mock
     Scheduler scheduler;
+
+    @Mock
+    EnsureOakIndexManager indexManager;
     
 
     @Before
@@ -95,12 +100,15 @@ public class EnsureOakIndexJobHandlerTest {
         props.put("oak.indexes.path", OAK_INDEX);
         props.put("ensure-definitions.path",DEFINITION_PATH);
         props.put("immediate", "false");
-        
+
         context.registerService(Scheduler.class,scheduler);
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
+
+        when(indexManager.getAdditionalIgnoreProperties()).thenReturn(new String[0]);
+        context.registerService(EnsureOakIndexManager.class, indexManager);
+        
         EnsureOakIndex eoi = new EnsureOakIndex();
         context.registerInjectActivateService(eoi, props);
-        
 
         handler = new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH);
         

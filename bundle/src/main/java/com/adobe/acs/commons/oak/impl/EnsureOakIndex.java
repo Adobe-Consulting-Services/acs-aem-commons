@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.jcr.RepositoryException;
 
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -92,6 +93,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
+    private EnsureOakIndexManager indexManager;
+
+    @Reference
     private Scheduler scheduler;
 
     private String ensureDefinitionsPath;
@@ -119,6 +123,8 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         }
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
+
+        this.ignoreProperties = new CopyOnWriteArrayList<String>(indexManager.getAdditionalIgnoreProperties());
 
         if (this.immediate) {
             apply(false);
@@ -166,11 +172,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Override
     public List<String> getIgnoreProperties() {
         return this.ignoreProperties;
-    }
-
-    @Override
-    public void setIgnoreProperties(String[] ignoreProperties) {
-        this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoreProperties);
     }
 
     @Override
