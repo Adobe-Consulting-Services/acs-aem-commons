@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 
 //@formatter:off
 @Component(
@@ -84,6 +85,14 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             boolValue = DEFAULT_IMMEDIATE
     )
     public static final String PROP_IMMEDIATE = "immediate";
+    
+    private static final String[] DEFAULT_ADDITIONAL_IGNORE_PROPERTIES = new String[]{};
+    private String[] additionalIgnoreProperties = DEFAULT_ADDITIONAL_IGNORE_PROPERTIES;
+    @Property(label = "Additional ignore properties",
+            description = "Property names that are to be ignored when determining if an oak index has changed, as well as what properties should be removed/updated.",
+            cardinality = Integer.MAX_VALUE,
+            value = {})
+    public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
     @Reference
     private ChecksumGenerator checksumGenerator;
@@ -93,6 +102,9 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
 
     @Reference
     private Scheduler scheduler;
+    
+    @Reference
+    private EnsureOakIndexManager indexManager;
 
     private String ensureDefinitionsPath;
     private String oakIndexesPath;
@@ -119,7 +131,21 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         }
 
         this.immediate = PropertiesUtil.toBoolean(config.get(PROP_IMMEDIATE), DEFAULT_IMMEDIATE);
-
+        
+        String[] ignoredProps = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+        if (ignoredProps.length == 0) {
+            // Legacy: check if EnsureOakIndexManagerImpl has this property configured -- https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1966
+            if (indexManager instanceof EnsureOakIndexManagerImpl) {
+                EnsureOakIndexManagerImpl impl = (EnsureOakIndexManagerImpl) indexManager;
+                if (impl.getIgnoredProperties().length != 0) {
+                    this.ignoreProperties = new CopyOnWriteArrayList<String>(impl.getIgnoredProperties());
+                    log.warn("The configuration of ignoredProperties on the EnsureOakIndexManagerImpl is deprecated, these properties should be configured on the EnsureOakIndex service instead. "
+                            + "For convenience they are respected for now, but please move them over.");
+                }
+            } else {
+                this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoredProps);
+            }
+        }
         if (this.immediate) {
             apply(false);
         }
@@ -166,11 +192,6 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
     @Override
     public List<String> getIgnoreProperties() {
         return this.ignoreProperties;
-    }
-
-    @Override
-    public void setIgnoreProperties(String[] ignoreProperties) {
-        this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoreProperties);
     }
 
     @Override
