@@ -108,6 +108,7 @@
                                 <severity>minor</severity>
                                 <expectedPaths>
                                     <path>/oak:index/rep:policy</path>
+                                    <path>/conf/rep:policy</path>
                                     <path>/content/rep:policy</path>
                                     <path>/content/dam/rep:policy</path>
                                     <path>/etc/rep:policy</path>
