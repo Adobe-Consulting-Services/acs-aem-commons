@@ -5,9 +5,13 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## Unreleased ([details][unreleased changes details])
+
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.0...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+### Added
+- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
@@ -31,9 +35,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1975 - Split application content from mutable content
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
 - #986 - Rewrote Generic Lists to use Touch UI
-
-### Added
-- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service uwer
 
 ## [4.3.0] - 2019-07-31
 
