@@ -136,7 +136,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
         
         if (ignoredProps.length == 0) {
             // Legacy: check if EnsureOakIndexManagerImpl has this property configured -- https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1966
-            if (indexManagerIgnoredProps != null && indexManagerIgnoredProps.length != 0) {
+            if (indexManagerIgnoredProps.length != 0) {
                 this.ignoreProperties = new CopyOnWriteArrayList<String>(indexManagerIgnoredProps);
                 log.warn("The configuration of ignoredProperties on the EnsureOakIndexManagerImpl is deprecated, these properties should be configured on the EnsureOakIndex service instead. "
                         + "For convenience they are respected for now, but please move them over.");
@@ -145,7 +145,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             // properties are configured on this class
             this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoredProps);
             // but we should warn nevertheless if this property is still configured on EnsureOakIndexManagerImpl
-            if (indexManagerIgnoredProps != null && indexManagerIgnoredProps.length != 0) {
+            if (indexManagerIgnoredProps.length != 0) {
                 log.warn("Configuration of the ignoredProperties is present on EnsureOakIndex, but there is also a (legacy) configuration at EnsureOakIndexManagerImpl"
                         + "; please delete it");
             }
@@ -161,7 +161,7 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             EnsureOakIndexManagerImpl impl = (EnsureOakIndexManagerImpl) indexManager;
             return impl.getIgnoredProperties();
         }
-        return null;
+        return new String[] {};
     }
 
     /**
