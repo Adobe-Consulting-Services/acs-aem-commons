@@ -144,6 +144,17 @@ public class EnsureOakIndex implements AppliableEnsureOakIndex {
             } else {
                 this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoredProps);
             }
+        } else {
+            // properties are configured on this class
+            this.ignoreProperties = new CopyOnWriteArrayList<String>(ignoredProps);
+            // but we should warn nevertheless if this property is still configured on EnsureOakIndexManagerImpl
+            if (indexManager instanceof EnsureOakIndexManagerImpl) {
+                EnsureOakIndexManagerImpl impl = (EnsureOakIndexManagerImpl) indexManager;
+                if (impl.getIgnoredProperties().length != 0) {
+                    log.warn("Configuration of the ignoredProperties is present on EnsureOakIndex, but there is also a (legacy) configuration at EnsureOakIndexManagerImpl"
+                            + "; please delete it");
+                }
+            }
         }
         if (this.immediate) {
             apply(false);
