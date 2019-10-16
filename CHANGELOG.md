@@ -5,7 +5,17 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## Unreleased ([details][unreleased changes details])
+
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+### Added
+- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
+
+### Added
+- #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
+
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
@@ -337,8 +347,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
-
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
 
 ## [3.16.0] - 2018-05-10
 
