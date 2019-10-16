@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
+    <filter root="/conf/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
@@ -96,6 +97,7 @@
             mode="merge"/>
         <include pattern="/var/acs-commons/httpcache"/>
         <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
+        <include pattern="/var/acs-commons/mcp"/>
     </filter>
     <filter root="/var/workflow/instances/rep:policy"/>
 </workspaceFilter>
