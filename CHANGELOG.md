@@ -40,6 +40,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
 - #986 - Rewrote Generic Lists to use Touch UI
 
+### Added
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
+
 ## [4.3.0] - 2019-07-31
 
 ### Fixed
