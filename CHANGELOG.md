@@ -10,19 +10,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+## [4.3.4] - 2019-10-16
+
 ### Added
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
-
-### Added
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
-
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
-- #2045 added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
 - #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
+- #2004 - Bugfix/httpcache combined cache key different entries 
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
@@ -35,14 +35,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
 
 ### Fixed
 - #1975 - Split application content from mutable content
 - #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
 - #986 - Rewrote Generic Lists to use Touch UI
-
-### Added
-- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
 
 ## [4.3.0] - 2019-07-31
 
