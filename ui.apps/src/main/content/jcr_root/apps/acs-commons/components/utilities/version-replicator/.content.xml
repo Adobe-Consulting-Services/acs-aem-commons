@@ -3,5 +3,5 @@
     jcr:description="Utility page for replicating previous versions of AEM resources."
     jcr:primaryType="cq:Component"
     jcr:title="ACS AEM Commons - Version Replicator"
-    sling:resourceSuperType="acs-commons/components/utilities/page"
+    sling:resourceSuperType="acs-commons/components/utilities/app-page"
     componentGroup=".hidden"/>
