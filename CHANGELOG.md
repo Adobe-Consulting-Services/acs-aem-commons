@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
 - #2058 - Fixed MCP JS errors in Firefox
 - #2063 - Fixed regression in MCP user interface following split of apps/content packages
+- #2074 - Ignore properties on EnsureOakIndex were sometimes not respected.
 
 ## [4.3.2] - 2019-08-29
 
