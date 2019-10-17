@@ -19,9 +19,6 @@
   --%>
 <div id="#buttons">
     <br clear="all"/>
-
-    <hr/>
-
     <button type="submit"
             role="button"
             ng-click="replicate()"

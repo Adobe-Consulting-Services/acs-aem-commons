@@ -29,45 +29,44 @@
     final Collection<Agent> agents = agentManager.getAgents().values();
     pageContext.setAttribute("agents", agents);
 %>
+<br clear="all"/>
   <%-- Error Message Notification --%>
-  <section class="coral-Well" ng-show="app.running && app.results">
+  <section class="coral-Well" ng-show="app.error">
         <div id="error-message">
-            <h4 acs-coral-heading>An error occurred. Please correct and try again.</h4>
-            <ul><li class="message"></li></ul>
+            <h3 acs-coral-heading>An error occurred. Please correct and try again.</h2>
+            <ul>
+                <li class="message"></li>
+            </ul>
         </div>
   </section>
-
-
   <%-- Result Notifications --%>
-  <section class="coral-Well" ng-show="app.running" ng-model="app.results">
+  <section class="coral-Well" ng-show="app.results">
        <div id="results">
           <div id="replication-agents-info">
-              <h4 acs-coral-heading>Your replication request has been submitted.</h4>
+              <h3 acs-coral-heading>Your replication request has been submitted.</h2>
               <p class="instructions">This request may take some time to complete. Please review the Replication agent logs and
                  configurations the complete replication status does not appear below shortly.</p>
-              <div class="message">
-                    <li ng-repeat="agent in agents">
-
-                        <h3>{{title}}</h3>
-                        <ul>
-                            <li>
-                                <a href="{{logHref}}" target="_blank">Replication Log</a>
-                            </li>
-                            <li>
-                                <a href="{{agentHref}}" target="_blank">Replication Agent Config</a>
-                            </li>
-                        </ul>
-
-                    </li>
+              <div class="message" ng-repeat="agent in agentsInfo">
+                    <h3>{{agent.title}}</h3>
+                    <ul>
+                        <li>
+                            <a x-cq-linkchecker="skip" href="{{agent.logHref}}" target="_blank">Replication Log</a>
+                        </li>
+                        <li>
+                            <a x-cq-linkchecker="skip" href="{{agent.agentHref}}" target="_blank">Replication Agent Config</a>
+                        </li>
+                    </ul>
               </div>
           </div>
           <div id="replication-queue-message">
-              <h4>Version replication initiated with the following items</h4>
+              <h3>Version replication initiated with the following items</h2>
               <ul>
                   <li ng-repeat="result in results">
-                       <li>{{path}} [ <strong>{{status}}</strong>{{[version=""]}}
-                            <%-- Check version null --%>
-                        ]
+                      {{result.path}} [ <strong>{{result.status}}</strong>
+                      <span ng-if="isEmpty(result.version)">
+                            @ version {{result.version}}
+                      </span>
+                      ]
                   </li>
               </ul>
           </div>
