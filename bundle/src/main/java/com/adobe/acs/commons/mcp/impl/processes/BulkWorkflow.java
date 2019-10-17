@@ -26,6 +26,7 @@ import com.adobe.acs.commons.mcp.ProcessInstance;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.form.TextareaComponent;
+import com.adobe.acs.commons.mcp.form.workflow.WorkflowModelSelector;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.adobe.acs.commons.util.QueryHelper;
@@ -85,7 +86,7 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
     @FormField(
             name = "Workflow model",
             description = "The workflow model to execute. This workflow model MUST be compatible with ACS AEM Commons Synthetic Workflow.",
-            component = BulkWorkflowFactory.WorkflowModelSelector.class,
+            component = WorkflowModelSelector.class,
             options = {"required"}
     )
     public String workflowId = "";

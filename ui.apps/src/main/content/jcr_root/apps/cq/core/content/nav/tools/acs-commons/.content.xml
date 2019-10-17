@@ -20,7 +20,6 @@
 
     <manage-controlled-processes/>
     <bulk-workflow-manager/>
-    <workflow-remover/>
 
     <system-notifications/>
 
