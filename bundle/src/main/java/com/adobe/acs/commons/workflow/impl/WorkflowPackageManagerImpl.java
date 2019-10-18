@@ -91,6 +91,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     
     private static final String SERVICE_NAME = "workflowpackagemanager-service";
     private static final Map<String, Object> AUTH_INFO;
+    
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
