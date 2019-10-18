@@ -21,7 +21,7 @@
 %><%@ page contentType="text/html" pageEncoding="utf-8" session="false"%>
 <div ng-controller="MainCtrl"
      ng-init="app.uri = '${resourcePath}.replicateversion.json'; init();">
-     <cq:include script="includes/results.jsp"/>
+     <cq:include script="includes/results.html"/>
      <cq:include script="includes/form.jsp"/>
-     <cq:include script="includes/buttons.jsp"/>
+     <cq:include script="includes/buttons.html"/>
 </div>

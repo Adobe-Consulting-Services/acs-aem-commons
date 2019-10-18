@@ -1,4 +1,4 @@
-<%--
+<!--
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
@@ -16,21 +16,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~ #L%
-  --%>
-<%@include file="/libs/foundation/global.jsp" %><%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
-<%@ page
-         import="com.day.cq.i18n.I18n,
-                 com.day.cq.replication.AgentManager,
-                 java.util.Collection,
-                 com.day.cq.replication.Agent"
-%><%
-
-    final AgentManager agentManager = sling.getService(AgentManager.class);
-    final Collection<Agent> agents = agentManager.getAgents().values();
-    pageContext.setAttribute("agents", agents);
-%>
+  -->
 <br clear="all"/>
-  <%-- Error Message Notification --%>
+  <!-- Error Message Notification -->
   <section class="coral-Well" ng-show="app.error">
         <div id="error-message">
             <h3 acs-coral-heading>An error occurred. Please correct and try again.</h2>
@@ -39,7 +27,7 @@
             </ul>
         </div>
   </section>
-  <%-- Result Notifications --%>
+  <!-- Result Notifications -->
   <section class="coral-Well" ng-show="app.results">
        <div id="results">
           <div id="replication-agents-info">

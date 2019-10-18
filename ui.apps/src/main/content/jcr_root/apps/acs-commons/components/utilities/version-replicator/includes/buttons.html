@@ -1,4 +1,4 @@
-<%--
+<!--
   ~ #%L
   ~ ACS AEM Commons Bundle
   ~ %%
@@ -16,19 +16,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~ #L%
-  --%>
-
-<%-- Running --%>
-<section class="coral-Well" ng-show="app.running">
-
-    <div id="results" class="notification hidden">
-        <div id="replication-agents-info">
-            <h2>Your replication request has been submitted.</h2>
-            <p>This request may take some time to complete. Please review the Replication agent logs and
-                configurations the complete replication status does not appear below shortly.</p>
-            <div class="message"></div>
-        </div>
-        <div id="replication-queue-message"></div>
-    </div>
-
-</section>
+  -->
+<div id="#buttons">
+    <br clear="all"/>
+    <button type="submit"
+            role="button"
+            ng-click="replicate()"
+            ng-hide="app.running"
+            class="coral-Button coral-Button--primary">Replicate Versions</button>
+</div>
