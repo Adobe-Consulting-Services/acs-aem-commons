@@ -290,8 +290,9 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
                 PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
             bucketPath = getBucketPath(resolver);
+            log.debug("using {} as bucket path for wf packages",bucketPath);
         } catch (LoginException e) {
-            log.error("Cannot determine bucket path for workflows",e);
+            log.error("Cannot determine bucket path for WorkflowPackageManager, do not activate this service",e);
             // this service must not get activated
             throw new IllegalStateException(e);
         }
