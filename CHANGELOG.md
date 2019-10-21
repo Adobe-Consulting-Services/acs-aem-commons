@@ -5,25 +5,37 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## [Unreleased]
+## Unreleased ([details][unreleased changes details])
+
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+## [4.3.4] - 2019-10-16
+
+### Added
+- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
+- #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
-- #2045 added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
 - #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
+- #2004 - Bugfix/httpcache combined cache key different entries 
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
 - #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
 - #2058 - Fixed MCP JS errors in Firefox
 - #2063 - Fixed regression in MCP user interface following split of apps/content packages
+- #2074 - Ignore properties on EnsureOakIndex were sometimes not respected.
 
 ## [4.3.2] - 2019-08-29
 
 ### Added
 - #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
 
 ### Fixed
 - #1975 - Split application content from mutable content
@@ -334,8 +346,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
-
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
 
 ## [3.16.0] - 2018-05-10
 
