@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>4.3.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -108,6 +108,7 @@
                                 <severity>minor</severity>
                                 <expectedPaths>
                                     <path>/oak:index/rep:policy</path>
+                                    <path>/conf/rep:policy</path>
                                     <path>/content/rep:policy</path>
                                     <path>/content/dam/rep:policy</path>
                                     <path>/etc/rep:policy</path>

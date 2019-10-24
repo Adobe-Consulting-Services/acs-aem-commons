@@ -20,8 +20,8 @@
 package com.adobe.acs.commons.mcp.impl;
 
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import com.day.cq.commons.jcr.JcrUtil;
 import java.awt.Color;
 import org.apache.commons.lang3.StringUtils;

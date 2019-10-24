@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 @Component(service = ProcessDefinitionFactory.class)
 public class BulkWorkflowFactory extends ProcessDefinitionFactory<BulkWorkflow> {
-    private static final Logger log = LoggerFactory.getLogger(BulkWorkflowFactory.class);
 
     @Reference
     private QueryHelper queryHelper;
@@ -58,38 +57,5 @@ public class BulkWorkflowFactory extends ProcessDefinitionFactory<BulkWorkflow> 
     @Override
     public BulkWorkflow createProcessDefinitionInstance() {
         return new BulkWorkflow(queryHelper, syntheticWorkflowRunner);
-    }
-
-    /**
-     * Selector that lists available Workflow Models in alphabetical order by Title. The selection value is the Workflow Model ID.
-     */
-    public static class WorkflowModelSelector extends SelectComponent {
-        @Override
-        public Map<String, String> getOptions() {
-            Map<String, String> options = new TreeMap<>();
-
-            final ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
-            final WorkflowSession workflowSession = resourceResolver.adaptTo(WorkflowSession.class);
-
-            try {
-                options = Arrays.stream(workflowSession.getModels())
-                        .collect(Collectors.toMap(
-                                WorkflowModel::getId,
-                                WorkflowModel::getTitle))
-                        .entrySet()
-                        .stream()
-                        .sorted(Map.Entry.comparingByValue())
-                        .collect(Collectors.toMap(
-                                e -> e.getKey(),
-                                e -> e.getValue(),
-                                (k, v)-> { throw new IllegalArgumentException("cannot merge"); },
-                                LinkedHashMap::new));
-
-            } catch (WorkflowException e) {
-                log.error("Could not collect workflow models", e);
-            }
-
-            return options;
-        }
     }
 }
