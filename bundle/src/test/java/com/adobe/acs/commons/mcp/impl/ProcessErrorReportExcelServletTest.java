@@ -21,8 +21,10 @@ package com.adobe.acs.commons.mcp.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+
 import java.util.Date;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Before;
