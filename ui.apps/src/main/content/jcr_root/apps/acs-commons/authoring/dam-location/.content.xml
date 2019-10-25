@@ -14,5 +14,5 @@ Wrapper Client Library definition:
           jsProcessor="[default:none,min:gcc]"
           allowProxy="{Boolean}true"
           categories="[dam.gui.coral.metadataeditor]"
-          embed="[acs-commons.dam.custom-component-activator,acs-commons.authoring.dam.location]"/>
+          embed="[acs-commons.authoring.dam.location]"/>
 -->
