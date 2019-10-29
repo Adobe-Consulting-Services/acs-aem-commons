@@ -14,6 +14,6 @@ Wrapper Client Library definition:
     jcr:primaryType="cq:ClientLibraryFolder"
           jsProcessor="[default:none,min:gcc]"
           allowProxy="{Boolean}true"
-          categories="[granite.ui.coral2.foundation]"
+          categories="[granite.ui.coral.foundation]"
           embed="[acs-commons.authoring.composite-multifield]"/>
 -->
