@@ -105,6 +105,7 @@ public class UrlAssetImportTest {
 
         importProcess = new UrlAssetImport(context.getService(MimeTypeService.class), null);
         importProcess.fileData = new Spreadsheet(true, "source", "target", "rendition", "original","dc:title", "dc:attr");
+        importProcess.dryRunMode = false;
 
         doAnswer(invocation -> {
             CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];

@@ -90,9 +90,10 @@ public class ContentFragmentImport extends ProcessDefinition {
 
     @FormField(
             name = "Dry run",
-            component = CheckboxComponent.class
+            component = CheckboxComponent.class,
+            options = "checked"
     )
-    transient boolean dryRunMode;
+    transient boolean dryRunMode = true;
 
     @FormField(
             name = "Detailed Report",
