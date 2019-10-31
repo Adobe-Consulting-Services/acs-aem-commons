@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.mcp.model.impl;
+package com.adobe.acs.commons.mcp.model;
 
 import com.adobe.acs.commons.fam.Failure;
 import java.util.Date;

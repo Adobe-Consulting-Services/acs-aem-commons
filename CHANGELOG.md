@@ -10,11 +10,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Fixed
+- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
+
 ## [4.3.4] - 2019-10-16
 
 ### Added
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
+
+### Added
+- #2071 - Added Tag Export as CSV functionality, as new option in Exports
 
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
@@ -30,7 +36,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2058 - Fixed MCP JS errors in Firefox
 - #2063 - Fixed regression in MCP user interface following split of apps/content packages
 - #2074 - Ignore properties on EnsureOakIndex were sometimes not respected.
-- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
+- #2080 - Fix BND warning in MCP (#1813)
 
 ## [4.3.2] - 2019-08-29
 
