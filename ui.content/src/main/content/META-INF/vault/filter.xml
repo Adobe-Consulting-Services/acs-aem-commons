@@ -34,6 +34,7 @@
         <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
         <include pattern="/etc/acs-commons/exporters"/>
         <include pattern="/etc/acs-commons/exporters/jcr:content"/>
+        <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
         <include pattern="/etc/acs-commons/qr-code"/>
         <include pattern="/etc/acs-commons/qr-code/jcr:content"/>
         <include

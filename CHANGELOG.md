@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
 
+### Added
+- #2071 - Added Tag Export as CSV functionality, as new option in Exports
+
 ### Changed
 - #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
 - #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
