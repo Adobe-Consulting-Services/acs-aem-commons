@@ -77,43 +77,41 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      */
     @Override
     public boolean syncAsset(Resource resource) {
-        ResourceResolver remoteAssetsResolver = null;
-        try {
-            remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
-            Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
-
-            Asset asset = DamUtil.resolveToAsset(localRes);
-            URI pathUri = new URI(null, null, asset.getPath(), null);
-            String baseUrl = this.remoteAssetsConfig.getServer().concat(pathUri.toString()).concat("/_jcr_content/renditions/");
-
-            Iterator<? extends Rendition> renditions = asset.listRenditions();
-            while (renditions.hasNext()) {
-                Rendition assetRendition = renditions.next();
-                if (StringUtils.isEmpty(assetRendition.getMimeType())) {
-                    continue;
-                }
-                String renditionName = assetRendition.getName();
-                String remoteUrl = String.format("%s%s", baseUrl, renditionName);
-                setRenditionOnAsset(remoteUrl, assetRendition, asset, renditionName);
-            }
-
-            ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
-            localResProps.remove(RemoteAssets.IS_REMOTE_ASSET);
-            localResProps.remove(RemoteAssets.REMOTE_SYNC_FAILED);
-            remoteAssetsResolver.commit();
-            return true;
-        } catch (Exception e) {
-            LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
+        ;
+        try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver()){
+            
             try {
-                if (remoteAssetsResolver != null) {
-                    remoteAssetsResolver.revert();
+                Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
+                Asset asset = DamUtil.resolveToAsset(localRes);
+                URI pathUri = new URI(null, null, asset.getPath(), null);
+                String baseUrl = this.remoteAssetsConfig.getServer().concat(pathUri.toString()).concat("/_jcr_content/renditions/");
+    
+                Iterator<? extends Rendition> renditions = asset.listRenditions();
+                while (renditions.hasNext()) {
+                    Rendition assetRendition = renditions.next();
+                    if (StringUtils.isEmpty(assetRendition.getMimeType())) {
+                        continue;
+                    }
+                    String renditionName = assetRendition.getName();
+                    String remoteUrl = String.format("%s%s", baseUrl, renditionName);
+                    setRenditionOnAsset(remoteUrl, assetRendition, asset, renditionName);
                 }
-            } catch (Exception re) {
-                LOG.error("Failed to rollback asset changes", re);
-            }
-            flagAssetAsFailedSync(remoteAssetsResolver, resource);
-        } finally {
-            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
+    
+                ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
+                localResProps.remove(RemoteAssets.IS_REMOTE_ASSET);
+                localResProps.remove(RemoteAssets.REMOTE_SYNC_FAILED);
+                remoteAssetsResolver.commit();
+                return true;
+            } catch (Exception e) {
+                LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
+                try {
+                    remoteAssetsResolver.revert();
+                } catch (Exception re) {
+                    LOG.error("Failed to rollback asset changes", re);
+                }
+                // TODO: concentrate the exception handling here
+                flagAssetAsFailedSync(remoteAssetsResolver, resource);
+            } 
         }
         return false;
     }
@@ -146,6 +144,8 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     /**
      * Sets a property on the resource if the asset sync failed.
      * @param resource Resource
+     * 
+     * TODO: any exception should be thrown and caught by the caller
      */
     private void flagAssetAsFailedSync(ResourceResolver remoteAssetsResolver, Resource resource) {
         try {
@@ -155,11 +155,6 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
             remoteAssetsResolver.commit();
         } catch (Exception e) {
             LOG.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);
-            try {
-                remoteAssetsResolver.revert();
-            } catch (Exception re) {
-                LOG.error("Failed to rollback asset changes", re);
-            }
         }
     }
 }

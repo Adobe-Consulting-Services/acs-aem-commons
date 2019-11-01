@@ -308,6 +308,9 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     /**
      * @see RemoteAssetsConfig#closeResourceResolver(ResourceResolver)
+     * 
+     * TODO: This handling is overly complex. It should just close the resource resolver.
+     * And even better, this method should just get removed, because it's not necessary.
      */
     @Override
     public void closeResourceResolver(ResourceResolver resourceResolver) {
