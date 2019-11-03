@@ -56,7 +56,7 @@ import com.adobe.acs.commons.util.ResourceServiceManager;
 import com.day.cq.replication.Replicator;
 
 /**
- * Listens to changes under /etc/acs-commons/automatic-package-replication and
+ * Listens to changes under /conf/acs-commons/automatic-package-replication and
  * manages the Automatic Package Replicator jobs based on the updates.
  */
 @Component(immediate = true)
@@ -64,13 +64,13 @@ import com.day.cq.replication.Replicator;
 @Service(value = { ResourceChangeListener.class, AutomaticPackageReplicatorMBean.class })
 @Properties({
         @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),
-        @Property(name = ResourceChangeListener.PATHS, value = "glob:/etc/acs-commons/automatic-package-replication/**/jcr:content") })
+        @Property(name = ResourceChangeListener.PATHS, value = "glob:/conf/acs-commons/automatic-package-replication/**/jcr:content") })
 public class ConfigurationUpdateListener extends ResourceServiceManager
         implements ResourceChangeListener, ExternalResourceChangeListener, AutomaticPackageReplicatorMBean {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurationUpdateListener.class);
 
-    private static final String ROOT_PATH = "/etc/acs-commons/automatic-package-replication";
+    private static final String ROOT_PATH = "/conf/acs-commons/automatic-package-replication";
 
     private static final String TRIGGER_KEY = "trigger.name";
 

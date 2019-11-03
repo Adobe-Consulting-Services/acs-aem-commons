@@ -156,7 +156,7 @@
                                     </expectedAce>
                                     <expectedAce>
                                         principal=acs-commons-automatic-package-replicator-service
-                                        ;type=allow;path=/;privileges=jcr:read
+                                        ;type=allow;path=/;privileges=jcr:read,rep:write,crx:replicate
                                     </expectedAce>
                                     <expectedAce>
                                         principal=acs-commons-on-deploy-scripts-service
@@ -171,7 +171,7 @@
                     been created for prior versions -->
                     <forcedRoots>
                         <forcedRoot>
-                            <path>/etc/acs-commons/automatic-package-replication/default</path>
+                            <path>/conf/acs-commons/automatic-package-replication/default</path>
                         </forcedRoot>
                         <forcedRoot>
                             <path>/etc/acs-commons/bulk-workflow-manager/default</path>

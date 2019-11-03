@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/rep:policy"/>
+    <filter root="/conf/acs-commons">
+		<include pattern="/conf/acs-commons/automatic-package-replication"/>
+		<include pattern="/conf/acs-commons/automatic-package-replication/jcr:content"/>
+    </filter>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/jcr:content"/>
-        <include pattern="/etc/acs-commons/automatic-package-replication"/>
-        <include pattern="/etc/acs-commons/automatic-package-replication/jcr:content"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content"/>
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?"/>

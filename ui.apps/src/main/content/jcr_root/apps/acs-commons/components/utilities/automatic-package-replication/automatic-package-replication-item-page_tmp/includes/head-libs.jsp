@@ -1,0 +1,25 @@
+<%--
+  ~ #%L
+  ~ ACS AEM Commons Bundle
+  ~ %%
+  ~ Copyright (C) 2015 Adobe
+  ~ %%
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~ #L%
+  --%><%@include file="/libs/foundation/global.jsp" %><%
+
+%><%@ taglib prefix="wcmmode" uri="http://www.adobe.com/consulting/acs-aem-commons/wcmmode" %><cq:includeClientLib css="acs-commons.app-page"/>
+<cq:includeClientLib css="${clientLib}"/>
+<c:if test="${!wcmmode:isDisabled(pageContext)}">
+	<cq:includeClientLib categories="wcm.foundation.allowedcomponents,cq.pagetypes.html5page,cq.authoring.page,cq.wcm.foundation-main,cq.shared" />
+</c:if>
