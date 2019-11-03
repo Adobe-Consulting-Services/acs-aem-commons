@@ -131,9 +131,10 @@ public class DataImporter extends ProcessDefinition {
     @FormField(
             name = "Dry run",
             description = "If checked, no import happens.  Useful for data validation",
-            component = CheckboxComponent.class
+            component = CheckboxComponent.class,
+            options = "checked"
     )
-    private boolean dryRunMode = false;
+    boolean dryRunMode = true;
 
     @FormField(
             name = "Detailed report",
