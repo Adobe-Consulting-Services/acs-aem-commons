@@ -7,7 +7,10 @@ env:
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-script: mvn verify -B
+script:
+  - mvn verify -B
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=Adobe-Consulting-Services_acs-aem-commons
 before_install:
   - cp .travis.settings.xml $HOME/.m2/settings.xml
 after_success:
@@ -22,3 +25,8 @@ before_cache:
 notifications:
   slack:
     secure: aC4TRo2EiPb0LUA5L1+7JhLzmSFw8Uiqzr3ycDpMc+PMQLM9pOKxZ1OckJZIQBcCnmgcnTMuNXrcuZAY0GIwJ65hu8uRxJGjLROb0KsVCvuJnvBdAjE+MlPIHbegyRA9YLupdRUdpuHAtYmy/Fdub33SHZ9ZXYpiOfYVFfaUpSk=
+addons:
+  sonarcloud:
+    organization: "adobe-consulting-services"
+    token:
+      secure: "i4uL/W3W2Y11hjFn2mhsCUO+tOpua4EN/ag/Zek7GG6AGe+sYUsBak2vyndB2+kO0I69kOZC5TsH98AUfGtF/AnSGwJPnwxXX3zv2kJBKYCKRlJHgRdH/VTfznvyMJVFPzss4WJr5/kJ48pPR+QMGO7E1RDUH23Zi6ZMeUd6yUA="
