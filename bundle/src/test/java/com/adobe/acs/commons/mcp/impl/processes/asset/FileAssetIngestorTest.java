@@ -115,6 +115,7 @@ public class FileAssetIngestorTest {
         ingestor.folderFilter = new NamesFilter("-.ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
         ingestor.fileBasePath = tempDirectory.getAbsolutePath();
+        ingestor.dryRunMode = false;
 
         doAnswer(invocation -> {
             CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];

@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
+- #2085 - Made dry run mode default for all MCP processes that have it
 
 ### Added
 - #2071 - Added Tag Export as CSV functionality, as new option in Exports
