@@ -85,7 +85,7 @@ public class TagsExportService {
 
   private String exportTagsForPath(String path, ResourceResolver rr, String lang, TagExportMode mode) {
     StringBuilder result = new StringBuilder();
-    if (StringUtils.containsAny(path, TAGS_ROOTS)) {
+    if (TagsExportService.containsTagRoot(path)) {
       List<Resource> tags = getAllTags(path, rr);
       int tagsDepth = tagsDepth(tags);
       if (tagsDepth != 0) {
@@ -102,9 +102,15 @@ public class TagsExportService {
       }
       log.info("Tags in number of {} has been exported for root path {}", tags.size(), path);
     } else {
+      result.append(String.format("Path '%s' do not contains tag root. Probably You've made mistake during typing path. Export tags cannot be done.", path));
       log.error("Path {} does not contain tags root path. Export tags cannot be done.", path);
     }
     return result.toString();
+  }
+
+  private static boolean containsTagRoot(String path) {
+    return Arrays.stream(path.split("/"))
+        .anyMatch(segment -> StringUtils.equalsAnyIgnoreCase(segment, TAGS_ROOTS));
   }
 
   private static List<Resource> getAllTags(String path, ResourceResolver rr) {
@@ -121,7 +127,7 @@ public class TagsExportService {
   }
 
   private static String tagLocalizedAsCsv(Resource resource, String[] tagElements, String lang) {
-    if (!StringUtils.equalsAny(resource.getName(), TAGS_ROOTS)) {
+    if (!StringUtils.equalsAnyIgnoreCase(resource.getName(), TAGS_ROOTS)) {
       ValueMap map = resource.getValueMap();
       int arrayIndex = calculateArrayIndex(resource);
       Set<String> keys = getTitleKeys(map);
@@ -144,7 +150,7 @@ public class TagsExportService {
   }
 
   private static String tagNonLocalizedAsCsv(Resource resource, String[] tagElements) {
-    if (!StringUtils.equalsAny(resource.getName(), TAGS_ROOTS)) {
+    if (!StringUtils.equalsAnyIgnoreCase(resource.getName(), TAGS_ROOTS)) {
       String name = extractName(resource);
       String title = extractTitle(resource, JcrConstants.JCR_TITLE, name);
       tagElements[calculateArrayIndex(resource)] = title + " {{" + name + "}}";
