@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
+- #2092 - Tag Export - IndexOutOfBoundsException issue
 - #2004 - Bugfix/httpcache combined cache key different entries 
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
