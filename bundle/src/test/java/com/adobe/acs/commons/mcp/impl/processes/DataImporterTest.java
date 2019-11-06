@@ -104,6 +104,7 @@ public class DataImporterTest {
         importer = spy(new DataImporter());
         doNothing().when(importer).storeReport(any(), any());
         importer.data = importerData;
+        importer.dryRunMode = false;
         process = spy(new ProcessInstanceImpl(cpm, importer, "test"));
         doNothing().when(process).persistStatus(any());
     }
