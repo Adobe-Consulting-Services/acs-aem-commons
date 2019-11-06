@@ -4,6 +4,6 @@
     jcr:title="Automatic Package Replication"
     jcr:description="Tooling to automatically replicate AEM packages."
     icon="archive"
-    href="/apps/acs-commons/content/automatic-package-replication.html"
+    href="/miscadmin#/etc/acs-commons/automatic-package-replication"
     id="acs-commons__automatic-package-replication"
     target="_blank"/>
