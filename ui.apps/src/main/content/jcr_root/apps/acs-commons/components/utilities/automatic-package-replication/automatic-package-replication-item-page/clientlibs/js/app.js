@@ -18,22 +18,23 @@
  * #L%
  */
 /*global angular: false */
-angular.module('acs-commons-automatic-package-replication-app', ['acsCoral', 'ACS.Commons.notifications'])
+angular.module('acs-commons-automatic-package-replication-item-page-app', ['acsCoral', 'ACS.Commons.notifications'])
     .controller('MainCtrl', ['$scope', '$http', '$timeout', 'NotificationsService',
     function ($scope, $http, $timeout, NotificationsService) {
 
         $scope.save = function () {
-        	
 			NotificationsService.running(true);
-            
-
             var $form = $('#fn-acsCommons-APR-form');
-
             $.post($form.attr('action'), $form.serialize(), function() {
                location.reload(true);
             });
         };
 
+        
+        $scope.back = function () {
+            window.location.href = '/apps/acs-commons/content/automatic-package-replication.html';
+        };
+        
         $scope.init = function () {
         	$('#trigger-select').change(function(){
             	$('#event-container').hide();

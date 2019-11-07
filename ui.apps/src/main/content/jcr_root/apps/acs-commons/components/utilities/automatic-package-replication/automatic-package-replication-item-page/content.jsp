@@ -13,6 +13,13 @@
 			<input type="text" class="coral-Textfield" name="./jcr:title" value="${properties['jcr:title']}"  required="required"/>
 		</div>
 		
+        <div class="coral-Form-fieldwrapper">
+			<label class="coral-Form-fieldlabel">
+				Description
+			</label>
+			<input type="text" class="coral-Textfield" name="./jcr:description" value="${properties['jcr:description']}"/>
+		</div>
+        
 		<div class="coral-Form-fieldwrapper">
 			<label class="coral-Form-fieldlabel">
 				Package Path *
@@ -67,8 +74,11 @@
 		
 		
 		<div class="coral-Form-fieldwrapper" >
-			<button class="coral-Button coral-Button--primary" >Save</button>
+			<button class="coral-Button coral-Button--primary">Save</button>
 		</div>
 		
 	</form>
+    <div class="coral-Form-fieldwrapper" >
+        <button ng-click="back()" class="coral-Button coral-Button--primary">Back</button>
+    </div>
 </div>
