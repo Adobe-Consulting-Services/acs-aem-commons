@@ -74,6 +74,8 @@
                             *
                         </Import-Package>
                         <Sling-Model-Packages>
+                            com.adobe.acs.commons.cloudconfig,
+                            com.adobe.acs.commons.marketo,
                             com.adobe.acs.commons.redirectmaps.models,
                             com.adobe.acs.commons.version.model,
                             com.adobe.acs.commons.wcm.comparisons.model,
