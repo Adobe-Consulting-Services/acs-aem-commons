@@ -129,6 +129,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         super(OnDeployExecutorMBean.class);
     }
 
+    //TODO: Is this really necessary?? This is default behavior, no need to specify explicitly here
     protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
         this.resourceResolverFactory = resourceResolverFactory;
     }

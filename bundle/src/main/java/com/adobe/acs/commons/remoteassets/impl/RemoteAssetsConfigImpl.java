@@ -19,36 +19,9 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.hc.impl.HealthCheckStatusEmailer;
-import com.adobe.acs.commons.mcp.util.StringUtil;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.client.fluent.Executor;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.AttributeType;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +29,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.jcr.Session;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.client.fluent.Executor;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 
 /**
  * Configuration service for Remote Asset feature.
@@ -308,6 +301,9 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     /**
      * @see RemoteAssetsConfig#closeResourceResolver(ResourceResolver)
+     * 
+     * TODO: This handling is overly complex. It should just close the resource resolver.
+     * And even better, this method should just get removed, because it's not necessary.
      */
     @Override
     public void closeResourceResolver(ResourceResolver resourceResolver) {

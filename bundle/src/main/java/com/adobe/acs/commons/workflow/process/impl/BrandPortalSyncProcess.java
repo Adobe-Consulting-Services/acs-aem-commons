@@ -70,9 +70,6 @@ public class BrandPortalSyncProcess implements WorkflowProcess {
     private WorkflowPackageManager workflowPackageManager;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private DAMSyncService damSyncService;
 
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {

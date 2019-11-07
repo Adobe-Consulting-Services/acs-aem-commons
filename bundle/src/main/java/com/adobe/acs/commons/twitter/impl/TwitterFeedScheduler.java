@@ -64,24 +64,15 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
     @Override
     public void runOnMaster() {
 
-        ResourceResolver resourceResolver = null;
-
-        try {
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO) ){
             log.debug("Master Instance, Running ACS AEM Commons Twitter Feed Scheduler");
-
-            resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
 
             twitterFeedService.updateTwitterFeedComponents(resourceResolver);
 
         } catch (Exception e) {
             log.error(
                     "Exception while running TwitterFeedScheduler.", e);
-        } finally {
-            if (resourceResolver != null) {
-                resourceResolver.close();
-                resourceResolver = null;
-            }
-        }
+        } 
 
     }
 
