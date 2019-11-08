@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 - #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
 
+### Changed
+- #2101 - Cleanup public API of the remote Assets feature (#2094)
+
 ## [4.3.4] - 2019-10-16
 
 ### Added
