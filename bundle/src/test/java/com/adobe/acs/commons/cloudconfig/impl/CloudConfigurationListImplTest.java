@@ -40,7 +40,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 public class CloudConfigurationListImplTest {
 
   @Rule
-  public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);;
+  public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
   @Before
   public void init() {
@@ -72,7 +72,7 @@ public class CloudConfigurationListImplTest {
     assertNotNull(config);
     assertEquals("/conf/test", config.getItemPath());
     assertEquals("/", config.getConfigPath());
-  };
+  }
 
   @Test
   public void invalid() {

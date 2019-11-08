@@ -36,9 +36,11 @@ public class MarketoForm {
   public int getId() {
     return id;
   }
+  
   public String getLocale() {
     return locale;
   }
+  
   public String getName() {
     return name;
   }
