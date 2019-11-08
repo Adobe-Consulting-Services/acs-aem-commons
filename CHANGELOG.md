@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+- #2101 - Cleanup public API of the remote Assets feature (#2094)
+
 ## [4.3.4] - 2019-10-16
 
 ### Added
