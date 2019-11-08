@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.granite.asset.api.RenditionHandler;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -68,7 +67,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
 
     @Reference
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
 
     /**
      * @see RemoteAssetsBinarySync#syncAsset(Resource)

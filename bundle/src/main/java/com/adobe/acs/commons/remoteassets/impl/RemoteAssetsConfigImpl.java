@@ -48,17 +48,15 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-
 /**
  * Configuration service for Remote Asset feature.
  */
 @Component(
         configurationPolicy = ConfigurationPolicy.REQUIRE,
-        service = RemoteAssetsConfig.class
+        service = RemoteAssetsConfigImpl.class
 )
 @Designate(ocd=RemoteAssetsConfigImpl.Config.class)
-public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
+public class RemoteAssetsConfigImpl {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsConfigImpl.class);
 
     @ObjectClassDefinition(name = "ACS AEM Commons - Remote Assets - Config")
@@ -156,7 +154,6 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
 
     /**
      * Method to run on activation.
-     * @param componentContext ComponentContext
      */
     @Activate
     protected final void activate(RemoteAssetsConfigImpl.Config config) {
@@ -190,99 +187,77 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
     }
 
     /**
-     * @see RemoteAssetsConfig#getServer()
      * @return String
      */
-    @Override
     public String getServer() {
         return this.server;
     }
 
     /**
-     * @see RemoteAssetsConfig#getUsername()
      * @return String
      */
-    @Override
     public String getUsername() {
         return this.username;
     }
 
     /**
-     * @see RemoteAssetsConfig#getPassword()
      * @return String
      */
-    @Override
     public String getPassword() {
         return this.password;
     }
 
     /**
-     * @see RemoteAssetsConfig#getTagSyncPaths()
      * @return List<String>
      */
-    @Override
     public List<String> getTagSyncPaths() {
         return this.tagSyncPaths;
     }
 
     /**
-     * @see RemoteAssetsConfig#getDamSyncPaths()
      * @return List<String>
      */
-    @Override
     public List<String> getDamSyncPaths() {
         return this.damSyncPaths;
     }
 
     /**
-     * @see RemoteAssetsConfig#getRetryDelay()
      * @return Integer
      */
-    @Override
     public Integer getRetryDelay() {
         return this.retryDelay;
     }
 
     /**
-     * @see RemoteAssetsConfig#getSaveInterval()
      * @return Integer
      */
-    @Override
     public Integer getSaveInterval() {
         return this.saveInterval;
     }
 
     /**
-     * @see RemoteAssetsConfig#getEventUserData()
      * @return String
      */
-    @Override
     public String getEventUserData() {
         return this.eventUserData;
     }
 
     /**
-     * @see RemoteAssetsConfig#getWhitelistedServiceUsers()
      * @return String
      */
-    @Override
     public Set<String> getWhitelistedServiceUsers() {
         return this.whitelistedServiceUsers;
     }
 
     /**
-     * @see RemoteAssetsConfig#getRemoteAssetsHttpExecutor()
      * @return Executor
      */
-    @Override
     public Executor getRemoteAssetsHttpExecutor() {
         return remoteAssetsHttpExecutor;
     }
 
     /**
-     * @see RemoteAssetsConfig#getResourceResolver()
      */
-    @Override
     public ResourceResolver getResourceResolver() {
         try {
             Map<String, Object> userParams = new HashMap<>();
@@ -296,31 +271,6 @@ public class RemoteAssetsConfigImpl implements RemoteAssetsConfig {
         } catch (Exception e) {
             LOG.error("Remote assets functionality cannot be enabled - service user login failed");
             throw new RemoteAssetsServiceException(e);
-        }
-    }
-
-    /**
-     * @see RemoteAssetsConfig#closeResourceResolver(ResourceResolver)
-     * 
-     * TODO: This handling is overly complex. It should just close the resource resolver.
-     * And even better, this method should just get removed, because it's not necessary.
-     */
-    @Override
-    public void closeResourceResolver(ResourceResolver resourceResolver) {
-        if (resourceResolver != null) {
-            try {
-                Session session = resourceResolver.adaptTo(Session.class);
-                if (session != null) {
-                    session.logout();
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed session.logout()", e);
-            }
-            try {
-                resourceResolver.close();
-            } catch (Exception e) {
-                LOG.warn("Failed resourceResolver.close()", e);
-            }
         }
     }
 

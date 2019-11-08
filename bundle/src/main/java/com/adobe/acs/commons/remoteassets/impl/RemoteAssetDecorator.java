@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
@@ -71,7 +70,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private RemoteAssetsBinarySync assetSync;
 
     @Reference
-    private RemoteAssetsConfig config;
+    private RemoteAssetsConfigImpl config;
 
     /**
      * When resolving a remote asset, first sync the asset from the remote server.

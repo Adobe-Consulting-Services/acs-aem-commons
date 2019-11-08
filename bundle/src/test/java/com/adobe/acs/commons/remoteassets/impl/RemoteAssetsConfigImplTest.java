@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -124,7 +123,7 @@ public class RemoteAssetsConfigImplTest {
     public void testGetResourceResolver() {
         Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
 
-        RemoteAssetsConfig config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
+        RemoteAssetsConfigImpl config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
 
         ResourceResolver resourceResolver = config.getResourceResolver();
         assertNotNull(resourceResolver);
@@ -135,7 +134,7 @@ public class RemoteAssetsConfigImplTest {
     public void testValidConfigs() {
         Map<String, Object> remoteAssetsConfigs = getRemoteAssetsConfigs();
 
-        RemoteAssetsConfig config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
+        RemoteAssetsConfigImpl config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
 
         assertEquals(TEST_SERVER_URL, config.getServer());
         assertEquals(TEST_SERVER_USERNAME, config.getUsername());
@@ -155,7 +154,7 @@ public class RemoteAssetsConfigImplTest {
         remoteAssetsConfigs.put("server.url", TEST_SERVER_URL.replace("https://", "http://"));
         remoteAssetsConfigs.put("server.insecure", true);
 
-        RemoteAssetsConfig config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
+        RemoteAssetsConfigImpl config = context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
 
         LogTester.assertLogText("Remote Assets connection is not HTTPS - authentication username and password will be"
                 + " communicated in CLEAR TEXT.  This configuration is NOT recommended, as it may allow"
