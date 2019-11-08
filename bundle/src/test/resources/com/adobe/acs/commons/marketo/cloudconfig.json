@@ -3,7 +3,7 @@
   "jcr:content": {
     "jcr:primaryType": "cq:PageContent",
     "jcr:title": "Test Cloud Config",
-    "cq:template": "/apps/core/wcm/templates/marketocloudconfig",
+    "cq:template": "/apps/acs-commons/templates/utilities/marketocloudconfig",
     "sling:resourceType": "page",
     "endpointHost": "test.mktorest.com",
     "serverInstance": "//test.marketo.com",

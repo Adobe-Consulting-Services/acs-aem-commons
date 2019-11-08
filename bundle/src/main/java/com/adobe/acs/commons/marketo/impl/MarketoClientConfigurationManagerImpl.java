@@ -61,4 +61,8 @@ public class MarketoClientConfigurationManagerImpl implements MarketoClientConfi
     }).findFirst().map(c -> c.getChild(JcrConstants.JCR_CONTENT)).map(c -> c.adaptTo(MarketoClientConfiguration.class))
         .orElse(null);
   }
+
+  public void setConfigRsrcRslvr(ConfigurationResourceResolver configRsrcRslvr) {
+    this.configRsrcRslvr = configRsrcRslvr;
+  }
 }

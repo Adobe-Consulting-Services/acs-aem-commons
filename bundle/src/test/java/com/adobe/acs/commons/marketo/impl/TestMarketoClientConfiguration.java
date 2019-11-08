@@ -41,6 +41,7 @@ public class TestMarketoClientConfiguration {
 
   @Rule
   public final AemContext context = new AemContext();
+  private ConfigurationResourceResolver configrr;
 
   @Before
   public void init() {
@@ -48,7 +49,7 @@ public class TestMarketoClientConfiguration {
     context.load().json("/com/adobe/acs/commons/marketo/pages.json", "/content/page");
     context.load().json("/com/adobe/acs/commons/marketo/cloudconfig.json", "/conf/test");
 
-    ConfigurationResourceResolver configrr = Mockito.mock(ConfigurationResourceResolver.class);
+    configrr = Mockito.mock(ConfigurationResourceResolver.class);
     Mockito.when(configrr.getResourceCollection(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(Collections.singletonList(context.resourceResolver().getResource("/conf/test")));
     context.registerService(ConfigurationResourceResolver.class, configrr);
@@ -58,7 +59,8 @@ public class TestMarketoClientConfiguration {
   @Test
   public void testConfigMgr() {
     context.request().setResource(context.resourceResolver().getResource("/content/page"));
-    MarketoClientConfigurationManager mccm = context.request().adaptTo(MarketoClientConfigurationManager.class);
+    MarketoClientConfigurationManagerImpl mccm = new MarketoClientConfigurationManagerImpl(context.request());
+    mccm.setConfigRsrcRslvr(configrr);
 
     assertNotNull(mccm);
     assertNotNull(mccm.getConfiguration());
