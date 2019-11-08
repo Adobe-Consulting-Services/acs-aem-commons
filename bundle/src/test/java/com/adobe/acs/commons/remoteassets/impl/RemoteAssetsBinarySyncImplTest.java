@@ -260,9 +260,9 @@ public class RemoteAssetsBinarySyncImplTest {
 
         Resource resource = context.resourceResolver().getResource(TEST_ASSET_CONTENT_PATH);
         assertFalse(remoteAssetsBinarySync.syncAsset(resource));
+        
+        LogTester.assertLogText("Failed to mark sync of "+TEST_ASSET_CONTENT_PATH + " as failed");
 
-        LogTester.assertLogText("Error flagging remote asset '" + TEST_ASSET_CONTENT_PATH
-                + "' as failed - asset may attempt to sync numerous times in succession");
     }
 }
 
