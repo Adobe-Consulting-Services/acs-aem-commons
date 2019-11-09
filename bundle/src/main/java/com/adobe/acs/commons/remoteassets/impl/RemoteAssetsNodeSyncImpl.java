@@ -106,8 +106,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     @Override
     public void syncAssetNodes() {
-        ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
-        try {
+        
+        try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();) {
             List<String> syncPaths = new ArrayList<>();
             syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
             syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
@@ -123,9 +123,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
         } catch (Exception e) {
             LOG.error("Unexpected error sync'ing remote asset nodes", e);
-        } finally {
-            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
-        }
+        } 
     }
 
     /**
