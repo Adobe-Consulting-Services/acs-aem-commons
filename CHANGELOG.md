@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
+- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 
 ## [4.3.4] - 2019-10-16
 

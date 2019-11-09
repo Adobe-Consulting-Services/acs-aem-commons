@@ -83,6 +83,7 @@
     </filter>
     <filter root="/etc/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
+    <filter root="/etc/workflow/packages/rep:policy"/>
     <filter root="/home/groups/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
@@ -101,4 +102,5 @@
         <include pattern="/var/acs-commons/mcp"/>
     </filter>
     <filter root="/var/workflow/instances/rep:policy"/>
+    <filter root="/var/workflow/packages/rep:policy"/>
 </workspaceFilter>
