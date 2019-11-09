@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="e7ba4bca-1a46-3e8f-ab05-dab75889c48a"
+    rep:authorizableId="acs-commons-workflowpackagemanager-service"
+    rep:principalName=" acs-commons-workflowpackagemanager-service"
+    />
