@@ -37,8 +37,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,6 +88,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
+    
+    private static final String SERVICE_NAME = "workflowpackagemanager-service";
+    private static final Map<String, Object> AUTH_INFO;
+    
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Property(label = "Workflow Package Types",
             description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
@@ -94,6 +104,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
+    
+    @Reference
+    ResourceResolverFactory resourceResolverFactory;
+    
+    private String bucketPath;
 
     /**
      * {@inheritDoc}
@@ -113,7 +128,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        String bucketPath = getBucketPath(resourceResolver);
+        
 
         if (StringUtils.isNotBlank(bucketSegment)) {
             bucketPath += "/" + bucketSegment;
@@ -274,5 +289,14 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     protected final void activate(final Map<String, String> config) {
         workflowPackageTypes =
                 PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+            bucketPath = getBucketPath(resolver);
+            log.debug("using {} as bucket path for wf packages",bucketPath);
+        } catch (LoginException e) {
+            log.error("Cannot determine bucket path for WorkflowPackageManager, do not activate this service",e);
+            // this service must not get activated
+            throw new IllegalStateException(e);
+        }
+        
     }
 }
