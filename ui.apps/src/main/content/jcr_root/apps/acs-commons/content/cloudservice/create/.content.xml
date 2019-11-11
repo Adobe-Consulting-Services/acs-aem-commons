@@ -25,7 +25,7 @@
                     granite:id="acs-commons-cloudservice-create"
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/form"
-                    action="/bin/acscommons/createcloudconfig"
+                    action="/apps/acs-commons/content/cloudservice/console/jcr:content/content/items/cloudconfiglist"
                     foundationForm="{Boolean}true"
                     maximized="{Boolean}true"
                     method="post"

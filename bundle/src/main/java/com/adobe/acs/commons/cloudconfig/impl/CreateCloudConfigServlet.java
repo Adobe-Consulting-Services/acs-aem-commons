@@ -45,7 +45,7 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.WCMException;
 
 @Component(service = Servlet.class, property = { "sling.servlet.methods=" + HttpConstants.METHOD_POST,
-    "sling.servlet.paths=/bin/acscommons/createcloudconfig" })
+    "sling.servlet.resourceTypes=acs-commons/components/utilities/cloudconfig/cloudconfiglist" })
 public class CreateCloudConfigServlet extends SlingAllMethodsServlet {
 
   private static final long serialVersionUID = -397622433323474345L;

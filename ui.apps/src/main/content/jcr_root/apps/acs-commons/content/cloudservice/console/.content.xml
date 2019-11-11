@@ -29,7 +29,7 @@
             jcr:primaryType="nt:unstructured"
             sling:resourceType="granite/ui/components/coral/foundation/container">
             <items jcr:primaryType="nt:unstructured">
-                <sitecollection
+                <cloudconfiglist
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="acs-commons/components/utilities/cloudconfig/cloudconfiglist"/>
             </items>
