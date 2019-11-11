@@ -228,7 +228,7 @@ public class OnDeployScriptBaseTest {
         when(result.getNodes()).thenReturn(Arrays.asList(node1, node2).iterator());
         when(query.getResult()).thenReturn(result);
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {
-            PredicateGroup pg = invocation.getArgumentAt(0, PredicateGroup.class);
+            PredicateGroup pg = invocation.getArgument(0);
             assertEquals("-1", pg.getParameters().get("limit"));
             assertEquals("path", pg.get(0).getType());
             assertEquals("/content", pg.get(0).getParameters().get("path"));

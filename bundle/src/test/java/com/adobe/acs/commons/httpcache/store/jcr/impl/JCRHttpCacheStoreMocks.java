@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.httpcache.store.jcr.impl;
 
+
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -54,18 +57,20 @@ public final class JCRHttpCacheStoreMocks {
 
     private final CacheKey cacheKey = generateCacheKey();
     private final CacheContent cacheContent = mock(CacheContent.class);
-
+    
     private static final Logger log = mock(Logger.class);
     private final EntryNodeWriter entryNodeWriter = mock(EntryNodeWriter.class);
     private final BucketNodeHandler bucketNodeHandler = mock(BucketNodeHandler.class);
     private final BucketNodeFactory factory = mock(BucketNodeFactory.class);
 
     public JCRHttpCacheStoreMocks() throws Exception {
+
+        mockBucketNodeHandler();
         mockLogger();
         mockRepository();
         mockStore();
         mockBucketNodeFactory();
-        mockBucketNodeHandler();
+
         mockEntryNodeWriter();
     }
 
@@ -86,8 +91,6 @@ public final class JCRHttpCacheStoreMocks {
     private void mockRepository() throws Exception {
         when(resourceResolverFactory.getServiceResourceResolver(any(Map.class))).thenReturn(resourceResolver);
         when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        when(session.getNode(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(rootNode);
-        when(session.nodeExists(JCRHttpCacheStoreImpl.DEFAULT_ROOTPATH)).thenReturn(true);
     }
 
     private void mockStore() throws Exception {
@@ -106,13 +109,14 @@ public final class JCRHttpCacheStoreMocks {
     }
 
     private void mockBucketNodeHandler() {
+//    	when(store.createBucketNodeHandler(any(Node.class))).thenReturn(bucketNodeHandler);
         doReturn(bucketNodeHandler).when(store)
-                .createBucketNodeHandler(any(Node.class));
+                .createBucketNodeHandler(any());
     }
 
     private void mockEntryNodeWriter() {
         doReturn(entryNodeWriter).when(store)
-            .createEntryNodeWriter(any(Session.class), any(Node.class), any(CacheKey.class), any(CacheContent.class), any(long.class));
+            .createEntryNodeWriter(any(), any(), any(), any(), anyLong());
     }
 
     public JCRHttpCacheStoreImpl getStore() {

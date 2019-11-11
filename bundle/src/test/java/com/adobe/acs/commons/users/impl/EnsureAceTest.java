@@ -112,7 +112,6 @@ public class EnsureAceTest {
         assertNotNull("new allow node should exist", newAce);
 
         Hit mockHit = mock(Hit.class);
-        when(mockHit.getResource()).thenReturn(newAce);
         when(mockHit.getPath()).thenThrow(new RepositoryException("no more storage on cloud!"));
 
         final List<Hit> hits = Collections.singletonList(mockHit);
@@ -136,9 +135,7 @@ public class EnsureAceTest {
         List<Hit> nextHits = new ArrayList<>();
         while (nextAces.hasNext()) {
             Hit nextHit = mock(Hit.class);
-            Resource nextAce = nextAces.next();
-            when(nextHit.getResource()).thenReturn(nextAce);
-            when(nextHit.getPath()).thenReturn(nextAce.getPath());
+            Resource nextAce = nextAces.next();;
         }
 
         when(result.getHits()).thenReturn(nextHits);

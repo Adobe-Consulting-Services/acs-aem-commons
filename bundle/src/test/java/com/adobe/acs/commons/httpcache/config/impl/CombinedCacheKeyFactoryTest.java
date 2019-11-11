@@ -84,25 +84,17 @@ public class CombinedCacheKeyFactoryTest {
     @Before
     public void init() throws HttpCacheKeyCreationException {
 
-        when(key1.getUri()).thenReturn(URI);
-        when(key2.getUri()).thenReturn(URI);
-        when(key3.getUri()).thenReturn(URI);
-        when(key4.getUri()).thenReturn(URI);
-
-
         when(factory1.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key1);
         when(factory2.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key2);
         when(factory3.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key3);
         when(factory4.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key4);
 
-        when(factory1.build(request, config)).thenReturn(key1);
-        when(factory2.build(request, config)).thenReturn(key2);
         when(factory3.build(request, config)).thenReturn(key3);
         when(factory4.build(request, config)).thenReturn(key4);
 
         when(request.getResource()).thenReturn(resource);
         when(request.getRequestURI()).thenReturn(URI);
-        //when(request.getRe)
+
         when(resource.getPath()).thenReturn(RESOURCE_PATH);
         underTest.activate(ocd);
         cacheKeyFactoryList.clear();

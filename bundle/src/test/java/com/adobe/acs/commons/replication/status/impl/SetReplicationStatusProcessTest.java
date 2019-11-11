@@ -36,12 +36,14 @@ import java.util.Locale;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.adobe.acs.commons.replication.status.ReplicationStatusManager;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -52,8 +54,11 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 import junitx.util.PrivateAccessor;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class SetReplicationStatusProcessTest {
+	
+	@Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     WorkflowHelper workflowHelper;
@@ -137,7 +142,7 @@ public class SetReplicationStatusProcessTest {
         verify(replicationStatusManager).setReplicationStatus(any(), eq("migration"), argThat(calMatch), any(), anyString());
     }
 
-    private static class CalendarMatcher extends ArgumentMatcher<Calendar> {
+    private static class CalendarMatcher implements ArgumentMatcher<Calendar> {
 
         private Calendar leftCal;
 
@@ -152,19 +157,15 @@ public class SetReplicationStatusProcessTest {
             this.leftCal = cal;
         }
 
-        @Override
-        public boolean matches(Object argument) {
-            if (argument instanceof Calendar) {
-                Calendar rightCal = (Calendar)argument;
-                return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR)
-                        && leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH)
-                        && leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE)
-                        && leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR)
-                        && leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
-            } else {
-                return false;
-            }
-        }
+		@Override
+		public boolean matches(Calendar argument) {
+			Calendar rightCal = (Calendar)argument;
+            return (leftCal.get(Calendar.YEAR) == rightCal.get(Calendar.YEAR)
+                    && leftCal.get(Calendar.MONTH) == rightCal.get(Calendar.MONTH)
+                    && leftCal.get(Calendar.DATE) == rightCal.get(Calendar.DATE)
+                    && leftCal.get(Calendar.HOUR) == rightCal.get(Calendar.HOUR)
+                    && leftCal.get(Calendar.MINUTE) == rightCal.get(Calendar.MINUTE));
+		}
 
     }
 

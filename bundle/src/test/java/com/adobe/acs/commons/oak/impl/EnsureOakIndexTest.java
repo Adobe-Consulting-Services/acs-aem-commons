@@ -32,15 +32,18 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class EnsureOakIndexTest {
+	
+	@Rule
+    public MockitoRule rule = MockitoJUnit.rule();
     
     @Rule
     public SlingContext context = new SlingContext();

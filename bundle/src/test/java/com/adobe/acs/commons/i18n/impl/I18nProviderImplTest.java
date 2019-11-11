@@ -100,8 +100,6 @@ public final class I18nProviderImplTest {
         i18nMap.put(I18N_KEY, TRANSLATED_FROM_ENGLISH);
 
         final Answer<String> answer = (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1]);
-        doAnswer(answer).when(i18nProvider).translate(anyString(), any(HttpServletRequest.class));
-        doAnswer(answer).when(i18nProvider).translate(anyString(), any(Locale.class));
 
         doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 

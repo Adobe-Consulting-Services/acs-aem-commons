@@ -128,11 +128,11 @@ public class ContentFragmentImportTest {
         Node node = mock(Node.class);
         when(ses.nodeExists("/test")).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
         when(ses.getNode(any())).then(invocation -> {
-            currentNodePath = invocation.getArgumentAt(0, String.class);
+            currentNodePath = invocation.getArgument(0);
             return node;
         });
         when(node.addNode(any(), any())).then(invocation -> {
-            String nodeName = invocation.getArgumentAt(0, String.class);
+            String nodeName = invocation.getArgument(0);
             String nodePath = currentNodePath + "/" + nodeName;
             createdNodePaths.add(nodePath);
             currentNodePath = nodePath;

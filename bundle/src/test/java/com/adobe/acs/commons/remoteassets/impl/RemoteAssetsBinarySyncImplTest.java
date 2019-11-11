@@ -80,7 +80,7 @@ public class RemoteAssetsBinarySyncImplTest {
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
 
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
     private RemoteAssetsBinarySync remoteAssetsBinarySync;
     private Map<String, Integer> renditionResponseStatusMap;
 
