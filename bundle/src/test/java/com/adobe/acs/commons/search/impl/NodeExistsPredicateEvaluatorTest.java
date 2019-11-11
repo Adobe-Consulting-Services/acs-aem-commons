@@ -110,8 +110,6 @@ public class NodeExistsPredicateEvaluatorTest {
 
     @Test
     public void includes_AndEmpty() throws Exception {
-        when(predicate.getBool(NodeExistsPredicateEvaluator.OR)).thenReturn(false);
-
         assertFalse(predicateEvaluator.canFilter(predicate, evaluationContext));
     }
 
@@ -142,8 +140,6 @@ public class NodeExistsPredicateEvaluatorTest {
 
     @Test
     public void includes_OrEmpty() throws Exception {
-        when(predicate.getBool(NodeExistsPredicateEvaluator.OR)).thenReturn(true);
-
         assertFalse(predicateEvaluator.canFilter(predicate, evaluationContext));
     }
 }

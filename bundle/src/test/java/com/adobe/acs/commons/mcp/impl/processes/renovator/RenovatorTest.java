@@ -260,7 +260,7 @@ public class RenovatorTest {
     private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
         doNothing().when(instance).persistStatus(anyObject());
-        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
+//        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());

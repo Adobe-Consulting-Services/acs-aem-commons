@@ -162,7 +162,6 @@ public final class EntryNodeWriterMocks
         when(cacheContent.getInputDataStream()).thenReturn(arguments.cacheContent);
         when(cacheContent.getStatus()).thenReturn(arguments.status);
         when(cacheContent.getHeaders()).thenReturn(arguments.cacheContentHeaders);
-        when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
         when(cacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
     }
 }

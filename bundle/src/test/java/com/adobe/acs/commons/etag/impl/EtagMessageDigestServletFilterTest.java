@@ -53,7 +53,6 @@ public class EtagMessageDigestServletFilterTest {
 
     @Before
     public void setUp() {
-        Mockito.when(configuration.enabled()).thenReturn(true);
         Mockito.when(configuration.messageDigestAlgorithm()).thenReturn("MD5");
         Mockito.when(configuration.ignoredResponseHeaders()).thenReturn(new String[] { "ignoredHeader" });
         filter = new EtagMessageDigestServletFilter();

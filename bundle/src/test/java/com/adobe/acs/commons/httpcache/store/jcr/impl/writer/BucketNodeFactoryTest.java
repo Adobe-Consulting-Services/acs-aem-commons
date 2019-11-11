@@ -46,12 +46,6 @@ public class BucketNodeFactoryTest
     @Mock Session session;
     @Mock Node cacheRootNode;
 
-    @Before
-    public void setup() throws Exception{
-        when(session.isLive()).thenReturn(true);
-        when(cacheRootNode.getPath()).thenReturn(MockSettings.VALID_ROOT_PATH);
-    }
-
     @Test(expected = BucketNodeFactoryException.class)
     public void testInvalidPath() throws BucketNodeFactoryException, RepositoryException
     {

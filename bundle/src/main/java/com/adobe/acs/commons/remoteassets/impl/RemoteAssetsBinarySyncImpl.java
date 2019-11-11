@@ -19,50 +19,40 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.granite.asset.api.RenditionHandler;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.api.Rendition;
-import com.day.cq.dam.commons.util.DamUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.client.fluent.Request;
-import org.apache.jackrabbit.value.DateValue;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.api.Rendition;
+import com.day.cq.dam.commons.util.DamUtil;
 
 /**
  * Service to sync a remote asset's binaries a from remote server.
  *
  * Pulls the binaries for a remote asset in order to make it a true local asset.
  */
-@Component(
-        service = RemoteAssetsBinarySync.class
-)
+@Component(service=RemoteAssetsBinarySync.class)
 public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
@@ -77,7 +67,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      */
     @Override
     public boolean syncAsset(Resource resource) {
-        ;
+        
         try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver()){
             
             try {

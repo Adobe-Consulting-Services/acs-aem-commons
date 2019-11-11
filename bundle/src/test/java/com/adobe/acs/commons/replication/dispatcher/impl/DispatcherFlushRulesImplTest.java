@@ -259,7 +259,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target"));
@@ -268,7 +268,7 @@ public class DispatcherFlushRulesImplTest {
         // Private impl class; no access to test for instanceof
         assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target2"));
@@ -296,7 +296,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target"));
@@ -326,7 +326,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/hierarchical"));
@@ -335,7 +335,7 @@ public class DispatcherFlushRulesImplTest {
         // Private impl class; no access to test for instanceof
         assertEquals("DispatcherFlushRulesFilter", agentFilterCaptor.getValue().getClass().getSimpleName());
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/resource-only"));
@@ -363,7 +363,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/page"));
@@ -391,7 +391,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/en/acs-aem-commons/page"));
@@ -420,7 +420,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verify(dispatcherFlusher, times(1)).flush(any(ResourceResolver.class), eq(ReplicationActionType.ACTIVATE),
+        verify(dispatcherFlusher, times(1)).flush(any(), eq(ReplicationActionType.ACTIVATE),
                 eq(false),
                 agentFilterCaptor.capture(),
                 eq("/content/target/en/acs-aem-commons/page"));

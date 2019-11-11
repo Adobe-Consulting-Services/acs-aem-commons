@@ -62,7 +62,6 @@ public class CombinedCacheConfigExtensionTest {
     public void init() throws HttpCacheRepositoryAccessException {
 
         when(extension1.accepts(request, config)).thenReturn(false);
-        when(extension2.accepts(request, config)).thenReturn(false);
         when(extension3.accepts(request, config)).thenReturn(true);
         when(extension4.accepts(request, config)).thenReturn(true);
         

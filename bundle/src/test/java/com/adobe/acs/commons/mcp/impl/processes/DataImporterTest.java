@@ -110,7 +110,7 @@ public class DataImporterTest {
     }
 
     private Object runImmediately(InvocationOnMock invocation) {
-        Runnable r = invocation.getArgumentAt(0, Runnable.class);
+        Runnable r = invocation.getArgument(0);
         r.run();
         return null;
     }

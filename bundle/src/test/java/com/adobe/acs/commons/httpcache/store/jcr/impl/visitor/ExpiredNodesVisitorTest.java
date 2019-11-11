@@ -24,13 +24,11 @@ import static org.junit.Assert.assertEquals;
 import javax.jcr.Node;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class ExpiredNodesVisitorTest
 {
     @Test public void test() throws Exception
