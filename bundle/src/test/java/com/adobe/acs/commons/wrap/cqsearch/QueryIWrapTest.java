@@ -22,8 +22,8 @@ package com.adobe.acs.commons.wrap.cqsearch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -32,19 +32,23 @@ import static org.mockito.Mockito.when;
 
 import javax.annotation.Nonnull;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
 import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
 import com.day.cq.search.eval.PredicateEvaluator;
 import com.day.cq.search.facets.Bucket;
 import com.day.cq.search.result.SearchResult;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class QueryIWrapTest {
+	
+	@Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     Query query;
@@ -91,8 +95,8 @@ public class QueryIWrapTest {
         final PredicateEvaluator mockPredEval = mock(PredicateEvaluator.class);
 
         doAnswer((invocation) -> {
-            String predTypeArg = invocation.getArgumentAt(0, String.class);
-            PredicateEvaluator predEvalArg = invocation.getArgumentAt(1, PredicateEvaluator.class);
+            String predTypeArg = invocation.getArgument(0);
+            PredicateEvaluator predEvalArg = invocation.getArgument(1);
             assertEquals("expect same predicate type arg", predType, predTypeArg);
             assertSame("expect same PredicateEvaluator instance arg", mockPredEval, predEvalArg);
             return null;

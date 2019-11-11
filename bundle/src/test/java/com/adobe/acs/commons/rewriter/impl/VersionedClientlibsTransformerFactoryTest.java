@@ -334,8 +334,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         final String badProxyPath = PROXY_PATH + "/bad";
 
         ClientLibrary clientLibrary = mock(ClientLibrary.class);
-        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
-        when(clientLibrary.allowProxy()).thenReturn(true);
         when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
 

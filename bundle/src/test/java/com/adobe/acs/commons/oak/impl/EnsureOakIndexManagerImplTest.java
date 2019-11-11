@@ -41,13 +41,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
 
-@RunWith(MockitoJUnitRunner.class)
 public class EnsureOakIndexManagerImplTest {
+	
+	@Rule
+    public MockitoRule rule = MockitoJUnit.rule();
     
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -71,7 +75,7 @@ public class EnsureOakIndexManagerImplTest {
         ScheduleOptions options = mock(ScheduleOptions.class);
         when(scheduler.NOW()).thenReturn(options);
         when(scheduler.schedule(anyObject(), anyObject())).thenAnswer((InvocationOnMock invocation) -> {
-            EnsureOakIndexJobHandler handler = invocation.getArgumentAt(0, EnsureOakIndexJobHandler.class);
+            EnsureOakIndexJobHandler handler = invocation.getArgument(0);
             handler.run();
             return true;
         });

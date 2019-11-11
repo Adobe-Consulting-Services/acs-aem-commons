@@ -75,7 +75,6 @@ public class ChildrenAsPropertyResourceTest {
 
         when(resource.getPath()).thenReturn("/content/test");
         when(resource.getValueMap()).thenReturn(valueMap);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(valueMap);
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
 

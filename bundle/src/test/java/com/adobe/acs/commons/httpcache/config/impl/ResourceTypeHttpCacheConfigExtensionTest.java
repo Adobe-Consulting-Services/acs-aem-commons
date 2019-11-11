@@ -99,8 +99,6 @@ public class ResourceTypeHttpCacheConfigExtensionTest {
         extension.activate(properties);
 
         when(resource.getPath()).thenReturn("/content/acs-commons/path/to/page");
-        when(jcrContentChild.getPath()).thenReturn("/content/acs-commons/path/to/page/jcr:content");
-        when(jcrContentChild.getResourceType()).thenReturn(RT_SUB_COMP);
         when(resourceResolver.isResourceType(jcrContentChild, RT_PARENT_COMP)).thenReturn(true);
 
         assertTrue(extension.accepts(request, config));
