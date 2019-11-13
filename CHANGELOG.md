@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2064 - Adding Marketo Form Component
+- #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
 
 ### Fixed
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
@@ -33,7 +34,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2092 - Tag Export - IndexOutOfBoundsException issue
-- #2004 - Bugfix/httpcache combined cache key different entries 
+- #2004 - Bugfix/httpcache combined cache key different entries
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
