@@ -36,8 +36,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.adobe.acs.commons.fetchfile.FileFetchConfiguration;
-import com.adobe.acs.commons.fetchfile.impl.FileFetchImpl;
+import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
+import com.adobe.acs.commons.filefetch.impl.FileFetcherImpl;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 
@@ -47,11 +47,11 @@ public class FileFetchImplTest {
 
   @Rule
   public final AemContext context = new AemContext();
-  private FileFetchImpl fileFetch;
+  private FileFetcherImpl fileFetch;
 
   @Before
   public void init() throws LoginException {
-    fileFetch = new FileFetchImpl() {
+    fileFetch = new FileFetcherImpl() {
       protected HttpURLConnection openConnection() throws IOException {
 
         HttpURLConnection huc = Mockito.mock(HttpURLConnection.class);
@@ -111,6 +111,11 @@ public class FileFetchImplTest {
         return new int[] { 200 };
       }
 
+      @Override
+      public int timeout() {
+        return 5000;
+      }
+
     });
 
     assertNull(fileFetch.getLastException());
@@ -160,6 +165,11 @@ public class FileFetchImplTest {
       @Override
       public int[] validResponseCodes() {
         return new int[] { 200 };
+      }
+
+      @Override
+      public int timeout() {
+        return 5000;
       }
 
     });

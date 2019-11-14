@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.fetchfile.impl;
+package com.adobe.acs.commons.filefetch.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,8 +41,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-import com.adobe.acs.commons.fetchfile.FileFetch;
-import com.adobe.acs.commons.fetchfile.FileFetchMBean;
+import com.adobe.acs.commons.filefetch.FileFetcher;
+import com.adobe.acs.commons.filefetch.FileFetchMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationException;
 
@@ -50,15 +50,18 @@ import com.day.cq.replication.ReplicationException;
  * Implementation of the FileFetch MBean
  */
 @Component(service = { DynamicMBean.class, FileFetchMBean.class }, property = {
-    "jmx.objectname=com.adobe.acs.commons.fetchfile:type=FileFetch" })
+    "jmx.objectname=com.adobe.acs.commons.filefetch:type=FileFetch" })
 public class FileFetchMBeanImpl extends AnnotatedStandardMBean implements FileFetchMBean {
 
   private static final String PN_INDEX = "Index";
+  private static final String PN_REMOTE_URL = "Remote URL";
+  private static final String PN_DAM_PATH = "DAM Path";
   private static final String PN_LAST_EXCEPTION = "Last Exception";
   private static final String PN_LAST_JOB_SUCCEEDED = "Last Job Succeeded";
+  private static final String PN_LAST_MODIFIED = "Last Modified";
 
   @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.AT_LEAST_ONE)
-  private List<FileFetch> fetchers;
+  private List<FileFetcher> fetchers;
 
   public FileFetchMBeanImpl() throws NotCompliantMBeanException {
     super(FileFetchMBean.class);
@@ -66,7 +69,7 @@ public class FileFetchMBeanImpl extends AnnotatedStandardMBean implements FileFe
 
   @Override
   public boolean allSucceeded() {
-    return fetchers.stream().allMatch(FileFetch::isLastJobSucceeded);
+    return fetchers.stream().allMatch(FileFetcher::isLastJobSucceeded);
   }
 
   @Override
@@ -75,25 +78,33 @@ public class FileFetchMBeanImpl extends AnnotatedStandardMBean implements FileFe
   }
 
   @Override
-  public TabularData getJobs() throws OpenDataException {
+  public TabularData getFetchers() throws OpenDataException {
     CompositeType compositeType = new CompositeType("File Fetch", "File Fetch Instance",
-        new String[] { PN_INDEX, PN_LAST_JOB_SUCCEEDED, PN_LAST_EXCEPTION },
-        new String[] { PN_INDEX, PN_LAST_JOB_SUCCEEDED, PN_LAST_EXCEPTION },
-        new OpenType[] { SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING });
+        new String[] { PN_INDEX, PN_LAST_JOB_SUCCEEDED, PN_LAST_EXCEPTION, PN_REMOTE_URL, PN_DAM_PATH,
+            PN_LAST_MODIFIED },
+        new String[] { PN_INDEX, PN_LAST_JOB_SUCCEEDED, PN_LAST_EXCEPTION, PN_REMOTE_URL, PN_DAM_PATH,
+            PN_LAST_MODIFIED },
+        new OpenType[] { SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING, SimpleType.STRING,
+            SimpleType.STRING, SimpleType.STRING });
     TabularDataSupport tabularData = new TabularDataSupport(
         new TabularType("File Fetch", "File Fetch Instance", compositeType, new String[] { PN_INDEX }));
     for (int i = 0; i < fetchers.size(); i++) {
       Map<String, Object> data = new HashMap<>();
+
+      FileFetcher fetch = fetchers.get(i);
       data.put(PN_INDEX, i);
-      data.put(PN_LAST_JOB_SUCCEEDED, fetchers.get(i).isLastJobSucceeded());
-      data.put(PN_LAST_EXCEPTION, fetchers.get(i).getLastException());
+      data.put(PN_LAST_JOB_SUCCEEDED, fetch.isLastJobSucceeded());
+      data.put(PN_LAST_EXCEPTION, fetch.getLastException());
+      data.put(PN_LAST_MODIFIED, fetch.getLastModified());
+      data.put(PN_REMOTE_URL, fetch.getConfig().remoteUrl());
+      data.put(PN_DAM_PATH, fetch.getConfig().damPath());
       CompositeData cd = new CompositeDataSupport(compositeType, data);
       tabularData.put(cd);
     }
     return tabularData;
   }
 
-  public void setFetchers(List<FileFetch> fetchers) {
+  public void setFetchers(List<FileFetcher> fetchers) {
     this.fetchers = fetchers;
   }
 

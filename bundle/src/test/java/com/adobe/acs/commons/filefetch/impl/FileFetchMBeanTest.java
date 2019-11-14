@@ -34,8 +34,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.adobe.acs.commons.fetchfile.FileFetch;
-import com.adobe.acs.commons.fetchfile.impl.FileFetchMBeanImpl;
+import com.adobe.acs.commons.filefetch.FileFetcher;
+import com.adobe.acs.commons.filefetch.impl.FileFetchMBeanImpl;
 import com.day.cq.replication.ReplicationException;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -44,11 +44,11 @@ public class FileFetchMBeanTest {
 
   @Rule
   public final AemContext context = new AemContext();
-  private FileFetch fileFetch;
+  private FileFetcher fileFetch;
 
   @Before
   public void init() throws LoginException {
-    fileFetch = Mockito.mock(FileFetch.class);
+    fileFetch = Mockito.mock(FileFetcher.class);
     Mockito.when(fileFetch.isLastJobSucceeded()).thenReturn(true);
     Mockito.when(fileFetch.getLastException()).thenReturn(null);
   }
@@ -57,9 +57,9 @@ public class FileFetchMBeanTest {
   public void testMBean() throws IOException, ReplicationException, NotCompliantMBeanException, OpenDataException {
     FileFetchMBeanImpl mbean = new FileFetchMBeanImpl();
     mbean.setFetchers(Collections.singletonList(fileFetch));
-    
+
     assertTrue(mbean.allSucceeded());
-    assertNotNull(mbean.getJobs());
+    assertNotNull(mbean.getFetchers());
     mbean.fetch(0);
   }
 

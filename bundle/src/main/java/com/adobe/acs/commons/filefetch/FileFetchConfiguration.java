@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.fetchfile;
+package com.adobe.acs.commons.filefetch;
 
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -46,4 +46,7 @@ public @interface FileFetchConfiguration {
 
   @AttributeDefinition(name = "Valid Response Codes", description = "Responses which will be considered successful")
   int[] validResponseCodes() default { 200 };
+
+  @AttributeDefinition(name = "Connection Timeout", description = "Maximum timeout for a connection response")
+  int timeout() default 5000;
 }
