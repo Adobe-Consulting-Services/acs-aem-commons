@@ -184,7 +184,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
                   .orElseThrow(() -> new PersistenceException("Failed to adapt Resource to Asset"));
               log.debug("Updating asset: {}", path);
               asset.removeRendition("original");
-              asset.addRendition("original", is, Collections.emptyMap());
+              asset.addRendition("original", is, config.mimeType());
             } else {
               log.debug("Adding new asset: {}", path);
               asset = manager.createAsset(path, is, config.mimeType(), true);
@@ -199,6 +199,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
           replicator.replicate(resolver.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         } else {
           log.warn("Received invalid status code: {}", responseCode);
+          throw new IOException("Received invalid status code: "+responseCode);
         }
       } finally {
         if (con != null) {

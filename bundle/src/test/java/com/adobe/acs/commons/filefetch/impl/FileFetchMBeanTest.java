@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 
 import javax.management.NotCompliantMBeanException;
@@ -34,8 +35,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
 import com.adobe.acs.commons.filefetch.FileFetcher;
-import com.adobe.acs.commons.filefetch.impl.FileFetchMBeanImpl;
 import com.day.cq.replication.ReplicationException;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -51,6 +52,49 @@ public class FileFetchMBeanTest {
     fileFetch = Mockito.mock(FileFetcher.class);
     Mockito.when(fileFetch.isLastJobSucceeded()).thenReturn(true);
     Mockito.when(fileFetch.getLastException()).thenReturn(null);
+
+    Mockito.when(fileFetch.getConfig()).thenReturn(new FileFetchConfiguration() {
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return null;
+      }
+
+      @Override
+      public String damPath() {
+        return "/content/dam";
+      }
+
+      @Override
+      public String[] headers() {
+        return new String[0];
+      }
+
+      @Override
+      public String mimeType() {
+        return "application/json";
+      }
+
+      @Override
+      public String remoteUrl() {
+        return "https://www.altavista.com";
+      }
+
+      @Override
+      public String scheduler_expression() {
+        return "* * * 8 * * * ";
+      }
+
+      @Override
+      public int[] validResponseCodes() {
+        return new int[] { 200 };
+      }
+
+      @Override
+      public int timeout() {
+        return 200;
+      }
+    });
   }
 
   @Test

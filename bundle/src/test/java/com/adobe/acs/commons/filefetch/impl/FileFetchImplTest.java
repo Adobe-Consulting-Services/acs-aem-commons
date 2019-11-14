@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.filefetch.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -37,7 +38,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
-import com.adobe.acs.commons.filefetch.impl.FileFetcherImpl;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 
@@ -58,9 +58,12 @@ public class FileFetchImplTest {
         if ("https://www.danklco.com/me.png".equals(config.remoteUrl())) {
           Mockito.when(huc.getResponseCode()).thenReturn(200);
           Mockito.when(huc.getInputStream()).thenReturn(new ByteArrayInputStream("Hello World".getBytes()));
+        } else if ("https://www.perficientdigital.com/logo.png".equals(config.remoteUrl())) {
+          Mockito.when(huc.getResponseCode()).thenReturn(304);
         } else {
           Mockito.when(huc.getResponseCode()).thenReturn(400);
         }
+        Mockito.when(huc.getHeaderField("Last-Modified")).thenReturn("1970-01-01");
         return huc;
       }
     };
@@ -120,11 +123,65 @@ public class FileFetchImplTest {
 
     assertNull(fileFetch.getLastException());
     assertTrue(fileFetch.isLastJobSucceeded());
+    assertEquals("1970-01-01",fileFetch.getLastModified());
 
     fileFetch.updateFile();
 
     assertNull(fileFetch.getLastException());
     assertTrue(fileFetch.isLastJobSucceeded());
+  }
+  
+
+  @Test
+  public void testFetchNoUpdate() throws IOException, ReplicationException {
+    fileFetch.activate(new FileFetchConfiguration() {
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return null;
+      }
+
+      @Override
+      public String damPath() {
+        return "/content/dam/an-asset.png";
+      }
+
+      @Override
+      public String[] headers() {
+        return new String[] { "Hi=123" };
+      }
+
+      @Override
+      public String mimeType() {
+        return "image/png";
+      }
+
+      @Override
+      public String remoteUrl() {
+        return "https://www.perficientdigital.com/logo.png";
+      }
+
+      @Override
+      public String scheduler_expression() {
+        return "* * * * *";
+      }
+
+      @Override
+      public int[] validResponseCodes() {
+        return new int[] { 200 };
+      }
+
+      @Override
+      public int timeout() {
+        return 5000;
+      }
+
+
+    });
+
+    assertNull(fileFetch.getLastException());
+    assertTrue(fileFetch.isLastJobSucceeded());
+    assertEquals(null,fileFetch.getLastModified());
   }
 
   @Test
