@@ -48,10 +48,12 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.filefetch.FileFetcher;
 import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
+import com.adobe.acs.commons.filefetch.FileFetcher;
+
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
+import com.day.cq.dam.api.Rendition;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
@@ -59,7 +61,9 @@ import com.day.cq.replication.Replicator;
 /**
  * Implementation of the FileFetcher service
  */
-@Component(service = { Runnable.class, FileFetcher.class }, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = { Runnable.class,
+    FileFetcher.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
+        "webconsole.configurationFactory.nameHint=File Fetcher for: {remoteUrl}, saving to: {damPath}" })
 @Designate(ocd = FileFetchConfiguration.class, factory = true)
 public class FileFetcherImpl implements FileFetcher, Runnable {
 
@@ -183,6 +187,9 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
               asset = Optional.ofNullable(assetResource.adaptTo(Asset.class))
                   .orElseThrow(() -> new PersistenceException("Failed to adapt Resource to Asset"));
               log.debug("Updating asset: {}", path);
+              for (Rendition r : asset.getRenditions()) {
+                asset.removeRendition(r.getName());
+              }
               asset.removeRendition("original");
               asset.addRendition("original", is, config.mimeType());
             } else {
@@ -192,14 +199,14 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
                   .orElseThrow(() -> new PersistenceException("Failed to adapt Asset to Resource"));
             }
           }
-          
+
           lastModified = con.getHeaderField("Last-Modified");
 
           log.info("Replicating fetched file {}", path);
           replicator.replicate(resolver.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         } else {
           log.warn("Received invalid status code: {}", responseCode);
-          throw new IOException("Received invalid status code: "+responseCode);
+          throw new IOException("Received invalid status code: " + responseCode);
         }
       } finally {
         if (con != null) {
