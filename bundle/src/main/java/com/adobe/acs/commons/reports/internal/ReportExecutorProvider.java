@@ -34,7 +34,8 @@ public final class ReportExecutorProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ReportExecutorProvider.class);
 
-    private ReportExecutorProvider() {}
+    private ReportExecutorProvider() {
+    }
 
     public Class<?> getReportExecutor(DynamicClassLoaderManager dynamicClassLoaderManager, Resource config)
             throws ReportException {

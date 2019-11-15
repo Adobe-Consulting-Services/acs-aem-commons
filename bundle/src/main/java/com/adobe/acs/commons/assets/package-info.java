@@ -17,5 +17,5 @@
  * limitations under the License.
  * #L%
  */
-@org.osgi.annotation.versioning.Version("4.2.0")
+@org.osgi.annotation.versioning.Version("4.3.4")
 package com.adobe.acs.commons.assets;
