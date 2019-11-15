@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2064 - Adding Marketo Form Component
+- #1919 - Report Builder | Path List Executor Implementation
 
 ### Fixed
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
@@ -98,7 +99,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
-- #1919 - Report Builder | Path List Executor Implementation
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
