@@ -298,28 +298,20 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
         final int status = responseWrapper.getStatus();
         final String charEncoding = responseWrapper.getCharacterEncoding();
         final String contentType = responseWrapper.getContentType();
-
-        throttledTaskRunner.scheduleWork(() -> {
-            CacheContent cacheContent = null;
-            // Construct the cache content.
-            try {
-                CacheKey cacheKey = cacheConfig.buildCacheKey(request);
-                cacheContent = new CacheContent().build(responseWrapper, status, charEncoding, contentType, extractedHeaders);
-
-                // Persist in cache.
-                if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
-                    getCacheStore(cacheConfig).put(cacheKey, cacheContent);
-                    log.debug("Response for the URI cached - {}", request.getRequestURI());
-                }
-            } catch (HttpCacheException e) {
-                log.error("Error storing http response in httpcache", e);
-            } finally {
-                // Close the temp sink input stream.
-                if (null != cacheContent) {
-                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
-                }
+        
+        // Construct the cache content.
+        try {
+            final CacheKey cacheKey = cacheConfig.buildCacheKey(request);
+            final CacheContent cacheContent = new CacheContent().build(responseWrapper, status, charEncoding, contentType, extractedHeaders);
+        
+            // Persist in cache.
+            if (isRequestCachableAccordingToHandlingRules(request, response, cacheConfig, cacheContent)) {
+                throttledTaskRunner.scheduleWork(putToStore(cacheConfig, cacheKey, cacheContent));
+                log.debug("Response for the URI cached - {}", request.getRequestURI());
             }
-        });
+        } catch (HttpCacheException e) {
+            log.error("Error creating http cache content", e);
+        }
 
     }
 
@@ -346,6 +338,21 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 executeCustomRuleInvalidations(path, cacheConfig);
             }
         }
+    }
+
+    private Runnable putToStore(final HttpCacheConfig cacheConfig, final CacheKey cacheKey, final CacheContent cacheContent) {
+        return () -> {
+            try {
+                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
+            } catch (HttpCacheException e) {
+                log.error("Error storing http response in httpcache", e);
+            } finally {
+                // Close the temp sink input stream.
+                if (null != cacheContent) {
+                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
+                }
+            }
+        };
     }
 
 

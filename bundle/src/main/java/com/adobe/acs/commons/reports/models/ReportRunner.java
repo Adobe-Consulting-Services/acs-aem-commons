@@ -72,6 +72,7 @@ public class ReportRunner {
     this.dynamicClassLoaderManager = dynamicClassLoaderManager;
   }
 
+  @SuppressWarnings("squid:S2658") // class name is from a trusted source
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
     log.trace("executeConfig");
     try {

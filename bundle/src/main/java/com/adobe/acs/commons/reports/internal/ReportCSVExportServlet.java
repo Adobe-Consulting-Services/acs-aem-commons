@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.text.csv.Csv;
@@ -121,9 +122,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       if (!StringUtils.isEmpty(className)) {
         try {
           log.debug("Finding ReportCellCSVExporter for {}", className);
-          @SuppressWarnings("unchecked")
-          Class<ReportCellCSVExporter> clazz = (Class<ReportCellCSVExporter>) getClass().getClassLoader()
-              .loadClass(className);
+          @SuppressWarnings({"unchecked", "squid:S2658"}) // class name is from a trusted source
+          Class<ReportCellCSVExporter> clazz =
+                  (Class<ReportCellCSVExporter>) Class.forName(className, true, dynamicClassLoaderManager.getDynamicClassLoader());
           ReportCellCSVExporter exporter = column.adaptTo(clazz);
           log.debug("Loaded ReportCellCSVExporter {}", exporter);
           if (exporter != null) {
@@ -143,12 +144,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
       Csv csv, Writer writer) throws ReportException {
-    Class<?> executorClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
-
-    ReportExecutor executor = Optional.ofNullable(request.adaptTo(executorClass))
-                                      .filter(model -> model instanceof ReportExecutor)
-                                      .map(model -> (ReportExecutor) model)
-                                      .orElseThrow(() -> new ReportException("Failed to get report executor"));
+    ReportExecutor executor = getReportExecutor(config, request);
 
     executor.setConfiguration(config);
     log.debug("Retrieved executor {}", executor);
@@ -172,5 +168,25 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
     log.debug("Results written successfully");
 
+  }
+
+  private ReportExecutor getReportExecutor(Resource config, SlingHttpServletRequest request) throws ReportException {
+    String executorClassName = config.getValueMap().get("reportExecutor", String.class);
+    if (StringUtils.isBlank(executorClassName)) {
+      throw new ReportException("reportExecutor property is not defined in the config node");
+    }
+    try {
+      @SuppressWarnings("unchecked")
+      Class<ReportCellCSVExporter> clazz =
+              (Class<ReportCellCSVExporter>) Class
+                      .forName(executorClassName, true, dynamicClassLoaderManager.getDynamicClassLoader());
+      ReportExecutor reportExecutor = (ReportExecutor) Optional.ofNullable(request.adaptTo(clazz))
+              .orElseThrow(() -> new ReportException("Failed to get report executor"));
+      log.debug("ReportExecutor loaded {}", executorClassName);
+      return reportExecutor;
+    } catch (ClassNotFoundException e) {
+      log.warn("Class not found for ReportExecutor [{}]", executorClassName);
+      throw new ReportException("Class not found for ReportExecutor [" + executorClassName + "]", e);
+    }
   }
 }

@@ -220,6 +220,7 @@ public class RequestThrottler implements Filter {
 
     }
 
+    @SuppressWarnings("CQRules:CWE-676") // use appropriate in this case
     protected void delay(long ms) {
         try {
             Thread.sleep(ms);

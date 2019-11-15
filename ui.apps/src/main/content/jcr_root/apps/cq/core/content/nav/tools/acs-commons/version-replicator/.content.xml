@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Version Replicator"
+    jcr:description="Replicate specific versions of content."
+    icon="publishSchedule"
+    href="/apps/acs-commons/content/version-replicator.html"
+    id="acs-commons__version-replicator"
+    target="_blank"/>

@@ -27,9 +27,9 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.mcp.ControlledProcessManager;
 import com.adobe.acs.commons.mcp.ProcessDefinition;
 import com.adobe.acs.commons.mcp.ProcessInstance;
+import com.adobe.acs.commons.mcp.model.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.mcp.model.Result;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -53,6 +53,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
     private transient ControlledProcessManager manager = null;
     private final transient ProcessDefinition definition;
     private transient boolean completedNormally = false;
-    private static final transient Random RANDOM = new Random();
+    private static final transient Random RANDOM = new SecureRandom();
 
     @Override
     public String getId() {

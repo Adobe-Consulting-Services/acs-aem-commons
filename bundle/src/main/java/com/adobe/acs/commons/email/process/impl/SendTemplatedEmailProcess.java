@@ -184,10 +184,8 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
         // Get ResourceResolver
         final Map<String, Object> authInfo = new HashMap<String, Object>();
         authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
-        final ResourceResolver resourceResolver;
 
-        try {
-            resourceResolver = resourceResolverFactory.getResourceResolver(authInfo);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getResourceResolver(authInfo) ) {
             Resource payloadRes = resourceResolver.getResource(payloadPath);
 
             // Email Parameter map

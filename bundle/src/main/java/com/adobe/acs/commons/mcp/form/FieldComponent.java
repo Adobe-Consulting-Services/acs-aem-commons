@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.data.Variant;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -43,7 +45,7 @@ public abstract class FieldComponent {
 
     private String name;
     private FormField formField;
-    private Field javaField;
+    private AccessibleObject accessibleObject;
     private SlingScriptHelper sling;
     private final ResourceMetadata componentMetadata = new ResourceMetadata();
     private String resourceType = "granite/ui/components/coral/foundation/form/textfield";
@@ -53,11 +55,11 @@ public abstract class FieldComponent {
     private final EnumMap<ClientLibraryType, Set<String>> clientLibraries = new EnumMap<>(ClientLibraryType.class);
     private String category;
 
-    public final void setup(String name, Field javaField, FormField field, SlingScriptHelper sling) {
+    public final void setup(String name, AccessibleObject fieldOrMethod, FormField field, SlingScriptHelper sling) {
         this.name = name;
         this.formField = field;
         this.sling = sling;
-        this.javaField = javaField;
+        this.accessibleObject = fieldOrMethod;
         this.setCategory(field.category());
         if (!componentMetadata.containsKey("name")) {
             componentMetadata.put("name", name);
@@ -92,8 +94,22 @@ public abstract class FieldComponent {
         return path;
     }
 
+    /**
+     * Get form field if possible
+     * @return Form field if a safe cast is possible otherwise null
+     * @deprecated Use getAccessibleObject and AccessibleObjectUtils to handle both Method (getter) or Fields
+     */
+    @Deprecated
     public final Field getField() {
-        return javaField;
+        if (accessibleObject instanceof Field) {
+            return (Field) accessibleObject;
+        } else {
+            return null;
+        }
+    }
+
+    public final AccessibleObject getAccessibleObject() {
+        return accessibleObject;
     }
 
     public final FormField getFieldDefinition() {
@@ -208,6 +224,15 @@ public abstract class FieldComponent {
      */
     public final String getName() {
         return name;
+    }
+
+    public final Collection<String> getOptionNames() {
+        if (formField == null || formField.options() == null) {
+            return Collections.emptySet();
+        }
+        return Stream.of(formField.options())
+                .map(s -> StringUtils.substringBefore(s, "="))
+                .collect(Collectors.toList());
     }
 
     public final boolean hasOption(String optionName) {

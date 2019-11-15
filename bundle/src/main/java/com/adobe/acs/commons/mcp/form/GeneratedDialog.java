@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -33,9 +34,9 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 
 /**
- * Generates a dialog out of @FormField annotations
- * Ideally your sling model should extend this class to inherit its features
- * but you can also just use the @DialogProvider annotation
+ * Generates a dialog out of @FormField annotations Ideally your sling model
+ * should extend this class to inherit its features but you can also just use
+ * the @DialogProvider annotation
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class},
@@ -43,6 +44,7 @@ import org.apache.sling.models.annotations.Model;
 )
 @DialogProvider
 public class GeneratedDialog {
+
     @Inject
     @JsonIgnore
     private Resource resource;
@@ -53,7 +55,7 @@ public class GeneratedDialog {
 
     @Inject
     @JsonIgnore
-    private SlingScriptHelper sling;
+    SlingScriptHelper sling;
 
     @JsonIgnore
     private FormComponent form;
@@ -61,12 +63,27 @@ public class GeneratedDialog {
     @JsonIgnore
     protected Map<String, FieldComponent> fieldComponents;
 
+    @JsonIgnore
+    private String formTitle = null;
+
+    DialogProvider providerAnnotation = null;
+
     @PostConstruct
     public void init() {
         if (getResource() == null && getRequest() != null) {
             resource = getRequest().getResource();
         }
         getFieldComponents();
+    }
+
+    public void initAnnotationValues(DialogProvider annotation) {
+        if (annotation == null) {
+            return;
+        }
+        if (StringUtils.isNotBlank(annotation.title())) {
+            setFormTitle(annotation.title());
+        }
+        providerAnnotation = annotation;
     }
 
     @JsonIgnore
@@ -134,6 +151,12 @@ public class GeneratedDialog {
     public FormComponent getForm() {
         if (form == null) {
             form = new FormComponent();
+            if (providerAnnotation != null) {
+                form.applyDialogProviderSettings(providerAnnotation);
+            }
+            if (formTitle != null) {
+                form.getComponentMetadata().put("jcr:title", formTitle);
+            }
             if (sling != null) {
                 form.setHelper(sling);
                 form.setPath(sling.getRequest().getResource().getPath());
@@ -145,5 +168,19 @@ public class GeneratedDialog {
             getFieldComponents().forEach((name, component) -> form.addComponent(name, component));
         }
         return form;
+    }
+
+    /**
+     * @return the formTitle
+     */
+    public String getFormTitle() {
+        return formTitle;
+    }
+
+    /**
+     * @param formTitle the formTitle to set
+     */
+    public void setFormTitle(String formTitle) {
+        this.formTitle = formTitle;
     }
 }

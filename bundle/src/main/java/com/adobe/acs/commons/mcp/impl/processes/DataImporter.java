@@ -131,9 +131,10 @@ public class DataImporter extends ProcessDefinition {
     @FormField(
             name = "Dry run",
             description = "If checked, no import happens.  Useful for data validation",
-            component = CheckboxComponent.class
+            component = CheckboxComponent.class,
+            options = "checked"
     )
-    private boolean dryRunMode = false;
+    boolean dryRunMode = true;
 
     @FormField(
             name = "Detailed report",
@@ -152,13 +153,13 @@ public class DataImporter extends ProcessDefinition {
     private boolean presortData = true;
     public static final String TOTAL = "Total";
 
-    EnumMap<ReportColumns, Object> createdNodes
+    private EnumMap<ReportColumns, Object> createdNodes
             = trackActivity(TOTAL, "Create", 0);
-    EnumMap<ReportColumns, Object> updatedNodes
+    private EnumMap<ReportColumns, Object> updatedNodes
             = trackActivity(TOTAL, "Updated", 0);
-    EnumMap<ReportColumns, Object> skippedNodes
+    private EnumMap<ReportColumns, Object> skippedNodes
             = trackActivity(TOTAL, "Skipped", 0);
-    EnumMap<ReportColumns, Object> noChangeNodes
+    private EnumMap<ReportColumns, Object> noChangeNodes
             = trackActivity(TOTAL, "No Change", 0);
 
     @SuppressWarnings("squid:S00115")
@@ -167,7 +168,7 @@ public class DataImporter extends ProcessDefinition {
     }
 
     Spreadsheet data;
-    List<EnumMap<ReportColumns, Object>> reportRows;
+    private List<EnumMap<ReportColumns, Object>> reportRows;
 
     protected synchronized EnumMap<ReportColumns, Object> trackActivity(String item, String action, Integer count) {
         if (reportRows == null) {
@@ -214,7 +215,7 @@ public class DataImporter extends ProcessDefinition {
     private transient GenericReport report = new GenericReport();
 
     @Override
-    public void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
+    public synchronized void storeReport(ProcessInstance instance, ResourceResolver rr) throws RepositoryException, PersistenceException {
         report.setRows(reportRows, ReportColumns.class);
         report.persist(rr, instance.getPath() + "/jcr:content/report");
     }

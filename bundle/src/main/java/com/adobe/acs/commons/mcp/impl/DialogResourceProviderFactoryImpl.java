@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -74,12 +76,15 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Reference(
             service = AdapterFactory.class,
             cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.STATIC,
+            policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY,
             bind = "bind",
             unbind = "unbind"
     )
     volatile List<AdapterFactory> adapterFactory;
+
+    @Reference
+    volatile DynamicClassLoaderManager dynamicClassLoaderManager;
 
     volatile BundleContext bundleContext;
 
@@ -89,8 +94,14 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
         return enabled;
     }
 
+    private List<Map<String, ?>> unregisteredAdapterFactories = new CopyOnWriteArrayList<>();
+
     public void bind(AdapterFactory adapterFactory, Map<String, ?> properties) {
-        getModelClass(properties).ifPresent(this::registerClass);
+        if (dynamicClassLoaderManager == null) {
+            unregisteredAdapterFactories.add(properties);
+        } else {
+            getModelClass(properties).ifPresent(this::registerClass);
+        }
     }
 
     public void unbind(AdapterFactory adapterFactory, Map<String, ?> properties) {
@@ -100,6 +111,8 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Activate
     public void activate(BundleContext context, DialogResourceProviderConfiguration config) {
         this.bundleContext = context;
+        unregisteredAdapterFactories.forEach(p -> getModelClass(p).ifPresent(this::registerClass));
+        unregisteredAdapterFactories.clear();
         setEnabled(config != null && config.enabled());
     }
 
@@ -126,6 +139,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
         return Optional.empty();
     }
 
+    @SuppressWarnings("squid:S2658") // class name is from a trusted source
     private Optional<Class> getClassIfAvailable(String className) {
         for (String ignored : ignoredPackages) {
             if (className.startsWith(ignored)) {
@@ -134,7 +148,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
         }
         Class clazz = null;
         try {
-            clazz = Class.forName(className);
+            clazz = Class.forName(className, true, dynamicClassLoaderManager.getDynamicClassLoader());
         } catch (ClassNotFoundException e) {
             for (Bundle bundle : FrameworkUtil.getBundle(this.getClass()).getBundleContext().getBundles()) {
                 try {
@@ -161,7 +175,7 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
             unregisterClass(c);
             DialogResourceProviderImpl provider = null;
             try {
-                provider = new DialogResourceProviderImpl(c);
+                provider = new DialogResourceProviderImpl(c, getDialogProviderAnnotation(c).orElse(null));
                 resourceProviderRegistrations.put(c.getName(), registerResourceProvider(provider));
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.error("Error when registering resource provider", e);
@@ -199,10 +213,13 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     }
 
     private boolean isDialogProvider(Class c) {
-        return c.isAnnotationPresent(DialogProvider.class)
-                || StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
-                        .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
-                        .findFirst()
-                        .isPresent();
+        return getDialogProviderAnnotation(c).isPresent();
+    }
+
+    private Optional<DialogProvider> getDialogProviderAnnotation(Class c) {
+        return StreamSupport.stream(ClassUtils.hierarchy(c, ClassUtils.Interfaces.INCLUDE).spliterator(), false)
+                .filter(clazz -> clazz.isAnnotationPresent(DialogProvider.class))
+                .findFirst()
+                .map(clazz -> clazz.getAnnotation(DialogProvider.class));
     }
 }

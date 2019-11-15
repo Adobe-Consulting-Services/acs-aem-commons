@@ -103,10 +103,11 @@ public class S3AssetIngestorTest {
         context.resourceResolver().commit();
         ingestor = new S3AssetIngestor(context.getService(MimeTypeService.class));
         ingestor.jcrBasePath = "/content/dam";
-        ingestor.ignoreFileList = Collections.emptyList();
-        ingestor.ignoreExtensionList = Collections.emptyList();
-        ingestor.ignoreFolderList = Arrays.asList(".ds_store");
+        ingestor.fileFilter = new NamesFilter();
+        ingestor.extensionFilter = new NamesFilter();
+        ingestor.folderFilter = new NamesFilter("-.ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
+        ingestor.dryRunMode = false;
 
         int port = FreePortFinder.findFreeLocalPort();
         s3Mock = new S3Mock.Builder().withPort(port).withInMemoryBackend().build();
@@ -147,7 +148,6 @@ public class S3AssetIngestorTest {
         verify(actionManager).setCurrentItem(currentItemCaptor.capture());
         assertEquals(1, currentItemCaptor.getAllValues().size());
         assertEquals(TEST_BUCKET, currentItemCaptor.getValue());
-
     }
 
     @Test

@@ -23,9 +23,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
-
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,6 +84,8 @@ public class EnsureOakIndexManagerImplTest {
     }
     
     private EnsureOakIndex createAndRegisterEnsureOakIndexDefinition(String definitionPath, String indexPropertyName) {
+        
+
         Map<String,Object> ensureIndexProperties;
         ensureIndexProperties = new HashMap<>();
         ensureIndexProperties.put("jcr:primaryType",EnsureOakIndexJobHandler.NT_OAK_UNSTRUCTURED);
@@ -111,9 +112,11 @@ public class EnsureOakIndexManagerImplTest {
     
     @Test
     public void testWithIndexRegistrations() throws NotCompliantMBeanException {
-        EnsureOakIndex eoi1 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index1", "abc");
+        
+        
         EnsureOakIndexManagerImpl impl = new EnsureOakIndexManagerImpl();
         context.registerInjectActivateService(impl,ensureOakIndexManagerProperties);
+        EnsureOakIndex eoi1 = createAndRegisterEnsureOakIndexDefinition("/apps/my/index1", "abc");
         assertEquals(1,impl.ensureAll(true));
         assertTrue(eoi1.isApplied());
         assertEquals(0,impl.ensureAll(false));

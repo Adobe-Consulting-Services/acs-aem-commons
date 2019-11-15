@@ -19,11 +19,18 @@
  */
 package com.adobe.acs.commons.genericlists.impl;
 
+import com.adobe.acs.commons.genericlists.GenericList;
+import com.adobe.acs.commons.genericlists.GenericList.Item;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.google.gson.Gson;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -34,20 +41,11 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.genericlists.GenericList;
-import com.adobe.acs.commons.genericlists.GenericList.Item;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import com.google.gson.Gson;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
 import org.apache.sling.spi.resource.provider.ResolveContext;
 import org.apache.sling.spi.resource.provider.ResourceContext;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resource provider which makes Generic Lists available as JSON String resources
@@ -60,7 +58,7 @@ import org.apache.sling.spi.resource.provider.ResourceProvider;
 @Properties({ @Property(name = ResourceProvider.PROPERTY_ROOT, value = GenericListJsonResourceProvider.ROOT) })
 public final class GenericListJsonResourceProvider extends ResourceProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericListJsonResourceProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenericListJsonResourceProvider.class);
 
     static final String ROOT = "/mnt/acs-commons/lists";
 
@@ -120,7 +118,7 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
 
     private static class JsonResource extends SyntheticResource {
 
-        private GenericList list;
+        private final GenericList list;
 
         public JsonResource(GenericList list, ResourceResolver resourceResolver, ResourceMetadata rm) {
             super(resourceResolver, rm, "acs-commons/components/utilities/genericlist/json");
@@ -138,7 +136,7 @@ public final class GenericListJsonResourceProvider extends ResourceProvider {
                     String json = gson.toJson(out);
                     return (AdapterType) new ByteArrayInputStream(json.getBytes("UTF-8"));
                 } catch (UnsupportedEncodingException e) {
-                    log.warn("Unable to generate JSON object.", e);
+                    LOG.warn("Unable to generate JSON object.", e);
                     return null;
                 }
             } else {

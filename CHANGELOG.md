@@ -5,7 +5,76 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## Unreleased
+## Unreleased ([details][unreleased changes details])
+
+<!-- Keep this up to date! After a release, change the tag name to the latest release -->
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+### Added
+- #2064 - Adding Marketo Form Component
+
+### Fixed
+- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
+
+## [4.3.4] - 2019-10-16
+
+### Added
+- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
+- #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
+- #2085 - Made dry run mode default for all MCP processes that have it
+
+### Added
+- #2071 - Added Tag Export as CSV functionality, as new option in Exports
+
+### Changed
+- #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
+- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
+- #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
+
+### Fixed
+- #2092 - Tag Export - IndexOutOfBoundsException issue
+- #2004 - Bugfix/httpcache combined cache key different entries 
+- #2032 - Fixed filter.xml on /var/acs-commons
+- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
+- #2053 - ETag header not properly delivered from the servlet (missing quotes)
+- #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
+- #2058 - Fixed MCP JS errors in Firefox
+- #2063 - Fixed regression in MCP user interface following split of apps/content packages
+- #2074 - Ignore properties on EnsureOakIndex were sometimes not respected.
+- #2080 - Fix BND warning in MCP (#1813)
+
+## [4.3.2] - 2019-08-29
+
+### Added
+- #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
+- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
+
+### Fixed
+- #1975 - Split application content from mutable content
+- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
+- #986 - Rewrote Generic Lists to use Touch UI
+
+## [4.3.0] - 2019-07-31
+
+### Fixed
+- #1644 - Asset Ingestor | Add include section
+- #1914 - java.lang.ClassNotFoundException: com.fasterxml.jackson.core.JsonProcessingException
+- #1942 - Renovator issues moving folder in AEM 6.3.3.3
+- #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
+- #1980 - Fixing error when not using redirect map file
+- #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
+- #1993 - DialogProvider now supports styles for Dialog and Page dialogs
+- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
+- #1997 - MCP Forms fixes for RTE configuration and NPE issue with AbstractResourceImpl when resource type is not set
+- #1998 - Coral3 checkbox storing json value as string instead of boolean when using Json Store in multifields
+- #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
+
+### Added
+- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
+- #1993 - New components for autocomplete and rich text editor
+- #2012 - Added support for query autocomplete widget
+
+## [4.2.2] - 2019-07-15
 
 ### Added
 - #1967 - Expose On-Deploy Script Executor for external script triggering
@@ -15,9 +84,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
+- #1644 - Asset Ingestor | Add include section
+- #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
 
 ### Fixed
+- #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
+- #1982 - Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and page refreshes due to Edit Config Listener ( Shared Component Properties )
 
 ## [4.2.0] - 2019-06-18
 
@@ -37,8 +110,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1897 - Fixed an NPE with removing a group w/ Ensure Authorizable when the group was already removed
 - #1934 - add explicit javax.annotation version to maven-bundle-plugin after #1893
 - #1202 - fix overflow handling in looping iterator
+- Adjust JCRHttpCacheStoreImplTest to Java 11
 - Adjust PageCompareDataImplTest to Java 11
 - Adjust EntryNodeWriterTest to Java 11
+- Adjust I18nProviderImplTest to Java 11
 
 ## [4.1.0] - 2019-05-07
 
@@ -283,8 +358,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
-
-[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
 
 ## [3.16.0] - 2018-05-10
 

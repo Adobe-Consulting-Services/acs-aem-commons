@@ -74,7 +74,7 @@ public final class FileImporter implements Importer {
     }
 
     @Override
-    @SuppressWarnings("squid:S3776")
+    @SuppressWarnings({"squid:S3776", "findsecbugs:PATH_TRAVERSAL_IN"}) // dataSource comes from trusted source
     public void importData(String schemeValue, String dataSource, Resource target) {
         if (scheme.equals(schemeValue)) {
             final File file = new File(dataSource);

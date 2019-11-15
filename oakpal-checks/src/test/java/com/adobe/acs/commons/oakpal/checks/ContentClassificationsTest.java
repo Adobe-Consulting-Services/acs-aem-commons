@@ -19,9 +19,9 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.OrgJson.arr;
-import static net.adamcin.oakpal.core.OrgJson.key;
-import static net.adamcin.oakpal.core.OrgJson.obj;
+import static net.adamcin.oakpal.core.JavaxJson.arr;
+import static net.adamcin.oakpal.core.JavaxJson.key;
+import static net.adamcin.oakpal.core.JavaxJson.obj;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +45,7 @@ public class ContentClassificationsTest extends CheckTestBase {
 
     static {
         INIT = new InitStage.Builder()
-                .withOrderedCndUrls(CND)
+                .withOrderedCndUrl(CND)
                 .withNs("sling", NS_URI_SLING)
                 .withNs("granite", NS_URI_GRANITE)
                 .withForcedRoot("/libs/acs/internal", "sling:Folder",

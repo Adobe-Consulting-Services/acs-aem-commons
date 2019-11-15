@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * ACS AEM Commons - Replicate Version Servlet
@@ -159,9 +160,10 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     private Date getDate(String datetime) {
         Date date = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss aa");
-
-            date = sdf.parse(datetime);
+            String modifiedDate = datetime.substring(0, datetime.indexOf('+'));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            date = sdf.parse(modifiedDate);
         } catch (Exception e) {
             log.error("exception occurred", e);
         }

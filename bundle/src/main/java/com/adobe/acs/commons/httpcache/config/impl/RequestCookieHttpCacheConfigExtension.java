@@ -118,7 +118,17 @@ public class RequestCookieHttpCacheConfigExtension extends AbstractKeyValueExten
         log.debug("Could not find any valid Cookie matches for HTTP Cache");
         return false;
     }
-
+    
+    @Override
+    protected String getActualValue(String key, SlingHttpServletRequest request) {
+        Cookie cookie =  CookieUtil.getCookie(request, key);
+        
+        if(cookie != null){
+            return cookie.getValue();
+        }
+        return null;
+    }
+    
     @Override
     public String getCacheKeyId() {
         return "[Cookie: " + cacheKeyId + "]";
