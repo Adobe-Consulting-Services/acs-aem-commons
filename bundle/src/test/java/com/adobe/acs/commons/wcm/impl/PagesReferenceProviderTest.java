@@ -182,7 +182,6 @@ public class PagesReferenceProviderTest {
     private Page registerPage(String path, String name) {
         Page result = mock(Page.class, path);
         when(pageManager.getContainingPage(path)).thenReturn(result);
-        when(result.getPath()).thenReturn(path);
         when(result.getName()).thenReturn(name);
         when(result.getLastModified()).thenReturn(Calendar.getInstance());
         when(result.getContentResource()).then(i -> context.resourceResolver().getResource(path + "/jcr:content"));

@@ -96,8 +96,6 @@ public final class WorkflowPackageManagerImplTest {
     @Before
     public void setUp() throws Exception {
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(pageManager);
-        when(resourceResolver.adaptTo(Session.class)).thenReturn(session);
-        when(resourceResolver.getResource("/var/workflow/packages")).thenReturn(workflowPackageRootResource);
         when(resourceResolver.getResource(WORKFLOW_PACKAGE_PATH)).thenReturn(workflowPackageResource);
         when(workflowPackageResource.adaptTo(Node.class)).thenReturn(workflowPackageNode);
         when(workflowPackageNode.getSession()).thenReturn(session);
@@ -111,7 +109,6 @@ public final class WorkflowPackageManagerImplTest {
         // Normal Page Path
 
         when(pageManager.getPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
-        when(pageManager.getContainingPage(NORMAL_PAGE_PATH)).thenReturn(normalPage);
         when(normalPage.getContentResource()).thenReturn(normalPageContentResource);
         when(normalPageContentResource.isResourceType("cq/workflow/components/collection/page")).thenReturn(false);
     }
