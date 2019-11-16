@@ -70,7 +70,6 @@ public class PropertyMergePostProcessorTest {
     @Before
     public void setUp() throws Exception {
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
-        doNothing().when(resourceResolver).commit();
     }
 
     @Test
