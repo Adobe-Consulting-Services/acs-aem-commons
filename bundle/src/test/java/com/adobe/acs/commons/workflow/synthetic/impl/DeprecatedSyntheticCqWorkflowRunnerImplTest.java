@@ -163,7 +163,6 @@ public class DeprecatedSyntheticCqWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Terminate() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
@@ -216,7 +215,6 @@ public class DeprecatedSyntheticCqWorkflowRunnerImplTest {
 
     @Test
     public void testExecute_Complete_noSave() throws Exception {
-        when(session.hasPendingChanges()).thenReturn(true).thenReturn(false);
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
