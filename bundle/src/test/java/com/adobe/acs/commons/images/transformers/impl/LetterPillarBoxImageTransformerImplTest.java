@@ -21,8 +21,16 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -348,14 +356,14 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         new LetterPillarBoxImageTransformerImpl().transform(layer, properties);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     @Test
     public void testTransform_nullParams() throws Exception {
         new LetterPillarBoxImageTransformerImpl().transform(layer, null);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     private class Transformer extends LetterPillarBoxImageTransformerImpl {
