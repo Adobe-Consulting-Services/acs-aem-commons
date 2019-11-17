@@ -22,17 +22,35 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 import static org.junit.Assert.assertEquals;
 
 import javax.jcr.Node;
+import javax.management.NotCompliantMBeanException;
 
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.adobe.acs.commons.httpcache.store.HttpCacheStore;
+import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreImpl;
 import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockFactory;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InvalidateAllNodesVisitorTest
-{
+public class InvalidateAllNodesVisitorTest {
+	
+	@Rule
+	public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
+	
+	JCRHttpCacheStoreImpl store;
+	
+	@Before
+	public void setup() throws NotCompliantMBeanException {
+		store = new JCRHttpCacheStoreImpl();
+		context.registerInjectActivateService(store);
+	}
+	
     @Test public void test() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
