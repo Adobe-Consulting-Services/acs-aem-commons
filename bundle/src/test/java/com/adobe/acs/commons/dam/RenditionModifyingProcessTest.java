@@ -19,8 +19,13 @@
  */
 package com.adobe.acs.commons.dam;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
 
@@ -93,7 +98,7 @@ public class RenditionModifyingProcessTest {
 
         process.execute(workItem, workflowSession, metaData, workflowHelper);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
@@ -104,7 +109,7 @@ public class RenditionModifyingProcessTest {
 
         process.execute(workItem, workflowSession, metaData, workflowHelper);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
@@ -129,7 +134,7 @@ public class RenditionModifyingProcessTest {
 
         process.execute(workItem, workflowSession, metaData, workflowHelper);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test

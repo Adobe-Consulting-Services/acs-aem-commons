@@ -19,8 +19,12 @@
  */
 package com.adobe.acs.commons.email.process.impl;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,7 +113,7 @@ public class SendTemplatedEmailProcessTest {
 
         process.execute(workItem, workflowSession, metaData);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
@@ -121,7 +125,7 @@ public class SendTemplatedEmailProcessTest {
         metaData.put("PROCESS_ARGS", "");
         process.execute(workItem, workflowSession, metaData);
 
-        verifyZeroInteractions(harness);
+        verifyNoInteractions(harness);
     }
 
     @Test
