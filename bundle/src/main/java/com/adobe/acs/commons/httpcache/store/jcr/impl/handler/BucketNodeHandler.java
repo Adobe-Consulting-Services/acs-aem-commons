@@ -69,17 +69,25 @@ public class BucketNodeHandler
     public Node getEntryIfExists(CacheKey key)
             throws RepositoryException, IOException, ClassNotFoundException
     {
+    	return getEntryIfExists(key, false);
+    }
+    
+    public Node getEntryIfExists(CacheKey key, boolean ignoreExpiration)
+            throws RepositoryException, IOException, ClassNotFoundException
+    {
         final NodeIterator entryNodeIterator  = bucketNode.getNodes();
 
         while(entryNodeIterator.hasNext()){
             Node entryNode = entryNodeIterator.nextNode();
             CacheKey entryKey = new EntryNodeToCacheKeyHandler(entryNode, dynamicClassLoaderManager).get();
             boolean isExpired = entryNode.getProperty(PN_EXPIRES_ON).getLong() < clock.instant().toEpochMilli();
-            if(key.equals(entryKey) && !isExpired) {
-                return entryNode;
+            if(key.equals(entryKey)) {
+            	if (!(isExpired && !ignoreExpiration)) {
+            		return entryNode;
+            	}
             }
         }
-
         return null;
     }
+    
 }

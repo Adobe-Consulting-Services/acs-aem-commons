@@ -277,16 +277,14 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
             if (bucketNode != null) {
                 final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
-                if (entryNode == null) {
-                	return null;
-                }
-                
-                final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
-
-                if (content != null) {
-                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
-                    incrementHitCount();
-                    return content;
+                if (entryNode != null) {
+	
+	                final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+	                if (content != null) {
+	                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
+	                    incrementHitCount();
+	                    return content;
+	                }
                 }
             }
 
@@ -314,7 +312,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
-                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
+                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key,true);
                 if (entryNode != null) {
                     entryNode.remove();
                     session.save();
@@ -365,7 +363,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public void purgeExpiredEntries() {
         withSession((Session session) -> {
             final Node rootNode = session.getNode(cacheRootPath);
-            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
+            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold, clock);
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());

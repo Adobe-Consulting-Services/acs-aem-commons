@@ -28,6 +28,7 @@ import static org.mockito.Mockito.spy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -78,6 +79,7 @@ public class JCRHttpCacheStoreImplTest2 {
 		store.invalidate(key1);
 		assertEquals(0,store.size());
 		assertNull(store.getIfPresent(key1));
+		assertFalse(store.contains(key1));
 	}
 	
 	@Test
@@ -90,14 +92,17 @@ public class JCRHttpCacheStoreImplTest2 {
 		
 		// fast forward : 12 seconds
 		setTime(currentInstant.plus(12, ChronoUnit.SECONDS ));
-		assertFalse(store.contains(key1));
 		
-//		assertEquals(1,store.getCacheEntriesCount());
-//		assertEquals("text/html",store.getIfPresent(key1).getContentType());
-//		
-//		store.invalidate(key1);
-//		assertEquals(0,store.getCacheEntriesCount());
-//		assertNull(store.getIfPresent(key1));
+		// the entry is expired, but not yet purged
+		assertFalse(store.contains(key1));
+		assertNull(store.getIfPresent(key1));
+		assertEquals(1,store.getCacheEntriesCount());
+		
+		// purge
+		store.purgeExpiredEntries();
+		assertFalse(store.contains(key1));
+		assertEquals(0,store.getCacheEntriesCount());
+		
 	}
 	
 	
