@@ -69,7 +69,7 @@ public class JCRHttpCacheStoreImplTest2 {
 	@Test
 	public void simplePutAndDelete() throws HttpCacheDataStreamException {
 		context.registerInjectActivateService(store, config);
-		CacheKey key1 = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example1");
+		CacheKey key1 = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example");
 		CacheContent content1 = new CacheContent("UTF-8", "text/html", cacheContentHeaders, new ByteArrayInputStream(INPUT.getBytes()));
 		store.put(key1, content1);
 		assertTrue(store.contains(key1));
@@ -85,7 +85,7 @@ public class JCRHttpCacheStoreImplTest2 {
 	@Test
 	public void expirationTest() throws HttpCacheDataStreamException {
 		context.registerInjectActivateService(store, config);
-		CacheKey key1 = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example1");
+		CacheKey key1 = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example");
 		CacheContent content1 = new CacheContent("UTF-8", "text/html", cacheContentHeaders, new ByteArrayInputStream(INPUT.getBytes()));
 		store.put(key1, content1);
 		assertTrue(store.contains(key1));
@@ -102,6 +102,35 @@ public class JCRHttpCacheStoreImplTest2 {
 		store.purgeExpiredEntries();
 		assertFalse(store.contains(key1));
 		assertEquals(0,store.getCacheEntriesCount());
+	}
+	
+	@Test
+	public void complexExpiration() throws HttpCacheDataStreamException {
+		context.registerInjectActivateService(store, config);
+		CacheKey key1 = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example");
+		CacheContent content1 = new CacheContent("UTF-8", "text/html", cacheContentHeaders, new ByteArrayInputStream(INPUT.getBytes()));
+		store.put(key1, content1);
+		assertTrue(store.contains(key1));
+		
+		// fast forward to +8 seconds
+		setTime(currentInstant.plus(8, ChronoUnit.SECONDS ));
+		for (int i = 0; i< 10; i++) {
+			CacheKey key = new CacheKeyMock("http://localhost/content/geometrixx/en.html","/content/geometrixx/en",1234,"example"+i);
+			store.put(key, content1);
+		}
+		assertEquals(11,store.getCacheEntriesCount());
+		
+		// fast forward to +11 seconds
+		setTime(currentInstant.plus(11, ChronoUnit.SECONDS ));
+		store.purgeExpiredEntries();
+		// the first entry should have expired
+		assertEquals(10,store.getCacheEntriesCount());
+		
+		
+		store.invalidateAll();
+		assertEquals(0,store.getCacheEntriesCount());
+		
+		
 		
 	}
 	

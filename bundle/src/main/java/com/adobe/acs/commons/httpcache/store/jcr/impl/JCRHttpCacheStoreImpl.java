@@ -237,7 +237,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     /* This is broken out into its own method to allow for easier unit testing */
     protected EntryNodeWriter createEntryNodeWriter(final Session session, final Node entryNode, final CacheKey key,
             final CacheContent content, long expiryTime) {
-        return new EntryNodeWriter(session, entryNode, key, content, expiryTime);
+        return new EntryNodeWriter(session, entryNode, key, content, expiryTime,clock);
     }
 
     @Override
