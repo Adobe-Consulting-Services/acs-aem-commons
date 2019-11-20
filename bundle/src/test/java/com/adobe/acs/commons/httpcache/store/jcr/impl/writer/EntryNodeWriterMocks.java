@@ -27,6 +27,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 public final class EntryNodeWriterMocks
 {
 
+	private Clock clock = Clock.systemUTC();
     private final Session session = mock(Session.class);
 
     private CacheKey cacheKey;
@@ -92,7 +94,7 @@ public final class EntryNodeWriterMocks
         mockCacheKey();
         mockCacheContent();
 
-        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, expireTimeInMilliSeconds);
+        final EntryNodeWriter writer = new EntryNodeWriter(session, entryNode, cacheKey,  cacheContent, expireTimeInMilliSeconds, clock);
         entryNodeWriter = spy(writer);
 
         mockJCRUtil();

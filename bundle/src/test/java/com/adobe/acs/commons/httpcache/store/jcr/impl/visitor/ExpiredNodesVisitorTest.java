@@ -21,6 +21,8 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.Clock;
+
 import javax.jcr.Node;
 
 import org.junit.Test;
@@ -33,6 +35,9 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 @RunWith(MockitoJUnitRunner.class)
 public class ExpiredNodesVisitorTest
 {
+	
+	Clock clock = Clock.systemUTC();
+	
     @Test public void test() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
@@ -66,7 +71,7 @@ public class ExpiredNodesVisitorTest
 
     public ExpiredNodesVisitor getMockedExpiredNodesVisitor(int deltaSaveThreshold)
     {
-        final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
+        final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold,clock);
 
         return visitor;
     }
