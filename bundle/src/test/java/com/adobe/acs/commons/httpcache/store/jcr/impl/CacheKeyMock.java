@@ -97,6 +97,14 @@ public class CacheKeyMock implements CacheKey
     }
 
     public boolean equals(Object o){
-        return false;
+        if (o instanceof CacheKeyMock) {
+        	CacheKeyMock other = (CacheKeyMock) o;
+        	return ((this.hashCode == other.hashCode) && 
+        			(this.hierarchyResourcePath.equals(other.hierarchyResourcePath)) && 
+        			(this.uri.equals(other.uri)) &&
+        			(this.toString.equals(other.toString)));
+        } else {
+        	return false;
+        }
     }
 }

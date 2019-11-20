@@ -23,6 +23,7 @@ import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreCo
 import static org.apache.jackrabbit.commons.JcrUtils.getOrCreateUniqueByPath;
 
 import java.io.IOException;
+import java.time.Clock;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -38,10 +39,13 @@ public class BucketNodeHandler
 
     private final Node bucketNode;
     private final DynamicClassLoaderManager dynamicClassLoaderManager;
+    
+    private final Clock clock;
 
-    public BucketNodeHandler(Node node, DynamicClassLoaderManager dynamicClassLoaderManager){
+    public BucketNodeHandler(Node node, DynamicClassLoaderManager dynamicClassLoaderManager, Clock clock){
         this.bucketNode = node;
         this.dynamicClassLoaderManager = dynamicClassLoaderManager;
+        this.clock = clock;
     }
 
     public Node createOrRetrieveEntryNode(CacheKey key, long engineDefaultExpiryInMs)
@@ -70,7 +74,8 @@ public class BucketNodeHandler
         while(entryNodeIterator.hasNext()){
             Node entryNode = entryNodeIterator.nextNode();
             CacheKey entryKey = new EntryNodeToCacheKeyHandler(entryNode, dynamicClassLoaderManager).get();
-            if(key.equals(entryKey)) {
+            boolean isExpired = entryNode.getProperty(PN_EXPIRES_ON).getLong() < clock.instant().toEpochMilli();
+            if(key.equals(entryKey) && !isExpired) {
                 return entryNode;
             }
         }

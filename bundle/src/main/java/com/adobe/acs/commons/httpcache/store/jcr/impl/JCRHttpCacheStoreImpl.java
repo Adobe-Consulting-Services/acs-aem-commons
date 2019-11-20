@@ -200,7 +200,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public void put(final CacheKey key, final CacheContent content) throws HttpCacheDataStreamException {
-        final long currentTime = clock.millis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementLoadCount();
 
         withSession((Session session) -> {
@@ -217,7 +217,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             session.save();
 
             incrementLoadSuccessCount();
-            incrementTotalLoadTime(clock.millis() - currentTime);
+            incrementTotalLoadTime(clock.instant().toEpochMilli() - currentTime);
         }, (Exception e) -> {
             incrementLoadExceptionCount();
         });
@@ -231,7 +231,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     /* This is broken out into its own method to allow for easier unit testing */
     protected BucketNodeHandler createBucketNodeHandler(final Node bucketNode) {
-        return new BucketNodeHandler(bucketNode, dclm);
+        return new BucketNodeHandler(bucketNode, dclm, clock);
     }
 
     /* This is broken out into its own method to allow for easier unit testing */
@@ -242,7 +242,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public boolean contains(final CacheKey key) {
-        final long currentTime = clock.millis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementRequestCount();
 
         return withSession((Session session) -> {
@@ -252,14 +252,14 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             if (bucketNode != null) {
                 Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 if (entryNode != null) {
-                    incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
                     incrementHitCount();
 
                     return true;
                 }
             }
 
-            incrementTotalLookupTime(clock.millis() - currentTime);
+            incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
             incrementMissCount();
 
             return false;
@@ -268,7 +268,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public CacheContent getIfPresent(final CacheKey key) {
-        final long currentTime = clock.millis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementRequestCount();
 
         return withSession((Session session) -> {
@@ -277,16 +277,20 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
             if (bucketNode != null) {
                 final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
+                if (entryNode == null) {
+                	return null;
+                }
+                
                 final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
 
                 if (content != null) {
-                    incrementTotalLookupTime(clock.millis() - currentTime);
+                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
                     incrementHitCount();
                     return content;
                 }
             }
 
-            incrementTotalLookupTime(clock.millis() - currentTime);
+            incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
             incrementMissCount();
 
             return null;
