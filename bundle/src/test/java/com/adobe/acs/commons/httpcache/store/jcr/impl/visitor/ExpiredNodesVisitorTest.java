@@ -36,9 +36,9 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 @RunWith(MockitoJUnitRunner.class)
 public class ExpiredNodesVisitorTest
 {
-	
-	Clock clock = Clock.systemUTC();
-	
+
+    Clock clock = Clock.systemUTC();
+
     @Test 
     @Ignore
     public void test() throws Exception

@@ -30,8 +30,8 @@ import javax.jcr.RepositoryException;
  * Traversed and automatically cleans up expired cache entry nodes / bucket nodes.
  */
 public class ExpiredNodesVisitor extends AbstractNodeVisitor {
-	
-	Clock clock;
+    
+    Clock clock;
 
     public ExpiredNodesVisitor( int maxLevel, long deltaSaveThreshold, Clock clock) {
         super(maxLevel, deltaSaveThreshold);

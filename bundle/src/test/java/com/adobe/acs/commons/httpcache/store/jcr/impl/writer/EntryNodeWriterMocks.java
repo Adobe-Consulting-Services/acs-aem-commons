@@ -53,7 +53,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 public final class EntryNodeWriterMocks
 {
 
-	private Clock clock = Clock.systemUTC();
+    private Clock clock = Clock.systemUTC();
     private final Session session = mock(Session.class);
 
     private CacheKey cacheKey;

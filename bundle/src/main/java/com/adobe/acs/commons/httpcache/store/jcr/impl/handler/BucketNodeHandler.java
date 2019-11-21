@@ -81,10 +81,8 @@ public class BucketNodeHandler
             Node entryNode = entryNodeIterator.nextNode();
             CacheKey entryKey = new EntryNodeToCacheKeyHandler(entryNode, dynamicClassLoaderManager).get();
             boolean isExpired = entryNode.getProperty(PN_EXPIRES_ON).getLong() < clock.instant().toEpochMilli();
-            if(key.equals(entryKey)) {
-            	if (!(isExpired && !ignoreExpiration)) {
-            		return entryNode;
-            	}
+            if(key.equals(entryKey) && (!(isExpired && !ignoreExpiration))) {
+                return entryNode;
             } 
         }
         return null;
