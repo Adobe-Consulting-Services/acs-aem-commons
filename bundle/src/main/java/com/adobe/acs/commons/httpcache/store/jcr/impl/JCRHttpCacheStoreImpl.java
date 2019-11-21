@@ -279,12 +279,12 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
                 final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 if (entryNode != null) {
 
-	                final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
-	                if (content != null) {
-	                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
-	                    incrementHitCount();
-	                    return content;
-	                }
+                    final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+                    if (content != null) {
+                        incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
+                        incrementHitCount();
+                        return content;
+                    }
                 }
             }
 

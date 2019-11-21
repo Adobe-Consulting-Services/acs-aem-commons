@@ -69,7 +69,7 @@ public class BucketNodeHandler
     public Node getEntryIfExists(CacheKey key)
             throws RepositoryException, IOException, ClassNotFoundException
     {
-    	return getEntryIfExists(key, false);
+        return getEntryIfExists(key, false);
     }
     
     public Node getEntryIfExists(CacheKey key, boolean ignoreExpiration)
