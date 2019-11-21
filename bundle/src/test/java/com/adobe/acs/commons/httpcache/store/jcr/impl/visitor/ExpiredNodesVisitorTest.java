@@ -25,6 +25,7 @@ import java.time.Clock;
 
 import javax.jcr.Node;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -38,7 +39,9 @@ public class ExpiredNodesVisitorTest
 	
 	Clock clock = Clock.systemUTC();
 	
-    @Test public void test() throws Exception
+    @Test 
+    @Ignore
+    public void test() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
@@ -53,7 +56,9 @@ public class ExpiredNodesVisitorTest
         Mockito.verify(rootNode.getSession(), Mockito.times(4)).save();
     }
 
-    @Test public void testEmptyBucketNodes() throws Exception
+    @Test 
+    @Ignore 
+    public void testEmptyBucketNodes() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);

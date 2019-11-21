@@ -85,7 +85,7 @@ public class BucketNodeHandler
             	if (!(isExpired && !ignoreExpiration)) {
             		return entryNode;
             	}
-            }
+            } 
         }
         return null;
     }

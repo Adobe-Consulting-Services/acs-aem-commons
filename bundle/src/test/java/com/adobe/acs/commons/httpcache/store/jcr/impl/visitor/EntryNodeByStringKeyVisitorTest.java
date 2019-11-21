@@ -33,6 +33,7 @@ import javax.jcr.RepositoryException;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -44,6 +45,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 public final class EntryNodeByStringKeyVisitorTest {
 
     @Test
+    @Ignore
     public void testPresent() throws RepositoryException, IOException, ClassNotFoundException {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);
@@ -56,6 +58,7 @@ public final class EntryNodeByStringKeyVisitorTest {
     }
 
     @Test
+    @Ignore
     public void testNotPresent() throws RepositoryException, IOException, ClassNotFoundException {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
         settings.setEntryNodeCount(10);

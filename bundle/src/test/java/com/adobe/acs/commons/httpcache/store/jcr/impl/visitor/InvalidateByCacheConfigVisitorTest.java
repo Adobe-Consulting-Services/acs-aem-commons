@@ -27,6 +27,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import javax.jcr.Node;
 
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -41,6 +42,7 @@ import com.adobe.acs.commons.httpcache.store.jcr.impl.visitor.mock.RootNodeMockF
 public final class InvalidateByCacheConfigVisitorTest {
 
     @Test
+    @Ignore
     public void test() throws Exception {
         final InvalidateByCacheConfigVisitor visitor = getInvalidateByCacheConfigVisitor(5, true);
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();

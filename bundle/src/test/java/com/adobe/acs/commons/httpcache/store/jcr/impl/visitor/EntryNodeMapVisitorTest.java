@@ -32,6 +32,7 @@ import javax.jcr.Node;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -47,6 +48,7 @@ public final class EntryNodeMapVisitorTest
 {
 
     @Test
+    @Ignore
     public void test10entries() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
@@ -62,6 +64,7 @@ public final class EntryNodeMapVisitorTest
     }
 
     @Test
+    @Ignore
     public void testNoEntries() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
@@ -77,6 +80,7 @@ public final class EntryNodeMapVisitorTest
     }
 
     @Test
+    @Ignore
     public void test5BucketDepth() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
@@ -93,6 +97,7 @@ public final class EntryNodeMapVisitorTest
     }
 
     @Test
+    @Ignore
     public void test5entries() throws Exception
     {
         final RootNodeMockFactory.Settings settings = new RootNodeMockFactory.Settings();
