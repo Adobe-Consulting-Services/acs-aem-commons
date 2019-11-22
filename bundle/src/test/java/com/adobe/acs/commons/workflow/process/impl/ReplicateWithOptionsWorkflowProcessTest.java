@@ -61,7 +61,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-	
+
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 

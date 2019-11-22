@@ -49,7 +49,7 @@ import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.google.common.collect.ImmutableMap;
 
 public final class VersionServiceImplTest {
-	
+
     private static final String MANY = "manyVersions";
     private static final String ONE = "oneVersion";
 
@@ -63,9 +63,6 @@ public final class VersionServiceImplTest {
     
     @Before
     public void setup() throws Exception {
-        Session session = context.resourceResolver().adaptTo(Session.class);
-
-
         Map<String, Object> props = ImmutableMap.of("jcr:primaryType", "nt:unstructured");
         ResourceResolver rr = context.resourceResolver();
         Resource root = rr.getResource("/");
@@ -78,6 +75,7 @@ public final class VersionServiceImplTest {
 
         rr.commit();
 
+        Session session = context.resourceResolver().adaptTo(Session.class);
         VersionManager vmgr = session.getWorkspace().getVersionManager();
         oneVersionVersion = vmgr.checkin(oneVersion.getPath());
         vmgr.checkout(oneVersion.getPath());

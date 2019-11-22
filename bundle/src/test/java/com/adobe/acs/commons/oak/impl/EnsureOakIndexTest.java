@@ -41,8 +41,8 @@ import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
 
 
 public class EnsureOakIndexTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     
     @Rule
