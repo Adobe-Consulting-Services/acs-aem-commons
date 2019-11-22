@@ -1,6 +1,8 @@
 language: java
 dist: trusty
-jdk: oraclejdk8
+jdk: 
+- oraclejdk8
+- oraclejdk11
 env:
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true
 - MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
