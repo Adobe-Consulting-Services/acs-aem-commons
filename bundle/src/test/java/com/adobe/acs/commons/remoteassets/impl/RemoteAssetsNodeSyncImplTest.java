@@ -417,11 +417,9 @@ public class RemoteAssetsNodeSyncImplTest {
         session.save();
     }
     
-    private boolean hasMixin (Resource resource, String mixin) throws RepositoryException {
-    	List<NodeType> nodetypes = Arrays.asList( resource.adaptTo(Node.class).getMixinNodeTypes());
-    	return nodetypes.stream().anyMatch(nt -> nt.getName().equals(mixin));
-    	
-    	
+    private boolean hasMixin(Resource resource, String mixin) throws RepositoryException {
+        List<NodeType> nodetypes = Arrays.asList(resource.adaptTo(Node.class).getMixinNodeTypes());
+        return nodetypes.stream().anyMatch(nt -> nt.getName().equals(mixin));
     }
     
 }

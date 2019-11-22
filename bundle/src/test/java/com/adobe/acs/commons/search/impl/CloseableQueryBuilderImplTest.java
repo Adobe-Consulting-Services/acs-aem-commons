@@ -63,8 +63,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 public class CloseableQueryBuilderImplTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule

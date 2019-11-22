@@ -51,8 +51,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TwitterAdapterFactoryTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     public static final String VALID_OAUTH_CLIENT_ID = "abcd";

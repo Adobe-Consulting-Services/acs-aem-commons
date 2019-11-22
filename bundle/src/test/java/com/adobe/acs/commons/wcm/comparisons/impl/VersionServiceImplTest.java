@@ -50,11 +50,11 @@ import com.google.common.collect.ImmutableMap;
 
 public final class VersionServiceImplTest {
 	
-	private static final String MANY = "manyVersions";
-	private static final String ONE = "oneVersion";
-	
-	@Rule
-	public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    private static final String MANY = "manyVersions";
+    private static final String ONE = "oneVersion";
+
+    @Rule
+    public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
 
     private final VersionService underTest = new VersionServiceImpl();
     
@@ -63,29 +63,30 @@ public final class VersionServiceImplTest {
     
     @Before
     public void setup() throws Exception {
-    	Session session = context.resourceResolver().adaptTo(Session.class);
-    	VersionManager vmgr = session.getWorkspace().getVersionManager();
-    	
-    	Map<String,Object> props = ImmutableMap.of("jcr:primaryType","nt:unstructured");
-    	ResourceResolver rr = context.resourceResolver();
-    	Resource root = rr.getResource("/");
-    	Resource manyVersions = rr.create(root, "manyVersions", props);
-    	Resource oneVersion = rr.create(root, "oneVersion", props);
-    	Resource noVersion = rr.create(root, "noVersion", props);
-    	
-    	manyVersions.adaptTo(Node.class).addMixin("mix:versionable");
-    	oneVersion.adaptTo(Node.class).addMixin("mix:versionable");
-    	
-    	rr.commit();
-    	
-    	oneVersionVersion = vmgr.checkin(oneVersion.getPath());
-    	vmgr.checkout(oneVersion.getPath());
-    	
-    	for (int i=0;i<10;i++) {
-    		manyVersionVersion = vmgr.checkin(manyVersions.getPath());
-    		vmgr.checkout(manyVersions.getPath());
-    	}
-    	
+        Session session = context.resourceResolver().adaptTo(Session.class);
+
+
+        Map<String, Object> props = ImmutableMap.of("jcr:primaryType", "nt:unstructured");
+        ResourceResolver rr = context.resourceResolver();
+        Resource root = rr.getResource("/");
+        Resource manyVersions = rr.create(root, "manyVersions", props);
+        Resource oneVersion = rr.create(root, "oneVersion", props);
+        Resource noVersion = rr.create(root, "noVersion", props);
+
+        manyVersions.adaptTo(Node.class).addMixin("mix:versionable");
+        oneVersion.adaptTo(Node.class).addMixin("mix:versionable");
+
+        rr.commit();
+
+        VersionManager vmgr = session.getWorkspace().getVersionManager();
+        oneVersionVersion = vmgr.checkin(oneVersion.getPath());
+        vmgr.checkout(oneVersion.getPath());
+
+        for (int i = 0; i < 10; i++) {
+            manyVersionVersion = vmgr.checkin(manyVersions.getPath());
+            vmgr.checkout(manyVersions.getPath());
+        }
+
     }
     
     @Test

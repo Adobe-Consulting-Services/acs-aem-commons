@@ -56,8 +56,8 @@ import junitx.util.PrivateAccessor;
 
 
 public class SetReplicationStatusProcessTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock

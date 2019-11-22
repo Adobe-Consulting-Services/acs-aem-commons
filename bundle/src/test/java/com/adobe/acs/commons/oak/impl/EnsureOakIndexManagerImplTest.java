@@ -49,8 +49,8 @@ import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
 
 public class EnsureOakIndexManagerImplTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     
     @Rule
@@ -71,7 +71,7 @@ public class EnsureOakIndexManagerImplTest {
         // setup test content in the repo
         context.build().resource(OAK_INDEX).commit();
         context.registerService(Scheduler.class,scheduler);
-        
+
         ScheduleOptions options = mock(ScheduleOptions.class);
         when(scheduler.NOW()).thenReturn(options);
         when(scheduler.schedule(anyObject(), anyObject())).thenAnswer((InvocationOnMock invocation) -> {
@@ -79,7 +79,7 @@ public class EnsureOakIndexManagerImplTest {
             handler.run();
             return true;
         });
-        
+
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
        
         ensureOakIndexManagerProperties = new HashMap<>();

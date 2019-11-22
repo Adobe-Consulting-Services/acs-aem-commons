@@ -46,7 +46,7 @@ public class SiteMapServletTest {
 
     private static final Map<String, String> NS = Collections.singletonMap("ns", "http://www.sitemaps.org/schemas/sitemap/0.9");
 
-	@Rule
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     
     @Rule

@@ -46,8 +46,8 @@ import com.day.cq.search.facets.Bucket;
 import com.day.cq.search.result.SearchResult;
 
 public class QueryIWrapTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
@@ -81,8 +81,8 @@ public class QueryIWrapTest {
         assertSame("getPredicates() should return mocked predicates", predicates, wrapQuery.getPredicates());
         assertSame("getResult() should return mocked SearchResult", searchResult, wrapQuery.getResult());
 
-        assertSame("wrapQuery.wrapQuery(refinedQuery) should return refinedQuery",
-                refinedQuery, wrapQuery.wrapQuery(refinedQuery));
+        assertSame("wrapQuery.wrapQuery(refinedQuery) should return refinedQuery", refinedQuery,
+                wrapQuery.wrapQuery(refinedQuery));
 
         wrapQuery.setStart(0L);
         verify(query, times(1)).setStart(0L);
@@ -104,8 +104,7 @@ public class QueryIWrapTest {
 
         wrapQuery.registerPredicateEvaluator(predType, mockPredEval);
 
-        verify(query, times(1))
-                .registerPredicateEvaluator(anyString(), any(PredicateEvaluator.class));
+        verify(query, times(1)).registerPredicateEvaluator(anyString(), any(PredicateEvaluator.class));
     }
 
     static class WrapQuery implements QueryIWrap {

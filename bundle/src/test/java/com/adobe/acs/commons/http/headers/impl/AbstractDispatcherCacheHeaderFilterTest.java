@@ -61,8 +61,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 
 public class AbstractDispatcherCacheHeaderFilterTest {
-	
-	@Rule
+
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     AbstractDispatcherCacheHeaderFilter filter;
