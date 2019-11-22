@@ -23,6 +23,7 @@ import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.functions.CheckedFunction;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
@@ -172,6 +173,9 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     private int bucketTreeDepth;
     private int deltaSaveThreshold;
     private int expireTimeInSeconds;
+    
+    
+    protected Clock clock;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -182,6 +186,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     public JCRHttpCacheStoreImpl() throws NotCompliantMBeanException {
         super(JcrCacheMBean.class);
+        clock = Clock.systemUTC();
     }
 
     @Activate
@@ -195,7 +200,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public void put(final CacheKey key, final CacheContent content) throws HttpCacheDataStreamException {
-        final long currentTime = System.currentTimeMillis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementLoadCount();
 
         withSession((Session session) -> {
@@ -212,7 +217,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             session.save();
 
             incrementLoadSuccessCount();
-            incrementTotalLoadTime(System.currentTimeMillis() - currentTime);
+            incrementTotalLoadTime(clock.instant().toEpochMilli() - currentTime);
         }, (Exception e) -> {
             incrementLoadExceptionCount();
         });
@@ -226,18 +231,18 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     /* This is broken out into its own method to allow for easier unit testing */
     protected BucketNodeHandler createBucketNodeHandler(final Node bucketNode) {
-        return new BucketNodeHandler(bucketNode, dclm);
+        return new BucketNodeHandler(bucketNode, dclm, clock);
     }
 
     /* This is broken out into its own method to allow for easier unit testing */
     protected EntryNodeWriter createEntryNodeWriter(final Session session, final Node entryNode, final CacheKey key,
             final CacheContent content, long expiryTime) {
-        return new EntryNodeWriter(session, entryNode, key, content, expiryTime);
+        return new EntryNodeWriter(session, entryNode, key, content, expiryTime,clock);
     }
 
     @Override
     public boolean contains(final CacheKey key) {
-        final long currentTime = System.currentTimeMillis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementRequestCount();
 
         return withSession((Session session) -> {
@@ -247,14 +252,14 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             if (bucketNode != null) {
                 Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
                 if (entryNode != null) {
-                    incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+                    incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
                     incrementHitCount();
 
                     return true;
                 }
             }
 
-            incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+            incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
             incrementMissCount();
 
             return false;
@@ -263,7 +268,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
     @Override
     public CacheContent getIfPresent(final CacheKey key) {
-        final long currentTime = System.currentTimeMillis();
+        final long currentTime = clock.instant().toEpochMilli();
         incrementRequestCount();
 
         return withSession((Session session) -> {
@@ -272,16 +277,18 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
 
             if (bucketNode != null) {
                 final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
-                final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+                if (entryNode != null) {
 
-                if (content != null) {
-                    incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
-                    incrementHitCount();
-                    return content;
+                    final CacheContent content = new EntryNodeToCacheContentHandler(entryNode).get();
+                    if (content != null) {
+                        incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
+                        incrementHitCount();
+                        return content;
+                    }
                 }
             }
 
-            incrementTotalLookupTime(System.currentTimeMillis() - currentTime);
+            incrementTotalLookupTime(clock.instant().toEpochMilli() - currentTime);
             incrementMissCount();
 
             return null;
@@ -305,7 +312,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
             final Node bucketNode = factory.getBucketNode();
 
             if (bucketNode != null) {
-                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key);
+                final Node entryNode = createBucketNodeHandler(bucketNode).getEntryIfExists(key,true);
                 if (entryNode != null) {
                     entryNode.remove();
                     session.save();
@@ -356,7 +363,7 @@ public class JCRHttpCacheStoreImpl extends AbstractJCRCacheMBean<CacheKey, Cache
     public void purgeExpiredEntries() {
         withSession((Session session) -> {
             final Node rootNode = session.getNode(cacheRootPath);
-            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold);
+            final ExpiredNodesVisitor visitor = new ExpiredNodesVisitor(11, deltaSaveThreshold, clock);
             visitor.visit(rootNode);
             visitor.close();
             incrementEvictionCount(visitor.getEvictionCount());

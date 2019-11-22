@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,13 +50,15 @@ public class EntryNodeWriter
     private final CacheKey cacheKey;
     private final CacheContent cacheContent;
     private final long expireTimeInMilliSeconds;
+    private final Clock clock;
 
-    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent, long expireTimeInMilliSeconds){
+    public EntryNodeWriter(Session session, Node entryNode, CacheKey cacheKey, CacheContent cacheContent, long expireTimeInMilliSeconds, Clock clock){
         this.session = session;
         this.entryNode = entryNode;
         this.cacheKey = cacheKey;
         this.cacheContent = cacheContent;
         this.expireTimeInMilliSeconds = expireTimeInMilliSeconds;
+        this.clock = clock;
     }
 
     /**
@@ -82,7 +85,7 @@ public class EntryNodeWriter
 
     private void setExpireTime() throws RepositoryException
     {
-        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  expireTimeInMilliSeconds + System.currentTimeMillis() );
+        entryNode.setProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON,  expireTimeInMilliSeconds + clock.instant().toEpochMilli() );
     }
 
     private void populateMetaData() throws RepositoryException
