@@ -71,7 +71,7 @@ import static org.mockito.Mockito.*;
 
 public class HttpCacheEngineImplTest {
 
-	@Rule
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 	
     @Mock

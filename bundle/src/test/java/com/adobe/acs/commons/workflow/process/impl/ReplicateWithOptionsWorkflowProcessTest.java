@@ -59,7 +59,7 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 
 public class ReplicateWithOptionsWorkflowProcessTest {
 
-	@Rule
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 	
     @Rule

@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class QueryBuilderViewHandlerTest {
     private static final Logger LOG = LoggerFactory.getLogger(QueryBuilderViewHandlerTest.class);
     
-	@Rule
+    @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule

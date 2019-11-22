@@ -95,14 +95,11 @@ public class BrandPortalSyncProcessTest {
 
     @Before
     public void setUp() throws Exception {
-    	
-    	context.build().resource(assetPath, 
-    			"jcr:primaryType","dam:Asset").commit();
-    	context.build().resource(assetPath + "/jcr:content", 
-    			"cq:name","foo").commit();
-    	Resource assetResource = context.resourceResolver().getResource(assetPath);
-    	asset = assetResource.adaptTo(Asset.class);
-    	
+
+        context.build().resource(assetPath, "jcr:primaryType", "dam:Asset").commit();
+        context.build().resource(assetPath + "/jcr:content", "cq:name", "foo").commit();
+        Resource assetResource = context.resourceResolver().getResource(assetPath);
+        asset = assetResource.adaptTo(Asset.class);
 
         metadataMap = new SimpleMetaDataMap();
         paths = new ArrayList<>();

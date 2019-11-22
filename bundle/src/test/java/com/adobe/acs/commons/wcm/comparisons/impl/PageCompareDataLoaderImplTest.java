@@ -37,11 +37,12 @@ import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
 
 public class PageCompareDataLoaderImplTest {
 
-	@Rule
-	public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
-	// otherweise we get unnecessary mocking errors; we cannot remove them because they are needed to 
-	// make PageCompareDataImplTest working :-|
-	
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
+    // otherweise we get unnecessary mocking errors; we cannot remove them because
+    // they are needed to
+    // make PageCompareDataImplTest working :-|
+
     @Test
     public void shouldInitialize() throws Exception {
         // given
