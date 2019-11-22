@@ -73,7 +73,7 @@ public class HttpCacheEngineImplTest {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-	
+
     @Mock
     HttpCacheConfig memCacheConfig;
 
