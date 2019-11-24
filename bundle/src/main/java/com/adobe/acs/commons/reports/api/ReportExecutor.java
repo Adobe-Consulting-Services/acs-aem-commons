@@ -19,7 +19,15 @@
  */
 package com.adobe.acs.commons.reports.api;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Interface for report execution classes to implement. These should be Sling
@@ -76,4 +84,15 @@ public interface ReportExecutor {
    *            the result page
    */
   void setPage(int page);
+
+  default Map<String, String> getParamPatternMap(SlingHttpServletRequest request) {
+    Map<String, String> parameters = new HashMap<>();
+    Enumeration<String> paramNames = request.getParameterNames();
+    while (paramNames.hasMoreElements()) {
+      String key = paramNames.nextElement();
+      parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
+    }
+    LoggerFactory.getLogger(this.getClass()).debug("Loading parameters from request: {}", parameters);
+    return parameters;
+  }
 }

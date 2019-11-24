@@ -20,6 +20,11 @@
                 jcr:title="Date Picker"
                 sling:resourceType="acs-commons/components/utilities/genericlist/item"
                 value="granite/ui/components/coral/foundation/form/datepicker"/>
+            <default_2
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Text Area"
+                    sling:resourceType="acs-commons/components/utilities/genericlist/item"
+                    value="granite/ui/components/coral/foundation/form/textarea"/>
         </list>
     </jcr:content>
 </jcr:root>
