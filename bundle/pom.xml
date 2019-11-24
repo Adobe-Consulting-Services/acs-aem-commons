@@ -341,29 +341,10 @@
 							<goal>test</goal>
 						</goals>
 						<configuration>
-							<includes>**/*.java</includes>
-							<excludes>
-								<exclude>**/RemoteAssetsBinarySyncImplTest.java</exclude>
-								<exclude>**/OnDeployScriptBaseTest.java</exclude>
-								<exclude>**/RemoteAssetsNodeSyncImplTest.java</exclude>
-							</excludes>
 							<reuseForks>true</reuseForks>
-						</configuration>
-					</execution>
-					<execution>
-						<id>second-test-phase</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-						<configuration>
-							<excludes>**/*.java</excludes>
-							<includes>
-								<include>**/RemoteAssetsBinarySyncImplTest.java</include>
-								<include>**/OnDeployScriptBaseTest.java</include>
-								<include>**/RemoteAssetsNodeSyncImplTest.java</include>
-							</includes>
-							<reuseForks>true</reuseForks>
+							<parallel>classes</parallel>
+							<threadCount>2</threadCount>
+							<perCoreThreadCount></perCoreThreadCount>
 						</configuration>
 					</execution>
 				</executions>
