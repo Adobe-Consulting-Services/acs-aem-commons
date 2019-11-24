@@ -217,28 +217,9 @@ public class ReplicateWithOptionsWorkflowProcessTest {
             return this;
         }
 
-//        @Override
-//        public boolean matches(Object argument) {
-//            if (argument instanceof ReplicationOptions) {
-//                ReplicationOptions options = (ReplicationOptions) argument;
-//                boolean matches = true;
-//                if (filterAgentId != null) {
-//                    Agent agent = mock(Agent.class);
-//                    when(agent.getId()).thenReturn(filterAgentId);
-//                    matches = matches && options.getFilter().isIncluded(agent);
-//                }
-//                if (brandPortalFilter) {
-//                    matches = matches && options.getFilter() instanceof BrandPortalAgentFilter;
-//                }
-//                return matches;
-//            } else {
-//                return false;
-//            }
-//        }
-
-		@Override
-		public boolean matches(ReplicationOptions argument) {
-			ReplicationOptions options = (ReplicationOptions) argument;
+        @Override
+        public boolean matches(ReplicationOptions argument) {
+            ReplicationOptions options = (ReplicationOptions) argument;
             boolean matches = true;
             if (filterAgentId != null) {
                 Agent agent = mock(Agent.class);
@@ -249,7 +230,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
                 matches = matches && options.getFilter() instanceof BrandPortalAgentFilter;
             }
             return matches;
-		}
+        }
 
     }
 }

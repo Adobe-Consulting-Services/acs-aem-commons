@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;

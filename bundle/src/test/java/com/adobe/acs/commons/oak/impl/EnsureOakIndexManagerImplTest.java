@@ -22,7 +22,7 @@ package com.adobe.acs.commons.oak.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,12 +38,10 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
@@ -74,7 +72,7 @@ public class EnsureOakIndexManagerImplTest {
 
         ScheduleOptions options = mock(ScheduleOptions.class);
         when(scheduler.NOW()).thenReturn(options);
-        when(scheduler.schedule(anyObject(), anyObject())).thenAnswer((InvocationOnMock invocation) -> {
+        when(scheduler.schedule(any(), any())).thenAnswer((InvocationOnMock invocation) -> {
             EnsureOakIndexJobHandler handler = invocation.getArgument(0);
             handler.run();
             return true;
