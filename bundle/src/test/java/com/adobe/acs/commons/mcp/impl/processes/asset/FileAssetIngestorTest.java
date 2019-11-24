@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
@@ -64,7 +64,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doAnswer;
@@ -327,7 +326,7 @@ public class FileAssetIngestorTest {
                 .addFile("file1.png", 1234L)
                 .addFile("file2.png", 4567L)
                 .asVector();
-        when(channel.ls(anyObject())).thenReturn(entries);
+        when(channel.ls(any())).thenReturn(entries);
 
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         int count = 0;

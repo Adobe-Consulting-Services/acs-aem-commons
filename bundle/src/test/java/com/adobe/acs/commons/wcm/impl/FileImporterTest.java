@@ -47,7 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -163,7 +163,7 @@ public class FileImporterTest {
 
     @Test
     public void testWrongScheme() throws Exception {
-    	Resource resource = context.resourceResolver().getResource(folder.getPath());
+        Resource resource = context.resourceResolver().getResource(folder.getPath());
         importer.importData("file2", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
@@ -172,8 +172,12 @@ public class FileImporterTest {
 
     @Test
     public void testNullAdaptation() throws Exception {
+<<<<<<< HEAD
 
     	Resource resource = context.resourceResolver().getResource("/var/non/existing/path");
+=======
+        Resource resource = new NonExistingResource(context.resourceResolver(), "/var/non/existing/resource");
+>>>>>>> remove use of deprecated mocks
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());

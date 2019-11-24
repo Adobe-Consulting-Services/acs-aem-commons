@@ -41,14 +41,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class DispatcherFlushRulesImplTest {
@@ -146,7 +146,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(null, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
 
@@ -156,7 +156,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(new ReplicationAction(ReplicationActionType.ACTIVATE, "/content/foo"), null);
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -195,7 +195,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -209,7 +209,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -223,7 +223,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, new ReplicationOptions());
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class DispatcherFlushRulesImplTest {
 
         dispatcherFlushRules.preprocess(replicationAction, replicationOptions);
 
-        verifyZeroInteractions(dispatcherFlusher);
+        verifyNoInteractions(dispatcherFlusher);
     }
 
 

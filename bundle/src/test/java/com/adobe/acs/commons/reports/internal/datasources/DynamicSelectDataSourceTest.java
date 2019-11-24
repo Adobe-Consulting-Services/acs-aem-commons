@@ -20,8 +20,8 @@
 package com.adobe.acs.commons.reports.internal.datasources;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
@@ -79,7 +79,8 @@ public class DynamicSelectDataSourceTest {
         
         // prepare services
         context.registerService(QueryHelper.class,queryHelper);
-        when(queryHelper.findResources(anyObject(),anyString(),anyString(), eq(StringUtils.EMPTY))).thenReturn(resourceList);
+        when(queryHelper.findResources(any(), anyString(), anyString(), eq(StringUtils.EMPTY)))
+                .thenReturn(resourceList);
         context.registerService(DataSourceBuilder.class,dataSourceBuilder);
         
         servlet = new DynamicSelectDataSource();

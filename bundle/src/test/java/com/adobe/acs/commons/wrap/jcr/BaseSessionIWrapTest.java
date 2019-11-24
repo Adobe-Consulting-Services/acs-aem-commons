@@ -23,10 +23,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,7 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.ContentHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,7 +106,7 @@ public class BaseSessionIWrapTest {
         when(session.hasPendingChanges()).thenReturn(true);
         when(session.getValueFactory()).thenReturn(valueFactory);
         when(session.hasPermission(anyString(), anyString())).thenReturn(true);
-        when(session.hasCapability(anyString(), anyObject(), any(Object[].class))).thenReturn(true);
+        when(session.hasCapability(anyString(), any(), any(Object[].class))).thenReturn(true);
         when(session.getImportContentHandler(anyString(), anyInt())).thenReturn(contentHandler);
         when(session.getNamespacePrefixes()).thenReturn(namespacePrefixes);
         when(session.getNamespaceURI(anyString())).thenReturn("http://someuri/");

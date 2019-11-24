@@ -66,7 +66,7 @@ import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CAC
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class HttpCacheEngineImplTest {

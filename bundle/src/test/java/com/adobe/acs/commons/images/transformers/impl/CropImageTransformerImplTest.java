@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.awt.Rectangle;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.Map;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -141,14 +141,14 @@ public class CropImageTransformerImplTest {
 
         transformer.transform(layer, properties);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     @Test
     public void testTransform_nullParams() throws Exception {
         transformer.transform(layer, null);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     @Test
