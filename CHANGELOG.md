@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
+- #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
@@ -36,7 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2092 - Tag Export - IndexOutOfBoundsException issue
-- #2004 - Bugfix/httpcache combined cache key different entries 
+- #2004 - Bugfix/httpcache combined cache key different entries
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
