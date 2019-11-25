@@ -10,8 +10,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Added
+- #2118 - Adding functionality to showhidedialogfields TouchUI widget
+- #2064 - Adding Marketo Form Component
+- #1919 - Report Builder | Path List Executor Implementation
+
 ### Fixed
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
+- #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
 
 ## [4.3.4] - 2019-10-16
 
@@ -95,7 +101,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
-- #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.

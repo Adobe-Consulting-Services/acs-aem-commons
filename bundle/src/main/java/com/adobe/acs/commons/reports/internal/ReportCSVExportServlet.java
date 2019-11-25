@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import com.adobe.acs.commons.reports.api.ReportExecutor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -143,7 +144,12 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
       Csv csv, Writer writer) throws ReportException {
-    ReportExecutor executor = getReportExecutor(config, request);
+    Class<?> executorClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
+
+    ReportExecutor executor = Optional.ofNullable(request.adaptTo(executorClass))
+        .filter(model -> model instanceof ReportExecutor)
+        .map(model -> (ReportExecutor) model)
+        .orElseThrow(() -> new ReportException("Failed to get report executor"));
 
     executor.setConfiguration(config);
     log.debug("Retrieved executor {}", executor);
@@ -167,25 +173,5 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
     log.debug("Results written successfully");
 
-  }
-
-  private ReportExecutor getReportExecutor(Resource config, SlingHttpServletRequest request) throws ReportException {
-    String executorClassName = config.getValueMap().get("reportExecutor", String.class);
-    if (StringUtils.isBlank(executorClassName)) {
-      throw new ReportException("reportExecutor property is not defined in the config node");
-    }
-    try {
-      @SuppressWarnings("unchecked")
-      Class<ReportCellCSVExporter> clazz =
-              (Class<ReportCellCSVExporter>) Class
-                      .forName(executorClassName, true, dynamicClassLoaderManager.getDynamicClassLoader());
-      ReportExecutor reportExecutor = (ReportExecutor) Optional.ofNullable(request.adaptTo(clazz))
-              .orElseThrow(() -> new ReportException("Failed to get report executor"));
-      log.debug("ReportExecutor loaded {}", executorClassName);
-      return reportExecutor;
-    } catch (ClassNotFoundException e) {
-      log.warn("Class not found for ReportExecutor [{}]", executorClassName);
-      throw new ReportException("Class not found for ReportExecutor [" + executorClassName + "]", e);
-    }
   }
 }

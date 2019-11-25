@@ -21,6 +21,8 @@ package com.adobe.acs.commons.httpcache.store.jcr.impl.visitor;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 
+import java.time.Clock;
+
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
@@ -28,9 +30,12 @@ import javax.jcr.RepositoryException;
  * Traversed and automatically cleans up expired cache entry nodes / bucket nodes.
  */
 public class ExpiredNodesVisitor extends AbstractNodeVisitor {
+    
+    Clock clock;
 
-    public ExpiredNodesVisitor( int maxLevel, long deltaSaveThreshold) {
+    public ExpiredNodesVisitor( int maxLevel, long deltaSaveThreshold, Clock clock) {
         super(maxLevel, deltaSaveThreshold);
+        this.clock = clock;
     }
 
     protected void leaving(final Node node, int level) throws RepositoryException
@@ -51,7 +56,7 @@ public class ExpiredNodesVisitor extends AbstractNodeVisitor {
         if(node.hasProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON)){
             final long expiryProperty = node.getProperty(JCRHttpCacheStoreConstants.PN_EXPIRES_ON).getLong();
 
-            if(expiryProperty < System.currentTimeMillis()) {
+            if (expiryProperty < clock.instant().toEpochMilli()) {
                 node.remove();
                 persistSession();
             }

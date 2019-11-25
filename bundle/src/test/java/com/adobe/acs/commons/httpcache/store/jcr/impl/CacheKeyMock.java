@@ -25,14 +25,13 @@ import java.io.ObjectOutputStream;
 
 import com.adobe.acs.commons.httpcache.keys.CacheKey;
 
-public class CacheKeyMock implements CacheKey
-{
+public class CacheKeyMock implements CacheKey {
     private String uri;
     private String hierarchyResourcePath;
     private int hashCode;
     private String toString;
 
-    public CacheKeyMock(String uri, String hierarchyResourcePath, int hashCode, String toString){
+    public CacheKeyMock(String uri, String hierarchyResourcePath, int hashCode, String toString) {
 
         this.uri = uri;
         this.hierarchyResourcePath = hierarchyResourcePath;
@@ -40,13 +39,13 @@ public class CacheKeyMock implements CacheKey
         this.toString = toString;
     }
 
-    @Override public String getUri()
-    {
+    @Override
+    public String getUri() {
         return uri;
     }
 
-    @Override public String getHierarchyResourcePath()
-    {
+    @Override
+    public String getHierarchyResourcePath() {
         return hierarchyResourcePath;
     }
 
@@ -65,38 +64,43 @@ public class CacheKeyMock implements CacheKey
         return -1;
     }
 
-    @Override public boolean isInvalidatedBy(CacheKey cacheKey)
-    {
+    @Override
+    public boolean isInvalidatedBy(CacheKey cacheKey) {
         return false;
     }
 
-    protected void writeObject(ObjectOutputStream o) throws IOException
-    {
+    protected void writeObject(ObjectOutputStream o) throws IOException {
         o.writeObject(toString);
         o.writeObject(uri);
         o.writeInt(hashCode);
         o.writeObject(hierarchyResourcePath);
     }
 
-    protected void readObject(ObjectInputStream o)
-            throws IOException, ClassNotFoundException {
+    protected void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
 
         toString = (String) o.readObject();
         uri = (String) o.readObject();
-        hashCode =  o.readInt();
+        hashCode = o.readInt();
         hierarchyResourcePath = (String) o.readObject();
     }
 
-
-    public int hashCode(){
+    public int hashCode() {
         return hashCode;
     }
 
-    public String toString(){
+    public String toString() {
         return toString;
     }
 
-    public boolean equals(Object o){
-        return false;
+    public boolean equals(Object o) {
+        if (o instanceof CacheKeyMock) {
+            CacheKeyMock other = (CacheKeyMock) o;
+            return ((this.hashCode == other.hashCode)
+                    && (this.hierarchyResourcePath.equals(other.hierarchyResourcePath)) 
+                    && (this.uri.equals(other.uri))
+                    && (this.toString.equals(other.toString)));
+        } else {
+            return false;
+        }
     }
 }
