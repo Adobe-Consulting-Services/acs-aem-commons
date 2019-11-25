@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
+- #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
@@ -19,6 +20,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 - #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
+
+### Changed
+=======
+- #2101 - Cleanup public API of the remote Assets feature (#2094)
 
 ## [4.3.4] - 2019-10-16
 
@@ -37,7 +42,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2092 - Tag Export - IndexOutOfBoundsException issue
-- #2004 - Bugfix/httpcache combined cache key different entries 
+- #2004 - Bugfix/httpcache combined cache key different entries
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)

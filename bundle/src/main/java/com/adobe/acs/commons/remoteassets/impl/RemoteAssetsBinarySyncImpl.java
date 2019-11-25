@@ -19,41 +19,33 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.granite.asset.api.RenditionHandler;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.api.Rendition;
-import com.day.cq.dam.commons.util.DamUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.client.fluent.Request;
-import org.apache.jackrabbit.value.DateValue;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.api.Rendition;
+import com.day.cq.dam.commons.util.DamUtil;
 
 /**
  * Service to sync a remote asset's binaries a from remote server.
@@ -68,7 +60,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
 
     @Reference
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
 
     /**
      * @see RemoteAssetsBinarySync#syncAsset(Resource)
@@ -85,7 +77,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 Asset asset = DamUtil.resolveToAsset(localRes);
                 URI pathUri = new URI(null, null, asset.getPath(), null);
                 String baseUrl = this.remoteAssetsConfig.getServer().concat(pathUri.toString()).concat("/_jcr_content/renditions/");
-    
+
                 Iterator<? extends Rendition> renditions = asset.listRenditions();
                 while (renditions.hasNext()) {
                     Rendition assetRendition = renditions.next();
@@ -96,7 +88,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                     String remoteUrl = String.format("%s%s", baseUrl, renditionName);
                     setRenditionOnAsset(remoteUrl, assetRendition, asset, renditionName);
                 }
-    
+
                 ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
                 localResProps.remove(RemoteAssets.IS_REMOTE_ASSET);
                 localResProps.remove(RemoteAssets.REMOTE_SYNC_FAILED);
@@ -106,11 +98,10 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
                 LOG.error("Error transferring remote asset '{}' to local server", resource.getPath(), e);
                 try {
                     remoteAssetsResolver.revert();
+                    flagAssetAsFailedSync(remoteAssetsResolver, resource.getPath());
                 } catch (Exception re) {
-                    LOG.error("Failed to rollback asset changes", re);
+                    LOG.error("Failed to mark sync of {} as failed", resource.getPath(),re);
                 }
-                // TODO: concentrate the exception handling here
-                flagAssetAsFailedSync(remoteAssetsResolver, resource);
             } 
         }
         return false;
@@ -143,18 +134,16 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
     /**
      * Sets a property on the resource if the asset sync failed.
-     * @param resource Resource
+     * @param remoteAssetsResolver a resolver to change the resource
+     * @param path describes the resource to change
      * 
-     * TODO: any exception should be thrown and caught by the caller
+     * @throws PersistenceException 
      */
-    private void flagAssetAsFailedSync(ResourceResolver remoteAssetsResolver, Resource resource) {
-        try {
-            Resource localRes = remoteAssetsResolver.getResource(resource.getPath());
-            ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
-            localResProps.put(RemoteAssets.REMOTE_SYNC_FAILED, Calendar.getInstance());
-            remoteAssetsResolver.commit();
-        } catch (Exception e) {
-            LOG.error("Error flagging remote asset '{}' as failed - asset may attempt to sync numerous times in succession", resource.getPath(), e);
-        }
+    private void flagAssetAsFailedSync(ResourceResolver remoteAssetsResolver, String path) throws PersistenceException {
+        Resource localRes = remoteAssetsResolver.getResource(path);
+        ModifiableValueMap localResProps = localRes.adaptTo(ModifiableValueMap.class);
+        localResProps.put(RemoteAssets.REMOTE_SYNC_FAILED, Calendar.getInstance());
+        remoteAssetsResolver.commit();
+
     }
 }
