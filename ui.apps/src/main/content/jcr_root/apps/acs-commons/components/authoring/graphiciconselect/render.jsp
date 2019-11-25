@@ -191,6 +191,7 @@ Select
 
     Tag tag = cmp.consumeTag();
     AttrBuilder attrs = tag.getAttrs();
+    cmp.populateCommonAttrs(attrs);
 
     attrs.add("id", cfg.get("id", String.class));
     attrs.addClass(cfg.get("class", String.class));
