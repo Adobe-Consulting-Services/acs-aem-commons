@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -90,7 +89,7 @@ public class RemoteAssetsNodeSyncImplTest {
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
 
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
     private RemoteAssetsNodeSyncImpl remoteAssetsNodeSync;
     private Map<String, List<String>> nodeMixinsTracker;
 
