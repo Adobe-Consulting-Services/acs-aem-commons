@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- #2118 - Adding functionality to showhidedialogfields TouchUI widget
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
