@@ -173,7 +173,6 @@ public class FileImporterTest {
     @Test
     public void testNullAdaptation() throws Exception {
 
-
     	Resource resource = context.resourceResolver().getResource("/var/non/existing/path");
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
