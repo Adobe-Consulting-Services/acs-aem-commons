@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
+
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_A;
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_B;
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_TAGS_PATH_A;
@@ -51,7 +52,6 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -64,7 +64,6 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -82,7 +81,9 @@ public class RemoteAssetsNodeSyncImplTest {
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
 
+
 //    private RemoteAssetsConfig remoteAssetsConfig;
+
     private RemoteAssetsNodeSyncImpl remoteAssetsNodeSync;
 //    private Map<String, List<String>> nodeMixinsTracker;
 
