@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
@@ -97,7 +96,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
     ));
 
     @Reference
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
 
     private int saveRefreshCount = 0;
 
@@ -106,8 +105,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     @Override
     public void syncAssetNodes() {
-        ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
-        try {
+        
+        try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();) {
             List<String> syncPaths = new ArrayList<>();
             syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
             syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
@@ -123,9 +122,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
         } catch (Exception e) {
             LOG.error("Unexpected error sync'ing remote asset nodes", e);
-        } finally {
-            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
-        }
+        } 
     }
 
     /**

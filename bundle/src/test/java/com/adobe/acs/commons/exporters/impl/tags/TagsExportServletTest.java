@@ -42,7 +42,9 @@ public class TagsExportServletTest {
   private static final String PARAMETER_LOCALIZED = "localized";
 
   private static final String PARAMETER_DEFAULT_LOCALIZATION = "defaultLocalization";
-  
+
+  private static final String EXPECTED_OUTPUT_WRONG_PATH_MESSAGE = "Path '/wrong/Path' do not contains tag root. Probably You've made mistake during typing path. Export tags cannot be done.";
+
   @Rule
   public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
@@ -88,7 +90,7 @@ public class TagsExportServletTest {
 
     assertEquals(HttpStatus.SC_OK, context.response().getStatus());
     String output = context.response().getOutputAsString();
-    assertTrue(output.isEmpty());
+    assertEquals(EXPECTED_OUTPUT_WRONG_PATH_MESSAGE, output);
   }
 
   @Test

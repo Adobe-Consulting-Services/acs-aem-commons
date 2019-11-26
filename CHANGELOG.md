@@ -10,11 +10,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Added
+- #2118 - Adding functionality to showhidedialogfields TouchUI widget
+- #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
+- #2064 - Adding Marketo Form Component
+- #1919 - Report Builder | Path List Executor Implementation
+
+### Fixed
+- #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
+- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
+- #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
+
+### Changed
+=======
+- #2101 - Cleanup public API of the remote Assets feature (#2094)
+
 ## [4.3.4] - 2019-10-16
 
 ### Added
 - #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
 - #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
+- #2085 - Made dry run mode default for all MCP processes that have it
 
 ### Added
 - #2071 - Added Tag Export as CSV functionality, as new option in Exports
@@ -25,7 +41,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
 
 ### Fixed
-- #2004 - Bugfix/httpcache combined cache key different entries 
+- #2092 - Tag Export - IndexOutOfBoundsException issue
+- #2004 - Bugfix/httpcache combined cache key different entries
 - #2032 - Fixed filter.xml on /var/acs-commons
 - #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
 - #2053 - ETag header not properly delivered from the servlet (missing quotes)
@@ -90,7 +107,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
-- #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.

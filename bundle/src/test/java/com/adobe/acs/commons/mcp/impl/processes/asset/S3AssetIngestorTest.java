@@ -107,6 +107,7 @@ public class S3AssetIngestorTest {
         ingestor.extensionFilter = new NamesFilter();
         ingestor.folderFilter = new NamesFilter("-.ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
+        ingestor.dryRunMode = false;
 
         int port = FreePortFinder.findFreeLocalPort();
         s3Mock = new S3Mock.Builder().withPort(port).withInMemoryBackend().build();
