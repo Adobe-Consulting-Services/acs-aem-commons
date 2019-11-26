@@ -189,9 +189,9 @@
 
                         _.each(record, function (rValue, rKey) {
                             $field = $($fieldSets[i]).find("[name='./" + rKey + "']").last();
-																												
-																												if ($field.hasClass("coral-RichText-editable")) {
-	                               $field = $($fieldSets[i]).find("input[name='./" + rKey + "']").first();
+				
+			    if ($field.hasClass("coral-RichText-editable")) {
+	                        $field = $($fieldSets[i]).find("input[name='./" + rKey + "']").first();
                             }
 
                             if (_.isEmpty($field) || $field.closest('ul').hasClass('js-coral-Autocomplete-tagList')) {
