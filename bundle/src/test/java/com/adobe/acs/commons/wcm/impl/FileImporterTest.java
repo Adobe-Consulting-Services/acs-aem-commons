@@ -172,12 +172,9 @@ public class FileImporterTest {
 
     @Test
     public void testNullAdaptation() throws Exception {
-<<<<<<< HEAD
+
 
     	Resource resource = context.resourceResolver().getResource("/var/non/existing/path");
-=======
-        Resource resource = new NonExistingResource(context.resourceResolver(), "/var/non/existing/resource");
->>>>>>> remove use of deprecated mocks
         importer.importData("file", testFile.getAbsolutePath(), resource);
 
         assertFalse(session.hasPendingChanges());
