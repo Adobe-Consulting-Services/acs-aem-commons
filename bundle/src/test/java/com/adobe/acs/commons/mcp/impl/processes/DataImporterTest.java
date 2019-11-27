@@ -60,7 +60,7 @@ public class DataImporterTest {
     private static Spreadsheet importerData;
 
     @Rule
-    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_MOCK);
+    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_OAK);
 
     private DataImporter importer;
     private ActionManagerFactory actionManagerFactory;
