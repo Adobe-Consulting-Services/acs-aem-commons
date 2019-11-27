@@ -26,14 +26,16 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent a generic container component which has one or more children
  */
 public class AbstractContainerComponent extends FieldComponent {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractContainerComponent.class);
 
     Map<String, FieldComponent> fieldComponents = new LinkedHashMap<>();
     private boolean composite;
@@ -96,7 +98,7 @@ public class AbstractContainerComponent extends FieldComponent {
         try {
             return defaultChildComponent.newInstance();
         } catch (InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(AbstractContainerComponent.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("got exception", ex);
             return null;
         }
     }
