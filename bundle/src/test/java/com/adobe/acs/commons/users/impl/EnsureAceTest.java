@@ -22,7 +22,7 @@ package com.adobe.acs.commons.users.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -54,7 +54,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,6 @@ public class EnsureAceTest {
         assertNotNull("new allow node should exist", newAce);
 
         Hit mockHit = mock(Hit.class);
-        when(mockHit.getResource()).thenReturn(newAce);
         when(mockHit.getPath()).thenThrow(new RepositoryException("no more storage on cloud!"));
 
         final List<Hit> hits = Collections.singletonList(mockHit);
@@ -136,9 +135,7 @@ public class EnsureAceTest {
         List<Hit> nextHits = new ArrayList<>();
         while (nextAces.hasNext()) {
             Hit nextHit = mock(Hit.class);
-            Resource nextAce = nextAces.next();
-            when(nextHit.getResource()).thenReturn(nextAce);
-            when(nextHit.getPath()).thenReturn(nextAce.getPath());
+            Resource nextAce = nextAces.next();;
         }
 
         when(result.getHits()).thenReturn(nextHits);

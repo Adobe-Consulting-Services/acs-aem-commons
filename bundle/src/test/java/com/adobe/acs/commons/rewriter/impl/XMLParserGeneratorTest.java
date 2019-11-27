@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -65,7 +65,7 @@ public class XMLParserGeneratorTest {
         generator.dispose();
         
         verify(contentHandler).startDocument();
-        verify(contentHandler).setDocumentLocator((Locator) anyObject());
+        verify(contentHandler).setDocumentLocator((Locator) any());
         verify(contentHandler).startPrefixMapping("fo", "http://www.w3.org/1999/XSL/Format");
 
         verify(contentHandler).startElement(eq("http://www.w3.org/1999/XSL/Format"), eq("root"), eq("fo:root"), attributesCaptor.capture());

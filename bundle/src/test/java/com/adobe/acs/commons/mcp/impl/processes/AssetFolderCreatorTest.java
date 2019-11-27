@@ -48,7 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import javax.annotation.Nullable;
@@ -59,7 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 @RunWith(MockitoJUnitRunner.class)

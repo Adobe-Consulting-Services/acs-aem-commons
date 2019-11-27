@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Constants;
 
 import java.util.ArrayList;
@@ -40,8 +40,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,25 +84,17 @@ public class CombinedCacheKeyFactoryTest {
     @Before
     public void init() throws HttpCacheKeyCreationException {
 
-        when(key1.getUri()).thenReturn(URI);
-        when(key2.getUri()).thenReturn(URI);
-        when(key3.getUri()).thenReturn(URI);
-        when(key4.getUri()).thenReturn(URI);
-
-
         when(factory1.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key1);
         when(factory2.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key2);
         when(factory3.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key3);
         when(factory4.build(anyString(), any(HttpCacheConfig.class))).thenReturn(key4);
 
-        when(factory1.build(request, config)).thenReturn(key1);
-        when(factory2.build(request, config)).thenReturn(key2);
         when(factory3.build(request, config)).thenReturn(key3);
         when(factory4.build(request, config)).thenReturn(key4);
 
         when(request.getResource()).thenReturn(resource);
         when(request.getRequestURI()).thenReturn(URI);
-        //when(request.getRe)
+
         when(resource.getPath()).thenReturn(RESOURCE_PATH);
         underTest.activate(ocd);
         cacheKeyFactoryList.clear();

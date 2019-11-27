@@ -31,10 +31,12 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.osgi.framework.BundleContext;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -48,8 +50,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TwitterAdapterFactoryTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     public static final String VALID_OAUTH_CLIENT_ID = "abcd";
     public static final String VALID_OAUTH_SECRET = "efgh";
@@ -215,7 +219,7 @@ public class TwitterAdapterFactoryTest {
             if (registeredFactory != null) {
                 throw new IllegalArgumentException("TwitterAdapterFactory already registered");
             }
-            registeredFactory = i.getArgumentAt(1, TwitterAdapterFactory.class);
+            registeredFactory = i.getArgument(1);
             return null;
         });
     }

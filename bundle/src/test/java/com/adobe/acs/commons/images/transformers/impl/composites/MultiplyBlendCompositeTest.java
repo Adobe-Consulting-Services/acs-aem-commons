@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultiplyBlendCompositeTest {
@@ -71,20 +71,20 @@ public class MultiplyBlendCompositeTest {
 
         CompositeContext ctx = composite.createContext(srcColorModel, destColorModel, hints);
         assertNotNull(ctx);
-        verifyZeroInteractions(srcColorModel, destColorModel, hints);
+        verifyNoInteractions(srcColorModel, destColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidSrc() throws Exception {
         composite.createContext(notDirect, destColorModel, hints);
-        verifyZeroInteractions(notDirect, destColorModel, hints);
+        verifyNoInteractions(notDirect, destColorModel, hints);
 
     }
 
     @Test(expected = RasterFormatException.class)
     public void testCreateContextInvalidDest() throws Exception {
         composite.createContext(srcColorModel, notDirect, hints);
-        verifyZeroInteractions(notDirect, srcColorModel, hints);
+        verifyNoInteractions(notDirect, srcColorModel, hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -94,7 +94,7 @@ public class MultiplyBlendCompositeTest {
                 srcColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -104,7 +104,7 @@ public class MultiplyBlendCompositeTest {
                 srcColorModel.getBlueMask(), srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -114,7 +114,7 @@ public class MultiplyBlendCompositeTest {
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -124,7 +124,7 @@ public class MultiplyBlendCompositeTest {
                 srcColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -134,7 +134,7 @@ public class MultiplyBlendCompositeTest {
                 destColorModel.getBlueMask(), 0);
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -144,7 +144,7 @@ public class MultiplyBlendCompositeTest {
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -154,7 +154,7 @@ public class MultiplyBlendCompositeTest {
                 destColorModel.getBlueMask(), destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 
     @Test(expected = RasterFormatException.class)
@@ -164,6 +164,6 @@ public class MultiplyBlendCompositeTest {
                 0, destColorModel.getAlphaMask());
         composite.createContext(srcColorModel, destColorModel, hints);
         Mockito.verifyNoMoreInteractions(srcColorModel, destColorModel);
-        verifyZeroInteractions(hints);
+        verifyNoInteractions(hints);
     }
 }

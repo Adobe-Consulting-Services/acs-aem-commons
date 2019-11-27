@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -75,7 +75,6 @@ public class ChildrenAsPropertyResourceTest {
 
         when(resource.getPath()).thenReturn("/content/test");
         when(resource.getValueMap()).thenReturn(valueMap);
-        when(resource.adaptTo(ValueMap.class)).thenReturn(valueMap);
         when(resource.adaptTo(ModifiableValueMap.class)).thenReturn(valueMap);
         when(resource.getResourceResolver()).thenReturn(resourceResolver);
 

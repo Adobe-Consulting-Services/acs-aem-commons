@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants.OAK_UNSTRUCTURED;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -164,7 +164,6 @@ public final class EntryNodeWriterMocks
         when(cacheContent.getInputDataStream()).thenReturn(arguments.cacheContent);
         when(cacheContent.getStatus()).thenReturn(arguments.status);
         when(cacheContent.getHeaders()).thenReturn(arguments.cacheContentHeaders);
-        when(cacheContent.getTempSink()).thenReturn(new MemTempSinkImpl());
         when(cacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
     }
 }
