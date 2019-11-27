@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.logging.Level;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET-With-Cookies Form Helper
@@ -56,6 +55,8 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     public static final int COOKIE_MAX_AGE = 10 * 60;
     public static final String ROOT_COOKIE_PATH = "/";
+
+    private static final Logger LOG = LoggerFactory.getLogger(PostRedirectGetFormHelperImpl.class);
 
     @Override
     public final void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
@@ -129,7 +130,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         try {
             return StringUtils.isBlank(unencoded) ? "" : URLEncoder.encode(unencoded, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            java.util.logging.Logger.getLogger(PostRedirectGetWithCookiesFormHelperImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot encode '{}' to UTF-8", unencoded, ex);
             return unencoded;
         }
     }
@@ -145,7 +146,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
         try {
             return StringUtils.isBlank(encoded) ? "" : URLDecoder.decode(encoded, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            java.util.logging.Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot decode '{}'", ex);
             return encoded;
         }
     }
