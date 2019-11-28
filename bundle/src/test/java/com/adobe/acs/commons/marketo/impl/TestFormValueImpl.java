@@ -56,12 +56,4 @@ public class TestFormValueImpl {
     assertEquals("static", formValue.getSource());
     assertEquals("Value", formValue.getValue());
   }
-
-  @Test
-  public void invalid() {
-    context.currentResource("/content/formvalue/jcr:content/root/invalid");
-    FormValue invalid = Optional.ofNullable(context.currentResource()).map(r -> r.adaptTo(FormValue.class))
-        .orElse(null);
-    assertNull(invalid);
-  }
 }
