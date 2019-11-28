@@ -22,8 +22,6 @@ package com.adobe.acs.commons.mcp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.RepositoryException;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.Group;
@@ -103,7 +101,7 @@ public class AuthorizedGroupProcessDefinitionFactoryTest {
             }
             return groupList.iterator();
         } catch (RepositoryException ex) {
-            Logger.getLogger(AuthorizedGroupProcessDefinitionFactoryTest.class.getName()).log(Level.SEVERE, null, ex);
+            // ignore it here, we are just mocking
             return null;
         }
 
