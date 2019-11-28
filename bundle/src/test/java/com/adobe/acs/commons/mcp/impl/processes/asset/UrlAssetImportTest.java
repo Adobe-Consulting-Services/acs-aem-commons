@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.data.CompositeVariant;
 import com.adobe.acs.commons.data.Spreadsheet;
@@ -112,6 +113,7 @@ public class UrlAssetImportTest {
             method.accept(context.resourceResolver());
             return null;
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
+        Actions.setCurrentActionManager(actionManager);
     }
 
     private void addImportRow(String... cols) {
