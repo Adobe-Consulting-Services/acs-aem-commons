@@ -188,7 +188,7 @@
                         }
 
                         _.each(record, function (rValue, rKey) {
-                            $field = $($fieldSets[i]).find("[name='./" + rKey + "']").last();
+                            $field = $($fieldSets[i]).find("[name='./" + rKey + "']").first();
 				
 			    if ($field.hasClass("coral-RichText-editable")) {
 	                        $field = $($fieldSets[i]).find("input[name='./" + rKey + "']").first();
