@@ -95,8 +95,9 @@ public class MarketoFieldDataSource extends SlingSafeMethodsServlet {
         throw new RepositoryException("Unable to retrieve Marketo Client Configuration Manager");
       }
       if (config == null) {
-        log.warn("No Marketo configuration found for resource {}", request.getRequestPathInfo().getSuffix());
-        throw new RepositoryException("No Marketo configuration found for resource");
+                String msg = String.format("No Marketo configuration found for resource",
+                        request.getRequestPathInfo().getSuffix());
+                throw new RepositoryException(msg);
       }
 
       options = formCache.get(config).stream()
