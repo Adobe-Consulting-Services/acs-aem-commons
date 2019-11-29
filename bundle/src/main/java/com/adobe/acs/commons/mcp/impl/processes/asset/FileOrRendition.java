@@ -38,11 +38,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.decodeUriParts;
 import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement.UriHelper.encodeUriParts;
@@ -51,6 +51,8 @@ import static com.adobe.acs.commons.mcp.impl.processes.asset.HierarchicalElement
  * Abstraction of a file which might be an asset or a rendition of another asset
  */
 public class FileOrRendition implements HierarchicalElement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FileOrRendition.class);
 
     final String url;
     final String name;
@@ -122,7 +124,7 @@ public class FileOrRendition implements HierarchicalElement {
             String filePath = decodeUriParts(uri.getRawPath());
             return decodeUriParts(filePath);
         } catch (URISyntaxException | UnsupportedEncodingException ex) {
-            Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot decode url '{}'", url, ex);
         }
         return url;
     }
@@ -205,7 +207,6 @@ public class FileOrRendition implements HierarchicalElement {
                 try {
                     size = getConnection().getContentLengthLong();
                 } catch (IOException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
                     throw ex;
                 }
@@ -250,7 +251,6 @@ public class FileOrRendition implements HierarchicalElement {
                     connection = clientProvider.getHttpClientSupplier().get().execute(lastRequest);
                     size = connection.getEntity().getContentLength();
                 } catch (IOException | IllegalArgumentException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     size = -1L;
                     throw new IOException("Error with URL " + url + ": " + ex.getMessage(), ex);
                 }
@@ -314,7 +314,6 @@ public class FileOrRendition implements HierarchicalElement {
                     session.setPassword(clientProvider.getPassword());
                     session.connect();
                 } catch (JSchException ex) {
-                    Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                     throw new IOException("Unable to connect to server", ex);
                 }
             }
@@ -342,13 +341,10 @@ public class FileOrRendition implements HierarchicalElement {
                 return currentStream;
 
             } catch (URISyntaxException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Bad URI format", ex);
             } catch (JSchException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error with connection", ex);
             } catch (SftpException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error retrieving file", ex);
             }
         }
@@ -367,13 +363,10 @@ public class FileOrRendition implements HierarchicalElement {
                 SftpATTRS stats = sftpChannel.lstat(decodeUriParts(uri.getRawPath()));
                 return stats.getSize();
             } catch (URISyntaxException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error parsing URL", ex);
             } catch (SftpException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error getting file stats", ex);
             } catch (JSchException ex) {
-                Logger.getLogger(FileOrRendition.class.getName()).log(Level.SEVERE, null, ex);
                 throw new IOException("Error opening SFTP channel", ex);
             }
         }

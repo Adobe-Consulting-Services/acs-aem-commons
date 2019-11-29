@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 - #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
 - #2104 - Updated test suite to use mockito 3, build now working with Java 11
+- #2124 - cleanup build logs for unittests
 
 ### Changed
 =======
