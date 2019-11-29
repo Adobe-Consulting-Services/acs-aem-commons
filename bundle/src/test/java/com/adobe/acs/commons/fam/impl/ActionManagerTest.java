@@ -32,8 +32,6 @@ import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -43,6 +41,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -52,13 +52,15 @@ import static org.mockito.Mockito.*;
  */
 public class ActionManagerTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ActionManagerTest.class);
+
     public static void run(Runnable r) {
         try {
             Thread t = new Thread(r);
             t.start();
             t.join();
         } catch (InterruptedException ex) {
-            Logger.getLogger(ActionManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("interrupted exception", ex);
         }
     }
 
