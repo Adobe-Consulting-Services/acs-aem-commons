@@ -92,8 +92,9 @@ public class MarketoFormDataSource extends SlingSafeMethodsServlet {
         config = cfgMgr.getConfiguration();
       }
       if (config == null) {
-        log.warn("No Marketo configuration found for resource {}", request.getRequestPathInfo().getSuffix());
-        throw new RepositoryException("No Marketo configuration found for resource");
+                String msg = String.format("No Marketo configuration found for resource '%s'",
+                        request.getRequestPathInfo().getSuffix());
+                throw new RepositoryException(msg);
       }
 
       int currentValue = getCurrentValue(request);
