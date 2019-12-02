@@ -94,6 +94,12 @@ public class IntrospectionUtil {
         return basicType != null && (isPrimitive(field) || basicType.isEnum() || basicType == String.class);
     }
 
+    /**
+     * Try any available public constructors to create an object.  Return the
+     * first successful attempt.
+     * @param c Class to use
+     * @return Optional object if successful, otherwise empty optional.
+     */
     public static Optional<Object> createObject(Class c) {
         for (Constructor constructor : c.getConstructors()) {
             try {
@@ -118,13 +124,13 @@ public class IntrospectionUtil {
      */
     public static Optional<Object> getDeclaredValue(AccessibleObject field) {
         if (field instanceof Field) {
-            Field f = (Field) field; // Don't throw any errors, just don't report any results
+            Field f = (Field) field;
             Optional<Object> o = createObject(f.getDeclaringClass());
             if (o.isPresent()) {
                 try {
                     return Optional.ofNullable(FieldUtils.readField(f, o.get(), true));
                 } catch (Exception e) {
-                    // Do nothing
+                    // Don't throw any errors, just don't report any results
                 }
             }
         }
