@@ -149,8 +149,9 @@ DatePicker
     attrs.add("min", cfg.get("minDate", String.class));
     attrs.add("max", cfg.get("maxDate", String.class));
     attrs.addDisabled(cfg.get("disabled", false));
-    attrs.add("displayformat", i18n.getVar(cfg.get("displayedFormat", String.class)));
-    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.SSSZ"));
+    attrs.add("displayformat", cfg.get("displayedFormat", "YYYY-MM-DD HH:mm"));
+
+    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000Z"));
     attrs.add("headerformat", i18n.get("MMMM YYYY", "Datepicker headline, see moment.js for allowed formats"));
 
     String fieldLabel = cfg.get("fieldLabel", String.class);
