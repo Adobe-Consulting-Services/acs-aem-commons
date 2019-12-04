@@ -20,8 +20,10 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.mcp.form.FieldComponent.ClientLibraryType;
+import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -99,7 +101,28 @@ public class FieldComponentTest {
         assertEquals("/apps/some/path", resourceCaptor.getValue().getPath());
     }
 
-    public class TestFieldComponent extends FieldComponent {
+    public static final String TEST_VALUE_1 = "Madness?  This is sparta!";
+
+    @Test
+    public void testDefaultFormValuesMatchCodeDefaults() {
+        Map<String, FieldComponent> form = AnnotatedFieldDeserializer.getFormFields(AnnotationTestClass.class, null);
+        assertEquals("Should have default string value", TEST_VALUE_1, form.get("test1").getComponentMetadata().get("value"));
+        assertEquals("1st Checkbox should be checked", "true", form.get("isChecked").getComponentMetadata().get("checked"));
+        assertEquals("2nd Checkbox not should be checked", null, form.get("isNotChecked").getComponentMetadata().get("checked"));
+    }
+
+    public static class AnnotationTestClass {
+        @FormField(name="field 1")
+        String test1=TEST_VALUE_1;
+
+        @FormField(name="Checkbox", component = CheckboxComponent.class)
+        boolean isChecked = true;
+
+        @FormField(name="Checkbox", component = CheckboxComponent.class)
+        boolean isNotChecked;
+    }
+
+    public static class TestFieldComponent extends FieldComponent {
         public TestFieldComponent(String[] options) {
             FormField field = new FormField() {
                 @Override
