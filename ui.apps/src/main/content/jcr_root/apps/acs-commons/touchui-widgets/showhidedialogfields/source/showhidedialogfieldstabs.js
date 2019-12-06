@@ -33,6 +33,8 @@
  * - add the attribute acs-combocheckboxshowhidevalues to the target component, the value should be a list of the
  *   target values of the checkboxes that should be combined
  *   the order of both lists should be the same: the first value should correspond to the first class given
+ * - add the attribute acs-combocheckboxshowhideoperator to the target component, the value should reflect the
+ *   operator that is wanted, currently AND and OR are supported, OR is default and
  */
 
 /* global Granite, Coral, $  */
@@ -49,6 +51,9 @@
         showHide(element);
       });
     });
+
+    // make sure all fields are initialized correctly
+    showCorrectComboTargetElements();
 
   });
 
@@ -107,12 +112,24 @@
     $('[data-acs-combocheckboxshowhideclasses]').each(function() {
       var classes = $(this).data('acsCombocheckboxshowhideclasses').split(' ');
       var values = $(this).data('acsCombocheckboxshowhidevalues').split(' ');
-      var boolean = false;
-      classes.forEach(function(classvalue, index) {
-        var temp = $('[data-acs-cq-dialog-combo-checkbox-showhide-target="' + classvalue + '"]');
-        var checked = temp.prop('checked');
-        boolean = (boolean || (checked === ('true' === values[index])));
-      });
+      var operator = $(this).data('acsCombocheckboxshowhideoperator');
+      var boolean;
+      if (operator === 'AND') {
+        boolean = true;
+        classes.forEach(function(classvalue, index) {
+          var temp = $('[data-acs-cq-dialog-combo-checkbox-showhide-target="' + classvalue + '"]');
+          var checked = temp.prop('checked');
+          boolean = (boolean && (checked === ('true' === values[index])));
+        });
+      } else {
+        //operator OR is default
+        boolean = false;
+        classes.forEach(function(classvalue, index) {
+          var temp = $('[data-acs-cq-dialog-combo-checkbox-showhide-target="' + classvalue + '"]');
+          var checked = temp.prop('checked');
+          boolean = (boolean || (checked === ('true' === values[index])));
+        });
+      }
       toggleVisibilityElement($(this), !boolean);
     });
   }
@@ -145,7 +162,8 @@
     if (hide) {
       // If target is a container, hides the container
       $elem.addClass('hide');
-      if (!$elem.is('coral-checkbox')) {
+      //checkboxes without fieldInfo have no wrapper around them
+      if (!($elem.is('coral-checkbox') && $elem.siblings('.coral-Form-fieldinfo').length === 0)) {
         // Hides the target field wrapper. Thus, hiding label, quicktip etc.
         $fieldWrapper.addClass('hide');
       }
@@ -155,7 +173,8 @@
     } else {
       // Unhide target container/field wrapper/tab
       $elem.removeClass('hide');
-      if (!$elem.is('coral-checkbox')) {
+      //checkboxes without fieldInfo have no wrapper around them
+      if (!($elem.is('coral-checkbox') && $elem.siblings('.coral-Form-fieldinfo').length === 0)) {
         $fieldWrapper.removeClass('hide');
       }
       $('#' + tabLabelId).removeClass('hide');
