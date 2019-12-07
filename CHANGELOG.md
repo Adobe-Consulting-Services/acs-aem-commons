@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
 - #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
+- #2084 - MCP Forms now extract default value/checkbox state from field value as well as from annotation options (both ways work now)
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
@@ -24,7 +25,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2124 - cleanup build logs for unittests
 
 ### Changed
-=======
 - #2101 - Cleanup public API of the remote Assets feature (#2094)
 
 
