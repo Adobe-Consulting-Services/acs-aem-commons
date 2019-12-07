@@ -33,6 +33,7 @@ import java.net.HttpURLConnection;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -76,6 +77,8 @@ public class FileFetchImplTest {
   }
 
   @Test
+  @Ignore
+  // Ignore until https://wcm-io.atlassian.net/browse/WTES-48 is resolved
   public void testFetch() throws IOException, ReplicationException {
     fileFetch.activate(new FileFetchConfiguration() {
 
