@@ -688,10 +688,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.testing.jcr-mock</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.wcm</groupId>
 			<artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
 			<exclusions>
