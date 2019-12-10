@@ -18,6 +18,7 @@
  * - the acs-dropdownshowhidetargetvalue and/or acs-checkboxshowhidetargetvalue attribute can be added to dialog tab items to show and
  *   hide them.
  * - (optional) add css class acs-commons-field-required-allow-hidden to provided required field validation, which turns off when the field is hidden
+ * - (optional) add data attribute acs-disablewhenhidden = true to disable the fields when hidden, useful when multiple fields have the same name
  *
  * - If the fields lie within a multifield
  * - add the extra empty property acs-cq-dialog-dropdown-checkbox-showhide-multifield to the dropdown/select or checkbox element
@@ -38,30 +39,29 @@
  */
 
 /* global Granite, Coral, $  */
-(function($document, $) {
+(function ($document, $) {
   'use strict';
 
   // when dialog gets injected
-  $document.on('foundation-contentloaded', function() {
+  $document.on('foundation-contentloaded', function () {
     // if there is already an initial value make sure the according target
     // element becomes visible
-    $('[data-acs-cq-dialog-dropdown-checkbox-showhide]').each(function() {
+    $('[data-acs-cq-dialog-dropdown-checkbox-showhide]').each(function () {
       // handle Coral3 base drop-down/checkbox
-      Coral.commons.ready($(this), function(element) {
+      Coral.commons.ready($(this), function (element) {
         showHide(element);
       });
     });
 
-    // make sure all fields are initialized correctly
     showCorrectComboTargetElements();
 
   });
 
-  $document.on('change', '[data-acs-cq-dialog-dropdown-checkbox-showhide]', function() {
+  $document.on('change', '[data-acs-cq-dialog-dropdown-checkbox-showhide]', function () {
     showHide($(this));
   });
 
-  $document.on('change', '[data-acs-cq-dialog-combo-checkbox-showhide]', function() {
+  $document.on('change', '[data-acs-cq-dialog-combo-checkbox-showhide]', function () {
     showCorrectComboTargetElements();
   });
 
@@ -103,34 +103,34 @@
 
   function showCorrectTargetElementsBeneath(target, dropdownValue, checkboxValue, $root) {
     // unhide target elements based on the target values
-    $root.find(target).each(function() {
+    $root.find(target).each(function () {
       toggleVisibilityElement($(this), !shouldBeVisible($(this), dropdownValue, checkboxValue));
     });
   }
 
   function showCorrectComboTargetElements() {
-    $('[data-acs-combocheckboxshowhideclasses]').each(function() {
+    $('[data-acs-combocheckboxshowhideclasses]').each(function () {
       var classes = $(this).data('acsCombocheckboxshowhideclasses').split(' ');
       var values = $(this).data('acsCombocheckboxshowhidevalues').split(' ');
       var operator = $(this).data('acsCombocheckboxshowhideoperator');
       var boolean;
       if (operator === 'AND') {
         boolean = true;
-        classes.forEach(function(classvalue, index) {
+        classes.forEach(function (classvalue, index) {
           var temp = $('[data-acs-cq-dialog-combo-checkbox-showhide-target="' + classvalue + '"]');
           var checked = temp.prop('checked');
           boolean = (boolean && (checked === ('true' === values[index])));
         });
       } else {
-        //operator OR is default
         boolean = false;
-        classes.forEach(function(classvalue, index) {
+        classes.forEach(function (classvalue, index) {
           var temp = $('[data-acs-cq-dialog-combo-checkbox-showhide-target="' + classvalue + '"]');
           var checked = temp.prop('checked');
           boolean = (boolean || (checked === ('true' === values[index])));
         });
       }
       toggleVisibilityElement($(this), !boolean);
+
     });
   }
 
@@ -158,26 +158,35 @@
     var $fieldWrapper = $elem.closest('.coral-Form-fieldwrapper');
     var tabPanel = $elem.parent().parent('coral-panel[role="tabpanel"]');
     var tabLabelId = $(tabPanel).attr('aria-labelledby');
+    var disable = $elem.attr('data-acs-disablewhenhidden');
 
     if (hide) {
       // If target is a container, hides the container
       $elem.addClass('hide');
-      //checkboxes without fieldInfo have no wrapper around them
-      if (!($elem.is('coral-checkbox') && $elem.siblings('.coral-Form-fieldinfo').length === 0)) {
+      if (!$elem.is('coral-checkbox') || ($elem.siblings('.coral-Form-fieldinfo').length > 0) || typeof ($elem.data('cqMsmLockable')) !== 'undefined') {
         // Hides the target field wrapper. Thus, hiding label, quicktip etc.
         $fieldWrapper.addClass('hide');
       }
 
       // hide the tab
       $('#' + tabLabelId).addClass('hide');
+
+      //disable all input fields within the element if necessary
+      if (disable === 'true') {
+        $elem.find('.coral-Form-field').attr('disabled', '');
+      }
     } else {
       // Unhide target container/field wrapper/tab
       $elem.removeClass('hide');
-      //checkboxes without fieldInfo have no wrapper around them
-      if (!($elem.is('coral-checkbox') && $elem.siblings('.coral-Form-fieldinfo').length === 0)) {
+      if (!$elem.is('coral-checkbox') || ($elem.siblings('.coral-Form-fieldinfo').length > 0) || typeof ($elem.data('cqMsmLockable')) !== 'undefined') {
         $fieldWrapper.removeClass('hide');
       }
       $('#' + tabLabelId).removeClass('hide');
+
+      //enable all input fields within the element if necessary
+      if (disable === 'true') {
+        $elem.find('.coral-Form-field').removeAttr('disabled');
+      }
     }
   }
 
