@@ -5,8 +5,8 @@
             return;
         }
         $("coral-datepicker").each(function (index) {
-
-            if($(this).attr('displayformat') !== 'YYYY-MM-DD') {
+            var displayFormat = $(this).attr('displayformat');
+            if(displayFormat && displayFormat.indexOf("HH") && displayFormat.indexOf("mm")) {
                 var defaultTimezone = "UTC+00:00";
                 var datepickerName = $(this).attr("name");
                 var datePickerValue = $(this).val();
@@ -15,7 +15,7 @@
                     return;
                 }
                 $(this).attr("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000[Z]");
-                var displayFormat = $(this).attr('displayformat');
+
                 var datepickerTimezoneName = datepickerName + "tz";
                 var selectedTimeZone = $(this).parent().find("coral-select[name='" + datepickerTimezoneName + "']");
                 var selectedTimeZoneValue = selectedTimeZone.val();
@@ -24,7 +24,7 @@
                     selectedTimeZone.val(defaultTimezone);
                     selectedTimeZoneValue = defaultTimezone;
                 }
-                if (selectedTimeZoneValue === "UTC-04:00") {
+                if (selectedTimeZoneValue === "EST") {
                     displayValue = moment.utc(datePickerValue).tz("America/New_York").format(displayFormat);
                     //To show in datepicker
                     $(this).find(".coral-InputGroup-input").val(displayValue);
@@ -42,7 +42,8 @@
     }
 
     $(document).on("change", "coral-datepicker", function (e) {
-        if($(this).attr('displayformat') !== 'YYYY-MM-DD') {
+        var displayFormat = $(this).attr('displayformat');
+        if(displayFormat && displayFormat.indexOf("HH") && displayFormat.indexOf("mm")) {
             if (!isAllowed) {
                 return;
             }
@@ -57,7 +58,7 @@
             $(this).attr("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000[Z]");
             var timeZoneName = datePickerName + "tz";
             var timeZoneValue = $parent.find("coral-select[name='" + timeZoneName + "']").val();
-            if (timeZoneValue === "UTC-04:00") {
+            if (timeZoneValue === "EST") {
                 var another = moment(datePickerValue).utc().clone();
                 var utcValue = another.tz('America/New_York', true);
                 $(this).attr('value', utcValue.format());
@@ -86,8 +87,8 @@
         if (!datePickerValue) {
             return;
         }
-        if($datePicker.attr('displayformat') !== 'YYYY-MM-DD') {
-            if (timeZoneValue === "UTC-04:00") {
+        if(displayFormat && displayFormat.indexOf("HH") && displayFormat.indexOf("mm")) {
+            if (timeZoneValue === "EST") {
                 displayValue = moment.utc(datePickerValue).tz("America/New_York").format(displayFormat);
                 $parent.find(".coral-InputGroup-input").val(displayValue);
             } else {

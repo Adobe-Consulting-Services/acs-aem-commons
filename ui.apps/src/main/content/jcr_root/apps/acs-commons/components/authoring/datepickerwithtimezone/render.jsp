@@ -96,7 +96,7 @@ DatePicker
       /**
        * The date format of the actual value, and for form submission.
        */
-      - valueFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSSZ'
+      - valueFormat = 'YYYY-MM-DD[T]HH:mm:ss.000[Z]'
 
       /**
        * The minimum boundary of the date.
@@ -151,7 +151,7 @@ DatePicker
     attrs.addDisabled(cfg.get("disabled", false));
     attrs.add("displayformat", cfg.get("displayedFormat", "YYYY-MM-DD HH:mm"));
 
-    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000Z"));
+    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000[Z]"));
     attrs.add("headerformat", i18n.get("MMMM YYYY", "Datepicker headline, see moment.js for allowed formats"));
 
     String fieldLabel = cfg.get("fieldLabel", String.class);
@@ -214,7 +214,6 @@ if(!cfg.get("disabled", false)) {
         String resourcePath = requestPathInfo.getSuffix();
         Resource cfResource = resourceResolver.resolve(resourcePath + "/jcr:content/data/master");
 
-
         if(!ResourceUtil.isNonExistingResource(cfResource)) {
             selectedTz = cfResource.getValueMap().get(timeZoneFieldName, "UTC+00:00");
         }
@@ -225,7 +224,7 @@ if(!cfg.get("disabled", false)) {
     <coral-select-item value="UTC+00:00" <%out.print("UTC+00:00".equals(selectedTz) ? "selected" : "");%>>
         (UTC&plusmn;00:00)
     </coral-select-item>
-    <coral-select-item value="UTC-04:00" <%out.print("UTC-04:00".equals(selectedTz) ? "selected" : "");%>>
+    <coral-select-item value="EST" <%out.print("EST".equals(selectedTz) ? "selected" : "");%>>
         Eastern Time - New York
     </coral-select-item>
 </coral-select>
