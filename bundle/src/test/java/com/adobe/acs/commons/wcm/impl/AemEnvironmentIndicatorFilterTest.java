@@ -22,8 +22,8 @@ package com.adobe.acs.commons.wcm.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,7 +48,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.day.cq.wcm.api.WCMMode;
@@ -91,8 +91,8 @@ public class AemEnvironmentIndicatorFilterTest {
         ServletResponse resp = mock(ServletResponse.class);
         
         filter.doFilter(req,resp,chain);
-        verify(chain,times(1)).doFilter(anyObject(),anyObject());
-        verify(filter,never()).accepts(anyObject());
+        verify(chain, times(1)).doFilter(any(), any());
+        verify(filter, never()).accepts(any());
     }
     
     @Test
@@ -116,7 +116,7 @@ public class AemEnvironmentIndicatorFilterTest {
             HttpServletResponse response = (HttpServletResponse) invocation.getArguments()[1];
             response.getWriter().println("<html><body>somebody</body></html>");
             return null;
-        }).when(chain).doFilter(anyObject(),anyObject());
+        }).when(chain).doFilter(any(), any());
         
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
@@ -130,12 +130,12 @@ public class AemEnvironmentIndicatorFilterTest {
         context.registerInjectActivateService(filter,props);
         context.request().setMethod("GET");  
         context.response().setContentType("text/html");
-        WCMMode.EDIT.toRequest(context.request());        
+        WCMMode.EDIT.toRequest(context.request());
         doAnswer((Answer) invocation -> {
             HttpServletResponse response = (HttpServletResponse) invocation.getArguments()[1];
             response.getWriter().println("<html><body>somebody</body></html>");
             return null;
-        }).when(chain).doFilter(anyObject(),anyObject());
+        }).when(chain).doFilter(any(), any());
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
         assertEquals(String.format("%s%n", "<html><body>somebody</body></html>"),response);
@@ -152,7 +152,7 @@ public class AemEnvironmentIndicatorFilterTest {
             HttpServletResponse response = (HttpServletResponse) invocation.getArguments()[1];
             response.getWriter().println("<html><body>somebody</body></html>");
             return null;
-        }).when(chain).doFilter(anyObject(),anyObject());
+        }).when(chain).doFilter(any(), any());
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
         assertTrue(response.startsWith("<html><body>somebody<style>#acs-commons-env-indicator"));

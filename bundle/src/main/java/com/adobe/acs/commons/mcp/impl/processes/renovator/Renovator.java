@@ -57,8 +57,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.jcr.RepositoryException;
@@ -278,7 +276,6 @@ public class Renovator extends ProcessDefinition {
         try {
             sheet = new Spreadsheet(sourceFile, SOURCE_COL, DESTINATION_COL).buildSpreadsheet();
         } catch (IOException ex) {
-            Logger.getLogger(Renovator.class.getName()).log(Level.SEVERE, null, ex);
             throw new RepositoryException("Unable to parse spreadsheet", ex);
         }
 

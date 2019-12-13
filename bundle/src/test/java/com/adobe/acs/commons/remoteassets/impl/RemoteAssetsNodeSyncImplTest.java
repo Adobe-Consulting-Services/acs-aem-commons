@@ -19,46 +19,6 @@
  */
 package com.adobe.acs.commons.remoteassets.impl;
 
-import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
-import com.adobe.acs.commons.testutil.LogTester;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.api.Rendition;
-import com.day.cq.tagging.TagConstants;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.invocation.Invocation;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_A;
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.TEST_DAM_PATH_B;
@@ -71,28 +31,61 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+
+import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
+import com.adobe.acs.commons.testutil.LogTester;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.api.Rendition;
+import com.day.cq.tagging.TagConstants;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
 public class RemoteAssetsNodeSyncImplTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
 
-    private RemoteAssetsConfig remoteAssetsConfig;
+
+//    private RemoteAssetsConfig remoteAssetsConfig;
+
     private RemoteAssetsNodeSyncImpl remoteAssetsNodeSync;
-    private Map<String, List<String>> nodeMixinsTracker;
+//    private Map<String, List<String>> nodeMixinsTracker;
 
     @Before
     public void setup() throws Exception {
@@ -111,40 +104,6 @@ public class RemoteAssetsNodeSyncImplTest {
         context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
         RemoteAssetsNodeSyncImpl remoteAssetsNodeSyncImpl = spy(new RemoteAssetsNodeSyncImpl());
         remoteAssetsNodeSync = context.registerInjectActivateService(remoteAssetsNodeSyncImpl);
-
-        nodeMixinsTracker = new HashMap<>();
-        // This hackery is in place because MockNode#addMixin throws an UnsupportedOperationException
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                // Need to cast this to Invocation so that we can get at the raw arguments
-                // to modify them prior to delegating the call to callRealMethod().
-                Invocation invocation = (Invocation) invocationOnMock;
-
-                Resource argResource = (Resource) invocation.getRawArguments()[2];
-                Resource mockResource = mock(Resource.class);
-                when(mockResource.getPath()).thenReturn(argResource.getPath());
-
-                Node mockResourceNode = mock(Node.class);
-                doNothing().when(mockResourceNode).addMixin(anyString());
-                doReturn(mockResourceNode).when(mockResource).adaptTo(Node.class);
-
-                invocation.getRawArguments()[2] = mockResource;
-                invocation.callRealMethod();
-
-                JsonArray argMixins = (JsonArray) invocation.getRawArguments()[0];
-                Iterator<JsonElement> mixinIter = argMixins.iterator();
-                while (mixinIter.hasNext()) {
-                    List<String> nodeMixins = nodeMixinsTracker.get(argResource.getPath());
-                    if (nodeMixins == null) {
-                        nodeMixins = new ArrayList<>();
-                        nodeMixinsTracker.put(argResource.getPath(), nodeMixins);
-                    }
-                    nodeMixins.add(mixinIter.next().getAsString());
-                }
-                return null;
-            }
-        }).when(remoteAssetsNodeSyncImpl).setNodeMixinsProperty(any(JsonArray.class), any(String.class), any(Resource.class));
 
         LogTester.reset();
     }
@@ -210,7 +169,7 @@ public class RemoteAssetsNodeSyncImplTest {
     }
 
     @Test
-    public void testSync() throws IOException {
+    public void testSync() throws IOException, RepositoryException {
         setupMockSyncRequests();
 
         remoteAssetsNodeSync.syncAssetNodes();
@@ -282,7 +241,7 @@ public class RemoteAssetsNodeSyncImplTest {
         assertEquals("Test Tag #B1", tagB1.getValueMap().get(JcrConstants.JCR_DESCRIPTION));
     }
 
-    private void validateSyncAssets() throws IOException {
+    private void validateSyncAssets() throws IOException, RepositoryException {
         ResourceResolver resourceResolver = context.resourceResolver();
 
         Resource assetFolderA = resourceResolver.getResource(TEST_DAM_PATH_A);
@@ -293,20 +252,14 @@ public class RemoteAssetsNodeSyncImplTest {
 
         Resource asset1Resource = resourceResolver.getResource(TEST_DAM_PATH_A + "/image_a1.jpg");
         assertEquals(DamConstants.NT_DAM_ASSET, asset1Resource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE));
-        assertEquals(Arrays.asList(JcrConstants.MIX_REFERENCEABLE, JcrConstants.MIX_VERSIONABLE), nodeMixinsTracker.get(asset1Resource.getPath()));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_CREATED));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_CREATED_BY));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_VERSIONHISTORY));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_BASEVERSION));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_ISCHECKEDOUT));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_UUID));
-        assertNull(asset1Resource.getValueMap().get(JcrConstants.JCR_PREDECESSORS));
+        assertTrue(hasMixin(asset1Resource,JcrConstants.MIX_REFERENCEABLE));
+        assertTrue(hasMixin(asset1Resource,JcrConstants.MIX_VERSIONABLE));
 
         Resource asset1ContentResource = asset1Resource.getChild(JcrConstants.JCR_CONTENT);
         assertEquals(DamConstants.NT_DAM_ASSETCONTENT, asset1ContentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE));
 
         Resource asset1MetadataResource = asset1ContentResource.getChild(DamConstants.METADATA_FOLDER);
-        assertEquals(Arrays.asList(TagConstants.NT_TAGGABLE), nodeMixinsTracker.get(asset1MetadataResource.getPath()));
+        assertTrue(hasMixin(asset1MetadataResource,TagConstants.NT_TAGGABLE));
 
         Asset asset1 = asset1Resource.adaptTo(Asset.class);
         assertEquals(FileExtensionMimeTypeConstants.EXT_JPEG_JPG, asset1.getMetadata("dam:MIMEtype"));
@@ -459,5 +412,15 @@ public class RemoteAssetsNodeSyncImplTest {
         Resource altRenditionContent = resourceResolver.getResource(nodeRenditionAltContent.getPath());
         byte[] altRenditionPlaceholder = getBytes(remoteAssetsNodeSync.getRemoteAssetPlaceholder(altRenditionContent));
         assertEquals(expectedPlaceholder.length, altRenditionPlaceholder.length);
+        
+        // Cleanup
+        nodeAsset.remove();
+        session.save();
     }
+    
+    private boolean hasMixin(Resource resource, String mixin) throws RepositoryException {
+        List<NodeType> nodetypes = Arrays.asList(resource.adaptTo(Node.class).getMixinNodeTypes());
+        return nodetypes.stream().anyMatch(nt -> nt.getName().equals(mixin));
+    }
+    
 }

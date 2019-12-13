@@ -161,7 +161,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
         if (index != null && !this.ensureIndexes.contains(index)) {
-            index.setIgnoreProperties(this.additionalIgnoreProperties);
             this.ensureIndexes.add(index);
         }
     }
@@ -214,5 +213,10 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Activate
     protected void activate(Map<String, Object> config) {
         additionalIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+    }
+    
+    
+    protected String[] getIgnoredProperties() {
+        return this.additionalIgnoreProperties;
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
+    <filter root="/conf/rep:policy"/>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
@@ -33,6 +34,7 @@
         <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
         <include pattern="/etc/acs-commons/exporters"/>
         <include pattern="/etc/acs-commons/exporters/jcr:content"/>
+        <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
         <include pattern="/etc/acs-commons/qr-code"/>
         <include pattern="/etc/acs-commons/qr-code/jcr:content"/>
         <include
@@ -81,6 +83,7 @@
     </filter>
     <filter root="/etc/rep:policy"/>
     <filter root="/etc/workflow/instances/rep:policy"/>
+    <filter root="/etc/workflow/packages/rep:policy"/>
     <filter root="/home/groups/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
@@ -95,7 +98,9 @@
             pattern="/etc/acs-commons/reports(.*)?"
             mode="merge"/>
         <include pattern="/var/acs-commons/httpcache"/>
-        <include pattern="/var/acs-commons/rep:policy"/>
-        <include pattern="/var/workflow/instances/rep:policy"/>
+        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
+        <include pattern="/var/acs-commons/mcp"/>
     </filter>
+    <filter root="/var/workflow/instances/rep:policy"/>
+    <filter root="/var/workflow/packages/rep:policy"/>
 </workspaceFilter>

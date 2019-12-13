@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.mcp.model;
 
 import org.osgi.annotation.versioning.ProviderType;
-import com.adobe.acs.commons.mcp.model.impl.ArchivedProcessFailure;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

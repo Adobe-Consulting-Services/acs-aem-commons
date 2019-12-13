@@ -20,6 +20,29 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.junit.SlingContext;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -29,36 +52,14 @@ import com.adobe.granite.workflow.exec.WorkflowData;
 import com.adobe.granite.workflow.metadata.MetaDataMap;
 import com.adobe.granite.workflow.metadata.SimpleMetaDataMap;
 import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.commons.util.DamUtil;
 import com.day.cq.replication.ReplicationActionType;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.apache.sling.testing.mock.sling.junit.SlingContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DamUtil.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(DamUtil.class)
+@RunWith(MockitoJUnitRunner.class)
 public class BrandPortalSyncProcessTest {
 
-    @Rule
-    public final OsgiContext osgiContext = new OsgiContext();
+
 
     @Rule
     public final SlingContext context = new SlingContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
@@ -72,7 +73,6 @@ public class BrandPortalSyncProcessTest {
     @Mock
     WorkflowPackageManager workflowPackageManager;
 
-    @Mock
     Asset asset;
 
     @Mock
@@ -95,7 +95,11 @@ public class BrandPortalSyncProcessTest {
 
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(DamUtil.class);
+
+        context.build().resource(assetPath, "jcr:primaryType", "dam:Asset").commit();
+        context.build().resource(assetPath + "/jcr:content", "cq:name", "foo").commit();
+        Resource assetResource = context.resourceResolver().getResource(assetPath);
+        asset = assetResource.adaptTo(Asset.class);
 
         metadataMap = new SimpleMetaDataMap();
         paths = new ArrayList<>();
@@ -106,8 +110,6 @@ public class BrandPortalSyncProcessTest {
 
         when(workflowHelper.getResourceResolver(workflowSession)).thenReturn(context.resourceResolver());
         when(workflowPackageManager.getPaths(eq(context.resourceResolver()), anyString())).thenReturn(paths);
-        when(asset.getPath()).thenReturn(assetPath);
-        when(DamUtil.resolveToAsset(any(Resource.class))).thenReturn(asset);
     }
 
     @Test

@@ -52,4 +52,4 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 
 10. After the files are promoted, add a release announcement (and any other docs) to the documentation site.
 
-11. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.
+11. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`

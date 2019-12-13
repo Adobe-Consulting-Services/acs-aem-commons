@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:description="Utility page for defining packages of tags nodes."
+          jcr:primaryType="cq:Template"
+          jcr:title="Tags to CSV Exporter"
+          allowedPaths="[/etc/acs-commons/exporters(/.*)?]"
+          ranking="{Long}2">
+    <jcr:content
+            cq:designPath="/etc/designs/acs-commons"
+            jcr:primaryType="cq:PageContent"
+            sling:resourceType="acs-commons/components/utilities/exporters/tags-to-csv">
+        <tags
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="acs-commons/components/utilities/exporters/tags-to-csv"/>
+    </jcr:content>
+</jcr:root>

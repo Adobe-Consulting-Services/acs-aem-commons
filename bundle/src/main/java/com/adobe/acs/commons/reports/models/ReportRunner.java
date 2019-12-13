@@ -22,9 +22,9 @@ package com.adobe.acs.commons.reports.models;
 import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
-import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.internal.ReportExecutorProvider;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
@@ -75,28 +75,22 @@ public class ReportRunner {
   @SuppressWarnings("squid:S2658") // class name is from a trusted source
   private boolean executeConfig(Resource config, SlingHttpServletRequest request) {
     log.trace("executeConfig");
-    String reportExecutorClass = config.getValueMap().get(PN_EXECUTOR, String.class);
-    if (StringUtils.isNotBlank(reportExecutorClass)) {
-      log.debug("Loading class for: {}", reportExecutorClass);
-      try {
-        Class<?> exClass = Class.forName(reportExecutorClass, true, dynamicClassLoaderManager.getDynamicClassLoader());
-        Object model = request.adaptTo(exClass);
-        if (model instanceof ReportExecutor) {
-          ReportExecutor ex = (ReportExecutor) model;
-          ex.setConfiguration(config);
-          ex.setPage(this.page);
-          this.reportExecutor = ex;
-          return true;
-        } else {
-          log.warn("Class {} is not an instance of ReportExecutor", reportExecutor);
-        }
-      } catch (ClassNotFoundException e) {
-        log.warn("Unable to find class for " + reportExecutor, e);
-      } catch (Exception e) {
-        log.warn("Unexpected exception executing report executor " + reportExecutor, e);
+    try {
+      Class<?> exClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
+      Object model = request.adaptTo(exClass);
+      if (model instanceof ReportExecutor) {
+        ReportExecutor ex = (ReportExecutor) model;
+        ex.setConfiguration(config);
+        ex.setPage(this.page);
+        this.reportExecutor = ex;
+        return true;
+      } else {
+        log.warn("Class {} is not an instance of ReportExecutor", reportExecutor);
       }
-    } else {
-      log.warn("No executor found for {}", config);
+    } catch (ReportException e) {
+      log.warn(e.getMessage(), e);
+    } catch (Exception e) {
+      log.warn("Unexpected exception executing report executor " + reportExecutor, e);
     }
     return false;
   }

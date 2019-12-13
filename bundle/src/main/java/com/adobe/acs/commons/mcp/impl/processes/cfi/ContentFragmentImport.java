@@ -44,8 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -56,11 +54,15 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Import a series of content fragments from a spreadsheet
  */
 public class ContentFragmentImport extends ProcessDefinition {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ContentFragmentImport.class);
 
     public enum ReportColumns {
         ITEM, ACTION, DESCRIPTION, COUNT
@@ -90,9 +92,10 @@ public class ContentFragmentImport extends ProcessDefinition {
 
     @FormField(
             name = "Dry run",
-            component = CheckboxComponent.class
+            component = CheckboxComponent.class,
+            options = "checked"
     )
-    transient boolean dryRunMode;
+    transient boolean dryRunMode = true;
 
     @FormField(
             name = "Detailed Report",
@@ -334,7 +337,7 @@ public class ContentFragmentImport extends ProcessDefinition {
 // TODO: Replace this reflection hack with the proper method once ACS Commons doesn't support 6.2 anymore
                 return (ContentFragment) MethodUtils.invokeMethod(fragmentTemplate, "createFragment", parent, name, title);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-                Logger.getLogger(ContentFragmentImport.class.getName()).log(Level.SEVERE, "Unable to call createFragment method -- Is this 6.3 or newer?", ex);
+                LOG.error("Unable to call createFragment method -- Is this 6.3 or newer?", ex);
                 return null;
             }
         } else {

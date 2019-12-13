@@ -129,6 +129,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
         super(OnDeployExecutorMBean.class);
     }
 
+    //TODO: Is this really necessary?? This is default behavior, no need to specify explicitly here
     protected void bindResourceResolverFactory(ResourceResolverFactory resourceResolverFactory) {
         this.resourceResolverFactory = resourceResolverFactory;
     }
@@ -205,6 +206,9 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
             } catch (Exception e) {
                 String errMsg = "On-deploy script failed: " + statusResource.getPath();
                 logger.error(errMsg, e);
+                // The script may have made changes to the resolver before failing - make sure to get rid of them,
+                // since they most likely represent an inconsistent state.
+                resourceResolver.revert();
                 trackScriptEnd(statusResource, SCRIPT_STATUS_FAIL, ExceptionUtils.getStackTrace(e.getCause()));
                 throw new OnDeployEarlyTerminationException(new RuntimeException(errMsg));
             }

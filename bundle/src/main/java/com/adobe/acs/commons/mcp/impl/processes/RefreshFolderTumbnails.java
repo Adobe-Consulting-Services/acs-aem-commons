@@ -108,8 +108,10 @@ public class RefreshFolderTumbnails extends ProcessDefinition {
     private ThumbnailScanLogic scanMode = ThumbnailScanLogic.PLACEHOLDERS;
 
     @FormField(name = "Dry Run",
-            component = CheckboxComponent.class)
-    private boolean dryRun = false;
+            component = CheckboxComponent.class,
+            options = "checked"
+    )
+    private boolean dryRun = true;
 
     private transient List<String> foldersToReplace = Collections.synchronizedList(new ArrayList<>());
 

@@ -93,10 +93,8 @@ public class ReplicatedByWorkflowProcess implements WorkflowProcess {
         // Get ResourceResolver
         final Map<String, Object> authInfo = new HashMap<String, Object>();
         authInfo.put(AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
-        final ResourceResolver resourceResolver;
 
-        try {
-            resourceResolver = resourceResolverFactory.getResourceResolver(authInfo);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getResourceResolver(authInfo)) {
 
             // Get replicated by value
             final String replicatedBy = StringUtils.defaultIfEmpty(workItem.getWorkflow().getInitiator(),
