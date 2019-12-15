@@ -137,12 +137,12 @@
                         <dependency>
                             <groupId>org.apache.maven.shared</groupId>
                             <artifactId>maven-invoker</artifactId>
-                            <version>2.2</version>
+                            <version>3.0.1</version>
                         </dependency>
                         <dependency>
                             <groupId>org.apache.maven.release</groupId>
                             <artifactId>maven-release-oddeven-policy</artifactId>
-                            <version>2.5.3</version>
+                            <version>3.0-r1585899</version>
                         </dependency>
                     </dependencies>
                 </plugin>
