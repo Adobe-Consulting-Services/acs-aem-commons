@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
 	<modelVersion>4.0.0</modelVersion>
 	<!-- ====================================================================== -->
 	<!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -9,7 +7,7 @@
 	<parent>
 		<groupId>com.adobe.acs</groupId>
 		<artifactId>acs-aem-commons</artifactId>
-		<version>4.3.5-SNAPSHOT</version>
+		<version>4.4.1-SNAPSHOT</version>
 	</parent>
 
 	<!-- ====================================================================== -->
@@ -117,8 +115,7 @@
 						<configuration>
 							<target>
 								<move todir="${project.build.outputDirectory}/OSGI-INF.bak">
-									<fileset
-										dir="${project.build.outputDirectory}/OSGI-INF" />
+									<fileset dir="${project.build.outputDirectory}/OSGI-INF" />
 								</move>
 							</target>
 						</configuration>
@@ -131,13 +128,10 @@
 						<phase>generate-test-sources</phase>
 						<configuration>
 							<target>
-								<move todir="${project.build.outputDirectory}/OSGI-INF"
-									overwrite="false">
-									<fileset
-										dir="${project.build.outputDirectory}/OSGI-INF.bak" />
+								<move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
+									<fileset dir="${project.build.outputDirectory}/OSGI-INF.bak" />
 								</move>
-								<delete
-									dir="${project.build.outputDirectory}/OSGI-INF.bak" />
+								<delete dir="${project.build.outputDirectory}/OSGI-INF.bak" />
 							</target>
 						</configuration>
 						<goals>
@@ -149,10 +143,8 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<jar update="true"
-									destfile="${project.build.directory}/${project.build.finalName}.jar">
-									<fileset dir="${project.build.outputDirectory}"
-										includes="OSGI-INF/l10n/**" />
+								<jar update="true" destfile="${project.build.directory}/${project.build.finalName}.jar">
+									<fileset dir="${project.build.outputDirectory}" includes="OSGI-INF/l10n/**" />
 								</jar>
 							</target>
 						</configuration>
@@ -331,7 +323,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<reuseForks>false</reuseForks>
-					<forkCount>2C</forkCount>
+					<forkCount>1C</forkCount>
 				</configuration>
 				<executions>
 					<execution>
@@ -343,8 +335,8 @@
 						<configuration>
 							<reuseForks>true</reuseForks>
 							<parallel>classes</parallel>
-							<threadCount>2</threadCount>
-							<perCoreThreadCount></perCoreThreadCount>
+							<threadCount>1</threadCount>
+							<perCoreThreadCount />
 						</configuration>
 					</execution>
 				</executions>
