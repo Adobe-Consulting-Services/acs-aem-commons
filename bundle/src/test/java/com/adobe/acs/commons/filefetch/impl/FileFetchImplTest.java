@@ -77,8 +77,6 @@ public class FileFetchImplTest {
   }
 
   @Test
-  @Ignore
-  // Ignore until https://wcm-io.atlassian.net/browse/WTES-48 is resolved
   public void testFetch() throws IOException, ReplicationException {
     fileFetch.activate(new FileFetchConfiguration() {
 
