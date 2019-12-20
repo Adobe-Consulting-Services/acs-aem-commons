@@ -30,14 +30,16 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -324,16 +326,19 @@ public class ChildrenAsPropertyResource extends ResourceWrapper {
     protected final JsonObject serializeToJSON(final Resource resourceToSerialize)
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
-        final DateTimeFormatter dtf = ISODateTimeFormat.dateTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         final Map<String, Object> serializedData = new HashMap<String, Object>();
 
         for (Map.Entry<String, Object> entry : resourceToSerialize.getValueMap().entrySet()) {
             if (entry.getValue() instanceof Calendar) {
                 final Calendar cal = (Calendar) entry.getValue();
-                serializedData.put(entry.getKey(), dtf.print(cal.getTimeInMillis()));
+                LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), 
+                    ZoneId.systemDefault());
+                serializedData.put(entry.getKey(), date.format(formatter));
             } else if (entry.getValue() instanceof Date) {
                 final Date date = (Date) entry.getValue();
-                serializedData.put(entry.getKey(), dtf.print(date.getTime()));
+                LocalDateTime ldt = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                serializedData.put(entry.getKey(), ldt.format(formatter));
             } else {
                 serializedData.put(entry.getKey(), entry.getValue());
             }

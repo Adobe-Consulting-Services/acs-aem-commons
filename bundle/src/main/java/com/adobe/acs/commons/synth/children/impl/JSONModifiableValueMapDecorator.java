@@ -20,12 +20,11 @@
 package com.adobe.acs.commons.synth.children.impl;
 
 import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -115,14 +114,9 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             return cal;
         } else {
             String tmp = super.get(name, String.class);
-            final DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(tmp);
-            if (dateTime != null) {
-                final Calendar cal = Calendar.getInstance();
-                cal.setTime(dateTime.toDate());
-                return cal;
-            } else {
-                return null;
-            }
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(OffsetDateTime.parse(tmp).toInstant().toEpochMilli());
+            return cal;
         }
     }
 
@@ -141,12 +135,7 @@ public final class JSONModifiableValueMapDecorator extends ModifiableValueMapDec
             return cal.getTime();
         } else {
             String tmp = super.get(name, String.class);
-            final DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(tmp);
-            if (dateTime != null) {
-                return dateTime.toDate();
-            } else {
-                return null;
-            }
+            return new Date(OffsetDateTime.parse(tmp).toInstant().toEpochMilli());
         }
     }
 
