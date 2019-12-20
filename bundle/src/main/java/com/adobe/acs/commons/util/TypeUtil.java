@@ -159,7 +159,7 @@ public final class TypeUtil {
             return klass.cast(Boolean.FALSE);
         } else if (JSON_DATE.matcher(data).matches()) {
             long epochSeconds = OffsetDateTime.parse(data).toInstant().toEpochMilli();
-            return klass.cast(new Date (epochSeconds));
+            return klass.cast(new Date(epochSeconds));
         } else {
             return klass.cast(data);
         }
