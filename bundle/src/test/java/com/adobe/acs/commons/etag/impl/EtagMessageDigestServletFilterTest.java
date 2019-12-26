@@ -109,10 +109,25 @@ public class EtagMessageDigestServletFilterTest {
     @Test
     public void testIsUnmodified() {
         Vector<String> ifNoneMatchETags = new Vector<>();
-        ifNoneMatchETags.add("ab");
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("\"cd\"");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // with weak tag it should still match
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("W/\"cd\"");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // without quotes it should not match
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
         ifNoneMatchETags.add("cd");
-        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "ab"));
+        Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // non matching etag
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("W/\"cd\"");
         Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "de"));
+        // wildcard match
         ifNoneMatchETags = new Vector<>();
         ifNoneMatchETags.add("*");
         Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "sometag"));
