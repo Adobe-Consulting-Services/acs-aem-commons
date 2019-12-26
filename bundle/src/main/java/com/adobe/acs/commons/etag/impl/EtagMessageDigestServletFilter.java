@@ -86,10 +86,10 @@ public class EtagMessageDigestServletFilter implements Filter {
         @AttributeDefinition(name = "Pattern", description = "Restricts the filter to paths that match the supplied regular expression. Requires Sling Engine 2.4.0 or newer.")
         String sling_filter_pattern() default ".*";
 
-        @AttributeDefinition(name = "Consider Response Headers", description = "If checked will also include the existing response headers for the digest calculation, i.e. different headers lead to different ETags. That is usually intended as you cannot send arbitrary response headers with a 304 response (https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.5).")
+        @AttributeDefinition(name = "Consider Response Headers", description = "If checked will also include the existing response headers for the digest calculation, i.e. different headers lead to different ETags. That is usually intended as you cannot send arbitrary response headers with a 304 response (https://tools.ietf.org/html/rfc7232#section-4.1).")
         boolean considerResponseHeaders() default true;
 
-        @AttributeDefinition(name = "Ignored Response Headers", description = "The header names (case-insensitive) which should in no case be considered for the digest calculation as they are considered also for a 304 response (compare with https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.5).")
+        @AttributeDefinition(name = "Ignored Response Headers", description = "The header names (case-insensitive) which should in no case be considered for the digest calculation as they are considered also for a 304 response (compare with https://tools.ietf.org/html/rfc7232#section-4.1).")
         String[] ignoredResponseHeaders() default { "Date", "Cache-Control", "Expires", "Vary" };
 
         @AttributeDefinition(name = "Salt", description = "The (optional) salt is also taken into account for the message digest calculation. It is necessary to change that value whenever the response content or the response headers are now modified differently in a proxy instance between client and AEM (e.g. Dispatcher sets additional headers).")
