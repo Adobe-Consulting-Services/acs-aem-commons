@@ -129,59 +129,69 @@ public class EtagMessageDigestServletFilter implements Filter {
         if (!(response instanceof SlingHttpServletResponse) || !(request instanceof SlingHttpServletRequest)) {
             throw new IllegalStateException("Filter not properly registered as Sling Servlet Filter");
         }
-        if (!configuration.enabled()) {
-            log.debug("ETag filter not enabled");
-            chain.doFilter(request, response);
-            return;
+        if (configuration.enabled()) {
+            log.debug("ETag filter enabled");
+
+            // we already checked that this is a HTTP servlet response before
+            SlingHttpServletResponse slingHttpServletResponse = (SlingHttpServletResponse) response;
+            SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
+
+            // is this a GET/HEAD?
+            if (slingHttpServletRequest.getMethod().equals(HttpConstants.METHOD_HEAD)
+                    || slingHttpServletRequest.getMethod().equals(HttpConstants.METHOD_GET)) {
+                log.debug("Method is GET or HEAD, calculating ETag...");
+                doFilterWithMessageDigest(slingHttpServletRequest, slingHttpServletResponse, chain);
+                return;
+            } else {
+                log.debug("Method neither GET or HEAD: {}, no ETag necessary!", slingHttpServletRequest.getMethod());
+            }
+        } else {
+            log.debug("ETag filter disabled");
         }
-        // we already checked that this is a HTTP servlet response before
-        SlingHttpServletResponse slingHttpServletResponse = (SlingHttpServletResponse) response;
-        SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
+        chain.doFilter(request, response);
+    }
 
-        // is this a GET?
-        if (slingHttpServletRequest.getMethod().equals(HttpConstants.METHOD_HEAD)
-                || slingHttpServletRequest.getMethod().equals(HttpConstants.METHOD_GET)) {
-            ByteArrayOutputStream outputStream = configuration.enabledForOutputStream() ? new ByteArrayOutputStream() : null;
-            try (BufferedSlingHttpServletResponse bufferedResponse = new BufferedSlingHttpServletResponse(slingHttpServletResponse,
-                    new StringWriter(), outputStream)) {
-                chain.doFilter(request, bufferedResponse);
-                if (!configuration.overwrite() && slingHttpServletResponse.containsHeader(HttpConstants.HEADER_ETAG)) {
-                    log.debug("Do not overwrite existing ETag header with value '{}'",
-                            slingHttpServletResponse.getHeader(HttpConstants.HEADER_ETAG));
-                    return;
-                }
-                // was the response buffered?
-                if (!configuration.enabledForOutputStream()
-                        && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.OUTPUTSTREAM) {
-                    log.debug("Can not calculate message digest as response was written via output stream which was not buffered.");
-                    return;
-                }
-                if (slingHttpServletResponse.isCommitted()) {
-                    log.error("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
-                    return;
-                }
+    private void doFilterWithMessageDigest(SlingHttpServletRequest slingHttpServletRequest, SlingHttpServletResponse slingHttpServletResponse,  FilterChain chain) throws IOException, ServletException {
+        ByteArrayOutputStream outputStream = configuration.enabledForOutputStream() ? new ByteArrayOutputStream() : null;
+        try (BufferedSlingHttpServletResponse bufferedResponse = new BufferedSlingHttpServletResponse(slingHttpServletResponse,
+                new StringWriter(), outputStream)) {
+            chain.doFilter(slingHttpServletRequest, bufferedResponse);
+            if (!configuration.overwrite() && slingHttpServletResponse.containsHeader(HttpConstants.HEADER_ETAG)) {
+                log.debug("Do not overwrite existing ETag header with value '{}'",
+                        slingHttpServletResponse.getHeader(HttpConstants.HEADER_ETAG));
+                return;
+            }
+            // was the response buffered?
+            if (!configuration.enabledForOutputStream()
+                    && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.OUTPUTSTREAM) {
+                log.debug("Can not calculate message digest as response was written via output stream which was not buffered.");
+                return;
+            }
+            if (slingHttpServletResponse.isCommitted()) {
+                log.error("Can not send ETag header because response is already committed, try to give this filter a higher ranking!");
+                return;
+            }
 
-                try {
-                    String digest = calculateDigestFromResponse(bufferedResponse);
-                    slingHttpServletRequest.getRequestProgressTracker().log("ETag from digest calculated with {0}: {1}",
-                            configuration.messageDigestAlgorithm(), digest);
-                    slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, "\"" + digest + "\"");
-                    if (isUnmodified(slingHttpServletRequest.getHeaders(HttpHeaders.IF_NONE_MATCH), digest)) {
-                        log.debug(
-                                "Digest is equal to one of the given ETags in the If-None-Match request header, returning empty response with a 304");
-                        bufferedResponse.resetBuffer();
-                        slingHttpServletResponse.setStatus(HttpStatus.SC_NOT_MODIFIED);
-                        return;
-                    }
-                    if (configuration.addAsHtmlComment()
-                            && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER
-                            && slingHttpServletResponse.getContentType() != null
-                            && slingHttpServletResponse.getContentType().startsWith("text/html")) {
-                        bufferedResponse.getWriter().println(String.format("%n<!-- ETag: %s -->", digest));
-                    }
-                } catch (NoSuchAlgorithmException e) {
-                    log.error("The algorithm configured for this servlet filter is invalid: " + configuration.messageDigestAlgorithm(), e);
+            try {
+                String digest = calculateDigestFromResponse(bufferedResponse);
+                slingHttpServletRequest.getRequestProgressTracker().log("ETag from digest calculated with {0}: {1}",
+                        configuration.messageDigestAlgorithm(), digest);
+                slingHttpServletResponse.setHeader(HttpConstants.HEADER_ETAG, "\"" + digest + "\"");
+                if (isUnmodified(slingHttpServletRequest.getHeaders(HttpHeaders.IF_NONE_MATCH), digest)) {
+                    log.debug(
+                            "Digest is equal to one of the given ETags in the If-None-Match request header, returning empty response with a 304");
+                    bufferedResponse.resetBuffer();
+                    slingHttpServletResponse.setStatus(HttpStatus.SC_NOT_MODIFIED);
+                    return;
                 }
+                if (configuration.addAsHtmlComment()
+                        && bufferedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER
+                        && slingHttpServletResponse.getContentType() != null
+                        && slingHttpServletResponse.getContentType().startsWith("text/html")) {
+                    bufferedResponse.getWriter().println(String.format("%n<!-- ETag: %s -->", digest));
+                }
+            } catch (NoSuchAlgorithmException e) {
+                log.error("The algorithm configured for this servlet filter is invalid: " + configuration.messageDigestAlgorithm(), e);
             }
         }
     }
@@ -194,7 +204,8 @@ public class EtagMessageDigestServletFilter implements Filter {
      * @see <a href="// https://tools.ietf.org/html/rfc7232#section-3.2">RFC7232</a> */
     static boolean isUnmodified(Enumeration<String> ifNoneMatchETags, String responseETag) {
         if (ifNoneMatchETags == null) {
-            throw new IllegalStateException("Can not access request headers");
+            log.debug("Can not access request headers or no NoneMatchETags header given!");
+            return false;
         }
         while (ifNoneMatchETags.hasMoreElements()) {
             String ifNoneMatchETag = ifNoneMatchETags.nextElement();
@@ -208,7 +219,7 @@ public class EtagMessageDigestServletFilter implements Filter {
             // remove double quotes (first and last value character)
             if (!ifNoneMatchETag.startsWith("\"") || !ifNoneMatchETag.endsWith("\"")) {
                 // ignoring invalid etag
-                log.debug("Ignoring invalid ETag not starting and ending with quotes: {}" + ifNoneMatchETag);
+                log.debug("Ignoring invalid ETag not starting and ending with quotes: {}", ifNoneMatchETag);
                 continue;
             }
             ifNoneMatchETag = ifNoneMatchETag.substring(1, ifNoneMatchETag.length() - 1);
