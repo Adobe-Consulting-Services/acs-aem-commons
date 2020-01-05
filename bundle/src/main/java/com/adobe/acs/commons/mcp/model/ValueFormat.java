@@ -72,10 +72,14 @@ public enum ValueFormat {
     public static strictfp String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         long absBytes = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
-        if (absBytes < unit) return bytes + " B";
+        if (absBytes < unit) {
+          return bytes + " B";
+        }
         int exp = (int) (Math.log(absBytes) / Math.log(unit));
         long th = (long) (Math.pow(unit, exp) * (unit - 0.05));
-        if (exp < 6 && absBytes >= th - ((th & 0xfff) == 0xd00 ? 52 : 0)) exp++;
+        if (exp < 6 && absBytes >= th - ((th & 0xfff) == 0xd00 ? 52 : 0))  {
+          exp++; 
+        }
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         if (exp > 4) {
             bytes /= unit;
