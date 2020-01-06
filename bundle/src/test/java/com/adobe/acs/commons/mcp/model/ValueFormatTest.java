@@ -51,21 +51,21 @@ public class ValueFormatTest {
     
     @Test
     public void oneKb() {
-        assertEquals(ONE + " kb", ValueFormat.getHumanSize(1 << 10));
+        assertEquals(ONE + " KiB", ValueFormat.getHumanSize(1 << 10));
     }
     
     @Test
     public void oneMb() {
-        assertEquals(ONE + " mb", ValueFormat.getHumanSize(1 << 20));
+        assertEquals(ONE + " MiB", ValueFormat.getHumanSize(1 << 20));
     }    
     
     @Test
     public void oneGb() {
-        assertEquals(ONE + " gb", ValueFormat.getHumanSize(1 << 30));
+        assertEquals(ONE + " GiB", ValueFormat.getHumanSize(1 << 30));
     }
     
     @Test
     public void onetb() {
-        assertEquals(ONE + " tb", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
+        assertEquals(ONE + " TiB", ValueFormat.getHumanSize(((long) (1 << 30)) * 1024L));
     }
 }
