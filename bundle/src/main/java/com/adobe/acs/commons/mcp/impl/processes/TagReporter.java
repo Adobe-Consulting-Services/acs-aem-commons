@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,6 +52,7 @@ import com.adobe.acs.commons.mcp.form.Description;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.RadioComponent;
+import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 import com.day.cq.commons.RangeIterator;
@@ -89,7 +90,7 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   /*
    * Limit based on cell char limit in Excel.
-   * 
+   *
    * @See https://bz.apache.org/bugzilla/show_bug.cgi?id=56579
    */
   public static final int CELL_CHAR_LIMIT = 32767;
@@ -105,6 +106,10 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   @FormField(name = "Include References", description = "Include the references to the tags in the report", component = CheckboxComponent.class)
   public boolean includeReferences = false;
 
+  @FormField(name = "References Char Limit", description = "Character limit for references when saving to the spreadsheet cells, must be less than 32,767", component = TextfieldComponent.class, required = true, options = {
+      "default=4096" })
+  public String referencesCharacterLimit = "4096";
+
   @FormField(name = "Reference Method", description = "The method used for finding references to the tag", component = RadioComponent.EnumerationSelector.class, options = {
       "vertical", "default=DEFAULT_TAG_FIND" })
   public ReferenceMethod referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
@@ -114,6 +119,8 @@ public class TagReporter extends ProcessDefinition implements Serializable {
   private final transient List<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
   private List<Pair<String, String>> tags = new ArrayList<>();
+
+  private int cellCharLimit;
 
   @Override
   public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
