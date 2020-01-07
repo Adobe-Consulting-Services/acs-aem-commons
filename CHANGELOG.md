@@ -7,8 +7,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 
+### Fixed
+- #2146 - POI exception generating Excel file with too many references
+
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+### Added
+
+### Fixed
+- #2082 - ETag filter never sends 304
+- #2148 bugfix for displaying sizes (adresses #2132)
+
+### Changed
 
 ## [4.4.0] - 2019-12-17
 

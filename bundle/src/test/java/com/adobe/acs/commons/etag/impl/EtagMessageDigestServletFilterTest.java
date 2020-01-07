@@ -20,13 +20,24 @@
 package com.adobe.acs.commons.etag.impl;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Vector;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+import org.apache.http.HttpHeaders;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestProgressTracker;
+import org.apache.sling.api.servlets.HttpConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +57,12 @@ public class EtagMessageDigestServletFilterTest {
     @Mock
     SlingHttpServletResponse mockResponse;
     BufferedSlingHttpServletResponse bufferedResponse;
-    
+
+    @Mock
+    SlingHttpServletRequest mockRequest;
+
+    @Mock
+    RequestProgressTracker tracker; 
     EtagMessageDigestServletFilter filter;
 
     private static final String EXAMPLE_TEXT = "The quick brown fox jumps over the lazy dog";
@@ -58,6 +74,7 @@ public class EtagMessageDigestServletFilterTest {
         filter = new EtagMessageDigestServletFilter();
         filter.activate(configuration);
         bufferedResponse = new BufferedSlingHttpServletResponse(mockResponse);
+        Mockito.when(mockRequest.getRequestProgressTracker()).thenReturn(tracker);
     }
 
     @Test
@@ -109,17 +126,82 @@ public class EtagMessageDigestServletFilterTest {
     @Test
     public void testIsUnmodified() {
         Vector<String> ifNoneMatchETags = new Vector<>();
-        ifNoneMatchETags.add("ab");
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("\"cd\"");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // with weak tag it should still match
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("W/\"cd\"");
+        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // without quotes it should not match
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
         ifNoneMatchETags.add("cd");
-        Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "ab"));
+        Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "cd"));
+        // non matching etag
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("W/\"ab\"");
+        ifNoneMatchETags.add("W/\"cd\"");
         Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "de"));
+        // wildcard match
         ifNoneMatchETags = new Vector<>();
         ifNoneMatchETags.add("*");
         Assert.assertTrue(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "sometag"));
+        // invalid quotes
+        ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("\"ab");
+        Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(ifNoneMatchETags.elements(), "ab"));
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test
     public void testIsUnmodifiedWithNullParameter() {
-        EtagMessageDigestServletFilter.isUnmodified(null, null);
+        Assert.assertFalse(EtagMessageDigestServletFilter.isUnmodified(null, "ab"));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDoFilter() throws IOException, ServletException {
+        Mockito.when(configuration.addAsHtmlComment()).thenReturn(true);
+        Mockito.when(configuration.enabled()).thenReturn(true);
+        StringWriter responseWriter = new StringWriter();
+        Mockito.when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
+        Mockito.when(mockResponse.getContentType()).thenReturn("text/html");
+        
+        // first test POST
+        Mockito.when(mockRequest.getMethod()).thenReturn(HttpConstants.METHOD_POST);
+        final FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+                response.getWriter().write(EXAMPLE_TEXT);
+            }
+        };
+        filter.doFilter(mockRequest, mockResponse, chain);
+        Mockito.verify(mockResponse, Mockito.never()).setHeader(Mockito.eq(HttpConstants.HEADER_ETAG), Mockito.anyString());
+        // don't change response code
+        Mockito.verify(mockResponse, Mockito.never()).setStatus(Mockito.anyInt());
+        
+        // then test GET
+        Mockito.when(mockRequest.getMethod()).thenReturn(HttpConstants.METHOD_GET);
+        responseWriter = new StringWriter();
+        Mockito.when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
+        // write to response
+        filter.doFilter(mockRequest, mockResponse, chain);
+        Mockito.verify(mockResponse).setHeader(HttpConstants.HEADER_ETAG, "\"9e107d9d372bb6826bd81d3542a419d6\"");
+        // don't change response code
+        Mockito.verify(mockResponse, Mockito.never()).setStatus(Mockito.anyInt());
+        Mockito.verify(mockResponse, Mockito.never()).setStatus(Mockito.anyInt(), Mockito.anyString());
+        
+        Assert.assertEquals(responseWriter.toString(), String.format("%s%n<!-- ETag: 9e107d9d372bb6826bd81d3542a419d6 -->%n", EXAMPLE_TEXT));
+        
+        // now request carries if-none-match header
+        Vector<String> ifNoneMatchETags = new Vector<>();
+        ifNoneMatchETags.add("\"someinvalidone\"");
+        ifNoneMatchETags.add("\"9e107d9d372bb6826bd81d3542a419d6\"");
+        Mockito.when(mockRequest.getHeaders(HttpHeaders.IF_NONE_MATCH)).thenReturn(ifNoneMatchETags.elements());
+        filter.doFilter(mockRequest, mockResponse, chain);
+        
+        Mockito.verify(mockResponse).setStatus(304);
+        
     }
 }
