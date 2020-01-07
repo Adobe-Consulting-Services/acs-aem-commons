@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,6 +43,7 @@ import com.adobe.acs.commons.mcp.impl.processes.TagReporter.ReportColumns;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
+import junit.framework.Assert;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TagReportTest {
@@ -154,18 +155,24 @@ public class TagReportTest {
     tagReporter.tagPath = "/etc/tags/workflow/wcm/translation";
     tagReporter.rootSearchPath = "/content";
     tagReporter.includeReferences = true;
-    tagReporter.referencesCharacterLimit = "4096";
 
     tagReporter.init();
     tagReporter.traverseTags(actionManager);
     tagReporter.recordTags(actionManager);
 
-    assertEquals(1, tagReporter.getReportRows().size());
+    assertEquals(3, tagReporter.getReportRows().size());
 
     assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.SUCCESS.name()),
         tagReporter.getReportRows().get(0).get(TagReporter.ReportColumns.STATUS));
+    assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.EXTENDED_DATA.name()),
+        tagReporter.getReportRows().get(1).get(TagReporter.ReportColumns.STATUS));
+    assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.EXTENDED_DATA.name()),
+        tagReporter.getReportRows().get(2).get(TagReporter.ReportColumns.STATUS));
 
-    assertEquals(4096, tagReporter.getReportRows().get(0).get(ReportColumns.REFERENCES).toString().length());
+    tagReporter.getReportRows().forEach(r -> {
+      assertTrue(r.get(ReportColumns.REFERENCES).toString().length() <= TagReporter.CELL_CHAR_LIMIT);
+    });
+
   }
 
 }
