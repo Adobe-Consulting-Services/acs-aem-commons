@@ -120,8 +120,6 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private List<Pair<String, String>> tags = new ArrayList<>();
 
-  private int cellCharLimit;
-
   @Override
   public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
     log.trace("buildProcess");
