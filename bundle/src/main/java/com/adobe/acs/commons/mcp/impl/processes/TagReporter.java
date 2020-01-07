@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,9 +31,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.Nonnull;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.resource.LoginException;
@@ -65,16 +65,16 @@ import com.day.cq.tagging.TagManager;
  */
 public class TagReporter extends ProcessDefinition implements Serializable {
   public enum ItemStatus {
-    FAILURE, INVALID_TAG, SUCCESS
+    EXTENDED_DATA, FAILURE, INVALID_TAG, SUCCESS
   }
 
   public enum ReferenceMethod {
 
-    @Description("Quicker method, requires the references to be in a cq:tags field of a cq:Taggable node (or mixin)")
-    DEFAULT_TAG_MANAGER_FIND,
-
     @Description("Slower method, will find references in any attribute, but runs a full text search for each tag")
-    DEEP_SEARCH
+    DEEP_SEARCH,
+
+    @Description("Quicker method, requires the references to be in a cq:tags field of a cq:Taggable node (or mixin)")
+    DEFAULT_TAG_MANAGER_FIND
 
   }
 
@@ -88,13 +88,20 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private static final long serialVersionUID = 4325471295421747160L;
 
-  @FormField(name = "Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
-      "default=/content/cq:tags", "base=/" })
-  public transient String tagPath = null;
+  /*
+   * Limit based on cell char limit in Excel.
+   *
+   * @See https://bz.apache.org/bugzilla/show_bug.cgi?id=56579
+   */
+  public static final int CELL_CHAR_LIMIT = 32767;
 
   @FormField(name = "Root Search path", description = "The path under which to search for references to the tags", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
       "default=/content", "base=/" })
   public transient String rootSearchPath = null;
+
+  @FormField(name = "Tag path", description = "The path to the root tag / namespace of this report, all tags under this tag will be included in the report", component = PathfieldComponent.NodeSelectComponent.class, required = true, options = {
+      "default=/content/cq:tags", "base=/" })
+  public transient String tagPath = null;
 
   @FormField(name = "Include References", description = "Include the references to the tags in the report", component = CheckboxComponent.class)
   public boolean includeReferences = false;
@@ -113,8 +120,6 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   private List<Pair<String, String>> tags = new ArrayList<>();
 
-  private int cellCharLimit;
-
   @Override
   public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
     log.trace("buildProcess");
@@ -124,6 +129,30 @@ public class TagReporter extends ProcessDefinition implements Serializable {
     instance.defineCriticalAction("Traversing tags", rr, this::traverseTags);
 
     instance.defineCriticalAction("Finding references", rr, this::recordTags);
+  }
+
+  private @Nonnull List<String> computeReferenceCellValues(Collection<String> references) {
+    List<String> cells = new ArrayList<>();
+    List<String> cell = new ArrayList<>();
+    int len = 0;
+    for (String ref : references) {
+      if (len + ref.length() < CELL_CHAR_LIMIT) {
+        cell.add(ref);
+        len = len + ref.length() + 1;
+      } else {
+        cells.add(cell.stream().collect(Collectors.joining(",")));
+        cell.clear();
+        cell.add(ref);
+        len = ref.length() + 1;
+      }
+    }
+    if (!cell.isEmpty()) {
+      cells.add(cell.stream().collect(Collectors.joining(",")));
+    }
+    if (cells.isEmpty()) {
+      cells.add("");
+    }
+    return cells;
   }
 
   private void findReferencesDeep(ResourceResolver resolver, String id, String title) {
@@ -172,26 +201,36 @@ public class TagReporter extends ProcessDefinition implements Serializable {
 
   @Override
   public void init() throws RepositoryException {
-    cellCharLimit = Integer.parseInt(referencesCharacterLimit, 10);
     if (referenceMethod == null) {
       referenceMethod = ReferenceMethod.DEFAULT_TAG_MANAGER_FIND;
     }
   }
 
   private void record(ItemStatus status, String tagId, String title, Collection<String> references) {
-    final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
 
-    row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
-    row.put(ReportColumns.TAG_ID, tagId);
-    row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
-    row.put(ReportColumns.TAG_TITLE, title);
     if (this.includeReferences) {
-      String referencesStr = StringUtils.left(StringUtils.join(references, ",\n"), cellCharLimit);
-      log.trace("Setting references string: {}", referencesStr);
-      row.put(ReportColumns.REFERENCES, referencesStr);
+      List<String> referenceCellValues = computeReferenceCellValues(references);
+      for (int i = 0; i < referenceCellValues.size(); i++) {
+        final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+        ItemStatus stat = i == 0 ? status : ItemStatus.EXTENDED_DATA;
+        row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(stat.name()));
+        row.put(ReportColumns.TAG_ID, tagId);
+        row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
+        row.put(ReportColumns.TAG_TITLE, title);
+        row.put(ReportColumns.REFERENCES, referenceCellValues.get(i));
+        reportRows.add(row);
+      }
+    } else {
+      final EnumMap<ReportColumns, Object> row = new EnumMap<>(ReportColumns.class);
+
+      row.put(ReportColumns.STATUS, StringUtil.getFriendlyName(status.name()));
+      row.put(ReportColumns.TAG_ID, tagId);
+      row.put(ReportColumns.REFERENCE_COUNT, (long) references.size());
+      row.put(ReportColumns.TAG_TITLE, title);
+      reportRows.add(row);
     }
 
-    reportRows.add(row);
   }
 
   private void record(ItemStatus status, String tagId, String title, long referenceCount) {
