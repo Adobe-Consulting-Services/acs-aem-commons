@@ -43,6 +43,7 @@ import com.adobe.acs.commons.mcp.impl.processes.TagReporter.ReportColumns;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
+import junit.framework.Assert;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TagReportTest {
@@ -125,7 +126,6 @@ public class TagReportTest {
     tagReporter.tagPath = "/etc/tags/workflow";
     tagReporter.rootSearchPath = "/content";
     tagReporter.includeReferences = true;
-    tagReporter.referencesCharacterLimit = "4096";
 
     tagReporter.init();
     tagReporter.traverseTags(actionManager);
@@ -154,18 +154,24 @@ public class TagReportTest {
     tagReporter.tagPath = "/etc/tags/workflow/wcm/translation";
     tagReporter.rootSearchPath = "/content";
     tagReporter.includeReferences = true;
-    tagReporter.referencesCharacterLimit = "4096";
 
     tagReporter.init();
     tagReporter.traverseTags(actionManager);
     tagReporter.recordTags(actionManager);
 
-    assertEquals(1, tagReporter.getReportRows().size());
+    assertEquals(3, tagReporter.getReportRows().size());
 
     assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.SUCCESS.name()),
         tagReporter.getReportRows().get(0).get(TagReporter.ReportColumns.STATUS));
+    assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.EXTENDED_DATA.name()),
+        tagReporter.getReportRows().get(1).get(TagReporter.ReportColumns.STATUS));
+    assertEquals(StringUtil.getFriendlyName(TagReporter.ItemStatus.EXTENDED_DATA.name()),
+        tagReporter.getReportRows().get(2).get(TagReporter.ReportColumns.STATUS));
 
-    assertEquals(4096, tagReporter.getReportRows().get(0).get(ReportColumns.REFERENCES).toString().length());
+    tagReporter.getReportRows().forEach(r -> {
+      assertTrue(r.get(ReportColumns.REFERENCES).toString().length() <= TagReporter.CELL_CHAR_LIMIT);
+    });
+
   }
 
 }
