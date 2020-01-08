@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 
 ### Fixed
+- #2082 - ETag filter never sends 304
 - #2148 bugfix for displaying sizes (adresses #2132)
 
 ### Changed
