@@ -175,10 +175,10 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
     
     private String formatQueryString(Map<String, String[]> map) {
         StringBuilder querystring = new StringBuilder();
-        Iterator var3 = map.entrySet().iterator();
+        Iterator<Entry<String,String[]>> var3 = map.entrySet().iterator();
         
         while (true) {
-            Entry entry;
+            Entry<String,String[]> entry;
             do {
                 if (!var3.hasNext()) {
                     if (querystring.length() > 0) {
@@ -188,19 +188,18 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
                     return null;
                 }
                 
-                entry = (Entry) var3.next();
+                entry = var3.next();
             } while (entry.getValue() == null);
             
-            String[] var5 = (String[]) entry.getValue();
+            String[] var5 = entry.getValue();
             int var6 = var5.length;
             try {
-                for (int var7 = 0; var7 < var6; ++var7) {
-                    String value = var5[var7];
+                for (String value : var5) {
                     if (querystring.length() != 0) {
                         querystring.append('&');
                     }
-                    
-                    querystring.append(URLEncoder.encode((String) entry.getKey(), StandardCharsets.UTF_8.name()));
+
+                    querystring.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()));
                     querystring.append('=');
                     if (value != null) {
                         querystring.append(URLEncoder.encode(value, StandardCharsets.UTF_8.name()));
@@ -245,7 +244,7 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
                 int idx = pair.indexOf(PARAM_VALUE_SEPARATOR_CODE);
                 String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8.name()) : pair;
                 if (!queryPairs.containsKey(key)) {
-                    queryPairs.put(key, new ArrayList());
+                    queryPairs.put(key, new ArrayList<>());
                 }
                 
                 String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8.name()) : null;
@@ -257,10 +256,8 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
         }
     
         Map<String, String[]> resultMap = new LinkedHashMap<>();
-        Iterator var12 = queryPairs.entrySet().iterator();
-        while (var12.hasNext()) {
-            Entry<String, List<String>> entry = (Entry) var12.next();
-            resultMap.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
+        for (Entry<String, List<String>> entry : queryPairs.entrySet()) {
+            resultMap.put(entry.getKey(), entry.getValue().toArray(new String[0]));
         }
         
         return resultMap;
@@ -377,10 +374,10 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
     
     public RequestParameterMap getRequestParameterMap() {
         SyntheticRequestParameterMap map = new SyntheticRequestParameterMap();
-        Iterator var2 = this.getParameterMap().entrySet().iterator();
+        Iterator<Entry<String, String[]>> var2 = this.getParameterMap().entrySet().iterator();
         
         while (var2.hasNext()) {
-            Entry<String, String[]> entry = (Entry) var2.next();
+            Entry<String, String[]> entry = var2.next();
             map.put(entry.getKey(), this.getRequestParameters(entry.getKey()));
         }
         
@@ -403,11 +400,11 @@ public class SyntheticSlingHttpServletRequest extends SlingAdaptable implements 
     }
     
     public List<RequestParameter> getRequestParameterList() {
-        List<RequestParameter> params = new ArrayList();
-        Iterator var2 = this.getRequestParameterMap().values().iterator();
+        List<RequestParameter> params = new ArrayList<>();
+        Iterator<RequestParameter[]> var2 = this.getRequestParameterMap().values().iterator();
         
         while (var2.hasNext()) {
-            RequestParameter[] requestParameters = (RequestParameter[]) var2.next();
+            RequestParameter[] requestParameters = var2.next();
             params.addAll(Arrays.asList(requestParameters));
         }
         

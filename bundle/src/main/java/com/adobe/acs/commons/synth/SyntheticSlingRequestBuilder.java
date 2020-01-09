@@ -1,11 +1,32 @@
+/*
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2014 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package com.adobe.acs.commons.synth;
 
 
+import com.adobe.acs.commons.synth.impl.support.SyntheticSlingHttpServletRequest;
 import com.adobe.acs.commons.synth.impl.support.CookieSupport;
 import com.adobe.acs.commons.synth.impl.support.HeaderSupport;
 import com.adobe.acs.commons.synth.impl.support.SyntheticRequestPathInfo;
-import com.adobe.acs.commons.synth.impl.support.SyntheticSlingHttpServletRequest;
 import com.day.cq.wcm.api.WCMMode;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -13,12 +34,18 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.servlet.http.Cookie;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
 public final class SyntheticSlingRequestBuilder {
+
+    private byte[] contentByteArray;
+    private int remotePort;
+    private String remoteUser;
+    private String remoteAddress;
 
     enum Method {
         GET,
@@ -90,6 +117,17 @@ public final class SyntheticSlingRequestBuilder {
 
     public SyntheticSlingRequestBuilder withWCMMode(WCMMode wcmMode){
         this.wcmMode = wcmMode;
+        return this;
+    }
+
+    public SyntheticSlingRequestBuilder withContent(byte[] byteArray){
+        this.contentByteArray = byteArray;
+        return this;
+    }
+
+    public SyntheticSlingRequestBuilder withPayload(byte[] content, String contentType) throws IOException {
+        this.contentByteArray = content;
+        this.contentType = contentType;
         return this;
     }
 
@@ -190,7 +228,20 @@ public final class SyntheticSlingRequestBuilder {
         return this;
     }
 
+    public SyntheticSlingRequestBuilder withRemoteUser(String user){
+        this.remoteUser = user;
+        return this;
+    }
 
+    public SyntheticSlingRequestBuilder withRemoteAddress(String remoteAddress){
+        this.remoteAddress = remoteAddress;
+        return this;
+    }
+
+    public SyntheticSlingRequestBuilder withRemotePort(int port){
+        this.remotePort = port;
+        return this;
+    }
 
     public SyntheticSlingRequestBuilder withParameter(String key, String[] value){
         this.parameterMap.put(key,value);
@@ -224,18 +275,29 @@ public final class SyntheticSlingRequestBuilder {
         syntheticRequestPathInfo.setExtension(extension != null? extension : DEFAULT_EXTENSION);
 
         SyntheticSlingHttpServletRequest syntheticRequest = new SyntheticSlingHttpServletRequest(resourceResolver, currentResource, syntheticRequestPathInfo, cookieSupport, headerSupport );
-        syntheticRequest.setQueryString(queryString);
 
         attributeMap.forEach(syntheticRequest::setAttribute);
-        syntheticRequest.setParameterMap(parameterMap);
+
+        if(MapUtils.isNotEmpty(parameterMap)){
+            syntheticRequest.setParameterMap(parameterMap);
+        }else if(StringUtils.isNotBlank(queryString)){
+            syntheticRequest.setQueryString(queryString);
+        }else{
+            syntheticRequest.setQueryString(StringUtils.EMPTY);
+        }
 
         syntheticRequest.setLocale(locale != null ? locale : Locale.ENGLISH);
+        syntheticRequest.setContent(contentByteArray);
         syntheticRequest.setMethod(method.name());
         syntheticRequest.setCharacterEncoding(characterEncoding);
         syntheticRequest.setContentType(contentType);
         syntheticRequest.setServerPort(serverPort);
         syntheticRequest.setScheme(scheme);
         syntheticRequest.setServerName(serverName);
+        syntheticRequest.setRemotePort(remotePort);
+        syntheticRequest.setRemoteUser(remoteUser);
+        syntheticRequest.setRemoteAddr(remoteAddress);
+
 
         if(dispatcherFactory != null){
             syntheticRequest.setRequestDispatcherFactory(dispatcherFactory);

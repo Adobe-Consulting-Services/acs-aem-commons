@@ -9,10 +9,7 @@ import javax.servlet.WriteListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-/**
 
- * @since 2018-10-09
- */
 class ResponseBodySupport {
     
     private static final Logger LOG = LoggerFactory.getLogger(ResponseBodySupport.class);

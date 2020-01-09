@@ -8,14 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
 
- * @since 2018-10-09
- */
 class SyntheticRequestParameterMap implements RequestParameterMap {
     private final Map<String, RequestParameter[]> delegate = new HashMap();
 
-    SyntheticRequestParameterMap() {
+    public SyntheticRequestParameterMap() {
     }
 
     public RequestParameter getValue(String name) {

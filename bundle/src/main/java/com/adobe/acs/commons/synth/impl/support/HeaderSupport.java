@@ -23,7 +23,7 @@ public class HeaderSupport {
         RFC1123_DATE_FORMAT.setTimeZone(TIMEZONE_GMT);
     }
     
-    private List<HeaderValue> headers = new ArrayList();
+    private List<HeaderValue> headers = new ArrayList<>();
 
     public HeaderSupport() {
     }
@@ -93,7 +93,7 @@ public class HeaderSupport {
     }
 
     public Collection<String> getHeaders(String name) {
-        List<String> values = new ArrayList();
+        List<String> values = new ArrayList<>();
         Iterator var3 = this.headers.iterator();
 
         while(var3.hasNext()) {
@@ -107,11 +107,11 @@ public class HeaderSupport {
     }
 
     public Collection<String> getHeaderNames() {
-        Set<String> values = new HashSet();
-        Iterator var2 = this.headers.iterator();
+        Set<String> values = new HashSet<>();
+        Iterator<HeaderValue> var2 = this.headers.iterator();
 
         while(var2.hasNext()) {
-            HeaderSupport.HeaderValue entry = (HeaderSupport.HeaderValue)var2.next();
+            HeaderSupport.HeaderValue entry = var2.next();
             values.add(entry.getKey());
         }
 
@@ -123,7 +123,7 @@ public class HeaderSupport {
     }
 
     public static Enumeration<String> toEnumeration(Collection<String> collection) {
-        return (new Vector(collection)).elements();
+        return (new Vector<>(collection)).elements();
     }
 
     private static synchronized String formatDate(Calendar date) {

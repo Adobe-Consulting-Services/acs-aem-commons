@@ -21,7 +21,7 @@ public class SyntheticHttpSession implements HttpSession {
     private static final int DEFAULT_MAX_ACTIVE_INTERVAL = 1800;
     
     private final ServletContext servletContext = this.newMockServletContext();
-    private final Map<String, Object> attributeMap = new HashMap();
+    private final Map<String, Object> attributeMap = new HashMap<>();
     private final String sessionID = UUID.randomUUID().toString();
     private final long creationTime = System.currentTimeMillis();
     private boolean invalidated;

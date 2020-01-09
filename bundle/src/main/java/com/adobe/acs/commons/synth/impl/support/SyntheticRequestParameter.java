@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-/**
 
- * @since 2018-10-09
- */
 class SyntheticRequestParameter implements RequestParameter {
     
     private static final Logger LOG = LoggerFactory.getLogger(SyntheticRequestParameter.class);
