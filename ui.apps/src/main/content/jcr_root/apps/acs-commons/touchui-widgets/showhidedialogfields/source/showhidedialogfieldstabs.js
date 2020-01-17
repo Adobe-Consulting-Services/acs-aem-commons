@@ -48,8 +48,11 @@
     // element becomes visible
     $('[data-acs-cq-dialog-dropdown-checkbox-showhide]').each(function () {
       // handle Coral3 base drop-down/checkbox
-      Coral.commons.ready($(this), function (element) {
-        showHide(element);
+      Coral.commons.ready($(this), function(element) {
+        // Make sure the showhide is called at the end of the event-loop, selects in IE11 otherwise are not yet initialized
+        setTimeout(function() {
+          showHide(element);
+        }, 0);
       });
     });
 
@@ -140,9 +143,9 @@
    */
   function shouldBeVisible($elem, dropdownValue, checkboxValue) {
     if ($elem.is('[data-acs-dropdownshowhidetargetvalue]') && $elem.is('[data-acs-checkboxshowhidetargetvalue]')) {
-      return $elem.attr('data-acs-dropdownshowhidetargetvalue').split(' ').includes(dropdownValue) && $elem.attr('data-acs-checkboxshowhidetargetvalue') === checkboxValue;
+      return ($elem.attr('data-acs-dropdownshowhidetargetvalue').split(' ').indexOf(dropdownValue) >= 0) && $elem.attr('data-acs-checkboxshowhidetargetvalue') === checkboxValue;
     } else if ($elem.is('[data-acs-dropdownshowhidetargetvalue]')) {
-      return $elem.attr('data-acs-dropdownshowhidetargetvalue').split(' ').includes(dropdownValue);
+      return $elem.attr('data-acs-dropdownshowhidetargetvalue').split(' ').indexOf(dropdownValue) >= 0;
     } else if ($elem.is('[data-acs-checkboxshowhidetargetvalue]')) {
       return $elem.attr('data-acs-checkboxshowhidetargetvalue') === checkboxValue;
     } else if ($elem.is('[data-acs-dropdownshowhidetargetnotvalue]')) {
