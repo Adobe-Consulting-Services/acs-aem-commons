@@ -179,6 +179,10 @@ public class FieldComponentTest {
                 public String[] options() {
                     return options;
                 }
+
+                public boolean showOnCreate() {
+                    return true;
+                }
             };
             setup("test", null, field, null);
         }

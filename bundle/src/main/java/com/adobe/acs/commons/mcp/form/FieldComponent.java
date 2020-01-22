@@ -73,6 +73,9 @@ public abstract class FieldComponent {
             componentMetadata.put("required", formField.required());
         }
         componentMetadata.put("emptyText", formField.hint());
+        if (formField.showOnCreate()) {
+            componentMetadata.put("cq:showOnCreate", true);
+        }
 
         Optional<String> defaultValue = getOption("default");
         if (!defaultValue.isPresent()) {
