@@ -68,8 +68,8 @@ public enum ValueFormat {
         return humanReadableByteCount(bytes, false);
     }
     
- // From: https://programming.guide/worlds-most-copied-so-snippet.html
-    public static strictfp String humanReadableByteCount(long bytes, boolean si) {
+    // From: https://programming.guide/worlds-most-copied-so-snippet.html
+    private static strictfp String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         long absBytes = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absBytes < unit) {
