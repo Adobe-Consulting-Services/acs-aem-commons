@@ -152,8 +152,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     public static final String PROP_EXCLUDED_WCMMODES = "excluded-wcm-modes";
     private String[] excludedWCMModes;
 
-    private static final String[] REJECT_PATH_PREFIXES = new String[]{};
-
     private String css = "";
 
     private ServiceRegistration filterRegistration;
@@ -275,7 +273,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         return StringUtils.endsWith(headerValue, "/editor.html" + requestUri)
                 || StringUtils.endsWith(headerValue, "/cf");
     }
-        boolean isDisallowedWcmMode(WCMMode currentMode, String[] excludedWcmModes) {
+    
+    boolean isDisallowedWcmMode(WCMMode currentMode, String[] excludedWcmModes) {
         return currentMode == null
                 || StringUtils.equalsAnyIgnoreCase(currentMode.name(), excludedWcmModes);
     }
