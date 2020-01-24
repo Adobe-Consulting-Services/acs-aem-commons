@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- Added more granular control of the environment indicator css
 
 ### Fixed
 - #2082 - ETag filter never sends 304
