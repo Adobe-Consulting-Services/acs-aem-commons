@@ -14,11 +14,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2082 - ETag filter never sends 304
-- #2148 bugfix for displaying sizes (adresses #2132)
+- #2148 - Bugfix for displaying sizes (adresses #2132)
 - #2146 - POI exception generating Excel file with too many references
 
 ### Changed
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
+- #2133 - Update test library dependencies
+
 
 ## [4.4.0] - 2019-12-17
 
