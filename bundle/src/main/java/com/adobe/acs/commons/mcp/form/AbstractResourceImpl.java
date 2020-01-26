@@ -20,10 +20,12 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.AbstractResource;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -128,10 +130,10 @@ public class AbstractResourceImpl extends AbstractResource {
                 if (current == null) {
                     return null;
                 }
-            } else if (current.getChild(name) == null) {
-                return null;
             } else {
-                current = current.getChild(name);
+                return StreamSupport.stream(getChildren().spliterator(), false)
+                        .filter(r->r.getName().equals(name))
+                        .findFirst().orElse(null);
             }
         }
         return current;
@@ -163,7 +165,11 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public boolean isResourceType(String type) {
-        return Objects.equals(getResourceType(), type);
+        if (getResourceResolver() != null) {
+            return getResourceResolver().isResourceType(this, type);
+        } else {
+            return Objects.equals(getResourceType(), type);
+        }
     }
 
     public void setPath(String path) {
@@ -177,7 +183,8 @@ public class AbstractResourceImpl extends AbstractResource {
 
     @Override
     public String getResourceType() {
-        return type;
+        Object t = meta.get("sling:resourceType");
+        return t == null ? null : String.valueOf(t);
     }
 
     @Override
@@ -213,5 +220,12 @@ public class AbstractResourceImpl extends AbstractResource {
     public void disableMergeResourceProvider() {
         getResourceMetadata().put("sling:hideChildren", "*");
         children.forEach(c -> ((AbstractResourceImpl) c).disableMergeResourceProvider());
+    }
+
+    public Map<String, Object> convertTreeToMap() {
+        HashMap<String, Object> out = new HashMap<>();
+        out.putAll(meta);
+        children.forEach(c -> out.put(c.getName(), ((AbstractResourceImpl) c).convertTreeToMap()));
+        return out;
     }
 }
