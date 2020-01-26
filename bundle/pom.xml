@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
 	<modelVersion>4.0.0</modelVersion>
 	<!-- ====================================================================== -->
 	<!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -9,7 +7,7 @@
 	<parent>
 		<groupId>com.adobe.acs</groupId>
 		<artifactId>acs-aem-commons</artifactId>
-		<version>4.3.5-SNAPSHOT</version>
+		<version>4.4.1-SNAPSHOT</version>
 	</parent>
 
 	<!-- ====================================================================== -->
@@ -117,8 +115,7 @@
 						<configuration>
 							<target>
 								<move todir="${project.build.outputDirectory}/OSGI-INF.bak">
-									<fileset
-										dir="${project.build.outputDirectory}/OSGI-INF" />
+									<fileset dir="${project.build.outputDirectory}/OSGI-INF" />
 								</move>
 							</target>
 						</configuration>
@@ -131,13 +128,10 @@
 						<phase>generate-test-sources</phase>
 						<configuration>
 							<target>
-								<move todir="${project.build.outputDirectory}/OSGI-INF"
-									overwrite="false">
-									<fileset
-										dir="${project.build.outputDirectory}/OSGI-INF.bak" />
+								<move todir="${project.build.outputDirectory}/OSGI-INF" overwrite="false">
+									<fileset dir="${project.build.outputDirectory}/OSGI-INF.bak" />
 								</move>
-								<delete
-									dir="${project.build.outputDirectory}/OSGI-INF.bak" />
+								<delete dir="${project.build.outputDirectory}/OSGI-INF.bak" />
 							</target>
 						</configuration>
 						<goals>
@@ -149,10 +143,8 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<jar update="true"
-									destfile="${project.build.directory}/${project.build.finalName}.jar">
-									<fileset dir="${project.build.outputDirectory}"
-										includes="OSGI-INF/l10n/**" />
+								<jar update="true" destfile="${project.build.directory}/${project.build.finalName}.jar">
+									<fileset dir="${project.build.outputDirectory}" includes="OSGI-INF/l10n/**" />
 								</jar>
 							</target>
 						</configuration>
@@ -331,7 +323,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<reuseForks>false</reuseForks>
-					<forkCount>2C</forkCount>
+					<forkCount>1C</forkCount>
 				</configuration>
 				<executions>
 					<execution>
@@ -343,8 +335,8 @@
 						<configuration>
 							<reuseForks>true</reuseForks>
 							<parallel>classes</parallel>
-							<threadCount>2</threadCount>
-							<perCoreThreadCount></perCoreThreadCount>
+							<threadCount>1</threadCount>
+							<perCoreThreadCount />
 						</configuration>
 					</execution>
 				</executions>
@@ -381,6 +373,14 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -426,12 +426,6 @@
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 			<version>3.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -613,7 +607,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.6</version>
+			<version>1.7</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- needed to override the embedded commons.osgi in org.apache.sling.models.impl -->
@@ -688,10 +682,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.testing.jcr-mock</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.wcm</groupId>
 			<artifactId>io.wcm.testing.aem-mock.junit4</artifactId>
 			<exclusions>
@@ -710,19 +700,15 @@
 			<artifactId>jsonassert</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>me.alexpanov</groupId>
 			<artifactId>free-port-finder</artifactId>
-			<version>1.0</version>
+			<version>1.1.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.findify</groupId>
 			<artifactId>s3mock_2.11</artifactId>
-			<version>0.2.3</version>
+			<version>0.2.5</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -734,7 +720,7 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-matchers</artifactId>
-			<version>2.5.1</version>
+			<version>2.6.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
