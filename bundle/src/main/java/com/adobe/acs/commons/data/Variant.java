@@ -106,6 +106,7 @@ public final class Variant {
         CellType(int ord) {
             this.ord=ord;
         }
+
         public static CellType fromObject(Object o) {
             if (o.getClass() == String.class || o.getClass().isEnum()) {
                 return CellType.valueOf(o.toString());
