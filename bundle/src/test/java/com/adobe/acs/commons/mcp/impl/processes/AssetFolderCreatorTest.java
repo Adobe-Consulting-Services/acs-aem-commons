@@ -32,7 +32,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.day.cq.dam.api.AssetManager;
 import com.google.common.base.Function;
-import io.findify.s3mock.S3Mock;
 import me.alexpanov.net.FreePortFinder;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
