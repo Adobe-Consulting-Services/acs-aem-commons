@@ -14,9 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2082 - ETag filter never sends 304
-- #2148 - Bugfix for displaying sizes (addresses #2132)
+- #2148 - Bugfix for displaying sizes (adresses #2132)
 - #2146 - POI exception generating Excel file with too many references
-- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (address #2177 & #2162)
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
 
 ### Changed
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
