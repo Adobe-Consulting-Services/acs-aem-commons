@@ -101,6 +101,8 @@ public final class Variant {
     public static enum CellType {
         // POI switches from int-based to enum-based constants, and unfortunately they also removed things along the way.
         // This bridges the gap between the constants and the enum types.
+        //None is used to match POI 4, see https://poi.apache.org/apidocs/4.0/org/apache/poi/ss/usermodel/CellType.html.
+        // therefore ingoring the code climate issue for this
         _NONE(3), NUMERIC(0), STRING(1), FORMULA(2), BLANK(3), BOOLEAN(4), ERROR(5);
         int ord;
         CellType(int ord) {

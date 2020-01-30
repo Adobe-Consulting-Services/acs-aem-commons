@@ -187,8 +187,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
      */
     private String parseAssetFolderCell(final Cell cell, final String previousAssetFolderPath) throws IllegalArgumentException {
         // #1791 - Cannot read from non-String type fields.
-        // Note: This line breaks in newer versions of POI because the setCellType method was removed
-        // cell.setCellType(Cell.CELL_TYPE_STRING);
+        // Note: switch from using cell.setCellType because it breaks in newer versions of POI
         // Use variant to proxy the value as it can deal with POI 3.x -> 4.x changes
         Variant var = new Variant(cell, Locale.getDefault());
         final String cellValue = StringUtils.trimToNull(var.toString());
