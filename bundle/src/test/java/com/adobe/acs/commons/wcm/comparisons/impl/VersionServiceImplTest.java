@@ -94,14 +94,14 @@ public final class VersionServiceImplTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void lastVersion_noElement_returnNull() throws Exception {
         Version lastVersion = underTest.lastVersion(context.resourceResolver().getResource("/noVersion"));
         assertNull(lastVersion);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void lastVersion_listOfVersion_returnLast() throws Exception {
         Version lastVersion = underTest.lastVersion(context.resourceResolver().getResource("/manyVersions"));
         assertEquals(lastVersion.getUUID(), manyVersionVersion.getUUID());
