@@ -98,6 +98,7 @@ public final class Variant {
                 && !booleanVal.isPresent();
     }
 
+    @SuppressWarnings("squid:S00115")
     public static enum CellType {
         // POI switches from int-based to enum-based constants, and unfortunately they also removed things along the way.
         // This bridges the gap between the constants and the enum types.
