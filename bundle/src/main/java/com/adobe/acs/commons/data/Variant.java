@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Calendar;
@@ -26,8 +27,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -70,7 +73,7 @@ public final class Variant {
     public <T> Variant(T src) {
         setValue(src);
     }
-    
+
     public Variant(Cell src) {
         this(src, Locale.getDefault());
     }
@@ -95,45 +98,78 @@ public final class Variant {
                 && !booleanVal.isPresent();
     }
 
-    private void setValue(Cell cell, Locale locale) {
-        int cellType = cell.getCellType();
-        if (cellType == Cell.CELL_TYPE_FORMULA) {
-            cellType = cell.getCachedFormulaResultType();
+    @SuppressWarnings("squid:S00115")
+    public static enum CellType {
+        // POI switches from int-based to enum-based constants, and unfortunately they also removed things along the way.
+        // This bridges the gap between the constants and the enum types.
+        // _NONE is used to match POI 4, see https://poi.apache.org/apidocs/4.0/org/apache/poi/ss/usermodel/CellType.html
+        // therefore ignoring the code climate issue for this
+        _NONE(3), NUMERIC(0), STRING(1), FORMULA(2), BLANK(3), BOOLEAN(4), ERROR(5);
+        int ord;
+        CellType(int ord) {
+            this.ord=ord;
         }
-        switch (cellType) {
-            case Cell.CELL_TYPE_BOOLEAN:
-                setValue(cell.getBooleanCellValue());
-                break;
-            case Cell.CELL_TYPE_NUMERIC:
-                double number = cell.getNumericCellValue();
-                if (Math.floor(number) == number) {
-                    setValue((long) number);
-                } else {
-                    setValue(number);
+
+        public static CellType fromObject(Object o) {
+            if (o.getClass() == String.class || o.getClass().isEnum()) {
+                return CellType.valueOf(o.toString());
+            } else {
+                int num = (Integer) o;
+                for (CellType ct:values()) {
+                    if (ct.ord == num) {
+                        return ct;
+                    }
                 }
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    setValue(cell.getDateCellValue());
-                    baseType = Calendar.class;
-                }
-                DataFormatter dataFormatter = new DataFormatter(locale);
-                if (cellType == Cell.CELL_TYPE_FORMULA) {
-                    setValue(dataFormatter.formatCellValue(cell));
-                } else {
-                    CellStyle cellStyle = cell.getCellStyle();
-                    setValue(dataFormatter.formatRawCellContents(
-                            cell.getNumericCellValue(),
-                            cellStyle.getDataFormat(),
-                            cellStyle.getDataFormatString()
-                    ));
-                }
-                break;
-            case Cell.CELL_TYPE_STRING:
-                setValue(cell.getStringCellValue().trim());
-                break;
-            case Cell.CELL_TYPE_BLANK:
-            default:
-                clear();
-                break;
+                return null;
+            }
+        }
+    }
+
+    private void setValue(Cell cell, Locale locale) {
+        try {
+            // Use reflection to access the method as it changes return type from int to CellType in 4.x
+            CellType cellType = CellType.fromObject(MethodUtils.invokeMethod(cell, "getCellType"));
+            if (cellType == CellType.FORMULA) {
+                // Use reflection to access the method as it changes return type from int to CellType in 4.x
+                cellType = CellType.fromObject(MethodUtils.invokeMethod(cell,"getCachedFormulaResultType"));
+            }
+            switch (cellType) {
+                case BOOLEAN:
+                    setValue(cell.getBooleanCellValue());
+                    break;
+                case NUMERIC:
+                    double number = cell.getNumericCellValue();
+                    if (Math.floor(number) == number) {
+                        setValue((long) number);
+                    } else {
+                        setValue(number);
+                    }
+                    if (DateUtil.isCellDateFormatted(cell)) {
+                        setValue(cell.getDateCellValue());
+                        baseType = Calendar.class;
+                    }
+                    DataFormatter dataFormatter = new DataFormatter(locale);
+                    if (cellType == CellType.FORMULA) {
+                        setValue(dataFormatter.formatCellValue(cell));
+                    } else {
+                        CellStyle cellStyle = cell.getCellStyle();
+                        setValue(dataFormatter.formatRawCellContents(
+                                cell.getNumericCellValue(),
+                                cellStyle.getDataFormat(),
+                                cellStyle.getDataFormatString()
+                        ));
+                    }
+                    break;
+                case STRING:
+                    setValue(cell.getStringCellValue().trim());
+                    break;
+                case BLANK:
+                default:
+                    clear();
+                    break;
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            Logger.getLogger(Variant.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
