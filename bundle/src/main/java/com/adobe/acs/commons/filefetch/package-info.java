@@ -18,7 +18,7 @@
  * #L%
  */
 /**
- * Adobe I/O services.
+ * File Fetcher
  */
 @org.osgi.annotation.versioning.Version("4.4.1")
 package com.adobe.acs.commons.filefetch;

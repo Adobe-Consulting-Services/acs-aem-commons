@@ -24,10 +24,11 @@ import java.io.IOException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 import com.adobe.granite.jmx.annotation.Description;
 import com.day.cq.replication.ReplicationException;
 
-import aQute.bnd.annotation.ProviderType;
 
 @ProviderType
 @Description("MBean for managing the FileFetch jobs")
