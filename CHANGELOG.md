@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - Added more granular control of the environment indicator css
 
 ### Fixed
+- #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
 - #2082 - ETag filter never sends 304
 - #2148 - Bugfix for displaying sizes (adresses #2132)
 - #2146 - POI exception generating Excel file with too many references
