@@ -20,7 +20,7 @@
 /**
  * Form components for MCP
  */
-@Version("5.0.0")
+@Version("5.1.0")
 package com.adobe.acs.commons.mcp.form;
 
 import org.osgi.annotation.versioning.Version;

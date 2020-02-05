@@ -67,6 +67,7 @@ public class SpreadsheetTest {
         createRow(sheet, "/test/a2", "A-2", "val");
         createRow(sheet, "/test/a1/a1a", "A-1-A", "val");
         createRow(sheet, "/test/a3/a3a", "A-3-A", "val");
+        createRow(sheet, null, null, null);
         XSSFRow valuesRow = createRow(sheet, "/some/types", "Types", "...", "12345", "one,two,three", "four;five;six",
                 "12.345", "One Value", null, "Another Value");
         XSSFCell dateCell = valuesRow.createCell(10);
@@ -98,7 +99,7 @@ public class SpreadsheetTest {
     @Test
     public void testGetRowCount() throws IOException {
         Spreadsheet instance = new Spreadsheet(new ByteArrayInputStream(workbookData.toByteArray())).buildSpreadsheet();
-        int expResult = 5;
+        int expResult = 6;
         int result = instance.getRowCount();
         assertEquals(expResult, result);
     }

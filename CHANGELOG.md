@@ -6,9 +6,24 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
-
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+### Added
+- Added more granular control of the environment indicator css
+
+### Fixed
+- #2082 - ETag filter never sends 304
+- #2148 - Bugfix for displaying sizes (adresses #2132)
+- #2146 - POI exception generating Excel file with too many references
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+
+### Changed
+- #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
+- #2133 - Update test library dependencies
+
+
+## [4.4.0] - 2019-12-17
 
 ### Added
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
@@ -26,9 +41,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #2101 - Cleanup public API of the remote Assets feature (#2094)
-
-
-
 
 ## [4.3.4] - 2019-10-16
 
