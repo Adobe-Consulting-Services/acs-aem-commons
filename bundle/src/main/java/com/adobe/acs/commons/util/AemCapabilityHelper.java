@@ -21,10 +21,6 @@ package com.adobe.acs.commons.util;
 
 import javax.jcr.RepositoryException;
 
-import com.adobe.acs.commons.util.compatability.AemCompatibility;
-import org.osgi.annotation.versioning.ProviderType;
-
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
