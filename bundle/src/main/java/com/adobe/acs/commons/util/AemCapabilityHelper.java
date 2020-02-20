@@ -44,7 +44,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * public class IOnlyWorkOnTheCloud implements Foo {
  *
  *    @Reference(
- *        target="&(cloud-ready=true)"
+ *        target="(cloud-ready=true)"
  *        scope = ReferenceCardinality.MANDATORY
  *    )
  *    AemCapabilityHelper aemCapabilityHelper;
@@ -57,7 +57,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
  *
  *      @Reference(
- *          target="&(cloud-ready=false)"
+ *          target="(cloud-ready=false)"
  *          scope = ReferenceCardinality.MANDATORY
  *      )
  *      AemCapabilityHelper aemCapabilityHelper;
