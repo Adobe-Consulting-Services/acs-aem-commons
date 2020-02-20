@@ -32,15 +32,17 @@ import javax.jcr.RepositoryException;
  *
  * Provides information about the current AEM installation and what it can and can't do.
  */
-@Deprecated
+
+/**
+ * @deprecated All supported AEM's run on Oak repositories now, so this will always return true.
+ */
+@Deprecated()
 @Component
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
-    @Deprecated
     @Reference
     private transient SlingRepository slingRepository;
 
     @Override
-    @Deprecated
     public final boolean isOak() throws RepositoryException {
         final String repositoryName = slingRepository.getDescriptorValue(SlingRepository.REP_NAME_DESC).getString();
         return StringUtils.equalsIgnoreCase("Apache Jackrabbit Oak", repositoryName);
