@@ -19,14 +19,11 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import javax.jcr.RepositoryException;
-
+import com.adobe.acs.commons.util.AemCapabilityHelper;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.jcr.api.SlingRepository;
-
-import com.adobe.acs.commons.util.AemCapabilityHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
@@ -34,6 +31,7 @@ import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -42,7 +40,10 @@ import java.util.Hashtable;
  *
  * Provides information about the current AEM installation and what it can and can't do.
  */
-@Component
+@Component(
+        service = {},
+        immediate = true
+)
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
     private static final Logger log = LoggerFactory.getLogger(AemCapabilityHelperImpl.class);
     private static final String PN_CLOUD_READY = "cloud-ready";
@@ -51,12 +52,11 @@ public class AemCapabilityHelperImpl implements AemCapabilityHelper {
     // This is the first Major/Minor GA Version of AEM as a Cloud Service
     private static final Version originalCloudServiceVersion = new Version(2019, 12,   0);
 
-    @Reference(
-            policy = ReferencePolicy.DYNAMIC,
-            policyOption = ReferencePolicyOption.GREEDY
-    )
+    @Reference
     private transient ProductInfoProvider productInfoProvider;
+
     private transient ProductInfo productInfo;
+    private transient ServiceRegistration serviceRegistration;
 
     @Override
     public boolean isCloudReady() {
@@ -67,13 +67,11 @@ public class AemCapabilityHelperImpl implements AemCapabilityHelper {
         }
     }
 
-    private transient ServiceRegistration serviceRegistration;
-
     @Activate
     protected void activate(final BundleContext bundleContext) {
         productInfo = productInfoProvider.getProductInfo();
 
-        final Dictionary<String, String> properties = new Hashtable<>();
+        final Dictionary<String, Object> properties = new Hashtable<>();
 
         String cloudReady;
         String version = productInfo.getShortVersion();
@@ -88,9 +86,9 @@ public class AemCapabilityHelperImpl implements AemCapabilityHelper {
         properties.put(PN_CLOUD_READY, cloudReady);
         properties.put(PN_VERSION, version);
 
-        serviceRegistration = bundleContext.registerService(this.getClass().getName(), this, new Hashtable<>());
+        serviceRegistration = bundleContext.registerService(AemCapabilityHelper.class.getName(), this, properties);
 
-        log.debug("Registering [ AemCapabilityHelper ] as an OSGi Service with OSGi properties [ cloud-ready = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
+        log.error("Registering [ AemCapabilityHelper.class ] as an OSGi Service with OSGi properties [ cloud-ready = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
                 properties.get(PN_CLOUD_READY), properties.get(PN_VERSION));
     }
 
@@ -100,15 +98,17 @@ public class AemCapabilityHelperImpl implements AemCapabilityHelper {
 
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
+            serviceRegistration = null;
         }
     }
 
-    /** Deprecated **/
 
+    @Deprecated
     @Reference
-    private SlingRepository slingRepository;
+    private transient SlingRepository slingRepository;
 
     @Override
+    @Deprecated
     public final boolean isOak() throws RepositoryException {
         final String repositoryName = slingRepository.getDescriptorValue(SlingRepository.REP_NAME_DESC).getString();
         return StringUtils.equalsIgnoreCase("Apache Jackrabbit Oak", repositoryName);

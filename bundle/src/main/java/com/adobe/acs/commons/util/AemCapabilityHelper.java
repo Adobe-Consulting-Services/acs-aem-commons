@@ -26,7 +26,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * This OSGi Service can be used in 2 different ways....
  *
- * 1. It can be used In-line in code to detect the Hosting type (Cloud or Non-Cloud)
+ * 1. It can be used In-line in code to detect if AEM is runinng as Cloud Ready (AEM as a Cloud Service or local AEM as a Cloud Service SDK QuickStart Jar) or not.
  *
  * @Reference
  * AemCapabilityHelper aemCapabilityHelper;
@@ -54,7 +54,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * ... OR ...
  *
  * @Component
- *   public class IOnlyWorkOnAmsOrOnPrem implements Bar {
+ * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
  *
  *      @Reference(
  *          target="&(cloud-ready=false)"
