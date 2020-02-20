@@ -31,12 +31,10 @@ import javax.jcr.RepositoryException;
  * ACS AEM Commons - AEM Capability Helper
  *
  * Provides information about the current AEM installation and what it can and can't do.
- */
-
-/**
+ *
  * @deprecated All supported AEM's run on Oak repositories now, so this will always return true.
  */
-@Deprecated()
+@Deprecated
 @Component
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
     @Reference
