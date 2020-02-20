@@ -20,89 +20,21 @@
 package com.adobe.acs.commons.util.impl;
 
 import com.adobe.acs.commons.util.AemCapabilityHelper;
-import com.adobe.granite.license.ProductInfo;
-import com.adobe.granite.license.ProductInfoProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.jcr.api.SlingRepository;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.Version;
-import org.osgi.service.component.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.jcr.RepositoryException;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 /**
  * ACS AEM Commons - AEM Capability Helper
  *
  * Provides information about the current AEM installation and what it can and can't do.
  */
-@Component(
-        service = {},
-        immediate = true
-)
+@Deprecated
+@Component
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
-    private static final Logger log = LoggerFactory.getLogger(AemCapabilityHelperImpl.class);
-    private static final String PN_CLOUD_READY = "cloud-ready";
-    private static final String PN_VERSION = "version";
-
-    // This is the first Major/Minor GA Version of AEM as a Cloud Service
-    private static final Version originalCloudServiceVersion = new Version(2019, 12,   0);
-
-    @Reference
-    private transient ProductInfoProvider productInfoProvider;
-
-    private transient ProductInfo productInfo;
-    private transient ServiceRegistration serviceRegistration;
-
-    @Override
-    public boolean isCloudReady() {
-        if (productInfo.getVersion().compareTo(originalCloudServiceVersion) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Activate
-    protected void activate(final BundleContext bundleContext) {
-        productInfo = productInfoProvider.getProductInfo();
-
-        final Dictionary<String, Object> properties = new Hashtable<>();
-
-        String cloudReady;
-        String version = productInfo.getShortVersion();
-
-        if (isCloudReady()) {
-            cloudReady = Boolean.TRUE.toString();
-        } else {
-            cloudReady = Boolean.FALSE.toString();
-            log.debug("Registering [ {} ] as an OSGi Service so it be be used to enable/disable other OSGi Components", this.getClass().getSimpleName());
-        }
-
-        properties.put(PN_CLOUD_READY, cloudReady);
-        properties.put(PN_VERSION, version);
-
-        serviceRegistration = bundleContext.registerService(AemCapabilityHelper.class.getName(), this, properties);
-
-        log.error("Registering [ AemCapabilityHelper.class ] as an OSGi Service with OSGi properties [ cloud-ready = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
-                properties.get(PN_CLOUD_READY), properties.get(PN_VERSION));
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        productInfo = null;
-
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
-    }
-
-
     @Deprecated
     @Reference
     private transient SlingRepository slingRepository;

@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.util.impl;
 
-import com.adobe.acs.commons.util.AemCapabilityHelper;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoProvider;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -13,13 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Version;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AemCapabilityHelperImplTest {
+public class RequireAemImplTest {
 
     @Mock
     ProductInfoProvider productInfoProvider;
@@ -45,7 +43,7 @@ public class AemCapabilityHelperImplTest {
         doReturn(productInfo).when(productInfoProvider).getProductInfo();
 
         ctx.registerService(ProductInfoProvider.class, productInfoProvider);
-        ctx.registerInjectActivateService(new AemCapabilityHelperImpl());
+        ctx.registerInjectActivateService(new RequireAemImpl());
     }
 
     private void setUpAsNotCloudReady() {
@@ -54,62 +52,62 @@ public class AemCapabilityHelperImplTest {
         doReturn(productInfo).when(productInfoProvider).getProductInfo();
 
         ctx.registerService(ProductInfoProvider.class, productInfoProvider);
-        ctx.registerInjectActivateService(new AemCapabilityHelperImpl());
+        ctx.registerInjectActivateService(new RequireAemImpl());
     }
     
     @Test
     public void isCloudReady_True() {
         setUpAsCloudReady();
 
-        AemCapabilityHelper aemCapabilityHelper = ctx.getService(AemCapabilityHelper.class);
+        RequireAem requireAem = ctx.getService(RequireAem.class);
 
-        assertTrue(aemCapabilityHelper.isCloudReady());
+        assertTrue(requireAem.isCloudReady());
     }
 
     @Test
     public void isCloudReady_False() {
         setUpAsNotCloudReady();
 
-        AemCapabilityHelper aemCapabilityHelper = ctx.getService(AemCapabilityHelper.class);
+        RequireAem requireAem = ctx.getService(RequireAem.class);
 
-        assertFalse(aemCapabilityHelper.isCloudReady());
+        assertFalse(requireAem.isCloudReady());
     }
 
     @Test
     public void referenceFilter_CloudReady_True_Satisfied() {
         setUpAsCloudReady();
 
-        AemCapabilityHelper[] aemCapabilityHelpers = ctx.getServices(AemCapabilityHelper.class, "(cloud-ready=true)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=true)");
 
-        assertEquals(1, aemCapabilityHelpers.length);
-        assertTrue(aemCapabilityHelpers[0].isCloudReady());
+        assertEquals(1, requireAems.length);
+        assertTrue(requireAems[0].isCloudReady());
     }
 
     @Test
     public void referenceFilter_CloudReady_True_Unsatisfied() {
         setUpAsNotCloudReady();
 
-        AemCapabilityHelper[] aemCapabilityHelpers = ctx.getServices(AemCapabilityHelper.class, "(cloud-ready=true)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=true)");
 
-        assertEquals(0, aemCapabilityHelpers.length);
+        assertEquals(0, requireAems.length);
     }
 
     @Test
     public void referenceFilter_CloudReady_False_Satisfied() {
         setUpAsNotCloudReady();
 
-        AemCapabilityHelper[] aemCapabilityHelpers = ctx.getServices(AemCapabilityHelper.class, "(cloud-ready=false)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=false)");
 
-        assertEquals(1, aemCapabilityHelpers.length);
-        assertFalse(aemCapabilityHelpers[0].isCloudReady());
+        assertEquals(1, requireAems.length);
+        assertFalse(requireAems[0].isCloudReady());
     }
 
     @Test
     public void referenceFilter_CloudReady_False_Unsatisfied() {
         setUpAsCloudReady();
 
-        AemCapabilityHelper[] aemCapabilityHelpers = ctx.getServices(AemCapabilityHelper.class, "(cloud-ready=false)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=false)");
 
-        assertEquals(0, aemCapabilityHelpers.length);
+        assertEquals(0, requireAems.length);
     }
 }

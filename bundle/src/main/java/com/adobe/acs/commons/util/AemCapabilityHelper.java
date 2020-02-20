@@ -23,48 +23,8 @@ import javax.jcr.RepositoryException;
 
 import org.osgi.annotation.versioning.ProviderType;
 
-/**
- * This OSGi Service can be used in 2 different ways....
- *
- * 1. It can be used In-line in code to detect if AEM is runinng as Cloud Ready (AEM as a Cloud Service or local AEM as a Cloud Service SDK QuickStart Jar) or not.
- *
- * @Reference
- * AemCapabilityHelper aemCapabilityHelper;
- * ...
- * if ((aemCapabilityHelper.isCloudReady()) {
- *     .. Do something that only works for the Cloud ..
- * } else {
- *     .. Do something for AMS / On-Prem ..
- * }
- *
- * 2. It can be used to allow/stop OSGi Components from starting entirely
- *
- *
- * @Component
- * public class IOnlyWorkOnTheCloud implements Foo {
- *
- *    @Reference(
- *        target="(cloud-ready=true)"
- *        scope = ReferenceCardinality.MANDATORY
- *    )
- *    AemCapabilityHelper aemCapabilityHelper;
- *    ...
- * }
- *
- * ... OR ...
- *
- * @Component
- * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
- *
- *      @Reference(
- *          target="(cloud-ready=false)"
- *          scope = ReferenceCardinality.MANDATORY
- *      )
- *      AemCapabilityHelper aemCapabilityHelper;
- *      ...
- *  }
- */
 @ProviderType
+@Deprecated
 public interface AemCapabilityHelper {
     /**
      * Determines if the AEM installation is running on an Apache Jackrabbit Oak-based repository.
@@ -77,10 +37,4 @@ public interface AemCapabilityHelper {
      */
     boolean isOak() throws RepositoryException;
 
-    /**
-     * Checks if the AEM running is "AEM as a Cloud Service" or an AMS/On-Prem/6.x version of AEM
-     *
-     * @return true if the AEM is running as AEM as a Cloud Service (either in Adobe Cloud as AEM as a CLoud Service OR AEM as a Cloud Service SDK QuickStart Jar)
-     */
-    boolean isCloudReady();
 }
