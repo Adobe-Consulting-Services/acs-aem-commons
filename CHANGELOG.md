@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - Added more granular control of the environment indicator css
+- #2160 - provide EL support for contextual root
 
 ### Fixed
 - #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
