@@ -81,7 +81,6 @@ public class RequireAemImpl implements RequireAem {
             distribution = Distribution.CLOUD_READY.getValue();
         } else {
             distribution =  Distribution.CLASSIC.getValue();
-            log.debug("Registering [ {} ] as an OSGi Service so it be be used to enable/disable other OSGi Components", this.getClass().getSimpleName());
         }
 
         properties.put(PN_DISTRIBUTION, distribution);
@@ -89,7 +88,7 @@ public class RequireAemImpl implements RequireAem {
 
         serviceRegistration = bundleContext.registerService(RequireAem.class.getName(), this, properties);
 
-        log.error("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ distribution = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
+        log.info("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ distribution = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
                 properties.get(PN_DISTRIBUTION), properties.get(PN_VERSION));
     }
 
