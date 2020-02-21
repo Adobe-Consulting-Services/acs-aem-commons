@@ -80,7 +80,7 @@ public class RequireAemImplTest {
 
         RequireAem requireAem = ctx.getService(RequireAem.class);
 
-        assertTrue(requireAem.isCloudReady());
+        assertEquals(RequireAem.Distribution.CLOUD_READY, requireAem.getDistribution());
     }
 
     @Test
@@ -89,24 +89,24 @@ public class RequireAemImplTest {
 
         RequireAem requireAem = ctx.getService(RequireAem.class);
 
-        assertFalse(requireAem.isCloudReady());
+        assertEquals(RequireAem.Distribution.CLASSIC, requireAem.getDistribution());
     }
 
     @Test
     public void referenceFilter_CloudReady_True_Satisfied() {
         setUpAsCloudReady();
 
-        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=true)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(distribution=cloud-ready)");
 
         assertEquals(1, requireAems.length);
-        assertTrue(requireAems[0].isCloudReady());
+        assertEquals(RequireAem.Distribution.CLOUD_READY, requireAems[0].getDistribution());
     }
 
     @Test
     public void referenceFilter_CloudReady_True_Unsatisfied() {
         setUpAsNotCloudReady();
 
-        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=true)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(distribution=cloud-ready)");
 
         assertEquals(0, requireAems.length);
     }
@@ -115,17 +115,17 @@ public class RequireAemImplTest {
     public void referenceFilter_CloudReady_False_Satisfied() {
         setUpAsNotCloudReady();
 
-        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=false)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(distribution=classic)");
 
         assertEquals(1, requireAems.length);
-        assertFalse(requireAems[0].isCloudReady());
+        assertEquals(RequireAem.Distribution.CLASSIC, requireAems[0].getDistribution());
     }
 
     @Test
     public void referenceFilter_CloudReady_False_Unsatisfied() {
         setUpAsCloudReady();
 
-        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(cloud-ready=false)");
+        RequireAem[] requireAems = ctx.getServices(RequireAem.class, "(distribution=classic)");
 
         assertEquals(0, requireAems.length);
     }

@@ -29,7 +29,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @Reference
  * RequireAem requireAem;
  * ...
- * if ((requireAem.isCloudReady()) {
+ * if ((Distribution.CLOUD_READY.equals(requireAem.getDistribution()) {
  *     .. Do something that only works for the Cloud ..
  * } else {
  *     .. Do something for AMS / On-Prem ..
@@ -41,7 +41,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * public class IOnlyWorkOnTheCloud implements Foo {
  *
  *    @Reference(
- *        target="(cloud-ready=true)"
+ *          target="(distribution=cloud-ready)"
  *        scope = ReferenceCardinality.MANDATORY
  *    )
  *    RequireAem requireAem;
@@ -54,7 +54,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
  *
  *      @Reference(
- *          target="(cloud-ready=false)"
+ *          target="(distribution=classic)"
  *          scope = ReferenceCardinality.MANDATORY
  *      )
  *      RequireAem requireAem;
@@ -63,10 +63,23 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface RequireAem {
+    enum Distribution {
+        CLOUD_READY("cloud-ready"),
+        CLASSIC("classic");
+
+        private String value;
+
+        Distribution(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     /**
-     * Checks if the AEM running is "AEM as a Cloud Service" or an AMS/On-Prem/6.x version of AEM
-     *
-     * @return true if the AEM is running as AEM as a Cloud Service (either in Adobe Cloud as AEM as a CLoud Service OR AEM as a Cloud Service SDK QuickStart Jar)
+     * @return the running AEM's environments distribution type.
      */
-    boolean isCloudReady();
+    Distribution getDistribution();
 }

@@ -46,7 +46,8 @@ import java.util.Hashtable;
 )
 public class RequireAemImpl implements RequireAem {
     private static final Logger log = LoggerFactory.getLogger(RequireAemImpl.class);
-    private static final String PN_CLOUD_READY = "cloud-ready";
+
+    private static final String PN_DISTRIBUTION = "distribution";
     private static final String PN_VERSION = "version";
 
     // This is the first Major/Minor GA Version of AEM as a Cloud Service
@@ -59,11 +60,11 @@ public class RequireAemImpl implements RequireAem {
     private transient ServiceRegistration serviceRegistration;
 
     @Override
-    public boolean isCloudReady() {
+    public Distribution getDistribution() {
         if (productInfo.getVersion().compareTo(originalCloudServiceVersion) > 0) {
-            return true;
+            return Distribution.CLOUD_READY;
         } else {
-            return false;
+            return Distribution.CLASSIC;
         }
     }
 
@@ -73,23 +74,23 @@ public class RequireAemImpl implements RequireAem {
 
         final Dictionary<String, Object> properties = new Hashtable<>();
 
-        String cloudReady;
+        String distribution;
         String version = productInfo.getShortVersion();
 
-        if (isCloudReady()) {
-            cloudReady = Boolean.TRUE.toString();
+        if (Distribution.CLOUD_READY.equals(getDistribution())) {
+            distribution = Distribution.CLOUD_READY.getValue();
         } else {
-            cloudReady = Boolean.FALSE.toString();
+            distribution =  Distribution.CLASSIC.getValue();
             log.debug("Registering [ {} ] as an OSGi Service so it be be used to enable/disable other OSGi Components", this.getClass().getSimpleName());
         }
 
-        properties.put(PN_CLOUD_READY, cloudReady);
+        properties.put(PN_DISTRIBUTION, distribution);
         properties.put(PN_VERSION, version);
 
         serviceRegistration = bundleContext.registerService(RequireAem.class.getName(), this, properties);
 
-        log.error("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ cloud-ready = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
-                properties.get(PN_CLOUD_READY), properties.get(PN_VERSION));
+        log.error("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ distribution = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
+                properties.get(PN_DISTRIBUTION), properties.get(PN_VERSION));
     }
 
     @Deactivate
