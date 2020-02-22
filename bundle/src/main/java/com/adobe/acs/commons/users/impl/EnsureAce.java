@@ -60,7 +60,6 @@ public class EnsureAce {
 
     private static final Logger log = LoggerFactory.getLogger(EnsureAce.class);
 
-    private static final String PROP_PRIVILEGES = "privileges";
     private static final String PROP_REP_GLOB = "rep:glob";
     private static final String PROP_REP_NT_NAMES = "rep:ntNames";
     private static final String PROP_REP_ITEM_NAMES = "rep:itemNames";
