@@ -19,17 +19,30 @@
  */
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
-import com.adobe.acs.commons.util.WorkflowHelper;
+import java.io.IOException;
+import java.util.Collections;
+
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.management.NotCompliantMBeanException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.replication.packages.automatic.AbstractAutomaticPackageReplicator;
+import com.adobe.acs.commons.util.WorkflowHelper;
+import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 import com.day.cq.workflow.WorkflowException;
 import com.day.cq.workflow.WorkflowSession;
@@ -45,44 +58,80 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 @Service
 public class ReplicatePackageProcess implements WorkflowProcess {
 
-    private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);
+  private static final Logger log = LoggerFactory.getLogger(ReplicatePackageProcess.class);
 
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+  @Reference
+  private EventAdmin eventAdmin;
 
-    @Reference
-    private Replicator replicator;
+  @Reference
+  private Packaging packaging;
 
-    @Reference
-    private EventAdmin eventAdmin;
+  @Reference
+  private Replicator replicator;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.day.cq.workflow.exec.WorkflowProcess#execute(com.day.cq.workflow.exec
-     * .WorkItem, com.day.cq.workflow.WorkflowSession,
-     * com.day.cq.workflow.metadata.MetaDataMap)
-     */
-    @Override
-    public void execute(WorkItem item, WorkflowSession session, MetaDataMap args) throws WorkflowException {
-        log.trace("execute");
-        String packagePath = args.get(WorkflowHelper.PROCESS_ARGS, String.class);
-        if (StringUtils.isNotEmpty(packagePath)) {
-            log.debug("Executing Automatic Package Replicator Job for package {}", packagePath);
-            AutomaticPackageReplicatorJob aprJob = new AutomaticPackageReplicatorJob(resourceResolverFactory,
-                    replicator, eventAdmin, packagePath);
+  @Reference
+  private ResourceResolverFactory resourceResolverFactory;
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * com.day.cq.workflow.exec.WorkflowProcess#execute(com.day.cq.workflow.exec
+   * .WorkItem, com.day.cq.workflow.WorkflowSession,
+   * com.day.cq.workflow.metadata.MetaDataMap)
+   */
+  @Override
+  public void execute(WorkItem item, WorkflowSession session, MetaDataMap args) throws WorkflowException {
+    log.trace("execute");
+    String packagePath = args.get(WorkflowHelper.PROCESS_ARGS, String.class);
+    if (StringUtils.isNotEmpty(packagePath)) {
+      log.debug("Executing Automatic Package Replicator Job for package {}", packagePath);
+      try {
+        AbstractAutomaticPackageReplicator apr = new AbstractAutomaticPackageReplicator() {
+
+          @Override
+          public EventAdmin getEventAdmin() {
+            return eventAdmin;
+          }
+
+          @Override
+          public String getPackagePath() {
+            return packagePath;
+          }
+
+          @Override
+          public Replicator getReplicator() {
+            return replicator;
+          }
+
+          public ResourceResolver getResourceResolver() {
             try {
-                aprJob.excute();
-            } catch (Exception e) {
-                log.error("Exception executing Automatic Package Replicator Job for package " + packagePath, e);
-                throw new WorkflowException(
-                        "Exception executing Automatic Package Replicator Job for package " + packagePath, e);
+              return resourceResolverFactory.getServiceResourceResolver(Collections.singletonMap(
+                  ResourceResolverFactory.SUBSERVICE, AbstractAutomaticPackageReplicator.SERVICE_USER_NAME));
+            } catch (LoginException e) {
+              throw new RuntimeException("Failed to get service resolver", e);
             }
-        } else {
-            log.warn("No package path specified");
-            throw new WorkflowException("No package path specified for Automatic Package Replicator Job");
-        }
+          }
+
+          @Override
+          public void replicatePackage()
+              throws RepositoryException, PackageException, IOException, ReplicationException {
+            try (ResourceResolver resolver = getResourceResolver()) {
+              super.doReplicatePackage(packaging.getPackageManager(resolver.adaptTo(Session.class)));
+            }
+          }
+        };
+        apr.replicatePackage();
+      } catch (NotCompliantMBeanException | RepositoryException | PackageException | IOException
+          | ReplicationException e) {
+        throw new WorkflowException("Exception executing Automatic Package Replicator Job for package " + packagePath,
+            e);
+      }
+
+    } else {
+      log.warn("No package path specified");
+      throw new WorkflowException("No package path specified for Automatic Package Replicator Job");
     }
+  }
 
 }
