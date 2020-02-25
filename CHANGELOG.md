@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2146 - POI exception generating Excel file with too many references
 - #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
 - #2185 - fix empty iconpicker and fontawesome files
-
+- #2199 - Read permisions on /conf folder for acs-commons-email-service user
 ### Changed
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
 - #2133 - Update test library dependencies
