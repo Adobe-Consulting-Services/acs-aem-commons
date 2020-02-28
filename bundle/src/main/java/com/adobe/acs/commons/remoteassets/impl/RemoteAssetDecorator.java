@@ -24,7 +24,6 @@ import com.day.cq.dam.api.DamConstants;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
-import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -58,6 +57,8 @@ public class RemoteAssetDecorator implements ResourceDecorator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);
     private static int SYNC_WAIT_SECONDS = 100;
+
+    private static String ADMIN_ID = "admin";
 
     /**
      * This set stores resource paths for remote assets that are in the process
@@ -168,7 +169,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private boolean isAllowedUser(Resource resource) throws RepositoryException {
         ResourceResolver resourceResolver = resource.getResourceResolver();
         String userId = resourceResolver.getUserID();
-        if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+        if (!userId.equals(ADMIN_ID)) {
             if (this.config.getWhitelistedServiceUsers().contains(userId)) {
                 return true;
             }
