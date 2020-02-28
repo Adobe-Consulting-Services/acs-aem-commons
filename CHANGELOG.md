@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - Added more granular control of the environment indicator css
+- #2194 - Add actions of Quickpublish an Managepublication to Generic list console
 - #2160 - provide EL support for contextual root
 
 ### Fixed
