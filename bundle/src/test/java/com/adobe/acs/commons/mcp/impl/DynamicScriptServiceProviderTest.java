@@ -50,6 +50,7 @@ public class DynamicScriptServiceProviderTest {
     static ProcessDefinition testProcessDefinition;
     static ProcessDefinitionFactory testProcessDefinitionFactory;
     static Map<String, FieldComponent> testComponents = new HashMap<>();
+    
     @BeforeClass
     public static void setupClass() {
         testProcessDefinition = mock(ProcessDefinition.class);
