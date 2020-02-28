@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.users.impl;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +39,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
-import org.apache.jackrabbit.oak.spi.security.principal.PrincipalImpl;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -223,7 +223,7 @@ public final class EnsureGroup implements EnsureAuthorizable {
             log.debug("Requesting creation of group [ {} ] at [ {} ]", group.getPrincipalName(),
                     group.getIntermediatePath());
 
-            jcrGroup = userManager.createGroup(new PrincipalImpl(group.getPrincipalName()), group.getIntermediatePath());
+            jcrGroup = userManager.createGroup(new SimplePrincipal(group.getPrincipalName()), group.getIntermediatePath());
             log.debug("Created group at [ {} ]", jcrGroup.getPath());
         }
 
@@ -357,5 +357,36 @@ public final class EnsureGroup implements EnsureAuthorizable {
             throw new IllegalArgumentException("Unknown Ensure Group operation [ " + operationStr + " ]", e);
         }
     }
+
+
+    // taken from https://www.albinsblog.com/2015/04/how-to-craetemanage-groups-and-users-java-adobecq5.html
+    private static class SimplePrincipal implements Principal {
+      protected final String name;
+
+      public SimplePrincipal(String name) {
+          if (StringUtils.isBlank(name)) {
+              throw new IllegalArgumentException("Principal name cannot be blank.");
+          }
+          this.name = name;
+      }
+
+      public String getName() {
+          return name;
+      }
+
+      @Override
+      public int hashCode() {
+          return name.hashCode();
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+          if (obj instanceof Principal) {
+              return name.equals(((Principal) obj).getName());
+          }
+          return false;
+      }
+  }
+
 
 }

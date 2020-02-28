@@ -26,7 +26,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.Privilege;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,10 +62,10 @@ public final class Ace {
     private static final String PROP_TYPE = "type";
     private static final String PROP_PATH = "path";
     private static final String PROP_PRIVILEGES = "privileges";
-    private static final String PROP_REP_GLOB = AccessControlConstants.REP_GLOB;
-    private static final String PROP_REP_NT_NAMES = AccessControlConstants.REP_NT_NAMES;
-    private static final String PROP_REP_ITEM_NAMES = AccessControlConstants.REP_ITEM_NAMES;
-    private static final String PROP_REP_PREFIXES = AccessControlConstants.REP_PREFIXES;
+    private static final String PROP_REP_GLOB = "rep:glob";
+    private static final String PROP_REP_NT_NAMES = "rep:ntNames";
+    private static final String PROP_REP_ITEM_NAMES = "rep:itemNames";
+    private static final String PROP_REP_PREFIXES = "rep:prefixes";
 
 
     private String type;
@@ -221,22 +219,22 @@ public final class Ace {
         // rep:glob
 
         // We are converting the single value RepGlob into a List for convenience
-        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(AccessControlConstants.REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
+        if(!isRestrictionValid(this.hasRepGlob(), actual.getRestrictions(PROP_REP_GLOB), Arrays.asList(new String[]{this.getRepGlob()}))) {
             return false;
         }
 
         // rep:ntNames
-        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(AccessControlConstants.REP_NT_NAMES), this.getRepNtNames())) {
+        if(!isRestrictionValid(this.hasRepNtNames(), actual.getRestrictions(PROP_REP_NT_NAMES), this.getRepNtNames())) {
             return false;
         }
 
         // rep:itemNames
-        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(AccessControlConstants.REP_ITEM_NAMES), this.getRepItemNames())) {
+        if(!isRestrictionValid(this.hasRepItemNames(), actual.getRestrictions(PROP_REP_ITEM_NAMES), this.getRepItemNames())) {
             return false;
         }
 
         // rep:prefixes
-        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(AccessControlConstants.REP_PREFIXES), this.getRepPrefixes())) {
+        if(!isRestrictionValid(this.hasRepPrefixes(), actual.getRestrictions(PROP_REP_PREFIXES), this.getRepPrefixes())) {
             return false;
         }
 

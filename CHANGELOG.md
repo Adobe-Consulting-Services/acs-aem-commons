@@ -11,12 +11,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - Added more granular control of the environment indicator css
+- #2194 - Add actions of Quickpublish an Managepublication to Generic list console
+- #2160 - provide EL support for contextual root
 
 ### Fixed
 - #2082 - ETag filter never sends 304
 - #2148 - Bugfix for displaying sizes (adresses #2132)
 - #2146 - POI exception generating Excel file with too many references
 - #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2185 - fix empty iconpicker and fontawesome files
 
 ### Changed
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
