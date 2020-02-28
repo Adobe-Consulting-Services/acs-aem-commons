@@ -195,6 +195,11 @@
                     <artifactId>gmaven-plugin</artifactId>
                     <version>1.5</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>5.1.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -234,26 +239,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>5.1.1</version>
-                <executions>
-                    <execution>
-                        <id>check-dependencies-for-vulnerabilities</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <cveValidForHours>24</cveValidForHours>
-                    <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
-                    <skipProvidedScope>true</skipProvidedScope>
-                    <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -607,10 +592,10 @@
             </build>
         </profile>
         <profile>
-            <id>skip-dependency-check</id>
+            <id>dependency-check</id>
             <activation>
                 <property>
-                    <name>env.SKIP_DEPENDENCY_CHECK</name>
+                    <name>env.DEPENDENCY_CHECK</name>
                 </property>
             </activation>
             <build>
@@ -621,11 +606,18 @@
                         <executions>
                             <execution>
                                 <id>check-dependencies-for-vulnerabilities</id>
-                                <configuration>
-                                    <skip>true</skip>
-                                </configuration>
+                                <phase>validate</phase>
+                                <goals>
+                                   <goal>check</goal>
+                                </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <cveValidForHours>24</cveValidForHours>
+                            <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                            <skipProvidedScope>true</skipProvidedScope>
+                            <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
