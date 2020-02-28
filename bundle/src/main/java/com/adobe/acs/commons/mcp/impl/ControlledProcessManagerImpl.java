@@ -73,7 +73,7 @@ public class ControlledProcessManagerImpl implements ControlledProcessManager {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindDefinitionFactory", unbind = "unbindDefinitionFactory", referenceInterface = ProcessDefinitionFactory.class, policy = ReferencePolicy.DYNAMIC)
     private final List<ProcessDefinitionFactory> processDefinitionFactories = new CopyOnWriteArrayList<>();
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, bind = "bindScriptResolverService", unbind = "unbindScriptResolverService", referenceInterface = DynamicScriptResolverService.class, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, bind = "bindScriptResolverService", unbind = "unbindScriptResolverService", referenceInterface = DynamicScriptResolverService.class, policy = ReferencePolicy.DYNAMIC)
     private final List<DynamicScriptResolverService> scriptResolverService = new CopyOnWriteArrayList<>();
 
     static {
