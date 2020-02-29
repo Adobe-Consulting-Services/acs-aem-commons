@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+
+### Fixed
+
+### Changed
+
+
+## [4.4.2] - 2020-02-28
+
+### Added
 - #2202 - Added dynamic script resolution modular support to MCP
 - #2194 - Add actions of Quickpublish an Managepublication to Generic list console
 - #2174 - Added more granular control of the environment indicator css
