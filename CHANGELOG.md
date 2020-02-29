@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2146 - POI exception generating Excel file with too many references
 - #2145 - Added null value test to spreadsheet tests
 - #2142 - ETag filter: Correctly evaluate if-none-match header
+- #2137 - Updating maven plugins used for release to resolve release issues
 - #2132 - Fix display of byte sizes 
 - #2082 - ETag filter never sends 304
 
