@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2206 fix sonar warnings; some package versions had to be increased
 
 ### Changed
-
+- #2208 - Remove the WCMInbox webconsole plugin (#2205)
 
 ## [4.4.2] - 2020-02-28
 
