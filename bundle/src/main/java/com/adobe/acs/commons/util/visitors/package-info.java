@@ -20,7 +20,7 @@
 /**
  * Miscellaneous Utilities.
  */
-@Version("2.1.1")
+@Version("3.0.0")
 package com.adobe.acs.commons.util.visitors;
 
 import org.osgi.annotation.versioning.Version;
