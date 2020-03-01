@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 ### Changed
-
+- #2208 - Remove the WCMInbox webconsole plugin (#2205)
 
 ## [4.4.2] - 2020-02-28
 
