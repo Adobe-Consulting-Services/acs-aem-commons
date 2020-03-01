@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 
 ### Fixed
+- #2206 fix sonar warnings; some package versions had to be increased
 
 ### Changed
 
