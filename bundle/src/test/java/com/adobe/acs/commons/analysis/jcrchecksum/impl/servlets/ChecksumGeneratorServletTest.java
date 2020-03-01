@@ -53,7 +53,7 @@ public class ChecksumGeneratorServletTest {
     private static final String SERVLET_EXTENSION = "txt";
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext();
 
     @Spy
     private ChecksumGenerator checksumGenerator = new ChecksumGeneratorImpl();
