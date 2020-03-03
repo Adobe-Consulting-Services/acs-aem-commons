@@ -124,6 +124,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
+    @Property(label = "Exclude Page from Sitemap", description = "The String [cq:Template] property on /jcr:content of page")
+    private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
+
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
@@ -175,6 +178,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
+
     }
 
     @Override
