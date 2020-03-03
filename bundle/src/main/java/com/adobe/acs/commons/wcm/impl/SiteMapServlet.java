@@ -156,6 +156,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean removeTrailingSlash;
 
+    private String template;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -178,6 +180,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
+        this.template = PropertiesUtil.toString(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),StringUtils.EMPTY);
 
     }
 
@@ -262,7 +265,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-        if (isHidden(page)) {
+        if (isHiddenOrProtected(page) || isExcluded(page)) {
             return;
         }
         stream.writeStartElement(NS, "url");
@@ -302,8 +305,26 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
-    private boolean isHidden(final Page page) {
-        return page.getProperties().get(this.excludeFromSiteMapProperty, false);
+    private boolean isHiddenOrProtected(Page page) {
+        boolean flag= false;
+        if(this.excludeFromSiteMapProperty != null){
+            String [] multipleProperties = this.excludeFromSiteMapProperty.split(",");
+            for (String prop: multipleProperties) {
+                flag = flag || page.getProperties().get(prop, Boolean.valueOf(false)).booleanValue();
+            }
+        }
+        return flag;
+    }
+
+    private boolean isExcluded(Page page){
+        boolean flag = false;
+        if(this.template != null){
+            String [] templates = this.template.split(",");
+            for(String pageTemplate : templates){
+                flag = flag || page.getProperties().get("cq:template", String.class).equalsIgnoreCase(pageTemplate);
+            }
+        }
+        return flag;
     }
 
     private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
