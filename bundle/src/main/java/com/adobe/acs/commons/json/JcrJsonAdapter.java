@@ -50,6 +50,7 @@ public class JcrJsonAdapter extends TypeAdapter<Node> {
                         for (Value v : p.getValues()) {
                             writeValue(writer, v);
                         }
+                        writer.endArray();
                     } else {
                         writeValue(writer, p.getValue());
                     }
