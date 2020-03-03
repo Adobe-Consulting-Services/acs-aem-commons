@@ -310,7 +310,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         if(this.excludeFromSiteMapProperty != null){
             String [] multipleProperties = this.excludeFromSiteMapProperty.split(",");
             for (String prop: multipleProperties) {
-                flag = flag || page.getProperties().get(prop, Boolean.valueOf(false)).booleanValue();
+                flag = flag || page.getProperties().get(prop, Boolean.FALSE);
             }
         }
         return flag;
