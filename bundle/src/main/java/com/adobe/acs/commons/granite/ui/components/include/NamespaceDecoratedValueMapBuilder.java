@@ -161,7 +161,7 @@ public class NamespaceDecoratedValueMapBuilder {
     
     private Object castTypeHintedValue(String typeHint, String chosenValue) {
     
-        Class<?> clazz = null;
+        final Class<?> clazz;
     
         switch(typeHint.toLowerCase()){
             case "boolean":
@@ -172,9 +172,6 @@ public class NamespaceDecoratedValueMapBuilder {
                 break;
             case "double":
                 clazz = Double.class;
-                break;
-            case "date":
-                clazz = Date.class;
                 break;
             default:
                 clazz = String.class;

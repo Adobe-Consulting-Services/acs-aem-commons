@@ -20,18 +20,18 @@
 package com.adobe.acs.commons.granite.ui.components.include;
 
 import com.adobe.granite.ui.components.ExpressionResolver;
-import org.apache.commons.collections.iterators.TransformIterator;
+import com.adobe.granite.ui.components.FilteringResourceWrapper;
 import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.commons.collections.iterators.TransformIterator;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceWrapper;
 import org.apache.sling.api.resource.ValueMap;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 
-public class NamespaceResourceWrapper extends ResourceWrapper {
+public class NamespaceResourceWrapper extends FilteringResourceWrapper {
   
     private final ExpressionResolver expressionResolver;
     
@@ -40,7 +40,7 @@ public class NamespaceResourceWrapper extends ResourceWrapper {
     
     public NamespaceResourceWrapper(@Nonnull Resource resource, @Nonnull ExpressionResolver expressionResolver,
                                     @Nonnull SlingHttpServletRequest request) {
-        super(resource);
+        super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;
         this.request = request;
         
@@ -54,8 +54,14 @@ public class NamespaceResourceWrapper extends ResourceWrapper {
         if(child == null){
             return null;
         }
-        
-        return new NamespaceResourceWrapper(child, expressionResolver, request);
+
+        NamespaceResourceWrapper wrapped =new  NamespaceResourceWrapper(child, expressionResolver, request);
+
+        if(!isVisible(wrapped)){
+            return null;
+        }else{
+            return wrapped;
+        }
     }
     
     @Override
@@ -70,16 +76,7 @@ public class NamespaceResourceWrapper extends ResourceWrapper {
     private boolean isVisible(Resource o) {
         return !o.getValueMap().get("hide", Boolean.FALSE);
     }
-    
-    
-    @Override
-    public boolean hasChildren() {
-        if (!super.hasChildren()) {
-            return false;
-        }
-        
-        return listChildren().hasNext();
-    }
+
     
     @Override
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
