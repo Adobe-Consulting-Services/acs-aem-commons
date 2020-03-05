@@ -22,6 +22,8 @@ package com.adobe.acs.commons.mcp.util;
 import com.adobe.acs.commons.mcp.form.FieldComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
@@ -34,8 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Named;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -184,27 +187,28 @@ public class AnnotatedFieldDeserializer {
         }
     }
 
+    public static Stream<AccessibleObject> getAllAnnotatedObjectMembers(Class source, Class<? extends Annotation> annotation) {
+        return Stream.concat(
+                FieldUtils.getFieldsListWithAnnotation(source, annotation).stream()
+                        .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst),
+                MethodUtils.getMethodsListWithAnnotation(source, annotation).stream()
+        );
+    }
+
     public static Map<String, FieldComponent> getFormFields(Class source, SlingScriptHelper sling) {
-        return FieldUtils.getFieldsListWithAnnotation(source, FormField.class)
-                .stream()
-                .sorted(AnnotatedFieldDeserializer::superclassFieldsFirst)
-                .collect(Collectors.toMap(AnnotatedFieldDeserializer::getFieldName, f -> {
+        return getAllAnnotatedObjectMembers(source, FormField.class)
+                .collect(Collectors.toMap(AccessibleObjectUtil::getFieldName, f -> {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
                         component = fieldDefinition.component().newInstance();
-                        component.setup(getFieldName(f), f, fieldDefinition, sling);
+                        component.setup(AccessibleObjectUtil.getFieldName(f), f, fieldDefinition, sling);
                         return component;
                     } catch (InstantiationException | IllegalAccessException ex) {
-                        LOG.error("Unable to instantiate field component for " + f.getName(), ex);
+                        LOG.error("Unable to instantiate field component for " + f.toString(), ex);
                     }
                     return null;
                 }, (a, b) -> a, LinkedHashMap::new));
-    }
-
-    private static String getFieldName(Field f) {
-        Named named = f.getAnnotation(Named.class);
-        return named == null ? f.getName() : named.value();
     }
 
     private static int superclassFieldsFirst(Field a, Field b) {

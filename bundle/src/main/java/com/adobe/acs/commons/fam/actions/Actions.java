@@ -149,7 +149,9 @@ public final class Actions {
                     LOG.info("Critical runtime exception " + e.getMessage(), e);
                     throw e;                    
                 } catch (Throwable e) {
-                    LOG.info("Error commit, retry count is " + remaining, e);
+                    LOG.info("Error commit, retry count is {}. Switch to DEBUG logging to get the full stacktrace",
+                            remaining);
+                    LOG.debug("Error commit, retry count is " + remaining, e);
                     r.revert();
                     r.refresh();
                     if (--remaining <= 0) {

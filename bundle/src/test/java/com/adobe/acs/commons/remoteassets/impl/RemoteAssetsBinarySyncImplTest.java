@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.testutil.LogTester;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
@@ -80,7 +79,7 @@ public class RemoteAssetsBinarySyncImplTest {
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
 
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
     private RemoteAssetsBinarySync remoteAssetsBinarySync;
     private Map<String, Integer> renditionResponseStatusMap;
 
@@ -261,9 +260,9 @@ public class RemoteAssetsBinarySyncImplTest {
 
         Resource resource = context.resourceResolver().getResource(TEST_ASSET_CONTENT_PATH);
         assertFalse(remoteAssetsBinarySync.syncAsset(resource));
+        
+        LogTester.assertLogText("Failed to mark sync of "+TEST_ASSET_CONTENT_PATH + " as failed");
 
-        LogTester.assertLogText("Error flagging remote asset '" + TEST_ASSET_CONTENT_PATH
-                + "' as failed - asset may attempt to sync numerous times in succession");
     }
 }
 

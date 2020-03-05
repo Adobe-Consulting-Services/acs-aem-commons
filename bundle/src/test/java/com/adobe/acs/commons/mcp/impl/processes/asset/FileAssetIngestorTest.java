@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
@@ -61,8 +61,15 @@ import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.mcp.impl.processes.asset.AssetIngestorUtil.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.times;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,6 +122,7 @@ public class FileAssetIngestorTest {
         ingestor.folderFilter = new NamesFilter("-.ds_store");
         ingestor.existingAssetAction = AssetIngestor.AssetAction.skip;
         ingestor.fileBasePath = tempDirectory.getAbsolutePath();
+        ingestor.dryRunMode = false;
 
         doAnswer(invocation -> {
             CheckedConsumer<ResourceResolver> method = (CheckedConsumer<ResourceResolver>) invocation.getArguments()[0];
@@ -318,7 +326,7 @@ public class FileAssetIngestorTest {
                 .addFile("file1.png", 1234L)
                 .addFile("file2.png", 4567L)
                 .asVector();
-        when(channel.ls(anyObject())).thenReturn(entries);
+        when(channel.ls(any())).thenReturn(entries);
 
         FileAssetIngestor.SftpHierarchicalElement elem1 = ingestor.new SftpHierarchicalElement(SFTP_HOST_TEST_PATH, channel, false);
         int count = 0;

@@ -173,20 +173,9 @@ public class QueryReportExecutor implements ReportExecutor {
 
   private void prepareStatement() throws ReportException {
     try {
-      Map<String, String> parameters = new HashMap<>();
-      Enumeration<String> paramNames = request.getParameterNames();
-      while (paramNames.hasMoreElements()) {
-        String key = paramNames.nextElement();
-        parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
-      }
-      log.trace("Loading parameters from request: {}", parameters);
-
-      Handlebars handlebars = new Handlebars();
-
-      Template template = handlebars.compileInline(config.getQuery());
-
+      Map<String, String> parameters = getParamPatternMap(request);
+      Template template =  new Handlebars().compileInline(config.getQuery());
       statement = template.apply(parameters);
-
       log.trace("Loaded statement: {}", statement);
     } catch (IOException ioe) {
       throw new ReportException("Exception templating query", ioe);

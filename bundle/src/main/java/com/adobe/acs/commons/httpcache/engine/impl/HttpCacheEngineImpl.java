@@ -315,21 +315,6 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
 
     }
 
-    private Runnable putToStore(final HttpCacheConfig cacheConfig, final CacheKey cacheKey, final CacheContent cacheContent) {
-        return () -> {
-            try {
-                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
-            } catch (HttpCacheException e) {
-                log.error("Error storing http response in httpcache", e);
-            } finally {
-                // Close the temp sink input stream.
-                if (null != cacheContent) {
-                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
-                }
-            }
-        };
-    }
-
 
     @Override
     public boolean isPathPotentialToInvalidate(String path) {
@@ -353,6 +338,21 @@ public class HttpCacheEngineImpl extends AnnotatedStandardMBean implements HttpC
                 executeCustomRuleInvalidations(path, cacheConfig);
             }
         }
+    }
+
+    private Runnable putToStore(final HttpCacheConfig cacheConfig, final CacheKey cacheKey, final CacheContent cacheContent) {
+        return () -> {
+            try {
+                getCacheStore(cacheConfig).put(cacheKey, cacheContent);
+            } catch (HttpCacheException e) {
+                log.error("Error storing http response in httpcache", e);
+            } finally {
+                // Close the temp sink input stream.
+                if (null != cacheContent) {
+                    IOUtils.closeQuietly(cacheContent.getInputDataStream());
+                }
+            }
+        };
     }
 
 

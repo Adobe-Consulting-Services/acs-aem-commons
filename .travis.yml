@@ -1,17 +1,29 @@
 language: java
 dist: trusty
-jdk: oraclejdk8
+jdk: 
+- oraclejdk8
+- oraclejdk11
 env:
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN" POST_COVERAGE=false SKIP_DEPENDENCY_CHECK=true
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true DEPENDENCY_CHECK=true
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN"
+jobs:
+   exclude:
+     - jdk: oraclejdk11
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true DEPENDENCY_CHECK=true
+     - jdk: oraclejdk11
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES"
+     - jdk: oraclejdk11
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR"
+     - jdk: oraclejdk11
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN"
 script: mvn verify -B
 before_install:
   - cp .travis.settings.xml $HOME/.m2/settings.xml
 after_success:
-  - if [ "$POST_COVERAGE" == "true" ]; then mvn -Pcoverage clean package coveralls:report; fi
+  - if [ "$POST_COVERAGE" == "true" ]; then mvn -Pcoverage clean package coveralls:report -Dlogback.configurationFile=bundle/src/test/resources/logback-test-no-logging.xml; fi
 sudo: false
 cache:
   directories:

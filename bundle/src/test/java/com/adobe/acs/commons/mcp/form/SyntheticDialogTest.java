@@ -52,6 +52,8 @@ public class SyntheticDialogTest {
         assertFieldExists("readOnly");
         assertFieldExists("tags");
         assertFieldExists("textArea");
+        assertFieldExists("beanProperty");
+        assertFieldExists("booleanProperty");
     }
 
     public void assertFieldExists(String name) {
@@ -172,6 +174,20 @@ public class SyntheticDialogTest {
 
         @FormField(component = TextareaComponent.class, name = "Text Area", category="4")
         String textArea;
+
+        String beanProperty;
+
+        @FormField(name = "Bean property", category="4")
+        public String getBeanProperty() {
+            return beanProperty;
+        }
+
+        boolean booleanProperty;
+
+        @FormField(component = CheckboxComponent.class, name = "Boolean property", category="4")
+        public boolean isBooleanProperty() {
+            return booleanProperty;
+        }
     }
 
     public static class TestSubtype {

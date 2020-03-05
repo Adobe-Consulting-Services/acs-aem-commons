@@ -20,12 +20,10 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.day.cq.dam.api.DamConstants;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
-import org.apache.jackrabbit.oak.spi.security.user.UserConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceDecorator;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -60,6 +58,8 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetDecorator.class);
     private static int SYNC_WAIT_SECONDS = 100;
 
+    private static String ADMIN_ID = "admin";
+
     /**
      * This set stores resource paths for remote assets that are in the process
      * of being sync'd from the remote server.  This prevents an infinite loop
@@ -71,7 +71,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private RemoteAssetsBinarySync assetSync;
 
     @Reference
-    private RemoteAssetsConfig config;
+    private RemoteAssetsConfigImpl config;
 
     /**
      * When resolving a remote asset, first sync the asset from the remote server.
@@ -169,7 +169,7 @@ public class RemoteAssetDecorator implements ResourceDecorator {
     private boolean isAllowedUser(Resource resource) throws RepositoryException {
         ResourceResolver resourceResolver = resource.getResourceResolver();
         String userId = resourceResolver.getUserID();
-        if (!userId.equals(UserConstants.DEFAULT_ADMIN_ID)) {
+        if (!userId.equals(ADMIN_ID)) {
             if (this.config.getWhitelistedServiceUsers().contains(userId)) {
                 return true;
             }

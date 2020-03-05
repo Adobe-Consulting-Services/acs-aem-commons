@@ -44,6 +44,12 @@
     <logger name="org.mockserver.mock.HttpStateHandler">
         <level value="WARN"/>
     </logger>
+    <logger name="org.apache.jackrabbit.oak.plugins.index">
+    	<level value="WARN" />
+    </logger>
+        <logger name="org.apache.sling.jcr">
+    	<level value="WARN" />
+    </logger>
 
     <root level="debug">
         <appender-ref ref="STDOUT" />

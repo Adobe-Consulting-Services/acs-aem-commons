@@ -46,8 +46,8 @@ import org.mockito.invocation.InvocationOnMock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -60,7 +60,7 @@ public class DataImporterTest {
     private static Spreadsheet importerData;
 
     @Rule
-    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_MOCK);
+    public final SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_OAK);
 
     private DataImporter importer;
     private ActionManagerFactory actionManagerFactory;
@@ -104,12 +104,13 @@ public class DataImporterTest {
         importer = spy(new DataImporter());
         doNothing().when(importer).storeReport(any(), any());
         importer.data = importerData;
+        importer.dryRunMode = false;
         process = spy(new ProcessInstanceImpl(cpm, importer, "test"));
         doNothing().when(process).persistStatus(any());
     }
 
     private Object runImmediately(InvocationOnMock invocation) {
-        Runnable r = invocation.getArgumentAt(0, Runnable.class);
+        Runnable r = invocation.getArgument(0);
         r.run();
         return null;
     }

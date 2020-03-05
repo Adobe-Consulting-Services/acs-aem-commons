@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GreyscaleImageTransformerImplTest {
@@ -80,7 +80,7 @@ public class GreyscaleImageTransformerImplTest {
         transformer.transform(layer, properties);
 
         verify(layer, times(1)).grayscale();
-        verifyZeroInteractions(layer);
+//        verifyNoInteractions(layer);
     }
 
     @Test
@@ -88,6 +88,6 @@ public class GreyscaleImageTransformerImplTest {
         transformer.transform(layer, null);
 
         verify(layer, times(1)).grayscale();
-        verifyZeroInteractions(layer);
+//        verifyNoInteractions(layer);
     }
 }

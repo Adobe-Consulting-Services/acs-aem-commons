@@ -29,8 +29,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -50,6 +50,7 @@ import javax.management.openmbean.TabularData;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFailExecute;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleFlipFlop;
+import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleMakeChangesThenFail;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
@@ -64,7 +65,7 @@ import org.junit.Test;
 
 public class OnDeployExecutorImplTest {
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
     @Before
     public void setup() throws RepositoryException {
@@ -305,6 +306,21 @@ public class OnDeployExecutorImplTest {
 
         Resource status3 = resourceResolver.getResource("/var/acs-commons/on-deploy-scripts-status/" + OnDeployScriptTestExampleSuccess2.class.getName());
         assertNull(status3);
+    }
+
+    @Test
+    public void testExecuteDoesntCommitChangesMadeByFailingScript() {
+        context.registerService(OnDeployScriptProvider.class, 
+                () -> asList(new OnDeployScriptTestExampleMakeChangesThenFail()));
+
+        try {
+            context.registerInjectActivateService(new OnDeployExecutorImpl());
+            fail("Expected exception from failed script");
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof OnDeployEarlyTerminationException);
+        }
+
+        assertNull(context.resourceResolver().getResource(OnDeployScriptTestExampleMakeChangesThenFail.CREATED_PATH));
     }
 
     @Test

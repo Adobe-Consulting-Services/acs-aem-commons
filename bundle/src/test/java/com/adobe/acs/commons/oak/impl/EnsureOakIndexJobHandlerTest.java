@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,12 +37,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
+import com.adobe.acs.commons.oak.EnsureOakIndexManager;
 
 /**
  * 
@@ -96,11 +99,13 @@ public class EnsureOakIndexJobHandlerTest {
         props.put("ensure-definitions.path",DEFINITION_PATH);
         props.put("immediate", "false");
         
+        EnsureOakIndexManager eoim = Mockito.mock(EnsureOakIndexManager.class);
+        context.registerService(EnsureOakIndexManager.class, eoim);
+        
         context.registerService(Scheduler.class,scheduler);
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
         EnsureOakIndex eoi = new EnsureOakIndex();
         context.registerInjectActivateService(eoi, props);
-        
 
         handler = new EnsureOakIndexJobHandler(eoi, OAK_INDEX, DEFINITION_PATH);
         

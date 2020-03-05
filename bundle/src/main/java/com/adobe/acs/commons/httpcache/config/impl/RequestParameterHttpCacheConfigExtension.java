@@ -109,7 +109,12 @@ public class RequestParameterHttpCacheConfigExtension extends AbstractKeyValueEx
         // No valid request parameter could be found.
         return false;
     }
-
+    
+    @Override
+    protected String getActualValue(String key, SlingHttpServletRequest request) {
+        return request.getParameter(key);
+    }
+    
     @Override
     public String getCacheKeyId() {
         return "[Request Parameter: " + cacheKeyId + "]";

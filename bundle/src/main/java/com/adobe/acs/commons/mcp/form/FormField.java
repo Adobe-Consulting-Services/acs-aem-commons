@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Annotation used to declare process inputs.
  */
 @ProviderType
-@Target(ElementType.FIELD)
+@Target(value={ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FormField {
 
@@ -47,6 +47,8 @@ public @interface FormField {
     Class<? extends FieldComponent> component() default TextfieldComponent.class;
 
     String[] options() default {};
+
+    boolean showOnCreate() default true;
 
     public static class Factory {
         private Factory() {
@@ -94,6 +96,11 @@ public @interface FormField {
                 @Override
                 public Class<? extends Annotation> annotationType() {
                     return null;
+                }
+
+                @Override
+                public boolean showOnCreate() {
+                    return true;
                 }
             };
         }

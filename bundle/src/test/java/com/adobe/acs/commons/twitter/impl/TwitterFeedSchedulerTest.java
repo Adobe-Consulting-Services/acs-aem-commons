@@ -20,8 +20,10 @@
 package com.adobe.acs.commons.twitter.impl;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import junitx.util.PrivateAccessor;
 
 import org.apache.sling.api.resource.ResourceResolver;
@@ -30,7 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.apache.sling.discovery.InstanceDescription;
 import org.apache.sling.discovery.TopologyEvent;
@@ -60,10 +62,7 @@ public class TwitterFeedSchedulerTest {
         PrivateAccessor.setField(scheduler, "twitterFeedService",
                 twitterFeedService);
 
-        when(
-                resourceResolverFactory
-                        .getServiceResourceResolver(anyMapOf(
-                                String.class, Object.class))).thenReturn(
+        when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(
                 resourceResolver);
 
     }

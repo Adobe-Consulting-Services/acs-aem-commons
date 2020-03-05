@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Constants;
 
 import java.util.HashMap;
@@ -62,7 +62,6 @@ public class CombinedCacheConfigExtensionTest {
     public void init() throws HttpCacheRepositoryAccessException {
 
         when(extension1.accepts(request, config)).thenReturn(false);
-        when(extension2.accepts(request, config)).thenReturn(false);
         when(extension3.accepts(request, config)).thenReturn(true);
         when(extension4.accepts(request, config)).thenReturn(true);
         

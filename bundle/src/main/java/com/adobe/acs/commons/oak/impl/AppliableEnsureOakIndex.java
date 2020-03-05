@@ -59,9 +59,4 @@ public interface AppliableEnsureOakIndex {
      * @return the list of additional properties to ignore
      */
     List<String> getIgnoreProperties();
-
-    /**
-     * @param ignoreProperties additional properties to ignore.
-     */
-    void setIgnoreProperties(String[] ignoreProperties);
 }

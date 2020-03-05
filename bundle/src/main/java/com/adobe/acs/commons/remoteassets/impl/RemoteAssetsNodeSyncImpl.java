@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
-import com.adobe.acs.commons.remoteassets.RemoteAssetsConfig;
 import com.adobe.acs.commons.remoteassets.RemoteAssetsNodeSync;
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.dam.api.Asset;
@@ -39,7 +38,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.vault.util.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -49,7 +47,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -82,6 +79,8 @@ import java.util.regex.Pattern;
 )
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
+  private static final String REP_POLICY = "rep:policy";
+
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
     private static final Pattern DATE_REGEX = Pattern
             .compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
@@ -93,11 +92,11 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID, JcrConstants.JCR_PREDECESSORS
     ));
     private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
-            DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
+            DamConstants.THUMBNAIL_NODE, REP_POLICY
     ));
 
     @Reference
-    private RemoteAssetsConfig remoteAssetsConfig;
+    private RemoteAssetsConfigImpl remoteAssetsConfig;
 
     private int saveRefreshCount = 0;
 
@@ -106,8 +105,8 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
      */
     @Override
     public void syncAssetNodes() {
-        ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();
-        try {
+        
+        try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver();) {
             List<String> syncPaths = new ArrayList<>();
             syncPaths.addAll(this.remoteAssetsConfig.getTagSyncPaths());
             syncPaths.addAll(this.remoteAssetsConfig.getDamSyncPaths());
@@ -123,9 +122,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             }
         } catch (Exception e) {
             LOG.error("Unexpected error sync'ing remote asset nodes", e);
-        } finally {
-            this.remoteAssetsConfig.closeResourceResolver(remoteAssetsResolver);
-        }
+        } 
     }
 
     /**
