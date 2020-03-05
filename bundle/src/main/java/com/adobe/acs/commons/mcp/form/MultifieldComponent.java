@@ -22,11 +22,12 @@ package com.adobe.acs.commons.mcp.form;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent.AssetSelectComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent.FolderSelectComponent;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent.NodeSelectComponent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represent multifield with sub-fields based on referenced class. Depending on
@@ -35,6 +36,8 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public final class MultifieldComponent extends AbstractContainerComponent {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MultifieldComponent.class);
 
     public static final String FIELD_PATH = "/field";
     public static final String NODE_PATH = "node_path";
@@ -59,7 +62,7 @@ public final class MultifieldComponent extends AbstractContainerComponent {
                 try {
                     setDefaultChildComponent((Class<? extends FieldComponent>) Class.forName(c));
                 } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(MultifieldComponent.class.getName()).log(Level.SEVERE, "Unable to find class " + c, ex);
+                    LOG.error("Unable to find class {}", ex);
                 }
             });
         }

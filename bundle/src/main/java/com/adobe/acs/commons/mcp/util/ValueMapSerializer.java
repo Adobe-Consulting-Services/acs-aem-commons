@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -60,7 +59,7 @@ public class ValueMapSerializer {
                             map.put(f.getName(), value);
                         }
                     } catch (IllegalAccessException ex) {
-                        java.util.logging.Logger.getLogger(ValueMapSerializer.class.getName()).log(Level.SEVERE, null, ex);
+                        LOG.error("Exception while serializing", ex);
                     }
                 });
     }

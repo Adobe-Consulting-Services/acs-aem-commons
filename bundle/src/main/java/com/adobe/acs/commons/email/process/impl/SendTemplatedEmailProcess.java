@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,8 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.jackrabbit.api.security.user.Authorizable;
+import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -91,7 +93,7 @@ import com.day.cq.workflow.metadata.MetaDataMap;
  * {@link java.text.SimpleDateFormat java.text.SimpleDateFormat}. Defaults to
  * <code>yyyy-MM-dd hh:mm a</code></dd>
  * </dl>
- * 
+ *
  */
 @Component
 @Property(label = "Workflow Label", name = "process.label", value = "Send Templated Email", description = "Sends a templated email using the ACS Commons Email Service")
@@ -184,10 +186,8 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
         // Get ResourceResolver
         final Map<String, Object> authInfo = new HashMap<String, Object>();
         authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, workflowSession.getSession());
-        final ResourceResolver resourceResolver;
 
-        try {
-            resourceResolver = resourceResolverFactory.getResourceResolver(authInfo);
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getResourceResolver(authInfo) ) {
             Resource payloadRes = resourceResolver.getResource(payloadPath);
 
             // Email Parameter map
@@ -231,7 +231,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailUtils#getEmailAddrsFromUserPath(ResourceResolver, String)}
      * Protected so that it can be overridden by implementing classes to add
      * unique logic to where emails are routed to.
-     * 
+     *
      * @param workItem
      *            the current WorkItem in the workflow
      * @param payloadResource
@@ -243,7 +243,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
     protected String[] getEmailAddrs(WorkItem workItem, Resource payloadResource, String[] args) {
         ResourceResolver resolver = payloadResource.getResourceResolver();
         String sendToUser = getValueFromArgs(Arguments.SEND_TO.getArgumentName(), args);
-        return SendTemplatedEmailUtils.getEmailAddrsFromUserPath(resolver, sendToUser);
+        return SendTemplatedEmailUtils.getEmailAddrsFromPathOrName(resolver, sendToUser);
     }
 
     /***
@@ -257,7 +257,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
      * {@link com.adobe.acs.commons.email.process.impl.SendTemplatedEmailConstants#WF_INITIATOR
      * WF_INITIATOR} Protected so that implementing classes can override and
      * add additional parameters.
-     * 
+     *
      * @param workItem
      * @param workflowSession
      * @param payloadResource
@@ -283,7 +283,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
 
     /***
      * Gets value from workflow process arguments
-     * 
+     *
      * @param key
      * @param arguments
      * @return String of the argument value or null if not found
@@ -301,7 +301,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
     /***
      * Uses the AuthorUIHelper to generate links to the payload on author Uses
      * Externalizer to generate links to the payload on publish
-     * 
+     *
      * @param payloadRes
      * @return
      */
@@ -339,7 +339,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
     }
 
     /***
-     * 
+     *
      * @param metaData
      * @return
      */
@@ -356,7 +356,7 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
     /***
      * Set the format to be used for displaying dates in the email Defaults to
      * format of 'yyyy-MM-dd hh:mm a'
-     * 
+     *
      * @param formatString
      *            - workflow process argument to override default format
      * @return SimpleDateFormat that will be used to convert jcr Date properties

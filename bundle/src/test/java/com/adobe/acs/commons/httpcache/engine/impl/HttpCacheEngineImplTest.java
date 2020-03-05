@@ -36,13 +36,15 @@ import org.apache.sling.commons.testing.sling.MockSlingHttpServletRequest;
 import org.apache.sling.commons.testing.sling.MockSlingHttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 import javax.management.NotCompliantMBeanException;
@@ -64,11 +66,13 @@ import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_JCR_CAC
 import static com.adobe.acs.commons.httpcache.store.HttpCacheStore.VALUE_MEM_CACHE_STORE_TYPE;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class HttpCacheEngineImplTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     HttpCacheConfig memCacheConfig;
@@ -109,7 +113,7 @@ public class HttpCacheEngineImplTest {
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
 
         doAnswer((Answer<Void>) invocationOnMock -> {
-            Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+            Runnable runnable = invocationOnMock.getArgument(0);
             runnable.run();
             return null;
         }).when(throttledTaskRunner).scheduleWork(any(Runnable.class));
@@ -234,7 +238,7 @@ public class HttpCacheEngineImplTest {
         when(response.getContentType()).thenReturn("text/html");
         when(response.getHeaderNames()).thenAnswer((Answer<List>) invocationOnMock -> headers.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
 
-        when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgumentAt(0, String.class))));
+        when(response.getHeaders(anyString())).thenAnswer((Answer<List>) invocationOnMock -> Arrays.asList(headers.get( invocationOnMock.getArgument(0))));
 
         when(response.getWriter()).thenReturn(new PrintWriter(byteOutputStream));
 

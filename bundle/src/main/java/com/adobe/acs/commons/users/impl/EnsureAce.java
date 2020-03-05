@@ -47,7 +47,6 @@ import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlManager;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
@@ -60,6 +59,13 @@ import com.day.cq.search.PredicateGroup;
 public class EnsureAce {
 
     private static final Logger log = LoggerFactory.getLogger(EnsureAce.class);
+
+    private static final String PROP_REP_GLOB = "rep:glob";
+    private static final String PROP_REP_NT_NAMES = "rep:ntNames";
+    private static final String PROP_REP_ITEM_NAMES = "rep:itemNames";
+    private static final String PROP_REP_PREFIXES = "rep:prefixes";
+    private static final String PROP_NT_REP_ACE = "rep:ACE";
+    private static final String PROP_REP_PRINCIPAL_NAME = "rep:principalName";
 
     @Reference
     private CloseableQueryBuilder queryBuilder;
@@ -147,25 +153,25 @@ public class EnsureAce {
 
             // Add rep:glob restriction
             if (ace.hasRepGlob()) {
-                restrictions.put(AccessControlConstants.REP_GLOB,
+                restrictions.put(PROP_REP_GLOB,
                         valueFactory.createValue(ace.getRepGlob(), PropertyType.STRING));
             }
 
             // Add rep:ntNames restriction
             if (ace.hasRepNtNames()) {
-                multiRestrictions.put(AccessControlConstants.REP_NT_NAMES,
+                multiRestrictions.put(PROP_REP_NT_NAMES,
                         getMultiValues(valueFactory, ace.getRepNtNames(), PropertyType.NAME));
             }
 
             // Add rep:itemNames
             if (ace.hasRepItemNames()) {
-                multiRestrictions.put(AccessControlConstants.REP_ITEM_NAMES,
+                multiRestrictions.put(PROP_REP_ITEM_NAMES,
                         getMultiValues(valueFactory, ace.getRepItemNames(), PropertyType.NAME));
             }
 
             // Add rep:prefixes
             if (ace.hasRepPrefixes()) {
-                multiRestrictions.put(AccessControlConstants.REP_PREFIXES,
+                multiRestrictions.put(PROP_REP_PREFIXES,
                         getMultiValues(valueFactory, ace.getRepPrefixes(), PropertyType.STRING));
             }
 
@@ -241,8 +247,8 @@ public class EnsureAce {
 
         final Map<String, String> params = new HashMap<String, String>();
 
-        params.put("type", AccessControlConstants.NT_REP_ACE);
-        params.put("property", AccessControlConstants.REP_PRINCIPAL_NAME);
+        params.put("type", PROP_NT_REP_ACE);
+        params.put("property", PROP_REP_PRINCIPAL_NAME);
         params.put("property.value", principalName);
         params.put("p.limit", "-1");
 

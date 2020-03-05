@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -54,8 +54,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -163,7 +175,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         props.put("enforce.md5", Boolean.TRUE);
         when(componentContext.getProperties()).thenReturn(props);
         factory.activate(componentContext);
-        verify(bundleContext).registerService(eq(Filter.class.getName()), any(Object.class), any(Dictionary.class));
+        verify(bundleContext).registerService(eq(Filter.class.getName()), any(Object.class), any());
     }
 
     @Test
@@ -178,7 +190,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("a"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("a"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".css", attributesCaptor.getValue().getValue(0));
@@ -198,7 +210,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -219,7 +231,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -241,7 +253,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -261,7 +273,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -282,7 +294,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min.ACSHASH"+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -301,7 +313,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
@@ -322,7 +334,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(path + "."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
@@ -334,8 +346,6 @@ public class VersionedClientlibsTransformerFactoryTest {
         final String badProxyPath = PROXY_PATH + "/bad";
 
         ClientLibrary clientLibrary = mock(ClientLibrary.class);
-        when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
-        when(clientLibrary.allowProxy()).thenReturn(true);
         when(htmlLibraryManager.getLibraries()).thenReturn(Collections.singletonMap(PROXIED_PATH, clientLibrary));
         when(htmlLibraryManager.getLibrary(eq(LibraryType.JS), eq(PROXIED_PATH))).thenReturn(proxiedHtmlLibrary);
 
@@ -347,7 +357,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         // because the path isn't correct, we refresh the cache, so there should be exactly two retrievals of the list
@@ -374,7 +384,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         verify(htmlLibraryManager, times(1)).getLibraries();
@@ -417,7 +427,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".min."+ FAKE_STREAM_CHECKSUM +".js", attributesCaptor.getValue().getValue(0));
@@ -437,7 +447,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".styles", attributesCaptor.getValue().getValue(0));
@@ -457,7 +467,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + "."+ FAKE_STREAM_CHECKSUM +".css", attributesCaptor.getValue().getValue(0));
@@ -476,7 +486,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals(PATH + ".vbs", attributesCaptor.getValue().getValue(0));
@@ -496,7 +506,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("relative/script.js", attributesCaptor.getValue().getValue(0));
@@ -515,7 +525,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("//example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
@@ -535,7 +545,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("//example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
@@ -554,7 +564,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("script"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("http://www.example.com/same/scheme/script.js", attributesCaptor.getValue().getValue(0));
@@ -574,7 +584,7 @@ public class VersionedClientlibsTransformerFactoryTest {
 
         ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
 
         assertEquals("https://example.com/same/scheme/styles.css", attributesCaptor.getValue().getValue(0));
@@ -704,7 +714,7 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     private void verifyNothingHappened() throws IOException, ServletException {
-        verifyZeroInteractions(htmlLibraryManager);
+        verifyNoInteractions(htmlLibraryManager);
         verifyNo404();
     }
 

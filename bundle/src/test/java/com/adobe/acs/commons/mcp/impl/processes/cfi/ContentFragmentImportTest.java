@@ -73,6 +73,7 @@ public class ContentFragmentImportTest {
         mockFragment = new MockContentFragment();
         importer = prepareProcessDefinition(new ContentFragmentImport());
         importer.spreadsheet = new Spreadsheet(false, PATH, FOLDER_TITLE, NAME, TITLE, TEMPLATE);
+        importer.dryRunMode = false;
         instance = prepareProcessInstance(new ProcessInstanceImpl(getControlledProcessManager(), importer, "Test content fragment import"));
         currentNodePath = "";
         createdNodePaths.clear();
@@ -127,11 +128,11 @@ public class ContentFragmentImportTest {
         Node node = mock(Node.class);
         when(ses.nodeExists("/test")).thenReturn(true); // Needed to prevent MovingFolder.createFolder from going berserk
         when(ses.getNode(any())).then(invocation -> {
-            currentNodePath = invocation.getArgumentAt(0, String.class);
+            currentNodePath = invocation.getArgument(0);
             return node;
         });
         when(node.addNode(any(), any())).then(invocation -> {
-            String nodeName = invocation.getArgumentAt(0, String.class);
+            String nodeName = invocation.getArgument(0);
             String nodePath = currentNodePath + "/" + nodeName;
             createdNodePaths.add(nodePath);
             currentNodePath = nodePath;
@@ -163,22 +164,22 @@ public class ContentFragmentImportTest {
 
     private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
-        doNothing().when(instance).persistStatus(anyObject());
-        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
+        doNothing().when(instance).persistStatus(any());
+        doNothing().when(instance).recordErrors(anyInt(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());
             return null;
-        }).when(instance).asServiceUser(anyObject());
+        }).when(instance).asServiceUser(any());
         return instance;
     }
 
     private ContentFragmentImport prepareProcessDefinition(ContentFragmentImport source) throws RepositoryException, PersistenceException, IllegalAccessException, ContentFragmentException {
         ContentFragmentImport definition = spy(source);
         Resource mockResource = mock(Resource.class);
-        doNothing().when(definition).storeReport(anyObject(), anyObject());
+        doNothing().when(definition).storeReport(any(), any());
         doReturn(mockResource).when(definition).getFragmentTemplateResource(any(), any());
-        doReturn(mockFragment).when(definition).getOrCreateFragment(anyObject(), anyObject(), anyObject(), anyObject());
+        doReturn(mockFragment).when(definition).getOrCreateFragment(any(), any(), any(), any());
         return definition;
     }
 }

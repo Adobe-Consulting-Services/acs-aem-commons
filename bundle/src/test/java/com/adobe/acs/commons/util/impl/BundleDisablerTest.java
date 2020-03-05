@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleException;
 import org.osgi.service.component.ComponentContext;
 
@@ -66,7 +66,6 @@ public class BundleDisablerTest {
     public void setUp() {
         bundles.clear();
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
-        when(ownBundle.getSymbolicName()).thenReturn("my.own.bundle");
         when(bundleContext.getBundles()).then(new Answer<Bundle[]>() {
             @Override
             public Bundle[] answer(final InvocationOnMock invocationOnMock) throws Throwable {

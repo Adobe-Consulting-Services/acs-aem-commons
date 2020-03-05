@@ -22,7 +22,7 @@ package com.adobe.acs.commons.mcp.impl;
 import com.adobe.acs.commons.mcp.form.AbstractResourceImpl;
 import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.GeneratedDialog;
-import com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper;
+import com.adobe.acs.commons.mcp.form.GeneratedDialogWrapper;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

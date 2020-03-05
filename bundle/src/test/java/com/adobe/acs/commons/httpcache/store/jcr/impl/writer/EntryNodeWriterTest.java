@@ -20,9 +20,9 @@
 package com.adobe.acs.commons.httpcache.store.jcr.impl.writer;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.startsWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,7 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.httpcache.store.jcr.impl.JCRHttpCacheStoreConstants;
 import com.day.cq.commons.jcr.JcrConstants;
@@ -50,6 +51,9 @@ import com.day.cq.commons.jcr.JcrConstants;
 public final class EntryNodeWriterTest {
 
     private static final String CACHE_CONTENT_LOCATION = "cachecontent.html";
+    
+    
+    Clock clock = Clock.systemUTC();
 
     private EntryNodeWriterMocks.MockArguments arguments;
     private final InputStream inputStream = getClass().getResourceAsStream(CACHE_CONTENT_LOCATION);
@@ -96,7 +100,7 @@ public final class EntryNodeWriterTest {
 
     @Test
     public void testGetOrCreateByPath() throws RepositoryException {
-        final EntryNodeWriter writer = new EntryNodeWriter(null, null, null, null, 0);
+        final EntryNodeWriter writer = new EntryNodeWriter(null, null, null, null, 0, clock);
         final String path = "/some/path";
         final Node baseNode = mock(Node.class);
         when(baseNode.hasNode(path)).thenReturn(true);

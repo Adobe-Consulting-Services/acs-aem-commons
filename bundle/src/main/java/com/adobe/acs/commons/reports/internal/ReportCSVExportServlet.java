@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import com.adobe.acs.commons.reports.api.ReportExecutor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -45,8 +46,8 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
 import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ReportExecutor;
 import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.adobe.acs.commons.reports.models.QueryReportExecutor;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.text.csv.Csv;
 
@@ -143,7 +144,11 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
 
   private void updateCSV(Resource config, SlingHttpServletRequest request, List<ReportCellCSVExporter> exporters,
       Csv csv, Writer writer) throws ReportException {
-    QueryReportExecutor executor = Optional.ofNullable(request.adaptTo(QueryReportExecutor.class))
+    Class<?> executorClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
+
+    ReportExecutor executor = Optional.ofNullable(request.adaptTo(executorClass))
+        .filter(model -> model instanceof ReportExecutor)
+        .map(model -> (ReportExecutor) model)
         .orElseThrow(() -> new ReportException("Failed to get report executor"));
 
     executor.setConfiguration(config);

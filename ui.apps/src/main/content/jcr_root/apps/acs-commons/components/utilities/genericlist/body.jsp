@@ -17,16 +17,13 @@
   limitations under the License.
   #L%
   --%>
+<%@page import="com.adobe.acs.commons.genericlists.GenericList, com.adobe.acs.commons.mcp.form.impl.GeneratedDialogWrapper"%>
 <%@include file="/libs/foundation/global.jsp"%>
 
+<%
+    GeneratedDialogWrapper dialog = new GeneratedDialogWrapper(GenericList.class);
+%>
+
 <body>
-
-    <h1>Generic List - <%= xssAPI.encodeForHTML(currentPage.getTitle()) %></h1>
-
-    <h2>List Items:</h2>
-
-    <ul>
-        <cq:include path="list" resourceType="foundation/components/parsys"/>
-    </ul>
-
+    <sling:include resource="<%=dialog.getFormResource()%>"/>
 </body>

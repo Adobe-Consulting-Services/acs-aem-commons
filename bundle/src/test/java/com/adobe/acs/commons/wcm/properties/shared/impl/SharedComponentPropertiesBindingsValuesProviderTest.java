@@ -35,7 +35,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
 import java.util.HashMap;
@@ -87,8 +87,6 @@ public class SharedComponentPropertiesBindingsValuesProviderTest {
     when(page.getPath()).thenReturn(SITE_ROOT);
     when(pageRootProvider.getRootPage(resource)).thenReturn(page);
     when(component.getResourceType()).thenReturn(RESOURCE_TYPE);
-    when(sharedPropsResource.getName()).thenReturn("Shared Properties Resource");
-    when(globalPropsResource.getName()).thenReturn("Global Properties Resource");
 
     sharedProps = new ValueMapDecorator(new HashMap<String, Object>());
     globalProps = new ValueMapDecorator(new HashMap<String, Object>());

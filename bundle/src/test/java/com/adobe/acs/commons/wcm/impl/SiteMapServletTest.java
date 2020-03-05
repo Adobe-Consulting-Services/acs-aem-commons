@@ -27,10 +27,10 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,11 +41,13 @@ import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
 import static org.xmlunit.matchers.EvaluateXPathMatcher.hasXPath;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SiteMapServletTest {
 
     private static final Map<String, String> NS = Collections.singletonMap("ns", "http://www.sitemaps.org/schemas/sitemap/0.9");
 
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+    
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -72,7 +74,7 @@ public class SiteMapServletTest {
 
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
 
-        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgumentAt(2, String.class));
+        when(externalizer.externalLink(eq(context.resourceResolver()), eq("external"), anyString())).then(i -> "http://test.com" + i.getArgument(2));
     }
 
     @Test

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.reports.api;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Simple POJO for representing a page of results.
@@ -54,5 +55,28 @@ public final class ResultsPage {
 
   public int getPreviousPage() {
     return page > 0 ? page - 1 : -1;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof ResultsPage)) {
+      return false;
+    }
+
+    final ResultsPage that = (ResultsPage) o;
+
+    return pageSize == that.pageSize
+           && page == that.page
+           && Objects.equals(results, that.results);
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(results, pageSize, page);
   }
 }

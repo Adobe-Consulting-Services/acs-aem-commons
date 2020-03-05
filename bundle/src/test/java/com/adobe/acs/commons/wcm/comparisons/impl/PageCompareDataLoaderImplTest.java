@@ -19,20 +19,29 @@
  */
 package com.adobe.acs.commons.wcm.comparisons.impl;
 
-import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
-import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
-import org.apache.sling.api.resource.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Date;
-
 import static com.adobe.acs.commons.wcm.comparisons.impl.PageCompareDataImplTest.mockResource;
 import static org.junit.Assert.assertNotNull;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.Date;
+
+import org.apache.sling.api.resource.Resource;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
+
+import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
+import com.adobe.acs.commons.wcm.comparisons.PageCompareDataLoader;
+
+
 public class PageCompareDataLoaderImplTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
+    // otherweise we get unnecessary mocking errors; we cannot remove them because
+    // they are needed to
+    // make PageCompareDataImplTest working :-|
 
     @Test
     public void shouldInitialize() throws Exception {
