@@ -48,28 +48,29 @@ public class IncludeDecoratorFilterImpl implements Filter {
                 parameters = parameterResource.getValueMap();
             }
 
-            Object existingNamespace = servletRequest.getAttribute(NAMESPACE);
-            boolean hasExistingNamespace = existingNamespace != null;
-            boolean hasNamespaceInParameters = parameters.containsKey(NAMESPACE);
+            ValueMap includeProperties = request.getResource().getValueMap();
 
+            Object existingNamespace = request.getAttribute(NAMESPACE);
+            boolean hasExistingNamespace = existingNamespace != null;
+            boolean hasNamespaceInInclude = request.getResource().getValueMap().containsKey(NAMESPACE);
 
             if(MapUtils.isNotEmpty(parameters)){
                 parameters.forEach((key, object) -> {
-                    servletRequest.setAttribute(PREFIX + key, object);
+                    request.setAttribute(PREFIX + key, object);
                 });
             }
 
-            if(hasNamespaceInParameters && hasExistingNamespace){
-                servletRequest.setAttribute(NAMESPACE, existingNamespace + "/" + parameters.get(NAMESPACE).toString());
-            }else if(hasNamespaceInParameters){
-                servletRequest.setAttribute(NAMESPACE, parameters.get(NAMESPACE).toString());
+            if(hasNamespaceInInclude && hasExistingNamespace){
+                request.setAttribute(NAMESPACE, existingNamespace + "/" + includeProperties.get(NAMESPACE).toString());
+            }else if(hasNamespaceInInclude){
+                request.setAttribute(NAMESPACE, includeProperties.get(NAMESPACE).toString());
             }
 
-            chain.doFilter(servletRequest, servletResponse);
+            chain.doFilter(request, servletResponse);
 
             if(MapUtils.isNotEmpty(parameters)){
                 parameters.forEach((key, object) -> {
-                    servletRequest.removeAttribute(PREFIX + key);
+                    request.removeAttribute(PREFIX + key);
                 });
             }
 
