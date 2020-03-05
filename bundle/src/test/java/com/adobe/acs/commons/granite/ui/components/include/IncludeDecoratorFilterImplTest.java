@@ -70,7 +70,7 @@ public class IncludeDecoratorFilterImplTest {
 
         Mockito.doAnswer(invocationOnMock -> {
 
-            SlingHttpServletRequest captured = invocationOnMock.getArgumentAt(0, SlingHttpServletRequest.class);
+            SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
             assertEquals("block1", captured.getAttribute(NAMESPACE));
             return null;
 
@@ -87,7 +87,7 @@ public class IncludeDecoratorFilterImplTest {
 
         Mockito.doAnswer(invocationOnMock -> {
 
-            SlingHttpServletRequest captured = invocationOnMock.getArgumentAt(0, SlingHttpServletRequest.class);
+            SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
             assertEquals("nested/block1", captured.getAttribute(NAMESPACE));
             return null;
 

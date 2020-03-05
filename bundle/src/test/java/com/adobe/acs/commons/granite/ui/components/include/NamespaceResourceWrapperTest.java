@@ -80,19 +80,21 @@ public class NamespaceResourceWrapperTest {
 
         systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request());
 
-        Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
-        Resource hideMeField = systemUnderTest.getChild("hideMe");
-        Resource someNumberField = systemUnderTest.getChild("someNumberField");
-        Resource regularTextField = systemUnderTest.getChild("someRegularField");
 
+
+
+        Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
         Double doubleDefaultValue = someDoubleField.getValueMap().get("defaultValue", Double.class);
         assertEquals(11.34d, doubleDefaultValue.doubleValue(), 0);
 
+        Resource someNumberField = systemUnderTest.getChild("someNumberField");
         Long longDefaultValue = someNumberField.getValueMap().get("defaultValue", Long.class);
         assertEquals(125L, longDefaultValue.longValue(), 0);
 
+        Resource hideMeField = systemUnderTest.getChild("hideMe");
         assertNull(hideMeField);
 
+        Resource regularTextField = systemUnderTest.getChild("someRegularField");
         String fieldLabelValue = regularTextField.getValueMap().get("fieldLabel", "");
         assertEquals("Some Text from parameters", fieldLabelValue);
     }
@@ -105,18 +107,17 @@ public class NamespaceResourceWrapperTest {
         systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request());
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
-        Resource hideMeField = systemUnderTest.getChild("hideMe");
-        Resource someNumberField = systemUnderTest.getChild("someNumberField");
-        Resource regularTextField = systemUnderTest.getChild("someRegularField");
-
         Double doubleDefaultValue = someDoubleField.getValueMap().get("defaultValue", Double.class);
         assertEquals(20.22d, doubleDefaultValue.doubleValue(), 0);
 
+        Resource someNumberField = systemUnderTest.getChild("someNumberField");
         Long longDefaultValue = someNumberField.getValueMap().get("defaultValue", Long.class);
         assertEquals(20L, longDefaultValue.longValue(), 0);
 
+        Resource hideMeField = systemUnderTest.getChild("hideMe");
         assertNotNull(hideMeField);
 
+        Resource regularTextField = systemUnderTest.getChild("someRegularField");
         String fieldLabelValue = regularTextField.getValueMap().get("fieldLabel", "");
         assertEquals("defaultText", fieldLabelValue);
     }

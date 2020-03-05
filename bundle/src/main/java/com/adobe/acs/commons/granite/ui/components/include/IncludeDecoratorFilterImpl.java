@@ -28,7 +28,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 import javax.annotation.CheckForNull;
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+
+
 import java.io.IOException;
 
 @Component(
