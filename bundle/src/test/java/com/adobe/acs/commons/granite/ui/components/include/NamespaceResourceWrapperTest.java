@@ -64,7 +64,7 @@ public class NamespaceResourceWrapperTest {
 
         //this is to pass the parent.listChildren code (with granit:hide check) from the parent class (FilteringResourceWrapper)
         when(expressionResolver.resolve(anyString(), any(Locale.class), any(Class.class), any(SlingHttpServletRequest.class))).thenReturn(false);
-        when(expressionResolver.resolve(anyString(), any(Locale.class), any(Class.class), any(PageContext.class))).thenReturn(false);
+
     }
 
     @Test
