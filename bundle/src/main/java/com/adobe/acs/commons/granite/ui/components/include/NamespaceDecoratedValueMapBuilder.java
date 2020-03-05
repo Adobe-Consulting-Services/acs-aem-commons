@@ -176,6 +176,9 @@ public class NamespaceDecoratedValueMapBuilder {
             case "date":
                 clazz = Date.class;
                 break;
+            default:
+                clazz = String.class;
+                break;
         }
         
         return TypeUtil.toObjectType(chosenValue, clazz);

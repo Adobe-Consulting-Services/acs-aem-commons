@@ -1,11 +1,3 @@
-package com.adobe.acs.commons.granite.ui.components.include;
-
-import org.apache.commons.collections.MapUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.engine.EngineConstants;
-import org.osgi.service.component.annotations.Component;
 /*
  * #%L
  * ACS AEM Commons Bundle
@@ -25,6 +17,14 @@ import org.osgi.service.component.annotations.Component;
  * limitations under the License.
  * #L%
  */
+package com.adobe.acs.commons.granite.ui.components.include;
+
+import org.apache.commons.collections.MapUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.engine.EngineConstants;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 import javax.annotation.CheckForNull;
