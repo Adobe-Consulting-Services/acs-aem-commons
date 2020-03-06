@@ -156,7 +156,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean removeTrailingSlash;
 
-    private String template;
+    private List<String> template;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -180,7 +180,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
-        this.template = PropertiesUtil.toString(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),StringUtils.EMPTY);
+        this.template = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
 
     }
 
@@ -319,8 +319,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private boolean isExcluded(Page page){
         boolean flag = false;
         if(this.template != null){
-            String [] templates = this.template.split(",");
-            for(String pageTemplate : templates){
+            for(String pageTemplate : this.template){
                 flag = flag || page.getProperties().get("cq:template", String.class).equalsIgnoreCase(pageTemplate);
             }
         }
