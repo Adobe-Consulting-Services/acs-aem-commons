@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 
 ### Fixed
+- #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
 
