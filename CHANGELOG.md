@@ -5,103 +5,16 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
-## Unreleased ([details][unreleased changes details])
-<!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
-
-### Added
-- Added more granular control of the environment indicator css
-- #2160 - provide EL support for contextual root
+## [Unreleased]
 
 ### Fixed
-- #2082 - ETag filter never sends 304
-- #2148 - Bugfix for displaying sizes (adresses #2132)
-- #2146 - POI exception generating Excel file with too many references
-- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
-- #2185 - fix empty iconpicker and fontawesome files
-- #2199 - Read permisions on /conf folder for acs-commons-email-service user
-
-### Changed
-- #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
-- #2133 - Update test library dependencies
-
-
-## [4.4.0] - 2019-12-17
-
-### Added
-- #2118 - Adding functionality to showhidedialogfields TouchUI widget
-- #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
-- #2084 - MCP Forms now extract default value/checkbox state from field value as well as from annotation options (both ways work now)
-- #2064 - Adding Marketo Form Component
-- #1919 - Report Builder | Path List Executor Implementation
-
-### Fixed
-- #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
-- #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
-- #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
-- #2104 - Updated test suite to use mockito 3, build now working with Java 11
-- #2124 - cleanup build logs for unittests
-
-### Changed
-- #2101 - Cleanup public API of the remote Assets feature (#2094)
-
-## [4.3.4] - 2019-10-16
-
-### Added
-- #2017 - Added read/write access to `/conf` for acs-commons-on-deploy-scripts-service user
-- #2067 - Rewrote the workflow remover as an MCP Task, in turn removed the existing workflow remover UI.
-- #2085 - Made dry run mode default for all MCP processes that have it
-
-### Added
-- #2071 - Added Tag Export as CSV functionality, as new option in Exports
-
-### Changed
-- #2033 - Upgraded oakpal to 1.4.2; added .opear artifact for oakpal-checks module for docker-based cli scans
-- #2045 - Added oakpal configuration to ui.content to verify that rep:policy nodes are effectively applied, and that existing config pages are not deleted
-- #2065 - Upgraded oakpal to 1.5.1; use expectPaths and expectAces checks to verify rep:policy nodes instead of inlineScript
-
-### Fixed
-- #2092 - Tag Export - IndexOutOfBoundsException issue
-- #2004 - Bugfix/httpcache combined cache key different entries
-- #2032 - Fixed filter.xml on /var/acs-commons
-- #2048 - Fixed ui.apps ACE import by setting acHandling property to "merge"
-- #2053 - ETag header not properly delivered from the servlet (missing quotes)
-- #2057 - Fixed MCP issue where table was not visible in new Chrome, or too short in other browsers
-- #2058 - Fixed MCP JS errors in Firefox
-- #2063 - Fixed regression in MCP user interface following split of apps/content packages
-- #2074 - Ignore properties on EnsureOakIndex were sometimes not respected.
-- #2080 - Fix BND warning in MCP (#1813)
-
-## [4.3.2] - 2019-08-29
-
-### Added
-- #986 - Generated dialog now understands annotated interfaces in addition to java bean classes.
-- #2022 - Adding logic for getting the custom report executor for exporting the reports CSV file (option -> Download Report)
-
-### Fixed
-- #1975 - Split application content from mutable content
-- #1951 - Fixed issue with Bulk Workflow Manager misidentifying Transient WF because the transient property location changed in AEM.
-- #986 - Rewrote Generic Lists to use Touch UI
-
-## [4.3.0] - 2019-07-31
-
-### Fixed
-- #1644 - Asset Ingestor | Add include section
-- #1914 - java.lang.ClassNotFoundException: com.fasterxml.jackson.core.JsonProcessingException
-- #1942 - Renovator issues moving folder in AEM 6.3.3.3
 - #1979 - DialogResourceProviderFactoryImpl slows down bundle deployment
 - #1980 - Fixing error when not using redirect map file
 - #1981 - Fixing Redirect Map Manager issue where the edit button didn't work for pages and Assets
 - #1993 - DialogProvider now supports styles for Dialog and Page dialogs
-- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
-- #1997 - MCP Forms fixes for RTE configuration and NPE issue with AbstractResourceImpl when resource type is not set
-- #1998 - Coral3 checkbox storing json value as string instead of boolean when using Json Store in multifields
-- #2011 - Setting Travis platform to Trusty so that Oracle JDK 8 build will continue to work.
 
 ### Added
-- #1953 - Bulk Workflow MCP process and relative path bug-fix for QueryHelperImpl when using QueryBuilder query type.
 - #1993 - New components for autocomplete and rich text editor
-- #2012 - Added support for query autocomplete widget
 
 ## [4.2.2] - 2019-07-15
 
@@ -113,13 +26,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1945 - Added support for jcr:content creation and update to the Data Importer
-- #1644 - Asset Ingestor | Add include section
 - #1989 - Updated maven dependency org.owasp:dependency-check-maven to 5.1.1
 
 ### Fixed
 - #1547 - Updated Report Runner's ReportCSVExportServlet to support extra-ACS Commons ReportCellCSVExporter
 - #1976 - Fixed failing Remote Assets and tests dependent on mock server on JDK 11
 - #1982 - Fixed the Shared and Global icons that are not appearing in edit bar when the dialog is edited and saved and page refreshes due to Edit Config Listener ( Shared Component Properties )
+-#2199 - Fixed rep polict for email service in conf folder
+
+
 
 ## [4.2.0] - 2019-06-18
 
@@ -127,6 +42,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1795 - Added the Asset Content Packager
 - #1880 - Granite Select Filter
 - #1893 - add javax.annotation dependency (removed in JDK 11)
+- #1900 - Tag Report MCP
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
@@ -386,6 +302,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1365 - Sling model injector for Shared Component Property values.
+
+[Unreleased]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-3.16.0...HEAD
 
 ## [3.16.0] - 2018-05-10
 
