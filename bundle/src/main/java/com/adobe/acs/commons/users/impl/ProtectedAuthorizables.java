@@ -151,6 +151,7 @@ public final class ProtectedAuthorizables {
                 "acs-commons-bulk-workflow-service",
                 "acs-commons-error-page-handler-service",
                 "acs-commons-wcm-inbox-cleanup-service",
+                "acs-commons-email-service",
                 "acs-commons-package-replication-status-event-service",
                 "acs-commons-component-error-handler-service",
                 "acs-commons-dispatcher-flush-service",
