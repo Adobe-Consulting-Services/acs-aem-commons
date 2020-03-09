@@ -269,6 +269,33 @@
                     activeSelectionCount="multiple"
                     target=".cq-siteadmin-admin-childpages"
                     variant="actionBar"/>
+                <quickpublish
+                        granite:rel="cq-siteadmin-admin-actions-quickpublish-activator"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq.wcm.quickpublish"
+                        activeSelectionCount="multiple"
+                        icon="globe"
+                        target=".cq-siteadmin-admin-childpages"
+                        text="Quick Publish"
+                        variant="actionBar">
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            referenceSrc.url="/libs/wcm/core/content/reference.json?_charset_=utf-8{&amp;path*}"/>
+                </quickpublish>
+                <managepublication
+                        granite:rel="cq-siteadmin-admin-actions-publish-activator"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="foundation.link"
+                        icon="globeClock"
+                        target=".cq-siteadmin-admin-childpages"
+                        text="Manage Publication"
+                        variant="actionBar">
+                    <data
+                            jcr:primaryType="nt:unstructured"
+                            href.uritemplate="/mnt/override/libs/wcm/core/content/common/managepublicationwizard.html{?item*}"/>
+                </managepublication>
             </selection>
         </actions>
         <rails jcr:primaryType="nt:unstructured">
