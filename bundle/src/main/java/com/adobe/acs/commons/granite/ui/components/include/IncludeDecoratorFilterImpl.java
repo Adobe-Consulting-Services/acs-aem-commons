@@ -50,9 +50,9 @@ import java.io.IOException;
 public class IncludeDecoratorFilterImpl implements Filter {
 
     static final String RESOURCE_TYPE = "acs-commons/granite/ui/components/include";
-    static final String NAMESPACE = "namespace";
+    static final String NAMESPACE = "ACS_AEM_COMMONS_INCLUDE_NAMESPACE";
     static final String PARAMETERS = "parameters";
-    public static final String PREFIX = "PREFIX_";
+    public static final String PREFIX = "ACS_AEM_COMMONS_INCLUDE_PREFIX_";
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
