@@ -10,20 +10,43 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
-- Added more granular control of the environment indicator css
+
+### Fixed
+- #2206 fix sonar warnings; some package versions had to be increased
+- Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
+
+### Changed
+- #2208 - Remove the WCMInbox webconsole plugin (#2205)
+
+## [4.4.2] - 2020-02-28
+
+### Added
+- #2202 - Added dynamic script resolution modular support to MCP
 - #2194 - Add actions of Quickpublish an Managepublication to Generic list console
+- #2174 - Added more granular control of the environment indicator css
+- #2164 - Content model framework now supports page create dialogs
 - #2160 - provide EL support for contextual root
 
 ### Fixed
-- #2082 - ETag filter never sends 304
-- #2148 - Bugfix for displaying sizes (adresses #2132)
-- #2146 - POI exception generating Excel file with too many references
-- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2195 - Removed direct references to Oak API
 - #2185 - fix empty iconpicker and fontawesome files
 - #2199 - Read permisions on /conf folder for acs-commons-email-service user
+- #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2169 - Fixed build warnings regarding baseline versions
+- #2146 - POI exception generating Excel file with too many references
+- #2145 - Added null value test to spreadsheet tests
+- #2142 - ETag filter: Correctly evaluate if-none-match header
+- #2137 - Updating maven plugins used for release to resolve release issues
+- #2132 - Fix display of byte sizes 
+- #2082 - ETag filter never sends 304
 
 ### Changed
+- #2181 - Only run dependency-check-maven-plugin in dedicated profile
+- #2172 - Updated maven central URL to HTTPS
+- #2170 - Changed human readable byte count method to private to minimize API surface
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
+- #2138 - Removed Joda-time library in favor of using standard Java Instant library
 - #2133 - Update test library dependencies
 
 

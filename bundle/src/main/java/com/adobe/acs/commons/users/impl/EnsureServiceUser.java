@@ -69,7 +69,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
     private static final Logger log = LoggerFactory.getLogger(EnsureServiceUser.class);
     private static final String SERVICE_NAME = "ensure-service-user";
     private static final Map<String, Object> AUTH_INFO;
-    public static boolean DEFAULT_ENSURE_IMMEDIATELY = true;
+    private static final boolean DEFAULT_ENSURE_IMMEDIATELY = true;
 
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
