@@ -51,7 +51,18 @@ public class IncludeDecoratorFilterImpl implements Filter {
 
     static final String RESOURCE_TYPE = "acs-commons/granite/ui/components/include";
     static final String NAMESPACE = "ACS_AEM_COMMONS_INCLUDE_NAMESPACE";
-    static final String PARAMETERS = "parameters";
+
+    /**
+     * Request Attribute name
+     */
+    static final String REQ_ATTR_PARAMETERS = "parameters";
+
+    /**
+     * Property name parameters
+     */
+    static final String PN_NAMESPACE = "parameters";
+
+
     public static final String PREFIX = "ACS_AEM_COMMONS_INCLUDE_PREFIX_";
     
     @Override
@@ -69,7 +80,7 @@ public class IncludeDecoratorFilterImpl implements Filter {
             
             SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
-            @CheckForNull Resource parameterResource = request.getResource().getChild(PARAMETERS);
+            @CheckForNull Resource parameterResource = request.getResource().getChild(REQ_ATTR_PARAMETERS);
             if(parameterResource != null){
                 parameters = parameterResource.getValueMap();
             }
@@ -87,9 +98,9 @@ public class IncludeDecoratorFilterImpl implements Filter {
             }
 
             if(hasNamespaceInInclude && hasExistingNamespace){
-                request.setAttribute(NAMESPACE, existingNamespace + "/" + includeProperties.get(NAMESPACE).toString());
+                request.setAttribute(NAMESPACE, existingNamespace + "/" + includeProperties.get(PN_NAMESPACE, String.class));
             }else if(hasNamespaceInInclude){
-                request.setAttribute(NAMESPACE, includeProperties.get(NAMESPACE).toString());
+                request.setAttribute(NAMESPACE, includeProperties.get(PN_NAMESPACE, String.class));
             }
 
             chain.doFilter(request, servletResponse);
