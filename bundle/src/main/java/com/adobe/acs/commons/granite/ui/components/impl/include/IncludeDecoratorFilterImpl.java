@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.granite.ui.components.include;
+package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -50,20 +50,25 @@ import java.io.IOException;
 public class IncludeDecoratorFilterImpl implements Filter {
 
     static final String RESOURCE_TYPE = "acs-commons/granite/ui/components/include";
-    static final String NAMESPACE = "ACS_AEM_COMMONS_INCLUDE_NAMESPACE";
 
     /**
-     * Request Attribute name
+     * Request attribute of the include namespace
      */
-    static final String REQ_ATTR_PARAMETERS = "parameters";
+    static final String REQ_ATTR_NAMESPACE = "ACS_AEM_COMMONS_INCLUDE_NAMESPACE";
+    /**
+     * Parameters node name
+     */
+    static final String NN_PARAMETERS = "parameters";
 
     /**
      * Property name parameters
      */
-    static final String PN_NAMESPACE = "parameters";
+    static final String PN_NAMESPACE = "namespace";
 
-
-    public static final String PREFIX = "ACS_AEM_COMMONS_INCLUDE_PREFIX_";
+    /**
+     * Prefix value parameters passed downwards
+     */
+    static final String PREFIX = "ACS_AEM_COMMONS_INCLUDE_PREFIX_";
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -80,16 +85,16 @@ public class IncludeDecoratorFilterImpl implements Filter {
             
             SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
-            @CheckForNull Resource parameterResource = request.getResource().getChild(REQ_ATTR_PARAMETERS);
+            @CheckForNull Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
             if(parameterResource != null){
                 parameters = parameterResource.getValueMap();
             }
 
             ValueMap includeProperties = request.getResource().getValueMap();
 
-            Object existingNamespace = request.getAttribute(NAMESPACE);
+            Object existingNamespace = request.getAttribute(REQ_ATTR_NAMESPACE);
             boolean hasExistingNamespace = existingNamespace != null;
-            boolean hasNamespaceInInclude = request.getResource().getValueMap().containsKey(NAMESPACE);
+            boolean hasNamespaceInInclude = includeProperties.containsKey(PN_NAMESPACE);
 
             if(MapUtils.isNotEmpty(parameters)){
                 parameters.forEach((key, object) -> {
@@ -98,9 +103,9 @@ public class IncludeDecoratorFilterImpl implements Filter {
             }
 
             if(hasNamespaceInInclude && hasExistingNamespace){
-                request.setAttribute(NAMESPACE, existingNamespace + "/" + includeProperties.get(PN_NAMESPACE, String.class));
+                request.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace + "/" + includeProperties.get(PN_NAMESPACE, String.class));
             }else if(hasNamespaceInInclude){
-                request.setAttribute(NAMESPACE, includeProperties.get(PN_NAMESPACE, String.class));
+                request.setAttribute(REQ_ATTR_NAMESPACE, includeProperties.get(PN_NAMESPACE, String.class));
             }
 
             chain.doFilter(request, servletResponse);
@@ -112,9 +117,9 @@ public class IncludeDecoratorFilterImpl implements Filter {
             }
 
             if(existingNamespace != null){
-                servletRequest.setAttribute(NAMESPACE, existingNamespace);
+                servletRequest.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace);
             }else{
-                servletRequest.removeAttribute(NAMESPACE);
+                servletRequest.removeAttribute(REQ_ATTR_NAMESPACE);
             }
 
             return;

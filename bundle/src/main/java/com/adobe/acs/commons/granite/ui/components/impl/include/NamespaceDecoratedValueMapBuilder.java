@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.granite.ui.components.include;
+package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import com.adobe.acs.commons.util.TypeUtil;
 import org.apache.commons.lang.StringUtils;
@@ -27,62 +27,62 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.adobe.acs.commons.granite.ui.components.include.IncludeDecoratorFilterImpl.NAMESPACE;
-import static com.adobe.acs.commons.granite.ui.components.include.IncludeDecoratorFilterImpl.PREFIX;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_NAMESPACE;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.PREFIX;
 import static org.apache.commons.lang3.StringUtils.*;
 
 
 public class NamespaceDecoratedValueMapBuilder {
-    
-    public static final String PN_NAME = "name";
+
     private final SlingHttpServletRequest request;
 
     private final Map<String,Object> copyMap;
-    
+    private final String[] namespacedProperties;
+
     static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(\\$\\{\\{([a-zA-Z0-9]+?)(:(.+?))??\\}\\})+?");
-    static final Pattern PLACEHOLDER_TYPEHINTED_PATTERN = Pattern.compile("(.*)\\$\\{\\{(\\(([a-zA-Z]+)\\)){1}([a-zA-Z0-9]+)(:(.+))?\\}\\}(.*)?");
+    static final Pattern PLACEHOLDER_TYPE_HINTED_PATTERN = Pattern.compile("(.*)\\$\\{\\{(\\(([a-zA-Z]+)\\)){1}([a-zA-Z0-9]+)(:(.+))?\\}\\}(.*)?");
     
-    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource) {
+    public NamespaceDecoratedValueMapBuilder(SlingHttpServletRequest request, Resource resource, String[] namespacedProperties) {
         this.request = request;
         this.copyMap = new HashMap<>(resource.getValueMap());
-    
+        this.namespacedProperties = namespacedProperties;
+
         this.applyDynamicVariables();
         this.applyNameSpacing();
     }
-    
+
     private void applyNameSpacing() {
-        
-        if(copyMap.containsKey(PN_NAME)){
-            
-            String originalValue = copyMap.get(PN_NAME).toString();
-            final String adjusted;
-          
-            if(request.getAttribute(NAMESPACE) != null){
-                String namespace = request.getAttribute(NAMESPACE).toString();
-                final boolean containsDotSlash = contains(originalValue, "./");
-                
-                if(containsDotSlash){
-                    String extracted = substringAfter( originalValue, "./");
-                    adjusted = "./" + namespace + "/" + extracted;
-                }else{
-                    adjusted = namespace + "/" + originalValue;
+
+        if (request.getAttribute(REQ_ATTR_NAMESPACE) != null) {
+            for (String namespacedProp : namespacedProperties) {
+                if (copyMap.containsKey(namespacedProp)) {
+
+                    String originalValue = copyMap.get(namespacedProp).toString();
+                    final String adjusted;
+
+
+                    String namespace = request.getAttribute(REQ_ATTR_NAMESPACE).toString();
+                    final boolean containsDotSlash = contains(originalValue, "./");
+
+                    if (containsDotSlash) {
+                        String extracted = substringAfter(originalValue, "./");
+                        adjusted = "./" + namespace + "/" + extracted;
+                    } else {
+                        adjusted = namespace + "/" + originalValue;
+                    }
+
+                    this.copyMap.put(namespacedProp, adjusted);
+
                 }
-                
-            }else{
-                adjusted = originalValue;
             }
-            
-            this.copyMap.put(PN_NAME, adjusted);
-            
         }
-        
+
     }
     
     public ValueMap build(){
@@ -114,7 +114,7 @@ public class NamespaceDecoratedValueMapBuilder {
     }
     
     private Object applyTypeHintedPlaceHolders(String value, SlingHttpServletRequest request) {
-        Matcher matcher = PLACEHOLDER_TYPEHINTED_PATTERN.matcher(value);
+        Matcher matcher = PLACEHOLDER_TYPE_HINTED_PATTERN.matcher(value);
     
         if (matcher.find()) {
         

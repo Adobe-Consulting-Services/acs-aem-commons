@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.granite.ui.components.include;
+package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -36,7 +36,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.adobe.acs.commons.granite.ui.components.include.IncludeDecoratorFilterImpl.NAMESPACE;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_NAMESPACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -71,14 +71,14 @@ public class IncludeDecoratorFilterImplTest {
         Mockito.doAnswer(invocationOnMock -> {
 
             SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
-            assertEquals("block1", captured.getAttribute(NAMESPACE));
+            assertEquals("block1", captured.getAttribute(REQ_ATTR_NAMESPACE));
             return null;
 
         }).when(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 
         systemUnderTest.doFilter(context.request(), context.response(), filterChain);
 
-        assertTrue("namespace is removed after the filter is performed", context.request().getAttribute(NAMESPACE) == null);
+        assertTrue("namespace is removed after the filter is performed", context.request().getAttribute(REQ_ATTR_NAMESPACE) == null);
 
     }
 
@@ -88,15 +88,15 @@ public class IncludeDecoratorFilterImplTest {
         Mockito.doAnswer(invocationOnMock -> {
 
             SlingHttpServletRequest captured = invocationOnMock.getArgument(0, SlingHttpServletRequest.class);
-            assertEquals("nested/block1", captured.getAttribute(NAMESPACE));
+            assertEquals("nested/block1", captured.getAttribute(REQ_ATTR_NAMESPACE));
             return null;
 
         }).when(filterChain).doFilter(any(SlingHttpServletRequest.class), any(SlingHttpServletResponse.class));
 
-        context.request().setAttribute(NAMESPACE, "nested");
+        context.request().setAttribute(REQ_ATTR_NAMESPACE, "nested");
         systemUnderTest.doFilter(context.request(), context.response(), filterChain);
 
-        assertEquals("nested", context.request().getAttribute(NAMESPACE));
+        assertEquals("nested", context.request().getAttribute(REQ_ATTR_NAMESPACE));
 
     }
 }

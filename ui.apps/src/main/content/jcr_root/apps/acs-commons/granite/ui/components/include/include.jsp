@@ -1,8 +1,7 @@
 <%@ include file="/libs/granite/ui/global.jsp" %><%
 %><%@ page session="false"
            import="com.adobe.granite.ui.components.Config,
-                  com.adobe.granite.ui.components.ExpressionResolver,
-                  com.adobe.acs.commons.granite.ui.components.include.NamespaceResourceWrapper" %><%
+                  com.adobe.acs.commons.granite.ui.components.NamespacedTransformedResourceProvider" %><%
 
 
     Config cfg = cmp.getConfig();
@@ -20,7 +19,8 @@
         return;
     }
 
-    NamespaceResourceWrapper resourceWrapper = new NamespaceResourceWrapper(targetResource, sling.getService(ExpressionResolver.class), slingRequest);
+    NamespacedTransformedResourceProvider transformedResourceProvider = sling.getService(NamespacedTransformedResourceProvider.class);
+    Resource resourceWrapper = transformedResourceProvider.transformResourceWithNameSpacing(slingRequest, targetResource);
 
     cmp.include(resourceWrapper, cfg.get("resourceType", String.class), cmp.getOptions());
 %>

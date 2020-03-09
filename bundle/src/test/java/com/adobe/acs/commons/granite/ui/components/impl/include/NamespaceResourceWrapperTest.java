@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.granite.ui.components.include;
+package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import com.adobe.granite.ui.components.ExpressionResolver;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -31,14 +31,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.servlet.jsp.PageContext;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.adobe.acs.commons.granite.ui.components.include.IncludeDecoratorFilterImpl.NAMESPACE;
-import static com.adobe.acs.commons.granite.ui.components.include.IncludeDecoratorFilterImpl.PREFIX;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.REQ_ATTR_NAMESPACE;
+import static com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl.PREFIX;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -54,6 +53,8 @@ public class NamespaceResourceWrapperTest {
 
     @Mock
     private ExpressionResolver expressionResolver;
+
+    private String[] properties = new String[]{"name"};
 
     @Before
     public void setUp() throws Exception {
@@ -78,7 +79,7 @@ public class NamespaceResourceWrapperTest {
 
         setParameters(parameters);
 
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request());
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(), properties);
 
 
 
@@ -104,7 +105,7 @@ public class NamespaceResourceWrapperTest {
     @Test
     public void test_default_values() {
 
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request());
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
         Double doubleDefaultValue = someDoubleField.getValueMap().get("defaultValue", Double.class);
@@ -126,8 +127,8 @@ public class NamespaceResourceWrapperTest {
     @Test
     public void test_namespacing() {
 
-        context.request().setAttribute(NAMESPACE, "block1");
-        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request());
+        context.request().setAttribute(REQ_ATTR_NAMESPACE, "block1");
+        systemUnderTest = new NamespaceResourceWrapper(context.currentResource(), expressionResolver, context.request(),properties);
 
         Resource someDoubleField = systemUnderTest.getChild("someDoubleField");
 

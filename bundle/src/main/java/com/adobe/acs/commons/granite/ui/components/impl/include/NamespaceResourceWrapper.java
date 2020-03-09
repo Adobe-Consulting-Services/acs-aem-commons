@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.granite.ui.components.include;
+package com.adobe.acs.commons.granite.ui.components.impl.include;
 
 import com.adobe.granite.ui.components.ExpressionResolver;
 import com.adobe.granite.ui.components.FilteringResourceWrapper;
@@ -32,30 +32,32 @@ import java.util.Iterator;
 
 
 public class NamespaceResourceWrapper extends FilteringResourceWrapper {
-  
+
     private final ExpressionResolver expressionResolver;
-    
+
     private final SlingHttpServletRequest request;
+    private final String[] namespacedProperties;
     private final ValueMap valueMap;
-    
+
     public NamespaceResourceWrapper(@Nonnull Resource resource, @Nonnull ExpressionResolver expressionResolver,
-                                    @Nonnull SlingHttpServletRequest request) {
+                                    @Nonnull SlingHttpServletRequest request, String[] namespacedProperties) {
         super(resource, expressionResolver, request);
         this.expressionResolver = expressionResolver;
         this.request = request;
-        
-        valueMap = new NamespaceDecoratedValueMapBuilder(request, resource).build();
+        this.namespacedProperties = namespacedProperties;
+
+        valueMap = new NamespaceDecoratedValueMapBuilder(request, resource, namespacedProperties).build();
     }
-    
+
     @Override
     public Resource getChild(String relPath) {
         Resource child = super.getChild(relPath);
-        
+
         if(child == null){
             return null;
         }
 
-        NamespaceResourceWrapper wrapped =new  NamespaceResourceWrapper(child, expressionResolver, request);
+        NamespaceResourceWrapper wrapped =new  NamespaceResourceWrapper(child, expressionResolver, request,namespacedProperties);
 
         if(!isVisible(wrapped)){
             return null;
@@ -63,36 +65,36 @@ public class NamespaceResourceWrapper extends FilteringResourceWrapper {
             return wrapped;
         }
     }
-    
+
     @Override
     public Iterator<Resource> listChildren() {
         return new TransformIterator(
                 new FilterIterator(super.listChildren(),
-                        o -> isVisible(new NamespaceResourceWrapper((Resource) o, expressionResolver, request))),
-                        o -> new NamespaceResourceWrapper((Resource) o, expressionResolver, request)
+                        o -> isVisible(new NamespaceResourceWrapper((Resource) o, expressionResolver, request,namespacedProperties))),
+                        o -> new NamespaceResourceWrapper((Resource) o, expressionResolver, request,namespacedProperties)
         );
     }
-    
+
     private boolean isVisible(Resource o) {
         return !o.getValueMap().get("hide", Boolean.FALSE);
     }
 
-    
+
     @Override
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        
+
         if(type == ValueMap.class){
               return (AdapterType) getValueMap();
         }
-        
+
         return super.adaptTo(type);
     }
-    
- 
+
+
     @Override
     public ValueMap getValueMap() {
         return valueMap;
     }
-    
+
 
 }
