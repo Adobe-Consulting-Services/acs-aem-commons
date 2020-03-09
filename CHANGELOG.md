@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- #2215 - Added Parameterized granite include to support generic dialog snippets
 
 ### Fixed
 - #2206 fix sonar warnings; some package versions had to be increased
