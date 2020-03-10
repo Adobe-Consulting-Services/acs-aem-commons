@@ -36,7 +36,7 @@
  *   the order of both lists should be the same: the first value should correspond to the first class given
  * - add the attribute acs-combocheckboxshowhideoperator to the target component, the value should reflect the
  *   operator that is wanted, currently AND and OR are supported, OR is default and
- * - Add the attribute acs-optionalwhenhidden to ignore required fields when the tab is hidden for those fields and set
+ * - Add the attribute acs-optional when hidden to ignore required fields when the tab is hidden for those fields and set
  *   it to true as a String value like this: acs-optionalwhenhidden="true"
  */
 
