@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2174 - Added more granular control of the environment indicator css
 - #2164 - Content model framework now supports page create dialogs
 - #2160 - provide EL support for contextual root
+- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or Classic (AMS/OnPrem)
 
 ### Fixed
 - #2195 - Removed direct references to Oak API
