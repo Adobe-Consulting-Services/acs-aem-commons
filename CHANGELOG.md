@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2206 fix sonar warnings; some package versions had to be increased
-- #2213 - Fix hidden required field not disabled to save the dialog 
+- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
 
 ### Changed
