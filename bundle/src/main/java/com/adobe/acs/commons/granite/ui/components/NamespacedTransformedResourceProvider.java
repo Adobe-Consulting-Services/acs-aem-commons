@@ -21,6 +21,7 @@ package com.adobe.acs.commons.granite.ui.components;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * NamespacedTransformedResourceProvider
@@ -31,6 +32,7 @@ import org.apache.sling.api.resource.Resource;
  * @author raaijmak@adobe.com
  * @since 2020-03-09
  */
+@ProviderType
 public interface NamespacedTransformedResourceProvider {
     
     /**
