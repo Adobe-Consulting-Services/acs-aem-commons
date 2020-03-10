@@ -28,9 +28,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * <p>
  * Transforms a resource underlying children with a namespace.
  * </p>
- *
- * @author raaijmak@adobe.com
- * @since 2020-03-09
  */
 @ProviderType
 public interface NamespacedTransformedResourceProvider {
