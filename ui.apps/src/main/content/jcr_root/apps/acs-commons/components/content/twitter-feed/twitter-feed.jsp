@@ -33,7 +33,7 @@
 
     pageContext.setAttribute("tweets", tweetList);
 
-    XSSAPI slingXssAPI = sling.get(XSSAPI.class);
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
     pageContext.setAttribute("slingXssAPI", slingXssAPI);
 %>
 <c:choose>
