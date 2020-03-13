@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2215 - Added Parameterized granite include to support generic dialog snippets
 
 ### Fixed
+- #2220 NPE in Audio component due to XSSApi adapter no longer available
 - #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
 - #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
