@@ -106,7 +106,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "DAM Asset MIME Types", unbounded = PropertyUnbounded.ARRAY, description = "MIME types allowed for DAM assets.")
     private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
 
-    @Property(label = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+    @Property(label = "Exclude Pages (by properties of boolean values) from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap.")
     private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
 
     @Property(label = "URL Rewrites", unbounded = PropertyUnbounded.ARRAY, description = "Colon separated URL rewrites to adjust the <loc> to match your dispatcher's apache rewrites")
