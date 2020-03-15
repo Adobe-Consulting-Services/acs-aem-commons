@@ -23,9 +23,12 @@ import javax.jcr.RepositoryException;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @deprecated All supported AEM's run on Oak repositories now, so this will always return true.
+ */
+@Deprecated
 @ProviderType
 public interface AemCapabilityHelper {
-
     /**
      * Determines if the AEM installation is running on an Apache Jackrabbit Oak-based repository.
      * 
@@ -33,7 +36,10 @@ public interface AemCapabilityHelper {
      * so the usage of this method is no longer required.
      * @return true is running on Oak
      * @throws RepositoryException
-     * @Deprecated
+     *
+     * @deprecated All ACS AEM Commons supported Repos are Oak now; This should always return true.
      */
+    @Deprecated
     boolean isOak() throws RepositoryException;
+
 }
