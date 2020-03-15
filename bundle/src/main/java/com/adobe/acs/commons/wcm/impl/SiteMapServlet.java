@@ -124,7 +124,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
-    @Property(label = "Exclude Page from Sitemap", description = "The String [cq:Template] property on /jcr:content of page")
+    @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
     private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
@@ -146,7 +146,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> damAssetTypes;
 
-    private String excludeFromSiteMapProperty;
+    private List<String> excludeFromSiteMapProperty;
 
     private String characterEncoding;
 
@@ -156,7 +156,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private boolean removeTrailingSlash;
 
-    private List<String> template;
+    private List<String> excludedPageTemplates;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -172,15 +172,15 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
         this.damAssetTypes = Arrays
                 .asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
-        this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
-                NameConstants.PN_HIDE_IN_NAV);
+        this.excludeFromSiteMapProperty = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
+                new String[0]));
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
         this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
-        this.template = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
+        this.excludedPageTemplates = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
 
     }
 
@@ -265,7 +265,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-        if (isHiddenOrProtected(page) || isExcluded(page)) {
+        if (isHiddenByPageProperty(page) || isHiddenByPageTemplate(page)) {
             return;
         }
         stream.writeStartElement(NS, "url");
@@ -305,22 +305,21 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
-    private boolean isHiddenOrProtected(Page page) {
-        boolean flag= false;
+    private boolean isHiddenByPageProperty(Page page){
+        boolean flag = false;
         if(this.excludeFromSiteMapProperty != null){
-            String [] multipleProperties = this.excludeFromSiteMapProperty.split(",");
-            for (String prop: multipleProperties) {
-                flag = flag || page.getProperties().get(prop, Boolean.FALSE);
+            for(String pageProperty : this.excludeFromSiteMapProperty){
+                flag = flag || page.getProperties().get(pageProperty, Boolean.FALSE);
             }
         }
         return flag;
     }
 
-    private boolean isExcluded(Page page){
+    private boolean isHiddenByPageTemplate(Page page) {
         boolean flag = false;
-        if(this.template != null){
-            for(String pageTemplate : this.template){
-                flag = flag || page.getProperties().get("cq:template", String.class).equalsIgnoreCase(pageTemplate);
+        if(this.excludedPageTemplates != null){
+            for(String pageTemplate : this.excludedPageTemplates){
+                flag = flag || page.getProperties().get("cq:template", StringUtils.EMPTY).equalsIgnoreCase(pageTemplate);
             }
         }
         return flag;
