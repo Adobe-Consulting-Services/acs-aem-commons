@@ -47,7 +47,6 @@
         <scr.plugin.version>1.26.0</scr.plugin.version>
         <oakpal.version>1.5.1</oakpal.version>
 
-        <!-- Skip CQRules:CQBP-84--dependencies in Oak-Pal -->
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
     </properties>
 
