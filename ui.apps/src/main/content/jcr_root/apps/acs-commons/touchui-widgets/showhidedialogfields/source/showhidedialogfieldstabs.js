@@ -36,6 +36,8 @@
  *   the order of both lists should be the same: the first value should correspond to the first class given
  * - add the attribute acs-combocheckboxshowhideoperator to the target component, the value should reflect the
  *   operator that is wanted, currently AND and OR are supported, OR is default and
+ * - Add the attribute acs-optional when hidden to ignore required fields when the tab is hidden for those fields and set
+ *   it to true as a String value like this: acs-optionalwhenhidden="true"
  */
 
 /* global Granite, Coral, $  */
@@ -162,6 +164,7 @@
     var tabPanel = $elem.parent().parent('coral-panel[role="tabpanel"]');
     var tabLabelId = $(tabPanel).attr('aria-labelledby');
     var disable = $elem.attr('data-acs-disablewhenhidden');
+    var required = $elem.attr('data-acs-optionalwhenhidden');
 
     if (hide) {
       // If target is a container, hides the container
@@ -178,6 +181,12 @@
       if (disable === 'true') {
         $elem.find('.coral-Form-field').attr('disabled', '');
       }
+
+      //disable validation when a tab is hidden
+      if (required === 'true') {
+        $elem.find('.coral-Form-field').removeAttr('required');
+        $elem.find('input.coral-Form-field').attr('aria-required', 'false');
+      }
     } else {
       // Unhide target container/field wrapper/tab
       $elem.removeClass('hide');
@@ -189,6 +198,14 @@
       //enable all input fields within the element if necessary
       if (disable === 'true') {
         $elem.find('.coral-Form-field').removeAttr('disabled');
+      }
+
+      //enable all inputfields when the tab is shown again
+      if (required === 'true') {
+        $elem.find('.coral-Form-field').attr('required');
+        var inputField = $elem.find('input.coral-Form-field');
+        $(inputField).attr('aria-required', 'true');
+        $(inputField).attr('aria-invalid', 'true');
       }
     }
   }

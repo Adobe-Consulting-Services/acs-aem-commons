@@ -10,9 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- #2215 - Added Parameterized granite include to support generic dialog snippets
 
 ### Fixed
+- #2220 NPE in Audio component due to XSSApi adapter no longer available
+- #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
+- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
 
 ### Changed
@@ -26,6 +30,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2174 - Added more granular control of the environment indicator css
 - #2164 - Content model framework now supports page create dialogs
 - #2160 - provide EL support for contextual root
+- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or Classic (AMS/OnPrem)
 
 ### Fixed
 - #2195 - Removed direct references to Oak API
