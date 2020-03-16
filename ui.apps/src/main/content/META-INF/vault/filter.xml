@@ -13,6 +13,7 @@
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
+    <filter root="/apps/settings/dam/indesign/scripts"/>
     <filter root="/apps/cq/core/content/nav/tools/cloudservices/marketo"/>
     <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl"/>
     <filter root="/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl"/>

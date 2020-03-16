@@ -1,0 +1,308 @@
+package com.adobe.acs.commons.indesign.deckdynamo.workflow.processes;
+
+import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoConstants;
+import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.deckdynamo.utils.DeckDynamoUtils;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.WorkflowProcess;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.wcm.api.NameConstants;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.core.fs.FileSystem;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.jcr.Session;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+
+/**
+ * Back track properties changes from generated deck and update it's particular asset.
+ */
+@Component(service = WorkflowProcess.class, property = {"process.label=Deck Dynamo Write Back Process"})
+public class DeckBackTrackProcess implements WorkflowProcess {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeckBackTrackProcess.class);
+
+    @Override
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap)
+            throws WorkflowException {
+        ResourceResolver resourceResolver;
+        try {
+
+            resourceResolver = workflowSession.adaptTo(ResourceResolver.class);
+
+            Session jcrSession = workflowSession.adaptTo(Session.class);
+            if (null == jcrSession) {
+                LOGGER.error("JCR Session is null");
+                return;
+            }
+
+            DeckDynamoUtils.updateUserData(jcrSession);
+            DeckDynamoUtils.updateUserData(resourceResolver.adaptTo(Session.class));
+
+            Resource assetResource = DeckDynamoUtils.getAssetResourceFromPayload(workItem, resourceResolver);
+
+            if (null == assetResource) {
+                LOGGER.error("Asset resource from payload is null");
+                return;
+            }
+
+            if (isFileEligibleToProcess(assetResource)) {
+                InputStream xmlInputStream = DeckDynamoUtils.getInddXmlRenditionInputStream(resourceResolver,
+                        assetResource);
+                if (null == xmlInputStream) {
+                    LOGGER.debug("File xml input stream is null, hence skipping the parsing process.");
+                    return;
+                }
+
+                parseXML(xmlInputStream, resourceResolver);
+
+            } else {
+                LOGGER.info("File is not eligible to be parsed, hence skipping the parsing process.");
+            }
+
+        } catch (DeckDynamoException e) {
+            LOGGER.error("Back track: Error while parsing asset xml", e);
+            throw new WorkflowException("Error while performing back track operation", e);
+        }
+
+
+    }
+
+    private void parseXML(InputStream xmlInputStream, ResourceResolver resourceResolver) {
+        File targetFile = new File("targetFile.tmp");
+        try {
+
+            Files.copy(xmlInputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = dBuilder.parse(targetFile);
+
+            if (doc.hasChildNodes()) {
+                final String assetPath = StringUtils.EMPTY;
+                readNode(doc.getChildNodes(), assetPath, resourceResolver);
+            }
+
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerFactoryConfigurationError | DeckDynamoException e) {
+            LOGGER.error("Error while processing the xml template ", e);
+        } finally {
+            if (!targetFile.delete()) {
+                LOGGER.error("Temporary file cannot be deleted or it's null");
+            }
+
+        }
+    }
+
+    private void readNode(NodeList nodeList, String assetPath, ResourceResolver resourceResolver) throws DOMException, DeckDynamoException {
+
+        for (int count = 0; count < nodeList.getLength(); count++) {
+
+            Node tempNode = nodeList.item(count);
+
+            // make sure it's element node.
+            if (tempNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            if (tempNode.hasAttributes()) {
+                // get attributes names and values
+                NamedNodeMap nodeMap = tempNode.getAttributes();
+                Node sectionType = nodeMap != null ? nodeMap.getNamedItem(DeckDynamoConstants.XML_ATTR_SECTION_TYPE) : null;
+
+                if (sectionType != null) {
+                    assetPath = getAssetPath(nodeMap, assetPath);
+
+                    if (StringUtils.isNotBlank(assetPath)) {
+                        retrieveFieldValues(assetPath, tempNode, resourceResolver);
+                    }
+                }
+            }
+
+            if (tempNode.hasChildNodes()) {
+                // loop again if has child nodes
+                readNode(tempNode.getChildNodes(), assetPath, resourceResolver);
+
+            }
+        }
+        DeckDynamoUtils.commit(resourceResolver);
+    }
+
+    private void retrieveFieldValues(String assetPath, Node sectionNode, ResourceResolver resourceResolver) throws DeckDynamoException {
+        NodeList childNodes = sectionNode.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node childNode = childNodes.item(i);
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            if (childNode.hasAttributes()) {
+                // get attributes names and values
+                NamedNodeMap nodeMap = childNode.getAttributes();
+                Node fieldTypeAttr = nodeMap != null ? nodeMap.getNamedItem(DeckDynamoConstants.XML_ATTR_FIELD_TYPE) : null;
+                Node dataSyncAttr = nodeMap != null ? nodeMap.getNamedItem(DeckDynamoConstants.XML_ATTR_DATA_SYNC) : null;
+                Node isArrayAttr = nodeMap != null ? nodeMap.getNamedItem(DeckDynamoConstants.XML_ATTR_IS_ARRAY) : null;
+                Boolean isArray = isArrayAttr != null && "true".equals(isArrayAttr.getNodeValue());
+
+                if (fieldTypeAttr != null && dataSyncAttr != null && "true".equals(dataSyncAttr.getNodeValue())) {
+
+                    Resource assetResource = resourceResolver.getResource(assetPath);
+                    ModifiableValueMap mValueMap = null;
+                    if (assetResource != null) {
+                        mValueMap = assetResource.adaptTo(ModifiableValueMap.class);
+                    }
+                    if (mValueMap != null) {
+                        String fieldType = fieldTypeAttr.getNodeValue();
+                        switch (fieldType) {
+                            case "image":
+                                handleImageType(assetResource, childNode, resourceResolver, isArray);
+                                break;
+                            case "text":
+                                handleTextType(assetResource, childNode, isArray);
+                                break;
+                            default:
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    private void handleTextType(Resource assetResource, Node childNode, Boolean isArray) {
+        Node propertyPathNode = childNode.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_PROPERTY_PATH);
+        if (propertyPathNode != null) {
+            String propertyPath = getAssetPropertyPath(propertyPathNode.getNodeValue(), assetResource.getValueMap());
+            String textValue = childNode.getTextContent();
+            setNewPropertyValue(isArray, propertyPath, assetResource, textValue);
+        }
+    }
+
+    private void setNewPropertyValue(Boolean isArray, String propertyPath, Resource assetResource, String nodeContentValue) {
+        String nodePath = StringUtils.substringBeforeLast(propertyPath, DeckDynamoConstants.SLASH);
+        ModifiableValueMap properties;
+        if (StringUtils.isNotBlank(nodePath)) {
+            Resource childResource = assetResource.getChild(nodePath);
+            properties = childResource.adaptTo(ModifiableValueMap.class);
+            propertyPath = StringUtils.substringAfterLast(propertyPath, DeckDynamoConstants.SLASH);
+        } else {
+            properties = assetResource.adaptTo(ModifiableValueMap.class);
+        }
+        if (isArray) {
+            String index = StringUtils.substringBetween(propertyPath, "[", "]");
+            propertyPath = StringUtils.substringBeforeLast(propertyPath, "[");
+            int indexVal = Integer.parseInt(index);
+            String[] values = properties.get(propertyPath, String[].class);
+            if (indexVal >= values.length) {
+                values = Arrays.copyOf(values, indexVal + 1);
+            }
+            values[indexVal] = nodeContentValue;
+            properties.put(propertyPath, values);
+
+        } else {
+            properties.put(propertyPath, nodeContentValue);
+        }
+    }
+
+    private void handleImageType(Resource assetResource, Node childNode, ResourceResolver resourceResolver, Boolean isArray) throws DeckDynamoException {
+        Node propertyPathNode = childNode.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_PROPERTY_PATH);
+        if (propertyPathNode != null) {
+            String propertyPath = getAssetPropertyPath(propertyPathNode.getNodeValue(), assetResource.getValueMap());
+            Node hrefNode = childNode.getAttributes().getNamedItem(DavConstants.XML_HREF);
+            try {
+                if (hrefNode != null) {
+                    String hrefValue = hrefNode.getNodeValue();
+                    if (StringUtils.contains(hrefValue, "INDD-SERVER-DOCUMENTS/")) {
+                        return;
+                    }
+                    String completeHrefValue = null;
+                    if (hrefValue.contains(DeckDynamoConstants.DAM_ROOT)) {
+                        String hrefEncodedValue = StringUtils.substringAfter(
+                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), DeckDynamoConstants.DAM_ROOT);
+                        completeHrefValue = DeckDynamoConstants.DAM_ROOT + hrefEncodedValue;
+                    }
+                    if (null == completeHrefValue) {
+                        LOGGER.error("Back track root path is not correct {}", hrefValue);
+                        return;
+                    }
+                    Resource imageResource = resourceResolver.getResource(completeHrefValue);
+                    if (DamUtil.isAsset(imageResource)) {
+                        setNewPropertyValue(isArray, propertyPath, assetResource, completeHrefValue);
+
+                    } else {
+                        LOGGER.error("ERROR: DATA SYNC : Invalid asset embedded. Asset not found in repository {}", hrefValue);
+                    }
+                }
+            } catch (UnsupportedEncodingException e) {
+                throw new DeckDynamoException("Exception while handling the image type.", e);
+            }
+        }
+    }
+
+    private String getAssetPropertyPath(String nodeValue, ValueMap properties) {
+        String propertyPath = nodeValue;
+        if (!properties.containsKey(nodeValue)) {
+            propertyPath = DeckDynamoConstants.DAM_METADATA + DeckDynamoConstants.SLASH + propertyPath;
+        }
+        return propertyPath;
+    }
+
+    private String getAssetPath(NamedNodeMap nodeMap, String assetPath) {
+        Node assetPathNode = nodeMap.getNamedItem(DeckDynamoConstants.XML_ATTR_ASSETPATH);
+        if (assetPathNode != null) {
+            return assetPathNode.getNodeValue();
+        }
+
+        return assetPath;
+    }
+
+    private boolean isFileEligibleToProcess(Resource assetResource) {
+
+        Resource metadataResource = assetResource.getResourceResolver()
+                .getResource(assetResource.getPath() + FileSystem.SEPARATOR + NameConstants.NN_CONTENT
+                        + FileSystem.SEPARATOR + DamConstants.METADATA_FOLDER);
+        if (null == metadataResource) {
+            LOGGER.error("Metadata resource is null, hence returning false");
+            return false;
+        }
+        ValueMap metadataValueMap = metadataResource.getValueMap();
+
+        Resource jcrContentResource = assetResource.getResourceResolver()
+                .getResource(assetResource.getPath() + FileSystem.SEPARATOR + NameConstants.NN_CONTENT);
+        if (null == jcrContentResource) {
+            LOGGER.error("JCR Content resource is null, hence returning false");
+            return false;
+        }
+        ValueMap jcrContentValueMap = jcrContentResource.getValueMap();
+
+
+        String assetMimeType = metadataValueMap.get(DamConstants.DC_FORMAT, String.class);
+        String assetTemplateType = jcrContentValueMap.get(DeckDynamoConstants.PN_INDD_TEMPLATE_TYPE, String.class);
+
+        String[] eligibleAssetMimeType = {DeckDynamoConstants.INDESIGN_MIME_TYPE};
+        return StringUtils.isNotEmpty(assetMimeType) && ArrayUtils.contains(eligibleAssetMimeType, assetMimeType)
+                && StringUtils.isNotBlank(assetTemplateType) && assetTemplateType.equals(DeckDynamoConstants.DECK_TYPE);
+    }
+
+}
