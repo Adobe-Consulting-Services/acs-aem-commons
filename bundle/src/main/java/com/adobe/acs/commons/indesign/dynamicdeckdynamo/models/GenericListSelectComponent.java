@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.deckdynamo.models;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.models;
 
 import com.adobe.acs.commons.genericlists.GenericList;
 import com.adobe.acs.commons.mcp.form.SelectComponent;

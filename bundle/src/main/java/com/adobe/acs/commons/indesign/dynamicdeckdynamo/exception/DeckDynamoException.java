@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.deckdynamo.exception;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception;
 
 public class DeckDynamoException extends Exception {
 

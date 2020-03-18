@@ -1,13 +1,13 @@
-package com.adobe.acs.commons.indesign.deckdynamo.services.impl;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoIDSConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.deckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
-import com.adobe.acs.commons.indesign.deckdynamo.pojos.XMLResourceIterator;
-import com.adobe.acs.commons.indesign.deckdynamo.services.DeckDynamoService;
-import com.adobe.acs.commons.indesign.deckdynamo.services.XMLGeneratorService;
-import com.adobe.acs.commons.indesign.deckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoIDSConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DeckDynamoService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
 import com.adobe.dam.print.ids.PrintFormat;
 import com.adobe.dam.print.ids.StringConstants;
 import com.day.cq.commons.RangeIterator;
@@ -93,7 +93,7 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
         addIdsScriptArgs(inddTemplatePath, damAsset.adaptTo(Resource.class), idspScriptArgs, imagePaths, processedXmlPath, exportFormats);
         DeckDynamoUtils.commit(resourceResolver);
 
-        return configurationService.getTemplateRootPath();
+        return damAsset.getPath();
     }
 
     /**
@@ -212,13 +212,6 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
         idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ARGS_TYPE, DeckDynamoConstants.DECK_TYPE));
 
         addIDSProperties(masterAssetResource.getPath(), idspScriptArgs, props, scriptPaths);
-
-        //TODO: Review and remove below code, it was from product codebase
-        String mergedType = masterAssetResource.adaptTo(Asset.class).getMetadataValue(StringConstants.MERGED_TYPE);
-        if (mergedType != null && mergedType.equals(StringConstants.MERGED_TYPE_TEMPLATE)) {
-            props.put(DeckDynamoIDSConstants.IDS_JOB_DECOUPLED, true);
-            props.put(DeckDynamoIDSConstants.IDS_JOB_PAGES_REGEX, DEFAULT_PAGES_REGEX);
-        }
 
         addJob(masterAssetResource.adaptTo(Asset.class), props, jobManager);
     }

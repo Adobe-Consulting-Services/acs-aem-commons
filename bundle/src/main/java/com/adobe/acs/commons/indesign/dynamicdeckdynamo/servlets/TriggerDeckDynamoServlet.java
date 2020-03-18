@@ -1,8 +1,8 @@
-package com.adobe.acs.commons.indesign.deckdynamo.servlets;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets;
 
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.deckdynamo.models.DeckDynamoInitiatorPageModel;
-import com.adobe.acs.commons.indesign.deckdynamo.services.DeckDynamoService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DeckDynamoInitiatorPageModel;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DeckDynamoService;
 import com.adobe.granite.rest.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -104,7 +104,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
                     throw new DeckDynamoException("Asset resource list cannot be null or empty. Hence exiting the deck generation process.");
                 }
 
-                jsonResponse.addProperty(MESSAGE, "Deck created successfully! Template Path = " + generatedDeckPath);
+                jsonResponse.addProperty(MESSAGE, "Deck created successfully! Generated deck Path = " + generatedDeckPath);
             } catch (DeckDynamoException e) {
                 response.setStatus(500);
                 jsonResponse.addProperty(MESSAGE, "Deck creation Failed!");

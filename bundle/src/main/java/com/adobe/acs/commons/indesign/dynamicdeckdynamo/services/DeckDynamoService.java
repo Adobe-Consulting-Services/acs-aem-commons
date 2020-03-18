@@ -1,6 +1,6 @@
-package com.adobe.acs.commons.indesign.deckdynamo.services;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services;
 
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 

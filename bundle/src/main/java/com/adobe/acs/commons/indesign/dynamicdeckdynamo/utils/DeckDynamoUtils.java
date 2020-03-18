@@ -1,8 +1,8 @@
-package com.adobe.acs.commons.indesign.deckdynamo.utils;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils;
 
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoIDSConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoIDSConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
 import com.adobe.dam.print.ids.PrintFormat;
 import com.adobe.granite.workflow.PayloadMap;
 import com.adobe.granite.workflow.exec.WorkItem;

@@ -14,6 +14,6 @@
  *  limitations under the License.
  */
 @Version("4.4.3")
-package com.adobe.acs.commons.indesign.deckdynamo.models;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets;
 
 import org.osgi.annotation.versioning.Version;

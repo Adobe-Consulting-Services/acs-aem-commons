@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.deckdynamo.osgiconfigurations;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -9,29 +9,22 @@ import org.osgi.service.metatype.annotations.Designate;
 @Designate(ocd = DeckDynamoConfiguration.class)
 public class DeckDynamoConfigurationService {
 
-    private String templateRootPath;
     private String placeholderImagePath;
     private String collectionQuery;
 
 
     @Activate
     protected void activate(DeckDynamoConfiguration config) {
-        templateRootPath = config.templateRootPath();
         placeholderImagePath = config.placeholderImagePath();
         collectionQuery = config.collectionQuery();
     }
 
     @Modified
     protected void modified(DeckDynamoConfiguration config) {
-        templateRootPath = config.templateRootPath();
         placeholderImagePath = config.placeholderImagePath();
         collectionQuery = config.collectionQuery();
     }
 
-
-    public String getTemplateRootPath() {
-        return templateRootPath;
-    }
 
     public String getPlaceholderImagePath() {
         return placeholderImagePath;

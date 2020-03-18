@@ -1,8 +1,8 @@
-package com.adobe.acs.commons.indesign.deckdynamo.workflow.processes;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes;
 
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.deckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;

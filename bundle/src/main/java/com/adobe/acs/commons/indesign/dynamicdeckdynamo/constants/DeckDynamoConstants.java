@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.deckdynamo.constants;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants;
 
 /**
  * This class will be used to store global Constants

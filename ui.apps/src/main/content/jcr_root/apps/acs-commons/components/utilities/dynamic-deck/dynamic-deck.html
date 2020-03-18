@@ -6,19 +6,22 @@
 <sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'deck-dynamo.base']}"
      data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
 
-<coral-shell-header aria-hidden="false" aria-label="Header Bar" class="coral--dark granite-shell-header coral3-Shell-header"
+<coral-shell-header aria-hidden="false" aria-label="Header Bar"
+                    class="coral--dark granite-shell-header coral3-Shell-header"
                     role="region">
     <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/" role="heading">
         <a class="coral3-Shell-homeAnchor" href="/"
-           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor" style="display: inline-block; padding-right: 0;">
+           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
+           style="display: inline-block; padding-right: 0;">
             <coral-icon
                     aria-label="adobe experience manager color"
-                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM" icon="adobeExperienceManagerColor" role="img"
+                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM"
+                    icon="adobeExperienceManagerColor" role="img"
                     size="M"></coral-icon>
             <coral-shell-homeanchor-label>Adobe Experience Manager
             </coral-shell-homeanchor-label>
         </a>
-        <span style="line-height: 2.375rem;">/ Dynamic Deck Dynamo</span>
+        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
     </coral-shell-header-home>
 </coral-shell-header>
 
@@ -27,15 +30,24 @@
     <div class="foundation-layout-panel-header">
         <betty-titlebar>
             <betty-titlebar-title>
-                <span aria-level="1" class="granite-title" role="heading">Dynamic Deck Dynamo</span>
+                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
             </betty-titlebar-title>
             <betty-titlebar-primary></betty-titlebar-primary>
-            <betty-titlebar-secondary></betty-titlebar-secondary>
+            <betty-titlebar-secondary>
+                <i class="coral-Icon coral-Icon--infoCircle docs-ThemeSwitcher-icon" data-init="quicktip"
+                   data-quicktip-arrow="right" data-quicktip-type="info"
+                   data-quicktip-content="Please install ACS commons UI.Content package to get query list page">
+                </i>
+                <a href="/mnt/overlay/acs-commons/components/utilities/genericlist.html?item=/etc/acs-commons/lists/dynamic-deck-query-list"
+                   is="coral-anchorbutton" variant="warning" icon="rail" iconsize="S">
+                    Query List
+                </a>
+            </betty-titlebar-secondary>
         </betty-titlebar>
     </div>
     <div class="content-container-inner" style="width:60%; margin:0 auto;">
 
-        <sly data-sly-use.properties="com.adobe.acs.commons.indesign.deckdynamo.models.DeckDynamoInitiatorPageModel">
+        <sly data-sly-use.properties="com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DeckDynamoInitiatorPageModel">
             <sly data-sly-resource="${properties.formResource}"/>
         </sly>
 

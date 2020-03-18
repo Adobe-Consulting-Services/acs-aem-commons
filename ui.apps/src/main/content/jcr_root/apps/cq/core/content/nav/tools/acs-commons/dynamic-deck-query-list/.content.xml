@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:description="Create query list for searching the asset for dynamic deck generation."
-    jcr:primaryType="nt:unstructured"
-    jcr:title="Dynamic Deck Query List (Configuration)"
-    href="/mnt/overlay/acs-commons/components/utilities/genericlist.html?item=/etc/acs-commons/lists/dynamic-deck-query-list"
-    icon="viewList"
-    id="acs-commons__generic-lists"
-    target="_blank"/>

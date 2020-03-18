@@ -1,10 +1,10 @@
-package com.adobe.acs.commons.indesign.deckdynamo.services.impl;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
-import com.adobe.acs.commons.indesign.deckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.deckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.deckdynamo.pojos.XMLResourceIterator;
-import com.adobe.acs.commons.indesign.deckdynamo.services.XMLGeneratorService;
-import com.adobe.acs.commons.indesign.deckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.DamConstants;

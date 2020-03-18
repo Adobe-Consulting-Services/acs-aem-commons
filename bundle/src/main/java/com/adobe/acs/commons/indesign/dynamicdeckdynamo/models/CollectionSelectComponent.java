@@ -1,7 +1,7 @@
-package com.adobe.acs.commons.indesign.deckdynamo.models;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.models;
 
-import com.adobe.acs.commons.indesign.deckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
-import com.adobe.acs.commons.indesign.deckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
