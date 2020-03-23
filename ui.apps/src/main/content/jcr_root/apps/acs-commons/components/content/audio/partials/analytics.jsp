@@ -26,7 +26,7 @@
 %><%@taglib prefix="audio" uri="http://www.adobe.com/consulting/acs-aem-commons/audio" %><%
 %><%@taglib prefix="dam" uri="http://www.adobe.com/consulting/acs-aem-commons/dam" %><%
 %><%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
-    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
     pageContext.setAttribute("slingXssAPI", slingXssAPI);
 %>
 <c:set var="resourcePath">${xss:encodeForJSString(slingXssAPI, resource.resourceType)}</c:set>

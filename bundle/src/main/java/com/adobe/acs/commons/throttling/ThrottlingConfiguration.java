@@ -26,8 +26,8 @@ public class ThrottlingConfiguration {
         this.startThrottlingPercentage = startThrottlingPercentage;
     }
 
-    public int maxRequests;
+    protected int maxRequests;
 
-    public int startThrottlingPercentage;
+    protected int startThrottlingPercentage;
 
 }

@@ -23,7 +23,7 @@
 %><%@ taglib prefix="widgets" uri="http://www.adobe.com/consulting/acs-aem-commons/widgets" %><%
 %><%@ taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss/2.0" %><%
 %><%@ taglib prefix="wcm" uri="http://www.adobe.com/consulting/acs-aem-commons/wcm" %><%
-    XSSAPI slingXssAPI = slingRequest.adaptTo(XSSAPI.class);
+    XSSAPI slingXssAPI = sling.getService(XSSAPI.class);
     pageContext.setAttribute("slingXssAPI", slingXssAPI);
 %>
 <c:set var="definitions" value="${widgets:getMultiFieldPanelValues(resource, 'definitions')}"/>
