@@ -1,0 +1,648 @@
+{
+  "structure": {
+    "header": {
+      "jcr:primaryType": "cq:Component",
+      "jcr:title": "Page Header",
+      "jcr:description": "Page header with navigation and toolbar",
+      "componentGroup": "site.Structure",
+      "cq:dialog": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Header",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "logo": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./logo",
+                  "fieldLabel": "Site Logo",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "dialogshared": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Header Shared",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "logo": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./logo",
+                  "fieldLabel": "Site Logo",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "dialogglobal": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Header Global",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "logo": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./logo",
+                  "fieldLabel": "Site Logo",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "header.html": {
+        "jcr:primaryType": "nt:file",
+        "jcr:content": {
+          "jcr:primaryType": "nt:resource",
+          "jcr:mimeType": "text/html",
+          ":jcr:data": 1047
+        }
+      }
+    },
+    "footer": {
+      "jcr:primaryType": "cq:Component",
+      "jcr:title": "Page Footer",
+      "componentGroup": "site.Structure",
+      "cq:dialog": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Footer",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "label": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./label",
+                  "fieldLabel": "Button label",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/textfield"
+                },
+                "link": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "suffix": ".html",
+                  "rootPath": "/content",
+                  "name": "./link",
+                  "fieldLabel": "Link to",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "dialogshared": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Footer Shared",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "label": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./label",
+                  "fieldLabel": "Button label",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/textfield"
+                },
+                "link": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "suffix": ".html",
+                  "rootPath": "/content",
+                  "name": "./link",
+                  "fieldLabel": "Link to",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "dialogglobal": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Footer Global",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "margin": false,
+          "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "column": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "granite/ui/components/coral/foundation/container",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "label": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "name": "./label",
+                  "fieldLabel": "Button label",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/textfield"
+                },
+                "link": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "suffix": ".html",
+                  "rootPath": "/content",
+                  "name": "./link",
+                  "fieldLabel": "Link to",
+                  "sling:resourceType": "granite/ui/components/coral/foundation/form/pathfield"
+                }
+              }
+            }
+          }
+        }
+      },
+      "footer.html": {
+        "jcr:primaryType": "nt:file",
+        "jcr:content": {
+          "jcr:primaryType": "nt:resource",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:mimeType": "text/html",
+          ":jcr:data": 864
+        }
+      }
+    }
+  },
+  "content": {
+    "text": {
+      "jcr:primaryType": "cq:Component",
+      "jcr:createdBy": "admin",
+      "jcr:title": "Text (v2)",
+      "jcr:created": "Tue Oct 15 2019 14:00:38 GMT-0600",
+      "jcr:description": "Rich Text Section",
+      "cq:icon": "textLeft",
+      "componentGroup": ".core-wcm",
+      "cq:dialog": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Text",
+        "trackingFeature": "core-components:text:v2",
+        "helpPath": "https://www.adobe.com/go/aem_cmp_text_v2",
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "granite/ui/components/coral/foundation/container",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "tabs": {
+              "jcr:primaryType": "nt:unstructured",
+              "maximized": true,
+              "sling:resourceType": "granite/ui/components/coral/foundation/tabs",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "properties": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "jcr:title": "Properties",
+                  "margin": true,
+                  "sling:resourceType": "granite/ui/components/coral/foundation/container",
+                  "items": {
+                    "jcr:primaryType": "nt:unstructured",
+                    "columns": {
+                      "jcr:primaryType": "nt:unstructured",
+                      "margin": true,
+                      "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+                      "items": {
+                        "jcr:primaryType": "nt:unstructured",
+                        "column": {
+                          "jcr:primaryType": "nt:unstructured",
+                          "granite:class": "cq-RichText-FixedColumn-column",
+                          "sling:resourceType": "granite/ui/components/coral/foundation/container",
+                          "items": {
+                            "jcr:primaryType": "nt:unstructured",
+                            "text": {
+                              "jcr:primaryType": "nt:unstructured",
+                              "name": "./text",
+                              "sling:resourceType": "cq/gui/components/authoring/dialog/richtext",
+                              "useFixedInlineToolbar": true,
+                              "rtePlugins": {
+                                "jcr:primaryType": "nt:unstructured",
+                                "format": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "bold,italic"
+                                },
+                                "justify": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "-"
+                                },
+                                "links": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "modifylink,unlink"
+                                },
+                                "lists": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "*"
+                                },
+                                "misctools": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "specialCharsConfig": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "chars": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "default_copyright": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "entity": "&copy;",
+                                        "name": "copyright"
+                                      },
+                                      "default_euro": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "entity": "&euro;",
+                                        "name": "euro"
+                                      },
+                                      "default_registered": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "entity": "&reg;",
+                                        "name": "registered"
+                                      },
+                                      "default_trademark": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "entity": "&trade;",
+                                        "name": "trademark"
+                                      }
+                                    }
+                                  }
+                                },
+                                "paraformat": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "*",
+                                  "formats": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "default_p": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Paragraph",
+                                      "tag": "p"
+                                    },
+                                    "default_h1": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 1",
+                                      "tag": "h1"
+                                    },
+                                    "default_h2": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 2",
+                                      "tag": "h2"
+                                    },
+                                    "default_h3": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 3",
+                                      "tag": "h3"
+                                    },
+                                    "default_h4": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 4",
+                                      "tag": "h4"
+                                    },
+                                    "default_h5": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 5",
+                                      "tag": "h5"
+                                    },
+                                    "default_h6": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Heading 6",
+                                      "tag": "h6"
+                                    },
+                                    "default_blockquote": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Quote",
+                                      "tag": "blockquote"
+                                    },
+                                    "default_pre": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "description": "Preformatted",
+                                      "tag": "pre"
+                                    }
+                                  }
+                                },
+                                "table": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "-",
+                                  "hiddenHeaderConfig": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "hiddenHeaderClassName": "cq-wcm-foundation-aria-visuallyhidden",
+                                    "hiddenHeaderEditingCSS": "cq-RichText-hiddenHeader--editing"
+                                  }
+                                },
+                                "tracklinks": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "features": "*"
+                                }
+                              },
+                              "uiSettings": {
+                                "jcr:primaryType": "nt:unstructured",
+                                "cui": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "inline": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "toolbar": [
+                                      "format#bold",
+                                      "format#italic",
+                                      "format#underline",
+                                      "#justify",
+                                      "#lists",
+                                      "links#modifylink",
+                                      "links#unlink",
+                                      "#paraformat"
+                                    ],
+                                    "popovers": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "justify": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "ref": "justify",
+                                        "items": [
+                                          "justify#justifyleft",
+                                          "justify#justifycenter",
+                                          "justify#justifyright"
+                                        ]
+                                      },
+                                      "lists": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "ref": "lists",
+                                        "items": [
+                                          "lists#unordered",
+                                          "lists#ordered",
+                                          "lists#outdent",
+                                          "lists#indent"
+                                        ]
+                                      },
+                                      "paraformat": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "ref": "paraformat",
+                                        "items": "paraformat:getFormats:paraformat-pulldown"
+                                      }
+                                    }
+                                  },
+                                  "dialogFullScreen": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "toolbar": [
+                                      "format#bold",
+                                      "format#italic",
+                                      "format#underline",
+                                      "justify#justifyleft",
+                                      "justify#justifycenter",
+                                      "justify#justifyright",
+                                      "lists#unordered",
+                                      "lists#ordered",
+                                      "lists#outdent",
+                                      "lists#indent",
+                                      "links#modifylink",
+                                      "links#unlink",
+                                      "table#createoredit",
+                                      "#paraformat",
+                                      "image#imageProps"
+                                    ],
+                                    "popovers": {
+                                      "jcr:primaryType": "nt:unstructured",
+                                      "paraformat": {
+                                        "jcr:primaryType": "nt:unstructured",
+                                        "ref": "paraformat",
+                                        "items": "paraformat:getFormats:paraformat-pulldown"
+                                      }
+                                    }
+                                  },
+                                  "tableEditOptions": {
+                                    "jcr:primaryType": "nt:unstructured",
+                                    "toolbar": [
+                                      "table#insertcolumn-before",
+                                      "table#insertcolumn-after",
+                                      "table#removecolumn",
+                                      "-",
+                                      "table#insertrow-before",
+                                      "table#insertrow-after",
+                                      "table#removerow",
+                                      "-",
+                                      "table#mergecells-right",
+                                      "table#mergecells-down",
+                                      "table#mergecells",
+                                      "table#splitcell-horizontal",
+                                      "table#splitcell-vertical",
+                                      "-",
+                                      "table#selectrow",
+                                      "table#selectcolumn",
+                                      "-",
+                                      "table#ensureparagraph",
+                                      "-",
+                                      "table#modifytableandcell",
+                                      "table#removetable",
+                                      "-",
+                                      "undo#undo",
+                                      "undo#redo",
+                                      "-",
+                                      "table#exitTableEditing",
+                                      "-"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "text.html": {
+        "jcr:primaryType": "nt:file",
+        "jcr:createdBy": "admin",
+        "jcr:created": "Tue Oct 15 2019 14:00:38 GMT-0600",
+        "jcr:content": {
+          "jcr:primaryType": "nt:resource",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:mimeType": "text/html",
+          "jcr:lastModified": "Wed Nov 13 2019 16:20:00 GMT-0700",
+          ":jcr:data": 1224,
+          "jcr:uuid": "a785e2c6-e86d-4f63-bb81-5d73f1144f76"
+        }
+      }
+    },
+    "title": {
+      "jcr:primaryType": "cq:Component",
+      "jcr:title": "Title (v2)",
+      "jcr:description": "Section Heading",
+      "cq:icon": "text",
+      "componentGroup": ".core-wcm",
+      "cq:dialog": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Title",
+        "trackingFeature": "core-components:title:v2",
+        "helpPath": "https://www.adobe.com/go/aem_cmp_title_v2",
+        "extraClientlibs": [
+          "core.wcm.components.title.v2.editor"
+        ],
+        "sling:resourceType": "cq/gui/components/authoring/dialog",
+        "content": {
+          "jcr:primaryType": "nt:unstructured",
+          "sling:resourceType": "granite/ui/components/coral/foundation/container",
+          "items": {
+            "jcr:primaryType": "nt:unstructured",
+            "tabs": {
+              "jcr:primaryType": "nt:unstructured",
+              "maximized": true,
+              "sling:resourceType": "granite/ui/components/coral/foundation/tabs",
+              "items": {
+                "jcr:primaryType": "nt:unstructured",
+                "properties": {
+                  "jcr:primaryType": "nt:unstructured",
+                  "jcr:title": "Properties",
+                  "margin": true,
+                  "sling:resourceType": "granite/ui/components/coral/foundation/container",
+                  "items": {
+                    "jcr:primaryType": "nt:unstructured",
+                    "columns": {
+                      "jcr:primaryType": "nt:unstructured",
+                      "margin": true,
+                      "sling:resourceType": "granite/ui/components/coral/foundation/fixedcolumns",
+                      "items": {
+                        "jcr:primaryType": "nt:unstructured",
+                        "column": {
+                          "jcr:primaryType": "nt:unstructured",
+                          "sling:resourceType": "granite/ui/components/coral/foundation/container",
+                          "items": {
+                            "jcr:primaryType": "nt:unstructured",
+                            "title": {
+                              "jcr:primaryType": "nt:unstructured",
+                              "name": "./jcr:title",
+                              "fieldLabel": "Title",
+                              "sling:resourceType": "granite/ui/components/coral/foundation/form/textfield",
+                              "fieldDescription": "Leave empty to use the page title."
+                            },
+                            "types": {
+                              "jcr:primaryType": "nt:unstructured",
+                              "granite:class": "core-title-sizes",
+                              "name": "./type",
+                              "fieldLabel": "Type / Size",
+                              "sling:resourceType": "granite/ui/components/coral/foundation/form/select",
+                              "datasource": {
+                                "jcr:primaryType": "nt:unstructured",
+                                "sling:resourceType": "core/wcm/components/title/v1/datasource/allowedtypes"
+                              }
+                            },
+                            "defaulttypes": {
+                              "jcr:primaryType": "nt:unstructured",
+                              "granite:class": "core-title-sizes-default",
+                              "name": "./type",
+                              "fieldLabel": "Type / Size",
+                              "sling:resourceType": "granite/ui/components/coral/foundation/form/select",
+                              "items": {
+                                "jcr:primaryType": "nt:unstructured",
+                                "h1": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H1",
+                                  "value": "h1"
+                                },
+                                "h2": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H2",
+                                  "value": "h2"
+                                },
+                                "h3": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H3",
+                                  "value": "h3"
+                                },
+                                "h4": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H4",
+                                  "value": "h4"
+                                },
+                                "h5": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H5",
+                                  "value": "h5"
+                                },
+                                "h6": {
+                                  "jcr:primaryType": "nt:unstructured",
+                                  "text": "H6",
+                                  "value": "h6"
+                                }
+                              }
+                            },
+                            "linkURL": {
+                              "jcr:primaryType": "nt:unstructured",
+                              "rootPath": "/content",
+                              "name": "./linkURL",
+                              "fieldLabel": "Link",
+                              "sling:resourceType": "cq/gui/components/coral/common/form/pagefield",
+                              "fieldDescription": "Links the title. Path to a content page, external URL or page anchor.",
+                              "granite:rendercondition": {
+                                "jcr:primaryType": "nt:unstructured",
+                                "expression": "${!cqDesign.linkDisabled}",
+                                "sling:resourceType": "granite/ui/components/foundation/renderconditions/simple"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "title.html": {
+        "jcr:primaryType": "nt:file",
+        "jcr:createdBy": "admin",
+        "jcr:created": "Tue Oct 15 2019 14:00:38 GMT-0600",
+        "jcr:content": {
+          "jcr:primaryType": "nt:resource",
+          "jcr:lastModifiedBy": "admin",
+          "jcr:mimeType": "text/html",
+          "jcr:lastModified": "Wed Nov 13 2019 16:19:59 GMT-0700",
+          ":jcr:data": 1259,
+          "jcr:uuid": "06069df3-6b94-4525-9509-da0c0b700f43"
+        }
+      }
+    }
+  }
+}
