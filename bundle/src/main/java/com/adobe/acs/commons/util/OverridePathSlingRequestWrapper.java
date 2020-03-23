@@ -22,12 +22,13 @@ package com.adobe.acs.commons.util;
 import com.adobe.cq.sightly.WCMBindings;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import com.day.text.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +63,13 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
 
         SlingBindings slingBindings = (SlingBindings) getSlingRequest().getAttribute(ATTR_SLING_BINDINGS);
 
-        this.adapterManager = slingBindings.getSling().getService(AdapterManager.class);
+        this.adapterManager = getAdapterManager(slingBindings);
 
         // Using `resolve` instead of `getResource` in order to support requests to non-existent resources
         this.resource = getSlingRequest().getResourceResolver().resolve(getSlingRequest(), path);
-
-        this.myBindings.putAll(slingBindings);
+        if(slingBindings != null){
+            this.myBindings.putAll(slingBindings);
+        }
         this.myBindings.put(WCMBindings.PROPERTIES, this.resource.getValueMap());
         this.myBindings.put(SlingBindings.RESOURCE, this.resource);
         this.myBindings.put(SlingBindings.REQUEST, this);
@@ -78,6 +80,22 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
             currentPage = pageManager.getContainingPage(this.resource);
         }
         this.myBindings.put(WCMBindings.CURRENT_PAGE, currentPage);
+    }
+
+    /**
+     * Gets the getAdapterManager from slingBindings.getSling() or the current bundle context.
+     * Return null if something goes wrong.
+     *
+     * @param slingBindings the slingBindings to get Sling Services
+     * @return        the AdapterManager from slingBindings.getSling() or the current bundle context
+     */
+    public static AdapterManager getAdapterManager(SlingBindings slingBindings) {
+        if (slingBindings != null && slingBindings.getSling() != null) {
+            return slingBindings.getSling().getService(AdapterManager.class);
+        } else {
+            BundleContext bundleContext = FrameworkUtil.getBundle(AdapterManager.class).getBundleContext();
+            return (AdapterManager) bundleContext.getService(bundleContext.getServiceReference(AdapterManager.class.getName()));
+        }
     }
 
     @Override
@@ -99,7 +117,7 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
      */
     @Override
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        AdapterType result = null;
+        AdapterType result;
         synchronized(this) {
             result = (AdapterType) this.adaptersCache.get(type);
 
