@@ -19,20 +19,21 @@
  */
 package com.adobe.acs.commons.util;
 
+import com.adobe.acs.commons.util.impl.Activator;
+import com.adobe.acs.commons.util.impl.ActivatorHelper;
 import com.adobe.cq.sightly.WCMBindings;
 import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import javax.jcr.RepositoryException;
 
 import java.util.Map;
 
@@ -46,14 +47,19 @@ public class OverridePathSlingRequestWrapperTest {
     private static final String PAGE_PATH = "/content/childPage";
     private static final String PAGE_CHILD_RESOURCE_PATH = "/content/childPage/jcr:content/some/child";
 
+    private TestAdaptable testAdaptableInstance = new TestAdaptable();
+
+    private ActivatorHelper activatorHelper = new ActivatorHelper();
+
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(activatorHelper.afterSetup(), activatorHelper.beforeTeardown(), ResourceResolverType.JCR_MOCK);
 
     @Before
-    public void setup() throws RepositoryException {
+    public void setup() throws Exception {
         this.context.create().resource(RESOURCE_PATH, "prop", "resourceval");
         this.context.create().page(PAGE_PATH, "prop", "pageval");
         this.context.create().resource(PAGE_CHILD_RESOURCE_PATH, "prop", "childval");
+        this.context.registerAdapter(SlingHttpServletRequest.class, TestAdaptable.class, testAdaptableInstance);
     }
 
     @Test
@@ -131,5 +137,42 @@ public class OverridePathSlingRequestWrapperTest {
         OverridePathSlingRequestWrapper bogusResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), "/content/bogus2");
         assertEquals("/content/bogus2", bogusResourceWrapper.getResource().getPath());
         assertEquals(Resource.RESOURCE_TYPE_NON_EXISTING, bogusResourceWrapper.getResource().getResourceType());
+    }
+
+    @Test
+    public void testCreationWithoutBindings() {
+        // AEM mocks always creates the bindings attribute so we need to manually remove it
+        this.context.request().setAttribute(SlingBindings.class.getName(), null);
+        this.context.currentResource(RESOURCE_PATH);
+
+        OverridePathSlingRequestWrapper pageResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), PAGE_CHILD_RESOURCE_PATH);
+        Map<String, Object> pageResourceBindings = (Map<String, Object>) pageResourceWrapper.getAttribute(SlingBindings.class.getName());
+        assertNotNull(pageResourceBindings.get(SlingBindings.RESOURCE));
+    }
+
+    @Test
+    public void testAdaptTo() {
+        this.context.currentResource(RESOURCE_PATH);
+
+        OverridePathSlingRequestWrapper pageResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), PAGE_CHILD_RESOURCE_PATH);
+
+        TestAdaptable adapted = pageResourceWrapper.adaptTo(TestAdaptable.class);
+        assertNotNull(adapted);
+    }
+
+    @Test
+    public void testAdaptToWithNoBindings() {
+        // AEM mocks always creates the bindings attribute so we need to manually remove it
+        this.context.request().setAttribute(SlingBindings.class.getName(), null);
+        this.context.currentResource(RESOURCE_PATH);
+
+        OverridePathSlingRequestWrapper pageResourceWrapper = new OverridePathSlingRequestWrapper(this.context.request(), PAGE_CHILD_RESOURCE_PATH);
+
+        TestAdaptable adapted = pageResourceWrapper.adaptTo(TestAdaptable.class);
+        assertNotNull(adapted);
+    }
+
+    private static class TestAdaptable {
+
     }
 }
