@@ -46,7 +46,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     @Override
-    @SuppressWarnings("squid:S2276")
+    @SuppressWarnings("squid:S2696")
     public void start(BundleContext context) throws Exception {
         LOG.info(context.getBundle().getSymbolicName() + " started");
         ServiceReference<SlingSettingsService> ref  = context.getServiceReference(SlingSettingsService.class);
