@@ -193,6 +193,20 @@
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
+                    <configuration>
+                        <cndNames>
+                            <cndName>nodetypes/nodetypes.cnd</cndName>
+                        </cndNames>
+                        <jcrNamespaces>
+                            <jcrNamespace>
+                                <prefix>crx</prefix>
+                                <uri>http://www.day.com/crx/1.0</uri>
+                            </jcrNamespace>
+                        </jcrNamespaces>
+                        <jcrPrivileges>
+                            <jcrPrivilege>crx:replicate</jcrPrivilege>
+                        </jcrPrivileges>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmaven</groupId>
