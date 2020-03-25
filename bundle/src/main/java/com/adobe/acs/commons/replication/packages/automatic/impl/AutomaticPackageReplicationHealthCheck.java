@@ -19,41 +19,31 @@
  */
 package com.adobe.acs.commons.replication.packages.automatic.impl;
 
-import java.util.List;
+import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicator;
 
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
-import org.apache.sling.hc.api.Result.Status;
 import org.apache.sling.hc.api.ResultLog;
-import org.apache.sling.hc.api.ResultLog.Entry;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicator;
+import aQute.bnd.annotation.component.Reference;
 
 @Component(service = HealthCheck.class, immediate = true, property = {
     HealthCheck.NAME + "=Automatic Package Replication", HealthCheck.TAGS + "=replication",
     HealthCheck.TAGS + "=packages" })
 public class AutomaticPackageReplicationHealthCheck implements HealthCheck {
 
-  @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-  public List<AutomaticPackageReplicator> replicators;
+  private AutomaticPackageReplicator automaticPackageReplicator;
 
   @Override
   public Result execute() {
-    ResultLog log = new ResultLog();
-    replicators.stream().forEach(r -> {
-      if (r.getLastStatus() != null) {
-        log.add(new Entry(r.getLastStatus(), String.format("Automatic Package Replicator %s has a last status of: %s",
-            r.toString(), r.getLastStatus().name())));
-      } else {
-        log.add(new Entry(Status.INFO, String.format("Automatic Package Replicator %s has not run", r.toString())));
-      }
-    });
+    ResultLog log = ((AutomaticPackageReplicatorImpl) automaticPackageReplicator).getResultLog();
     return new Result(log);
+  }
+
+  @Reference
+  public void setAutomaticPackageReplicator(AutomaticPackageReplicator automaticPackageReplicator) {
+    this.automaticPackageReplicator = automaticPackageReplicator;
   }
 
 }

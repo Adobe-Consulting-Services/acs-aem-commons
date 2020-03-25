@@ -4,35 +4,47 @@ import java.io.IOException;
 
 import javax.jcr.RepositoryException;
 
-import org.apache.jackrabbit.vault.packaging.PackageException;
-import org.apache.sling.hc.api.Result;
-
 import com.adobe.granite.jmx.annotation.Description;
 import com.day.cq.replication.ReplicationException;
 
+import org.apache.jackrabbit.vault.packaging.PackageException;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.hc.api.Result;
+
 /**
- * Service interface for Automatic Package Replicator instances
+ * A service for automatically building and replicating packages
  */
-@Description("MBean for managing an Automatic Package Replicator instance")
+@Description("MBean for managing the Automatic Package Replicator")
 public interface AutomaticPackageReplicator {
 
   /**
-   * Gets the status of the last execution or null if not executed
+   * Gets the recent replications as an array
    * 
-   * @return the last status of the instance
+   * @return the recent replications
    */
-  @Description("Gets the status of the last execution or null if not executed")
-  public Result.Status getLastStatus();
+  @Description("Gets the recent replications as an array")
+  public String[] getRecentReplications();
 
   /**
-   * Execute the process to build and replicate the package configured for the
-   * instance of the Automatic Package Replicator.
+   * Gets the status from the recent replications
+   * 
+   * @return the status
+   */
+  @Description("Gets the status from the recent replications")
+  public Result.Status getStatus();
+
+  /**
+   * Replicates the package at the specified path
+   * 
+   * @param packagePath the path to the package
    * 
    * @throws RepositoryException  an exception occurs saving the package
    * @throws PackageException     an exception occurs assembling the package
    * @throws IOException          an exception occurs assembling the package
    * @throws ReplicationException an exception occurs replicating the package
+   * @throws LoginException       the service user is not configured
    */
-  @Description("Replicates the package configured for this Automatic Package Replicator instance")
-  public void replicatePackage() throws RepositoryException, PackageException, IOException, ReplicationException;
+  @Description("Replicates the package at the specified path")
+  public void replicatePackage(String packagePath)
+      throws RepositoryException, PackageException, IOException, ReplicationException, LoginException;
 }
