@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,6 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   protected FileFetchConfiguration config;
 
-  @Reference
   private ResourceResolverFactory factory;
 
   private Exception lastException = null;
@@ -82,11 +82,10 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   private String lastModified = null;
 
-  @Reference
   private Replicator replicator;
 
   @Activate
-  public void activate(FileFetchConfiguration config) {
+  public void activate(final FileFetchConfiguration config) {
     log.info("Activing with configuration: {}", config);
     this.config = config;
     run();
@@ -121,18 +120,20 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
       updateFile();
       lastJobSucceeded = true;
       lastException = null;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.warn("Failed to run fetch file job for {}", config.remoteUrl(), e);
       lastException = e;
       lastJobSucceeded = false;
     }
   }
 
-  public void setFactory(ResourceResolverFactory factory) {
+  @Reference(policyOption = ReferencePolicyOption.GREEDY)
+  public void setFactory(final ResourceResolverFactory factory) {
     this.factory = factory;
   }
 
-  public void setReplicator(Replicator replicator) {
+  @Reference(policyOption = ReferencePolicyOption.GREEDY)
+  public void setReplicator(final Replicator replicator) {
     this.replicator = replicator;
   }
 
@@ -140,15 +141,15 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
     log.trace("fetchFile");
 
     log.debug("Opening connection to {}", config.remoteUrl());
-    HttpURLConnection con = openConnection();
+    final HttpURLConnection con = openConnection();
     con.setConnectTimeout(config.timeout());
 
-    List<Pair<String, String>> header = Arrays.stream(config.headers()).map(h -> h.split("\\="))
+    final List<Pair<String, String>> header = Arrays.stream(config.headers()).map(h -> h.split("\\="))
         .filter(h -> (h.length >= 2)).map(h -> {
-          String value = Arrays.stream(ArrayUtils.remove(h, 0)).collect(Collectors.joining("="));
+          final String value = Arrays.stream(ArrayUtils.remove(h, 0)).collect(Collectors.joining("="));
           return new ImmutablePair<String, String>(h[0], value);
         }).collect(Collectors.toList());
-    for (Pair<String, String> p : header) {
+    for (final Pair<String, String> p : header) {
       log.trace("Adding request property {}={}", p.getKey(), p.getValue());
       con.addRequestProperty(p.getKey(), p.getValue());
     }
@@ -165,7 +166,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
     try (ResourceResolver resolver = factory
         .getServiceResourceResolver(Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_USER_NAME))) {
-      AssetManager manager = Optional.ofNullable(resolver.adaptTo(AssetManager.class))
+      final AssetManager manager = Optional.ofNullable(resolver.adaptTo(AssetManager.class))
           .orElseThrow(() -> new PersistenceException("Failed to get Asset Manager"));
 
       HttpURLConnection con = null;
@@ -173,12 +174,12 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
       try {
         con = setupConnection();
 
-        int responseCode = con.getResponseCode();
+        final int responseCode = con.getResponseCode();
         if (responseCode == 304) {
           log.debug("Received Not Modified status code, no further action required");
         } else if (Arrays.stream(config.validResponseCodes()).anyMatch(rc -> rc == responseCode)) {
           log.debug("Received valid status code: {}", responseCode);
-          String path = config.damPath();
+          final String path = config.damPath();
           Resource assetResource = resolver.getResource(path);
 
           Asset asset = null;
@@ -187,7 +188,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
               asset = Optional.ofNullable(assetResource.adaptTo(Asset.class))
                   .orElseThrow(() -> new PersistenceException("Failed to adapt Resource to Asset"));
               log.debug("Updating asset: {}", path);
-              for (Rendition r : asset.getRenditions()) {
+              for (final Rendition r : asset.getRenditions()) {
                 asset.removeRendition(r.getName());
               }
               asset.removeRendition("original");
@@ -216,7 +217,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
       log.debug("Update complete!");
 
-    } catch (LoginException e) {
+    } catch (final LoginException e) {
       log.error("Failed to get service user", e);
     }
 

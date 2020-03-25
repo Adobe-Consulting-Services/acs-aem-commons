@@ -21,7 +21,6 @@ package com.adobe.acs.commons.audit_log_search.impl;
 
 import com.adobe.granite.security.user.UserPropertiesManager;
 import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.jackrabbit.api.JackrabbitSession;
