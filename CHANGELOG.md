@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2215 - Added Parameterized granite include to support generic dialog snippets
 
 ### Fixed
+- #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
 - #2220 NPE in Audio component due to XSSApi adapter no longer available
 - #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
