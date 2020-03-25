@@ -19,10 +19,10 @@
  */
 package com.adobe.acs.commons.util;
 
+import com.adobe.acs.commons.util.impl.Activator;
 import com.adobe.cq.sightly.WCMBindings;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import com.day.text.Text;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterManager;
 import org.apache.sling.api.resource.Resource;
@@ -48,7 +48,6 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
     private final SlingBindings myBindings = new SlingBindings();
     private final Resource resource;
 
-    private final AdapterManager adapterManager;
     private final Map<Class<?>, Object> adaptersCache = new HashMap<>();
 
     /**
@@ -62,12 +61,12 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
 
         SlingBindings slingBindings = (SlingBindings) getSlingRequest().getAttribute(ATTR_SLING_BINDINGS);
 
-        this.adapterManager = slingBindings.getSling().getService(AdapterManager.class);
-
         // Using `resolve` instead of `getResource` in order to support requests to non-existent resources
         this.resource = getSlingRequest().getResourceResolver().resolve(getSlingRequest(), path);
 
-        this.myBindings.putAll(slingBindings);
+        if (slingBindings != null) {
+            this.myBindings.putAll(slingBindings);
+        }
         this.myBindings.put(WCMBindings.PROPERTIES, this.resource.getValueMap());
         this.myBindings.put(SlingBindings.RESOURCE, this.resource);
         this.myBindings.put(SlingBindings.REQUEST, this);
@@ -104,7 +103,7 @@ public class OverridePathSlingRequestWrapper extends SlingHttpServletRequestWrap
             result = (AdapterType) this.adaptersCache.get(type);
 
             if (result == null) {
-                AdapterManager mgr = this.adapterManager;
+                AdapterManager mgr = Activator.getAdapterManager();
                 if (mgr == null) {
                     LOG.warn("Unable to adapt request for path {} to {} because AdapterManager is null", this.resource.getPath(), type);
                 } else {

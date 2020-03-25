@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2206 fix sonar warnings; some package versions had to be increased
 - #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
+- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
 
 ### Changed
 - #2208 - Remove the WCMInbox webconsole plugin (#2205)
