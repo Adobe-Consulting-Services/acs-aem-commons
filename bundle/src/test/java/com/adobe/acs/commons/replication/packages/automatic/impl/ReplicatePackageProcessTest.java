@@ -32,6 +32,8 @@ import com.day.cq.workflow.metadata.MetaDataMap;
 
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.resource.LoginException;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -40,18 +42,38 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ReplicatePackageProcessTest {
 
+    private static final String PACKAGE_PATH = "/etc/packages/test";
+    private ReplicatePackageProcess rpp;
+    private AutomaticPackageReplicator apr;
+    private MetaDataMap mdm;
+
+    @Before
+    public void init() {
+
+        rpp = new ReplicatePackageProcess();
+        apr = Mockito.mock(AutomaticPackageReplicator.class);
+        rpp.setAutomaticPackageReplicator(apr);
+        mdm = Mockito.mock(MetaDataMap.class);
+        Mockito.when(mdm.get(WorkflowHelper.PROCESS_ARGS, String.class)).thenReturn(PACKAGE_PATH);
+    }
+
     @Test
     public void testProcess() throws RepositoryException, PackageException, IOException, ReplicationException,
             LoginException, WorkflowException {
-
-        final String packagePath = "/etc/packages/test";
-        final ReplicatePackageProcess rpp = new ReplicatePackageProcess();
-        final AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
-        rpp.setAutomaticPackageReplicator(apr);
-        final MetaDataMap mdm = Mockito.mock(MetaDataMap.class);
-        Mockito.when(mdm.get(WorkflowHelper.PROCESS_ARGS, String.class)).thenReturn(packagePath);
         rpp.execute(null, null, mdm);
-        Mockito.verify(apr).replicatePackage(packagePath);
+        Mockito.verify(apr).replicatePackage(PACKAGE_PATH);
+    }
+
+    @Test
+    public void testException() throws RepositoryException, PackageException, IOException, ReplicationException,
+            LoginException, WorkflowException {
+        Mockito.doThrow(new RepositoryException("")).when(apr).replicatePackage(Mockito.anyString());
+        try {
+            rpp.execute(null, null, mdm);
+            Assert.fail();
+        } catch (WorkflowException we) {
+            // expected
+        }
 
     }
 }

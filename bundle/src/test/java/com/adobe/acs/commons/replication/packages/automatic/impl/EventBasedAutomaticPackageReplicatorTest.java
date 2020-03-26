@@ -31,6 +31,7 @@ import com.day.cq.replication.ReplicationException;
 
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.resource.LoginException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -39,11 +40,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EventBasedAutomaticPackageReplicatorTest {
 
-    @Test
-    public void testEvent()
-            throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
+    private static final String PACKAGE_PATH = "/etc/packages/test";
+    private AutomaticPackageReplicator apr;
+    private EventBasedAutomaticPackageReplicator eb;
 
-        final String packagePath = "/etc/packages/test";
+    @Before
+    public void init() {
+
         final EventBasedAutomaticPackageReplicatorConfig config = new EventBasedAutomaticPackageReplicatorConfig() {
 
             @Override
@@ -58,7 +61,7 @@ public class EventBasedAutomaticPackageReplicatorTest {
 
             @Override
             public String packagePath() {
-                return packagePath;
+                return PACKAGE_PATH;
             }
 
             @Override
@@ -67,12 +70,25 @@ public class EventBasedAutomaticPackageReplicatorTest {
             }
 
         };
-        final EventBasedAutomaticPackageReplicator eb = new EventBasedAutomaticPackageReplicator();
+        eb = new EventBasedAutomaticPackageReplicator();
         eb.activate(config);
-        final AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
+        apr = Mockito.mock(AutomaticPackageReplicator.class);
         eb.setAutomaticPackageReplicator(apr);
-        eb.handleEvent(null);
-        Mockito.verify(apr).replicatePackage(packagePath);
 
+    }
+
+    @Test
+    public void testEvent()
+            throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
+        eb.handleEvent(null);
+        Mockito.verify(apr).replicatePackage(PACKAGE_PATH);
+    }
+
+    @Test
+    public void testFailure()
+            throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
+        Mockito.doThrow(new ReplicationException("")).when(apr).replicatePackage(Mockito.anyString());
+        eb.handleEvent(null);
+        Mockito.verify(apr).replicatePackage(PACKAGE_PATH);
     }
 }

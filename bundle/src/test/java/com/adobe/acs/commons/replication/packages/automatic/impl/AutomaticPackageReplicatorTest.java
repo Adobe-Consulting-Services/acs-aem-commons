@@ -115,7 +115,12 @@ public class AutomaticPackageReplicatorTest {
   public void testRecent()
       throws PackageException, IOException, ReplicationException, LoginException, RepositoryException {
     apr.replicatePackage(PACKAGE_ID);
+    assertEquals(Result.Status.OK, apr.getStatus());
     assertEquals(1, apr.getRecentReplications().length);
     assertTrue(apr.getResultLog().getAggregateStatus() == Result.Status.OK);
+    
+    apr.resetRecentReplications();
+    assertEquals(0, apr.getRecentReplications().length);
+    assertEquals(Result.Status.OK, apr.getStatus());
   }
 }
