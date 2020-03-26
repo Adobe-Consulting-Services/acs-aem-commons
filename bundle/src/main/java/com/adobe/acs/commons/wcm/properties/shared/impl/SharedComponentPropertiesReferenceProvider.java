@@ -89,12 +89,15 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
 
     /**
      * Collect the resourceType of current resource and its children recursively.
-     * Avoided the usage of resource.getResourceType() as it returns the "jcr:primaryType" when the resource doesn't have "sling:resourceType" property.
+     * Avoided the usage of resource.getResourceType() as it returns the "jcr:primaryType"
+     * when the resource doesn't have "sling:resourceType" property.
+     *
      * @param resource {@link Resource}
      */
     private void collectComponentResourceTypes(Resource resource) {
         if (resource != null) {
-            String componentResourceType = resource.getValueMap().get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class);
+            String componentResourceType = resource.getValueMap()
+                .get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class);
             if (StringUtils.isNotEmpty(componentResourceType)) {
                 componentResourceTypes.add(componentResourceType);
             }
@@ -121,46 +124,51 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
         ResourceResolver resourceResolver = resource.getResourceResolver();
         for (String resourceType : componentResourceTypes) {
 
-            if (StringUtils.isNotEmpty(resourceType)) {
+            Resource componentResource = getComponentResource(resourceType, resourceResolver);
+            if (componentResource == null) {
+                continue;
+            }
 
-                String[] resolverSearchPaths = resourceResolver.getSearchPath();
+            if (!componentResource.getResourceType().equalsIgnoreCase("cq:Component")) {
+                continue;
+            }
 
-                for (String searchPath : resolverSearchPaths) {
-                    String tempResourceType = searchPath + resourceType;
-                    if (resourceResolver.getResource(tempResourceType) != null) {
-                        resourceType = searchPath + resourceType;
-                        break;
-                    }
-                }
+            Resource sharedDialog = componentResource.getResourceResolver()
+                .getResource(componentResource.getPath() + "/dialogshared");
+            Resource globalDialog = componentResource.getResourceResolver()
+                .getResource(componentResource.getPath() + "/dialogglobal");
+            if (sharedDialog == null && globalDialog == null) {
+                continue;
+            }
 
-                Resource componentResource = resource.getResourceResolver()
-                    .getResource(resourceType);
-                if (componentResource == null) {
-                    continue;
-                }
-
-                if (!componentResource.getResourceType().equalsIgnoreCase("cq:Component")) {
-                    continue;
-                }
-
-                Resource sharedDialog = componentResource.getResourceResolver()
-                    .getResource(componentResource.getPath() + "/dialogshared");
-                Resource globalDialog = componentResource.getResourceResolver()
-                    .getResource(componentResource.getPath() + "/dialogglobal");
-                if (sharedDialog == null && globalDialog == null) {
-                    continue;
-                }
-
-                Page rootPage = pageRootProvider.getRootPage(resource);
-                if (rootPage != null) {
-                    references.add(new Reference("sharedProperties", getReferenceName(rootPage),
-                        rootPage.getContentResource(),
-                        rootPage.getLastModified() != null ? rootPage.getLastModified()
-                            .getTimeInMillis() : -1L));
-                }
+            Page rootPage = pageRootProvider.getRootPage(resource);
+            if (rootPage != null) {
+                references.add(new Reference("sharedProperties", getReferenceName(rootPage),
+                    rootPage.getContentResource(),
+                    rootPage.getLastModified() != null ? rootPage.getLastModified()
+                        .getTimeInMillis() : -1L));
             }
         }
         return references;
+    }
+
+    /**
+     * Returns the Component Resource by searching the configured resolver search paths ["/libs", "/apps"]
+     * @param resourceType {@link String}
+     * @param resourceResolver {@link ResourceResolver}
+     * @return Resource
+     */
+    private Resource getComponentResource(String resourceType, ResourceResolver resourceResolver) {
+        String[] resolverSearchPaths = resourceResolver.getSearchPath();
+
+        for (String searchPath : resolverSearchPaths) {
+            String tempResourceType = searchPath + resourceType;
+            if (resourceResolver.getResource(tempResourceType) != null) {
+                resourceType = searchPath + resourceType;
+                return resourceResolver.getResource(resourceType);
+            }
+        }
+        return null;
     }
 
     /**
