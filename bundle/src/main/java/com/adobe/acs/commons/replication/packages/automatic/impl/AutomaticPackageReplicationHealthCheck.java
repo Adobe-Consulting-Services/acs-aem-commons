@@ -38,6 +38,9 @@ public class AutomaticPackageReplicationHealthCheck implements HealthCheck {
   @Override
   public Result execute() {
     ResultLog log = ((AutomaticPackageReplicatorImpl) automaticPackageReplicator).getResultLog();
+    if(!log.iterator().hasNext()){
+      return new Result(Result.Status.OK, "No Automatic Package Replications run");
+    }
     return new Result(log);
   }
 

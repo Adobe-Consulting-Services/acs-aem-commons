@@ -47,4 +47,11 @@ public interface AutomaticPackageReplicator {
   @Description("Replicates the package at the specified path")
   public void replicatePackage(String packagePath)
       throws RepositoryException, PackageException, IOException, ReplicationException, LoginException;
+
+
+  /**
+   * Resets the recent replications
+   */
+  @Description("Resets the recent replications")
+  public void resetRecentReplications();
 }

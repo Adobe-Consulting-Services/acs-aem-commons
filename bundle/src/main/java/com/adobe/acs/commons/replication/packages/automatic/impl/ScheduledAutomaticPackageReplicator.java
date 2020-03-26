@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd = ScheduledAutomaticPackageReplicatorConfig.class, factory = true)
 public class ScheduledAutomaticPackageReplicator implements Runnable {
 
-  @ObjectClassDefinition(name = "Scheduled Automatic Package Replicator")
+  @ObjectClassDefinition(name = "	ACS AEM Commons - Scheduled Automatic Package Replicator")
   public @interface ScheduledAutomaticPackageReplicatorConfig {
 
     @AttributeDefinition(name = "Package Path")
@@ -51,7 +51,7 @@ public class ScheduledAutomaticPackageReplicator implements Runnable {
     @AttributeDefinition(name = "Scheduler Expression")
     String scheduler_expression();
 
-    String webconsole_configurationFactory_nameHint() default "Scheduled Automatic Package Replicator <b>{packagePath}</b>";
+    String webconsole_configurationFactory_nameHint() default "Scheduled Automatic Package Replicator <b>{scheduler.expression}->{packagePath}</b>";
 
   }
 

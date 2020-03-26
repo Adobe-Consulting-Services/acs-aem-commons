@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd = EventBasedAutomaticPackageReplicatorConfig.class, factory = true)
 public class EventBasedAutomaticPackageReplicator implements EventHandler {
 
-  @ObjectClassDefinition(name = "Event-Based Automatic Package Replicator")
+  @ObjectClassDefinition(name = "	ACS AEM Commons - Event-Based Automatic Package Replicator")
   public @interface EventBasedAutomaticPackageReplicatorConfig {
 
     @SuppressWarnings({ "squid:S00100" })
@@ -58,7 +58,7 @@ public class EventBasedAutomaticPackageReplicator implements EventHandler {
     @AttributeDefinition(name = "Package Path")
     String packagePath();
 
-    String webconsole_configurationFactory_nameHint() default "Event-Based Automatic Package Replicator <b>]{packagePath}</b>";
+    String webconsole_configurationFactory_nameHint() default "Event-Based Automatic Package Replicator <b>{event.topics}->{packagePath}</b>";
   }
 
   private static final Logger log = LoggerFactory.getLogger(EventBasedAutomaticPackageReplicator.class);

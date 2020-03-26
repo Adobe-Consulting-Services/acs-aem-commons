@@ -57,9 +57,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base implementation to automatically build and replicate a package.
+ * Implementation of to automatically build and replicate a package.
  */
-@Component(service = { AutomaticPackageReplicator.class, DynamicMBean.class })
+@Component(service = { AutomaticPackageReplicator.class, DynamicMBean.class }, property = {
+    "jmx.objectname=com.adobe.acs.commons.replication:type=Automatic Package Replicator" })
 public class AutomaticPackageReplicatorImpl extends AnnotatedStandardMBean implements AutomaticPackageReplicator {
   private static final Logger log = LoggerFactory.getLogger(AutomaticPackageReplicatorImpl.class);
 
@@ -171,6 +172,11 @@ public class AutomaticPackageReplicatorImpl extends AnnotatedStandardMBean imple
   public String[] getRecentReplications() {
     return this.recentReplications.stream().map(e -> e.getStatus().toString() + " - " + e.getMessage())
         .toArray(String[]::new);
+  }
+
+  @Override
+  public void resetRecentReplications() {
+    this.recentReplications.clear();
   }
 
 }
