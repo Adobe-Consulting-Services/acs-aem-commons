@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>4.4.3-SNAPSHOT</version>
+    <version>4.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -46,6 +46,9 @@
         <sl4fj.version>1.7.21</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
         <oakpal.version>1.5.1</oakpal.version>
+
+        <!-- Supress CQRules:CQBP-84-\-dependencies -->
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
     </properties>
 
     <build>
@@ -190,6 +193,20 @@
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
+                    <configuration>
+                        <cndNames>
+                            <cndName>nodetypes/nodetypes.cnd</cndName>
+                        </cndNames>
+                        <jcrNamespaces>
+                            <jcrNamespace>
+                                <prefix>crx</prefix>
+                                <uri>http://www.day.com/crx/1.0</uri>
+                            </jcrNamespace>
+                        </jcrNamespaces>
+                        <jcrPrivileges>
+                            <jcrPrivilege>crx:replicate</jcrPrivilege>
+                        </jcrPrivileges>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.gmaven</groupId>
