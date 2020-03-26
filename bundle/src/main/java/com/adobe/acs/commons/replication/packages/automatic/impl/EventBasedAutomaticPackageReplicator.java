@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd = EventBasedAutomaticPackageReplicatorConfig.class, factory = true)
 public class EventBasedAutomaticPackageReplicator implements EventHandler {
 
-  @ObjectClassDefinition(name = "	ACS AEM Commons - Event-Based Automatic Package Replicator")
+  @ObjectClassDefinition(name = "ACS AEM Commons - Event-Based Automatic Package Replicator")
   public @interface EventBasedAutomaticPackageReplicatorConfig {
 
     @SuppressWarnings({ "squid:S00100" })
