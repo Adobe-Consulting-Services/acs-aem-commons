@@ -45,11 +45,11 @@
               "jcr:primaryType": "nt:unstructured",
               "header": {
                 "logo": "/content/dam/sample-site/logo.png",
-                "sling:resourceType": "aem-activate/components/structure/header"
+                "sling:resourceType": "sample-site/components/structure/header"
               },
               "footer": {
                 "jcr:primaryType": "nt:unstructured",
-                "sling:resourceType": "aem-activate/components/structure/footer",
+                "sling:resourceType": "sample-site/components/structure/footer",
                 "items": {
                   "jcr:primaryType": "nt:unstructured",
                   "item0": {
@@ -91,6 +91,10 @@
               "text": "<p><b>Lorem Ipsum</b>",
               "sling:resourceType": "sample-site/components/content/text",
               "textIsRich": "true"
+            },
+            "timing": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "sample-site/components/content/timing"
             }
           }
         }

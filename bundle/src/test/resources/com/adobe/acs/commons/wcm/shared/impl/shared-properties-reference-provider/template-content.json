@@ -20,7 +20,7 @@
     },
     "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
-      "jcr:title": "Hero Page",
+      "jcr:title": "Content Page",
       "status": "enabled",
       "cq:templateType": "/conf/sample-site/settings/wcm/template-types/empty-page"
     },

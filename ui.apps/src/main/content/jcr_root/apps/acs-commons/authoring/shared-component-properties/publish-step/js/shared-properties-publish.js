@@ -22,15 +22,12 @@
 
         var configOptions = $(".publish-wizard-config").data("config");
 
-        if(configOptions && configOptions.texts && configOptions.texts.types && configOptions.texts.types) {
+        if(configOptions && configOptions.texts && configOptions.texts.types) {
 
-            configOptions.texts.types.sharedProperties = "Shared Component Properties";
+            //add the sharedProperties type to the list of reference types
+            configOptions.texts.types.sharedProperties = "Shared Component Properties/Root Page";
 
-            if (configOptions.wizard) {
-                delete configOptions.wizard;
-            }
-
-            $(".publish-wizard-config").attr("data-config", JSON.stringify(configOptions));
+            $(".publish-wizard-config").data("config", JSON.stringify(configOptions));
         }
 
     });

@@ -643,6 +643,17 @@
           "jcr:uuid": "06069df3-6b94-4525-9509-da0c0b700f43"
         }
       }
+    },
+    "timing": {
+      "jcr:primaryType": "nt:folder",
+      "timing.jsp": {
+        "jcr:primaryType": "nt:file",
+        "jcr:content": {
+          "jcr:primaryType": "nt:resource",
+          "jcr:mimeType": "text/plain",
+          ":jcr:data": 5964
+        }
+      }
     }
   }
 }

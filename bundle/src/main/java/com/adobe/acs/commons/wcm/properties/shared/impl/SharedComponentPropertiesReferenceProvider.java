@@ -121,9 +121,7 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
                     continue;
                 }
 
-                com.day.cq.wcm.api.components.Component component = componentResource
-                    .adaptTo(com.day.cq.wcm.api.components.Component.class);
-                if (component == null) {
+                if (!componentResource.getResourceType().equalsIgnoreCase("cq:Component")) {
                     continue;
                 }
 
