@@ -9,15 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+## [4.5.0] - 2020-03-25
+
 ### Added
 - #2215 - Added Parameterized granite include to support generic dialog snippets
 
 ### Fixed
+- #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
 - #2220 NPE in Audio component due to XSSApi adapter no longer available
 - #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
 - #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
+- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
 
 ### Changed
 - #2208 - Remove the WCMInbox webconsole plugin (#2205)
