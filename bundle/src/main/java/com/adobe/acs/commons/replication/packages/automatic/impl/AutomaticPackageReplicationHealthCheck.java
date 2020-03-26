@@ -25,8 +25,8 @@ import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.apache.sling.hc.api.ResultLog;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import aQute.bnd.annotation.component.Reference;
 
 @Component(service = HealthCheck.class, immediate = true, property = {
     HealthCheck.NAME + "=Automatic Package Replication", HealthCheck.TAGS + "=replication",

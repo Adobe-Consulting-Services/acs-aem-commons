@@ -100,7 +100,8 @@ public class AutomaticPackageReplicatorImpl extends AnnotatedStandardMBean imple
     boolean succeeded = false;
     try (ResourceResolver resolver = getResourceResolver()) {
 
-      JcrPackageManager packageManager = packaging.getPackageManager(resolver.adaptTo(Session.class));
+      Session session = resolver.adaptTo(Session.class);
+      JcrPackageManager packageManager = packaging.getPackageManager(session);
       final PackageId packageId = new PackageId(packagePath);
 
       // check if the package exists
@@ -116,8 +117,7 @@ public class AutomaticPackageReplicatorImpl extends AnnotatedStandardMBean imple
       log.debug("Replicating package {}", packagePath);
       final Node pkgNode = Optional.ofNullable(jcrPackage.getNode())
           .orElseThrow(() -> new RepositoryException("Failed to get package node"));
-      this.replicator.replicate(packageManager.getPackageRoot().getSession(), ReplicationActionType.ACTIVATE,
-          pkgNode.getPath());
+      this.replicator.replicate(session, ReplicationActionType.ACTIVATE, pkgNode.getPath());
 
       log.debug("Package {} replicated successfully!", packagePath);
       fireEvent(OSGI_EVENT_REPLICATED_TOPIC, packagePath);

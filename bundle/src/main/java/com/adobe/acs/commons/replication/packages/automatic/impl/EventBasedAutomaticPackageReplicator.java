@@ -57,6 +57,8 @@ public class EventBasedAutomaticPackageReplicator implements EventHandler {
 
     @AttributeDefinition(name = "Package Path")
     String packagePath();
+
+    String webconsole_configurationFactory_nameHint() default "Event-Based Automatic Package Replicator <b>]{packagePath}</b>";
   }
 
   private static final Logger log = LoggerFactory.getLogger(EventBasedAutomaticPackageReplicator.class);

@@ -51,6 +51,8 @@ public class ScheduledAutomaticPackageReplicator implements Runnable {
     @AttributeDefinition(name = "Scheduler Expression")
     String scheduler_expression();
 
+    String webconsole_configurationFactory_nameHint() default "Scheduled Automatic Package Replicator <b>{packagePath}</b>";
+
   }
 
   private static final Logger log = LoggerFactory.getLogger(ScheduledAutomaticPackageReplicator.class);

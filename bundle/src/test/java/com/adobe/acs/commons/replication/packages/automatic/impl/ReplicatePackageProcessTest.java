@@ -18,14 +18,13 @@
  * #L%
  */
 
-package com.adobe.acs.commons.replication.packages.impl;
+package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.io.IOException;
 
 import javax.jcr.RepositoryException;
 
 import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicator;
-import com.adobe.acs.commons.replication.packages.automatic.impl.ReplicatePackageProcess;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.workflow.WorkflowException;
@@ -46,10 +45,10 @@ public class ReplicatePackageProcessTest {
             LoginException, WorkflowException {
 
         final String packagePath = "/etc/packages/test";
-        ReplicatePackageProcess rpp = new ReplicatePackageProcess();
-        AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
+        final ReplicatePackageProcess rpp = new ReplicatePackageProcess();
+        final AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
         rpp.setAutomaticPackageReplicator(apr);
-        MetaDataMap mdm = Mockito.mock(MetaDataMap.class);
+        final MetaDataMap mdm = Mockito.mock(MetaDataMap.class);
         Mockito.when(mdm.get(WorkflowHelper.PROCESS_ARGS, String.class)).thenReturn(packagePath);
         rpp.execute(null, null, mdm);
         Mockito.verify(apr).replicatePackage(packagePath);

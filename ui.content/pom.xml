@@ -171,9 +171,6 @@
                     been created for prior versions -->
                     <forcedRoots>
                         <forcedRoot>
-                            <path>/etc/acs-commons/automatic-package-replication/default</path>
-                        </forcedRoot>
-                        <forcedRoot>
                             <path>/etc/acs-commons/bulk-workflow-manager/default</path>
                         </forcedRoot>
                         <forcedRoot>

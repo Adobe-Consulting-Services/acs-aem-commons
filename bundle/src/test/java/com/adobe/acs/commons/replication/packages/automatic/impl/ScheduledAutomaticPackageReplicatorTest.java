@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.replication.packages.impl;
+package com.adobe.acs.commons.replication.packages.automatic.impl;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -26,8 +26,7 @@ import java.lang.annotation.Annotation;
 import javax.jcr.RepositoryException;
 
 import com.adobe.acs.commons.replication.packages.automatic.AutomaticPackageReplicator;
-import com.adobe.acs.commons.replication.packages.automatic.impl.EventBasedAutomaticPackageReplicator;
-import com.adobe.acs.commons.replication.packages.automatic.impl.EventBasedAutomaticPackageReplicator.EventBasedAutomaticPackageReplicatorConfig;
+import com.adobe.acs.commons.replication.packages.automatic.impl.ScheduledAutomaticPackageReplicator.ScheduledAutomaticPackageReplicatorConfig;
 import com.day.cq.replication.ReplicationException;
 
 import org.apache.jackrabbit.vault.packaging.PackageException;
@@ -38,22 +37,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventBasedAutomaticPackageReplicatorTest {
+public class ScheduledAutomaticPackageReplicatorTest {
 
     @Test
-    public void testEvent()
+    public void testRunnable()
             throws RepositoryException, PackageException, IOException, ReplicationException, LoginException {
 
         final String packagePath = "/etc/packages/test";
-        EventBasedAutomaticPackageReplicatorConfig config = new EventBasedAutomaticPackageReplicatorConfig() {
+        final ScheduledAutomaticPackageReplicatorConfig config = new ScheduledAutomaticPackageReplicatorConfig() {
 
             @Override
             public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-
-            @Override
-            public String event_topics() {
                 return null;
             }
 
@@ -62,12 +56,22 @@ public class EventBasedAutomaticPackageReplicatorTest {
                 return packagePath;
             }
 
+            @Override
+            public String scheduler_expression() {
+                return null;
+            }
+
+            @Override
+            public String webconsole_configurationFactory_nameHint() {
+                return null;
+            }
+
         };
-        EventBasedAutomaticPackageReplicator eb = new EventBasedAutomaticPackageReplicator();
-        eb.activate(config);
-        AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
-        eb.setAutomaticPackageReplicator(apr);
-        eb.handleEvent(null);
+        final ScheduledAutomaticPackageReplicator sb = new ScheduledAutomaticPackageReplicator();
+        sb.activate(config);
+        final AutomaticPackageReplicator apr = Mockito.mock(AutomaticPackageReplicator.class);
+        sb.setAutomaticPackageReplicator(apr);
+        sb.run();
         Mockito.verify(apr).replicatePackage(packagePath);
 
     }
