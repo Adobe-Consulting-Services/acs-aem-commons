@@ -79,7 +79,7 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
             }
 
             if (componentResourceTypes.size() > 0) {
-                return findSharedComponents(componentResourceTypes, resource);
+                references = findSharedComponents(resource);
             }
         }
 
@@ -112,15 +112,14 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
      * Iterates through the given collection of resourceTypes and finds all the components that has
      * shared dialog, then adds the root page of the given resource to the list.
      *
-     * @param resourceTypes {@link Set}
      * @param resource {@link Resource}
      * @return references
      */
-    private List<Reference> findSharedComponents(Set<String> resourceTypes, Resource resource) {
+    private List<Reference> findSharedComponents(Resource resource) {
         List<Reference> references = new ArrayList<>();
 
         ResourceResolver resourceResolver = resource.getResourceResolver();
-        for (String resourceType : resourceTypes) {
+        for (String resourceType : componentResourceTypes) {
 
             if (StringUtils.isNotEmpty(resourceType)) {
 

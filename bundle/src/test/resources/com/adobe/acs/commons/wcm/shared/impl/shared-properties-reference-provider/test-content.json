@@ -4,6 +4,8 @@
     "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
       "jcr:title": "English",
+      "cq:lastModified":"Mon Mar 23 2020 14:30:26 GMT-0600",
+      "cq:lastModifiedBy":"admin",
       "cq:template": "/conf/sample-site/settings/wcm/templates/content-page",
       "sling:resourceType": "sample-site/components/structure/page",
       "root": {
