@@ -62,7 +62,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
         }
         dialog.initAnnotationValues(annotation);
         setResourceTypeFromClass();
-        root = "/apps/" + resourceType + "/cq:dialog";
+        root = "/apps/" + resourceType + "/" + annotation.dialogNodeName();
         AbstractResourceImpl formResource = (AbstractResourceImpl) dialog.getFormResource();
         AbstractResourceImpl formItems = ((AbstractResourceImpl) formResource.getChild("items")).cloneResource();
         SyntheticResourceBuilder rb = new SyntheticResourceBuilder(root, isComponent ? "cq/gui/components/authoring/dialog" : formResource.getResourceType());

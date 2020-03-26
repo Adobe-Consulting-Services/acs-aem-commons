@@ -54,4 +54,10 @@ public @interface DialogProvider {
      * @return If true (default) all form fields are prefixed with "./"
      */
     boolean forceDotSlashPrefix() default true;
+
+    /**
+     * @return The dialog node name.
+     */
+    String dialogNodeName() default "cq:dialog";
+
 }
