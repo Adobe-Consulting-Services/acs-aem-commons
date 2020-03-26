@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Added
+- #2238 - Added a feature to Publish the Site Root Page along with the publishing page if Shared/Global Component content modified
+
+
 ## [4.5.0] - 2020-03-25
 
 ### Added
