@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,22 +27,22 @@ import com.adobe.acs.commons.wcm.impl.PageRootProviderConfig;
 import com.adobe.acs.commons.wcm.impl.PageRootProviderMultiImpl;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
-import io.wcm.testing.mock.aem.junit5.AemContext;
-import io.wcm.testing.mock.aem.junit5.AemContextExtension;
+import io.wcm.testing.mock.aem.junit.AemContext;
 import java.util.List;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.testing.resourceresolver.MockResourceResolverFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(AemContextExtension.class)
-class SharedComponentPropertiesReferenceProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class SharedComponentPropertiesReferenceProviderTest {
 
-    SharedComponentPropertiesReferenceProvider sharedPropertiesReferenceProvider;
-    private AemContext aemContext;
+    private SharedComponentPropertiesReferenceProvider sharedPropertiesReferenceProvider;
 
     private static final String CONTENT_PATH = "/content/sample-site";
     private static final String SHARED_PROPS_REFERENCE_PROVIDER_BASE = "/com/adobe/acs/commons/wcm/shared/impl/shared-properties-reference-provider";
@@ -55,9 +55,11 @@ class SharedComponentPropertiesReferenceProviderTest {
     private static final String HOME_PAGE_PATH = "/content/sample-site/en/home";
     private static final String CONTENT_TEMPLATE_PATH = "/conf/sample-site/settings/wcm/templates/content-page";
 
-    @BeforeEach
-    private void setUp() {
-        aemContext = new AemContext();
+    @Rule
+    public final AemContext aemContext = new AemContext();
+
+    @Before
+    public void setUp() {
 
         aemContext.registerInjectActivateService(new PageRootProviderConfig(), "page.root.path", LANGUAGE_ROOT_PAGE_PATH);
         aemContext.registerInjectActivateService(new PageRootProviderMultiImpl());
@@ -76,7 +78,6 @@ class SharedComponentPropertiesReferenceProviderTest {
 
     @Test
     public void testFindReferences() {
-
         Resource resource = aemContext.currentResource(HOME_PAGE_PATH);
 
         List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
