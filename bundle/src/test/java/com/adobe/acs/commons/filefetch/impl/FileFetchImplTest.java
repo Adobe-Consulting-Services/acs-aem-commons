@@ -24,20 +24,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.Replicator;
 
@@ -46,193 +47,76 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 public class FileFetchImplTest {
 
   @Rule
-  public final AemContext context = new AemContext();
+  public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
   private FileFetcherImpl fileFetch;
+  
+  HttpURLConnection mockConnection;
+  
+  Replicator replicator;
+  
+  Map<String, Object> props = new HashMap<>();
 
   @Before
-  public void init() throws LoginException {
-    fileFetch = new FileFetcherImpl() {
-      protected HttpURLConnection openConnection() throws IOException {
+	public void init() throws IOException, Exception {
 
-        HttpURLConnection huc = Mockito.mock(HttpURLConnection.class);
-        if ("https://www.danklco.com/me.png".equals(config.remoteUrl())) {
-          Mockito.when(huc.getResponseCode()).thenReturn(200);
-          Mockito.when(huc.getInputStream()).thenReturn(new ByteArrayInputStream("Hello World".getBytes()));
-        } else if ("https://www.perficientdigital.com/logo.png".equals(config.remoteUrl())) {
-          Mockito.when(huc.getResponseCode()).thenReturn(304);
-        } else {
-          Mockito.when(huc.getResponseCode()).thenReturn(400);
-        }
-        Mockito.when(huc.getHeaderField("Last-Modified")).thenReturn("1970-01-01");
-        return huc;
-      }
-    };
+		replicator = Mockito.mock(Replicator.class);
+		context.registerService(Replicator.class, replicator);
 
-    ResourceResolverFactory factory = Mockito.mock(ResourceResolverFactory.class);
-    Mockito.when(factory.getServiceResourceResolver(Mockito.any())).thenReturn(context.resourceResolver());
-    fileFetch.setFactory(factory);
+		ResourceResolverFactory rrf = context.getService(ResourceResolverFactory.class);
+		context.registerService(ResourceResolverFactory.class, rrf);
 
-    fileFetch.setReplicator(Mockito.mock(Replicator.class));
-  }
+		fileFetch = spy(new FileFetcherImpl());
+
+		props.put("damPath", "/content/dam/an-asset.png");
+		props.put("headers", new Object[] { "Hi=123" });
+		props.put("mimeType", "image/png");
+		props.put("scheduler.expression", "* * * * *");
+		props.put("remoteUrl", "https://www.danklco.com/me.png");
+		props.put("validResponseCodes", "200");
+		props.put("timeout", "5000");
+
+		mockConnection = Mockito.mock(HttpURLConnection.class);
+		Mockito.when(mockConnection.getHeaderField("Last-Modified")).thenReturn("1970-01-01");
+		Mockito.doReturn(mockConnection).when(fileFetch).openConnection();
+	}
 
   @Test
   public void testFetch() throws IOException, ReplicationException {
-    fileFetch.activate(new FileFetchConfiguration() {
+	  
+		Mockito.when(mockConnection.getResponseCode()).thenReturn(200);
+		Mockito.when(mockConnection.getInputStream()).thenReturn(new ByteArrayInputStream("Hello World".getBytes()));
+		context.registerInjectActivateService(fileFetch, props);
 
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return null;
-      }
+		assertNull(fileFetch.getLastException());
+		assertTrue(fileFetch.isLastJobSucceeded());
+		assertEquals("1970-01-01", fileFetch.getLastModified());
 
-      @Override
-      public String damPath() {
-        return "/content/dam/an-asset.png";
-      }
+		fileFetch.updateFile();
 
-      @Override
-      public String[] headers() {
-        return new String[] { "Hi=123" };
-      }
-
-      @Override
-      public String mimeType() {
-        return "image/png";
-      }
-
-      @Override
-      public String remoteUrl() {
-        return "https://www.danklco.com/me.png";
-      }
-
-      @Override
-      public String scheduler_expression() {
-        return "* * * * *";
-      }
-
-      @Override
-      public int[] validResponseCodes() {
-        return new int[] { 200 };
-      }
-
-      @Override
-      public int timeout() {
-        return 5000;
-      }
-
-    });
-
-    assertNull(fileFetch.getLastException());
-    assertTrue(fileFetch.isLastJobSucceeded());
-    assertEquals("1970-01-01",fileFetch.getLastModified());
-
-    fileFetch.updateFile();
-
-    assertNull(fileFetch.getLastException());
-    assertTrue(fileFetch.isLastJobSucceeded());
+		assertNull(fileFetch.getLastException());
+		assertTrue(fileFetch.isLastJobSucceeded());
   }
   
 
   @Test
   public void testFetchNoUpdate() throws IOException, ReplicationException {
-    fileFetch.activate(new FileFetchConfiguration() {
+	  
+		Mockito.when(mockConnection.getResponseCode()).thenReturn(304);
+		context.registerInjectActivateService(fileFetch, props);
 
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return null;
-      }
-
-      @Override
-      public String damPath() {
-        return "/content/dam/an-asset.png";
-      }
-
-      @Override
-      public String[] headers() {
-        return new String[] { "Hi=123" };
-      }
-
-      @Override
-      public String mimeType() {
-        return "image/png";
-      }
-
-      @Override
-      public String remoteUrl() {
-        return "https://www.perficientdigital.com/logo.png";
-      }
-
-      @Override
-      public String scheduler_expression() {
-        return "* * * * *";
-      }
-
-      @Override
-      public int[] validResponseCodes() {
-        return new int[] { 200 };
-      }
-
-      @Override
-      public int timeout() {
-        return 5000;
-      }
-
-
-    });
-
-    assertNull(fileFetch.getLastException());
-    assertTrue(fileFetch.isLastJobSucceeded());
-    assertEquals(null,fileFetch.getLastModified());
+		assertNull(fileFetch.getLastException());
+		assertTrue(fileFetch.isLastJobSucceeded());
+		assertEquals(null, fileFetch.getLastModified());
   }
 
   @Test
   public void testBadUrl() throws IOException, ReplicationException {
+	  
+		Mockito.when(mockConnection.getResponseCode()).thenReturn(400);
+		context.registerInjectActivateService(fileFetch, props);
 
-    fileFetch.activate(new FileFetchConfiguration() {
-
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return null;
-      }
-
-      @Override
-      public String damPath() {
-        return "/content/dam/an-asset.png";
-      }
-
-      @Override
-      public String[] headers() {
-        return new String[] { "Hi=123" };
-      }
-
-      @Override
-      public String mimeType() {
-        return "image/png";
-      }
-
-      @Override
-      public String remoteUrl() {
-        return "https://www.adobe.com/logo.png";
-      }
-
-      @Override
-      public String scheduler_expression() {
-        return "* * * * *";
-      }
-
-      @Override
-      public int[] validResponseCodes() {
-        return new int[] { 200 };
-      }
-
-      @Override
-      public int timeout() {
-        return 5000;
-      }
-
-    });
-
-    assertNotNull(fileFetch.getLastException());
-    assertFalse(fileFetch.isLastJobSucceeded());
+		assertNotNull(fileFetch.getLastException());
+		assertFalse(fileFetch.isLastJobSucceeded());
 
   }
 
