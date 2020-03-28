@@ -74,6 +74,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   protected FileFetchConfiguration config;
 
+  @Reference(policyOption = ReferencePolicyOption.GREEDY)
   private ResourceResolverFactory factory;
 
   private Exception lastException = null;
@@ -82,6 +83,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   private String lastModified = null;
 
+  @Reference(policyOption = ReferencePolicyOption.GREEDY)
   private Replicator replicator;
 
   @Activate
@@ -127,15 +129,6 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
     }
   }
 
-  @Reference(policyOption = ReferencePolicyOption.GREEDY)
-  public void setFactory(final ResourceResolverFactory factory) {
-    this.factory = factory;
-  }
-
-  @Reference(policyOption = ReferencePolicyOption.GREEDY)
-  public void setReplicator(final Replicator replicator) {
-    this.replicator = replicator;
-  }
 
   private HttpURLConnection setupConnection() throws IOException {
     log.trace("fetchFile");
