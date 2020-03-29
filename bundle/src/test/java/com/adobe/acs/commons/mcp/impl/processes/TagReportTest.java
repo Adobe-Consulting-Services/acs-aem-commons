@@ -49,7 +49,7 @@ import junit.framework.Assert;
 public class TagReportTest {
 
   @Rule
-  public AemContext ctx = new AemContext(ResourceResolverType.JCR_MOCK);
+  public AemContext ctx = new AemContext();
 
   @Mock
   private ActionManager actionManager;

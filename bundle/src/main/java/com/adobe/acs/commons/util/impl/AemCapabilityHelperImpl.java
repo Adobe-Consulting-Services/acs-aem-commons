@@ -19,26 +19,26 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import javax.jcr.RepositoryException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.jcr.api.SlingRepository;
-
 import com.adobe.acs.commons.util.AemCapabilityHelper;
+import org.apache.commons.lang.StringUtils;
+import org.apache.sling.jcr.api.SlingRepository;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.jcr.RepositoryException;
 
 /**
  * ACS AEM Commons - AEM Capability Helper
+ *
  * Provides information about the current AEM installation and what it can and can't do.
+ *
+ * @deprecated All supported AEM's run on Oak repositories now, so this will always return true.
  */
+@Deprecated
 @Component
-@Service
 public class AemCapabilityHelperImpl implements AemCapabilityHelper {
-
     @Reference
-    private SlingRepository slingRepository;
+    private transient SlingRepository slingRepository;
 
     @Override
     public final boolean isOak() throws RepositoryException {
