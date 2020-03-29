@@ -3,16 +3,11 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants;
 /**
  * This class will be used to store Indesign Server Specific Constants
  */
-public class DeckDynamoIDSConstants {
+public class DynamicDeckDynamoIDSConstants {
 
     public static final String IDS_EXTENDSCRIPT_JOB = "dam/proxy/ids/job";
     public static final String IDS_JOB_PAYLOAD = "ids.job.payload";
     public static final String IDS_JOB_SCRIPT = "ids.job.script";
-    /**
-     * Sling Context Aware Configuration bucket and base (relative) path
-     */
-    public static final String IDS_JOB_DECOUPLED = "ids.job.decoupled";
-    public static final String IDS_JOB_PAGES_REGEX = "ids.job.pages.regex";
 
     /**
      * Job parameter for created InDesign Snippet name prefix

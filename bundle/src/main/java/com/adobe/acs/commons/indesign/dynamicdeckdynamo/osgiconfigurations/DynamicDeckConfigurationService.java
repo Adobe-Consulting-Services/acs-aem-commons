@@ -5,22 +5,22 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 
-@Component(immediate = true, service = DeckDynamoConfigurationService.class)
-@Designate(ocd = DeckDynamoConfiguration.class)
-public class DeckDynamoConfigurationService {
+@Component(immediate = true, service = DynamicDeckConfigurationService.class)
+@Designate(ocd = DynamicDeckConfiguration.class)
+public class DynamicDeckConfigurationService {
 
     private String placeholderImagePath;
     private String collectionQuery;
 
 
     @Activate
-    protected void activate(DeckDynamoConfiguration config) {
+    protected void activate(DynamicDeckConfiguration config) {
         placeholderImagePath = config.placeholderImagePath();
         collectionQuery = config.collectionQuery();
     }
 
     @Modified
-    protected void modified(DeckDynamoConfiguration config) {
+    protected void modified(DynamicDeckConfiguration config) {
         placeholderImagePath = config.placeholderImagePath();
         collectionQuery = config.collectionQuery();
     }

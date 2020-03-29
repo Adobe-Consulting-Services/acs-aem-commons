@@ -1,15 +1,14 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoIDSConstants;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoIDSConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DynamicDeckConfigurationService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DeckDynamoService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
 import com.adobe.dam.print.ids.PrintFormat;
-import com.adobe.dam.print.ids.StringConstants;
 import com.day.cq.commons.RangeIterator;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.commons.jcr.JcrUtil;
@@ -35,16 +34,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Component(immediate = true, service = DeckDynamoService.class)
-public class DeckDynamoServiceImpl implements DeckDynamoService {
+@Component(immediate = true, service = DynamicDeckService.class)
+public class DynamicDeckServiceImpl implements DynamicDeckService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeckDynamoServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckServiceImpl.class);
     private static final String DEFAULT_PAGES_REGEX = "^page[0-9]*.jpg$";
     private static final PrintFormat[] formats = {PrintFormat.JPG, PrintFormat.INDD, PrintFormat.PDF};
     private static final List<PrintFormat> allFormats = Arrays.asList(formats);
 
     @Reference
-    private DeckDynamoConfigurationService configurationService;
+    private DynamicDeckConfigurationService configurationService;
     @Reference
     private XMLGeneratorService xmlGeneratorService;
     @Reference
@@ -53,13 +52,13 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
     @Override
     public String createDeck(String deckName, String masterAssetPath, List<Resource> assetResourceList, String templateFolderPath,
                              String destinationFolderPath, ResourceResolver resourceResolver)
-            throws DeckDynamoException {
+            throws DynamicDeckDynamoException {
 
-        String inddTemplatePath = DeckDynamoUtils.findFileUnderFolderByExtension(templateFolderPath, DeckDynamoConstants.INDD_EXTENSION, resourceResolver);
-        String annotatedXmlPath = DeckDynamoUtils.findFileUnderFolderByExtension(templateFolderPath, DeckDynamoConstants.XML_EXTENSION, resourceResolver);
+        String inddTemplatePath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderPath, DynamicDeckDynamoConstants.INDD_EXTENSION, resourceResolver);
+        String annotatedXmlPath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderPath, DynamicDeckDynamoConstants.XML_EXTENSION, resourceResolver);
 
         if (StringUtils.isEmpty(inddTemplatePath) || StringUtils.isEmpty(annotatedXmlPath)) {
-            throw new DeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderPath);
+            throw new DynamicDeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderPath);
         }
 
         StringBuilder idspScriptArgs = new StringBuilder();
@@ -67,31 +66,31 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
 
         Resource destinationFolderResource = resourceResolver.getResource(destinationFolderPath);
         if (null == destinationFolderResource) {
-            throw new DeckDynamoException("Destination folder resource is null, hence exiting the deck generation process.");
+            throw new DynamicDeckDynamoException("Destination folder resource is null, hence exiting the deck generation process.");
         }
 
 
-        Asset damAsset = DeckDynamoUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + DeckDynamoConstants.DOT + DeckDynamoConstants.INDD_EXTENSION, resourceResolver);
+        Asset damAsset = DynamicDeckUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.INDD_EXTENSION, resourceResolver);
         if (damAsset == null) {
-            throw new DeckDynamoException("Dynamic Deck document not created at the destination : " + destinationFolderResource.getPath());
+            throw new DynamicDeckDynamoException("Dynamic Deck document not created at the destination : " + destinationFolderResource.getPath());
         }
 
-        InputStream templateXmlInputStream = DeckDynamoUtils.getAssetInputStreamByPath(resourceResolver, annotatedXmlPath);
+        InputStream templateXmlInputStream = DynamicDeckUtils.getAssetInputStreamByPath(resourceResolver, annotatedXmlPath);
         if (null == templateXmlInputStream) {
-            throw new DeckDynamoException("InDesign Template XML is null, hence exiting the deck generation process");
+            throw new DynamicDeckDynamoException("InDesign Template XML is null, hence exiting the deck generation process");
         }
 
         List<XMLResourceIterator> assetItrList = new ArrayList<>();
-        assetItrList.add(new XMLResourceIterator(DeckDynamoConstants.XML_SECTION_TYPE_GENERIC, assetResourceList.listIterator()));
+        assetItrList.add(new XMLResourceIterator(DynamicDeckDynamoConstants.XML_SECTION_TYPE_GENERIC, assetResourceList.listIterator()));
 
         String processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
                 resourceResolver.getResource(masterAssetPath), damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
 
-        StringBuilder exportFormats = DeckDynamoUtils.addExportFormat(damAsset, allFormats);
-        StringBuilder imagePaths = DeckDynamoUtils.getImagePaths(inddImageList, configurationService.getPlaceholderImagePath());
+        StringBuilder exportFormats = DynamicDeckUtils.addExportFormat(damAsset, allFormats);
+        StringBuilder imagePaths = DynamicDeckUtils.getImagePaths(inddImageList, configurationService.getPlaceholderImagePath());
 
         addIdsScriptArgs(inddTemplatePath, damAsset.adaptTo(Resource.class), idspScriptArgs, imagePaths, processedXmlPath, exportFormats);
-        DeckDynamoUtils.commit(resourceResolver);
+        DynamicDeckUtils.commit(resourceResolver);
 
         return damAsset.getPath();
     }
@@ -106,18 +105,18 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
      * @return
      */
     @Override
-    public List<Resource> fetchAssetListFromCollection(String collectionPath, ResourceResolver resourceResolver) throws DeckDynamoException {
+    public List<Resource> fetchAssetListFromCollection(String collectionPath, ResourceResolver resourceResolver) throws DynamicDeckDynamoException {
         List<Resource> arrayList = new ArrayList<>();
         if (StringUtils.isBlank(collectionPath)) {
-            throw new DeckDynamoException("Resource Path is Null/Empty ");
+            throw new DynamicDeckDynamoException("Resource Path is Null/Empty ");
         }
         Resource collectionResource = resourceResolver.getResource(collectionPath);
         if (collectionResource == null) {
-            throw new DeckDynamoException("No Resource exists at Supplied Path :" + collectionPath);
+            throw new DynamicDeckDynamoException("No Resource exists at Supplied Path :" + collectionPath);
         }
 
         if (DamUtil.isSmartCollection(collectionResource)) {
-            return DeckDynamoUtils.fetchSmartCollectionResourceList(collectionResource);
+            return DynamicDeckUtils.fetchSmartCollectionResourceList(collectionResource);
         }
 
         Iterator<Asset> assets = DamUtil.getAssets(collectionResource);
@@ -142,11 +141,11 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
     public List<Resource> fetchAssetListFromTags(String tagsString, ResourceResolver resourceResolver) {
         TagManager tagManager = resourceResolver.adaptTo(TagManager.class);
         List<Resource> arrayList = new ArrayList<>();
-        String[] tagsArray = StringUtils.split(tagsString, DeckDynamoConstants.COMMA);
+        String[] tagsArray = StringUtils.split(tagsString, DynamicDeckDynamoConstants.COMMA);
         Arrays.stream(tagsArray).forEach(tag -> {
             RangeIterator<Resource> tags = tagManager.find(tag);
             tags.forEachRemaining(taggedResource -> {
-                if (taggedResource.getPath().startsWith(DeckDynamoConstants.DAM_ROOT) && taggedResource.getPath().endsWith(DeckDynamoConstants.SLASH + DeckDynamoConstants.DAM_METADATA)) {
+                if (taggedResource.getPath().startsWith(DynamicDeckDynamoConstants.DAM_ROOT) && taggedResource.getPath().endsWith(DynamicDeckDynamoConstants.SLASH + DynamicDeckDynamoConstants.DAM_METADATA)) {
                     Asset taggedAsset = taggedResource.getParent().getParent().adaptTo(Asset.class);
                     if (null != taggedAsset) {
                         arrayList.add(taggedAsset.adaptTo(Resource.class));
@@ -180,15 +179,15 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
         }
         contentProperties.put("exportJobId", exportJobId);
         contentProperties.put(DamConstants.DAM_ASSET_STATE, DamConstants.DAM_ASSET_STATE_PROCESSING);
-        contentProperties.put(DeckDynamoConstants.PN_INDD_TEMPLATE_TYPE, DeckDynamoConstants.DECK_TYPE);
+        contentProperties.put(DynamicDeckDynamoConstants.PN_INDD_TEMPLATE_TYPE, DynamicDeckDynamoConstants.DECK_TYPE);
 
     }
 
 
-    private Job addJob(Asset master, Map<String, Object> props, JobManager jobManager) throws DeckDynamoException {
-        Job offloadingJob = jobManager.addJob(DeckDynamoIDSConstants.IDS_EXTENDSCRIPT_JOB, props);
+    private Job addJob(Asset master, Map<String, Object> props, JobManager jobManager) throws DynamicDeckDynamoException {
+        Job offloadingJob = jobManager.addJob(DynamicDeckDynamoIDSConstants.IDS_EXTENDSCRIPT_JOB, props);
         if (offloadingJob == null) {
-            throw new DeckDynamoException("Job manager is not able to create job");
+            throw new DynamicDeckDynamoException("Job manager is not able to create job");
         }
         addExportJobProperty(master, offloadingJob.getId());
         return offloadingJob;
@@ -196,20 +195,20 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
 
     private void addIdsScriptArgs(String templatePath, Resource masterAssetResource,
                                   StringBuilder idspScriptArgs, StringBuilder imagePaths, String formattedXMLPath,
-                                  StringBuilder exportFormats) throws DeckDynamoException {
+                                  StringBuilder exportFormats) throws DynamicDeckDynamoException {
         Map<String, Object> props = new HashMap<>();
         String[] scriptPaths = new String[]{
-                DeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "json2.jsx/" + JcrConstants.JCR_CONTENT,
-                DeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "cq-lib.jsx/" + JcrConstants.JCR_CONTENT,
-                DeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "dynamic-deck.jsx/" + JcrConstants.JCR_CONTENT};
+                DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "json2.jsx/" + JcrConstants.JCR_CONTENT,
+                DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "cq-lib.jsx/" + JcrConstants.JCR_CONTENT,
+                DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "dynamic-deck.jsx/" + JcrConstants.JCR_CONTENT};
 
 
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ASSET_NAME, masterAssetResource.getName()));
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_TEMPLATE_PATH, templatePath));
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ARGS_TAG_XML, formattedXMLPath));
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ARGS_IMAGE_LIST, imagePaths.toString()));
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ARGS_FORMATS, exportFormats.toString()));
-        idspScriptArgs.append(DeckDynamoUtils.createIDSPScriptArg(DeckDynamoIDSConstants.IDS_ARGS_TYPE, DeckDynamoConstants.DECK_TYPE));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_ASSET_NAME, masterAssetResource.getName()));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_TEMPLATE_PATH, templatePath));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_ARGS_TAG_XML, formattedXMLPath));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_ARGS_IMAGE_LIST, imagePaths.toString()));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_ARGS_FORMATS, exportFormats.toString()));
+        idspScriptArgs.append(DynamicDeckUtils.createIDSPScriptArg(DynamicDeckDynamoIDSConstants.IDS_ARGS_TYPE, DynamicDeckDynamoConstants.DECK_TYPE));
 
         addIDSProperties(masterAssetResource.getPath(), idspScriptArgs, props, scriptPaths);
 
@@ -217,10 +216,10 @@ public class DeckDynamoServiceImpl implements DeckDynamoService {
     }
 
     private void addIDSProperties(String assetPath, StringBuilder idspScriptArgs, Map<String, Object> props, String[] scriptPaths) {
-        props.put(DeckDynamoIDSConstants.IDS_JOB_SCRIPT, scriptPaths);
-        props.put(DeckDynamoIDSConstants.IDS_JOB_PAYLOAD, assetPath);
-        props.put(DeckDynamoIDSConstants.INPUT_PAYLOAD, assetPath);
-        props.put(DeckDynamoIDSConstants.OUTPUT_PAYLOAD, assetPath);
-        props.put(DeckDynamoIDSConstants.IDS_ADD_SOAP_ARGS, idspScriptArgs.toString());
+        props.put(DynamicDeckDynamoIDSConstants.IDS_JOB_SCRIPT, scriptPaths);
+        props.put(DynamicDeckDynamoIDSConstants.IDS_JOB_PAYLOAD, assetPath);
+        props.put(DynamicDeckDynamoIDSConstants.INPUT_PAYLOAD, assetPath);
+        props.put(DynamicDeckDynamoIDSConstants.OUTPUT_PAYLOAD, assetPath);
+        props.put(DynamicDeckDynamoIDSConstants.IDS_ADD_SOAP_ARGS, idspScriptArgs.toString());
     }
 }

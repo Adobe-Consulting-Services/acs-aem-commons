@@ -1,6 +1,6 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
@@ -8,7 +8,7 @@ import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.List;
 
-public interface DeckDynamoService {
+public interface DynamicDeckService {
 
 
     /**
@@ -28,7 +28,7 @@ public interface DeckDynamoService {
      */
     public String createDeck(String deckName, String masterAssetPath, List<Resource> assetResourceList,
                              String templateFolderPath, String destinationFolderPath, ResourceResolver resourceResolver)
-            throws DeckDynamoException;
+            throws DynamicDeckDynamoException;
 
     /**
      * This method fetch asset list from collection/smart-collection.
@@ -40,7 +40,7 @@ public interface DeckDynamoService {
      * @return
      */
     public List<Resource> fetchAssetListFromCollection(String collectionPath, ResourceResolver resourceResolver)
-            throws DeckDynamoException;
+            throws DynamicDeckDynamoException;
 
     public List<Resource> fetchAssetListFromQuery(String queryString, ResourceResolver resourceResolver);
 

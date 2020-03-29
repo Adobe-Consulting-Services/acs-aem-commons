@@ -1,8 +1,8 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DeckDynamoInitiatorPageModel;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DeckDynamoService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DynamicDeckInitiatorPageModel;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckService;
 import com.adobe.granite.rest.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -42,7 +42,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
     private static final String MESSAGE = "message";
 
     @Reference
-    private transient DeckDynamoService deckDynamoService;
+    private transient DynamicDeckService dynamicDeckService;
 
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
@@ -69,43 +69,43 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
 
             try {
                 if (StringUtils.isEmpty(deckName) || StringUtils.isEmpty(operationMode) || StringUtils.isEmpty(templatePath) || StringUtils.isEmpty(destinationPath)) {
-                    throw new DeckDynamoException("Supplied deck name OR operation mode OR template path OR destination path is null/empty. Hence exiting the deck generation process.");
+                    throw new DynamicDeckDynamoException("Supplied deck name OR operation mode OR template path OR destination path is null/empty. Hence exiting the deck generation process.");
                 }
 
-                if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.COLLECTION.toString(), operationMode) && StringUtils.isEmpty(collectionPath)) {
-                    throw new DeckDynamoException("Collection path is expected when COLLECTION is operation mode. Hence exiting the deck generation process.");
+                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.COLLECTION.toString(), operationMode) && StringUtils.isEmpty(collectionPath)) {
+                    throw new DynamicDeckDynamoException("Collection path is expected when COLLECTION is operation mode. Hence exiting the deck generation process.");
                 }
 
-                if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.QUERY.toString(), operationMode) && StringUtils.isEmpty(queryString)) {
-                    throw new DeckDynamoException("Query string is expected when QUERY is operation mode. Hence exiting the deck generation process.");
+                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.QUERY.toString(), operationMode) && StringUtils.isEmpty(queryString)) {
+                    throw new DynamicDeckDynamoException("Query string is expected when QUERY is operation mode. Hence exiting the deck generation process.");
                 }
 
-                if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.TAGS.toString(), operationMode) && StringUtils.isEmpty(tagValues)) {
-                    throw new DeckDynamoException("Tags string is expected when TAGS is operation mode. Hence exiting the deck generation process.");
+                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.TAGS.toString(), operationMode) && StringUtils.isEmpty(tagValues)) {
+                    throw new DynamicDeckDynamoException("Tags string is expected when TAGS is operation mode. Hence exiting the deck generation process.");
                 }
 
                 String generatedDeckPath = null;
 
                 List<Resource> assetResourceList = null;
-                if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.COLLECTION.toString(), operationMode)) {
-                    assetResourceList = deckDynamoService.fetchAssetListFromCollection(collectionPath, resourceResolver);
-                } else if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.QUERY.toString(), operationMode)) {
-                    assetResourceList = deckDynamoService.fetchAssetListFromQuery(queryString, resourceResolver);
-                } else if (StringUtils.equalsIgnoreCase(DeckDynamoInitiatorPageModel.Mode.TAGS.toString(), operationMode)) {
-                    assetResourceList = deckDynamoService.fetchAssetListFromTags(tagValues, resourceResolver);
+                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.COLLECTION.toString(), operationMode)) {
+                    assetResourceList = dynamicDeckService.fetchAssetListFromCollection(collectionPath, resourceResolver);
+                } else if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.QUERY.toString(), operationMode)) {
+                    assetResourceList = dynamicDeckService.fetchAssetListFromQuery(queryString, resourceResolver);
+                } else if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.TAGS.toString(), operationMode)) {
+                    assetResourceList = dynamicDeckService.fetchAssetListFromTags(tagValues, resourceResolver);
                 } else {
-                    throw new DeckDynamoException("Invalid operation mode supplied. Hence exiting the deck generation process.");
+                    throw new DynamicDeckDynamoException("Invalid operation mode supplied. Hence exiting the deck generation process.");
                 }
 
 
                 if (null != assetResourceList && !assetResourceList.isEmpty()) {
-                    generatedDeckPath = deckDynamoService.createDeck(deckName, masterAssetPath, assetResourceList, templatePath, destinationPath, resourceResolver);
+                    generatedDeckPath = dynamicDeckService.createDeck(deckName, masterAssetPath, assetResourceList, templatePath, destinationPath, resourceResolver);
                 } else {
-                    throw new DeckDynamoException("Asset resource list cannot be null or empty. Hence exiting the deck generation process.");
+                    throw new DynamicDeckDynamoException("Asset resource list cannot be null or empty. Hence exiting the deck generation process.");
                 }
 
                 jsonResponse.addProperty(MESSAGE, "Deck created successfully! Generated deck Path = " + generatedDeckPath);
-            } catch (DeckDynamoException e) {
+            } catch (DynamicDeckDynamoException e) {
                 response.setStatus(500);
                 jsonResponse.addProperty(MESSAGE, "Deck creation Failed!");
                 LOGGER.error("Exception occurred while initiating the deck generation", e);
@@ -115,7 +115,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
         out.print(new Gson().toJson(jsonResponse));
     }
 
-    public void setDeckDynamoService(DeckDynamoService deckDynamoService) {
-        this.deckDynamoService = deckDynamoService;
+    public void setDynamicDeckService(DynamicDeckService dynamicDeckService) {
+        this.dynamicDeckService = dynamicDeckService;
     }
 }

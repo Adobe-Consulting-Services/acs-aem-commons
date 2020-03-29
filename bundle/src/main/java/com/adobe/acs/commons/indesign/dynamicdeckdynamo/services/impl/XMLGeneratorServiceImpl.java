@@ -1,10 +1,10 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.DamConstants;
@@ -52,7 +52,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     @Override
     public String generateInddXML(InputStream xmlInputStream,
                                   List<XMLResourceIterator> assetItrList, Resource masterResource, Resource deckResource,
-                                  ResourceResolver resourceResolver, List<String> imageList) throws DeckDynamoException {
+                                  ResourceResolver resourceResolver, List<String> imageList) throws DynamicDeckDynamoException {
 
         InputStream resultInputStream;
         Asset processXmlAsset = null;
@@ -62,8 +62,8 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             masterResource = deckResource;
         }
 
-        File targetFile = new File("targetFile-" + Calendar.getInstance().getTimeInMillis() + DeckDynamoConstants.DASH
-                + StringUtils.substringBeforeLast(xmlName, DeckDynamoConstants.DOT) + ".tmp");
+        File targetFile = new File("targetFile-" + Calendar.getInstance().getTimeInMillis() + DynamicDeckDynamoConstants.DASH
+                + StringUtils.substringBeforeLast(xmlName, DynamicDeckDynamoConstants.DOT) + ".tmp");
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
@@ -83,7 +83,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             resultInputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
             Resource subassetsFolderResource = resourceResolver.getResource(
-                    DeckDynamoUtils.getOrCreateFolder(resourceResolver, DamConstants.SUBASSETS_FOLDER, deckResource));
+                    DynamicDeckUtils.getOrCreateFolder(resourceResolver, DamConstants.SUBASSETS_FOLDER, deckResource));
             if (null != subassetsFolderResource) {
                 AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
                 if (assetManager == null) {
@@ -91,8 +91,8 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                     return null;
                 }
                 processXmlAsset = assetManager.createAsset(
-                        subassetsFolderResource.getPath() + DeckDynamoConstants.SLASH + xmlName, resultInputStream,
-                        DeckDynamoConstants.XML_MIME_TYPE, true);
+                        subassetsFolderResource.getPath() + DynamicDeckDynamoConstants.SLASH + xmlName, resultInputStream,
+                        DynamicDeckDynamoConstants.XML_MIME_TYPE, true);
                 LOGGER.debug("XML stored at {}", processXmlAsset.getPath());
             } else {
                 LOGGER.debug("Asset subfolder is null, where processed xml asset needs to be created {}",
@@ -102,7 +102,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             LOGGER.error("Error while generation of xml.", e);
         } finally {
             if (!targetFile.delete()) {
-                throw new DeckDynamoException("Temporary file cannot be deleted or it's null");
+                throw new DynamicDeckDynamoException("Temporary file cannot be deleted or it's null");
             }
         }
         return processXmlAsset == null ? null : processXmlAsset.getPath();
@@ -116,7 +116,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     private void populateIterableValues(Document doc, List<XMLResourceIterator> assetItrList, List<String> imageList) {
         NodeList documentChildren = doc.getChildNodes();
         List<Node> iterableSections = new ArrayList<>();
-        findSections(documentChildren, DeckDynamoConstants.XML_SECTION_TYPE_ITERABLE, iterableSections);
+        findSections(documentChildren, DynamicDeckDynamoConstants.XML_SECTION_TYPE_ITERABLE, iterableSections);
         Map<String, List<Node>> iterableSectionTypes = new HashMap<>();
         segregateSections(iterableSections, iterableSectionTypes);
         for (XMLResourceIterator assetItr : assetItrList) {
@@ -143,14 +143,14 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         NodeList documentChildren = doc.getChildNodes();
         ValueMap masterResourceValueMap = masterResource.getValueMap();
         List<Node> headerSections = new ArrayList<>();
-        findSections(documentChildren, DeckDynamoConstants.XML_SECTION_TYPE_MASTER, headerSections);
+        findSections(documentChildren, DynamicDeckDynamoConstants.XML_SECTION_TYPE_MASTER, headerSections);
         headerSections.listIterator().forEachRemaining(section -> populateMasterAssetPaths(section, masterResource));
         headerSections.listIterator().forEachRemaining(section -> processSection(masterResource, masterResourceValueMap, section, imageList));
 
     }
 
     private void populateMasterAssetPaths(Node section, Resource masterResource) {
-        Node assetPath = section.hasAttributes() ? section.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_ASSETPATH) : null;
+        Node assetPath = section.hasAttributes() ? section.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_ASSETPATH) : null;
         if (assetPath != null) {
             assetPath.setNodeValue(masterResource.getPath());
         }
@@ -160,14 +160,14 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         NodeList sectionChildren = section.getChildNodes();
         for (int i = 0; i < sectionChildren.getLength(); i++) {
             Node childElement = sectionChildren.item(i);
-            Node propertyType = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_FIELD_TYPE) : null;
+            Node propertyType = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_FIELD_TYPE) : null;
 
             if (propertyType != null) {
                 switch (propertyType.getNodeValue()) {
-                    case DeckDynamoConstants.XML_FIELD_TYPE_IMAGE:
+                    case DynamicDeckDynamoConstants.XML_FIELD_TYPE_IMAGE:
                         populateImageProperty(assetProperties, childElement, assetResource.getPath(), imageList, assetResource.getResourceResolver());
                         break;
-                    case DeckDynamoConstants.XML_FIELD_TYPE_TEXT:
+                    case DynamicDeckDynamoConstants.XML_FIELD_TYPE_TEXT:
                         populateTextProperty(assetProperties, childElement, assetResource.getPath());
                         break;
                     default:
@@ -180,7 +180,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     private void duplicateNodeAndSetValues(Node node, ValueMap assetProperties, Resource assetResource, List<String> imageList) {
         if (assetResource != null) {
             Node nodeCopy = node.cloneNode(true);
-            Node assetPath = nodeCopy.hasAttributes() ? nodeCopy.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_ASSETPATH) : null;
+            Node assetPath = nodeCopy.hasAttributes() ? nodeCopy.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_ASSETPATH) : null;
             if (assetPath != null) {
                 assetPath.setNodeValue(assetResource.getPath());
             }
@@ -190,15 +190,15 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     }
 
     private String processPropertyPath(ValueMap assetProperties, Node childElement, String assetPath) {
-        Node propertyPathAttr = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_PROPERTY_PATH) : null;
+        Node propertyPathAttr = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_PROPERTY_PATH) : null;
         String propertyValue = null;
         if (propertyPathAttr != null) {
             String propertyPath = propertyPathAttr.getNodeValue();
-            String metadataProperty = DeckDynamoConstants.DAM_METADATA + DeckDynamoConstants.SLASH + propertyPath;
-            if (StringUtils.equals(propertyPath, DeckDynamoConstants.XML_ATTR_VAL_SELF)) {
+            String metadataProperty = DynamicDeckDynamoConstants.DAM_METADATA + DynamicDeckDynamoConstants.SLASH + propertyPath;
+            if (StringUtils.equals(propertyPath, DynamicDeckDynamoConstants.XML_ATTR_VAL_SELF)) {
                 propertyValue = assetPath;
             } else {
-                Node isArrayAttr = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_IS_ARRAY) : null;
+                Node isArrayAttr = childElement.hasAttributes() ? childElement.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_IS_ARRAY) : null;
                 if (isArrayAttr != null && StringUtils.equals(isArrayAttr.getNodeValue(), "true")) {
                     if (assetProperties.containsKey(metadataProperty)) {
                         propertyValue = getArrayValue(assetProperties, metadataProperty);
@@ -244,8 +244,8 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         if (StringUtils.isNotBlank(propertyValue)) {
             Resource assetResource = resourceResolver.getResource(propertyValue);
             if (DamUtil.isAsset(assetResource)) {
-                ((Element) childElement).setAttribute(BindConstants.XML_HREF, DeckDynamoConstants.FILE_PATH_PREFIX
-                        + StringUtils.substringAfterLast(propertyValue, DeckDynamoConstants.SLASH));
+                ((Element) childElement).setAttribute(BindConstants.XML_HREF, DynamicDeckDynamoConstants.FILE_PATH_PREFIX
+                        + StringUtils.substringAfterLast(propertyValue, DynamicDeckDynamoConstants.SLASH));
                 if (!isImageAdded(imageList, assetResource)) {
                     imageList.add(assetResource.getPath());
                 }
@@ -258,7 +258,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     private boolean isImageAdded(List<String> imageList, Resource assetResource) {
         String assetName = assetResource.getName();
         for (String path : imageList) {
-            if (StringUtils.equals(StringUtils.substringAfterLast(path, DeckDynamoConstants.SLASH), assetName)) {
+            if (StringUtils.equals(StringUtils.substringAfterLast(path, DynamicDeckDynamoConstants.SLASH), assetName)) {
                 return true;
             }
         }
@@ -267,7 +267,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
 
     private void segregateSections(List<Node> iterableSections, Map<String, List<Node>> iterableSectionTypes) {
         for (Node section : iterableSections) {
-            Node itrSecs = section.hasAttributes() ? section.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_ITERABLE_TYPE) : null;
+            Node itrSecs = section.hasAttributes() ? section.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_ITERABLE_TYPE) : null;
             if (itrSecs != null) {
                 String itrType = itrSecs.getNodeValue();
                 List<Node> itrTypesList;
@@ -288,7 +288,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node childNode = nodeList.item(i);
 
-            Node secType = childNode.hasAttributes() ? childNode.getAttributes().getNamedItem(DeckDynamoConstants.XML_ATTR_SECTION_TYPE) : null;
+            Node secType = childNode.hasAttributes() ? childNode.getAttributes().getNamedItem(DynamicDeckDynamoConstants.XML_ATTR_SECTION_TYPE) : null;
             if (secType != null && secType.getNodeValue().equals(type)) {
                 sectionList.add(childNode);
 

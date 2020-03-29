@@ -12,7 +12,7 @@ import javax.inject.Named;
 @Model(
         adaptables = {Resource.class, SlingHttpServletRequest.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
+public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
 
     @Inject
     @Named(value = "deckTitle")
@@ -101,7 +101,7 @@ public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
             description = "Select the tags from the system. It will fetch the assets associated with the respective tags.")
     private String assetTag;
 
-    public DeckDynamoInitiatorPageModel() {
+    public DynamicDeckInitiatorPageModel() {
     }
 
     public String getDeckTitle() {

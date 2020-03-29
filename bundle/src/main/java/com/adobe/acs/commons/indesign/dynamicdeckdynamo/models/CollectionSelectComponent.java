@@ -1,7 +1,7 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.models;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DeckDynamoConfigurationService;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DeckDynamoUtils;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DynamicDeckConfigurationService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +31,7 @@ public class CollectionSelectComponent extends SelectComponent {
         Map<String, String> options = new LinkedHashMap<>();
         ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
         if (null != resourceResolver) {
-            DeckDynamoConfigurationService configurationService = getHelper().getService(DeckDynamoConfigurationService.class);
+            DynamicDeckConfigurationService configurationService = getHelper().getService(DynamicDeckConfigurationService.class);
 
             if (null == configurationService) {
                 LOGGER.debug("Configuration service is null, hence exiting the process and returning empty map");
@@ -39,7 +39,7 @@ public class CollectionSelectComponent extends SelectComponent {
             }
 
             Map<String, String> collectionMap =
-                    DeckDynamoUtils.getCollectionsListForLoggedInUser(configurationService.getCollectionQuery(),
+                    DynamicDeckUtils.getCollectionsListForLoggedInUser(configurationService.getCollectionQuery(),
                             resourceResolver);
             options.put(StringUtils.EMPTY, "Select the Collection");
             collectionMap.forEach((key, value) -> options.put(value, key));

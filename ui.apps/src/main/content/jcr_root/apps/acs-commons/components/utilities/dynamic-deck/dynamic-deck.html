@@ -3,7 +3,7 @@
     <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
 </head>
 <body class="coral--light foundation-layout-util-maximized-alt">
-<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'deck-dynamo.base']}"
+<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'dynamic-deck-dynamo.base']}"
      data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
 
 <coral-shell-header aria-hidden="false" aria-label="Header Bar"
@@ -47,7 +47,7 @@
     </div>
     <div class="content-container-inner" style="width:60%; margin:0 auto;">
 
-        <sly data-sly-use.properties="com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DeckDynamoInitiatorPageModel">
+        <sly data-sly-use.properties="com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DynamicDeckInitiatorPageModel">
             <sly data-sly-resource="${properties.formResource}"/>
         </sly>
 

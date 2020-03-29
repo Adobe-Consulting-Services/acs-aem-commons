@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"
-        cq:lastModified="{Date}2020-03-16T00:10:24.186+05:30"
+        cq:lastModified="{Date}2020-03-29T20:24:01.650+05:30"
         cq:lastModifiedBy="admin"
         cq:template="/apps/acs-commons/templates/utilities/genericlist"
         jcr:primaryType="cq:PageContent"
@@ -12,28 +12,16 @@
         <list jcr:primaryType="nt:unstructured">
             <item0
                 jcr:primaryType="nt:unstructured"
-                jcr:title="Query 1"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo&quot;) AND s.[jcr:content/metadata/dc:creator] = &quot;Gaurav&quot; ORDER BY s.[jcr:content/cq:name] ASC"/>
+                jcr:title="We.Retail all JPEG Images under Apparel"
+                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/we-retail/en/products/apparel&quot;) AND s.[jcr:content/metadata/dc:format] = &quot;image/jpeg&quot; ORDER BY s.[jcr:content/cq:name] ASC"/>
             <item1
                 jcr:primaryType="nt:unstructured"
-                jcr:title="Mock Outdoors Query 1"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/sample-assets-2&quot;)"/>
+                jcr:title="We.Retail All Activities"
+                value="SELECT * from [dam:Asset] AS a WHERE  isdescendantnode(a, '/content/dam/we-retail/en/activities') AND [/jcr:content/metadata/dc:title] IS NOT NULL AND [/jcr:content/metadata/dc:description] IS NOT NULL AND [/jcr:content/metadata/xmp:CreatorTool] IS NOT NULL ORDER BY NAME(a) ASC"/>
             <item2
                 jcr:primaryType="nt:unstructured"
-                jcr:title="Mock Outdoors Query - sort by file name ascending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/sample-assets-2&quot;) ORDER BY NAME(s) ASC"/>
-            <item3
-                jcr:primaryType="nt:unstructured"
-                jcr:title="Mock Outdoors Query - sort by file name descending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/sample-assets-2&quot;) ORDER BY NAME(s) DESC"/>
-            <item4
-                jcr:primaryType="nt:unstructured"
-                jcr:title="Get Outside Query 1 - sort by file name ascending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/sample-assets-2&quot;) ORDER BY NAME(s) ASC"/>
-            <item5
-                jcr:primaryType="nt:unstructured"
-                jcr:title="Get Outside Query 2 - sort by file name descending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/sample-assets-2&quot;) ORDER BY NAME(s) DESC"/>
+                jcr:title="We.Retail Hiking Camping"
+                value="SELECT * from [dam:Asset] AS a WHERE  isdescendantnode(a, '/content/dam/we-retail/en/activities/hiking-camping')"/>
         </list>
     </jcr:content>
 </jcr:root>

@@ -11,7 +11,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
         name = "Dynamic Deck Dynamo Configurations",
         description = "These are some important configurations for generation InDesign deck dynamically."
 )
-public @interface DeckDynamoConfiguration {
+public @interface DynamicDeckConfiguration {
 
     @AttributeDefinition(name = "Placeholder Image Path", description = "This placeholder image is used if deck image is not available", type = AttributeType.STRING)
     public String placeholderImagePath() default "/content/dam/dynamic-deck-dynamo/placeholder-images/APPAREL_PLACEHOLDER_TRANSPARENT.png";

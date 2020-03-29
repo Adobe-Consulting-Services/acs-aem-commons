@@ -1,8 +1,8 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils;
 
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoConstants;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DeckDynamoIDSConstants;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DeckDynamoException;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoIDSConstants;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.dam.print.ids.PrintFormat;
 import com.adobe.granite.workflow.PayloadMap;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -30,8 +30,8 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class DeckDynamoUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeckDynamoUtils.class);
+public final class DynamicDeckUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckUtils.class);
     private static final String IDSP_SCRIPT_ARG = "<IDSP:scriptArgs>\n"
             + "                            <IDSP:name>%s</IDSP:name>\n"
             + "                            <IDSP:value><![CDATA[%s]]></IDSP:value>\n"
@@ -40,7 +40,7 @@ public final class DeckDynamoUtils {
     /**
      * Private Constructor will prevent the instantiation of this class directly
      */
-    private DeckDynamoUtils() {
+    private DynamicDeckUtils() {
 
     }
 
@@ -70,7 +70,7 @@ public final class DeckDynamoUtils {
 
     public static StringBuilder addExportFormat(Asset master, List<PrintFormat> formats) {
         StringBuilder exportFormats = getExportFormats(formats);
-        for (String format : exportFormats.toString().split(DeckDynamoConstants.COMMA)) {
+        for (String format : exportFormats.toString().split(DynamicDeckDynamoConstants.COMMA)) {
             if (PrintFormat.INDD.getFormat().equals(format)) {
                 addExportJobProperty(master);
             }
@@ -82,7 +82,7 @@ public final class DeckDynamoUtils {
         StringBuilder exportFormats = new StringBuilder(StringUtils.EMPTY);
         if (formats != null && !formats.isEmpty()) {
             for (PrintFormat format : formats) {
-                exportFormats.append(format.getFormat()).append(DeckDynamoConstants.COMMA);
+                exportFormats.append(format.getFormat()).append(DynamicDeckDynamoConstants.COMMA);
             }
         }
         return exportFormats;
@@ -100,7 +100,7 @@ public final class DeckDynamoUtils {
                     && content.adaptTo(ModifiableValueMap.class) != null) {
                 ModifiableValueMap contentProperties = content.adaptTo(ModifiableValueMap.class);
                 if (contentProperties != null) {
-                    contentProperties.put(DeckDynamoIDSConstants.IDS_EXPORTED, true);
+                    contentProperties.put(DynamicDeckDynamoIDSConstants.IDS_EXPORTED, true);
                     contentProperties.put(DamConstants.DAM_ASSET_STATE, DamConstants.DAM_ASSET_STATE_PROCESSING);
                 }
             }
@@ -120,7 +120,7 @@ public final class DeckDynamoUtils {
             Resource resultCollectionResource = resultItr.next();
             LOGGER.debug("CollectionList Query Result Resource:{}", resultCollectionResource);
 
-            if (DeckDynamoConstants.PN_LIGHTBOX_COLLECTION.equalsIgnoreCase(resultCollectionResource.getName())) {
+            if (DynamicDeckDynamoConstants.PN_LIGHTBOX_COLLECTION.equalsIgnoreCase(resultCollectionResource.getName())) {
                 continue;
             }
 
@@ -136,37 +136,37 @@ public final class DeckDynamoUtils {
      * @param resourceResolver
      * @param assetResource
      * @return
-     * @throws DeckDynamoException
+     * @throws DynamicDeckDynamoException
      */
     public static InputStream getInddXmlRenditionInputStream(ResourceResolver resourceResolver,
-                                                             Resource assetResource) throws DeckDynamoException {
-        Resource assetJcrContentResource = resourceResolver.getResource(assetResource.getPath() + DeckDynamoConstants.SLASH
-                + JcrConstants.JCR_CONTENT + DeckDynamoConstants.SLASH + DamConstants.RENDITIONS_FOLDER + DeckDynamoConstants.SLASH
-                + StringUtils.replace(assetResource.getName(), DeckDynamoConstants.DOT + DeckDynamoConstants.INDD_EXTENSION,
-                DeckDynamoConstants.DOT + DeckDynamoConstants.XML_EXTENSION)
-                + DeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
+                                                             Resource assetResource) throws DynamicDeckDynamoException {
+        Resource assetJcrContentResource = resourceResolver.getResource(assetResource.getPath() + DynamicDeckDynamoConstants.SLASH
+                + JcrConstants.JCR_CONTENT + DynamicDeckDynamoConstants.SLASH + DamConstants.RENDITIONS_FOLDER + DynamicDeckDynamoConstants.SLASH
+                + StringUtils.replace(assetResource.getName(), DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.INDD_EXTENSION,
+                DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.XML_EXTENSION)
+                + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
         return getInputStreamByResource(assetJcrContentResource);
     }
 
-    public static InputStream getAssetInputStreamByPath(ResourceResolver resourceResolver, String annotatedXmlPath) throws DeckDynamoException {
+    public static InputStream getAssetInputStreamByPath(ResourceResolver resourceResolver, String annotatedXmlPath) throws DynamicDeckDynamoException {
         Resource assetJcrContentResource = resourceResolver
-                .getResource(annotatedXmlPath + DeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT + DeckDynamoConstants.SLASH
-                        + DamConstants.RENDITIONS_FOLDER + DeckDynamoConstants.SLASH + DamConstants.ORIGINAL_FILE + DeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
+                .getResource(annotatedXmlPath + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT + DynamicDeckDynamoConstants.SLASH
+                        + DamConstants.RENDITIONS_FOLDER + DynamicDeckDynamoConstants.SLASH + DamConstants.ORIGINAL_FILE + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
         return getInputStreamByResource(assetJcrContentResource);
     }
 
-    private static InputStream getInputStreamByResource(Resource assetJcrContentResource) throws DeckDynamoException {
+    private static InputStream getInputStreamByResource(Resource assetJcrContentResource) throws DynamicDeckDynamoException {
         if (null == assetJcrContentResource) {
-            throw new DeckDynamoException("Annotated XML resource is null");
+            throw new DynamicDeckDynamoException("Annotated XML resource is null");
         }
         Node node = assetJcrContentResource.adaptTo(Node.class);
         if (null == node) {
-            throw new DeckDynamoException("Annotated XML node is null, asset resource path: " + assetJcrContentResource.getPath());
+            throw new DynamicDeckDynamoException("Annotated XML node is null, asset resource path: " + assetJcrContentResource.getPath());
         }
         try {
             return node.getProperty(JcrConstants.JCR_DATA).getBinary().getStream();
         } catch (RepositoryException e) {
-            throw new DeckDynamoException("Repository exception occurred while fetching the xml input stream", e);
+            throw new DynamicDeckDynamoException("Repository exception occurred while fetching the xml input stream", e);
         }
     }
 
@@ -201,30 +201,15 @@ public final class DeckDynamoUtils {
 
     }
 
-    /**
-     * This method close resourceResolver object once no longer required
-     *
-     * @param resourceResolver
-     */
-    public static void closeResourceResolver(ResourceResolver resourceResolver) {
-        Session session = null;
-        if (resourceResolver != null && resourceResolver.isLive()) {
-            session = resourceResolver.adaptTo(Session.class);
-            resourceResolver.close();
-        }
-        if (null != session && session.isLive()) {
-            session.logout();
-        }
-    }
 
     /**
      * Fetches all Resources which are there in a smart collection
      *
      * @param smartCollectionResource
      * @return
-     * @throws DeckDynamoException
+     * @throws DynamicDeckDynamoException
      */
-    public static List<Resource> fetchSmartCollectionResourceList(Resource smartCollectionResource) throws DeckDynamoException {
+    public static List<Resource> fetchSmartCollectionResourceList(Resource smartCollectionResource) throws DynamicDeckDynamoException {
 
         List<Resource> arrayList = new ArrayList<>();
 
@@ -239,7 +224,7 @@ public final class DeckDynamoUtils {
         try {
             query = smartResourceCollection.getQuery();
         } catch (IOException | RepositoryException e) {
-            throw new DeckDynamoException("Error while getting the collection query from smart collection resource", e);
+            throw new DynamicDeckDynamoException("Error while getting the collection query from smart collection resource", e);
         }
         query.setHitsPerPage(0);
         SearchResult result = query.getResult();
@@ -253,7 +238,7 @@ public final class DeckDynamoUtils {
     public static Asset createUniqueAsset(Resource parent, String name, ResourceResolver resolver) {
         AssetManager graniteAssetMgr = resolver.adaptTo(AssetManager.class);
         if (graniteAssetMgr != null) {
-            return graniteAssetMgr.createAsset(parent.getPath() + DeckDynamoConstants.SLASH + name, null, DeckDynamoConstants.INDESIGN_MIME_TYPE, true);
+            return graniteAssetMgr.createAsset(parent.getPath() + DynamicDeckDynamoConstants.SLASH + name, null, DynamicDeckDynamoConstants.INDESIGN_MIME_TYPE, true);
         }
         return null;
 
@@ -338,27 +323,6 @@ public final class DeckDynamoUtils {
         return resource;
     }
 
-    /**
-     * Get the modifiable value map for the given property path in the resource
-     *
-     * @param resource
-     * @param propertyPath
-     * @return
-     */
-    public static ModifiableValueMap getResourceModifiableValueMap(Resource resource, String propertyPath) {
-        if (resource == null || StringUtils.isBlank(propertyPath)) {
-            LOGGER.debug("Supplied resource is null/empty. Returning an empty map.");
-            return null;
-        }
-
-        Resource propertiesResource = resource.getChild(propertyPath);
-        if (propertiesResource == null) {
-            LOGGER.debug("Couldn't get the child resource '{}' for resource at path '{}'. Returning an empty map.",
-                    propertyPath, resource.getPath());
-            return null;
-        }
-        return propertiesResource.adaptTo(ModifiableValueMap.class);
-    }
 
     public static void updateUserData(Session jcrSession) {
 

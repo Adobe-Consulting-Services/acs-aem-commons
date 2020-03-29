@@ -3,12 +3,12 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants;
 /**
  * This class will be used to store global Constants
  */
-public class DeckDynamoConstants {
+public class DynamicDeckDynamoConstants {
 
     /**
      * Private Constructor will prevent the instantiation of this class directly
      */
-    private DeckDynamoConstants() {
+    private DynamicDeckDynamoConstants() {
 
     }
 

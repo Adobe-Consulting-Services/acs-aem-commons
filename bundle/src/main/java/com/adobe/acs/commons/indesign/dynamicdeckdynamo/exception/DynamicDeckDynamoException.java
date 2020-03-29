@@ -1,13 +1,13 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception;
 
-public class DeckDynamoException extends Exception {
+public class DynamicDeckDynamoException extends Exception {
 
     private static final long serialVersionUID = 1955355079908933046L;
 
     /**
      * Creates a Deck Dynamo Exception.
      */
-    public DeckDynamoException() {
+    public DynamicDeckDynamoException() {
     }
 
     /**
@@ -15,7 +15,7 @@ public class DeckDynamoException extends Exception {
      *
      * @param message Custom message for exception.
      */
-    public DeckDynamoException(String message) {
+    public DynamicDeckDynamoException(String message) {
         super(message);
     }
 
@@ -24,7 +24,7 @@ public class DeckDynamoException extends Exception {
      *
      * @param throwable
      */
-    public DeckDynamoException(Throwable throwable) {
+    public DynamicDeckDynamoException(Throwable throwable) {
         super(throwable);
     }
 
@@ -34,7 +34,7 @@ public class DeckDynamoException extends Exception {
      * @param paramString
      * @param throwable
      */
-    public DeckDynamoException(String paramString, Throwable throwable) {
+    public DynamicDeckDynamoException(String paramString, Throwable throwable) {
         super(paramString, throwable);
     }
 
