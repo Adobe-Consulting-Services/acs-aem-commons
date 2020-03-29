@@ -7,7 +7,7 @@
         cq:lastModifiedBy="admin"
         cq:template="/apps/acs-commons/templates/utilities/genericlist"
         jcr:primaryType="cq:PageContent"
-        jcr:title="Deck Dynamo Query"
+        jcr:title="Dynamic Deck Dynamo Query List"
         sling:resourceType="acs-commons/components/utilities/genericlist">
         <list jcr:primaryType="nt:unstructured">
             <item0
