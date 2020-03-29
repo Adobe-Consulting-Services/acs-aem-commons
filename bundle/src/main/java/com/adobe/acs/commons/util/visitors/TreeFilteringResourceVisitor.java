@@ -34,13 +34,13 @@ import org.apache.sling.jcr.resource.api.JcrResourceConstants;
  */
 public class TreeFilteringResourceVisitor extends SimpleFilteringResourceVisitor {
 
-    public static String[] TREE_TYPES = {
+    protected static final String[] TREE_TYPES = {
         JcrConstants.NT_FOLDER,
         JcrResourceConstants.NT_SLING_FOLDER,
         JcrResourceConstants.NT_SLING_ORDERED_FOLDER
     };
 
-    public String[] treeTypes;
+    private String[] treeTypes;
 
     /**
      * Create a standard visitor for commonly used folder structures.
