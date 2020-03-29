@@ -1,7 +1,6 @@
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.models;
 
 import com.adobe.acs.commons.mcp.form.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
@@ -17,21 +16,31 @@ public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
 
     @Inject
     @Named(value = "deckTitle")
-    @JsonProperty(value = "deckTitle")
     @FormField(
             name = "Deck Title",
             required = true,
             category = "General",
-            description = "Enter deck name",
+            description = "Enter a InDesign deck name. e.g. summer-2020",
             hint = "sample")
     private String deckTitle;
 
     @Inject
+    @Named(value = "destinationPath")
+    @FormField(
+            name = "Deck Destination Folder Path",
+            description = "Select the folder path where the InDesign deck will be generated.",
+            required = true,
+            component = PathfieldComponent.FolderSelectComponent.class,
+            options = {"base=/content/dam"},
+            hint = "/content/dam/someFolder",
+            category = "General")
+    private String destinationPath;
+
+    @Inject
     @Named(value = "masterAssetPath")
-    @JsonProperty(value = "masterAssetPath")
     @FormField(
             name = "Master Asset Path",
-            description = "Select master asset path",
+            description = "Select the master asset. InDesign deck's header & footer info will be taken from master asset's metadata",
             component = PathfieldComponent.AssetSelectComponent.class,
             options = {"base=/content/dam"},
             hint = "/content/dam/someAsset",
@@ -40,10 +49,9 @@ public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
 
     @Inject
     @Named(value = "templatePath")
-    @JsonProperty(value = "templatePath")
     @FormField(
-            name = "Template Path",
-            description = "Select Template path",
+            name = "Template Folder Path",
+            description = "Select the InDesign template folder for generating the InDesign deck. Make sure that the folder must have a template file and the mapped XML file in the same folder.",
             required = true,
             component = PathfieldComponent.FolderSelectComponent.class,
             options = {"base=/content/dam"},
@@ -51,29 +59,15 @@ public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
             category = "General")
     private String templatePath;
 
-    @Inject
-    @Named(value = "destinationPath")
-    @JsonProperty(value = "destinationPath")
-    @FormField(
-            name = "Destination Path",
-            description = "Select Destination path",
-            required = true,
-            component = PathfieldComponent.FolderSelectComponent.class,
-            options = {"base=/content/dam"},
-            hint = "/content/dam/someFolder",
-            category = "General")
-    private String destinationPath;
-
     public enum Mode {
         COLLECTION, QUERY, TAGS
     }
 
     @Inject
     @Named(value = "operationMode")
-    @JsonProperty(value = "operationMode")
     @FormField(
             name = "Operation Mode",
-            description = "Select the operation mode to supply the assets",
+            description = "Select the operation mode to supply the assets to the deck dynamo.",
             required = false,
             component = RadioComponent.EnumerationSelector.class,
             options = {"horizontal", "default=COLLECTION"})
@@ -81,33 +75,30 @@ public class DeckDynamoInitiatorPageModel extends GeneratedDialog {
 
     @Inject
     @Named(value = "collectionPath")
-    @JsonProperty(value = "collectionPath")
     @FormField(
-            name = "Collection Path",
-            description = "Select Collection Path",
+            name = "Collection",
+            description = "Select the collection from the drop-down below.",
             component = CollectionSelectComponent.class,
             category = "General")
     private String collectionPath;
 
     @Inject
     @Named(value = "assetQuery")
-    @JsonProperty(value = "assetQuery")
     @FormField(
             name = "Query to fetch assets",
             component = GenericListSelectComponent.class,
             category = "General",
-            description = "Select query",
+            description = "Select the query from the drop-down below. These queries are listed from the 'Query List' page linked on top-right of this page.",
             options = {GenericListSelectComponent.GENERIC_LIST_PATH + "=/etc/acs-commons/lists/dynamic-deck-query-list"})
     private String assetQuery;
 
     @Inject
     @Named(value = "assetTag")
-    @JsonProperty(value = "assetTag")
     @FormField(
             name = "Tags to fetch assets",
             component = TagPickerComponent.class,
             category = "General",
-            description = "Select Tags")
+            description = "Select the tags from the system. It will fetch the assets associated with the respective tags.")
     private String assetTag;
 
     public DeckDynamoInitiatorPageModel() {
