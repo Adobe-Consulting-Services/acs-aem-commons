@@ -3,12 +3,14 @@
     "jcr:primaryType" : "cq:Page",
     "jcr:content" : {
       "jcr:primaryType": "cq:PageContent",
-      "robotsContents": "User-agent: *\nDisallow: /"
+      "robotsContents": "User-agent: *\nDisallow: /",
+      "allowRobots": true
     },
     "no-bots" : {
       "jcr:primaryType" : "cq:Page",
       "jcr:content" : {
-        "jcr:primaryType": "cq:PageContent"
+        "jcr:primaryType": "cq:PageContent",
+        "denyRobots": true
       }
     },
     "events" : {
@@ -20,7 +22,8 @@
     "about" : {
       "jcr:primaryType" : "cq:Page",
       "jcr:content" : {
-        "jcr:primaryType": "cq:PageContent"
+        "jcr:primaryType": "cq:PageContent",
+        "denyGoogle": true
       }
     }
   }

@@ -113,6 +113,36 @@ public class RobotsServletTest {
     }
 
     @Test
+    public void testWriteFromPageProperties() {
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
+        props.put("user.agent.directives", new String[]{
+                "*",
+                "google:googlebot"
+        });
+        props.put("allow.property.names", new String[]{
+                "allowRobots",
+                "google:allowRobots"
+        });
+        props.put("disallow.property.names", new String[]{
+                "denyRobots",
+                "google:denyGoogle"
+        });
+
+        RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
+
+        try {
+            robotsServlet.doGet(request, response);
+            assertEquals("servlet returned an error", 200, response.getStatus());
+            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperties.txt"), response);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testWriteFromOsgiConfigSimple() {
 
         Map<String, Object> props = new HashMap<>();
@@ -120,7 +150,7 @@ public class RobotsServletTest {
         props.put("user.agent.directives", new String[]{
                 "*"
         });
-        props.put("disallowed.directives", new String[]{
+        props.put("disallow.directives", new String[]{
                 "/"
         });
 
@@ -148,12 +178,12 @@ public class RobotsServletTest {
                 "two:yahoobot",
                 "three:*"
         });
-        props.put("allowed.directives", new String[]{
+        props.put("allow.directives", new String[]{
                 "one:/botsOnly/",
                 "one:/onlyGoogle/",
                 "three:/content/geometrixx/en"
         });
-        props.put("disallowed.directives", new String[]{
+        props.put("disallow.directives", new String[]{
                 "one:/noGoogle/",
                 "one:/stillNoGoogle/",
                 "two:/content/geometrixx/en/no-bots",

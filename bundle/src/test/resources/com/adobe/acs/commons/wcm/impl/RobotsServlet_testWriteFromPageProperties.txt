@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /content/geometrixx/en/
+Disallow: /content/geometrixx/en/no-bots/
+User-agent: googlebot
+Allow: /content/geometrixx/en/
+Disallow: /content/geometrixx/en/about/
