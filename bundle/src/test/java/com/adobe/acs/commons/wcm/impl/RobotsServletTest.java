@@ -69,7 +69,7 @@ public class RobotsServletTest {
         context.load().json(getClass().getResourceAsStream("RobotsServlet.json"), "/content/geometrixx");
 
         context.registerService(Externalizer.class, externalizer);
-        request.setResource(context.resourceResolver().getResource("/content/geometrixx/en"));
+        request.setResource(context.resourceResolver().getResource("/content/geometrixx/en/jcr:content"));
 
 
         when(externalizer.externalLink(eq(context.resourceResolver()), eq("publish"), anyString())).then(i -> "https://www.geometrixx.com" + i.getArgument(2));
@@ -80,7 +80,7 @@ public class RobotsServletTest {
     public void testWriteFromPageProperty() {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
-        props.put("robots.content.property.path", "jcr:content/robotsContents");
+        props.put("robots.content.property.path", "robotsContents");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
 
         try {
