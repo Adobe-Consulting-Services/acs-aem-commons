@@ -40,15 +40,25 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.*;
+import javax.jcr.Binary;
+import javax.jcr.Item;
+import javax.jcr.Property;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component(service = Servlet.class, immediate = true, property = {
         "sling.servlet.selectors=robots",
@@ -106,7 +116,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeGroup(RobotsRuleGroup group, ResourceResolver resourceResolver, PrintWriter writer) {
-        if(printGroupingComments) {
+        if (printGroupingComments) {
             writer.println("# Start Group: " + group.getGroupName());
         }
 
@@ -116,7 +126,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         group.getDisallowed().stream().map(disallowed -> buildDisallowedString(disallowed, resourceResolver)).forEach(writer::println);
 
-        if(printGroupingComments) {
+        if (printGroupingComments) {
             writer.println("# End Group: " + group.getGroupName());
         }
     }
@@ -200,7 +210,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
         String[] sling_servlet_resourceTypes() default {};
 
-        @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. jcr:content/robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data).")
+        @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data).")
         String robots_content_property_path();
 
         @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
