@@ -151,7 +151,7 @@ public class RobotsServletTest {
         props.put("allowed.directives", new String[]{
                 "one:/botsOnly/",
                 "one:/onlyGoogle/",
-                "three:/"
+                "three:/content/geometrixx/en"
         });
         props.put("disallowed.directives", new String[]{
                 "one:/noGoogle/",

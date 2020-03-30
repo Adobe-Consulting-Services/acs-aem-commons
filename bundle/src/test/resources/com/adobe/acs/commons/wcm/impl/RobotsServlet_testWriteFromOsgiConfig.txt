@@ -12,7 +12,7 @@ Disallow: /content/geometrixx/en/no-bots/
 # End Group: two
 # Start Group: three
 User-agent: *
-Allow: /
+Allow: /content/geometrixx/en/
 # End Group: three
 Sitemap: https://www.geometrixx.com/sitemap.xml
 Sitemap: https://www.geometrixx.com/content/geometrixx/en.sitemap.xml
