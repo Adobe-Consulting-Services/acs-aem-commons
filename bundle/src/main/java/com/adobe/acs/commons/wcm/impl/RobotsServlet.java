@@ -61,6 +61,10 @@ import java.util.function.BiFunction;
 public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private static final Logger log = LoggerFactory.getLogger(RobotsServlet.class);
+    private static final String ALLOW = "Allow: ";
+    private static final String USER_AGENT = "User-agent: ";
+    private static final String SITEMAP = "Sitemap: ";
+    private static final String DISALLOW = "Disallow: ";
 
     private String externalizerDomain;
 
@@ -112,14 +116,15 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             writer.println("# Start Group: " + group.getGroupName());
         }
 
+        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        Page page = pageManager.getContainingPage(request.getResource());
+
         group.getUserAgents().stream().map(this::buildUserAgentsString).forEach(writer::println);
 
         group.getAllowed().stream().map(allowed -> buildAllowedString(allowed, request.getResourceResolver())).forEach(writer::println);
 
         List<String> allowProperties = group.getAllowProperties();
         if (!allowProperties.isEmpty()) {
-            PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-            Page page = pageManager.getContainingPage(request.getResource());
             addRulesFromPages(page, request.getResourceResolver(), allowProperties, writer, this::buildAllowedString);
         }
 
@@ -127,8 +132,6 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         List<String> disallowProperties = group.getDisallowProperties();
         if (!disallowProperties.isEmpty()) {
-            PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-            Page page = pageManager.getContainingPage(request.getResource());
             addRulesFromPages(page, request.getResourceResolver(), disallowProperties, writer, this::buildDisallowedString);
         }
 
@@ -139,7 +142,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> func) {
         ValueMap pageProps = page.getProperties();
-        boolean added =false;
+        boolean added = false;
         for (String prop : propNames) {
             boolean shouldAdd = pageProps.get(prop, false);
             if (shouldAdd) {
@@ -195,7 +198,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private String buildUserAgentsString(String agent) {
-        return "User-agent: " + agent;
+        return USER_AGENT + agent;
     }
 
     private String buildSitemapString(String sitemap, ResourceResolver resourceResolver) {
@@ -205,7 +208,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             sitemap = externalizer.externalLink(resourceResolver, externalizerDomain, sitemap) + ".sitemap.xml";
         }
 
-        return "Sitemap: " + sitemap;
+        return SITEMAP + sitemap;
     }
 
     private String buildAllowedString(String allowedRule, ResourceResolver resourceResolver) {
@@ -215,13 +218,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             allowedRule = resourceResolver.map(allowedRule) + "/";
         }
 
-        return "Allow: " + allowedRule;
+        return ALLOW + allowedRule;
     }
 
     private String buildAllowedString(Page page, ResourceResolver resourceResolver) {
         String allowedRule = resourceResolver.map(page.getPath()) + "/";
 
-        return "Allow: " + allowedRule;
+        return ALLOW + allowedRule;
     }
 
     private String buildDisallowedString(String disallowedRule, ResourceResolver resourceResolver) {
@@ -231,13 +234,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             disallowedRule = resourceResolver.map(disallowedRule) + "/";
         }
 
-        return "Disallow: " + disallowedRule;
+        return DISALLOW + disallowedRule;
     }
 
     private String buildDisallowedString(Page page, ResourceResolver resourceResolver) {
         String disallowedRule = resourceResolver.map(page.getPath()) + "/";
 
-        return "Disallow: " + disallowedRule;
+        return DISALLOW + disallowedRule;
     }
 
     @ObjectClassDefinition(name = "ACS AEM Commons - Robots Servlet")
