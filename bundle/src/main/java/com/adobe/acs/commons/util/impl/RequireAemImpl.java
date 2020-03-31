@@ -54,10 +54,10 @@ public class RequireAemImpl implements RequireAem {
     private static final Version originalCloudServiceVersion = new Version(2019, 12,   0);
 
     @Reference
-    private transient ProductInfoProvider productInfoProvider;
+    private ProductInfoProvider productInfoProvider;
 
-    private transient ProductInfo productInfo;
-    private transient ServiceRegistration serviceRegistration;
+    private ProductInfo productInfo;
+    private ServiceRegistration<?> serviceRegistration;
 
     @Override
     public Distribution getDistribution() {
@@ -72,6 +72,7 @@ public class RequireAemImpl implements RequireAem {
     protected void activate(final BundleContext bundleContext) {
         productInfo = productInfoProvider.getProductInfo();
 
+        @SuppressWarnings("squid:java:S1149")
         final Dictionary<String, Object> properties = new Hashtable<>();
 
         String distribution;
@@ -88,7 +89,7 @@ public class RequireAemImpl implements RequireAem {
 
         serviceRegistration = bundleContext.registerService(RequireAem.class.getName(), this, properties);
 
-        log.info("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ distribution = {}, version = {} ] so it be be used to enable/disable other OSGi Components",
+        log.info("Registering [ RequireAem.class ] as an OSGi Service with OSGi properties [ distribution = {}, version = {} ] so it can be used to enable/disable other OSGi Components",
                 properties.get(PN_DISTRIBUTION), properties.get(PN_VERSION));
     }
 

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.reports.models.ReportRunner.PN_EXECUTOR;
 
+@SuppressWarnings("squid:S2658")
 public final class ReportExecutorProvider {
 
     public static final ReportExecutorProvider INSTANCE = new ReportExecutorProvider();

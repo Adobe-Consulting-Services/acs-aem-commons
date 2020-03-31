@@ -42,18 +42,10 @@ public class RequireAemImplTest {
     ProductInfoProvider productInfoProvider;
 
     @Mock
-    SlingRepository slingRepository;
-
-    @Mock
     ProductInfo productInfo;
 
     @Rule
     public final AemContext ctx = new AemContext();
-
-    @Before
-    public void setUp() throws Exception {
-        ctx.registerService(SlingRepository.class, slingRepository);
-    }
 
     private void setUpAsCloudReady() {
         doReturn(new Version("2020.2.2239.20200214T010959Z")).when(productInfo).getVersion();
