@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+- #2199 Add read permission for acs-commons-email-service user in conf folder using rep policy
 
 ## [4.5.0] - 2020-03-25
 
@@ -21,7 +22,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2206 fix sonar warnings; some package versions had to be increased
 - #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
-- #2199 Add read permission for acs-commons-email-service user in conf folder using rep policy
 - #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
 
 ### Changed
