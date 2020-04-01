@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.4.3-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -44,6 +44,15 @@
                 <targetPath>../vault-work/META-INF</targetPath>
             </resource>
         </resources>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>${maven.multiModuleProjectDirectory}/src/test/resources</directory>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>

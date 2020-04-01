@@ -23,9 +23,8 @@ import com.adobe.acs.commons.models.injectors.annotation.impl.ChildResourceFromR
 import com.adobe.acs.commons.models.injectors.impl.model.TestModelChildResourceFromRequest;
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestModelChildResourceFromRequestChildImpl;
 import com.adobe.acs.commons.models.injectors.impl.model.impl.TestModelChildResourceFromRequestImpl;
+import com.adobe.acs.commons.util.impl.ActivatorHelper;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,13 +33,14 @@ import org.junit.Test;
 import javax.jcr.RepositoryException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 public class ChildResourceFromRequestInjectorTest {
+
+    private ActivatorHelper activatorHelper = new ActivatorHelper();
+
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    public final AemContext context = new AemContext(activatorHelper.afterSetup(), activatorHelper.beforeTeardown(), ResourceResolverType.JCR_MOCK);
 
     @Before
     public void setup() throws RepositoryException {
@@ -54,6 +54,7 @@ public class ChildResourceFromRequestInjectorTest {
         this.context.create().resource("/content/childList/2", "prop", "val3");
 
         this.context.currentResource("/content");
+
     }
 
     @Test
