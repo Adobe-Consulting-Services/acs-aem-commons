@@ -80,6 +80,9 @@ public class MarketoClientConfigurationImpl implements MarketoClientConfiguratio
 
   @Override
   public String getEndpointHost() {
+    if(endpointHost.startsWith("https://")){
+      return endpointHost.substring(8);
+    }
     return endpointHost;
   }
 
