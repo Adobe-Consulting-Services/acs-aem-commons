@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 import static com.adobe.acs.commons.json.JsonObjectUtil.*;
@@ -61,7 +63,7 @@ public class StartServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(StartServlet.class);
 
     @Reference
-    private BulkWorkflowEngine bulkWorkflowEngine;
+    private transient BulkWorkflowEngine bulkWorkflowEngine;
     
     @Override
     @SuppressWarnings({"squid:S1192", "squid:S1872"})
@@ -116,21 +118,21 @@ public class StartServlet extends SlingAllMethodsServlet {
         } catch (RepositoryException e) {
             log.error("Could not initialize Bulk Workflow: {}", e);
 
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow.",
                     e.getMessage());
 
         } catch (IllegalArgumentException e) {
             log.warn("Could not initialize Bulk Workflow due to invalid arguments: {}", e);
 
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not initialize Bulk Workflow due to invalid arguments.",
                     e.getMessage());
 
         } catch (Exception e) {
             log.error("Could not initialize Bulk Workflow due to unexpected error: {}", e);
 
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not start Bulk Workflow.",
                     e.getMessage());
         }
