@@ -145,8 +145,7 @@ public class AutomaticPackageReplicatorImpl extends AnnotatedStandardMBean imple
     }
 
     try {
-      @SuppressWarnings("java:S1149")
-      final Dictionary<String, Object> configProperties = new Hashtable<>();
+      final Dictionary<String, Object> configProperties = new Hashtable<>(); // NOSONAR
       Configuration config;
       if ("cron".equals(trigger)) {
         final String cronTrigger = properties.get("cronTrigger", String.class);
