@@ -26,14 +26,13 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
+
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
-import com.adobe.acs.commons.marketo.MarketoClientConfigurationManager;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
