@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2017 - Adobe
+ * Copyright (C) 2017 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
-    private final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(PermissionSensitiveCacheServlet.class);
 
 
     public void doHead(SlingHttpServletRequest request, SlingHttpServletResponse response) {

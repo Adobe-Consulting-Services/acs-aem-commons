@@ -35,11 +35,13 @@ import org.apache.felix.scr.annotations.Service;
  */
 
 // TODO - Placeholder component. To be implemented.
+/*
 @Component
 @Service
 @Property(name = HttpCacheStore.KEY_CACHE_STORE_TYPE,
           value = HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE,
           propertyPrivate = true)
+*/
 public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     @Override
     public void put(CacheKey key, CacheContent content) throws HttpCacheDataStreamException {
@@ -80,4 +82,11 @@ public class DiskHttpCacheStoreImpl implements HttpCacheStore {
     public TempSink createTempSink() {
         throw new NotImplementedException();
     }
+
+    @Override
+    public String getStoreType() {
+        return HttpCacheStore.VALUE_DISK_CACHE_STORE_TYPE;
+    }
+
+
 }

@@ -21,10 +21,19 @@
 package com.adobe.acs.commons.images.transformers.impl;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.sling.api.resource.ValueMap;
@@ -34,7 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.day.image.Layer;
 
@@ -75,7 +84,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         map.put("height", height);
         map.put("color", color);
         map.put("alpha", alpha);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -107,7 +116,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -139,7 +148,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -169,7 +178,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -198,7 +207,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("width", width);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -226,7 +235,7 @@ public class LetterPillarBoxImageTransformerImplTest {
         final int height = 225;
 
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -255,7 +264,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -287,7 +296,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -318,7 +327,7 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         map.put("width", width);
         map.put("height", height);
-        ValueMap properties = new ValueMapDecorator(map);
+        final ValueMap properties = new ValueMapDecorator(map);
 
         final Layer mockLayer = mock(Layer.class);
 
@@ -347,14 +356,14 @@ public class LetterPillarBoxImageTransformerImplTest {
 
         new LetterPillarBoxImageTransformerImpl().transform(layer, properties);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     @Test
     public void testTransform_nullParams() throws Exception {
         new LetterPillarBoxImageTransformerImpl().transform(layer, null);
 
-        verifyZeroInteractions(layer);
+        verifyNoInteractions(layer);
     }
 
     private class Transformer extends LetterPillarBoxImageTransformerImpl {

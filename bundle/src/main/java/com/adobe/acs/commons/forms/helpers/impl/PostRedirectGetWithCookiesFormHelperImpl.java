@@ -31,13 +31,15 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.commons.json.JSONException;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  * ACS AEM Commons - Forms - POST-Redirect-GET-With-Cookies Form Helper
@@ -56,7 +58,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, String path, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JSONException {
+            throws IOException {
         final String url = this.getRedirectPath(form, path, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -64,7 +66,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, Page page, String formSelector, SlingHttpServletResponse response)
-            throws IOException, JSONException {
+            throws IOException {
         final String url = this.getRedirectPath(form, page, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -72,7 +74,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
 
     @Override
     public final void sendRedirect(Form form, Resource resource, String formSelector,
-            SlingHttpServletResponse response) throws IOException, JSONException {
+            SlingHttpServletResponse response) throws IOException {
         final String url = this.getRedirectPath(form, resource, formSelector);
         addFlashCookie(response, form);
         response.sendRedirect(url);
@@ -106,8 +108,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
     }
 
     @Override
-    protected final String getRedirectPath(final Form form, final String path, final String formSelector) throws
-            JSONException {
+    protected final String getRedirectPath(final Form form, final String path, final String formSelector) {
         String redirectPath = path;
         redirectPath += this.getSuffix();
         if (StringUtils.isNotBlank(formSelector)) {
@@ -124,7 +125,12 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      */
     @Override
     protected final String encode(String unencoded) {
-        return StringUtils.isBlank(unencoded) ? "" : org.apache.sling.commons.json.http.Cookie.escape(unencoded);
+        try {
+            return StringUtils.isBlank(unencoded) ? "" : URLEncoder.encode(unencoded, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Cannot encode '{}' to UTF-8", unencoded, ex);
+            return unencoded;
+        }
     }
 
     /**
@@ -135,7 +141,12 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      */
     @Override
     protected final String decode(String encoded) {
-        return StringUtils.isBlank(encoded) ? "" : org.apache.sling.commons.json.http.Cookie.unescape(encoded);
+        try {
+            return StringUtils.isBlank(encoded) ? "" : URLDecoder.decode(encoded, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Cannot decode '{}'", ex);
+            return encoded;
+        }
     }
 
     /**
@@ -144,7 +155,7 @@ public class PostRedirectGetWithCookiesFormHelperImpl extends PostRedirectGetFor
      * @param form
      * @throws JSONException
      */
-    protected void addFlashCookie(SlingHttpServletResponse response, Form form) throws JSONException {
+    protected void addFlashCookie(SlingHttpServletResponse response, Form form) {
         final String name = this.getGetLookupKey(form.getName());
         final String value = getQueryParameterValue(form);
         final Cookie cookie = new Cookie(name, value);

@@ -25,10 +25,10 @@ import com.adobe.acs.commons.quickly.operations.AbstractOperation;
 import com.adobe.acs.commons.quickly.operations.Operation;
 import com.adobe.acs.commons.quickly.results.Result;
 import com.adobe.acs.commons.quickly.results.impl.serializers.OpenResultSerializerImpl;
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.acs.commons.util.TextUtil;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.Query;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import com.day.cq.search.result.SearchResult;
 import com.day.cq.wcm.api.NameConstants;
@@ -46,19 +46,18 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 
 /**
  * ACS AEM Commons - Quickly - Last Modified Operation
@@ -79,7 +78,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
     private static final int MAX_QUERY_RESULTS = 25;
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
 
     @Override
     public boolean accepts(final SlingHttpServletRequest request,
@@ -193,22 +192,18 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         map.put("p.limit", String.valueOf(limit));
         map.put("p.guessTotal", "true");
 
-        try {
-            log.debug("Lastmod QueryBuilder Map: {}", new JSONObject(map).toString(2));
-        } catch (JSONException e) {
-            // no-op
-        }
+        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2).toString());
 
-        final Query query = queryBuilder.createQuery(PredicateGroup.create(map),
-                resourceResolver.adaptTo(Session.class));
-        final SearchResult result = query.getResult();
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), resourceResolver)) {
+            final SearchResult result = query.getResult();
 
-        for (final Hit hit : result.getHits()) {
-            try {
-                resources.add(hit.getResource());
-            } catch (RepositoryException e) {
-                log.error("Error resolving Hit to Resource [ {} ]. "
-                        + "Likely issue with lucene index being out of sync.", hit.toString());
+            for (final Hit hit : result.getHits()) {
+                try {
+                    resources.add(resourceResolver.getResource(hit.getPath()));
+                } catch (RepositoryException e) {
+                    log.error("Error resolving Hit to Resource [ {} ]. "
+                            + "Likely issue with lucene index being out of sync.", hit.toString());
+                }
             }
         }
 

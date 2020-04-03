@@ -37,8 +37,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.SlingConstants;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +64,10 @@ import java.util.Map;
 @Service
 public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final Logger log = LoggerFactory.getLogger(WorkflowPackageManagerImpl.class);
+
+    private static final String WORKFLOW_PACKAGES_PATH = "/var/workflow/packages";
+
+    private static final String LEGACY_WORKFLOW_PACKAGES_PATH = "/etc/workflow/packages";
 
     private static final String WORKFLOW_PACKAGE_TEMPLATE = "/libs/cq/workflow/templates/collectionpage";
 
@@ -81,6 +88,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
+    
+    private static final String SERVICE_NAME = "workflowpackagemanager-service";
+    private static final Map<String, Object> AUTH_INFO;
+    
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
+    }
 
     @Property(label = "Workflow Package Types",
             description = "Node Types allowed by the WF Package. Default: cq:Page, cq:PageContent, dam:Asset",
@@ -90,6 +104,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
+    
+    @Reference
+    ResourceResolverFactory resourceResolverFactory;
+    
+    private String bucketPath;
 
     /**
      * {@inheritDoc}
@@ -106,11 +125,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     public final Page create(final ResourceResolver resourceResolver, String bucketSegment,
                              final String name, final String... paths) throws WCMException,
             RepositoryException {
-
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        String bucketPath = "/etc/workflow/packages";
+        
+
         if (StringUtils.isNotBlank(bucketSegment)) {
             bucketPath += "/" + bucketSegment;
         }
@@ -161,7 +180,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
         if (resource == null) {
             log.warn("Requesting paths for a non-existent Resource [ {} ]; returning empty results.", path);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         } else if (!isWorkflowPackage(resourceResolver, path)) {
             log.debug("Requesting paths for a non-Resource Collection  [ {} ]; returning provided path.", path);
@@ -174,8 +193,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             if (page != null && page.getContentResource() != null) {
                 final Node node = page.getContentResource().adaptTo(Node.class);
 
-                final ResourceCollection resourceCollection =
-                        ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
+                final ResourceCollection resourceCollection = getResourceCollection(node);
 
                 if (resourceCollection != null) {
                     final List<Node> members = resourceCollection.list(nodeTypes);
@@ -188,6 +206,11 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
             return Arrays.asList(new String[]{ path });
         }
+    }
+
+    /* This is broken out into its own method to allow for easier unit testing */
+    protected ResourceCollection getResourceCollection(final Node node) throws RepositoryException {
+        return ResourceCollectionUtil.getResourceCollection(node, resourceCollectionManager);
     }
 
     /**
@@ -215,7 +238,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      */
     public final boolean isWorkflowPackage(final ResourceResolver resourceResolver, final String path) {
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-
         final Page workflowPackagesPage = pageManager.getPage(path);
         if (workflowPackagesPage == null) {
             return false;
@@ -254,9 +276,27 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         return rules;
     }
 
+    private String getBucketPath(final ResourceResolver resourceResolver) {
+        if (resourceResolver.getResource(WORKFLOW_PACKAGES_PATH) != null) {
+            return WORKFLOW_PACKAGES_PATH;
+        } else {
+            return LEGACY_WORKFLOW_PACKAGES_PATH;
+        }
+
+    }
+
     @Activate
     protected final void activate(final Map<String, String> config) {
         workflowPackageTypes =
                 PropertiesUtil.toStringArray(config.get(PROP_WF_PACKAGE_TYPES), DEFAULT_WF_PACKAGE_TYPES);
+        try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
+            bucketPath = getBucketPath(resolver);
+            log.debug("using {} as bucket path for wf packages",bucketPath);
+        } catch (LoginException e) {
+            log.error("Cannot determine bucket path for WorkflowPackageManager, do not activate this service",e);
+            // this service must not get activated
+            throw new IllegalStateException(e);
+        }
+        
     }
 }

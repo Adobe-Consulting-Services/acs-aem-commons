@@ -140,7 +140,7 @@ public class AuditLogSearchRequest {
     public String getUserName(ResourceResolver resolver, String userId) throws RepositoryException {
         if (!userNames.containsKey(userId)) {
             final UserPropertiesManager upm = resolver.adaptTo(UserPropertiesManager.class);
-            UserProperties userProperties = upm.getUserProperties(userId, UserPropertiesService.PROFILE_PATH);
+            UserProperties userProperties = upm.getUserProperties(userId, UserPropertiesService.PRIVATE_PROFILE);
             String name = userId;
             if (userProperties != null && !StringUtils.isEmpty(userProperties.getDisplayName())) {
                 name = userProperties.getDisplayName();

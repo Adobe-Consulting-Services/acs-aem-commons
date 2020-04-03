@@ -17,12 +17,11 @@
  * limitations under the License.
  * #L%
  */
-
 package com.adobe.acs.commons.workflow.bulk.execution.impl.servlets;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 
 import java.io.IOException;
 
@@ -33,22 +32,18 @@ public final class JSONErrorUtil {
     }
 
     public static void sendJSONError(SlingHttpServletResponse response,
-                                     int statusCode,
-                                     String title,
-                                     String message) throws IOException {
+            int statusCode,
+            String title,
+            String message) throws IOException {
 
         response.setStatus(statusCode);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        JSONObject json = new JSONObject();
-        try {
-            json.put("title", title);
-            json.put("message", message);
-            response.getWriter().write(json.toString());
-        } catch (JSONException e) {
-            String jsonString = "{title: \"Error constructing error message\"}";
-            response.getWriter().write(jsonString);
-        }
+        JsonObject json = new JsonObject();
+        json.addProperty("title", title);
+        json.addProperty("message", message);
+        Gson gson = new Gson();
+        gson.toJson(json, response.getWriter());
     }
 }

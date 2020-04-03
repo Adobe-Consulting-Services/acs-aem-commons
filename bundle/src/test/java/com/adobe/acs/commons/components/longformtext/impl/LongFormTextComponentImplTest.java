@@ -29,12 +29,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Document;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -65,8 +63,8 @@ public class LongFormTextComponentImplTest {
     public void testGetTextParagraphs_2() throws Exception {
         final String input = "<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a lot</p></div>";
 
-        final String[] expected = new String[] {"<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a " +
-                "lot</p></div>"};
+        final String[] expected = new String[] {"<div class=\"dog-park\"><p>ira is a dog</p><p> she barks a "
+                + "lot</p></div>"};
         final String[] result = longFormTextComponent.getTextParagraphs(input);
 
         Assert.assertArrayEquals(expected, result);

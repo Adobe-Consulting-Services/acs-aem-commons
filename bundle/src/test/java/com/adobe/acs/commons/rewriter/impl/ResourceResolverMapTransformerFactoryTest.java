@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
@@ -40,8 +40,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -94,7 +94,7 @@ public class ResourceResolverMapTransformerFactoryTest extends TestCase {
         
         /* Verify */
         
-        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/en/jcr:content/img.png", out.getValue(0));
@@ -123,9 +123,38 @@ public class ResourceResolverMapTransformerFactoryTest extends TestCase {
         
         /* Verify */
 
-        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
-        verifyZeroInteractions(resourceResolver);
+        verifyNoInteractions(resourceResolver);
+    }
+
+    @Test
+    public void testRebuildAttributes_DoubleEncodingScenario() throws Exception {
+        when(resourceResolver.map(request, "/content/site/en/jcr:content/img test.png")).thenReturn("/en/jcr:content/img%20test.png");
+
+        final Map<String, Object> config = new HashMap<String, Object>();
+        config.put("attributes", new String[]{"img:src"});
+
+        ResourceResolverMapTransformerFactory factory = new ResourceResolverMapTransformerFactory();
+
+        factory.activate(config);
+        Transformer transformer = factory.createTransformer();
+        transformer.init(processingContext, null);
+        transformer.setContentHandler(handler);
+
+        AttributesImpl in = new AttributesImpl();
+        in.addAttribute(null, "src", null, "CDATA", "/content/site/en/jcr:content/img%20test.png");
+
+        /* Execute */
+
+        transformer.startElement(null, "img", null, in);
+
+        /* Verify */
+
+        verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
+                                             attributesCaptor.capture());
+        Attributes out = attributesCaptor.getValue();
+        assertEquals("/en/jcr:content/img%20test.png", out.getValue(0));
     }
 
     @Test

@@ -20,20 +20,17 @@
 package com.adobe.acs.commons.widgets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.ProviderType;
-import tldgen.Function;
+import org.osgi.annotation.versioning.ProviderType;
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 
 /**
  * JSP functions for working with MultiFieldPanel widget.
@@ -53,26 +50,18 @@ public final class MultiFieldPanelFunctions {
      * @param name the property name
      * @return a list of maps.
      */
-    @Function
     public static List<Map<String, String>> getMultiFieldPanelValues(Resource resource, String name) {
+        Gson gson = new Gson();
         ValueMap map = resource.adaptTo(ValueMap.class);
-        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> results = new ArrayList<>();
         if (map != null && map.containsKey(name)) {
             String[] values = map.get(name, new String[0]);
             for (String value : values) {
 
                 try {
-                    JSONObject parsed = new JSONObject(value);
-                    Map<String, String> columnMap = new HashMap<String, String>();
-                    for (Iterator<String> iter = parsed.keys(); iter.hasNext();) {
-                        String key = iter.next();
-                        String innerValue = parsed.getString(key);
-                        columnMap.put(key, innerValue);
-                    }
+                    results.add(gson.fromJson(value, Map.class));
 
-                    results.add(columnMap);
-
-                } catch (JSONException e) {
+                } catch (JsonParseException e) {
                     log.error(
                             String.format("Unable to parse JSON in %s property of %s", name, resource.getPath()),
                             e);

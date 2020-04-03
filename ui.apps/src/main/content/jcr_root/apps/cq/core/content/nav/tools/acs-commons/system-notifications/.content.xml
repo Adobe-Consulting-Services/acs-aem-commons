@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="System Notifications"
+    jcr:description="Notify AEM users of important system events."
+    icon="answer"
+    href="/miscadmin#/etc/acs-commons/notifications"
+    id="acs-commons__system-notifications"
+    target="_blank"/>

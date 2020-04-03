@@ -1,0 +1,20 @@
+{
+  "test-1.png": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:content": {
+      "jcr:primaryType": "dam:AssetContent",
+      "metadata": {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    }
+  },
+  "test-2.png": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:content": {
+      "jcr:primaryType": "dam:AssetContent",
+      "metadata": {
+        "jcr:primaryType": "nt:unstructured"
+      }
+    }
+  }
+}

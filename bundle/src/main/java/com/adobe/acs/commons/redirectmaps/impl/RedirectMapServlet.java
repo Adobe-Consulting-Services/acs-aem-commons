@@ -45,6 +45,7 @@ public class RedirectMapServlet extends SlingSafeMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(RedirectMapServlet.class);
     private static final long serialVersionUID = -3564475196678277711L;
 
+    @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         log.trace("doGet");

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.email;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.activation.DataSource;
 import javax.mail.internet.InternetAddress;

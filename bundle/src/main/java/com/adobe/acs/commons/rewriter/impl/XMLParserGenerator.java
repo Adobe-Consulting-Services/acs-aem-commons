@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -45,11 +46,18 @@ public final class XMLParserGenerator implements Generator {
 
     private ContentHandler contentHandler;
 
+    @SuppressWarnings("java:S2755")
     public XMLParserGenerator() throws ParserConfigurationException, SAXException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
+        // XXE prevention is done in the other constructor
+        this(SAXParserFactory.newInstance());
+    }
+
+    public XMLParserGenerator(final SAXParserFactory factory) throws ParserConfigurationException, SAXException {
         factory.setNamespaceAware(true);
 
         saxParser = factory.newSAXParser();
+        saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, ""); 
+        saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); 
         this.writer = new StringWriter();
         this.printWriter = new PrintWriter(writer);
     }

@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.wcm.notifications;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.day.cq.wcm.api.Page;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;

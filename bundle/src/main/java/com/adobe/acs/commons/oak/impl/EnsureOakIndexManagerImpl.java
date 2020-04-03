@@ -89,11 +89,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
                 propertyPrivate = true
         )
 })
-@Reference(
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        referenceInterface = AppliableEnsureOakIndex.class,
-        policy = ReferencePolicy.DYNAMIC
-)
 @Service(value = {DynamicMBean.class, EnsureOakIndexManager.class})
 //@formatter:on
 public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements EnsureOakIndexManager, EnsureOakIndexManagerMBean {
@@ -108,6 +103,12 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
             value = {})
     public static final String PROP_ADDITIONAL_IGNORE_PROPERTIES = "properties.ignore";
 
+
+    @Reference(
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+        referenceInterface = AppliableEnsureOakIndex.class,
+        policy = ReferencePolicy.DYNAMIC
+    )
     // Thread-safe ArrayList to track EnsureIndex service registrations
     private CopyOnWriteArrayList<AppliableEnsureOakIndex> ensureIndexes =
             new CopyOnWriteArrayList<AppliableEnsureOakIndex>();
@@ -160,7 +161,6 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
 
     protected final void bindAppliableEnsureOakIndex(AppliableEnsureOakIndex index) {
         if (index != null && !this.ensureIndexes.contains(index)) {
-            index.setIgnoreProperties(this.additionalIgnoreProperties);
             this.ensureIndexes.add(index);
         }
     }
@@ -213,5 +213,10 @@ public class EnsureOakIndexManagerImpl extends AnnotatedStandardMBean implements
     @Activate
     protected void activate(Map<String, Object> config) {
         additionalIgnoreProperties = PropertiesUtil.toStringArray(config.get(PROP_ADDITIONAL_IGNORE_PROPERTIES), DEFAULT_ADDITIONAL_IGNORE_PROPERTIES);
+    }
+    
+    
+    protected String[] getIgnoredProperties() {
+        return this.additionalIgnoreProperties;
     }
 }

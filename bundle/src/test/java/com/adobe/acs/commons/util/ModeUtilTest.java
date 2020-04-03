@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
@@ -138,7 +138,7 @@ public class ModeUtilTest {
     public void testIsAnalytics() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.ANALYTICS);
         assertTrue(ModeUtil.isAnalytics(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -146,7 +146,7 @@ public class ModeUtilTest {
     public void testIsNotAnalytics() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isAnalytics(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -154,7 +154,7 @@ public class ModeUtilTest {
     public void testIsDesign() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.DESIGN);
         assertTrue(ModeUtil.isDesign(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -162,7 +162,7 @@ public class ModeUtilTest {
     public void testIsNotDesign() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isDesign(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -170,7 +170,7 @@ public class ModeUtilTest {
     public void testIsDisabled() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.DISABLED);
         assertTrue(ModeUtil.isDisabled(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -178,7 +178,7 @@ public class ModeUtilTest {
     public void testIsNotDisabled() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isDisabled(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -186,7 +186,7 @@ public class ModeUtilTest {
     public void testIsEdit() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertTrue(ModeUtil.isEdit(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -194,7 +194,7 @@ public class ModeUtilTest {
     public void testIsNotEdit() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.PREVIEW);
         assertFalse(ModeUtil.isEdit(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -202,7 +202,7 @@ public class ModeUtilTest {
     public void testIsPreview() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.PREVIEW);
         assertTrue(ModeUtil.isPreview(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -210,7 +210,7 @@ public class ModeUtilTest {
     public void testIsNotPreview() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isPreview(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -218,7 +218,7 @@ public class ModeUtilTest {
     public void testIsReadOnly() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.READ_ONLY);
         assertTrue(ModeUtil.isReadOnly(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -226,7 +226,7 @@ public class ModeUtilTest {
     public void testIsNotReadOnly() {
         when(request.getAttribute(WCMMode.class.getName())).thenReturn(WCMMode.EDIT);
         assertFalse(ModeUtil.isReadOnly(request));
-        verify(request, times(1)).getAttribute(WCMMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(WCMMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -234,7 +234,7 @@ public class ModeUtilTest {
     public void testIsClassic() {
         when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.CLASSIC);
         assertTrue(ModeUtil.isClassic(request));
-        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -242,7 +242,7 @@ public class ModeUtilTest {
     public void testIsNotClassic() {
         when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.TOUCH);
         assertFalse(ModeUtil.isClassic(request));
-        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -250,7 +250,7 @@ public class ModeUtilTest {
     public void testIsTouch() {
         when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.TOUCH);
         assertTrue(ModeUtil.isTouch(request));
-        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 
@@ -258,7 +258,7 @@ public class ModeUtilTest {
     public void testIsNotTouch() {
         when(request.getAttribute(AuthoringUIMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(AuthoringUIMode.CLASSIC);
         assertFalse(ModeUtil.isTouch(request));
-        verify(request, times(1)).getAttribute(AuthoringUIMode.class.getName());
+        verify(request, atLeast(1)).getAttribute(AuthoringUIMode.class.getName());
         verifyNoMoreInteractions(request);
     }
 

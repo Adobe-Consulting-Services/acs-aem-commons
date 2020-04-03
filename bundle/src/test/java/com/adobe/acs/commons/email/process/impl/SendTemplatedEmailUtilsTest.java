@@ -45,7 +45,7 @@ import static org.mockito.Mockito.mock;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.wcm.api.Page;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.when;
 
@@ -162,8 +162,8 @@ public class SendTemplatedEmailUtilsTest {
     public void testGetEmailAddrs_Group() throws Exception {
 
         // mock group and users
-        String groupPath = "/home/users/g/group";
-        List<Authorizable> groupMembers = new ArrayList<Authorizable>();
+        final String groupPath = "/home/users/g/group";
+        final List<Authorizable> groupMembers = new ArrayList<Authorizable>();
 
         Authorizable user1 = mock(Authorizable.class);
         Authorizable user2 = mock(Authorizable.class);

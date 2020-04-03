@@ -20,8 +20,21 @@
 
 package com.adobe.acs.commons.quickly.impl;
 
-import com.adobe.acs.commons.quickly.QuicklyEngine;
-import com.adobe.acs.commons.util.BufferingResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Map;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -33,18 +46,9 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.Map;
+import com.adobe.acs.commons.quickly.QuicklyEngine;
+import com.adobe.acs.commons.util.BufferedHttpServletResponse;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 
 /**
  * ACS AEM Commons - Quickly - App HTML Injection Filter
@@ -88,31 +92,30 @@ public class QuicklyFilter implements Filter {
             return;
         }
 
-        final BufferingResponse capturedResponse = new BufferingResponse(response);
+        try (BufferedHttpServletResponse capturedResponse = new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
-        filterChain.doFilter(request, capturedResponse);
-
-        // Get contents
-        final String contents = capturedResponse.getContents();
-
-        if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
-
-            final int bodyIndex = contents.indexOf("</body>");
-            if (bodyIndex != -1) {
-
-                final PrintWriter printWriter = response.getWriter();
-
-                printWriter.write(contents.substring(0, bodyIndex));
-                printWriter.write(appHTML);
-                printWriter.write(contents.substring(bodyIndex));
-
-                return;
+            filterChain.doFilter(request, capturedResponse);
+    
+            // Get contents
+            final String contents = capturedResponse.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER ? capturedResponse.getBufferedServletOutput().getBufferedString() : null;
+    
+            if (contents != null && StringUtils.contains(response.getContentType(), "html")) {
+    
+                final int bodyIndex = contents.indexOf("</body>");
+                if (bodyIndex != -1) {
+                    // prevent the captured response from being given out a 2nd time via the implicit close()
+                    capturedResponse.resetBuffer();
+                    final PrintWriter printWriter = response.getWriter();
+    
+                    printWriter.write(contents.substring(0, bodyIndex));
+                    printWriter.write(appHTML);
+                    printWriter.write(contents.substring(bodyIndex));
+    
+                    return;
+                }
             }
         }
 
-        if (contents != null) {
-            response.getWriter().write(contents);
-        }
     }
 
     @Override

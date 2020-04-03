@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.adobe.acs.commons.genericlists.GenericList;
@@ -133,11 +133,6 @@ public class GenericListAdapterFactoryTest {
     @Test
     public void test_that_adapting_page_with_null_template_returns_null() {
         Page wrongPage = mock(Page.class);
-        when(wrongPage.getProperties()).thenAnswer(new Answer<ValueMap>() {
-            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
-                return new ValueMapDecorator(new HashMap<String, Object>());
-            }
-        });
 
         GenericList section = adaptToGenericList(wrongPage);
         assertNull(section);
@@ -145,9 +140,9 @@ public class GenericListAdapterFactoryTest {
 
     @Test
     public void test_i18n_titles() {
-        Locale french = new Locale("fr");
-        Locale swissFrench = new Locale("fr", "ch");
-        Locale franceFrench = new Locale("fr", "fr");
+        final Locale french = new Locale("fr");
+        final Locale swissFrench = new Locale("fr", "ch");
+        final Locale franceFrench = new Locale("fr", "fr");
 
         GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
         assertNotNull(list);

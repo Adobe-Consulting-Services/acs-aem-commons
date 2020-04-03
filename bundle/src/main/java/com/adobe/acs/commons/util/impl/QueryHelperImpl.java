@@ -20,10 +20,11 @@
 
 package com.adobe.acs.commons.util.impl;
 
+import com.adobe.acs.commons.search.CloseableQuery;
+import com.adobe.acs.commons.search.CloseableQueryBuilder;
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.adobe.acs.commons.util.QueryHelper;
 import com.day.cq.search.PredicateGroup;
-import com.day.cq.search.QueryBuilder;
 import com.day.cq.search.result.Hit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -50,11 +51,11 @@ import java.util.Map;
 public class QueryHelperImpl implements QueryHelper {
 
     @Reference
-    private QueryBuilder queryBuilder;
+    private CloseableQueryBuilder queryBuilder;
 
-    private static final String QUERY_BUILDER = "queryBuilder";
+    public static final String QUERY_BUILDER = "queryBuilder";
 
-    private static final String LIST = "list";
+    public static final String LIST = "list";
 
     /**
      * Find all the resources needed for the package definition.
@@ -77,7 +78,7 @@ public class QueryHelperImpl implements QueryHelper {
         final String[] lines = StringUtils.split(statement, '\n');
 
         if (QUERY_BUILDER.equalsIgnoreCase(language)) {
-            return getResourcesFromQueryBuilder(resourceResolver, lines);
+            return getResourcesFromQueryBuilder(resourceResolver, lines, relPath);
         } else if (LIST.equalsIgnoreCase(language)) {
             return getResourcesFromList(resourceResolver, lines, relPath);
         } else {
@@ -118,7 +119,7 @@ public class QueryHelperImpl implements QueryHelper {
         return resources;
     }
 
-    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines) throws RepositoryException {
+    private List<Resource> getResourcesFromQueryBuilder(ResourceResolver resourceResolver, String[] lines, String relPath) throws RepositoryException {
         final List<Resource> resources = new ArrayList<>();
         final Map<String, String> params = ParameterUtil.toMap(lines, "=", false, null, true);
 
@@ -127,10 +128,16 @@ public class QueryHelperImpl implements QueryHelper {
             params.put("p.limit", "-1");
         }
 
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver.adaptTo(Session.class));
-        final List<Hit> hits = query.getResult().getHits();
-        for (final Hit hit : hits) {
-            resources.add(hit.getResource());
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(params), resourceResolver)) {
+            final List<Hit> hits = query.getResult().getHits();
+            for (final Hit hit : hits) {
+                final Resource resource = resourceResolver.getResource(hit.getPath());
+                final Resource relativeAwareResource = getRelativeAwareResource(resource, relPath);
+
+                if (relativeAwareResource != null) {
+                    resources.add(relativeAwareResource);
+                }
+            }
         }
 
         return resources;
@@ -151,9 +158,11 @@ public class QueryHelperImpl implements QueryHelper {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // XPATH is dead, long live XPATH
     public boolean isTraversal(ResourceResolver resourceResolver, Map<String, String> queryBuilderParams) throws RepositoryException {
-        final com.day.cq.search.Query query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver.adaptTo(Session.class));
-        return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
+        try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(queryBuilderParams), resourceResolver)) {
+            return isTraversal(resourceResolver, Query.XPATH, query.getResult().getQueryStatement());
+        }
     }
 
     /**

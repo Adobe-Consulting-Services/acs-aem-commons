@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.httpcache.store.mem.impl;
 
+import com.adobe.acs.commons.httpcache.engine.HttpCacheServletResponseWrapper;
 import com.adobe.acs.commons.httpcache.exception.HttpCacheDataStreamException;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -27,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Value for cache item in mem store.
  */
-class MemCachePersistenceObject {
+public class MemCachePersistenceObject implements Serializable {
     /** Response status **/
     private int status;
     /** Response character encoding */
@@ -48,12 +50,15 @@ class MemCachePersistenceObject {
     Multimap<String, String> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
+    private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;
+
     AtomicInteger count = new AtomicInteger(0);
 
     /**
      * Create <code>MemCachePersistenceObject</code>. Use <code>buildForCaching</code> method to initialize parameters.
      */
-    MemCachePersistenceObject() {
+    public MemCachePersistenceObject() {
+        //empty constructor
     }
 
     /**
@@ -67,11 +72,12 @@ class MemCachePersistenceObject {
      * @throws HttpCacheDataStreamException
      */
     public MemCachePersistenceObject buildForCaching(int status, String charEncoding, String contentType, Map<String,
-            List<String>> headers, InputStream dataInputStream) throws HttpCacheDataStreamException {
+            List<String>> headers, InputStream dataInputStream, HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod) throws HttpCacheDataStreamException {
 
         this.status = status;
         this.charEncoding = charEncoding;
         this.contentType = contentType;
+        this.writeMethod = writeMethod;
 
         // Iterate headers and take a copy.
         this.headers = HashMultimap.create();
@@ -160,5 +166,9 @@ class MemCachePersistenceObject {
      */
     public int getHitCount() {
         return count.get();
+    }
+
+    public HttpCacheServletResponseWrapper.ResponseWriteMethod getWriteMethod() {
+        return writeMethod;
     }
 }

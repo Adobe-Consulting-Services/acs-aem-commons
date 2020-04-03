@@ -29,10 +29,10 @@ import java.util.Collections;
 
 public class CustomComponentActivatorListServletTest {
 
-    private static final String DEFAULT_RESULT = "{\"components\":[{\"propertyName\":\"xmpMM:History\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/history\"}," +
-            "{\"propertyName\":\"xmpTPg:Fonts\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/fonts\"}," +
-            "{\"propertyName\":\"xmpTPg:Colorants\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/color-swatches\"}," +
-            "{\"propertyName\":\"location\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/asset-location-map\"}]}";
+    private static final String DEFAULT_RESULT = "{\"components\":[{\"propertyName\":\"xmpMM:History\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/history\"},"
+            + "{\"propertyName\":\"xmpTPg:Fonts\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/fonts\"},"
+            + "{\"propertyName\":\"xmpTPg:Colorants\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/color-swatches\"},"
+            + "{\"propertyName\":\"location\",\"componentPath\":\"/apps/acs-commons/dam/content/admin/asset-location-map\"}]}";
 
     @Test
     public void testDefault() throws Exception {

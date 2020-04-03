@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
@@ -81,12 +82,13 @@ public class QueryReportExecutor implements ReportExecutor {
     Session session = resolver.adaptTo(Session.class);
     List<Object> results = new ArrayList<>();
     try {
-      QueryManager queryMgr = session.getWorkspace().getQueryManager();
+      QueryManager queryMgr = Optional.ofNullable(session)
+          .orElseThrow(() -> new ReportException("Failed to get JCR Session")).getWorkspace().getQueryManager();
 
       Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
 
       if (page != -1) {
-        log.debug("Fetching results with limit {} and offset {}", new Object[] { limit, offset });
+        log.debug("Fetching results with limit {} and offset {}", limit, offset);
         query.setLimit(limit);
         query.setOffset(offset);
       } else {
@@ -99,7 +101,6 @@ public class QueryReportExecutor implements ReportExecutor {
         results.add(resolver.getResource(nodes.nextNode().getPath()));
       }
     } catch (RepositoryException re) {
-      log.error("Exception executing search results", re);
       throw new ReportException("Exception executing search results", re);
     }
     return new ResultsPage(results, config.getPageSize(), page);
@@ -112,15 +113,15 @@ public class QueryReportExecutor implements ReportExecutor {
 
   @Override
   public String getDetails() throws ReportException {
-    Map<String, String> details = new LinkedHashMap<String, String>();
+    Map<String, String> details = new LinkedHashMap<>();
     details.put("Language", config.getQueryLanguage());
     details.put("Page", Integer.toString(page));
     details.put("Page Size", Integer.toString(config.getPageSize()));
     details.put("Query", statement);
 
     try {
-      final QueryManager queryManager = request.getResourceResolver().adaptTo(Session.class).getWorkspace()
-          .getQueryManager();
+      final QueryManager queryManager = Optional.ofNullable(request.getResourceResolver().adaptTo(Session.class))
+          .orElseThrow(() -> new ReportException("Failed to get JCR Session")).getWorkspace().getQueryManager();
       final Query query = queryManager.createQuery("explain " + statement, config.getQueryLanguage());
       final QueryResult queryResult = query.execute();
 
@@ -137,7 +138,6 @@ public class QueryReportExecutor implements ReportExecutor {
       }
 
     } catch (RepositoryException re) {
-      log.error("Exception getting details", re);
       throw new ReportException("Exception getting details", re);
     }
     StringBuilder sb = new StringBuilder();
@@ -151,7 +151,7 @@ public class QueryReportExecutor implements ReportExecutor {
 
   @Override
   public String getParameters() throws ReportException {
-    List<String> params = new ArrayList<String>();
+    List<String> params = new ArrayList<>();
     Enumeration<String> keys = request.getParameterNames();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
@@ -173,20 +173,9 @@ public class QueryReportExecutor implements ReportExecutor {
 
   private void prepareStatement() throws ReportException {
     try {
-      Map<String, String> parameters = new HashMap<String, String>();
-      Enumeration<String> paramNames = request.getParameterNames();
-      while (paramNames.hasMoreElements()) {
-        String key = paramNames.nextElement();
-        parameters.put(key, StringEscapeUtils.escapeSql(request.getParameter(key)));
-      }
-      log.trace("Loading parameters from request: {}", parameters);
-
-      Handlebars handlebars = new Handlebars();
-
-      Template template = handlebars.compileInline(config.getQuery());
-
+      Map<String, String> parameters = getParamPatternMap(request);
+      Template template =  new Handlebars().compileInline(config.getQuery());
       statement = template.apply(parameters);
-
       log.trace("Loaded statement: {}", statement);
     } catch (IOException ioe) {
       throw new ReportException("Exception templating query", ioe);

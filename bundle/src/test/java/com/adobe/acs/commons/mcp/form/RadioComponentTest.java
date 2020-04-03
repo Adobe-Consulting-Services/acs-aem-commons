@@ -26,11 +26,18 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -47,9 +54,15 @@ public class RadioComponentTest {
     @Mock
     private SlingHttpServletRequest request;
 
+    @Captor
+    private ArgumentCaptor<Resource> resourceCaptor;
+
+    private Field javaField;
+
     @Before
-    public void setup() {
+    public void setup() throws NoSuchFieldException {
         when(sling.getRequest()).thenReturn(request);
+        javaField = TestFieldContainer.class.getField("field");
     }
 
     @Test
@@ -61,11 +74,12 @@ public class RadioComponentTest {
         RadioComponent cmp = new RadioComponent() {
             @Override
             public Map<String, String> getOptions() {
-                return new HashMap<String, String>() {{
+                return new HashMap<String, String>() { {
                     put("v1", "t1");
                     put("v2", "t2");
                     put("v3", "t3");
-                }};
+                }
+            };
             }
         };
         cmp.setup("test", null, formField, sling);
@@ -77,4 +91,37 @@ public class RadioComponentTest {
         assertFalse(map.containsKey("fieldDescription"));
 
     }
+
+    @Test
+    public void testEnumWithoutDefault() {
+        RadioComponent.EnumerationSelector radioComponent = new RadioComponent.EnumerationSelector();
+        radioComponent.setup("testRadio", javaField, formField, sling);
+
+        radioComponent.getHtml();
+
+        verify(sling, times(1)).include(resourceCaptor.capture());
+        Resource resource = resourceCaptor.getValue();
+
+        List<String> options = StreamSupport.stream(resource.getChild("items").getChildren().spliterator(), false).map(r -> {
+            ValueMap props = r.getValueMap();
+            return String.format("%s:%s:%s", props.get("text"), props.get("value"), props.get("selected", false));
+        }).collect(Collectors.toList());
+
+        assertEquals(Arrays.asList(
+            "First:first:false",
+            "Second:second:false",
+            "Third:third:false"
+        ), options);
+    }
+
+    private class TestFieldContainer {
+        public TestEnum field;
+    }
+
+    private enum TestEnum {
+        first,
+        second,
+        third
+    }
+
 }

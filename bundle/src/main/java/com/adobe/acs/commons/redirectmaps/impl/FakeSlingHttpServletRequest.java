@@ -58,6 +58,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -278,6 +279,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
     }
 
     @Override
+    public String changeSessionId() {
+        return null;
+    }
+
+    @Override
     public HttpSession getSession() {
         return null;
     }
@@ -302,7 +308,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
         return false;
     }
 
+    /**
+     * @deprecated
+     */
     @Override
+    @Deprecated    
     public boolean isRequestedSessionIdFromUrl() {
         return false;
     }
@@ -334,6 +344,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     @Override
     public int getContentLength() {
+        return 0;
+    }
+
+    @Override
+    public long getContentLengthLong() {
         return 0;
     }
 
@@ -402,7 +417,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
         return null;
     }
 
+    /**
+     * @deprecated
+     */
     @Override
+    @Deprecated
     public String getRealPath(String path) {
         return null;
     }
@@ -484,6 +503,11 @@ public class FakeSlingHttpServletRequest implements SlingHttpServletRequest {
 
     @Override
     public Part getPart(String name) throws IOException, ServletException {
+        return null;
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> aClass) throws IOException, ServletException {
         return null;
     }
 

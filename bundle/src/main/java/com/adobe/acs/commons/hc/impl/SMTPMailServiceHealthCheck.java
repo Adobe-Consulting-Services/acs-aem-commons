@@ -34,6 +34,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicyOption;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.hc.api.HealthCheck;
@@ -88,7 +89,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final String PROP_EMAIL = "email";
     private String toEmail;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policyOption = ReferencePolicyOption.GREEDY)
     private MessageGatewayService messageGatewayService;
 
     @Activate
@@ -115,7 +116,7 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
                 try {
                     List<InternetAddress> emailAddresses = new ArrayList<InternetAddress>();
                     emailAddresses.add(new InternetAddress(this.toEmail));
-                    MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE), CharEncoding.UTF_8);
+                    MailTemplate mailTemplate = new MailTemplate(IOUtils.toInputStream(MAIL_TEMPLATE, "UTF-8"), CharEncoding.UTF_8);
                     SimpleEmail email = mailTemplate.getEmail(StrLookup.mapLookup(Collections.emptyMap()), SimpleEmail.class);
 
                     email.setSubject("AEM E-mail Service Health Check");

@@ -53,7 +53,7 @@ public class TagsCellValue {
 
     Resource resource = (Resource) request.getAttribute("result");
 
-    log.debug("Loading tags from {}@{}", new String[] { resource.getPath(), property });
+    log.debug("Loading tags from {}@{}", resource.getPath(), property);
     List<Tag> tags = new ArrayList<Tag>();
     String[] values = resource.getValueMap().get(property, String[].class);
     if (values != null) {

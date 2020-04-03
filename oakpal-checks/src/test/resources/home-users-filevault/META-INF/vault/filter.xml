@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<workspaceFilter version="1.0">
+    <filter root="/home/users/acme"/>
+    <filter root="/home/users/acs-commons-developer"/>
+    <filter root="/home/users/system/acs-commons-service-user-for-acme"/>
+    <filter root="/home/groups/acs-commons-derived"/>
+    <filter root="/home/groups/developers"/>
+</workspaceFilter>

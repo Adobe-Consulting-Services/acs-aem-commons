@@ -19,8 +19,7 @@
  */
 package com.adobe.acs.commons.wcm.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +31,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.osgi.Order;
+import org.apache.sling.commons.osgi.RankedServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
     private static final Logger log = LoggerFactory.getLogger(PageRootProviderMultiImpl.class);
 
     @Reference(name = "config", referenceInterface = PageRootProviderConfig.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    private List<PageRootProviderConfig> configList = new ArrayList<PageRootProviderConfig>();
+    private RankedServices<PageRootProviderConfig> configList = new RankedServices<>(Order.ASCENDING);
 
     @Override
     public Page getRootPage(Resource resource) {
@@ -92,22 +93,12 @@ public class PageRootProviderMultiImpl implements PageRootProvider {
         return null;
     }
 
-    @Activate
-    protected void activate() {
-        log.debug("Activating");
+    protected void bindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+        this.configList.bind(config, props);
     }
 
-    @Deactivate
-    protected void deactivate() {
-        log.debug("Deactivating");
-    }
-
-    protected void bindConfig(final PageRootProviderConfig config) {
-        this.configList.add(config);
-    }
-
-    protected void unbindConfig(final PageRootProviderConfig config) {
-        this.configList.remove(config);
+    protected void unbindConfig(final PageRootProviderConfig config, Map<String, Object> props) {
+        this.configList.unbind(config, props);
     }
 
 }

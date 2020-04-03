@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -103,6 +103,15 @@ public class ContentVisitorTest {
     @Test
     public void accept_ContentCqPage() throws Exception {
         properties.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Page");
+
+        ContentVisitor visitor = new ContentVisitor(runnable);
+        visitor.accept(resource);
+        verify(runnable, times(1)).run(resource);
+    }
+
+    @Test
+    public void accept_ContentCqTag() throws Exception {
+        properties.put(JcrConstants.JCR_PRIMARYTYPE, "cq:Tag");
 
         ContentVisitor visitor = new ContentVisitor(runnable);
         visitor.accept(resource);

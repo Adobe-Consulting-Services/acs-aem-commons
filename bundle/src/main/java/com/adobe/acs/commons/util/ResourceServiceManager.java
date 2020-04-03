@@ -137,11 +137,8 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
     public synchronized void refreshCache() {
         log.trace("refreshCache");
 
-        ResourceResolver resolver = null;
+        try ( ResourceResolver resolver = getResourceResolver()) {
 
-        try {
-
-            resolver = getResourceResolver();
             Resource aprRoot = resolver.getResource(getRootPath());
             List<String> configuredIds = new ArrayList<String>();
             for (Resource child : aprRoot.getChildren()) {
@@ -176,10 +173,6 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
         } catch (InvalidSyntaxException e) {
             log.warn("Unable to search for invalid references due to invalid filter format", e);
-        } finally {
-            if (resolver != null) {
-                resolver.close();
-            }
         }
     }
 
@@ -192,7 +185,7 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
 
         registeredServices.put(id, serviceRegistration);
         log.debug("Automatic Package Replication job {} successfully updated with service {}",
-                new Object[] { id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID) });
+                id, serviceRegistration.getReference().getProperty(Constants.SERVICE_ID));
 
         return serviceRegistration;
     }

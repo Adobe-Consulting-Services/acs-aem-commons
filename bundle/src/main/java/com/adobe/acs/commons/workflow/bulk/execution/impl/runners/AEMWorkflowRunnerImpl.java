@@ -181,13 +181,11 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
         public void run() {
             log.debug("Running Bulk AEM Workflow job [ {} ]", jobName);
 
-            ResourceResolver adminResourceResolver = null;
             Resource configResource = null;
             Config config = null;
             Workspace workspace = null;
 
-            try {
-                adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO);
+            try (ResourceResolver adminResourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
                 configResource = adminResourceResolver.getResource(configPath);
 
                 if (configResource != null) {
@@ -306,10 +304,6 @@ public class AEMWorkflowRunnerImpl extends AbstractAEMWorkflowRunner implements 
                     stop(workspace);
                 } catch (PersistenceException e1) {
                     log.error("Unable to mark this workspace [ {} ] as stopped.", workspacePath, e1);
-                }
-            } finally {
-                if (adminResourceResolver != null) {
-                    adminResourceResolver.close();
                 }
             }
         }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="QR Code"
+    jcr:description="Quickly review published pages on mobile devices."
+    icon="devicePreview"
+    href="/etc/acs-commons/qr-code.html"
+    id="acs-commons__qr-code"
+    target="_blank"/>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="ACS Commons| Generic List Properties"
+        sling:resourceType="granite/ui/components/shell/propertiespage"
+        backHref="${empty param.backHref ? (empty header.Referer ? granite:concat(&quot;/generic-lists.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 1))) : header.Referer) : param.backHref}"
+        consoleId="cq-sites-pages-properties"
+        coral2="{Boolean}true"
+        formId="mcp-generated-form"
+        simpleSave="{Boolean}false">
+        <head jcr:primaryType="nt:unstructured">
+            <dialogclientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="cq/gui/components/siteadmin/admin/properties/includeclientlibs"
+                folderResourceTypes="[sling:Folder,sling:OrderedFolder]"
+                path="${param.item}/jcr:content"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/properties/title"
+            path="${param.item}"/>
+        <actions jcr:primaryType="nt:unstructured">
+        </actions>
+        <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/viewproperties">
+            <bulk jcr:primaryType="nt:unstructured">
+                <content
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                    margin="{Boolean}true">
+                    <items jcr:primaryType="nt:unstructured">
+                        <pageselector
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/properties/pageselector"/>
+                        <pageproperties
+                            granite:class="cq-siteadmin-admin-properties"
+                            granite:id="cq-sites-properties-form"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/siteadmin/admin/properties/bulk/form"
+                            style="vertical">
+                            <successresponse
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
+                            <items jcr:primaryType="nt:unstructured">
+                                <ref
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/bulk/include"
+                                    folderResourceTypes="[sling:Folder,sling:OrderedFolder]"
+                                    path="${param.item}/jcr:content"/>
+                            </items>
+                        </pageproperties>
+                    </items>
+                </content>
+            </bulk>
+            <single jcr:primaryType="nt:unstructured">
+                <content
+                    granite:class="cq-siteadmin-admin-properties"
+                    granite:id="cq-sites-properties-form"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="acs-commons/components/utilities/genericlist/content"
+                    path="${param.item}"/>
+            </single>
+        </content>
+    </jcr:content>
+</jcr:root>

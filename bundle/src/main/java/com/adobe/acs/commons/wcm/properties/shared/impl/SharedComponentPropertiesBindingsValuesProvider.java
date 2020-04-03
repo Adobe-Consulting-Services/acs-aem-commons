@@ -84,6 +84,7 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
             Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
             if (globalPropsResource != null) {
                 bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES, globalPropsResource.getValueMap());
+                bindings.put(SharedComponentProperties.GLOBAL_PROPERTIES_RESOURCE, globalPropsResource);
             }
 
             String sharedPropsPath = pageRoot.getPath() + "/jcr:content/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES +  "/"
@@ -91,6 +92,7 @@ public class SharedComponentPropertiesBindingsValuesProvider implements Bindings
             Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
             if (sharedPropsResource != null) {
                 bindings.put(SharedComponentProperties.SHARED_PROPERTIES, sharedPropsResource.getValueMap());
+                bindings.put(SharedComponentProperties.SHARED_PROPERTIES_RESOURCE, sharedPropsResource);
             }
         } else {
             log.debug("Could not determine shared properties root for resource {}", resource.getPath());

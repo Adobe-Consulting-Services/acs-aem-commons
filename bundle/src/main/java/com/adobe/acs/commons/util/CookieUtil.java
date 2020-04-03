@@ -21,7 +21,7 @@ package com.adobe.acs.commons.util;
 
 import org.apache.commons.lang.StringUtils;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;

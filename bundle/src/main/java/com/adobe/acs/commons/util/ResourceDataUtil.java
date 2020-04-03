@@ -19,9 +19,13 @@
  */
 package com.adobe.acs.commons.util;
 
-import aQute.bnd.annotation.ProviderType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 
-import com.day.cq.commons.jcr.JcrConstants;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.servlet.RequestDispatcher;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,15 +33,12 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.servlet.RequestDispatcher;
-
-import java.io.IOException;
-import java.io.InputStream;
+import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
+import com.day.cq.commons.jcr.JcrConstants;
 
 @ProviderType
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1118"})
@@ -47,21 +48,18 @@ public class ResourceDataUtil {
 
     public static String getIncludeAsString(final String path, final SlingHttpServletRequest slingRequest,
                                             final SlingHttpServletResponse slingResponse) {
-        StringWriterResponse responseWrapper = null;
+        BufferedSlingHttpServletResponse responseWrapper = null;
 
         try {
-            responseWrapper = new StringWriterResponse(slingResponse);
+            responseWrapper = new BufferedSlingHttpServletResponse(slingResponse, new StringWriter(), null);
             final RequestDispatcher requestDispatcher = slingRequest.getRequestDispatcher(path);
 
             requestDispatcher.include(slingRequest, responseWrapper);
-
-            return StringUtils.stripToNull(responseWrapper.getString());
+            if (responseWrapper.getBufferedServletOutput().getWriteMethod() == ResponseWriteMethod.WRITER) {
+                return StringUtils.stripToNull(responseWrapper.getBufferedServletOutput().getBufferedString());
+            }
         } catch (Exception ex) {
             log.error("Error creating the String representation for: " + path, ex);
-        } finally {
-            if (responseWrapper != null) {
-                responseWrapper.clearWriter();
-            }
         }
 
         return null;

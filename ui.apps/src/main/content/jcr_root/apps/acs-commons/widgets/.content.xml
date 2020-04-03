@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:ClientLibraryFolder"
+          jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
+          categories="[acs-commons.classicui.widgets]"
+          channels="[extjs,ie6]"
+          dependencies="[acs-commons.fontawesome]"/>
+<!--
+
+Wrapper Client Library definition:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="cq:ClientLibraryFolder"
+          jsProcessor="[default:none,min:gcc]"
+          allowProxy="{Boolean}true"
+          categories="[cq.widgets]"
+          channels="[extjs,ie6]"
+          embed="[acs-commons.classicui.widgets]"/>
+-->

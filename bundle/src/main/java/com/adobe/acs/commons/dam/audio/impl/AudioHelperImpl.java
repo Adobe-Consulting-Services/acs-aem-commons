@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 @Component(metatype = true, label = "ACS Commons - Audio Processor", description = "ACS Commons - Audio Processor")
 @Service
@@ -65,11 +66,12 @@ public class AudioHelperImpl implements AudioHelper {
     }
 
     @Override
-    @SuppressWarnings("squid:S2095")
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     public <A, R> R process(Asset asset, ResourceResolver resourceResolver, A args, AudioProcessor<A, R> audioProcessor)
             throws AudioException {
         File tmpDir = null;
         File tmpWorkingDir = null;
+        File tmpFile;
 
         try {
             // creating temp directory
@@ -77,12 +79,12 @@ public class AudioHelperImpl implements AudioHelper {
 
             // creating temp working directory for ffmpeg
             tmpWorkingDir = FFMpegAudioUtils.createTempDir(workingDir);
+
+            // streaming file to temp directory
+            tmpFile = Files.createTempFile(tmpDir.toPath(), "acs-commons", "audio").toFile();
         } catch (IOException e) {
             throw new AudioException(e);
         }
-
-        // streaming file to temp directory
-        final File tmpFile = new File(tmpDir, asset.getName().replace(' ', '_'));
 
         try (FileOutputStream fos = new FileOutputStream(tmpFile);
              InputStream is = asset.getOriginal().getStream();) {
@@ -94,14 +96,12 @@ public class AudioHelperImpl implements AudioHelper {
         } catch (IOException e) {
             throw new AudioException(e);
         } catch (FfmpegNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("Unable to find ffmpeg", e);
             return null;
         } finally {
             try {
                 // cleaning up temp directory
-                if (tmpDir != null) {
-                    FileUtils.deleteDirectory(tmpDir);
-                }
+                FileUtils.deleteDirectory(tmpDir);
             } catch (IOException e) {
                 log.warn("Could not delete temp directory: {}", tmpDir.getPath());
             }

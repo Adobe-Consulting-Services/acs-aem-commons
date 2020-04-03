@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -32,7 +32,7 @@ import org.xml.sax.helpers.AttributesImpl;
 public class SaxElementUtilsTest {
 
     @Test
-    public void testIsCSS() throws Exception {
+    public void testIsCss() throws Exception {
         assertTrue("CSS Happy Path", 
                 SaxElementUtils.isCss("link",
                         makeAtts(

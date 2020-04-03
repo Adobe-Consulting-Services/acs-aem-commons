@@ -31,7 +31,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
         return null;
     }
 
-    protected void doPackaging(SlingHttpServletRequest request, SlingHttpServletResponse response, boolean preview, ValueMap properties, List<PathFilterSet> packageResources) throws IOException, JSONException, RepositoryException {
+    protected void doPackaging(SlingHttpServletRequest request, SlingHttpServletResponse response, boolean preview, ValueMap properties, List<PathFilterSet> packageResources) throws IOException, RepositoryException {
         // Add the ACL Packager Configuration page
         if (properties.get(INCLUDE_CONFIGURATION, DEFAULT_INCLUDE_CONFIGURATION)) {
             final PathFilterSet tmp = this.getPackagerPageResource(request);
@@ -133,6 +133,21 @@ public abstract class AbstractPackagerServlet extends SlingAllMethodsServlet {
             log.debug("Successfully created JCR package");
             response.getWriter().print(
                     getPackageHelper().getSuccessJSON(jcrPackage));
+        }
+    }
+
+    /**
+     * Gets the properties saved to the Asset Packager Page's jcr:content node.
+     *
+     * @param request The request obj
+     * @return A ValueMap representing the properties
+     */
+    protected ValueMap getProperties(final SlingHttpServletRequest request) {
+        if (request.getResource().getChild("configuration") == null) {
+            log.warn("Packager Configuration node could not be found for: {}", request.getResource());
+            return new ValueMapDecorator(new HashMap<>());
+        } else {
+            return request.getResource().getChild("configuration").getValueMap();
         }
     }
 

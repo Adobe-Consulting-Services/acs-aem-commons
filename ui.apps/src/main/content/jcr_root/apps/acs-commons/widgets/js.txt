@@ -1,0 +1,16 @@
+#base=source/js
+
+add_multifield_limit.js
+create_namespace.js
+predicates/AuthorizablePredicate.js
+predicates/PathPropertyPredicate.js
+predicates/SelectionPredicate.js
+DDPathField.js
+polyfill_composite_field_processParentRecord.js
+multipanel.js
+node-multi-panel.js
+check_vanity_path.js
+validate_responsive_column_control_dialog.js
+add_dynamic_options_to_feed_importer.js
+add_language_titles_to_item_dialog.js
+icon-picker.js

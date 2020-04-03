@@ -20,6 +20,5 @@
 /**
  * WCM JSP Tags and Function.
  */
-@aQute.bnd.annotation.Version("1.0.1")
-@tldgen.TagLibrary(value = "http://www.adobe.com/consulting/acs-aem-commons/wcmmode", descriptorFile = "wcmmode.tld")
+@org.osgi.annotation.versioning.Version("1.0.2")
 package com.adobe.acs.commons.wcm.tags.wcmmode;

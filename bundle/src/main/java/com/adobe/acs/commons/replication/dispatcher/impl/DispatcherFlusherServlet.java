@@ -39,8 +39,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.io.JSONWriter;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +46,12 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.adobe.acs.commons.replication.dispatcher.impl.DispatcherFlushRulesImpl.AUTH_INFO;
+import com.google.gson.Gson;
+import java.util.LinkedHashMap;
 
 @SuppressWarnings("serial")
 @SlingServlet(resourceTypes = "acs-commons/components/utilities/dispatcher-flush/configuration",
@@ -136,17 +135,12 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
         if (request.getRequestPathInfo().getExtension().equals("json")) {
             response.setContentType("application/json");
-            JSONWriter writer = new JSONWriter(response.getWriter());
-            try {
-                writer.object();
-                for (final FlushResult result : overallResults) {
-                    writer.key(result.agentId);
-                    writer.value(result.success);
-                }
-                writer.endObject();
-            } catch (JSONException e) {
-                throw new ServletException("Unable to output JSON data", e);
+            Gson gson = new Gson();
+            Map<String, Object> resultMap = new LinkedHashMap<>();
+            for (final FlushResult result : overallResults) {
+                resultMap.put(result.agentId, result.success);
             }
+            gson.toJson(resultMap, response.getWriter());
         } else {
             String suffix;
             if (caughtException) {

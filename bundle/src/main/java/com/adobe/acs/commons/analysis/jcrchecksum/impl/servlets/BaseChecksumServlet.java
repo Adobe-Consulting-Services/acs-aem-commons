@@ -47,6 +47,7 @@ public class BaseChecksumServlet extends SlingAllMethodsServlet {
         return "anonymous".equals(request.getResourceResolver().getUserID());
     }
 
+    @Override
     protected final void doOptions(SlingHttpServletRequest request, SlingHttpServletResponse response) throws
             IOException,
             ServletException {

@@ -20,7 +20,7 @@
 
 package com.adobe.acs.commons.replication;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 import com.day.cq.replication.Agent;
 import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.AgentFilter;
