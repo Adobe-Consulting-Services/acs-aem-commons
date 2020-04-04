@@ -153,13 +153,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> func) {
+    private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> ruleBulderFunc) {
         ValueMap pageProps = page.getProperties();
         boolean added = false;
         for (String prop : propNames) {
             boolean shouldAdd = pageProps.get(prop, false);
             if (shouldAdd) {
-                String rule = func.apply(page, resourceResolver);
+                String rule = ruleBulderFunc.apply(page, resourceResolver);
                 writer.println(rule);
                 added = true;
                 break;
@@ -169,7 +169,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         if (!added) {
             //since the rules are added to (dis)allow a page and it's children, we only need to recurse if no rule is added for the current page.
             Iterator<Page> pageIterator = page.listChildren(new PageFilter(false, true), false);
-            pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, func));
+            pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, ruleBulderFunc));
         }
 
     }
@@ -268,16 +268,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data). If this is specified, all other configurations are effectively ignored.")
         String robots_content_property_path();
 
-        @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
-        String externalizer_domain() default "publish";
-
         @AttributeDefinition(name = "User Agent Directives", description = "A set of User-agent directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<user agent name>")
         String[] user_agent_directives() default {};
 
         @AttributeDefinition(name = "Allow Directives", description = "A set of Allow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<allowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
         String[] allow_directives() default {};
 
-        @AttributeDefinition(name = "Allow Property Names", description = "A list of page properties used to generate the allow directives.  Any directives added through this method are in addition to those specified in the allowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
+        @AttributeDefinition(name = "Allow Property Names", description = "A list of page properties used to generate the allow directives.  Any directives added through this method are in addition to those specified in the allow.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
         String[] allow_property_names() default {};
 
         @AttributeDefinition(name = "Disallow Directives", description = "A set of Disallow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<disallowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
@@ -288,6 +285,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         @AttributeDefinition(name = "Sitemap Directives", description = "A set of Sitemap directives to add to the robots file. If the specified path is a valid cq page, externalizer is called with the specified Externalizer Domain to generate an absolute url to that page's .sitemap.xml, which will resolve to the ACS Commons Site Map Servlet.")
         String[] sitemap_directives() default {};
+
+        @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
+        String externalizer_domain() default "publish";
 
         @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group. This is primarily for debugging purposes.")
         boolean print_grouping_comments() default false;
@@ -320,14 +320,14 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             processConfig(allowProps, RobotsRuleGroup::getAllowProperties);
         }
 
-        private void processConfig(String[] configs, Function<RobotsRuleGroup, List<String>> supplier) {
+        private void processConfig(String[] configs, Function<RobotsRuleGroup, List<String>> configListGetFunc) {
             for (String config : configs) {
                 Pair<String, String> groupNamePair = getGroupNameTuple(config);
                 String groupName = groupNamePair.getKey();
                 String value = groupNamePair.getValue();
 
                 RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                supplier.apply(group).add(value);
+                configListGetFunc.apply(group).add(value);
                 groups.put(groupName, group);
             }
         }
