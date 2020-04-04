@@ -51,6 +51,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Component(service = Servlet.class, immediate = true, property = {
         "sling.servlet.selectors=robots",
@@ -148,12 +150,12 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             if (shouldAdd) {
                 String rule = func.apply(page, resourceResolver);
                 writer.println(rule);
-                added=true;
+                added = true;
                 break;
             }
         }
 
-        if(!added) {
+        if (!added) {
             //since the rules are added to (dis)allow a page and it's children, we only need to recurse if no rule is added for the current page.
             Iterator<Page> pageIterator = page.listChildren(new PageFilter(false, true), false);
             pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, func));
@@ -215,10 +217,10 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(allowedRule);
         if (page != null) {
-            allowedRule = resourceResolver.map(allowedRule) + "/";
+            return buildAllowedString(page, resourceResolver);
+        } else {
+            return ALLOW + allowedRule;
         }
-
-        return ALLOW + allowedRule;
     }
 
     private String buildAllowedString(Page page, ResourceResolver resourceResolver) {
@@ -231,10 +233,10 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(disallowedRule);
         if (page != null) {
-            disallowedRule = resourceResolver.map(disallowedRule) + "/";
+            return buildDisallowedString(page, resourceResolver);
+        } else {
+            return DISALLOW + disallowedRule;
         }
-
-        return DISALLOW + disallowedRule;
     }
 
     private String buildDisallowedString(Page page, ResourceResolver resourceResolver) {
@@ -252,7 +254,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Sling Resource Type", description = "Sling Resource Type for the Home Page component or components.")
         String[] sling_servlet_resourceTypes() default {};
 
-        @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data).")
+        @AttributeDefinition(name = "Robots Content Property", description = "Path (either relative or absolute) to a String or Binary property containing the entire robots.txt contents. This could be a page property (e.g. robotsTxtContents) or the contents of a file within the DAM (e.g. /content/dam/my-site/seo/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data). If this is specified, all other configurations are effectively ignored.")
         String robots_content_property_path();
 
         @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
@@ -264,19 +266,19 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Allow Directives", description = "A set of Allow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<allowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
         String[] allow_directives() default {};
 
-        @AttributeDefinition(name = "Allow Property Name", description = "A list of page properties used to generate the allow directives.  Any directives added through this method are in addition to those specified in the allowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
+        @AttributeDefinition(name = "Allow Property Names", description = "A list of page properties used to generate the allow directives.  Any directives added through this method are in addition to those specified in the allowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
         String[] allow_property_names() default {};
 
         @AttributeDefinition(name = "Disallow Directives", description = "A set of Disallow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<disallowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
         String[] disallow_directives() default {};
 
-        @AttributeDefinition(name = "Disallow Property Name", description = "A list of page properties used to generate the disallow directives.  Any directives added through this method are in addition to those specified in the disallowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
+        @AttributeDefinition(name = "Disallow Property Names", description = "A list of page properties used to generate the disallow directives.  Any directives added through this method are in addition to those specified in the disallowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
         String[] disallow_property_names() default {};
 
         @AttributeDefinition(name = "Sitemap Directives", description = "A set of Sitemap directives to add to the robots file. If the specified path is a valid cq page, externalizer is called with the specified Externalizer Domain to generate an absolute url to that page's .sitemap.xml, which will resolve to the ACS Commons Site Map Servlet.")
         String[] sitemap_directives() default {};
 
-        @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group.")
+        @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group. This is primarily for debugging purposes.")
         boolean print_grouping_comments() default false;
     }
 
@@ -292,60 +294,31 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             groups = new LinkedHashMap<>();
 
             String[] userAgents = config.user_agent_directives();
-            for (String agent : userAgents) {
-                Pair<String, String> groupNamePair = getGroupNameTuple(agent);
-                String groupName = groupNamePair.getKey();
-                String value = groupNamePair.getValue();
-
-                RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                group.getUserAgents().add(value);
-                groups.put(groupName, group);
-            }
+            processConfig(userAgents, RobotsRuleGroup::getUserAgents);
 
             String[] allowed = config.allow_directives();
-            for (String allow : allowed) {
-                Pair<String, String> groupNamePair = getGroupNameTuple(allow);
-                String groupName = groupNamePair.getKey();
-                String value = groupNamePair.getValue();
-
-                RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                group.getAllowed().add(value);
-                groups.put(groupName, group);
-            }
+            processConfig(allowed, RobotsRuleGroup::getAllowed);
 
             String[] disallowed = config.disallow_directives();
-            for (String disallow : disallowed) {
-                Pair<String, String> groupNamePair = getGroupNameTuple(disallow);
-                String groupName = groupNamePair.getKey();
-                String value = groupNamePair.getValue();
-
-                RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                group.getDisallowed().add(value);
-                groups.put(groupName, group);
-            }
+            processConfig(disallowed, RobotsRuleGroup::getDisallowed);
 
             String[] disallowProps = config.disallow_property_names();
-            for (String prop : disallowProps) {
-                Pair<String, String> groupNamePair = getGroupNameTuple(prop);
-                String groupName = groupNamePair.getKey();
-                String value = groupNamePair.getValue();
-
-                RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                group.getDisallowProperties().add(value);
-                groups.put(groupName, group);
-            }
+            processConfig(disallowProps, RobotsRuleGroup::getDisallowProperties);
 
             String[] allowProps = config.allow_property_names();
-            for (String prop : allowProps) {
-                Pair<String, String> groupNamePair = getGroupNameTuple(prop);
+            processConfig(allowProps, RobotsRuleGroup::getAllowProperties);
+        }
+
+        private void processConfig(String[] configs, Function<RobotsRuleGroup, List<String>> supplier) {
+            for (String config : configs) {
+                Pair<String, String> groupNamePair = getGroupNameTuple(config);
                 String groupName = groupNamePair.getKey();
                 String value = groupNamePair.getValue();
 
                 RobotsRuleGroup group = getRobotsRuleGroup(groupName);
-                group.getAllowProperties().add(value);
+                supplier.apply(group).add(value);
                 groups.put(groupName, group);
             }
-
         }
 
         private RobotsRuleGroup getRobotsRuleGroup(String groupName) {
