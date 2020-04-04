@@ -122,6 +122,11 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         rules.getGroups().forEach(group -> writeGroup(group, request, writer));
 
         rules.getSitemaps().stream().map(sitemap -> buildSitemapString(sitemap, request.getResourceResolver())).forEach(writer::println);
+        if(!rules.getSitemapProperties().isEmpty()) {
+            PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+            Page page = pageManager.getContainingPage(request.getResource());
+            addRulesFromPages(page, request.getResourceResolver(), rules.getSitemapProperties(), writer, this::buildSitemapString);
+        }
     }
 
     private void writeGroup(RobotsRuleGroup group, SlingHttpServletRequest request, PrintWriter writer) {
@@ -153,13 +158,13 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> ruleBulderFunc) {
+    private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> ruleBuilderFunc) {
         ValueMap pageProps = page.getProperties();
         boolean added = false;
         for (String prop : propNames) {
             boolean shouldAdd = pageProps.get(prop, false);
             if (shouldAdd) {
-                String rule = ruleBulderFunc.apply(page, resourceResolver);
+                String rule = ruleBuilderFunc.apply(page, resourceResolver);
                 writer.println(rule);
                 added = true;
                 break;
@@ -169,7 +174,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         if (!added) {
             //since the rules are added to (dis)allow a page and it's children, we only need to recurse if no rule is added for the current page.
             Iterator<Page> pageIterator = page.listChildren(new PageFilter(false, true), false);
-            pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, ruleBulderFunc));
+            pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, ruleBuilderFunc));
         }
 
     }
@@ -218,10 +223,16 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
         Page page = pageManager.getContainingPage(sitemap);
         if (page != null) {
-            sitemap = externalizer.externalLink(resourceResolver, externalizerDomain, sitemap) + ".sitemap.xml";
+           return buildSitemapString(page, resourceResolver);
+        } else {
+            return SITEMAP + sitemap;
         }
+    }
 
-        return SITEMAP + sitemap;
+    private String buildSitemapString(Page page, ResourceResolver resourceResolver) {
+        String sitemapRule = externalizer.externalLink(resourceResolver, externalizerDomain, page.getPath()) + ".sitemap.xml";
+
+        return SITEMAP + sitemapRule;
     }
 
     private String buildAllowedString(String allowedRule, ResourceResolver resourceResolver) {
@@ -286,6 +297,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Sitemap Directives", description = "A set of Sitemap directives to add to the robots file. If the specified path is a valid cq page, externalizer is called with the specified Externalizer Domain to generate an absolute url to that page's .sitemap.xml, which will resolve to the ACS Commons Site Map Servlet.")
         String[] sitemap_directives() default {};
 
+        @AttributeDefinition(name = "Sitemap Property Names", description = "A list of page properties used to generate the sitemap directives.  Any directives added through this method are in addition to those specified in the sitemap.directives property.")
+        String[] sitemap_property_names() default {};
+
         @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
         String externalizer_domain() default "publish";
 
@@ -298,10 +312,12 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         private static final String GROUP_NAME_DEFAULT = "RobotsServletDefaultGroup";
 
         private List<String> sitemaps;
+        private List<String> sitemapProperties;
         private Map<String, RobotsRuleGroup> groups;
 
         public RobotsRuleSet(RobotsServletConfig config) {
             sitemaps = Arrays.asList(config.sitemap_directives());
+            sitemapProperties = Arrays.asList(config.sitemap_property_names());
             groups = new LinkedHashMap<>();
 
             String[] userAgents = config.user_agent_directives();
@@ -355,6 +371,10 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
         public List<String> getSitemaps() {
             return Collections.unmodifiableList(sitemaps);
+        }
+
+        public List<String> getSitemapProperties() {
+            return Collections.unmodifiableList(sitemapProperties);
         }
 
         public List<RobotsRuleGroup> getGroups() {
