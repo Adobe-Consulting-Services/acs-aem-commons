@@ -1,27 +1,27 @@
 {
-  "en" : {
-    "jcr:primaryType" : "cq:Page",
-    "jcr:content" : {
+  "en": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
       "robotsContents": "User-agent: *\nDisallow: /",
       "allowRobots": true
     },
-    "no-bots" : {
-      "jcr:primaryType" : "cq:Page",
-      "jcr:content" : {
+    "no-bots": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
         "jcr:primaryType": "cq:PageContent",
         "denyRobots": true
       }
     },
-    "events" : {
-      "jcr:primaryType" : "cq:Page",
-      "jcr:content" : {
+    "events": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
         "jcr:primaryType": "cq:PageContent"
       }
     },
-    "about" : {
-      "jcr:primaryType" : "cq:Page",
-      "jcr:content" : {
+    "about": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
         "jcr:primaryType": "cq:PageContent",
         "denyGoogle": true
       }
