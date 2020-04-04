@@ -127,6 +127,9 @@ public class RobotsServletTest {
                 "denyRobots",
                 "google:denyGoogle"
         });
+        props.put("sitemap.property.names", new String[]{
+           "isSiteMap"
+        });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
 

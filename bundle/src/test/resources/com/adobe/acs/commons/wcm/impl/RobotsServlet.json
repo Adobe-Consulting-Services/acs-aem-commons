@@ -4,7 +4,8 @@
     "jcr:content": {
       "jcr:primaryType": "cq:PageContent",
       "robotsContents": "User-agent: *\nDisallow: /",
-      "allowRobots": true
+      "allowRobots": true,
+      "isSiteMap": true
     },
     "no-bots": {
       "jcr:primaryType": "cq:Page",
