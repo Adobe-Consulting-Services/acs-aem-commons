@@ -96,7 +96,7 @@ DatePicker
       /**
        * The date format of the actual value, and for form submission.
        */
-      - valueFormat = 'YYYY-MM-DD[T]HH:mm:ss.000[Z]'
+      - valueFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSSZ'
 
       /**
        * The minimum boundary of the date.
@@ -143,15 +143,15 @@ DatePicker
     if (isMixed) {
         attrs.addClass("foundation-field-mixed");
     }
+    String displayFormat = i18n.getVar(cfg.get("displayedFormat", StringUtils.EMPTY));
 
     attrs.add("type", cfg.get("type", String.class));
     attrs.add("name", name);
     attrs.add("min", cfg.get("minDate", String.class));
     attrs.add("max", cfg.get("maxDate", String.class));
     attrs.addDisabled(cfg.get("disabled", false));
-    attrs.add("displayformat", cfg.get("displayedFormat", "YYYY-MM-DD HH:mm"));
-
-    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.000[Z]"));
+    attrs.add("displayformat", displayFormat);
+    attrs.add("valueformat", cfg.get("valueFormat", "YYYY-MM-DD[T]HH:mm:ss.SSSZ"));
     attrs.add("headerformat", i18n.get("MMMM YYYY", "Datepicker headline, see moment.js for allowed formats"));
 
     String fieldLabel = cfg.get("fieldLabel", String.class);
@@ -206,26 +206,34 @@ DatePicker
 
 %><input <%= typeAttrs %>><%
     }
-if(!cfg.get("disabled", false)) {
+    RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
+    if ((displayFormat.contains("HH") || StringUtils.isEmpty(displayFormat)) &&
+            (requestPathInfo.getResourcePath() == null || !requestPathInfo.getResourcePath().contains("/cfm/models/editor/content/editor"))) {
+
         String timeZoneFieldName = name + "tz";
         String selectedTz = cmp.getValue().get(timeZoneFieldName, "");
 
-        RequestPathInfo requestPathInfo = slingRequest.getRequestPathInfo();
         String resourcePath = requestPathInfo.getSuffix();
         Resource cfResource = resourceResolver.resolve(resourcePath + "/jcr:content/data/master");
 
         if(!ResourceUtil.isNonExistingResource(cfResource)) {
-            selectedTz = cfResource.getValueMap().get(timeZoneFieldName, "UTC+00:00");
+            selectedTz = cfResource.getValueMap().get(timeZoneFieldName, "GMT");
         }
 
 %>
 
 <coral-select class="datepickertz" name="<%=name%>tz" placeholder="Choose Timezone" style="width:100%">
-    <coral-select-item value="UTC+00:00" <%out.print("UTC+00:00".equals(selectedTz) ? "selected" : "");%>>
-        (UTC&plusmn;00:00)
+    <coral-select-item value="GMT" <%out.print("GMT".equals(selectedTz) ? "selected" : "");%>>
+       GMT - Europe/London
     </coral-select-item>
-    <coral-select-item value="EST" <%out.print("EST".equals(selectedTz) ? "selected" : "");%>>
-        Eastern Time - New York
+    <coral-select-item value="EST" <%out.print("EST".equals(selectedTz) || StringUtils.isEmpty(selectedTz)  ? "selected" : "");%>>
+        EST - America/New_York
+    </coral-select-item>
+    <coral-select-item value="PST" <%out.print("PST".equals(selectedTz) ? "selected" : "");%>>
+        PST - America/Los_Angeles
+    </coral-select-item>
+    <coral-select-item value="IST" <%out.print("IST".equals(selectedTz) ? "selected" : "");%>>
+        IST - Asia/Kolkata
     </coral-select-item>
 </coral-select>
 <%}%>
