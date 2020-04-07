@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2215 - Added Parameterized granite include to support generic dialog snippets
+- #2252 - Make comment available as email template variable
 
 ### Fixed
 - #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
