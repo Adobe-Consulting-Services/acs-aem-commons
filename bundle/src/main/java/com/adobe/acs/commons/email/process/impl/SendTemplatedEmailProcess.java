@@ -274,6 +274,10 @@ public class SendTemplatedEmailProcess implements WorkflowProcess {
                     .getTitle());
             // Set workflow initiator
             wfParams.put(SendTemplatedEmailConstants.WF_INITIATOR, workItem.getWorkflow().getInitiator());
+            
+            if(workItem.getMetaDataMap().containsKey("comment")) {
+                wfParams.put(SendTemplatedEmailConstants.WF_STEP_COMMENT, workItem.getMetaDataMap().get("comment").toString());
+            }
         } catch (Exception e) {
             log.warn("Error getting workflow title and workflow step title {}", e);
         }
