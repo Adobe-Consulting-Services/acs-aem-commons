@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
@@ -44,7 +44,7 @@ import java.util.Collections;
 
 import static com.adobe.acs.commons.version.impl.CurrentEvolutionImpl.LATEST_VERSION;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)

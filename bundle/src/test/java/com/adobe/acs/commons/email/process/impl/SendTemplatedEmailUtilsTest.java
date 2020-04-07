@@ -45,7 +45,7 @@ import static org.mockito.Mockito.mock;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.wcm.api.Page;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.when;
 

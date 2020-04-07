@@ -32,9 +32,10 @@ import org.apache.sling.settings.SlingSettingsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,11 +49,11 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,7 +108,7 @@ public class HealthCheckStatusEmailerTest {
         when(failureExecutionResult.getHealthCheckResult()).thenReturn(failureResult);
 
         results = new ArrayList<>();
-        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), any(String[].class))).thenReturn(results);
+        when(healthCheckExecutor.execute(any(HealthCheckExecutionOptions.class), ArgumentMatchers.<String>any())).thenReturn(results);
 
         when(productInfoService.getInfos()).thenReturn(new ProductInfo[]{mock(ProductInfo.class)});
         Set<String> runModes = new HashSet<String>();
@@ -123,7 +124,7 @@ public class HealthCheckStatusEmailerTest {
         healthCheckStatusEmailer.activate(config);
 
         healthCheckStatusEmailer.run();
-        verifyZeroInteractions(emailService);
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -135,7 +136,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -147,7 +148,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -159,7 +160,7 @@ public class HealthCheckStatusEmailerTest {
 
         healthCheckStatusEmailer.run();
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 
     @Test
@@ -198,7 +199,7 @@ public class HealthCheckStatusEmailerTest {
         healthCheckStatusEmailer.run();
 
         verify(emailService, times(1)).sendEmail(any(String.class),
-                any(Map.class), any(String[].class));
+                any(Map.class), ArgumentMatchers.<String>any());
     }
 }
 

@@ -32,7 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,7 +76,6 @@ public class HttpCacheConfigImplTest {
 
         when(request.getResourceResolver()).thenReturn(resourceResolver);
         when(resourceResolver.getUserID()).thenReturn("anonymous");
-        when(extension.accepts(request, systemUnderTest)).thenReturn(true);
     }
 
     private void activateWithDefaultValues(Map<String,Object> specifiedProps){

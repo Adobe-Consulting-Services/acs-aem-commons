@@ -28,9 +28,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -67,7 +66,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.fam.ActionManagerFactory;
 import com.adobe.acs.commons.fam.impl.ActionManagerFactoryImpl;
@@ -259,28 +258,28 @@ public class RenovatorTest {
 
     private ProcessInstanceImpl prepareProcessInstance(ProcessInstanceImpl source) throws PersistenceException {
         ProcessInstanceImpl instance = spy(source);
-        doNothing().when(instance).persistStatus(anyObject());
-        doNothing().when(instance).recordErrors(anyInt(), anyObject(), anyObject());
+        doNothing().when(instance).persistStatus(any());
+//        doNothing().when(instance).recordErrors(anyInt(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             CheckedConsumer<ResourceResolver> action = (CheckedConsumer<ResourceResolver>) invocationOnMock.getArguments()[0];
             action.accept(getMockResolver());
             return null;
-        }).when(instance).asServiceUser(anyObject());
+        }).when(instance).asServiceUser(any());
 
         return instance;
     }
 
     private Renovator prepareProcessDefinition(Renovator source, Function<String, List<String>> refFunction) throws RepositoryException, PersistenceException, IllegalAccessException {
         Renovator definition = spy(source);
-        doNothing().when(definition).storeReport(anyObject(), anyObject());
-        doNothing().when(definition).checkNodeAcls(anyObject(), anyObject(), anyObject());
+        doNothing().when(definition).storeReport(any(), any());
+        doNothing().when(definition).checkNodeAcls(any(), any(), any());
         doAnswer((InvocationOnMock invocationOnMock) -> {
             if (refFunction != null) {
                 MovingNode node = (MovingNode) invocationOnMock.getArguments()[1];
                 node.getAllReferences().addAll(refFunction.apply(node.getSourcePath()));
             }
             return null;
-        }).when(definition).findReferences(anyObject(), anyObject());
+        }).when(definition).findReferences(any(), any());
         return definition;
     }
 }

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.jcr.Session;
 
+import com.adobe.acs.commons.packaging.PackageHelper;
 import com.day.cq.wcm.api.NameConstants;
 
 import org.apache.jackrabbit.vault.packaging.Packaging;
@@ -41,7 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
@@ -49,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssetPackagerServletImplTest {
@@ -56,12 +58,12 @@ public class AssetPackagerServletImplTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
+//    @InjectMocks
     @Mock
     Packaging packaging;
 
     @InjectMocks
-    @Spy
-    final AssetPackagerServletImpl assetPackagerServlet = new AssetPackagerServletImpl();
+    final AssetPackagerServletImpl assetPackagerServlet = spy(new AssetPackagerServletImpl());
 
     @InjectMocks
     final PackageHelperImpl packageHelper = new PackageHelperImpl();
@@ -145,6 +147,7 @@ public class AssetPackagerServletImplTest {
         response = context.response();
 
         doReturn(packageHelper).when(assetPackagerServlet).getPackageHelper();
+        context.registerService(PackageHelper.class, packageHelper);
         when(packaging.getPackageManager(any(Session.class))).thenReturn(new JcrPackageManagerImpl(context.resourceResolver().adaptTo(Session.class)));
     }
 

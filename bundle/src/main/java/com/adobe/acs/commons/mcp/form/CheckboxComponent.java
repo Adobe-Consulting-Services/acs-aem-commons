@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.mcp.form;
 
+import com.adobe.acs.commons.mcp.util.IntrospectionUtil;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -33,7 +34,8 @@ public final class CheckboxComponent extends FieldComponent {
         getComponentMetadata().put("value", "true");
         getComponentMetadata().put("uncheckedValue", "false");
         getComponentMetadata().put("required", false);
-        if (hasOption("checked")) {
+        boolean trueByDefault = IntrospectionUtil.getDeclaredValue(getAccessibleObject()).map(Boolean.TRUE::equals).orElse(false);
+        if (hasOption("checked") || trueByDefault) {
             getComponentMetadata().put("checked", "true");
         }
     }

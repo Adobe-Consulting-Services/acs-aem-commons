@@ -25,9 +25,9 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -57,10 +57,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class CloseableQueryBuilderImplTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_MOCK);
@@ -118,7 +123,7 @@ public class CloseableQueryBuilderImplTest {
         final Query mockQuery = mock(Query.class);
 
         when(mockQueryBuilder.createQuery(any(Session.class))).then((invocation) -> {
-            Session sessionArg = invocation.getArgumentAt(0, Session.class);
+            Session sessionArg = invocation.getArgument(0);
             assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
                     sessionArg instanceof BaseSessionIWrap);
             return mockQuery;
@@ -137,9 +142,9 @@ public class CloseableQueryBuilderImplTest {
         when(mockQuery.getPredicates()).thenReturn(predicates);
 
         when(mockQueryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then((invocation) -> {
-            PredicateGroup predicatesArg = invocation.getArgumentAt(0, PredicateGroup.class);
+            PredicateGroup predicatesArg = invocation.getArgument(0);
             assertSame("Same predicate group should be passed through", predicates, predicatesArg);
-            Session sessionArg = invocation.getArgumentAt(1, Session.class);
+            Session sessionArg = invocation.getArgument(1);
             assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
                     sessionArg instanceof BaseSessionIWrap);
             return mockQuery;
@@ -167,8 +172,8 @@ public class CloseableQueryBuilderImplTest {
         final Query mockQuery = mock(Query.class);
 
         when(mockQueryBuilder.loadQuery(any(String.class), any(Session.class))).then((invocation) -> {
-            String pathArg = invocation.getArgumentAt(0, String.class);
-            Session sessionArg = invocation.getArgumentAt(1, Session.class);
+            String pathArg = invocation.getArgument(0);
+            Session sessionArg = invocation.getArgument(1);
             assertTrue("query session should be a wrapper: " + sessionArg.getClass().getName(),
                     sessionArg instanceof BaseSessionIWrap);
             if ("".equals(pathArg)) {
@@ -204,7 +209,7 @@ public class CloseableQueryBuilderImplTest {
         final Query mockQuery = mock(Query.class);
 
         doAnswer((invocation) -> {
-            Session sessionArg = invocation.getArgumentAt(3, Session.class);
+            Session sessionArg = invocation.getArgument(3);
             assertTrue("query session should NOT be a session wrapper: " + sessionArg.getClass().getName(),
                     !(sessionArg instanceof BaseSessionIWrap));
             return null;

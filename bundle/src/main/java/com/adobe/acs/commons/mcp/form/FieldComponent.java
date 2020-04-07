@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.form;
 
 import com.adobe.acs.commons.data.Variant;
+import com.adobe.acs.commons.mcp.util.IntrospectionUtil;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -72,7 +73,15 @@ public abstract class FieldComponent {
             componentMetadata.put("required", formField.required());
         }
         componentMetadata.put("emptyText", formField.hint());
-        getOption("default").ifPresent(val -> componentMetadata.put("value", val));
+        if (formField.showOnCreate()) {
+            componentMetadata.put("cq:showOnCreate", true);
+        }
+
+        Optional<String> defaultValue = getOption("default");
+        if (!defaultValue.isPresent()) {
+            defaultValue = IntrospectionUtil.getDeclaredValue(fieldOrMethod).map(String::valueOf);
+        }
+        defaultValue.ifPresent(val -> componentMetadata.put("value", val));
         init();
     }
 

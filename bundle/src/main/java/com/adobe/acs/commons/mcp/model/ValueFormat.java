@@ -65,11 +65,26 @@ public enum ValueFormat {
             return null;
         }
         Long bytes = (val instanceof Long) ? (Long) val : Long.parseLong(String.valueOf(val));
-        if (bytes < 1024) {
-            return bytes + " b";
+        return humanReadableByteCount(bytes, false);
+    }
+    
+    // From: https://programming.guide/worlds-most-copied-so-snippet.html
+    private static strictfp String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        long absBytes = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+        if (absBytes < unit) {
+          return bytes + " B";
         }
-        int exp = (int) (Math.log(bytes) / Math.log(1024));
-        char pre = "kmgtpe".charAt(exp - 1);
-        return String.format("%.1f %cb", bytes / Math.pow(1024, exp), pre);
+        int exp = (int) (Math.log(absBytes) / Math.log(unit));
+        long th = (long) (Math.pow(unit, exp) * (unit - 0.05));
+        if (exp < 6 && absBytes >= th - ((th & 0xfff) == 0xd00 ? 52 : 0))  {
+          exp++; 
+        }
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        if (exp > 4) {
+            bytes /= unit;
+            exp -= 1;
+        }
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 }

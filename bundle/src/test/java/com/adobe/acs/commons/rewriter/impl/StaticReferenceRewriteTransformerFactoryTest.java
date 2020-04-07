@@ -19,9 +19,14 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
 
 import org.apache.sling.commons.testing.osgi.MockBundle;
 import org.apache.sling.commons.testing.osgi.MockComponentContext;
@@ -31,12 +36,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
-
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StaticReferenceRewriteTransformerFactoryTest {
@@ -62,7 +65,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/etc/clientlib/test.css", out.getValue(0));
@@ -85,7 +88,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/test.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("//static.host.com/etc/clientlib/test.css", out.getValue(0));
@@ -114,7 +117,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "/content/dam/flower.jpg");
         transformer.startElement(null, "img", null, imageWithJustSrc);
 
-        verify(handler, times(2)).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        verify(handler, times(2)).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
         List<Attributes> values = attributesCaptor.getAllValues();
         assertEquals("//static.host.com/content/dam/flower.jpg 1280w,//static.host.com/content/dam/house.png 480w", values.get(0).getValue(0));
@@ -141,7 +144,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "https://www.host.com/content/dam/flower.jpg");
         transformer.startElement(null, "img", null, imageWithJustSrc);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
         List<Attributes> values = attributesCaptor.getAllValues();
         assertEquals("https://static.host.com/content/dam/flower.jpg", values.get(0).getValue(0));
@@ -167,7 +170,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         imageWithJustSrc.addAttribute(null, "src", null, "CDATA", "//www.host.com/content/dam/flower_2.jpg");
         transformer.startElement(null, "img", null, imageWithJustSrc);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("img"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("img"), isNull(),
                 attributesCaptor.capture());
         List<Attributes> values = attributesCaptor.getAllValues();
         assertEquals("//static.host.com/content/dam/flower_2.jpg", values.get(0).getValue(0));
@@ -191,7 +194,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "class", null, "CDATA", "something nostatic");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/etc/clientlib/test.css", out.getValue(0));
@@ -215,7 +218,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "href", null, "CDATA", "/content/clientlib/test.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/content/clientlib/test.css", out.getValue(0));
@@ -239,7 +242,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testA.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("//static2.host.com/etc/clientlib/testA.css", out.getValue(0));
@@ -263,7 +266,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "href", null, "CDATA", "/etc/clientlib/testA.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("//staticB.host.com/etc/clientlib/testA.css", out.getValue(0));
@@ -287,7 +290,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "src", null, "CDATA", "/etc/clientlib/testABC.css");
         transformer.startElement(null, "link", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("link"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/etc/clientlib/testABC.css", out.getValue(0));
@@ -311,7 +314,7 @@ public class StaticReferenceRewriteTransformerFactoryTest {
         in.addAttribute(null, "src", null, "CDATA", "/etc/clientlib/testABC.css");
         transformer.startElement(null, "iframe", null, in);
 
-        verify(handler, only()).startElement(isNull(String.class), eq("iframe"), isNull(String.class),
+        verify(handler, only()).startElement(isNull(), eq("iframe"), isNull(),
                 attributesCaptor.capture());
         Attributes out = attributesCaptor.getValue();
         assertEquals("/etc/clientlib/testABC.css", out.getValue(0));

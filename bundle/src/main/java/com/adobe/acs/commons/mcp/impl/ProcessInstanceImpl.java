@@ -33,25 +33,6 @@ import com.adobe.acs.commons.mcp.model.Result;
 import com.adobe.acs.commons.mcp.util.DeserializeException;
 import com.adobe.acs.commons.mcp.util.ValueMapSerializer;
 import com.day.cq.commons.jcr.JcrUtil;
-import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
-import org.slf4j.LoggerFactory;
-
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularType;
 import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -61,6 +42,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularType;
+import org.apache.jackrabbit.JcrConstants;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstraction of a Process which runs using FAM and consists of one or more actions.
@@ -231,7 +230,9 @@ public class ProcessInstanceImpl implements ProcessInstance, Serializable {
                 action.manager.onFailure((failures, rr) -> {
                     asServiceUser(service -> recordErrors(step, failures, service));
                 });
-                action.manager.onFinish(() -> runStep(step + 1));
+                action.manager.onFinish(() -> {
+                    runStep(step + 1);
+                });
             }
             action.manager.deferredWithResolver(rr -> action.builder.accept(action.manager));
         }

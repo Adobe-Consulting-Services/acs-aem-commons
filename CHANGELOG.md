@@ -6,22 +6,75 @@ after the 3.9.0 release. All changes up until the 3.9.0 release can be found in 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
-
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+
+## [4.5.0] - 2020-03-25
+
+### Added
+- #2215 - Added Parameterized granite include to support generic dialog snippets
+
+### Fixed
+- #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
+- #2220 NPE in Audio component due to XSSApi adapter no longer available
+- #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
+- #2206 fix sonar warnings; some package versions had to be increased
+- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
+- Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
+- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
+
+### Changed
+- #2208 - Remove the WCMInbox webconsole plugin (#2205)
+
+## [4.4.2] - 2020-02-28
+
+### Added
+- #2202 - Added dynamic script resolution modular support to MCP
+- #2194 - Add actions of Quickpublish an Managepublication to Generic list console
+- #2174 - Added more granular control of the environment indicator css
+- #2164 - Content model framework now supports page create dialogs
+- #2160 - provide EL support for contextual root
+- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or Classic (AMS/OnPrem)
+
+### Fixed
+- #2195 - Removed direct references to Oak API
+- #2185 - fix empty iconpicker and fontawesome files
+- #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2169 - Fixed build warnings regarding baseline versions
+- #2146 - POI exception generating Excel file with too many references
+- #2145 - Added null value test to spreadsheet tests
+- #2142 - ETag filter: Correctly evaluate if-none-match header
+- #2137 - Updating maven plugins used for release to resolve release issues
+- #2132 - Fix display of byte sizes 
+- #2082 - ETag filter never sends 304
+
+### Changed
+- #2181 - Only run dependency-check-maven-plugin in dedicated profile
+- #2172 - Updated maven central URL to HTTPS
+- #2170 - Changed human readable byte count method to private to minimize API surface
+- #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
+- #2138 - Removed Joda-time library in favor of using standard Java Instant library
+- #2133 - Update test library dependencies
+
+
+## [4.4.0] - 2019-12-17
 
 ### Added
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
 - #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
+- #2084 - MCP Forms now extract default value/checkbox state from field value as well as from annotation options (both ways work now)
 - #2064 - Adding Marketo Form Component
 - #1919 - Report Builder | Path List Executor Implementation
 
 ### Fixed
+- #2090 - A failing on-deploy script could still have some of its pending changes persisted by the framework.
 - #2078 - Using the WorkflowPackageManager required read access to /(var/etc)/workflow/packages (fixes #2019)
 - #2120 - Fixed issues on the JCRHttpCacheStore regarding expiration handling, rewrote testcases (addresses #2113)
+- #2104 - Updated test suite to use mockito 3, build now working with Java 11
+- #2124 - cleanup build logs for unittests
 
 ### Changed
-=======
 - #2101 - Cleanup public API of the remote Assets feature (#2094)
 
 ## [4.3.4] - 2019-10-16

@@ -21,7 +21,7 @@ package com.adobe.acs.commons.users.impl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;

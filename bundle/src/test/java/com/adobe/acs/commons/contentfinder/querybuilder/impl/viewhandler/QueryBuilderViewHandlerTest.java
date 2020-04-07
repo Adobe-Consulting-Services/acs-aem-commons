@@ -20,7 +20,7 @@
 package com.adobe.acs.commons.contentfinder.querybuilder.impl.viewhandler;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -42,13 +42,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class QueryBuilderViewHandlerTest {
     private static final Logger LOG = LoggerFactory.getLogger(QueryBuilderViewHandlerTest.class);
+    
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
     public SlingContext slingContext = new SlingContext(ResourceResolverType.JCR_MOCK);
@@ -72,7 +76,7 @@ public class QueryBuilderViewHandlerTest {
         when(searchResult.getHits()).thenReturn(new ArrayList<>());
         when(query.getResult()).thenReturn(searchResult);
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(Session.class))).then(invocation -> {
-            PredicateGroup predicates = invocation.getArgumentAt(0, PredicateGroup.class);
+            PredicateGroup predicates = invocation.getArgument(0);
             LOG.info("predicates: {}", predicates);
             return query;
         });

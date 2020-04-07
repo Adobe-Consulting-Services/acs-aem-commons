@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Session;
 
@@ -53,7 +53,7 @@ public class ChecksumGeneratorServletTest {
     private static final String SERVLET_EXTENSION = "txt";
 
     @Rule
-    public final SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
+    public final SlingContext context = new SlingContext();
 
     @Spy
     private ChecksumGenerator checksumGenerator = new ChecksumGeneratorImpl();

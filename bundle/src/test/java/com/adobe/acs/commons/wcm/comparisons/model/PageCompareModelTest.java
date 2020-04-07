@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
@@ -46,8 +46,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -200,12 +200,12 @@ public class PageCompareModelTest {
     private PageCompareData mockOne2OneData(String pathA, String version) throws RepositoryException {
         Resource resource = mock(Resource.class);
         when(resolver.resolve(pathA)).thenReturn(resource);
-        when(resource.getResourceResolver()).thenReturn(resolver);
+//        when(resource.getResourceResolver()).thenReturn(resolver);
 
         PageCompareData pageCompareData = mock(PageCompareData.class);
         final List<Line<PageCompareDataLine>> lineResult = Lists.newArrayList(
                 mockOne2OneDataLine("a", "b"));
-        when(lines.generate(anyCollectionOf(PageCompareDataLine.class), anyCollectionOf(PageCompareDataLine.class))).thenReturn(lineResult);
+        when(lines.generate(anyCollection(), anyCollection())).thenReturn(lineResult);
         final ArrayList<VersionSelection> versionSelections = Lists.newArrayList(
                 mock(VersionSelection.class),
                 mock(VersionSelection.class));
@@ -216,9 +216,9 @@ public class PageCompareModelTest {
 
     private Line<PageCompareDataLine> mockOne2OneDataLine(String left, String right) {
         PageCompareDataLine leftLine = mock(PageCompareDataLine.class);
-        when(leftLine.getUniqueName()).thenReturn(left);
+//        when(leftLine.getUniqueName()).thenReturn(left);
         PageCompareDataLine rightLine = mock(PageCompareDataLine.class);
-        when(rightLine.getUniqueName()).thenReturn(right);
+//        when(rightLine.getUniqueName()).thenReturn(right);
 
         Line<PageCompareDataLine> line = mock(Line.class);
         when(line.getLeft()).thenReturn(leftLine);
