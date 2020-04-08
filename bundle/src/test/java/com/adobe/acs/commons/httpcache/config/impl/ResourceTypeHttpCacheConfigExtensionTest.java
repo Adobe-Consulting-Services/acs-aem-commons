@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
@@ -99,8 +99,6 @@ public class ResourceTypeHttpCacheConfigExtensionTest {
         extension.activate(properties);
 
         when(resource.getPath()).thenReturn("/content/acs-commons/path/to/page");
-        when(jcrContentChild.getPath()).thenReturn("/content/acs-commons/path/to/page/jcr:content");
-        when(jcrContentChild.getResourceType()).thenReturn(RT_SUB_COMP);
         when(resourceResolver.isResourceType(jcrContentChild, RT_PARENT_COMP)).thenReturn(true);
 
         assertTrue(extension.accepts(request, config));

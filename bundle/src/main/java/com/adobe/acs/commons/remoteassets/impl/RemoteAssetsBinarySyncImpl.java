@@ -52,9 +52,7 @@ import com.day.cq.dam.commons.util.DamUtil;
  *
  * Pulls the binaries for a remote asset in order to make it a true local asset.
  */
-@Component(
-        service = RemoteAssetsBinarySync.class
-)
+@Component(service=RemoteAssetsBinarySync.class)
 public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsBinarySyncImpl.class);
@@ -69,7 +67,7 @@ public class RemoteAssetsBinarySyncImpl implements RemoteAssetsBinarySync {
      */
     @Override
     public boolean syncAsset(Resource resource) {
-        ;
+        
         try (ResourceResolver remoteAssetsResolver = this.remoteAssetsConfig.getResourceResolver()){
             
             try {

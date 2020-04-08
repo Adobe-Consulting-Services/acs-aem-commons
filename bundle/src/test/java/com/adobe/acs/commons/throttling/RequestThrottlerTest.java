@@ -32,7 +32,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
@@ -89,10 +88,10 @@ public class RequestThrottlerTest {
         rt.activate(config);
         context.request().setResource(context.resourceResolver().getResource("/"));
         FilterChain chain = mock(FilterChain.class);
-        doNothing().when(chain).doFilter(anyObject(), anyObject());
+        doNothing().when(chain).doFilter(any(), any());
         rt.doFilter(context.request(), context.response(), chain);
         verify(chain).doFilter(context.request(), context.response());
-        verify(rt, never()).doFilterInternal(anyObject(), anyObject());
+        verify(rt, never()).doFilterInternal(any(), any());
     }
 
     @Test
@@ -115,14 +114,14 @@ public class RequestThrottlerTest {
         doReturn(rpt).when(request).getRequestProgressTracker();
 
         FilterChain chain = mock(FilterChain.class);
-        doNothing().when(chain).doFilter(anyObject(), anyObject());
+        doNothing().when(chain).doFilter(any(), any());
 
         for (int i = 0; i < 10; i++) {
             rt.doFilter(request, context.response(), chain);
 
         }
         verify(chain, times(10)).doFilter(request, context.response());
-        verify(rpt, times(10)).log(anyObject());
+        verify(rpt, times(10)).log(any());
 
     }
 

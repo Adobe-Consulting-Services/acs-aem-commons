@@ -48,6 +48,8 @@ public @interface FormField {
 
     String[] options() default {};
 
+    boolean showOnCreate() default true;
+
     public static class Factory {
         private Factory() {
             // Factory cannot be instantiated
@@ -94,6 +96,11 @@ public @interface FormField {
                 @Override
                 public Class<? extends Annotation> annotationType() {
                     return null;
+                }
+
+                @Override
+                public boolean showOnCreate() {
+                    return true;
                 }
             };
         }

@@ -19,6 +19,28 @@
  */
 package com.adobe.acs.commons.workflow.process.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
 import com.adobe.acs.commons.fam.ThrottledTaskRunner;
 import com.adobe.acs.commons.replication.BrandPortalAgentFilter;
 import com.adobe.acs.commons.util.WorkflowHelper;
@@ -32,23 +54,13 @@ import com.day.cq.workflow.WorkflowSession;
 import com.day.cq.workflow.exec.WorkItem;
 import com.day.cq.workflow.exec.WorkflowData;
 import com.day.cq.workflow.metadata.MetaDataMap;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Arrays;
-
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
 public class ReplicateWithOptionsWorkflowProcessTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
@@ -108,7 +120,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
         verifyNoMoreInteractions(replicator);
-        verifyZeroInteractions(throttledTaskRunner);
+        verifyNoInteractions(throttledTaskRunner);
     }
 
     @Test
@@ -156,7 +168,7 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/page/child2"), argThat(optionsMatcher));
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
         verifyNoMoreInteractions(replicator);
-        verifyZeroInteractions(throttledTaskRunner);
+        verifyNoInteractions(throttledTaskRunner);
     }
 
     @Test(expected = WorkflowException.class)
@@ -187,10 +199,10 @@ public class ReplicateWithOptionsWorkflowProcessTest {
 
         verify(replicator).replicate(any(), eq(ReplicationActionType.DEACTIVATE), eq("/content/asset"), argThat(optionsMatcher));
         verifyNoMoreInteractions(replicator);
-        verifyZeroInteractions(throttledTaskRunner);
+        verifyNoInteractions(throttledTaskRunner);
     }
 
-    private static class ReplicationOptionsMatcher extends ArgumentMatcher<ReplicationOptions> {
+    private static class ReplicationOptionsMatcher implements ArgumentMatcher<ReplicationOptions> {
 
         private String filterAgentId;
         private boolean brandPortalFilter;
@@ -206,22 +218,18 @@ public class ReplicateWithOptionsWorkflowProcessTest {
         }
 
         @Override
-        public boolean matches(Object argument) {
-            if (argument instanceof ReplicationOptions) {
-                ReplicationOptions options = (ReplicationOptions) argument;
-                boolean matches = true;
-                if (filterAgentId != null) {
-                    Agent agent = mock(Agent.class);
-                    when(agent.getId()).thenReturn(filterAgentId);
-                    matches = matches && options.getFilter().isIncluded(agent);
-                }
-                if (brandPortalFilter) {
-                    matches = matches && options.getFilter() instanceof BrandPortalAgentFilter;
-                }
-                return matches;
-            } else {
-                return false;
+        public boolean matches(ReplicationOptions argument) {
+            ReplicationOptions options = (ReplicationOptions) argument;
+            boolean matches = true;
+            if (filterAgentId != null) {
+                Agent agent = mock(Agent.class);
+                when(agent.getId()).thenReturn(filterAgentId);
+                matches = matches && options.getFilter().isIncluded(agent);
             }
+            if (brandPortalFilter) {
+                matches = matches && options.getFilter() instanceof BrandPortalAgentFilter;
+            }
+            return matches;
         }
 
     }

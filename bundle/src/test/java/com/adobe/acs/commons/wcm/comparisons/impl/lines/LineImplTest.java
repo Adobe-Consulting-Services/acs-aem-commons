@@ -22,7 +22,7 @@ package com.adobe.acs.commons.wcm.comparisons.impl.lines;
 import com.adobe.acs.commons.wcm.comparisons.lines.Line;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.EQUAL;
 import static com.adobe.acs.commons.wcm.comparisons.lines.Line.State.NOT_EQUAL;

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.fam.ActionManager;
+import com.adobe.acs.commons.fam.actions.Actions;
 import com.adobe.acs.commons.functions.CheckedConsumer;
 import com.adobe.acs.commons.data.CompositeVariant;
 import com.adobe.acs.commons.data.Spreadsheet;
@@ -48,10 +49,10 @@ import org.junit.Test;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
@@ -112,6 +113,7 @@ public class UrlAssetImportTest {
             method.accept(context.resourceResolver());
             return null;
         }).when(actionManager).deferredWithResolver(any(CheckedConsumer.class));
+        Actions.setCurrentActionManager(actionManager);
     }
 
     private void addImportRow(String... cols) {

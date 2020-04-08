@@ -23,18 +23,20 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.NameConstants;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents an asset being moved.
  */
 public class MovingAsset extends MovingNode {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MovingAsset.class);
 
     @Override
     public boolean isCopiedBeforeMove() {
@@ -91,7 +93,7 @@ public class MovingAsset extends MovingNode {
                 rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
             }
         } catch (ReplicationException ex) {
-            Logger.getLogger(MovingAsset.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error("Cannot replicate '{}'", ref, ex);
         }
     }
 }

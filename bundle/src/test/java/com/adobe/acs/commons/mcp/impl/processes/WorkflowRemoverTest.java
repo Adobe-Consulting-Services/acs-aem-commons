@@ -141,7 +141,7 @@ public class WorkflowRemoverTest {
 
     }
 
-    @Test
+    @Test(expected = ParseException.class)
     public void parseParametersBadDateInput() throws Exception {
         remover.payloadPaths = new ArrayList<>();
         remover.payloadPaths.add("/content/dam/.*");
@@ -160,15 +160,11 @@ public class WorkflowRemoverTest {
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.COMPLETED.name());
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.SUSPENDED.name());
 
-        try {
-            remover.parseParameters();
-        } catch (ParseException e) {
-            log.warn("parse exception is expected with bad input.", e);
-        }
+        remover.parseParameters();
 
     }
 
-    @Test
+    @Test(expected = PatternSyntaxException.class)
     public void parseParametersBadRegexInput() throws Exception {
         remover.payloadPaths = new ArrayList<>();
         remover.payloadPaths.add("/content/dam/.*");
@@ -187,11 +183,7 @@ public class WorkflowRemoverTest {
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.COMPLETED.name());
         remover.statuses.add(WorkflowStatusSelector.WorkflowStatus.SUSPENDED.name());
 
-        try{
-            remover.parseParameters();
-        } catch (PatternSyntaxException e) {
-            log.warn("pattern exception is expected with bad input.", e);
-        }
+        remover.parseParameters();
 
     }
 

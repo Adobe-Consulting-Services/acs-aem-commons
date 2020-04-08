@@ -26,6 +26,7 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -39,8 +40,13 @@ import static org.powermock.api.mockito.PowerMockito.when;
  *
  * Split out as ErrorPageCacheImplTest was having problems with @Spy'ied vars
  */
+
+// See https://stackoverflow.com/questions/52966897/powermock-java-11 for details about the 
+// @PowerMockIgnore statement
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ResourceDataUtil.class)
+@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*"})
 public class PowerMockErrorPageCacheImplTest {
 
     private ErrorPageCacheImpl errorPageCache;
