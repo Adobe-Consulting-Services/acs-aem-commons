@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- #2253 - Added dateicker with timezone select
 - #2118 - Adding functionality to showhidedialogfields TouchUI widget
 - #2110 - Adding File Fetcher for downloading and caching remote files in AEM Assets
 - #2064 - Adding Marketo Form Component
