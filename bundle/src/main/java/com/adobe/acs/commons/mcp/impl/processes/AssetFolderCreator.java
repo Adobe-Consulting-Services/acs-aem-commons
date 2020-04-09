@@ -319,7 +319,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     private final transient GenericReport report = new GenericReport();
 
-    private transient final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+    private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private enum ReportColumns {
         STATUS,
