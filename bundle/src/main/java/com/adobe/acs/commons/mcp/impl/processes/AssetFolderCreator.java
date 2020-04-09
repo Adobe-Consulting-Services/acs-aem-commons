@@ -131,7 +131,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         instance.defineCriticalAction("Create Asset Folders", rr, this::createAssetFolders);
     }
 
-    volatile transient HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
+    transient volatile HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
 
     /**
      * Parses the input Excel file and creates a list of AssetFolderDefinition objects to process.
