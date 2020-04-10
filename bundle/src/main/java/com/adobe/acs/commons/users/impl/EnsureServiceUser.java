@@ -131,7 +131,7 @@ public final class EnsureServiceUser implements EnsureAuthorizable {
 
             log.info(
                     "Successfully ensured [ {} ] of Service User [ {} ] in [ {} ms ]",
-                    operation.toString(), getAuthorizable().getPrincipalName(),
+                    operation, getAuthorizable().getPrincipalName(),
                             String.valueOf(System.currentTimeMillis() - start));
         } catch (Exception e) {
             throw new EnsureAuthorizableException(String.format("Failed to ensure [ %s ] of Service User [ %s ]",
