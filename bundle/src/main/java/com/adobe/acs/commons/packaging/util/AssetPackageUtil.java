@@ -110,7 +110,7 @@ public class AssetPackageUtil {
                 }
                 patterns.add(Pattern.compile(item));
             } catch (PatternSyntaxException e) {
-                log.error("Pattern invalid, skipping. Pattern value: " + item);
+                log.error("Pattern invalid, skipping. Pattern value: {}", item);
             }
         }
         return patterns;

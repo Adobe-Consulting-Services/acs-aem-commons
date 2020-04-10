@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to this project will be documented in this file. This format was adapated
+All notable changes to this project will be documented in this file. This format was adapted
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+- #2254 Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
 
 ## [4.5.0] - 2020-03-25
 
