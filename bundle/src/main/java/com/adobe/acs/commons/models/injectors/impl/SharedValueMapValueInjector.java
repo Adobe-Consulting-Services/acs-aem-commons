@@ -96,7 +96,7 @@ public class SharedValueMapValueInjector implements Injector {
     protected ValueMap getSharedProperties(Page pageRoot, Resource resource) {
         String sharedPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_SHARED_COMPONENT_PROPERTIES + "/" + resource.getResourceType();
         Resource sharedPropsResource = resource.getResourceResolver().getResource(sharedPropsPath);
-        return sharedPropsResource != null ? sharedPropsResource.getValueMap() : ValueMapDecorator.EMPTY;
+        return sharedPropsResource != null ? sharedPropsResource.getValueMap() : ValueMap.EMPTY;
     }
 
     /**
@@ -105,7 +105,7 @@ public class SharedValueMapValueInjector implements Injector {
     protected ValueMap getGlobalProperties(Page pageRoot, Resource resource) {
         String globalPropsPath = pageRoot.getPath() + "/" + JcrConstants.JCR_CONTENT + "/" + SharedComponentProperties.NN_GLOBAL_COMPONENT_PROPERTIES;
         Resource globalPropsResource = resource.getResourceResolver().getResource(globalPropsPath);
-        return globalPropsResource != null ? globalPropsResource.getValueMap() : ValueMapDecorator.EMPTY;
+        return globalPropsResource != null ? globalPropsResource.getValueMap() : ValueMap.EMPTY;
     }
 
     /**
