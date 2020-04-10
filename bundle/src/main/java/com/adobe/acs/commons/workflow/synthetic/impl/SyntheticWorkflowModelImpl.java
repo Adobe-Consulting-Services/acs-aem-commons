@@ -61,7 +61,6 @@ public class SyntheticWorkflowModelImpl implements SyntheticWorkflowModel {
         WorkflowModel model = workflowSession.getModel(modelId);
 
         if (model == null) {
-            log.error("Unable to locate workflow starting node for " + modelId);
             throw new WorkflowException("Unable to locate workflow starting node for " + modelId);            
         }
         

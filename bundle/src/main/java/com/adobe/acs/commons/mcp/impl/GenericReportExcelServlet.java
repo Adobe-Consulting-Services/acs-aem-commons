@@ -75,8 +75,8 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
                 throw ex;
             }
         } else {
-            LOG.error("Unable to process report stored at "+request.getResource().getPath());
-            throw new ServletException("Unable to process report stored at "+request.getResource().getPath());
+            String msg = String.format("Unable to process report stored at %s", request.getResource().getPath());
+            throw new ServletException(msg);
         }
     }
 
@@ -148,7 +148,7 @@ public class GenericReportExcelServlet extends SlingSafeMethodsServlet {
                 sheet.autoSizeColumn(i);
             } catch (Exception e){
                 // autosize depends on AWT stuff and can fail, but it should not be fatal
-                LOG.warn("autoSizeColumn(" + i + ") failed: " + e.getMessage());
+                LOG.warn("autoSizeColumn({}) failed: {}",i, e.getMessage());
             }
             int cw = sheet.getColumnWidth(i);
             // increase width to accommodate drop-down arrow in the header

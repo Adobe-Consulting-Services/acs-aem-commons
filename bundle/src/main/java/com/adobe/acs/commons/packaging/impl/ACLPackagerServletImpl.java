@@ -289,7 +289,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
         if (log.isDebugEnabled()) {
             for (final Pattern pattern : patterns) {
-                log.debug("Compiled pattern: {}", pattern.toString());
+                log.debug("Compiled pattern: {}", pattern);
             }
         }
 

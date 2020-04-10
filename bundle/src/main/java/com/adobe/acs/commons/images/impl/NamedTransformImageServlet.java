@@ -370,7 +370,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         Rendition rendition = asset.getRendition(renditionPatternPicker);
 
         if (rendition == null) {
-            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker.toString(),
+            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker,
                     resource.getPath());
             rendition = asset.getOriginal();
         }

@@ -91,7 +91,7 @@ public final class StylesheetInlinerTransformerFactory implements TransformerFac
         public void init(final ProcessingContext context, final ProcessingComponentConfiguration config) throws IOException {
             super.init(context, config);
             slingRequest = context.getRequest();
-            log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL().toString());
+            log.debug("Inlining Stylesheet references for {}", slingRequest.getRequestURL());
         }
 
         @Override

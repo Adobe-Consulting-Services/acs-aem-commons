@@ -192,7 +192,7 @@ public class LastModifiedOperationImpl extends AbstractOperation {
         map.put("p.limit", String.valueOf(limit));
         map.put("p.guessTotal", "true");
 
-        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2).toString());
+        log.debug("Lastmod QueryBuilder Map: {}", toJsonObject(map, 2));
 
         try (CloseableQuery query = queryBuilder.createQuery(PredicateGroup.create(map), resourceResolver)) {
             final SearchResult result = query.getResult();
