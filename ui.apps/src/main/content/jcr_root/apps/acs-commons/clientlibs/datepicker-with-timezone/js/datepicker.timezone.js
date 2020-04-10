@@ -109,6 +109,9 @@
         if (!datePickerValue) {
             return;
         }
+        if (!moment(datePickerValue).isValid() && datePickerValue.indexOf('Z') !== -1) {
+            datePickerValue = datePickerValue.replace('Z', '');
+        }
         if(displayFormat && displayFormat.indexOf("HH") && displayFormat.indexOf("mm")) {
             if (timeZoneValue !== "GMT") {
                 var utcTime = moment.tz(datePickerValue, offsetTimeZoneMap.GMT);
