@@ -257,7 +257,7 @@ public class JsonEventLogger implements EventHandler {
         final LogLevel logLevel = LogLevel.fromProperty(this.level);
         this.logEnabler = logEnablerForLevel(logLevel, this.eventLogger);
         this.logMapper = logMapperForLevel(logLevel, this.eventLogger);
-        log.trace("[activate] logger state: {}", toString());
+        log.trace("[activate] logger state: {}", this);
     }
 
     @Deactivate

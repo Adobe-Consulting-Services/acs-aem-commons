@@ -150,7 +150,7 @@ public class MemHttpCacheStoreImpl extends AbstractGuavaCacheMBean<CacheKey, Mem
 
         @Override
         public void onRemoval(RemovalNotification<CacheKey, MemCachePersistenceObject> removalNotification) {
-            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey().toString(),
+            log.debug("Mem cache entry for uri {} removed due to {}", removalNotification.getKey(),
                     removalNotification.getCause().name());
         }
     }

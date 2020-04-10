@@ -60,7 +60,7 @@ public class FrozenRendition implements InvocationHandler {
             case "getSize":
                 return getSize();
             default:
-                LOG.error("FROZEN RENDITION >> NO IMPLEMENTATION FOR "+methodName);
+                LOG.error("FROZEN RENDITION >> NO IMPLEMENTATION FOR {}", methodName);
                 throw new UnsupportedOperationException();
         }
     }
