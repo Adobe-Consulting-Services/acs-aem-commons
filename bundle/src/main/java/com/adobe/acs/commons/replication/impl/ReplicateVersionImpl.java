@@ -67,7 +67,7 @@ public class ReplicateVersionImpl implements
             .getLogger(ReplicateVersionImpl.class);
 
     @Reference
-    private Replicator replicator;
+    private transient Replicator replicator;
 
     @Override
     public final List<ReplicationResult> replicate(
@@ -167,7 +167,7 @@ public class ReplicateVersionImpl implements
                 return 0;
             }
         });
-        Calendar cal = GregorianCalendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         for (Version v : versions) {
             try {

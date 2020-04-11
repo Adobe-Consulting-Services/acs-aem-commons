@@ -46,7 +46,7 @@ public final class IncludeDesignLibrariesTag extends TagSupport {
 
     private boolean css;
 
-    private Design design;
+    private transient Design design;
 
     /**
      * {@inheritDoc}

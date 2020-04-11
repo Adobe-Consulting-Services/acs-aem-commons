@@ -31,6 +31,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
@@ -57,7 +58,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
         })
     public static final String PROP_COMPONENTS = "components";
 
-    private JsonObject json;
+    private transient JsonObject json;
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -70,7 +71,7 @@ public class CustomComponentActivatorListServlet extends SlingSafeMethodsServlet
             array.add(obj);
         }
         this.json = new JsonObject();
-        json.add("components", array);
+        json.add("components", array); // NOSONAR
     }
 
     @Override
