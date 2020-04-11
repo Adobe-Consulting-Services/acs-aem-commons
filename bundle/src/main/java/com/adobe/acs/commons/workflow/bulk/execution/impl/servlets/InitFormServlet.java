@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**
@@ -65,7 +67,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
     private static final String KEY_USER_EVENT_DATA = "userEventData";
 
     @Reference
-    private WorkflowService workflowService;
+    private transient WorkflowService workflowService;
 
     @Override
     protected final void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -115,7 +117,7 @@ public class InitFormServlet extends SlingAllMethodsServlet {
         } catch (WorkflowException e) {
             log.error("Could not create workflow model drop-down.", e);
 
-            JSONErrorUtil.sendJSONError(response, SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            JSONErrorUtil.sendJSONError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not collect workflows",
                     e.getMessage());
         }

@@ -44,7 +44,7 @@ import java.io.IOException;
 public class StopServlet extends SlingAllMethodsServlet {
 
     @Reference
-    private BulkWorkflowEngine bulkWorkflowEngine;
+    private transient BulkWorkflowEngine bulkWorkflowEngine;
 
     @Override
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)

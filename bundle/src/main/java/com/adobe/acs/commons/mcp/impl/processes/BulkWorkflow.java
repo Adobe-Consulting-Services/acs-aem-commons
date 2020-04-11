@@ -54,8 +54,8 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
 
     public static final String PROCESS_NAME = "Bulk Workflow";
 
-    private final QueryHelper queryHelper;
-    private final SyntheticWorkflowRunner syntheticWorkflowRunner;
+    private final transient QueryHelper queryHelper;
+    private final transient SyntheticWorkflowRunner syntheticWorkflowRunner;
 
     public enum ItemStatus {
         SUCCESS, FAILURE

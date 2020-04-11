@@ -84,7 +84,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
         final Parameters parameters = new Parameters(request);
 
-        log.debug("Users to CSV Export Parameters: {}", parameters.toString());
+        log.debug("Users to CSV Export Parameters: {}", parameters);
 
         final Csv csv = new Csv();
         final Writer writer = response.getWriter();

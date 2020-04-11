@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to this project will be documented in this file. This format was adapated
+All notable changes to this project will be documented in this file. This format was adapted
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
@@ -10,13 +10,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Added
+- #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
 - #2238 - Added a feature to Publish the Site Root Page along with the publishing page if Shared/Global Component content modified
 
+### Fixed
+- #2254 - Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
+- #2248 - Fixed issue with null values in Generic Lists
 
 ## [4.5.0] - 2020-03-25
 
 ### Added
 - #2215 - Added Parameterized granite include to support generic dialog snippets
+- #2252 - Make comment available as email template variable
 
 ### Fixed
 - #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
