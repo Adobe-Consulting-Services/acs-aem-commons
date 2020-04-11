@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
     @Override
     @SuppressWarnings("squid:S2696")
     public void start(BundleContext context) throws Exception {
-        LOG.info(context.getBundle().getSymbolicName() + " started");
+        LOG.info("{} started",context.getBundle().getSymbolicName());
         ServiceReference<SlingSettingsService> ref  = context.getServiceReference(SlingSettingsService.class);
         SlingSettingsService service = context.getService(ref);
         try {
@@ -68,7 +68,7 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         adapterManagerServiceTracker.close();
-        LOG.info(context.getBundle().getSymbolicName() + " stopped");
+        LOG.info("{} stopped",context.getBundle().getSymbolicName());
     }
 
     public static AdapterManager getAdapterManager() {

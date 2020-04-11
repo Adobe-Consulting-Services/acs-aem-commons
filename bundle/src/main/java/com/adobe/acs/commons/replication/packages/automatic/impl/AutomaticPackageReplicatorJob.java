@@ -79,7 +79,7 @@ public class AutomaticPackageReplicatorJob implements Runnable, EventHandler {
             // check if the package exists
             JcrPackage jcrPackage = pkgMgr.open(packageId);
             if (jcrPackage == null || jcrPackage.getNode() == null) {
-                log.warn("Package at path " + packagePath + " does not exist");
+                log.warn("Package at path '{}' does not exist", packagePath);
                 throw new IllegalArgumentException("Package at path " + packagePath + " does not exist");
             }
 

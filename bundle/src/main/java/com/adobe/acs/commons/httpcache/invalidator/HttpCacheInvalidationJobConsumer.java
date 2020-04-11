@@ -95,7 +95,7 @@ public class HttpCacheInvalidationJobConsumer implements JobConsumer {
             invalidateReferences(path);
         }
 
-        log.trace("Invalidation job for the path processed.", path);
+        log.trace("Invalidation job for the path [ {} ] processed.", path);
         return JobResult.OK;
     }
 

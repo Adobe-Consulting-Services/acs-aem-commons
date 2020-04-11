@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -146,7 +147,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         response.setCharacterEncoding("UTF-8");
 
         if (!this.accepts(request)) {
-            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("{}");
         }
 
