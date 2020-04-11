@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import com.adobe.acs.commons.wcm.PageRootProvider;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.reference.Reference;
@@ -29,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -44,12 +46,10 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
  */
 @Component(service = ReferenceProvider.class,
         configurationPolicy = ConfigurationPolicy.REQUIRE)
-public class SharedComponentPropertiesReferenceProvider implements ReferenceProvider {
+public final class SharedComponentPropertiesReferenceProvider implements ReferenceProvider {
 
     @org.osgi.service.component.annotations.Reference
     private PageRootProvider pageRootProvider;
-
-    private Set<String> componentResourceTypes = new HashSet<>();
 
     @Override
     public List<Reference> findReferences(Resource resource) {
@@ -70,16 +70,16 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
             return references;
         } else {
 
-            collectComponentResourceTypes(page.getContentResource());
+            Set<String> componentResourceTypes = collectComponentResourceTypes(page.getContentResource());
 
             if (page.getTemplate() != null) {
                 Resource templateResource = resourceResolver
                     .getResource(page.getTemplate().getPath());
-                collectComponentResourceTypes(templateResource);
+                componentResourceTypes.addAll(collectComponentResourceTypes(templateResource));
             }
 
             if (componentResourceTypes.size() > 0) {
-                references = findSharedComponents(resource);
+                references = findSharedComponents(resource, componentResourceTypes);
             }
         }
 
@@ -94,20 +94,23 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
      *
      * @param resource {@link Resource}
      */
-    private void collectComponentResourceTypes(Resource resource) {
+    private Set<String> collectComponentResourceTypes(Resource resource) {
+        Set<String> componentResourceTypes = new HashSet<>();
         if (resource != null) {
             String componentResourceType = resource.getValueMap()
                 .get(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, String.class);
             if (StringUtils.isNotEmpty(componentResourceType)) {
                 componentResourceTypes.add(componentResourceType);
             }
+
             if (resource.hasChildren()) {
                 Iterator<Resource> children = resource.listChildren();
                 while (children.hasNext()) {
-                    collectComponentResourceTypes(children.next());
+                    componentResourceTypes.addAll(collectComponentResourceTypes(children.next()));
                 }
             }
         }
+        return componentResourceTypes;
     }
 
 
@@ -116,9 +119,11 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
      * shared dialog, then adds the root page of the given resource to the list.
      *
      * @param resource {@link Resource}
+     * @param componentResourceTypes {@link Set<String>}
      * @return references
      */
-    private List<Reference> findSharedComponents(Resource resource) {
+    private List<Reference> findSharedComponents(Resource resource,
+        Set<String> componentResourceTypes) {
         List<Reference> references = new ArrayList<>();
 
         ResourceResolver resourceResolver = resource.getResourceResolver();
@@ -129,7 +134,8 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
                 continue;
             }
 
-            if (!componentResource.getResourceType().equalsIgnoreCase("cq:Component")) {
+            String jcrPrimaryType = componentResource.getValueMap().get(JcrConstants.JCR_PRIMARYTYPE, String.class);
+            if (StringUtils.isEmpty(jcrPrimaryType) || !jcrPrimaryType.equalsIgnoreCase("cq:Component")) {
                 continue;
             }
 
@@ -147,6 +153,8 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
                     rootPage.getContentResource(),
                     rootPage.getLastModified() != null ? rootPage.getLastModified()
                         .getTimeInMillis() : -1L));
+
+                return references;
             }
         }
         return references;
@@ -162,10 +170,9 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
         String[] resolverSearchPaths = resourceResolver.getSearchPath();
 
         for (String searchPath : resolverSearchPaths) {
-            String tempResourceType = searchPath + resourceType;
-            if (resourceResolver.getResource(tempResourceType) != null) {
-                resourceType = searchPath + resourceType;
-                return resourceResolver.getResource(resourceType);
+            Resource resource = resourceResolver.getResource(searchPath + resourceType);
+            if (resource != null) {
+                return resource;
             }
         }
         return null;
@@ -177,12 +184,8 @@ public class SharedComponentPropertiesReferenceProvider implements ReferenceProv
      * @param page {@link Page}
      * @return page title | name
      */
-    private String getReferenceName(Page page) {
-        String title = null;
-        if (page != null) {
-            title = page.getTitle() != null ? page.getTitle() : page.getName();
-        }
-        return title;
+    private String getReferenceName(@Nonnull Page page) {
+        return StringUtils.defaultIfEmpty(page.getTitle(), page.getName());
     }
 
 }

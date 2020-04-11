@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.properties.shared.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +54,7 @@ public class SharedComponentPropertiesReferenceProviderTest {
 
     private static final String LANGUAGE_ROOT_PAGE_PATH = "/content/sample-site/en";
     private static final String HOME_PAGE_PATH = "/content/sample-site/en/home";
-    private static final String CONTENT_TEMPLATE_PATH = "/conf/sample-site/settings/wcm/templates/content-page";
+    private static final String CONTENT_TEMPLATE_PATH = "/conf/sample-site/settings/wcm/templates";
 
     @Rule
     public final AemContext aemContext = new AemContext();
@@ -77,12 +78,24 @@ public class SharedComponentPropertiesReferenceProviderTest {
 
 
     @Test
-    public void testFindReferences() {
+    public void testFindReferencesWithSharedComponents() {
         Resource resource = aemContext.currentResource(HOME_PAGE_PATH);
 
         List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
-        assertEquals(2, references.size());
-        assertEquals("English", references.get(0).getName());
+        assertEquals(1, references.size());
+
+        Reference reference = references.get(0);
+        assertEquals("English", reference.getName());
+        assertEquals("sharedProperties", reference.getType());
+        assertEquals("/content/sample-site/en/jcr:content", reference.getResource().getPath());
+    }
+
+    @Test
+    public void testFindReferencesWithoutSharedComponents() {
+        Resource resource = aemContext.currentResource(HOME_PAGE_PATH + "/privacy-policy");
+
+        List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
+        assertTrue(references.isEmpty());
     }
 
     @Test
@@ -92,7 +105,7 @@ public class SharedComponentPropertiesReferenceProviderTest {
         when(resource.getResourceResolver()).thenReturn(mock(ResourceResolver.class));
 
         List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
-        assertEquals(0, references.size());
+        assertTrue(references.isEmpty());
     }
 
     @Test
@@ -104,7 +117,7 @@ public class SharedComponentPropertiesReferenceProviderTest {
         when(resourceResolver.adaptTo(PageManager.class)).thenReturn(mock(PageManager.class));
 
         List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
-        assertEquals(0, references.size());
+        assertTrue(references.isEmpty());
     }
 
     @Test
@@ -112,7 +125,7 @@ public class SharedComponentPropertiesReferenceProviderTest {
         Resource resource = aemContext.currentResource(CONTENT_TEMPLATE_PATH);
 
         List<Reference> references = sharedPropertiesReferenceProvider.findReferences(resource);
-        assertEquals(0, references.size());
+        assertTrue(references.isEmpty());
     }
 
 }

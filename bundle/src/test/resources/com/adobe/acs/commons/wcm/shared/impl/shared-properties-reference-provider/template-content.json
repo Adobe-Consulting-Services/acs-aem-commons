@@ -1,94 +1,182 @@
 {
-  "jcr:primaryType": "cq:Template",
-  "jcr:content": {
-    "jcr:primaryType": "nt:resource",
-    "initial": {
-      "jcr:primaryType": "cq:Page",
-      "jcr:content": {
-        "jcr:primaryType": "cq:PageContent",
-        "cq:template": "/conf/sample-site/settings/wcm/templates/content-page",
-        "sling:resourceType": "sample-site/components/structure/page",
-        "root": {
-          "jcr:primaryType": "nt:unstructured",
-          "sling:resourceType": "wcm/foundation/components/responsivegrid",
-          "responsivegrid": {
-            "jcr:primaryType": "nt:unstructured",
-            "sling:resourceType": "wcm/foundation/components/responsivegrid"
-          }
-        }
-      }
-    },
+  "jcr:primaryType": "cq:Page",
+  "content-page": {
+    "jcr:primaryType": "cq:Template",
     "jcr:content": {
-      "jcr:primaryType": "cq:PageContent",
-      "jcr:title": "Content Page",
-      "status": "enabled",
-      "cq:templateType": "/conf/sample-site/settings/wcm/template-types/empty-page"
-    },
-    "structure": {
-      "jcr:primaryType": "cq:Page",
-      "jcr:content": {
-        "jcr:primaryType": "cq:PageContent",
-        "cq:template": "/conf/sample-site/settings/wcm/templates/content-page",
-        "sling:resourceType": "sample-site/components/structure/page",
-        "root": {
-          "jcr:primaryType": "nt:unstructured",
-          "sling:resourceType": "wcm/foundation/components/responsivegrid",
-          "header": {
-            "jcr:primaryType": "nt:unstructured",
-            "sling:resourceType": "sample-site/components/structure/header"
-          },
-          "responsivegrid": {
+      "jcr:primaryType": "nt:resource",
+      "initial": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+          "jcr:primaryType": "cq:PageContent",
+          "cq:template": "/conf/sample-site/settings/wcm/templates/content-page",
+          "sling:resourceType": "sample-site/components/structure/page",
+          "root": {
             "jcr:primaryType": "nt:unstructured",
             "sling:resourceType": "wcm/foundation/components/responsivegrid",
-            "editable": true
-          },
-          "footer": {
-            "jcr:primaryType": "nt:unstructured",
-            "sling:resourceType": "sample-site/components/structure/footer",
-            "navigation": {
+            "responsivegrid": {
               "jcr:primaryType": "nt:unstructured",
-              "sling:resourceType": "sample-site/components/structure/navigation",
-              "collectAllPages": "false",
-              "structureDepth": "1"
+              "sling:resourceType": "wcm/foundation/components/responsivegrid"
             }
           }
-        },
-        "cq:responsive": {
-          "jcr:primaryType": "nt:unstructured",
-          "breakpoints": {
+        }
+      },
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "jcr:title": "Content Page",
+        "status": "enabled",
+        "cq:templateType": "/conf/sample-site/settings/wcm/template-types/empty-page"
+      },
+      "structure": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+          "jcr:primaryType": "cq:PageContent",
+          "cq:template": "/conf/sample-site/settings/wcm/templates/content-page",
+          "sling:resourceType": "sample-site/components/structure/page",
+          "root": {
             "jcr:primaryType": "nt:unstructured",
-            "phone": {
+            "sling:resourceType": "wcm/foundation/components/responsivegrid",
+            "header": {
               "jcr:primaryType": "nt:unstructured",
-              "title": "Smaller Screen",
-              "width": 650
+              "sling:resourceType": "sample-site/components/structure/header"
             },
-            "tablet": {
+            "responsivegrid": {
               "jcr:primaryType": "nt:unstructured",
-              "title": "Tablet",
-              "width": 1200
+              "sling:resourceType": "wcm/foundation/components/responsivegrid",
+              "editable": true
+            },
+            "footer": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "sample-site/components/structure/footer",
+              "navigation": {
+                "jcr:primaryType": "nt:unstructured",
+                "sling:resourceType": "sample-site/components/structure/navigation",
+                "collectAllPages": "false",
+                "structureDepth": "1"
+              }
+            }
+          },
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "breakpoints": {
+              "jcr:primaryType": "nt:unstructured",
+              "phone": {
+                "jcr:primaryType": "nt:unstructured",
+                "title": "Smaller Screen",
+                "width": 650
+              },
+              "tablet": {
+                "jcr:primaryType": "nt:unstructured",
+                "title": "Tablet",
+                "width": 1200
+              }
+            }
+          }
+        }
+      },
+      "policies": {
+        "jcr:primaryType": "cq:Page",
+        "cq:policy": "sample-site/components/structure/page/sample-site-page",
+        "sling:resourceType": "wcm/core/components/policies/mappings",
+        "root": {
+          "jcr:primaryType": "nt:unstructured",
+          "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-structure",
+          "sling:resourceType": "wcm/core/components/policies/mapping",
+          "responsivegrid": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-default",
+            "sling:resourceType": "wcm/core/components/policies/mapping",
+            "sample-site": {
+              "jcr:primaryType": "nt:unstructured",
+              "components": {
+                "jcr:primaryType": "nt:unstructured",
+                "content": {
+                  "jcr:primaryType": "nt:unstructured"
+                }
+              }
             }
           }
         }
       }
-    },
-    "policies": {
-      "jcr:primaryType": "cq:Page",
-      "cq:policy": "sample-site/components/structure/page/sample-site-page",
-      "sling:resourceType": "wcm/core/components/policies/mappings",
-      "root": {
-        "jcr:primaryType": "nt:unstructured",
-        "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-structure",
-        "sling:resourceType": "wcm/core/components/policies/mapping",
-        "responsivegrid": {
-          "jcr:primaryType": "nt:unstructured",
-          "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-default",
-          "sling:resourceType": "wcm/core/components/policies/mapping",
-          "sample-site": {
+    }
+  },
+  "free-form-page": {
+    "jcr:primaryType": "cq:Template",
+    "jcr:content": {
+      "jcr:primaryType": "nt:resource",
+      "initial": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+          "jcr:primaryType": "cq:PageContent",
+          "cq:template": "/conf/sample-site/settings/wcm/templates/free-form-page",
+          "sling:resourceType": "sample-site/components/structure/page",
+          "root": {
             "jcr:primaryType": "nt:unstructured",
-            "components": {
+            "sling:resourceType": "wcm/foundation/components/responsivegrid",
+            "responsivegrid": {
               "jcr:primaryType": "nt:unstructured",
-              "content": {
-                "jcr:primaryType": "nt:unstructured"
+              "sling:resourceType": "wcm/foundation/components/responsivegrid"
+            }
+          }
+        }
+      },
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "jcr:title": "Content Page",
+        "status": "enabled",
+        "cq:templateType": "/conf/sample-site/settings/wcm/template-types/empty-page"
+      },
+      "structure": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+          "jcr:primaryType": "cq:PageContent",
+          "cq:template": "/conf/sample-site/settings/wcm/templates/free-form-page",
+          "sling:resourceType": "sample-site/components/structure/page",
+          "root": {
+            "jcr:primaryType": "nt:unstructured",
+            "sling:resourceType": "wcm/foundation/components/responsivegrid",
+            "responsivegrid": {
+              "jcr:primaryType": "nt:unstructured",
+              "sling:resourceType": "wcm/foundation/components/responsivegrid",
+              "editable": true
+            }
+          },
+          "cq:responsive": {
+            "jcr:primaryType": "nt:unstructured",
+            "breakpoints": {
+              "jcr:primaryType": "nt:unstructured",
+              "phone": {
+                "jcr:primaryType": "nt:unstructured",
+                "title": "Smaller Screen",
+                "width": 650
+              },
+              "tablet": {
+                "jcr:primaryType": "nt:unstructured",
+                "title": "Tablet",
+                "width": 1200
+              }
+            }
+          }
+        }
+      },
+      "policies": {
+        "jcr:primaryType": "cq:Page",
+        "cq:policy": "sample-site/components/structure/page/sample-site-page",
+        "sling:resourceType": "wcm/core/components/policies/mappings",
+        "root": {
+          "jcr:primaryType": "nt:unstructured",
+          "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-structure",
+          "sling:resourceType": "wcm/core/components/policies/mapping",
+          "responsivegrid": {
+            "jcr:primaryType": "nt:unstructured",
+            "cq:policy": "wcm/foundation/components/responsivegrid/sample-site-default",
+            "sling:resourceType": "wcm/core/components/policies/mapping",
+            "sample-site": {
+              "jcr:primaryType": "nt:unstructured",
+              "components": {
+                "jcr:primaryType": "nt:unstructured",
+                "content": {
+                  "jcr:primaryType": "nt:unstructured"
+                }
               }
             }
           }
