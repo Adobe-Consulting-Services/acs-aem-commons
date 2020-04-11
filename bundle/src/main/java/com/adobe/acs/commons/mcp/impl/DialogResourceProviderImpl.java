@@ -95,7 +95,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
                     }
                 }
             } catch (InvocationTargetException | IllegalAccessException ex) {
-                LOGGER.debug("Unable to determine sling resource type for model bean: " + originalClass);
+                LOGGER.debug("Unable to determine sling resource type for model bean: {} ", originalClass);
             }
         }
     }
@@ -103,7 +103,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     @CheckForNull
     @Override
     public Resource getResource(@Nonnull ResolveContext resolveContext, @Nonnull String path, @Nonnull ResourceContext resourceContext, @CheckForNull Resource parent) {
-        LOGGER.debug("Get resource at path: " + path);
+        LOGGER.debug("Get resource at path: {}", path);
         AbstractResourceImpl clone = null;
         if (root.equals(path)) {
             clone = ((AbstractResourceImpl) this.resource).cloneResource();
@@ -111,7 +111,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             return parent;
         } else {
             String relPath = path.substring(root.length() + 1);
-            LOGGER.debug("Relative path: " + relPath);
+            LOGGER.debug("Relative path: {}", relPath);
             AbstractResourceImpl child = (AbstractResourceImpl) this.resource.getChild(relPath);
             if (child != null) {
                 clone = child.cloneResource();
@@ -122,7 +122,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             clone.setResourceResolver(resolveContext.getResourceResolver());
             clone.setPath(path);
         } else {
-            LOGGER.debug("Unable to find node for " + path);
+            LOGGER.debug("Unable to find node for {}", path);
         }
         return clone;
     }
@@ -130,7 +130,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     @CheckForNull
     @Override
     public Iterator<Resource> listChildren(@Nonnull ResolveContext resolveContext, @Nonnull Resource parent) {
-        LOGGER.debug("List children of " + parent.getPath());
+        LOGGER.debug("List children of {}", parent.getPath());
         if (parent instanceof AbstractResourceImpl) {
             AbstractResourceImpl res = (AbstractResourceImpl) parent;
             return res.listChildren();

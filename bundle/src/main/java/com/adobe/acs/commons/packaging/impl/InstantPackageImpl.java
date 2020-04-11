@@ -77,10 +77,10 @@ public class InstantPackageImpl extends SlingAllMethodsServlet {
     private static final String INSTANT_PACKAGE_THUMBNAIL_RESOURCE_PATH = "/apps/acs-commons/components/utilities/instant-package/thumbnail.png";
 
     @Reference
-    private Packaging packaging;
+    private transient Packaging packaging;
 
     @Reference
-    private PackageHelper packageHelper;
+    private transient PackageHelper packageHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response)

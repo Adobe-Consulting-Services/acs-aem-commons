@@ -180,7 +180,7 @@ public abstract class AbstractFormHelperImpl {
             if (values == null || values.length == 0) {
                 log.debug("Value did not exist for key: {}", key);
             } else if (values.length == 1) {
-                log.debug("Adding to form data: {} ~> {}", key, values[0].toString());
+                log.debug("Adding to form data: {} ~> {}", key, values[0]);
                 map.put(key, values[0].getString());
             } else {
                 // Requires support for transporting them and re-writing them back into HTML Form on error
