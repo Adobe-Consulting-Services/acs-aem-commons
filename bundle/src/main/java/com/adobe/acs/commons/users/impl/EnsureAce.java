@@ -113,7 +113,7 @@ public class EnsureAce {
                     // Remove all ACE's for this user from this ACL since this Service User is not configured to cover
                     // this path
                     log.debug("Service user does NOT cover the path yet has an ACE; ensure removal of the ace! {}",
-                            ace.toString());
+                            ace);
                     acl.removeAccessControlEntry(ace);
 
                 } else {

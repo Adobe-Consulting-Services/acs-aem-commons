@@ -47,7 +47,7 @@ extensions = "json")
 public class OptionsServlet extends SlingSafeMethodsServlet {
 
     @Reference
-    private HtmlLibraryManager libraryManager;
+    private transient HtmlLibraryManager libraryManager;
 
     @Override
     @SuppressWarnings({"squid:S3776", "squid:S1141"})

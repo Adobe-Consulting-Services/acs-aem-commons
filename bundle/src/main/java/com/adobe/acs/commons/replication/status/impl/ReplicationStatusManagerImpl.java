@@ -82,7 +82,7 @@ public class ReplicationStatusManagerImpl implements ReplicationStatusManager {
             resource = resourceResolver.getResource(path);
         }
 
-        log.trace(type + "'s resource that tracks replication status is " + resource.getPath());
+        log.trace("{}'s resource that tracks replication status is {}", type, resource.getPath());
         return resource;
     }
     

@@ -494,7 +494,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
             pathRestrictionByNodeType.put(nodeTypeAndPathRestriction.getKey(), pathRestrictionPattern);
         }
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
-        log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt.toString());
+        log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt);
         log.info("Package Replication Status - Node Types and Path Restrictions: [ {} ]", pathRestrictionByNodeType);
     }
 
