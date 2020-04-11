@@ -274,9 +274,9 @@ public class ManagedProcess implements Serializable {
         cal.setTimeInMillis(time);
         DateFormat format;
         if (cal.after(today)) {
-            format = SimpleDateFormat.getTimeInstance();        
+            format = DateFormat.getTimeInstance();        
         } else {
-            format = SimpleDateFormat.getDateTimeInstance();
+            format = DateFormat.getDateTimeInstance();
         }
         return format.format(new Date(time));
     }

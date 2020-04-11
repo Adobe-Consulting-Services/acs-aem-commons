@@ -402,7 +402,7 @@ public class UrlAssetImport extends AssetIngestor {
                 .collect(Collectors.toList());
 
         if (filesInFolder.isEmpty()) {
-            LOG.error("Unable to find any other files in directory " + rendition.getParent().getNodePath(preserveFileName));
+            LOG.error("Unable to find any other files in directory {}", rendition.getParent().getNodePath(preserveFileName));
             return Optional.empty();
         } else {
             // Organize files by closest match (better match = smaller levensthein distance)

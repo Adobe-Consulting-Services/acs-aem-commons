@@ -47,7 +47,7 @@ public class MemCachePersistenceObject implements Serializable {
     /** Response content type */
     private String contentType;
     /** Response headers */
-    Multimap<String, String> headers;
+    transient Multimap<String, String> headers;
     /** Byte array to hold the data from the stream */
     private byte[] bytes;
     private HttpCacheServletResponseWrapper.ResponseWriteMethod writeMethod;

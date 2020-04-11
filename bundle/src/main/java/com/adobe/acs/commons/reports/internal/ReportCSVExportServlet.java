@@ -63,7 +63,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
   private static final Logger log = LoggerFactory.getLogger(ReportCSVExportServlet.class);
 
   @Reference
-  private DynamicClassLoaderManager dynamicClassLoaderManager;
+  private transient DynamicClassLoaderManager dynamicClassLoaderManager;
 
   @Override
   protected void doGet(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response)
