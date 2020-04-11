@@ -25,6 +25,7 @@ import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 
 /**
@@ -42,7 +43,7 @@ public class AemCapabilityHelperImpl implements AemCapabilityHelper {
 
     @Override
     public final boolean isOak() throws RepositoryException {
-        final String repositoryName = slingRepository.getDescriptorValue(SlingRepository.REP_NAME_DESC).getString();
+        final String repositoryName = slingRepository.getDescriptorValue(Repository.REP_NAME_DESC).getString();
         return StringUtils.equalsIgnoreCase("Apache Jackrabbit Oak", repositoryName);
     }
 }

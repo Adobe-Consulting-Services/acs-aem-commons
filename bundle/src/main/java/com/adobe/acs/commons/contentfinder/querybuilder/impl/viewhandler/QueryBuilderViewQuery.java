@@ -60,7 +60,7 @@ public final class QueryBuilderViewQuery implements ViewQuery {
                     try {
                         hits.add(createHit(hit));
                     } catch (RepositoryException e) {
-                        log.error("Could not return required information for Content Finder result: {}", hit.toString());
+                        log.error("Could not return required information for Content Finder result: {}", hit);
                     }
                 }
 
