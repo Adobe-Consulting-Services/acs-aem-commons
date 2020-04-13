@@ -110,7 +110,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     static {
         try {
-            scriptsItemNames = new String[] { "_provider", "_script", "startDate", "endDate", "status" };
+            scriptsItemNames = new String[] { "_provider", "_script", SCRIPT_DATE_START, SCRIPT_DATE_END, SCRIPT_STATUS };
             scriptsCompositeType =
                     new CompositeType("Script Row", "single script status row", scriptsItemNames, new String[] {
                             "Provider", "Script", "Start Date", "End Date", "Status" },

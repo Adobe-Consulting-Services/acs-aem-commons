@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +114,7 @@ public class DynamicSelectDataSource extends SlingSafeMethodsServlet {
     } catch (Exception e) {
       log.error(
           "Unable to collect the information to populate the ACS Commons Report Builder dynamic-select drop-down.", e);
-      response.sendError(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

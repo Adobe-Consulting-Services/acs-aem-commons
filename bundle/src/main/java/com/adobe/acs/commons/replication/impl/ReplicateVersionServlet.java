@@ -63,7 +63,7 @@ public class ReplicateVersionServlet extends SlingAllMethodsServlet {
     private static final String KEY_VERSION = "version";
 
     @Reference
-    private ReplicateVersion replicateVersion;
+    private transient ReplicateVersion replicateVersion;
 
     @Override
     public final void doPost(SlingHttpServletRequest req,

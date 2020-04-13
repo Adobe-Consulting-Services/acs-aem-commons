@@ -60,6 +60,8 @@ import javax.management.DynamicMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
@@ -659,7 +661,7 @@ public final class ErrorPageHandlerImpl implements ErrorPageHandlerService {
             log.debug(iw.toString());
         }
 
-        if (this.getStatusCode(request) == SlingHttpServletResponse.SC_NOT_FOUND
+        if (this.getStatusCode(request) == HttpServletResponse.SC_NOT_FOUND
                 && this.isAnonymousRequest(request)
                 && AuthUtil.isBrowserRequest(request)
                 && this.isRedirectToLogin(path)) {

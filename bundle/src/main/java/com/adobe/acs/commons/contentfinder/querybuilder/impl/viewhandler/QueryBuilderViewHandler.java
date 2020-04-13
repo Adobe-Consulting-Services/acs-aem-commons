@@ -60,7 +60,7 @@ public final class QueryBuilderViewHandler extends ViewHandler {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilderViewHandler.class);
 
     @Reference
-    private CloseableQueryBuilder queryBuilder;
+    private transient CloseableQueryBuilder queryBuilder;
 
     @Override
     protected ViewQuery createQuery(SlingHttpServletRequest slingRequest, Session session,
