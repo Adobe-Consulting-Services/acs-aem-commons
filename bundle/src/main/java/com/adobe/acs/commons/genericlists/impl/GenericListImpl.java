@@ -108,7 +108,7 @@ public final class GenericListImpl implements GenericList {
             ValueMap map = res.getValueMap();
             String title = map.get(NameConstants.PN_TITLE, String.class);
             String value = map.get(PN_VALUE, String.class);
-            if (title != null && value != null) {
+            if (title != null) {
                 ItemImpl item = new ItemImpl(title, value, map);
                 tempItems.add(item);
                 tempValueMapping.put(value, item);
