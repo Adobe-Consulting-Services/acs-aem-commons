@@ -131,7 +131,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
         instance.defineCriticalAction("Create Asset Folders", rr, this::createAssetFolders);
     }
 
-    volatile HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
+    transient volatile HashMap<String, AssetFolderDefinition> assetFolderDefinitions = new LinkedHashMap<>();
 
     /**
      * Parses the input Excel file and creates a list of AssetFolderDefinition objects to process.
@@ -319,7 +319,7 @@ public class AssetFolderCreator extends ProcessDefinition implements Serializabl
 
     private final transient GenericReport report = new GenericReport();
 
-    private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+    private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private enum ReportColumns {
         STATUS,
