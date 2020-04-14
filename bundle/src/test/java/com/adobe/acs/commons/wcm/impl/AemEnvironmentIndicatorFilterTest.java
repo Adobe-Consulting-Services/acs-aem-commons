@@ -50,6 +50,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import io.wcm.testing.mock.aem.junit.AemContext;
 
@@ -251,8 +252,6 @@ public class AemEnvironmentIndicatorFilterTest {
   
     @Test
     public void testActivate() {
-        when(filter.shouldUseBaseCss(anyBoolean(), any(), any())).thenReturn(false);
-        when(filter.shouldUseColorCss(anyBoolean(), any(), any())).thenReturn(false);
     
         context.registerInjectActivateService(filter);
     

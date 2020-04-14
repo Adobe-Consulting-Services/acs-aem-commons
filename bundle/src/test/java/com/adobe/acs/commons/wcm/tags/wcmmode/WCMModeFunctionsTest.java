@@ -28,6 +28,7 @@ import javax.servlet.jsp.PageContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.day.cq.wcm.api.WCMMode;
@@ -51,7 +52,7 @@ public class WCMModeFunctionsTest {
         when(pageContext.getRequest()).thenReturn(request);
         assertFalse(WCMModeFunctions.isDesign(pageContext));
 
-        when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DESIGN);
+        Mockito.lenient().when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DESIGN);
         assertTrue(WCMModeFunctions.isDesign(pageContext));
 
         when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.EDIT);
@@ -68,7 +69,7 @@ public class WCMModeFunctionsTest {
         when(pageContext.getRequest()).thenReturn(request);
         assertTrue(WCMModeFunctions.isDisabled(pageContext));
 
-        when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DISABLED);
+        Mockito.lenient().when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DISABLED);
         assertTrue(WCMModeFunctions.isDisabled(pageContext));
 
         when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.EDIT);
@@ -85,7 +86,7 @@ public class WCMModeFunctionsTest {
         when(pageContext.getRequest()).thenReturn(request);
         assertFalse(WCMModeFunctions.isEdit(pageContext));
 
-        when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.EDIT);
+        Mockito.lenient().when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.EDIT);
         assertTrue(WCMModeFunctions.isEdit(pageContext));
 
         when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DISABLED);
@@ -102,7 +103,7 @@ public class WCMModeFunctionsTest {
         when(pageContext.getRequest()).thenReturn(request);
         assertFalse(WCMModeFunctions.isPreview(pageContext));
 
-        when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.PREVIEW);
+        Mockito.lenient().when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.PREVIEW);
         assertTrue(WCMModeFunctions.isPreview(pageContext));
 
         when(request.getAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME)).thenReturn(WCMMode.DISABLED);

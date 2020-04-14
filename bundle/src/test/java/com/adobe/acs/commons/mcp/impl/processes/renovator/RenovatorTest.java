@@ -103,7 +103,7 @@ public class RenovatorTest {
     @Test(expected = RepositoryException.class)
     public void testRequiredFields() throws LoginException, DeserializeException, RepositoryException {
         assertEquals("Renovator: relocator test", instance.getName());
-        instance.init(rr, Collections.EMPTY_MAP);
+        instance.init(rr, Collections.emptyMap());
         tool.buildProcess(instance, rr);
         fail("That should have thrown an error");
     }

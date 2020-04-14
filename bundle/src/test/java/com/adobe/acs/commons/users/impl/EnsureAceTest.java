@@ -54,6 +54,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class EnsureAceTest {
     public void setUp() throws Exception {
         context.registerService(CloseableQueryBuilder.class, queryBuilder);
 
-        when(result.getHits()).thenReturn(Collections.emptyList());
+        Mockito.lenient().when(result.getHits()).thenReturn(Collections.emptyList());
         when(query.getResult()).thenReturn(result);
         doNothing().when(query).close();
         when(queryBuilder.createQuery(any(PredicateGroup.class), any(ResourceResolver.class))).thenReturn(query);
@@ -115,7 +116,7 @@ public class EnsureAceTest {
         when(mockHit.getPath()).thenThrow(new RepositoryException("no more storage on cloud!"));
 
         final List<Hit> hits = Collections.singletonList(mockHit);
-        when(result.getHits()).thenReturn(hits);
+        Mockito.lenient().when(result.getHits()).thenReturn(hits);
 
         Map<String, Object> init2Config = new HashMap<>();
         init2Config.put(EnsureServiceUser.PROP_PRINCIPAL_NAME, "testuser2");

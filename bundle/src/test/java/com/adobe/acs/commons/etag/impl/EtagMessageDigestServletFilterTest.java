@@ -165,11 +165,11 @@ public class EtagMessageDigestServletFilterTest {
         Mockito.when(configuration.addAsHtmlComment()).thenReturn(true);
         Mockito.when(configuration.enabled()).thenReturn(true);
         StringWriter responseWriter = new StringWriter();
-        Mockito.when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
+        Mockito.lenient().when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
         Mockito.when(mockResponse.getContentType()).thenReturn("text/html");
         
         // first test POST
-        Mockito.when(mockRequest.getMethod()).thenReturn(HttpConstants.METHOD_POST);
+        Mockito.lenient().when(mockRequest.getMethod()).thenReturn(HttpConstants.METHOD_POST);
         final FilterChain chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
