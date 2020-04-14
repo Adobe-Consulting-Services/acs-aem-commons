@@ -85,13 +85,13 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
             "/apps/acs-commons/components/utilities/packager/query-packager/definition/package-thumbnail.png";
 
     @Reference
-    private Packaging packaging;
+    private transient Packaging packaging;
 
     @Reference
-    private PackageHelper packageHelper;
+    private transient PackageHelper packageHelper;
 
     @Reference
-    private QueryHelper queryHelper;
+    private transient QueryHelper queryHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -107,7 +107,7 @@ public class QueryPackagerServletImpl extends SlingAllMethodsServlet {
         try {
             final List<Resource> packageResources = queryHelper.findResources(resourceResolver,
                     properties.get("queryLanguage", Query.JCR_SQL2),
-                    properties.get("query", String.class),
+                    properties.get("query", String.class), // NOSONAR // replace string with existing constant
                     properties.get("relPath", String.class));
 
             final Map<String, String> packageDefinitionProperties = new HashMap<String, String>();

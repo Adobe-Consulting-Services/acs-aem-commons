@@ -141,6 +141,7 @@ public class SyntheticWorkItem implements WorkItem {
         return null;
     }
 
+    @SuppressWarnings("java:S1192")
     @Override
     public String getItemType() {
         return "Synthetic Workflow";
