@@ -45,10 +45,19 @@
         <level value="WARN"/>
     </logger>
     <logger name="org.apache.jackrabbit.oak.plugins.index">
-    	<level value="WARN" />
+        <level value="WARN" />
     </logger>
-        <logger name="org.apache.sling.jcr">
-    	<level value="WARN" />
+    
+    <logger name="org.apache.sling.jcr">
+        <level value="WARN" />
+    </logger>
+        
+    <logger name="org.apache.sling.scripting.core.impl">
+        <level value="WARN" />
+    </logger>
+    
+    <logger name="org.apache.sling.resourceresolver.impl.mapping">
+        <level value="WARN" />
     </logger>
 
     <root level="debug">
