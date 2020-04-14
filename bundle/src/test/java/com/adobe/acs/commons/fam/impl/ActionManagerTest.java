@@ -39,6 +39,7 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Test;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -66,14 +67,14 @@ public class ActionManagerTest {
 
     public static ThrottledTaskRunner getTaskRunner() {
         ThrottledTaskRunner taskRunner = mock(ThrottledTaskRunner.class);
-//        doAnswer(i -> {
-//            run((Runnable) i.getArguments()[0]);
-//            return null;
-//        }).when(taskRunner).scheduleWork(any(Runnable.class));
-//        doAnswer(i -> {
-//            run((Runnable) i.getArguments()[0]);
-//            return null;
-//        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
+        Mockito.lenient().doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class));
+        Mockito.lenient().doAnswer(i -> {
+            run((Runnable) i.getArguments()[0]);
+            return null;
+        }).when(taskRunner).scheduleWork(any(Runnable.class),any(CancelHandler.class));
         doAnswer(i -> {
             run((Runnable) i.getArguments()[0]);
             return null;
@@ -98,7 +99,7 @@ public class ActionManagerTest {
             mockResolver = mock(ResourceResolver.class);
             when(mockResolver.clone(any())).thenReturn(mockResolver);
             when(mockResolver.isLive()).thenReturn(true);
-            when(mockResolver.hasChanges()).thenReturn(true);
+            Mockito.lenient().when(mockResolver.hasChanges()).thenReturn(true);
             when(mockResolver.create(any(), any(), any())).then((InvocationOnMock invocation) -> {
                 Resource parent = invocation.getArgument(0);
                 String name = invocation.getArgument(1);

@@ -48,6 +48,7 @@ import org.apache.sling.api.resource.ValueMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.adobe.acs.commons.wcm.comparisons.PageCompareData;
@@ -56,7 +57,6 @@ import com.adobe.acs.commons.wcm.comparisons.VersionSelection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-@RunWith(MockitoJUnitRunner.class)
 public final class PageCompareDataImplTest {
 
     @Test
@@ -238,7 +238,7 @@ public final class PageCompareDataImplTest {
         when(version.getName()).thenReturn(versionName);
         final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        when(version.getCreated()).thenReturn(calendar);
+        Mockito.lenient().when(version.getCreated()).thenReturn(calendar);
         when(version.getFrozenNode().getPath()).thenReturn(path);
 
 
