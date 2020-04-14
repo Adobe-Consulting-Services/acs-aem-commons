@@ -18,6 +18,7 @@
 --%><%
 %>
 <%@ include file="/libs/granite/ui/global.jsp" %>
+<%@taglib prefix="cq" uri="http://www.day.com/taglibs/cq/1.0" %>
 <%
 %>
 <%@ page import="org.apache.sling.api.request.RequestPathInfo,
@@ -217,23 +218,11 @@ DatePicker
         Resource cfResource = resourceResolver.resolve(resourcePath + "/jcr:content/data/master");
 
         if(!ResourceUtil.isNonExistingResource(cfResource)) {
-            selectedTz = cfResource.getValueMap().get(timeZoneFieldName, "GMT");
+            selectedTz = cfResource.getValueMap().get(timeZoneFieldName, "Europe/London");
         }
+        request.setAttribute("selectedTz", selectedTz);
+        request.setAttribute("nameTz",name);
 
 %>
-
-<coral-select class="datepickertz" name="<%=name%>tz" placeholder="Choose Timezone" style="width:100%">
-    <coral-select-item value="GMT" <%out.print("GMT".equals(selectedTz) ? "selected" : "");%>>
-       GMT - Europe/London
-    </coral-select-item>
-    <coral-select-item value="EST" <%out.print("EST".equals(selectedTz) || StringUtils.isEmpty(selectedTz)  ? "selected" : "");%>>
-        EST - America/New_York
-    </coral-select-item>
-    <coral-select-item value="PST" <%out.print("PST".equals(selectedTz) ? "selected" : "");%>>
-        PST - America/Los_Angeles
-    </coral-select-item>
-    <coral-select-item value="IST" <%out.print("IST".equals(selectedTz) ? "selected" : "");%>>
-        IST - Asia/Kolkata
-    </coral-select-item>
-</coral-select>
+<cq:include script="timezones.jsp"/>
 <%}%>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:designPath="/etc/designs/acs-commons"
+        cq:template="/apps/acs-commons/templates/utilities/genericlist"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Datepicker Timezones"
+        sling:resourceType="acs-commons/components/utilities/genericlist">
+        <list
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="foundation/components/parsys">
+            <item_1
+                jcr:primaryType="nt:unstructured"
+                jcr:title="(UTC) | Europe/London"
+                sling:resourceType="acs-commons/components/utilities/genericlist/item"
+                value="Europe/London"/>
+            <item_2
+                jcr:primaryType="nt:unstructured"
+                jcr:title="(UTC-05:00)  EST | (UTC-04:00)  EDT | America/New York"
+                sling:resourceType="acs-commons/components/utilities/genericlist/item"
+                value="America/New_York"/>
+            <item_3
+                jcr:primaryType="nt:unstructured"
+                jcr:title="(UTC-08:00)  PST | (UTC-07:00)  PDT | America/Los Angeles"
+                sling:resourceType="acs-commons/components/utilities/genericlist/item"
+                value="America/Los_Angeles"/>
+            <item_4
+                jcr:primaryType="nt:unstructured"
+                jcr:title="(UTC+05:30)  IST | Asia/Kolkata"
+                sling:resourceType="acs-commons/components/utilities/genericlist/item"
+                value="Asia/Kolkata"/>
+        </list>
+    </jcr:content>
+</jcr:root>

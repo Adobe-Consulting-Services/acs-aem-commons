@@ -1,12 +1,6 @@
 (function ($, $document) {
     var isAllowed = true;
     var utcValueFormat = "YYYY-MM-DD[T]HH:mm:ss.SSS[Z]";
-    var offsetTimeZoneMap = {
-        'GMT': 'Europe/London',
-        'EST': 'America/New_York',
-        'PST': 'America/Los_Angeles',
-        'IST': 'Asia/Kolkata'
-    };
     function handleDatePickerWithTimeZone() {
         if (!isAllowed) {
             return;
@@ -22,25 +16,25 @@
                 $(this).attr("valueFormat", utcValueFormat);
 
                 var datepickerTimezoneName = datepickerName + "tz";
-            var selectedTimeZone = $(this).parent().find("coral-select[name='" + datepickerTimezoneName + "'] coral-select-item[selected]");
+                var selectedTimeZone = $(this).parent().find("coral-autocomplete[name='" + datepickerTimezoneName + "'] coral-autocomplete-item[selected]");
                 var selectedTimeZoneValue = selectedTimeZone.val();
                 var displayValue;
 
-            if (selectedTimeZoneValue && selectedTimeZoneValue !== "GMT") {
-                    displayValue = moment.utc(datePickerValue).tz(offsetTimeZoneMap[selectedTimeZoneValue]).format(displayFormat);
-                    //To show in datepicker
-                    $(this).find(".coral-InputGroup-input").val(displayValue);
+                if (selectedTimeZoneValue && selectedTimeZoneValue !== "Europe/London") {
+                        displayValue = moment.utc(datePickerValue).tz(selectedTimeZoneValue).format(displayFormat);
+                        //To show in datepicker
+                        $(this).find(".coral-InputGroup-input").val(displayValue);
 
-                    //To save the value on submit
-                    $(this).attr('value',moment.utc(datePickerValue).tz(offsetTimeZoneMap[selectedTimeZoneValue]).format());
-                    $(this).find("input[name='" + datepickerName + "']").val(moment(datePickerValue).utc().format(utcValueFormat));
-            } else {
-                if (datePickerValue.indexOf('Z') === -1) {
-                    $(this).find("input[name='" + datepickerName + "']").val(datePickerValue + "Z");
+                        //To save the value on submit
+                        $(this).attr('value',moment.utc(datePickerValue).tz(selectedTimeZoneValue).format());
+                        $(this).find("input[name='" + datepickerName + "']").val(moment(datePickerValue).utc().format(utcValueFormat));
                 } else {
-                    $(this).find("input[name='" + datepickerName + "']").val(datePickerValue);
+                    if (datePickerValue.indexOf('Z') === -1) {
+                        $(this).find("input[name='" + datepickerName + "']").val(datePickerValue + "Z");
+                    } else {
+                        $(this).find("input[name='" + datepickerName + "']").val(datePickerValue);
+                    }
                 }
-            }
             }
         });
     }
@@ -61,40 +55,39 @@
             }
             $(this).attr("valueFormat", utcValueFormat);
             var timeZoneName = datePickerName + "tz";
-        var timeZoneValue = $parent.find("coral-select[name='" + timeZoneName + "']").val();
-        if (timeZoneValue !== "GMT") {
-			var componentName=$("coral-dialog-content").find("[name='./sling:resourceType']").val(),
-                currentDate;
-			if(typeof componentName !== "undefined") {
-			componentName = componentName.substring(componentName.lastIndexOf("/")+1);
-			if(componentName === 'event-schedule') {
-			$(this).find("input[name='" + datePickerName + "']").val(datePickerValue);
-				} else {
-                if (datePickerValue.indexOf('Z') !== -1) {
-                    datePickerValue = datePickerValue.replace('Z', '');
-                }
-                currentDate = moment.tz(datePickerValue, offsetTimeZoneMap[timeZoneValue]);
+            var timeZoneValue = $parent.find("coral-autocomplete[name='" + timeZoneName + "']").val();
+            if (timeZoneValue !== "Europe/London") {
+                var componentName=$("coral-dialog-content").find("[name='./sling:resourceType']").val(),
+                    currentDate;
+                if(typeof componentName !== "undefined") {
+                    componentName = componentName.substring(componentName.lastIndexOf("/")+1);
+                    if(componentName === 'event-schedule') {
+                        $(this).find("input[name='" + datePickerName + "']").val(datePickerValue);
+                    } else {
+                        if (datePickerValue.indexOf('Z') !== -1) {
+                            datePickerValue = datePickerValue.replace('Z', '');
+                        }
+                        currentDate = moment.tz(datePickerValue, timeZoneValue);
+                        $(this).find("input[name='" + datePickerName + "']").val(currentDate.utc().format(utcValueFormat));
+                    }
+                } else {
+                    if (datePickerValue.indexOf('Z') !== -1) {
+                        datePickerValue = datePickerValue.replace('Z', '');
+                    }
+                    currentDate = moment.tz(datePickerValue, timeZoneValue);
 
-                $(this).find("input[name='" + datePickerName + "']").val(currentDate.utc().format(utcValueFormat));
-            }
-			} else {
-                if (datePickerValue.indexOf('Z') !== -1) {
-                    datePickerValue = datePickerValue.replace('Z', '');
+                    $(this).find("input[name='" + datePickerName + "']").val(currentDate.utc().format(utcValueFormat));
                 }
-                currentDate = moment.tz(datePickerValue, offsetTimeZoneMap[timeZoneValue]);
-
-                $(this).find("input[name='" + datePickerName + "']").val(currentDate.utc().format(utcValueFormat));
-			}
             } else {
                 ZToAvoidSlingPostConversion = $(this).closest("coral-multifield-item").length === 0 && datePickerValue.indexOf("Z") === -1 ? "Z" : "";
                 if (ZToAvoidSlingPostConversion) {
                     $(this).find("input[name='" + datePickerName + "']").val(datePickerValue + ZToAvoidSlingPostConversion);
                 }
             }
-        }
+          }
 
     });
-   $(document).on("change", "coral-select.datepickertz", function (e) {
+   $(document).on("change", "coral-autocomplete.datepickertz", function (e) {
         if (!isAllowed) {
             return;
         }
@@ -105,7 +98,7 @@
         var datePickerValue = $datePicker.find('input[type="hidden"]').val();
         var displayFormat = $datePicker.attr('displayformat');
         var timeZoneName = datePickerName + "tz";
-        var timeZoneValue = $parent.find("coral-select[name='" + timeZoneName + "']").val();
+        var timeZoneValue = $parent.find("coral-autocomplete[name='" + timeZoneName + "']").val();
         if (!datePickerValue) {
             return;
         }
@@ -113,9 +106,9 @@
             datePickerValue = datePickerValue.replace('Z', '');
         }
         if(displayFormat && displayFormat.indexOf("HH") && displayFormat.indexOf("mm")) {
-            if (timeZoneValue !== "GMT") {
-                var utcTime = moment.tz(datePickerValue, offsetTimeZoneMap.GMT);
-                displayValue = utcTime.clone().tz(offsetTimeZoneMap[timeZoneValue]).format(displayFormat);
+            if (timeZoneValue !== "Europe/London") {
+                var utcTime = moment.tz(datePickerValue, "Europe/London");
+                displayValue = utcTime.clone().tz(timeZoneValue).format(displayFormat);
                 $parent.find(".coral-InputGroup-input").val(displayValue);
             } else {
                 if (datePickerValue.indexOf('Z') !== -1) {
