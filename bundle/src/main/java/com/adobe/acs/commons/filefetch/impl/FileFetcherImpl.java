@@ -122,7 +122,7 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
       lastJobSucceeded = true;
       lastException = null;
     } catch (Exception e) {
-      log.warn("Failed to run fetch file job for {}: {}", config.remoteUrl(), e.getMessage());
+      log.warn("Failed to run fetch file job for {}", config.remoteUrl(), e);
       lastException = e;
       lastJobSucceeded = false;
     }
