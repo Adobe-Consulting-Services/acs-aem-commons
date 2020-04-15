@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #2208 - Remove the WCMInbox webconsole plugin (#2205)
 - #2260 - Require Maven 3.5.0 for build, update test dependencies
+- #2261 - Update test dependencies, minor adjustments to tests
 
 ## [4.4.2] - 2020-02-28
 
