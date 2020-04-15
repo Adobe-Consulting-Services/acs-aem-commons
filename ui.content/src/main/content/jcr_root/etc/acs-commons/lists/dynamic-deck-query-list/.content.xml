@@ -3,25 +3,9 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         cq:designPath="/etc/designs/acs-commons"
-        cq:lastModified="{Date}2020-03-29T20:24:01.650+05:30"
-        cq:lastModifiedBy="admin"
         cq:template="/apps/acs-commons/templates/utilities/genericlist"
         jcr:primaryType="cq:PageContent"
         jcr:title="Dynamic Deck Dynamo Query List"
         sling:resourceType="acs-commons/components/utilities/genericlist">
-        <list jcr:primaryType="nt:unstructured">
-            <item0
-                jcr:primaryType="nt:unstructured"
-                jcr:title="We.Retail All Activities"
-                value="SELECT * from [dam:Asset] AS a WHERE  isdescendantnode(a, '/content/dam/we-retail/en/activities') AND [/jcr:content/metadata/dc:title] IS NOT NULL AND [/jcr:content/metadata/dc:description] IS NOT NULL AND [/jcr:content/metadata/xmp:CreatorTool] IS NOT NULL ORDER BY NAME(a) ASC"/>
-            <item1
-                jcr:primaryType="nt:unstructured"
-                jcr:title="Get Outside Query 1 - sort by file name ascending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/get-outside-assets&quot;) ORDER BY NAME(s) ASC"/>
-            <item2
-                jcr:primaryType="nt:unstructured"
-                jcr:title="Get Outside Query 2 - sort by file name descending"
-                value="SELECT s.* FROM [dam:Asset] AS s where ISDESCENDANTNODE(s, &quot;/content/dam/dynamic-deck-dynamo/get-outside-assets&quot;) ORDER BY NAME(s) DESC"/>
-        </list>
     </jcr:content>
 </jcr:root>
