@@ -38,7 +38,6 @@ import java.util.stream.StreamSupport;
 public class DynamicDeckServiceImpl implements DynamicDeckService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckServiceImpl.class);
-    private static final String DEFAULT_PAGES_REGEX = "^page[0-9]*.jpg$";
     private static final PrintFormat[] formats = {PrintFormat.JPG, PrintFormat.INDD, PrintFormat.PDF};
     private static final List<PrintFormat> allFormats = Arrays.asList(formats);
 
