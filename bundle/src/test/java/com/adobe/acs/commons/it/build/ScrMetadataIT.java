@@ -54,6 +54,27 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * The purpose of this test is to validate that SCR and Metatype properties are not inadvertantly changed between ACS AEM Commons releases.
+ * It does this by downloading the bundle from the latest release and comparing the SCR and Metatype XML files to the ones generated
+ * by the current build.
+ *
+ * In exceptional cases, there are use cases where changes are appropriate. These can be controlled by three sets defined in this class:
+ *
+ * <dl>
+ *   <dt>PROPERTIES_TO_IGNORE</dt>
+ *   <dd>These are properties which should be ignored on every component. These should be relatively rare.</dd>
+ *   <dt>COMPONENT_PROPERTIES_TO_IGNORE</dt>
+ *   <dd>These are properties to ignore on a specific component. The syntax for these values is the form PID:PROPERTY_NAME</dd>
+ *   <dt>COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE</dt>
+ *   <dd>These are properties to ignore specifically for type changes, but will still produce a test failure when the property value changes. Syntax is the same as COMPONENT_PROPERTIES_TO_IGNORE</dd>
+ * </dl>
+ *
+ * In addition, this test validates that all factory components have an OSGi Web Console name hint and all variables
+ * referenced from the name hint exist. Currently there is no affordance for ignoring components or variables for this
+ * aspect of the test.
+ *
+ */
 @SuppressWarnings("PMD.SystemPrintln")
 public class ScrMetadataIT {
 
@@ -88,6 +109,9 @@ public class ScrMetadataIT {
         // properties removed when updating to OSGi R6 annotations
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportCSVExportServlet:service.vendor");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportsRenderCondition:service.vendor");
+
+        // properties removed for #2190 (RequireAem implementation)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.util.impl.AemCapabilityHelperImpl:service.vendor");
 
         // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/1852
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.topics");

@@ -89,7 +89,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
             "/apps/acs-commons/components/utilities/packager/acl-packager/definition/package-thumbnail.png";
 
     @Reference
-    private PackageHelper packageHelper;
+    private transient PackageHelper packageHelper;
 
     @Override
     public final void doPost(final SlingHttpServletRequest request,
@@ -289,7 +289,7 @@ public class ACLPackagerServletImpl extends AbstractPackagerServlet {
 
         if (log.isDebugEnabled()) {
             for (final Pattern pattern : patterns) {
-                log.debug("Compiled pattern: {}", pattern.toString());
+                log.debug("Compiled pattern: {}", pattern);
             }
         }
 

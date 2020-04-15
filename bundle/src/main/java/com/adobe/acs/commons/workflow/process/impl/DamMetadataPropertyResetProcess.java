@@ -98,8 +98,8 @@ public class DamMetadataPropertyResetProcess implements WorkflowProcess {
                 Resource metadataResource = resourceResolver.getResource(metadataPath);
 
                 if (metadataResource == null) {
-                    log.error("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
-                    throw new WorkflowException("Could not find the metadata node for Asset [ " + asset.getPath() + " ]");
+                    String msg = String.format("Could not find the metadata node for Asset [ %s ]", asset.getPath());
+                    throw new WorkflowException(msg);
                 }
 
                 final ModifiableValueMap mvm = metadataResource.adaptTo(ModifiableValueMap.class);
