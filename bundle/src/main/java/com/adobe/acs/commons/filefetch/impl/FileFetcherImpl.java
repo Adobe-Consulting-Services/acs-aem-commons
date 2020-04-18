@@ -87,8 +87,8 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
 
   @Activate
   public void activate(FileFetchConfiguration config) {
-    log.info("Activing with configuration: {}", config);
     this.config = config;
+    log.info("Activating FileFetcher with configuration {}", getConfigurationAsString());
     run();
   }
 
@@ -205,7 +205,6 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
           log.info("Replicating fetched file {}", path);
           replicator.replicate(resolver.adaptTo(Session.class), ReplicationActionType.ACTIVATE, path);
         } else {
-          log.warn("Received invalid status code: {}", responseCode);
           throw new IOException("Received invalid status code: " + responseCode);
         }
       } finally {
@@ -220,6 +219,21 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
       log.error("Failed to get service user", e);
     }
 
+  }
+  
+  // Unfortunately annotations cannot have default methods, so we have to implement
+  // it here.
+  private String getConfigurationAsString() {
+    return String.format("FileFetcherConfiguration[remoteURL=%s, damPath=%s, mimeType=%s, headers=%s, cron expression=[%s],"
+        + " valid response codes=%s, connection timeout=%s]", 
+        config.remoteUrl(),
+        config.damPath(),
+        config.mimeType(),
+        Arrays.toString(config.headers()),
+        config.scheduler_expression(),
+        Arrays.toString(config.validResponseCodes()),
+        config.timeout()
+        );
   }
 
 }
