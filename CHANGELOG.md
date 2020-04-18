@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
 
 ### Fixed
+- #2241 - Automatic Package Replicator - Missing Service User
 - #2245 - Marketo Endpoint Protocol Documentation Issue
 - #2254 - Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
 - #2248 - Fixed issue with null values in Generic Lists
