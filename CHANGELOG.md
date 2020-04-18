@@ -9,6 +9,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+
+### Added
+
+### Fixed
+- #2265 Review ResourceChangeListener configuration
+
+### Changed
+
+
 ## [4.5.2] - 2020-04-18
 
 ### Added
