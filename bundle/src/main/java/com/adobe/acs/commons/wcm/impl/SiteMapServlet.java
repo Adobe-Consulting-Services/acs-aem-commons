@@ -130,7 +130,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
-    private Externalizer externalizer;
+    private transient Externalizer externalizer;
 
     private String externalizerDomain;
 

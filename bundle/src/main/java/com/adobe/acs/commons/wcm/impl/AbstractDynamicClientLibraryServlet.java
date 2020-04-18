@@ -42,7 +42,7 @@ import java.util.Map;
 abstract class AbstractDynamicClientLibraryServlet extends SlingSafeMethodsServlet {
 
 
-    private HtmlLibraryManager htmlLibraryManager;
+    private transient HtmlLibraryManager htmlLibraryManager;
 
     private String[] categories;
     private boolean excludeAll;

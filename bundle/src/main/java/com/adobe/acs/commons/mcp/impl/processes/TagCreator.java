@@ -65,7 +65,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     public static final String NAME = "Tag Creator";
 
-    private final Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
+    private final transient Map<String, ResourceDefinitionBuilder> resourceDefinitionBuilders;
 
     public enum TagBuilder {
         TITLE_TO_NODE_NAME,
@@ -117,7 +117,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
         instance.defineCriticalAction("Create tags", rr, this::importTags);
     }
 
-    volatile HashMap<String, TagDefinition> tagDefinitions = new LinkedHashMap<>();
+    transient volatile HashMap<String, TagDefinition> tagDefinitions = new LinkedHashMap<>();
 
     /**
      * Parses the input Excel file and creates a list of TagDefinition objects to process.
@@ -285,7 +285,7 @@ public class TagCreator extends ProcessDefinition implements Serializable {
 
     private final transient GenericReport report = new GenericReport();
 
-    private final ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
+    private final transient ArrayList<EnumMap<ReportColumns, Object>> reportRows = new ArrayList<>();
 
     private enum ReportColumns {
         STATUS,
