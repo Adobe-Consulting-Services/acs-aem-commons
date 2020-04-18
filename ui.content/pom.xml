@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.5.1-SNAPSHOT</version>
+        <version>4.5.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -127,7 +127,6 @@
                                     <path>/etc/cloudservices/dtm/rep:policy</path>
                                     <path>/etc/cloudservices/sharethis/rep:policy</path>
                                     <path>/etc/cloudservices/typekit/rep:policy</path>
-                                    <path>/etc/packages/rep:policy</path>
                                     <path>/etc/notification/email/rep:policy</path>
                                     <path>/etc/workflow/instances/rep:policy</path>
                                     <path>/home/groups/rep:policy</path>
@@ -164,10 +163,6 @@
                                         ;type=allow;path=/;privileges=jcr:read,rep:write,jcr:readAccessControl,jcr:modifyAccessControl
                                     </expectedAce>
                                     <expectedAce>
-                                        principal=acs-commons-automatic-package-replicator-service
-                                        ;type=allow;path=/;privileges=jcr:read
-                                    </expectedAce>
-                                    <expectedAce>
                                         principal=acs-commons-on-deploy-scripts-service
                                         ;type=allow;path=/;privileges=jcr:read
                                     </expectedAce>
@@ -179,9 +174,6 @@
                     <!-- assume that we are installing into an instance where utility pages and configs have already
                     been created for prior versions -->
                     <forcedRoots>
-                        <forcedRoot>
-                            <path>/etc/acs-commons/automatic-package-replication/default</path>
-                        </forcedRoot>
                         <forcedRoot>
                             <path>/etc/acs-commons/bulk-workflow-manager/default</path>
                         </forcedRoot>
