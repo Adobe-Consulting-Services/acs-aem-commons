@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <!-- ====================================================================== -->
     <!-- P A R E N T P R O J E C T D E S C R I P T I O N -->
@@ -38,7 +39,7 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
-        <crx.contextRoot />
+        <crx.contextRoot/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <license.licenseName>apache_v2</license.licenseName>
@@ -54,7 +55,80 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- TODO: Remove this plugin-->
+                <!-- all standard Maven plugins (in group org.apache.maven.plugins) -->
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <excludePackageNames>
+                            *.impl
+                        </excludePackageNames>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <configuration>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <releaseProfiles>release</releaseProfiles>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.shared</groupId>
+                            <artifactId>maven-invoker</artifactId>
+                            <version>2.2</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.maven.release</groupId>
+                            <artifactId>maven-release-oddeven-policy</artifactId>
+                            <version>2.5.3</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.6</version>
+                </plugin>
+                <!-- all custom plugins -->
+                <!-- TODO: Remove this plugin -->
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
@@ -86,20 +160,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>maven-sling-plugin</artifactId>
@@ -111,15 +172,6 @@
                     <version>0.0.24</version>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.1</version>
-                    <configuration>
-                        <excludePackageNames>
-                            *.impl
-                        </excludePackageNames>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jslint-maven-plugin</artifactId>
                     <version>1.0.1</version>
@@ -128,37 +180,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.5</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <projectVersionPolicyId>OddEvenVersionPolicy</projectVersionPolicyId>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.shared</groupId>
-                            <artifactId>maven-invoker</artifactId>
-                            <version>2.2</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.apache.maven.release</groupId>
-                            <artifactId>maven-release-oddeven-policy</artifactId>
-                            <version>2.5.3</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.22.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -218,6 +239,11 @@
                     <artifactId>dependency-check-maven</artifactId>
                     <version>5.1.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.8</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -257,6 +283,19 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- use https://help.sonatype.com/repomanager2/staging-releases/configuring-your-project-for-deployment#ConfiguringYourProjectforDeployment-DeploymentwiththeNexusStagingMavenPlugin
+                instead of maven-deploy-plugin -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <!-- manually release in https://oss.sonatype.org/#stagingRepositories after the Maven release build -->
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -621,7 +660,7 @@
                                 <id>check-dependencies-for-vulnerabilities</id>
                                 <phase>validate</phase>
                                 <goals>
-                                   <goal>check</goal>
+                                    <goal>check</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -635,12 +674,62 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <build>
+                <!-- https://central.sonatype.org/pages/requirements.html -->
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <!--
-       Inclusion of repositories in POMs is controversial, to say the least.
-       It would be best if you proxied the Adobe repository using a Maven
-       Repository Manager. Once you do that, remove these sections.
+        Inclusion of repositories in POMs is controversial, to say the least.
+        It would be best if you proxied the Adobe repository using a Maven
+        Repository Manager. Once you do that, remove these sections.
     -->
     <repositories>
         <repository>
@@ -660,16 +749,10 @@
     </pluginRepositories>
 
     <distributionManagement>
-        <repository>
-            <id>bintray</id>
-            <name>acs-releases-acs-aem-commons</name>
-            <url>https://api.bintray.com/maven/acs/releases/acs-aem-commons</url>
-        </repository>
+        <!-- the nexus-staging-maven-plugin only needs a snapshot repository -->
         <snapshotRepository>
-            <id>${snapshotRepository-Id}</id>
-            <name>${snapshotRepository-Name}</name>
-            <url>${snapshotRepository-URL}</url>
-            <uniqueVersion>false</uniqueVersion>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
