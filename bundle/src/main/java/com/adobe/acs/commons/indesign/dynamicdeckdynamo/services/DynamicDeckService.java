@@ -17,17 +17,17 @@ public interface DynamicDeckService {
      * TODO Planning to create service account and remove the dependency of resourceResolver from this service
      *
      * @param deckName
-     * @param masterAssetPath
+     * @param masterAssetResource
      * @param assetResourceList
-     * @param templateFolderPath
+     * @param templateFolderResource
      * @param resourceResolver
-     * @param destinationFolderPath
+     * @param destinationFolderResource
      * @return
      * @throws IOException
      * @throws RepositoryException
      */
-    public String createDeck(String deckName, String masterAssetPath, List<Resource> assetResourceList,
-                             String templateFolderPath, String destinationFolderPath, ResourceResolver resourceResolver)
+    String createDeck(String deckName, Resource masterAssetResource, List<Resource> assetResourceList,
+                      Resource templateFolderResource, Resource destinationFolderResource, ResourceResolver resourceResolver)
             throws DynamicDeckDynamoException;
 
     /**
@@ -35,14 +35,14 @@ public interface DynamicDeckService {
      * <p>
      * TODO Planning to create service account and remove the dependency of resourceResolver from this service
      *
-     * @param collectionPath
+     * @param collectionResource
      * @param resourceResolver
      * @return
      */
-    public List<Resource> fetchAssetListFromCollection(String collectionPath, ResourceResolver resourceResolver)
+    List<Resource> fetchAssetListFromCollection(Resource collectionResource, ResourceResolver resourceResolver)
             throws DynamicDeckDynamoException;
 
-    public List<Resource> fetchAssetListFromQuery(String queryString, ResourceResolver resourceResolver);
+    List<Resource> fetchAssetListFromQuery(String queryString, ResourceResolver resourceResolver);
 
-    public List<Resource> fetchAssetListFromTags(String tagsString, ResourceResolver resourceResolver);
+    List<Resource> fetchAssetListFromTags(String tagsString, ResourceResolver resourceResolver);
 }

@@ -25,10 +25,7 @@ public class GenericListSelectComponent extends SelectComponent {
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericListSelectComponent.class);
     public static final String GENERIC_LIST_PATH = "genericListPath";
 
-    @Inject
-    @JsonIgnore
-    SlingScriptHelper sling;
-    
+  
     /**
      * Override to support options for select list from Generic Lists
      *
@@ -66,7 +63,7 @@ public class GenericListSelectComponent extends SelectComponent {
             options.put(StringUtils.EMPTY, "Select the Option");
             itemList.getItems().forEach(item -> options.put(item.getValue(), item.getTitle()));
         } else {
-            LOGGER.error("Exception occurred while initiating the deck generation");
+            LOGGER.error("Resource resolver is null while getting the generic list");
         }
         return options;
 

@@ -5,6 +5,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -14,7 +15,6 @@ import javax.inject.Named;
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
 
-    @Inject
     @Named(value = "deckTitle")
     @FormField(
             name = "Deck Title",
@@ -24,7 +24,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
             hint = "sample")
     private String deckTitle;
 
-    @Inject
     @Named(value = "destinationPath")
     @FormField(
             name = "Deck Destination Folder Path",
@@ -36,7 +35,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
             category = "General")
     private String destinationPath;
 
-    @Inject
     @Named(value = "masterAssetPath")
     @FormField(
             name = "Master Asset Path",
@@ -47,7 +45,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
             category = "General")
     private String masterAssetPath;
 
-    @Inject
     @Named(value = "templatePath")
     @FormField(
             name = "Template Folder Path",
@@ -63,7 +60,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
         COLLECTION, QUERY, TAGS
     }
 
-    @Inject
     @Named(value = "operationMode")
     @FormField(
             name = "Operation Mode",
@@ -92,7 +88,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
             options = {GenericListSelectComponent.GENERIC_LIST_PATH + "=/etc/acs-commons/lists/dynamic-deck-query-list"})
     private String assetQuery;
 
-    @Inject
     @Named(value = "assetTag")
     @FormField(
             name = "Tags to fetch assets",

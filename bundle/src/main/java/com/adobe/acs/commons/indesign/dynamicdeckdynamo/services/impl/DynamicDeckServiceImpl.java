@@ -3,7 +3,7 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoIDSConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.osgiconfigurations.DynamicDeckConfigurationService;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckConfigurationService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Component(immediate = true, service = DynamicDeckService.class)
+@Component(service = DynamicDeckService.class)
 public class DynamicDeckServiceImpl implements DynamicDeckService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckServiceImpl.class);
@@ -49,25 +49,19 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
     private JobManager jobManager;
 
     @Override
-    public String createDeck(String deckName, String masterAssetPath, List<Resource> assetResourceList, String templateFolderPath,
-                             String destinationFolderPath, ResourceResolver resourceResolver)
+    public String createDeck(String deckName, Resource masterAssetResource, List<Resource> assetResourceList, Resource templateFolderResource,
+                             Resource destinationFolderResource, ResourceResolver resourceResolver)
             throws DynamicDeckDynamoException {
 
-        String inddTemplatePath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderPath, DynamicDeckDynamoConstants.INDD_EXTENSION, resourceResolver);
-        String annotatedXmlPath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderPath, DynamicDeckDynamoConstants.XML_EXTENSION, resourceResolver);
+        String inddTemplatePath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, DynamicDeckDynamoConstants.INDD_EXTENSION);
+        String annotatedXmlPath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, DynamicDeckDynamoConstants.XML_EXTENSION);
 
         if (StringUtils.isEmpty(inddTemplatePath) || StringUtils.isEmpty(annotatedXmlPath)) {
-            throw new DynamicDeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderPath);
+            throw new DynamicDeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderResource.getPath());
         }
 
         StringBuilder idspScriptArgs = new StringBuilder();
         List<String> inddImageList = new ArrayList<>();
-
-        Resource destinationFolderResource = resourceResolver.getResource(destinationFolderPath);
-        if (null == destinationFolderResource) {
-            throw new DynamicDeckDynamoException("Destination folder resource is null, hence exiting the deck generation process.");
-        }
-
 
         Asset damAsset = DynamicDeckUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.INDD_EXTENSION, resourceResolver);
         if (damAsset == null) {
@@ -83,7 +77,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
         assetItrList.add(new XMLResourceIterator(DynamicDeckDynamoConstants.XML_SECTION_TYPE_GENERIC, assetResourceList.listIterator()));
 
         String processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
-                resourceResolver.getResource(masterAssetPath), damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
+                masterAssetResource, damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
 
         StringBuilder exportFormats = DynamicDeckUtils.addExportFormat(damAsset, allFormats);
         StringBuilder imagePaths = DynamicDeckUtils.getImagePaths(inddImageList, configurationService.getPlaceholderImagePath());
@@ -99,20 +93,13 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
      * <p>
      * TODO Planning to create service account and remove the dependency of resourceResolver from this service
      *
-     * @param collectionPath
+     * @param collectionResource
      * @param resourceResolver
      * @return
      */
     @Override
-    public List<Resource> fetchAssetListFromCollection(String collectionPath, ResourceResolver resourceResolver) throws DynamicDeckDynamoException {
+    public List<Resource> fetchAssetListFromCollection(Resource collectionResource, ResourceResolver resourceResolver) throws DynamicDeckDynamoException {
         List<Resource> arrayList = new ArrayList<>();
-        if (StringUtils.isBlank(collectionPath)) {
-            throw new DynamicDeckDynamoException("Resource Path is Null/Empty ");
-        }
-        Resource collectionResource = resourceResolver.getResource(collectionPath);
-        if (collectionResource == null) {
-            throw new DynamicDeckDynamoException("No Resource exists at Supplied Path :" + collectionPath);
-        }
 
         if (DamUtil.isSmartCollection(collectionResource)) {
             return DynamicDeckUtils.fetchSmartCollectionResourceList(collectionResource);

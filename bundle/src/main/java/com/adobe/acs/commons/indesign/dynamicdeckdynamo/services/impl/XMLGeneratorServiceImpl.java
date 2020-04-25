@@ -72,6 +72,9 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = dBuilder.parse(targetFile);
 
+            /*
+            Processing the annotated xml to create the processed xml
+             */
             if (doc.hasChildNodes()) {
                 populateDocNodes(doc, assetItrList, masterResource, imageList);
             }

@@ -281,17 +281,11 @@ public final class DynamicDeckUtils {
     /**
      * This method is used to find files under specific folder by file extension.
      *
-     * @param templateFolderPath
+     * @param templateFolderResource
      * @param extension
-     * @param resourceResolver
      * @return
      */
-    public static String findFileUnderFolderByExtension(String templateFolderPath, String extension, ResourceResolver resourceResolver) {
-        Resource templateFolderResource = resourceResolver.getResource(templateFolderPath);
-        if (null == templateFolderResource) {
-            LOGGER.debug("Supplied template folder path is null/empty, hence exiting the deck generation process");
-            return null;
-        }
+    public static String findFileUnderFolderByExtension(Resource templateFolderResource, String extension) {
 
         Stream<Resource> resourceStream = StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(templateFolderResource.getChildren().iterator(), Spliterator.ORDERED),

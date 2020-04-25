@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-@Version("4.4.3")
+@Version("1.0.0")
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets;
 
 import org.osgi.annotation.versioning.Version;

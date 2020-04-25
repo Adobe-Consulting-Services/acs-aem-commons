@@ -90,7 +90,7 @@ var Coral = window.Coral || {},
 
             $.ajax({
                 url: "/etc/dynamic-deck-dynamo/deck-initiator.triggerDeckDynamo.json",
-                method: "GET",
+                method: "POST",
                 cache: false,
                 data: {
                     deckTitle: deckTitle,

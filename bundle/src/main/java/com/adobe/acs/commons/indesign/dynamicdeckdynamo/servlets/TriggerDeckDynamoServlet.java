@@ -31,7 +31,7 @@ import java.util.List;
         service = Servlet.class,
         property = {
                 ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES + "=" + ServletResolverConstants.DEFAULT_RESOURCE_TYPE,
-                ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_GET,
+                ServletResolverConstants.SLING_SERVLET_METHODS + "=" + HttpConstants.METHOD_POST,
                 ServletResolverConstants.SLING_SERVLET_EXTENSIONS + "=" + "json",
                 ServletResolverConstants.SLING_SERVLET_SELECTORS + "=" + TriggerDeckDynamoServlet.SELECTOR_TRIGGER_DECK_DYNAMO})
 public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
@@ -45,7 +45,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
     private transient DynamicDeckService dynamicDeckService;
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         PrintWriter out = response.getWriter();
         // Set response headers.
         response.setContentType(JSONResponse.RESPONSE_CONTENT_TYPE);
@@ -57,22 +57,22 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
         /* Determine the type of request through selector*/
         if (Arrays.asList(request.getRequestPathInfo().getSelectors()).contains(SELECTOR_TRIGGER_DECK_DYNAMO)) {
             String deckName = request.getParameter("deckTitle");
-            String collectionPath = request.getParameter("collectionPath");
-            String templatePath = request.getParameter("templatePath");
+            Resource collectionResource = resourceResolver.getResource(request.getParameter("collectionPath"));
+            Resource templateResource = resourceResolver.getResource(request.getParameter("templatePath"));
 
-            String masterAssetPath = request.getParameter("masterAssetPath");
-            String destinationPath = request.getParameter("destinationPath");
+            Resource masterAssetResource = resourceResolver.getResource(request.getParameter("masterAssetPath"));
+            Resource destinationResource = resourceResolver.getResource(request.getParameter("destinationPath"));
             String operationMode = request.getParameter("operationMode");
             String queryString = request.getParameter("queryString");
 
             String tagValues = request.getParameter("tagValues");
 
             try {
-                if (StringUtils.isEmpty(deckName) || StringUtils.isEmpty(operationMode) || StringUtils.isEmpty(templatePath) || StringUtils.isEmpty(destinationPath)) {
-                    throw new DynamicDeckDynamoException("Supplied deck name OR operation mode OR template path OR destination path is null/empty. Hence exiting the deck generation process.");
+                if (StringUtils.isEmpty(deckName) || StringUtils.isEmpty(operationMode) || null == templateResource || null == destinationResource || StringUtils.isEmpty(operationMode)) {
+                    throw new DynamicDeckDynamoException("Supplied deck name OR operation mode OR template path OR destination path OR operation mode is null/empty. Hence exiting the deck generation process.");
                 }
 
-                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.COLLECTION.toString(), operationMode) && StringUtils.isEmpty(collectionPath)) {
+                if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.COLLECTION.toString(), operationMode) && null == collectionResource) {
                     throw new DynamicDeckDynamoException("Collection path is expected when COLLECTION is operation mode. Hence exiting the deck generation process.");
                 }
 
@@ -88,7 +88,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
 
                 List<Resource> assetResourceList = null;
                 if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.COLLECTION.toString(), operationMode)) {
-                    assetResourceList = dynamicDeckService.fetchAssetListFromCollection(collectionPath, resourceResolver);
+                    assetResourceList = dynamicDeckService.fetchAssetListFromCollection(collectionResource, resourceResolver);
                 } else if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.QUERY.toString(), operationMode)) {
                     assetResourceList = dynamicDeckService.fetchAssetListFromQuery(queryString, resourceResolver);
                 } else if (StringUtils.equalsIgnoreCase(DynamicDeckInitiatorPageModel.Mode.TAGS.toString(), operationMode)) {
@@ -99,7 +99,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
 
 
                 if (null != assetResourceList && !assetResourceList.isEmpty()) {
-                    generatedDeckPath = dynamicDeckService.createDeck(deckName, masterAssetPath, assetResourceList, templatePath, destinationPath, resourceResolver);
+                    generatedDeckPath = dynamicDeckService.createDeck(deckName, masterAssetResource, assetResourceList, templateResource, destinationResource, resourceResolver);
                 } else {
                     throw new DynamicDeckDynamoException("Asset resource list cannot be null or empty. Hence exiting the deck generation process.");
                 }
