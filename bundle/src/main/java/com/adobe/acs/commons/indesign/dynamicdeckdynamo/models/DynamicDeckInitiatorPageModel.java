@@ -96,8 +96,6 @@ public class DynamicDeckInitiatorPageModel extends GeneratedDialog {
             description = "Select the tags from the system. It will fetch the assets associated with the respective tags.")
     private String assetTag;
 
-    public DynamicDeckInitiatorPageModel() {
-    }
 
     public String getDeckTitle() {
         return deckTitle;

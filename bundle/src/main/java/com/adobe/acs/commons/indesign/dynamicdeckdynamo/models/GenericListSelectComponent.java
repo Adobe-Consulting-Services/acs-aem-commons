@@ -48,6 +48,10 @@ public class GenericListSelectComponent extends SelectComponent {
                 return Collections.emptyMap();
             }
             Optional<String> listPath = getOption(GENERIC_LIST_PATH);
+            if (!listPath.isPresent()){
+                LOGGER.debug("Generic list path under getOption is null, hence exiting the select options process and returning empty map");
+                return Collections.emptyMap();
+            }
             Page genericListPage = pageManager.getPage(listPath.get());
 
             if (genericListPage == null) {

@@ -132,13 +132,11 @@ public final class DynamicDeckUtils {
     /**
      * This method will return asset Input stream for indd file
      *
-     * @param resourceResolver
      * @param assetResource
      * @return
      * @throws DynamicDeckDynamoException
      */
-    public static InputStream getInddXmlRenditionInputStream(ResourceResolver resourceResolver,
-                                                             Resource assetResource) throws DynamicDeckDynamoException {
+    public static InputStream getInddXmlRenditionInputStream(Resource assetResource) throws DynamicDeckDynamoException {
 
         String renditionName = StringUtils.replace(assetResource.getName(), ".indd", ".xml");
         Rendition xmlRenditionAsset = assetResource.adaptTo(Asset.class).getRendition(renditionName);
@@ -149,7 +147,7 @@ public final class DynamicDeckUtils {
         return getInputStreamByResource(xmlRenditionAsset.adaptTo(Resource.class));
     }
 
-    public static InputStream getAssetOriginalInputStream(ResourceResolver resourceResolver, Resource annotatedXmlResource) throws DynamicDeckDynamoException {
+    public static InputStream getAssetOriginalInputStream(Resource annotatedXmlResource) throws DynamicDeckDynamoException {
         Rendition annotatedXmlRendition = annotatedXmlResource.adaptTo(Asset.class).getRendition("original");
         return getInputStreamByResource(annotatedXmlRendition.adaptTo(Resource.class));
     }

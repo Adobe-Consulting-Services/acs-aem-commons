@@ -68,7 +68,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
             String tagValues = request.getParameter("tagValues");
 
             try {
-                if (StringUtils.isEmpty(deckName) || StringUtils.isEmpty(operationMode) || null == templateResource || null == destinationResource || StringUtils.isEmpty(operationMode)) {
+                if (StringUtils.isEmpty(deckName) || StringUtils.isEmpty(operationMode) || null == templateResource || null == destinationResource) {
                     throw new DynamicDeckDynamoException("Supplied deck name OR operation mode OR template path OR destination path OR operation mode is null/empty. Hence exiting the deck generation process.");
                 }
 

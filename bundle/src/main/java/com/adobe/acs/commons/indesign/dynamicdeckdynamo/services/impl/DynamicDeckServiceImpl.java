@@ -74,7 +74,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
 
         String processedXmlPath;
 
-        try (InputStream templateXmlInputStream = DynamicDeckUtils.getAssetOriginalInputStream(resourceResolver, annotatedXmlResource)) {
+        try (InputStream templateXmlInputStream = DynamicDeckUtils.getAssetOriginalInputStream(annotatedXmlResource)) {
             processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
                     masterAssetResource, damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
         } catch (IOException e) {
@@ -97,8 +97,6 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
 
     /**
      * This method fetch asset list from collection/smart-collection.
-     * <p>
-     * TODO Planning to create service account and remove the dependency of resourceResolver from this service
      *
      * @param collectionResource
      * @param resourceResolver

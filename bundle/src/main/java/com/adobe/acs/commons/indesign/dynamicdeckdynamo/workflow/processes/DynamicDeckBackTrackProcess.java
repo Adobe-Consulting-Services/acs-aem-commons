@@ -68,7 +68,7 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
             }
 
             if (isFileEligibleToProcess(assetResource)) {
-                InputStream xmlInputStream = DynamicDeckUtils.getInddXmlRenditionInputStream(resourceResolver, assetResource);
+                InputStream xmlInputStream = DynamicDeckUtils.getInddXmlRenditionInputStream(assetResource);
                 if (null == xmlInputStream) {
                     LOGGER.debug("File xml input stream is null, hence skipping the parsing process.");
                     return;
