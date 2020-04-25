@@ -3,8 +3,8 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoIDSConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckConfigurationService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckConfigurationService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.DynamicDeckService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.query.Query;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,22 +69,28 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
             throw new DynamicDeckDynamoException("Dynamic Deck document not created at the destination : " + destinationFolderResource.getPath());
         }
 
-        InputStream templateXmlInputStream = DynamicDeckUtils.getAssetInputStreamByPath(resourceResolver, annotatedXmlPath);
-        if (null == templateXmlInputStream) {
-            throw new DynamicDeckDynamoException("InDesign Template XML is null, hence exiting the deck generation process");
-        }
-
         List<XMLResourceIterator> assetItrList = new ArrayList<>();
         assetItrList.add(new XMLResourceIterator(DynamicDeckDynamoConstants.XML_SECTION_TYPE_GENERIC, assetResourceList.listIterator()));
 
-        String processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
-                masterAssetResource, damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
+        String processedXmlPath;
+
+        try (InputStream templateXmlInputStream = DynamicDeckUtils.getAssetInputStreamByPath(resourceResolver, annotatedXmlPath)) {
+            processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
+                    masterAssetResource, damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
+        } catch (IOException e) {
+            throw new DynamicDeckDynamoException(" Error while processing InDesign Template XML, hence exiting the deck generation process");
+        }
+
+        if (StringUtils.isBlank(processedXmlPath)) {
+            throw new DynamicDeckDynamoException("Processed XML is null/empty, hence exiting the deck generation process");
+        }
 
         StringBuilder exportFormats = DynamicDeckUtils.addExportFormat(damAsset, allFormats);
         StringBuilder imagePaths = DynamicDeckUtils.getImagePaths(inddImageList, configurationService.getPlaceholderImagePath());
 
         addIdsScriptArgs(inddTemplatePath, damAsset.adaptTo(Resource.class), idspScriptArgs, imagePaths, processedXmlPath, exportFormats);
         DynamicDeckUtils.commit(resourceResolver);
+
 
         return damAsset.getPath();
     }
@@ -142,9 +149,13 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
         return arrayList;
     }
 
-    private void addExportJobProperty(Asset assetObject, Object exportJobId) {
+    private void addExportJobProperty(Asset assetObject, String exportJobId) {
         if (assetObject == null) {
             LOGGER.error("Asset is null, hence export properties cannot be added.");
+            return;
+        }
+        if (StringUtils.isBlank(exportJobId)) {
+            LOGGER.error("ExportJobId is null/empty, hence export properties cannot be added.");
             return;
         }
         Resource assetResource = assetObject.adaptTo(Resource.class);
@@ -170,7 +181,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
     }
 
 
-    private Job addJob(Asset master, Map<String, Object> props, JobManager jobManager) throws DynamicDeckDynamoException {
+    private Job addJob(Asset master, Map<String, Object> props) throws DynamicDeckDynamoException {
         Job offloadingJob = jobManager.addJob(DynamicDeckDynamoIDSConstants.IDS_EXTENDSCRIPT_JOB, props);
         if (offloadingJob == null) {
             throw new DynamicDeckDynamoException("Job manager is not able to create job");
@@ -198,7 +209,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
 
         addIDSProperties(masterAssetResource.getPath(), idspScriptArgs, props, scriptPaths);
 
-        addJob(masterAssetResource.adaptTo(Asset.class), props, jobManager);
+        addJob(masterAssetResource.adaptTo(Asset.class), props);
     }
 
     private void addIDSProperties(String assetPath, StringBuilder idspScriptArgs, Map<String, Object> props, String[] scriptPaths) {

@@ -32,9 +32,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -62,15 +63,10 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             masterResource = deckResource;
         }
 
-        File targetFile = new File("targetFile-" + Calendar.getInstance().getTimeInMillis() + DynamicDeckDynamoConstants.DASH
-                + StringUtils.substringBeforeLast(xmlName, DynamicDeckDynamoConstants.DOT) + ".tmp");
-
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            Files.copy(xmlInputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(targetFile);
+            Document doc = dBuilder.parse(xmlInputStream);
 
             /*
             Processing the annotated xml to create the processed xml
@@ -90,23 +86,18 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             if (null != subassetsFolderResource) {
                 AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
                 if (assetManager == null) {
-                    LOGGER.error("Asset manager is null");
-                    return null;
+                    throw new DynamicDeckDynamoException("Asset manager is null");
                 }
                 processXmlAsset = assetManager.createAsset(
                         subassetsFolderResource.getPath() + DynamicDeckDynamoConstants.SLASH + xmlName, resultInputStream,
                         DynamicDeckDynamoConstants.XML_MIME_TYPE, true);
                 LOGGER.debug("XML stored at {}", processXmlAsset.getPath());
             } else {
-                LOGGER.debug("Asset subfolder is null, where processed xml asset needs to be created {}",
+                throw new DynamicDeckDynamoException("Asset subfolder is null, where processed xml asset needs to be created " +
                         deckResource.getPath());
             }
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
-            LOGGER.error("Error while generation of xml.", e);
-        } finally {
-            if (!targetFile.delete()) {
-                throw new DynamicDeckDynamoException("Temporary file cannot be deleted or it's null");
-            }
+            throw new DynamicDeckDynamoException("Error while generation of xml", e);
         }
         return processXmlAsset == null ? null : processXmlAsset.getPath();
     }
