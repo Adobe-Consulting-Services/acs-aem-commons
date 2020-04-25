@@ -181,21 +181,12 @@ public final class DynamicDeckUtils {
             return;
         }
 
-        Session session = resourceResolver.adaptTo(Session.class);
-        if (session == null || !session.isLive()) {
-            LOGGER.error("Resource resolver is null or not live while committing resourceResolver");
-            return;
-        }
         try {
             resourceResolver.refresh();
-            session.refresh(true);
             if (resourceResolver.hasChanges()) {
                 resourceResolver.commit();
             }
-            if (session.hasPendingChanges()) {
-                session.save();
-            }
-        } catch (PersistenceException | RepositoryException e) {
+        } catch (PersistenceException e) {
             LOGGER.error("Error occurred while committing resource resolver", e);
         }
 
