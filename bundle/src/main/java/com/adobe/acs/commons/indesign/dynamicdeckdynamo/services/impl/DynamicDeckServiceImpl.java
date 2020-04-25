@@ -191,8 +191,8 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
     private void addIdsScriptArgs(String templatePath, Resource masterAssetResource,
                                   StringBuilder idspScriptArgs, StringBuilder imagePaths, String formattedXMLPath,
                                   StringBuilder exportFormats) throws DynamicDeckDynamoException {
-        Map<String, Object> props = new HashMap<>();
-        String[] scriptPaths = new String[]{
+        final Map<String, Object> props = new HashMap<>();
+        final String[] scriptPaths = new String[]{
                 DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "json2.jsx/" + JcrConstants.JCR_CONTENT,
                 DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "cq-lib.jsx/" + JcrConstants.JCR_CONTENT,
                 DynamicDeckDynamoIDSConstants.IDS_SCRIPT_ROOT_PATH + "dynamic-deck.jsx/" + JcrConstants.JCR_CONTENT};

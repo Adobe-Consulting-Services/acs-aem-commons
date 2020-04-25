@@ -5,6 +5,13 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants;
  */
 public class DynamicDeckDynamoIDSConstants {
 
+    /**
+     * Private Constructor will prevent the instantiation of this class directly
+     */
+    private DynamicDeckDynamoIDSConstants() {
+
+    }
+    
     public static final String IDS_EXTENDSCRIPT_JOB = "dam/proxy/ids/job";
     public static final String IDS_JOB_PAYLOAD = "ids.job.payload";
     public static final String IDS_JOB_SCRIPT = "ids.job.script";
