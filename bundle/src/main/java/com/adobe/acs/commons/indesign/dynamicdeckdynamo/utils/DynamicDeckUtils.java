@@ -10,6 +10,7 @@ import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.DamConstants;
+import com.day.cq.dam.api.Rendition;
 import com.day.cq.dam.api.collection.SmartCollection;
 import com.day.cq.search.Query;
 import com.day.cq.search.result.SearchResult;
@@ -49,16 +50,14 @@ public final class DynamicDeckUtils {
     }
 
 
-    public static StringBuilder getImagePaths(List<String> assetPathList,
-                                              String placeholderImagePath) {
+    public static StringBuilder getImagePaths(List<String> assetPathList, String placeholderImagePath) {
         StringBuilder imagePaths = new StringBuilder(StringUtils.EMPTY);
         getCollectionPaths(assetPathList, imagePaths);
         imagePaths.append(placeholderImagePath);
         return imagePaths;
     }
 
-    private static void getCollectionPaths(List<String> assetPathList,
-                                           StringBuilder imagePaths) {
+    private static void getCollectionPaths(List<String> assetPathList, StringBuilder imagePaths) {
         if (assetPathList.isEmpty()) {
             LOGGER.debug("Asset resource list is empty");
             return;
@@ -70,7 +69,7 @@ public final class DynamicDeckUtils {
 
     public static StringBuilder addExportFormat(Asset master, List<PrintFormat> formats) {
         StringBuilder exportFormats = getExportFormats(formats);
-        for (String format : exportFormats.toString().split(DynamicDeckDynamoConstants.COMMA)) {
+        for (String format : exportFormats.toString().split(",")) {
             if (PrintFormat.INDD.getFormat().equals(format)) {
                 addExportJobProperty(master);
             }
@@ -82,7 +81,7 @@ public final class DynamicDeckUtils {
         StringBuilder exportFormats = new StringBuilder(StringUtils.EMPTY);
         if (formats != null && !formats.isEmpty()) {
             for (PrintFormat format : formats) {
-                exportFormats.append(format.getFormat()).append(DynamicDeckDynamoConstants.COMMA);
+                exportFormats.append(format.getFormat()).append(",");
             }
         }
         return exportFormats;
@@ -140,31 +139,33 @@ public final class DynamicDeckUtils {
      */
     public static InputStream getInddXmlRenditionInputStream(ResourceResolver resourceResolver,
                                                              Resource assetResource) throws DynamicDeckDynamoException {
-        Resource assetJcrContentResource = resourceResolver.getResource(assetResource.getPath() + DynamicDeckDynamoConstants.SLASH
-                + JcrConstants.JCR_CONTENT + DynamicDeckDynamoConstants.SLASH + DamConstants.RENDITIONS_FOLDER + DynamicDeckDynamoConstants.SLASH
-                + StringUtils.replace(assetResource.getName(), DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.INDD_EXTENSION,
-                DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.XML_EXTENSION)
-                + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
-        return getInputStreamByResource(assetJcrContentResource);
+
+        String renditionName = StringUtils.replace(assetResource.getName(), ".indd", ".xml");
+        Rendition xmlRenditionAsset = assetResource.adaptTo(Asset.class).getRendition(renditionName);
+
+        if (null == xmlRenditionAsset) {
+            throw new DynamicDeckDynamoException("Asset xml rendition doesn't exists");
+        }
+        return getInputStreamByResource(xmlRenditionAsset.adaptTo(Resource.class));
     }
 
-    public static InputStream getAssetInputStreamByPath(ResourceResolver resourceResolver, String annotatedXmlPath) throws DynamicDeckDynamoException {
-        Resource assetJcrContentResource = resourceResolver
-                .getResource(annotatedXmlPath + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT + DynamicDeckDynamoConstants.SLASH
-                        + DamConstants.RENDITIONS_FOLDER + DynamicDeckDynamoConstants.SLASH + DamConstants.ORIGINAL_FILE + DynamicDeckDynamoConstants.SLASH + JcrConstants.JCR_CONTENT);
-        return getInputStreamByResource(assetJcrContentResource);
+    public static InputStream getAssetOriginalInputStream(ResourceResolver resourceResolver, Resource annotatedXmlResource) throws DynamicDeckDynamoException {
+        Rendition annotatedXmlRendition = annotatedXmlResource.adaptTo(Asset.class).getRendition("original");
+        return getInputStreamByResource(annotatedXmlRendition.adaptTo(Resource.class));
     }
 
-    private static InputStream getInputStreamByResource(Resource assetJcrContentResource) throws DynamicDeckDynamoException {
-        if (null == assetJcrContentResource) {
+    private static InputStream getInputStreamByResource(Resource assetResource) throws DynamicDeckDynamoException {
+        if (null == assetResource) {
             throw new DynamicDeckDynamoException("Annotated XML resource is null");
         }
-        Node node = assetJcrContentResource.adaptTo(Node.class);
+        Node node = assetResource.getChild(JcrConstants.JCR_CONTENT).adaptTo(Node.class);
+
         if (null == node) {
-            throw new DynamicDeckDynamoException("Annotated XML node is null, asset resource path: " + assetJcrContentResource.getPath());
+            throw new DynamicDeckDynamoException("Asset resource's data node is null");
         }
         try {
-            return node.getProperty(JcrConstants.JCR_DATA).getBinary().getStream();
+
+            return node.getProperty("jcr:data").getBinary().getStream();
         } catch (RepositoryException e) {
             throw new DynamicDeckDynamoException("Repository exception occurred while fetching the xml input stream", e);
         }
@@ -229,7 +230,7 @@ public final class DynamicDeckUtils {
     public static Asset createUniqueAsset(Resource parent, String name, ResourceResolver resolver) {
         AssetManager graniteAssetMgr = resolver.adaptTo(AssetManager.class);
         if (graniteAssetMgr != null) {
-            return graniteAssetMgr.createAsset(parent.getPath() + DynamicDeckDynamoConstants.SLASH + name, null, DynamicDeckDynamoConstants.INDESIGN_MIME_TYPE, true);
+            return graniteAssetMgr.createAsset(parent.getPath() + "/" + name, null, DynamicDeckDynamoConstants.INDESIGN_MIME_TYPE, true);
         }
         return null;
 
@@ -276,7 +277,7 @@ public final class DynamicDeckUtils {
      * @param extension
      * @return
      */
-    public static String findFileUnderFolderByExtension(Resource templateFolderResource, String extension) {
+    public static Resource findFileUnderFolderByExtension(Resource templateFolderResource, String extension) {
 
         Stream<Resource> resourceStream = StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(templateFolderResource.getChildren().iterator(), Spliterator.ORDERED),
@@ -284,7 +285,7 @@ public final class DynamicDeckUtils {
 
         Optional<Resource> targetResource = resourceStream.filter(item -> StringUtils.endsWithIgnoreCase(item.getPath(), extension)).findFirst();
 
-        return targetResource.map(Resource::getPath).orElse(null);
+        return targetResource.orElse(null);
 
     }
 

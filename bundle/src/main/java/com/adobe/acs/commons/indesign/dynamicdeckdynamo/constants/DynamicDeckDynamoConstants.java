@@ -14,14 +14,6 @@ public class DynamicDeckDynamoConstants {
 
     public static final String XML_MIME_TYPE = "text/xml";
     public static final String INDESIGN_MIME_TYPE = "application/x-indesign";
-    public static final String DOT = ".";
-    public static final String SLASH = "/";
-    public static final String DASH = "-";
-    public static final String COMMA = ",";
-    public static final String INDD_EXTENSION = "indd";
-    public static final String XML_EXTENSION = "xml";
-    public static final String DAM_ROOT = "/content/dam/";
-    public static final String DAM_METADATA = "jcr:content/metadata";
     public static final String FILE_PATH_PREFIX = "file:///";
     public static final String DECK_TYPE = "DYNAMIC DECK";
 

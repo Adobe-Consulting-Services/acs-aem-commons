@@ -88,8 +88,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                 if (assetManager == null) {
                     throw new DynamicDeckDynamoException("Asset manager is null");
                 }
-                processXmlAsset = assetManager.createAsset(
-                        subassetsFolderResource.getPath() + DynamicDeckDynamoConstants.SLASH + xmlName, resultInputStream,
+                processXmlAsset = assetManager.createAsset(subassetsFolderResource.getPath() + "/" + xmlName, resultInputStream, 
                         DynamicDeckDynamoConstants.XML_MIME_TYPE, true);
                 LOGGER.debug("XML stored at {}", processXmlAsset.getPath());
             } else {
@@ -188,7 +187,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         String propertyValue = null;
         if (propertyPathAttr != null) {
             String propertyPath = propertyPathAttr.getNodeValue();
-            String metadataProperty = DynamicDeckDynamoConstants.DAM_METADATA + DynamicDeckDynamoConstants.SLASH + propertyPath;
+            String metadataProperty = "jcr:content/metadata/" + propertyPath;
             if (StringUtils.equals(propertyPath, DynamicDeckDynamoConstants.XML_ATTR_VAL_SELF)) {
                 propertyValue = assetPath;
             } else {
@@ -239,7 +238,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
             Resource assetResource = resourceResolver.getResource(propertyValue);
             if (DamUtil.isAsset(assetResource)) {
                 ((Element) childElement).setAttribute(BindConstants.XML_HREF, DynamicDeckDynamoConstants.FILE_PATH_PREFIX
-                        + StringUtils.substringAfterLast(propertyValue, DynamicDeckDynamoConstants.SLASH));
+                        + StringUtils.substringAfterLast(propertyValue, "/"));
                 if (!isImageAdded(imageList, assetResource)) {
                     imageList.add(assetResource.getPath());
                 }
@@ -252,7 +251,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
     private boolean isImageAdded(List<String> imageList, Resource assetResource) {
         String assetName = assetResource.getName();
         for (String path : imageList) {
-            if (StringUtils.equals(StringUtils.substringAfterLast(path, DynamicDeckDynamoConstants.SLASH), assetName)) {
+            if (StringUtils.equals(StringUtils.substringAfterLast(path, "/"), assetName)) {
                 return true;
             }
         }

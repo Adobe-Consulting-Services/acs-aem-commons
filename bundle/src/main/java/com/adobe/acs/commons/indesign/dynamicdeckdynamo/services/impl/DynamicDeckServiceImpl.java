@@ -54,17 +54,17 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
                              Resource destinationFolderResource, ResourceResolver resourceResolver)
             throws DynamicDeckDynamoException {
 
-        String inddTemplatePath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, DynamicDeckDynamoConstants.INDD_EXTENSION);
-        String annotatedXmlPath = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, DynamicDeckDynamoConstants.XML_EXTENSION);
+        Resource inddTemplateResource = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, "indd");
+        Resource annotatedXmlResource = DynamicDeckUtils.findFileUnderFolderByExtension(templateFolderResource, "xml");
 
-        if (StringUtils.isEmpty(inddTemplatePath) || StringUtils.isEmpty(annotatedXmlPath)) {
+        if (null == inddTemplateResource || null == annotatedXmlResource) {
             throw new DynamicDeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderResource.getPath());
         }
 
         StringBuilder idspScriptArgs = new StringBuilder();
         List<String> inddImageList = new ArrayList<>();
 
-        Asset damAsset = DynamicDeckUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + DynamicDeckDynamoConstants.DOT + DynamicDeckDynamoConstants.INDD_EXTENSION, resourceResolver);
+        Asset damAsset = DynamicDeckUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + ".indd", resourceResolver);
         if (damAsset == null) {
             throw new DynamicDeckDynamoException("Dynamic Deck document not created at the destination : " + destinationFolderResource.getPath());
         }
@@ -74,7 +74,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
 
         String processedXmlPath;
 
-        try (InputStream templateXmlInputStream = DynamicDeckUtils.getAssetInputStreamByPath(resourceResolver, annotatedXmlPath)) {
+        try (InputStream templateXmlInputStream = DynamicDeckUtils.getAssetOriginalInputStream(resourceResolver, annotatedXmlResource)) {
             processedXmlPath = xmlGeneratorService.generateInddXML(templateXmlInputStream, assetItrList,
                     masterAssetResource, damAsset.adaptTo(Resource.class), resourceResolver, inddImageList);
         } catch (IOException e) {
@@ -88,7 +88,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
         StringBuilder exportFormats = DynamicDeckUtils.addExportFormat(damAsset, allFormats);
         StringBuilder imagePaths = DynamicDeckUtils.getImagePaths(inddImageList, configurationService.getPlaceholderImagePath());
 
-        addIdsScriptArgs(inddTemplatePath, damAsset.adaptTo(Resource.class), idspScriptArgs, imagePaths, processedXmlPath, exportFormats);
+        addIdsScriptArgs(inddTemplateResource.getPath(), damAsset.adaptTo(Resource.class), idspScriptArgs, imagePaths, processedXmlPath, exportFormats);
         DynamicDeckUtils.commit(resourceResolver);
 
 
@@ -134,11 +134,11 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
     public List<Resource> fetchAssetListFromTags(String tagsString, ResourceResolver resourceResolver) {
         TagManager tagManager = resourceResolver.adaptTo(TagManager.class);
         List<Resource> arrayList = new ArrayList<>();
-        String[] tagsArray = StringUtils.split(tagsString, DynamicDeckDynamoConstants.COMMA);
+        String[] tagsArray = StringUtils.split(tagsString, ",");
         Arrays.stream(tagsArray).forEach(tag -> {
             RangeIterator<Resource> tags = tagManager.find(tag);
             tags.forEachRemaining(taggedResource -> {
-                if (taggedResource.getPath().startsWith(DynamicDeckDynamoConstants.DAM_ROOT) && taggedResource.getPath().endsWith(DynamicDeckDynamoConstants.SLASH + DynamicDeckDynamoConstants.DAM_METADATA)) {
+                if (taggedResource.getPath().startsWith("/content/dam/") && taggedResource.getPath().endsWith("/jcr:content/metadata")) {
                     Asset taggedAsset = taggedResource.getParent().getParent().adaptTo(Asset.class);
                     if (null != taggedAsset) {
                         arrayList.add(taggedAsset.adaptTo(Resource.class));

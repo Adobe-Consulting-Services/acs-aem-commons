@@ -30,14 +30,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 /**
@@ -48,8 +45,7 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckBackTrackProcess.class);
 
     @Override
-    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap)
-            throws WorkflowException {
+    public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         ResourceResolver resourceResolver;
         try {
 
@@ -72,15 +68,12 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
             }
 
             if (isFileEligibleToProcess(assetResource)) {
-                InputStream xmlInputStream = DynamicDeckUtils.getInddXmlRenditionInputStream(resourceResolver,
-                        assetResource);
+                InputStream xmlInputStream = DynamicDeckUtils.getInddXmlRenditionInputStream(resourceResolver, assetResource);
                 if (null == xmlInputStream) {
                     LOGGER.debug("File xml input stream is null, hence skipping the parsing process.");
                     return;
                 }
-
                 parseXML(xmlInputStream, resourceResolver);
-
             } else {
                 LOGGER.info("File is not eligible to be parsed, hence skipping the parsing process.");
             }
@@ -94,12 +87,9 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     }
 
     private void parseXML(InputStream xmlInputStream, ResourceResolver resourceResolver) {
-        File targetFile = new File("targetFile.tmp");
         try {
-
-            Files.copy(xmlInputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(targetFile);
+            Document doc = dBuilder.parse(xmlInputStream);
 
             if (doc.hasChildNodes()) {
                 final String assetPath = StringUtils.EMPTY;
@@ -108,11 +98,6 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
 
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerFactoryConfigurationError | DynamicDeckDynamoException e) {
             LOGGER.error("Error while processing the xml template ", e);
-        } finally {
-            if (!targetFile.delete()) {
-                LOGGER.error("Temporary file cannot be deleted or it's null");
-            }
-
         }
     }
 
@@ -200,12 +185,12 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     }
 
     private void setNewPropertyValue(Boolean isArray, String propertyPath, Resource assetResource, String nodeContentValue) {
-        String nodePath = StringUtils.substringBeforeLast(propertyPath, DynamicDeckDynamoConstants.SLASH);
+        String nodePath = StringUtils.substringBeforeLast(propertyPath, "/");
         ModifiableValueMap properties;
         if (StringUtils.isNotBlank(nodePath)) {
             Resource childResource = assetResource.getChild(nodePath);
             properties = childResource.adaptTo(ModifiableValueMap.class);
-            propertyPath = StringUtils.substringAfterLast(propertyPath, DynamicDeckDynamoConstants.SLASH);
+            propertyPath = StringUtils.substringAfterLast(propertyPath, "/");
         } else {
             properties = assetResource.adaptTo(ModifiableValueMap.class);
         }
@@ -237,10 +222,10 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
                         return;
                     }
                     String completeHrefValue = null;
-                    if (hrefValue.contains(DynamicDeckDynamoConstants.DAM_ROOT)) {
+                    if (hrefValue.contains("/content/dam/")) {
                         String hrefEncodedValue = StringUtils.substringAfter(
-                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), DynamicDeckDynamoConstants.DAM_ROOT);
-                        completeHrefValue = DynamicDeckDynamoConstants.DAM_ROOT + hrefEncodedValue;
+                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), "/content/dam/");
+                        completeHrefValue = "/content/dam/" + hrefEncodedValue;
                     }
                     if (null == completeHrefValue) {
                         LOGGER.error("Back track root path is not correct {}", hrefValue);
@@ -263,7 +248,7 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     private String getAssetPropertyPath(String nodeValue, ValueMap properties) {
         String propertyPath = nodeValue;
         if (!properties.containsKey(nodeValue)) {
-            propertyPath = DynamicDeckDynamoConstants.DAM_METADATA + DynamicDeckDynamoConstants.SLASH + propertyPath;
+            propertyPath = "jcr:content/metadata/" + propertyPath;
         }
         return propertyPath;
     }
