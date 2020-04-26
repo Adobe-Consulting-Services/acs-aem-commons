@@ -23,19 +23,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -55,7 +49,8 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                                   List<XMLResourceIterator> assetItrList, Resource masterResource, Resource deckResource,
                                   ResourceResolver resourceResolver, List<String> imageList) throws DynamicDeckDynamoException {
 
-        InputStream resultInputStream;
+        InputStream processedXmlInputStream = null;
+        File processedXmlTempFile = null;
         Asset processXmlAsset = null;
         final String xmlName = "processedXml.xml";
 
@@ -75,11 +70,16 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                 populateDocNodes(doc, assetItrList, masterResource, imageList);
             }
 
-            Result outputTarget = new StreamResult(outputStream);
-            TransformerFactory factory = TransformerFactory.newInstance();
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            factory.newTransformer().transform(new DOMSource(doc), outputTarget);
-            resultInputStream = new ByteArrayInputStream(outputStream.toByteArray());
+            // create a temp file 
+            processedXmlTempFile = File.createTempFile("targetFile-" + Calendar.getInstance().getTimeInMillis() + ".tmp", null);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            Source domSource = new DOMSource(doc);
+            Result result = new StreamResult(processedXmlTempFile);
+            transformer.transform(domSource, result);
+
+            processedXmlInputStream = new FileInputStream(processedXmlTempFile);
 
             Resource subassetsFolderResource = resourceResolver.getResource(
                     DynamicDeckUtils.getOrCreateFolder(resourceResolver, DamConstants.SUBASSETS_FOLDER, deckResource));
@@ -88,15 +88,28 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                 if (assetManager == null) {
                     throw new DynamicDeckDynamoException("Asset manager is null");
                 }
-                processXmlAsset = assetManager.createAsset(subassetsFolderResource.getPath() + "/" + xmlName, resultInputStream, 
+                processXmlAsset = assetManager.createAsset(subassetsFolderResource.getPath() + "/" + xmlName, processedXmlInputStream,
                         DynamicDeckDynamoConstants.XML_MIME_TYPE, true);
                 LOGGER.debug("XML stored at {}", processXmlAsset.getPath());
             } else {
                 throw new DynamicDeckDynamoException("Asset subfolder is null, where processed xml asset needs to be created " +
                         deckResource.getPath());
             }
+
+
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             throw new DynamicDeckDynamoException("Error while generation of xml", e);
+        } finally {
+            if (processedXmlTempFile != null && processedXmlTempFile.exists()) {
+                processedXmlTempFile.delete();
+            }
+            if (null != processedXmlInputStream) {
+                try {
+                    processedXmlInputStream.close();
+                } catch (IOException e) {
+                    throw new DynamicDeckDynamoException("Exception occurred while closing the processed xml inputstream", e);
+                }
+            }
         }
         return processXmlAsset == null ? null : processXmlAsset.getPath();
     }
