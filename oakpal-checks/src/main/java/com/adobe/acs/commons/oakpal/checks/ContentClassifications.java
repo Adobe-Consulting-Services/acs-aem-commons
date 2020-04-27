@@ -19,28 +19,30 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
-import static net.adamcin.oakpal.core.JavaxJson.optArray;
+import net.adamcin.oakpal.api.JavaxJson;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Rule;
+import net.adamcin.oakpal.api.Rules;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
+import org.apache.jackrabbit.vault.packaging.PackageId;
+import org.apache.jackrabbit.vault.util.Text;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.json.JsonObject;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.json.JsonObject;
 
-import net.adamcin.oakpal.core.JavaxJson;
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.ProgressCheckFactory;
-import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.Violation;
-import net.adamcin.oakpal.core.checks.Rule;
-import org.apache.jackrabbit.vault.packaging.PackageId;
-import org.apache.jackrabbit.vault.util.Text;
+import static net.adamcin.oakpal.api.JavaxJson.arrayOrEmpty;
+import static net.adamcin.oakpal.api.JavaxJson.optArray;
 
 /**
  * Enforce rules for "Content Classifications" in
@@ -54,7 +56,7 @@ import org.apache.jackrabbit.vault.util.Text;
  * <dt>{@code libsPathPrefix}</dt>
  * <dd>(default: {@code /libs}) specify where to look for granite protected areas.</dd>
  * <dt>{@code severity}</dt>
- * <dd>(default: {@link net.adamcin.oakpal.core.Violation.Severity#MAJOR}) specify the severity of violations reported
+ * <dd>(default: {@link net.adamcin.oakpal.api.Severity#MAJOR}) specify the severity of violations reported
  * by this check.</dd>
  * <dt>{@code scopePaths} (type: {@link Rule[]})</dt>
  * <dd>(default: allow all) specify a list of pattern rules to allow or deny import paths from the scope of this check.
@@ -86,23 +88,24 @@ public final class ContentClassifications implements ProgressCheckFactory {
     @Override
     public ProgressCheck newInstance(final JsonObject jsonObject) {
         final String libsPathPrefix = jsonObject.getString(CONFIG_LIBS_PATH_PREFIX, LIBS_PATH_PREFIX);
-        final Violation.Severity severity = Violation.Severity.valueOf(jsonObject.getString(CONFIG_SEVERITY,
-                Violation.Severity.MAJOR.name()).toUpperCase());
-        final List<Rule> scopePaths = Rule.fromJsonArray(arrayOrEmpty(jsonObject, CONFIG_SCOPE_PATHS));
+        final Severity severity = Severity.valueOf(jsonObject.getString(CONFIG_SEVERITY,
+                Severity.MAJOR.name()).toUpperCase());
+        final List<Rule> scopePaths = Rules.fromJsonArray(arrayOrEmpty(jsonObject, CONFIG_SCOPE_PATHS));
         final List<String> searchPaths = optArray(jsonObject, CONFIG_SEARCH_PATHS)
                 .map(JavaxJson::mapArrayOfStrings).orElse(Arrays.asList(APPS_PATH_PREFIX, LIBS_PATH_PREFIX));
 
         return new Check(libsPathPrefix, severity, scopePaths, searchPaths);
     }
 
-    static final class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheckFactoryCheck<ContentClassifications> {
         final String libsPathPrefix;
-        final Violation.Severity severity;
+        final Severity severity;
         final List<Rule> scopePaths;
         final List<String> searchPaths;
 
-        Check(final String libsPathPrefix, final Violation.Severity severity,
+        Check(final String libsPathPrefix, final Severity severity,
               final List<Rule> scopePaths, final List<String> searchPaths) {
+            super(ContentClassifications.class);
             this.libsPathPrefix = libsPathPrefix;
             this.severity = severity;
             this.scopePaths = scopePaths;
@@ -126,7 +129,7 @@ public final class ContentClassifications implements ProgressCheckFactory {
 
             // default to ALLOW ALL
             // if first rule is allow, change default to DENY ALL
-            Rule lastMatched = Rule.lastMatch(scopePaths, path);
+            Rule lastMatched = Rules.lastMatch(scopePaths, path);
 
             // if path is denied from scope, short circuit.
             if (lastMatched.isExclude()) {
@@ -156,8 +159,12 @@ public final class ContentClassifications implements ProgressCheckFactory {
             final String libsRt = libsPathPrefix + relPath;
 
             assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
-                    .ifPresent(message -> reportViolation(severity,
-                            String.format("%s [restricted overlay]: %s", path, message), packageId));
+                    .ifPresent(message ->
+                            reporting(violation -> violation
+                                    .withSeverity(severity)
+                                    .withPackage(packageId)
+                                    .withDescription("{0} [restricted overlay]: {1}")
+                                    .withArgument(path, message)));
 
         }
 
@@ -174,9 +181,12 @@ public final class ContentClassifications implements ProgressCheckFactory {
                     }
 
                     assertClassifications(node.getSession(), libsRt, AreaType.ALLOWED_FOR_RESOURCE_TYPE)
-                            .ifPresent(message -> reportViolation(severity,
-                                    String.format("%s [restricted resource type]: %s", path, message),
-                                    packageId));
+                            .ifPresent(message ->
+                                    reporting(violation -> violation
+                                            .withSeverity(severity)
+                                            .withPackage(packageId)
+                                            .withDescription("{0} [restricted resource type]: {1}")
+                                            .withArgument(path, message)));
                 }
             }
         }
@@ -194,9 +204,12 @@ public final class ContentClassifications implements ProgressCheckFactory {
                     }
 
                     assertClassifications(node.getSession(), libsRst, AreaType.ALLOWED_FOR_RESOURCE_SUPER_TYPE)
-                            .ifPresent(message -> reportViolation(severity,
-                                    String.format("%s [restricted super type]: %s", path, message),
-                                    packageId));
+                            .ifPresent(message ->
+                                    reporting(violation -> violation
+                                            .withSeverity(severity)
+                                            .withPackage(packageId)
+                                            .withDescription("{0} [restricted super type]: {1}")
+                                            .withArgument(path, message)));
                 }
             }
         }
@@ -207,10 +220,12 @@ public final class ContentClassifications implements ProgressCheckFactory {
                 final Node leaf = getLeafNode(session, libsPath);
                 final AreaType leafArea = AreaType.fromNode(leaf);
                 if (leafArea == AreaType.FINAL && libsPath.startsWith(leaf.getPath() + "/")) {
-                    return Optional.of(String.format("%s is implicitly marked %s", libsPath, AreaType.INTERNAL));
+                    return Optional.of(MessageFormat.format(getString("{0} is implicitly marked {1}"),
+                            libsPath, AreaType.INTERNAL));
                 }
                 if (!allowedAreas.contains(leafArea)) {
-                    return Optional.of(String.format("%s is marked %s", leaf.getPath(), leafArea));
+                    return Optional.of(MessageFormat.format(getString("{0} is marked {1}"),
+                            leaf.getPath(), leafArea));
                 }
             }
 

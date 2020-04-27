@@ -19,24 +19,25 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.json.JsonObject;
-
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.ProgressCheckFactory;
-import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.Violation;
-import net.adamcin.oakpal.core.checks.Rule;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Rule;
+import net.adamcin.oakpal.api.Rules;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.User;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.packaging.PackageId;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+
+import static net.adamcin.oakpal.api.JavaxJson.arrayOrEmpty;
 
 /**
  * Report explicitly-imported rep:SystemUser and rep:Group nodes as violations, to encourage migration to ACS AEM Commons
@@ -44,7 +45,7 @@ import org.apache.jackrabbit.vault.packaging.PackageId;
  * {@code config} items:
  * <dl>
  * <dt>{@code severity}</dt>
- * <dd>(default: {@link Violation.Severity#MINOR}) specify the severity of violations reported
+ * <dd>(default: {@link net.adamcin.oakpal.api.Severity#MINOR}) specify the severity of violations reported
  * by this check.</dd>
  * <dt>{@code scopeIds} ({@link Rule[]})</dt>
  * <dd>(default: include all) List of scope rules matching rep:authorizableId values for inclusion in the scope for
@@ -58,31 +59,31 @@ public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
     public static final String CONFIG_SCOPE_IDS = "scopeIds";
-    public static final String DEFAULT_RECOMMENDATION = "We recommend using Ensure Authorizable instead. https://adobe-consulting-services.github.io/acs-aem-commons/features/ensure-service-users/index.html";
+
+    /**
+     * This constant value is referenced as an i18n key in {@link RecommendEnsureAuthorizable}.properties.
+     */
+    public static final String DEFAULT_RECOMMENDATION = "DEFAULT_RECOMMENDATION";
 
     @Override
     public ProgressCheck newInstance(final JsonObject config) {
-        final Violation.Severity severity = Violation.Severity.valueOf(config.getString(CONFIG_SEVERITY,
-                Violation.Severity.MINOR.name()).toUpperCase());
+        final Severity severity = Severity.valueOf(config.getString(CONFIG_SEVERITY,
+                Severity.MINOR.name()).toUpperCase());
         final String recommendation = config.getString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
-        final List<Rule> scopeIds = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
+        final List<Rule> scopeIds = Rules.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
         return new Check(severity, recommendation, scopeIds);
     }
 
-    static final class Check extends SimpleProgressCheck {
-        private final Violation.Severity severity;
+    static final class Check extends SimpleProgressCheckFactoryCheck<RecommendEnsureAuthorizable> {
+        private final Severity severity;
         private final String recommendation;
         private final List<Rule> scopeIds;
 
-        Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopeIds) {
+        Check(final Severity severity, final String recommendation, final List<Rule> scopeIds) {
+            super(RecommendEnsureAuthorizable.class);
             this.severity = severity;
             this.recommendation = recommendation;
             this.scopeIds = new ArrayList<>(scopeIds);
-        }
-
-        @Override
-        public String getCheckName() {
-            return RecommendEnsureAuthorizable.class.getSimpleName();
         }
 
         @Override
@@ -98,7 +99,7 @@ public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
                     final String id = authz.getID();
 
                     // check for inclusion based on authorizableId
-                    Rule lastMatched = Rule.lastMatch(scopeIds, id);
+                    Rule lastMatched = Rules.lastMatch(scopeIds, id);
 
                     // if id is excluded, or is user and not system user, short circuit
                     if (lastMatched.isExclude() || (!authz.isGroup() && !((User) authz).isSystemUser())) {
@@ -106,12 +107,15 @@ public final class RecommendEnsureAuthorizable implements ProgressCheckFactory {
                     }
 
                     // report for groups and system users
-                    reportViolation(severity,
-                            String.format("%s: imported explicit %s. %s",
-                                    path, authz.isGroup() ? "group" : "system user", recommendation), packageId);
+                    reporting(violation -> violation
+                            .withSeverity(severity)
+                            .withPackage(packageId)
+                            .withDescription("{0}: imported explicit {1}. {2}")
+                            .withArgument(path,
+                                    authz.isGroup() ? getString("group") : getString("system user"),
+                                    recommendation));
                 }
             }
         }
     }
-
 }
