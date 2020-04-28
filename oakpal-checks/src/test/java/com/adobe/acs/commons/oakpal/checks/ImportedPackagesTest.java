@@ -25,26 +25,21 @@ import net.adamcin.oakpal.core.CheckReport;
 import net.adamcin.oakpal.core.InitStage;
 import net.adamcin.oakpal.testing.TestPackageUtil;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.jackrabbit.commons.SimpleValueFactory;
-import org.apache.jackrabbit.value.ValueFactoryImpl;
 import org.apache.jackrabbit.vault.packaging.PackageId;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Answers;
 import org.osgi.framework.Version;
 
 import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
-import javax.jcr.ValueFactory;
 import javax.json.Json;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -168,4 +163,36 @@ public class ImportedPackagesTest extends CheckTestBase {
         check.importedPath(PackageId.fromString("my_packages:test"), path, ntFileNode);
     }
 
+
+    @Test
+    public void testMismatchedVersions() throws Exception {
+        final File jarFile = new File(pack.getParentFile(), "package-imports-version-mismatch.jar");
+        if (jarFile.exists()) {
+            jarFile.delete();
+        }
+        TestPackageUtil.buildJarFromDir(new File("src/test/resources/package-imports-version-mismatch-jar"),
+                jarFile, Collections.emptyMap());
+
+        final ProgressCheck check = new ImportedPackages().newInstance(key("aemVersion", arr("6.4")).get());
+        final PackageId packageId = PackageId.fromString("my_packages:test");
+        check.startedScan();
+        check.beforeExtract(packageId, null, null, null, Collections.emptyList());
+
+        final String path = "/apps/test/install/test.jar";
+        final Node ntFileNode = mock(Node.class);
+        when(ntFileNode.isNodeType(JcrConstants.NT_FILE)).thenReturn(true);
+        when(ntFileNode.hasProperty(Property.JCR_DATA)).thenReturn(true);
+
+        final Property data = mock(Property.class);
+        when(ntFileNode.getProperty(Property.JCR_DATA)).thenReturn(data);
+        final Binary binary = mock(Binary.class);
+        when(data.getBinary()).thenReturn(binary);
+        doAnswer(call -> new FileInputStream(jarFile)).when(binary).getStream();
+
+        check.importedPath(packageId, path, ntFileNode);
+
+        check.finishedScan();
+
+        assertEquals("reported violations", 1, check.getReportedViolations().size());
+    }
 }
