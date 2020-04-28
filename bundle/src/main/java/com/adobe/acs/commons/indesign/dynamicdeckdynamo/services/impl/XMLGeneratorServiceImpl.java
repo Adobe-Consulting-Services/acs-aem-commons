@@ -30,6 +30,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -100,14 +101,16 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             throw new DynamicDeckDynamoException("Error while generation of xml", e);
         } finally {
-            if (processedXmlTempFile != null && processedXmlTempFile.exists()) {
-                processedXmlTempFile.delete();
+            try {
+                Files.deleteIfExists(processedXmlTempFile.toPath());
+            } catch (IOException e) {
+                LOGGER.error("Exception occurred while deleting the temp file", e);
             }
             if (null != processedXmlInputStream) {
                 try {
                     processedXmlInputStream.close();
                 } catch (IOException e) {
-                    throw new DynamicDeckDynamoException("Exception occurred while closing the processed xml inputstream", e);
+                    LOGGER.error("Exception occurred while closing the processed xml inputstream", e);
                 }
             }
         }

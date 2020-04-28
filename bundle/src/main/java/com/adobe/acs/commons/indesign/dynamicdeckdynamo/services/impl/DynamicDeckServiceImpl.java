@@ -61,7 +61,7 @@ public class DynamicDeckServiceImpl implements DynamicDeckService {
             throw new DynamicDeckDynamoException("Supplied INDD template folder path doesn't contain InDesign Template file OR template XML file : " + templateFolderResource.getPath());
         }
 
-        StringBuilder idspScriptArgs = new StringBuilder();
+        final StringBuilder idspScriptArgs = new StringBuilder();
         List<String> inddImageList = new ArrayList<>();
 
         Asset damAsset = DynamicDeckUtils.createUniqueAsset(destinationFolderResource, JcrUtil.createValidName(deckName) + ".indd", resourceResolver);

@@ -89,7 +89,7 @@ var Coral = window.Coral || {},
 
 
             $.ajax({
-                url: "/etc/dynamic-deck-dynamo/deck-initiator.triggerDeckDynamo.json",
+                url: "acs-commons/content/dynamic-deck-initiator.triggerDeckDynamo.json",
                 method: "POST",
                 cache: false,
                 data: {
@@ -102,11 +102,20 @@ var Coral = window.Coral || {},
                     queryString: queryString,
                     tagValues: tagValues
                 }
-            }).done(function () {
-                ui.notify("Success", "Deck Generation Triggered", "success");
-            }).fail(function () {
-                ui.notify("Error", "Unable to process deck generation", "error");
+            }).done(function (data) {
+                if (data && data.message){
+                    ui.notify("Success", data.message, "success");
+                }else{
+                    ui.notify("Error", "Unable to process deck generation", "error");
+                }
+            }).fail(function (data) {
+                console.log(data.responseJSON.message);
+                if (data && data.responseJSON && data.responseJSON.message){
+                    ui.notify("Error", data.responseJSON.message, "error");
+                }else{
+                    ui.notify("Error", "Unable to process deck generation", "error");
+                }
             });
         });
     });
-}(window, document, $, Coral));
+})(window, document, $, Coral);

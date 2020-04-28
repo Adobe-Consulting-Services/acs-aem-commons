@@ -46,7 +46,7 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
-        PrintWriter out = response.getWriter();
+        final PrintWriter out = response.getWriter();
         // Set response headers.
         response.setContentType(JSONResponse.RESPONSE_CONTENT_TYPE);
         response.setCharacterEncoding(Constants.DEFAULT_CHARSET);
@@ -104,10 +104,10 @@ public class TriggerDeckDynamoServlet extends SlingAllMethodsServlet {
                     throw new DynamicDeckDynamoException("Asset resource list cannot be null or empty. Hence exiting the deck generation process.");
                 }
 
-                jsonResponse.addProperty(MESSAGE, "Deck created successfully! Generated deck Path = " + generatedDeckPath);
+                jsonResponse.addProperty(MESSAGE, "Deck generation triggered successfully! Generated deck path = " + generatedDeckPath);
             } catch (DynamicDeckDynamoException e) {
                 response.setStatus(500);
-                jsonResponse.addProperty(MESSAGE, "Deck creation Failed!");
+                jsonResponse.addProperty(MESSAGE, "Deck generation failed! Please check logs for more details.");
                 LOGGER.error("Exception occurred while initiating the deck generation", e);
             }
         }

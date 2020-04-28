@@ -28,7 +28,7 @@ public class CollectionSelectComponent extends SelectComponent {
             DynamicDeckConfigurationService configurationService = getHelper().getService(DynamicDeckConfigurationService.class);
 
             if (null == configurationService) {
-                LOGGER.debug("Configuration service is null, hence exiting the process and returning empty map");
+                LOGGER.error("Configuration service is null, hence exiting the process and returning empty map");
                 return Collections.emptyMap();
             }
 
