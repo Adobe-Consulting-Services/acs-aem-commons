@@ -19,7 +19,10 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static org.junit.Assert.assertTrue;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.core.CheckReport;
+import net.adamcin.oakpal.core.InitStage;
+import net.adamcin.oakpal.core.OakMachine;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,10 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import net.adamcin.oakpal.core.CheckReport;
-import net.adamcin.oakpal.core.InitStage;
-import net.adamcin.oakpal.core.OakMachine;
-import net.adamcin.oakpal.core.ProgressCheck;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Convenient base class for testing progress checks.
