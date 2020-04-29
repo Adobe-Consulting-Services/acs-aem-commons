@@ -17,6 +17,6 @@
  *
  */
 @Version("1.0.0")
-package com.adobe.acs.commons.indesign.dynamicdeckdynamo.models;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception;
 
 import org.osgi.annotation.versioning.Version;
