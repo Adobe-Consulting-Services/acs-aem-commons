@@ -4,14 +4,11 @@ import com.adobe.acs.commons.genericlists.GenericList;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;

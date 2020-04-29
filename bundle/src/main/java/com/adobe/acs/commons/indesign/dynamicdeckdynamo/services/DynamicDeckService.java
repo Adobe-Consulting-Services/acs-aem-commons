@@ -3,11 +3,13 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.annotation.versioning.ProviderType;
 
 import javax.jcr.RepositoryException;
 import java.io.IOException;
 import java.util.List;
 
+@ProviderType
 public interface DynamicDeckService {
 
 

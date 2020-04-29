@@ -2,7 +2,7 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
 
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
-import com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos.XMLResourceIterator;
+import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.XMLResourceIterator;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.XMLGeneratorService;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
 import com.day.cq.dam.api.Asset;

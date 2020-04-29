@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.dynamicdeckdynamo.pojos;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils;
 
 import org.apache.sling.api.resource.Resource;
 

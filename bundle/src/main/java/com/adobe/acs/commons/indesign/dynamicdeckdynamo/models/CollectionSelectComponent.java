@@ -5,7 +5,6 @@ import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
