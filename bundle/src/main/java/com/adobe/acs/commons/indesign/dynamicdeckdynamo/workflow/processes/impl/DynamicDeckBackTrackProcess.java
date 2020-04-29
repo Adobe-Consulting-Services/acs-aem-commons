@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes.impl;
 
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;

@@ -1,4 +1,4 @@
-package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets;
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.servlets.impl;
 
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.models.DynamicDeckInitiatorPageModel;
