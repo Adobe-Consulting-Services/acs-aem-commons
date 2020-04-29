@@ -396,7 +396,7 @@
                          * On icon selected
                          */
                         this.iconContainer.on('click', '.fip-box', $.proxy(function (e) {
-                                this.setSelectedIcon($(e.currentTarget).find('i').attr('data-fip-value'));
+                                this.setSelectedIcon($(e.currentTarget).find('i, svg').attr('data-fip-value'));
                                 this.toggleIconSelector();
                         }, this));
 
