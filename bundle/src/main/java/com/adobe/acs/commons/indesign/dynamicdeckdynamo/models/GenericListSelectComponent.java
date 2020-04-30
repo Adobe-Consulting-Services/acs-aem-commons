@@ -51,9 +51,13 @@ public class GenericListSelectComponent extends SelectComponent {
     public Map<String, String> getOptions() {
 
         Map<String, String> options = new LinkedHashMap<>();
-        ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
-        if (null != resourceResolver) {
+        if (null != getHelper() &&
+                null != getHelper().getRequest() &&
+                null != getHelper().getRequest().getResourceResolver()) {
+
+            ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
             PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
+
             if (pageManager == null) {
                 LOGGER.debug("Page manager is null, hence exiting the process and returning empty map");
                 return Collections.emptyMap();
