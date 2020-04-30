@@ -41,8 +41,11 @@ public class CollectionSelectComponent extends SelectComponent {
     @Override
     public Map<String, String> getOptions() {
         Map<String, String> options = new LinkedHashMap<>();
-        ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
-        if (null != resourceResolver) {
+        if (null != getHelper() &&
+                null != getHelper().getRequest() &&
+                null != getHelper().getRequest().getResourceResolver()) {
+
+            ResourceResolver resourceResolver = getHelper().getRequest().getResourceResolver();
             DynamicDeckConfigurationService configurationService = getHelper().getService(DynamicDeckConfigurationService.class);
 
             if (null == configurationService) {
