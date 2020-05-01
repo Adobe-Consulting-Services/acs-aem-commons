@@ -72,7 +72,7 @@ import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants
                   description = "List of paths to watch. Entries with the 'glob:' prefix are interpreted as globs, "
                           + "i.e. the * and ** wildcards are supported.",
                   name = ResourceChangeListener.PATHS),
-        @Property(label = "Type of change to listent to",
+        @Property(label = "Type of change to listen to",
         value = {"ADDED", "REMOVED","CHANGED"},
         name = ResourceChangeListener.CHANGES),
         @Property(name = "webconsole.configurationFactory.nameHint",
