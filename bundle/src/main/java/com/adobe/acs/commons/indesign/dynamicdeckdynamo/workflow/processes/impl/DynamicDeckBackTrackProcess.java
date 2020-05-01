@@ -46,6 +46,7 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.jcr.Session;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -108,7 +109,10 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
 
     private void parseXML(InputStream xmlInputStream, ResourceResolver resourceResolver) {
         try {
-            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); 
+            DocumentBuilder dBuilder = dbf.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlInputStream);
 
             if (doc.hasChildNodes()) {
