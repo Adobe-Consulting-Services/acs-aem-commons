@@ -76,7 +76,7 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the @agent is considered an active Flush agent (Serialization Type ~> Flush and is enabled).
+     * Checks if the @agent is considered an active Flush agent (Serialization Type ~&gt; Flush and is enabled).
      *
      * @param agent the agent to test test
      * @return true is is considered an enabled Flush agent

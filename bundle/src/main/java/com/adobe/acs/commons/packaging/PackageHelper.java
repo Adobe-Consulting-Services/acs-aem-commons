@@ -76,13 +76,13 @@ public interface PackageHelper {
      * Derives the next package version to use based on the input params and the existing package versions matching
      * the input Package group and name. Next version increments "minor" version only.
      *
-     * Ex. 1.0.0 ~> 1.1.0
-     *     3.22.0 ~> 3.23.0
+     * Ex. 1.0.0 ~&gt; 1.1.0
+     *     3.22.0 ~&gt; 3.23.0
      *
      * If the param version's major is greater than the largest existing package version in jcr,
      * then the param version will be used.
      *
-     * Ex. param ~> 2.0.0, largest in jcr ~>1.40.0; returned version will be 2.0.0
+     * Ex. param ~&gt; 2.0.0, largest in jcr ~&gt; 1.40.0; returned version will be 2.0.0
      *
      * @param jcrPackageManager JcrPackageManager object
      * @param groupName package group name
