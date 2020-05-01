@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:description="Create InDesign deck from AEM assets and metadata via InDesign Server"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Dynamic Deck Dynamo"
+    href="/apps/acs-commons/content/dynamic-deck-initiator.html"
+    icon="image"
+    id="acs-commons__dynamic-deck"
+    target="_blank"/>
