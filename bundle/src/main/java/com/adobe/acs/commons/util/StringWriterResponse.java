@@ -29,7 +29,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wrapper around {@link SlingHttpServletResponse} which buffers all output written to the writer
- * acquired via {@link #getWriter()).
+ * acquired via getWriter().
  * 
  * @deprecated Rather use {@link BufferedSlingHttpServletResponse} instead
  */

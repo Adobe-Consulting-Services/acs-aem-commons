@@ -40,7 +40,7 @@ public interface SyntheticWorkflowRunner extends WorkflowService {
     /**
      * Process a payload path using using the provided Workflow Processes.
      * Convenience method for calling:
-     * > execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
+     * &gt; execute(resourceResolver, payloadPath, workflowProcessLabels, null, false, false);
      *
      * @param resourceResolver      the resourceResolver object that provides access to the JCR for WF operations
      * @param payloadPath           the path to execute the workflow against

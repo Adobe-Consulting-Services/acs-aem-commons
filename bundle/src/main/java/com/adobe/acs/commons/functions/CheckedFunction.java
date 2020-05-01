@@ -60,7 +60,6 @@ public interface CheckedFunction<T, R> {
      * function and then applies this function
      * @throws NullPointerException if before is null
      *
-     * @see #andThen(IFunction)
      */
     default <V> CheckedFunction<V, R> compose(final CheckedFunction<? super V, ? extends T> before) {
         if (before == null) {
@@ -82,7 +81,6 @@ public interface CheckedFunction<T, R> {
      * applies the {@code after} function
      * @throws NullPointerException if after is null
      *
-     * @see #compose(IFunction)
      */
     default <V> CheckedFunction<T, V> andThen(final CheckedFunction<? super R, ? extends V> after) {
         if (after == null) {
