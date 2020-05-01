@@ -40,10 +40,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @Component
  * public class IOnlyWorkOnTheCloud implements Foo {
  *
- *    @Reference(
- *          target="(distribution=cloud-ready)"
- *        scope = ReferenceCardinality.MANDATORY
- *    )
+ *    @Reference(target="(distribution=cloud-ready)")
  *    RequireAem requireAem;
  *    ...
  * }
@@ -53,10 +50,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @Component
  * public class IOnlyWorkOnAmsOrOnPrem implements Bar {
  *
- *      @Reference(
- *          target="(distribution=classic)"
- *          scope = ReferenceCardinality.MANDATORY
- *      )
+ *      @Reference(target="(distribution=classic)")
  *      RequireAem requireAem;
  *      ...
  *  }
