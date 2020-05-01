@@ -59,7 +59,7 @@ public class CacheUtils {
 
         File file = File.createTempFile(cacheKey.toString(), ".tmp");
         if (null != file) {
-            log.debug("Temp file created with the name - {}", cacheKey.toString());
+            log.debug("Temp file created with the name - {}", cacheKey);
         }
         return file;
     }

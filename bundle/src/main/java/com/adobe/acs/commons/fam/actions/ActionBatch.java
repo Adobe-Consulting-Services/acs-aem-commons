@@ -37,7 +37,7 @@ public class ActionBatch extends LinkedBlockingQueue<CheckedConsumer<ResourceRes
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionBatch.class);
 
-    private final ActionManager manager;
+    private final transient ActionManager manager;
     private int retryCount = 5;
     private long retryDelay = 100;
 

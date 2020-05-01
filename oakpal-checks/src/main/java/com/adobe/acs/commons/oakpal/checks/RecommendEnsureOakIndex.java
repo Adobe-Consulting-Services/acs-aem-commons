@@ -19,27 +19,28 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Rule;
+import net.adamcin.oakpal.api.Rules;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
+import org.apache.jackrabbit.vault.packaging.PackageId;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.ProgressCheckFactory;
-import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.Violation;
-import net.adamcin.oakpal.core.checks.Rule;
-import org.apache.jackrabbit.vault.packaging.PackageId;
+import static net.adamcin.oakpal.api.JavaxJson.arrayOrEmpty;
 
 /**
  * Report explicitly-imported oak:index nodes as violations to encourage migration to ACS AEM Commons - Ensure Oak Index.
  * {@code config} items:
  * <dl>
  * <dt>{@code severity}</dt>
- * <dd>(default: {@link net.adamcin.oakpal.core.Violation.Severity#MINOR}) specify the severity of violations reported
+ * <dd>(default: {@link net.adamcin.oakpal.api.Severity#MINOR}) specify the severity of violations reported
  * by this check.</dd>
  * <dt>{@code scopePaths} (type: {@link Rule[]})</dt>
  * <dd>(default: allow all) specify a list of pattern rules to allow or deny import paths from the scope of this check.
@@ -55,31 +56,31 @@ public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
     public static final String CONFIG_SEVERITY = "severity";
     public static final String CONFIG_RECOMMENDATION = "recommendation";
     public static final String CONFIG_SCOPE_PATHS = "scopePaths";
-    public static final String DEFAULT_RECOMMENDATION = "We recommend using Ensure Oak Index instead. https://adobe-consulting-services.github.io/acs-aem-commons/features/ensure-oak-index/index.html";
+
+    /**
+     * This constant value is referenced as an i18n key in {@link RecommendEnsureOakIndex}.properties.
+     */
+    public static final String DEFAULT_RECOMMENDATION = "DEFAULT_RECOMMENDATION";
 
     @Override
     public ProgressCheck newInstance(final JsonObject config) {
-        final Violation.Severity severity = Violation.Severity.valueOf(config.getString(CONFIG_SEVERITY,
-                Violation.Severity.MINOR.name()).toUpperCase());
+        final Severity severity = Severity.valueOf(config.getString(CONFIG_SEVERITY,
+                Severity.MINOR.name()).toUpperCase());
         final String recommendation = config.getString(CONFIG_RECOMMENDATION, DEFAULT_RECOMMENDATION);
-        final List<Rule> scopePaths = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_PATHS));
+        final List<Rule> scopePaths = Rules.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_PATHS));
         return new Check(severity, recommendation, scopePaths);
     }
 
-    static final class Check extends SimpleProgressCheck {
-        private final Violation.Severity severity;
+    static final class Check extends SimpleProgressCheckFactoryCheck<RecommendEnsureOakIndex> {
+        private final Severity severity;
         private final String recommendation;
         private final List<Rule> scopePaths;
 
-        Check(final Violation.Severity severity, final String recommendation, final List<Rule> scopePaths) {
+        Check(final Severity severity, final String recommendation, final List<Rule> scopePaths) {
+            super(RecommendEnsureOakIndex.class);
             this.severity = severity;
             this.recommendation = recommendation;
             this.scopePaths = new ArrayList<>(scopePaths);
-        }
-
-        @Override
-        public String getCheckName() {
-            return RecommendEnsureOakIndex.class.getSimpleName();
         }
 
         @Override
@@ -87,7 +88,7 @@ public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
                 throws RepositoryException {
 
             // evaluate scope paths
-            Rule lastMatched = Rule.lastMatch(scopePaths, path);
+            Rule lastMatched = Rules.lastMatch(scopePaths, path);
 
             // short circuit if out of scope
             if (lastMatched.isExclude()) {
@@ -96,11 +97,11 @@ public final class RecommendEnsureOakIndex implements ProgressCheckFactory {
 
             // report for every immediate child of an oak:index node.
             if (NN_OAK_INDEX.equals(node.getParent().getName())) {
-                reportViolation(severity,
-                        String.format("%s: imported explicit oak:index. %s",
-                                path, recommendation), packageId);
+                reporting(violation -> violation.withSeverity(severity)
+                        .withPackage(packageId)
+                        .withDescription("{0}: imported explicit oak:index. {1}")
+                        .withArgument(path, recommendation));
             }
         }
     }
-
 }

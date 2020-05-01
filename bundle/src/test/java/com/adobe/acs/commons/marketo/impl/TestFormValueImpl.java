@@ -21,16 +21,15 @@ package com.adobe.acs.commons.marketo.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Optional;
 
+import com.adobe.acs.commons.marketo.FormValue;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.adobe.acs.commons.marketo.FormValue;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 

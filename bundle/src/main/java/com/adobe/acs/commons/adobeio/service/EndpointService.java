@@ -25,12 +25,12 @@ import com.google.gson.JsonObject;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This is the interface for the EndpointService.<br/>
- * Using this service, the calling component can post to and retrieve from the endpoint.<br/>
- * All the plumbing around authentication will be taken care of.<br/>
+ * This is the interface for the EndpointService.<br>
+ * Using this service, the calling component can post to and retrieve from the endpoint.<br>
+ * All the plumbing around authentication will be taken care of.<br>
  *
- * Example how to use the service in your custom code:<br/>
- * {@code @Reference(target="(id=yourEndpointId)")}<br/>
+ * Example how to use the service in your custom code:<br>
+ * {@code @Reference(target="(id=yourEndpointId)")}<br>
  * {@code private EndpointService endpointService;}
  * </code>
  */

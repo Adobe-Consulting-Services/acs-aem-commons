@@ -3,7 +3,7 @@
     "jcr:content": {
         "jcr:primaryType": "cq:PageContent",
         "jcr:title": "English",
-        "cq:conf": "/conf/test",
+        "cq:conf": "/conf/test/default",
         "sling:resourceType": "weretail/components/structure/page",
         "root": {
             "jcr:primaryType": "nt:unstructured",

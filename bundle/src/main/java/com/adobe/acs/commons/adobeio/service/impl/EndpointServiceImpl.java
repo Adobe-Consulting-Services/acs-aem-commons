@@ -303,7 +303,7 @@ public class EndpointServiceImpl implements EndpointService {
          base.setEntity(input);
       }
 
-      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI().toString(), payload);
+      LOGGER.debug("Process call. uri = {}. payload = {}", base.getURI(), payload);
 
       try (CloseableHttpClient httpClient = helper.getHttpClient(integrationService.getTimeoutinMilliSeconds())) {
          CloseableHttpResponse response = httpClient.execute(base);

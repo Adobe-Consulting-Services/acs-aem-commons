@@ -254,14 +254,14 @@ public class DispatcherFlushRulesImpl implements Preprocessor {
                 PropertiesUtil.toStringArray(properties.get(PROP_FLUSH_RULES),
                         DEFAULT_HIERARCHICAL_FLUSH_RULES), "="));
 
-        log.debug("Hierarchical flush rules: " + this.hierarchicalFlushRules);
+        log.debug("Hierarchical flush rules: {}", this.hierarchicalFlushRules);
 
         /* ResourceOnly Flush Rules */
         this.resourceOnlyFlushRules = this.configureFlushRules(ParameterUtil.toMap(
                 PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_ONLY_FLUSH_RULES),
                         DEFAULT_RESOURCE_ONLY_FLUSH_RULES), "="));
 
-        log.debug("ResourceOnly flush rules: " + this.resourceOnlyFlushRules);
+        log.debug("ResourceOnly flush rules: {}", this.resourceOnlyFlushRules);
     }
 
     /**
