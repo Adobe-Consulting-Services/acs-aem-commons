@@ -9,9 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
-### Fixed
+### Added
 
+### Fixed
+- #2265 Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+
+### Changed
 
 ## [4.5.2] - 2020-04-18
 
