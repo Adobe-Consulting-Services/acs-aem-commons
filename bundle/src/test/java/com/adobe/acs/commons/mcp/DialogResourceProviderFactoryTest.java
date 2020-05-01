@@ -59,16 +59,17 @@ public class DialogResourceProviderFactoryTest {
     @Test
     public void testEnableSwitch() throws IOException {
         assertTrue("Service should report being enabled", dialogProvider.isEnabled());
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
+        // Bumped to 4 due to addition of Dynamic Deck
+        assertEquals("Should have 4 services registered", 4, dialogProvider.getActiveProviders().size());
         dialogProvider.setEnabled(false);
         assertFalse("Service should report being disabled", dialogProvider.isEnabled());
         assertEquals("Should have 0 services registered", 0, dialogProvider.getActiveProviders().size());
         assertFalse("Should not resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
         dialogProvider.setEnabled(true);
         assertTrue("Service should report being enabled", dialogProvider.isEnabled());
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
+        // Bumped to 4 due to addition of Dynamic Deck
+        assertEquals("Should have 4 services registered", 4, dialogProvider.getActiveProviders().size());
         assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
-
     }
 
     @Test

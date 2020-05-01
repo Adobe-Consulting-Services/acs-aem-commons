@@ -20,9 +20,11 @@
 package com.adobe.acs.commons.oakpal.checks;
 
 import com.google.common.collect.ImmutableMap;
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.ProgressCheckFactory;
-import net.adamcin.oakpal.core.SimpleProgressCheck;
+import net.adamcin.oakpal.api.PathAction;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.vault.fs.config.MetaInf;
@@ -52,6 +54,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -68,40 +71,41 @@ public final class ImportedPackages implements ProgressCheckFactory {
         final List<String> versions;
         JsonArray versionsFromConfig = config.getJsonArray(CONFIG_VERSION);
         if (versionsFromConfig != null) {
-            versions = versionsFromConfig.stream().map(v -> (JsonString)v).map(JsonString::getString).collect(Collectors.toList());
+            versions = versionsFromConfig.stream().map(v -> (JsonString) v).map(JsonString::getString).collect(Collectors.toList());
         } else {
             versions = DEFAULT_VERSIONS;
         }
         Map<String, Map<String, Set<Version>>> exportedPackagesByVersion = versions.stream()
-            .map(version -> {
-                InputStream inputStream = getClass().getResourceAsStream(String.format("/bundleinfo/%s.json", version));
-                if (inputStream == null) {
-                    throw new IllegalArgumentException(String.format("Unknown version %s", version));
-                }
-                try (JsonReader reader = Json.createReader(inputStream)) {
-                    JsonObject packageDefinitions = reader.readObject();
-                    ImmutableMap.Builder<String, Set<Version>> builder = ImmutableMap.builder();
-                    packageDefinitions.keySet().forEach(key -> {
-                        builder.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
-                            String str = ((JsonString) v).getString();
-                            return new Version(str);
-                        }).collect(Collectors.toSet()));
-                    });
-                    return new AbstractMap.SimpleEntry<>(version, builder.build());
-                }
-            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .map(version -> {
+                    InputStream inputStream = getClass().getResourceAsStream(String.format("/bundleinfo/%s.json", version));
+                    if (inputStream == null) {
+                        throw new IllegalArgumentException(String.format("Unknown version %s", version));
+                    }
+                    try (JsonReader reader = Json.createReader(inputStream)) {
+                        JsonObject packageDefinitions = reader.readObject();
+                        ImmutableMap.Builder<String, Set<Version>> builder = ImmutableMap.builder();
+                        packageDefinitions.keySet().forEach(key -> {
+                            builder.put(key, packageDefinitions.getJsonArray(key).stream().map(v -> {
+                                String str = ((JsonString) v).getString();
+                                return new Version(str);
+                            }).collect(Collectors.toSet()));
+                        });
+                        return new AbstractMap.SimpleEntry<>(version, builder.build());
+                    }
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return new Check(exportedPackagesByVersion);
 
     }
 
-    static final class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheckFactoryCheck<ImportedPackages> {
 
         private final Map<String, Map<String, Set<Version>>> exportedPackagesByVersion;
 
         private Map<PackageId, List<Set<ImportedPackage>>> importedPackages;
 
         Check(Map<String, Map<String, Set<Version>>> exportedPackagesByVersion) {
+            super(ImportedPackages.class);
             ImmutableMap.Builder<String, Map<String, Set<Version>>> builder = ImmutableMap.builder();
             exportedPackagesByVersion.forEach((version, exportedPackages) -> {
                 Map<String, Set<Version>> mutableExports = new HashMap<>();
@@ -134,7 +138,7 @@ public final class ImportedPackages implements ProgressCheckFactory {
                         if (entry.getName().equals("META-INF/MANIFEST.MF")) {
                             Manifest manifest = new Manifest(zipInputStream);
                             String exportPackageHeader = manifest.getMainAttributes().getValue("Export-Package");
-                            parseExportPackage(exportPackageHeader);
+                            parseExportPackage(exportPackageHeader, this::parseExportPackageClause);
 
                             String importedPackageHeader = manifest.getMainAttributes().getValue("Import-Package");
                             Set<ImportedPackage> importedPackagesForBundle = parseImportPackageHeader(importedPackageHeader);
@@ -160,11 +164,18 @@ public final class ImportedPackages implements ProgressCheckFactory {
                             Result result = importedPackage.satisfied(exportedPackages);
                             if (!result.satisfied) {
                                 if (result.availableVersions.isEmpty()) {
-                                    severeViolation(String.format("Package import %s cannot be satisified by AEM Version %s. Package is not exported.", importedPackage, version), packageId);
+                                    reporting(violation -> violation
+                                            .withSeverity(Severity.SEVERE)
+                                            .withPackage(packageId)
+                                            .withDescription("Package import {0} cannot be satisified by AEM Version {1}. Package is not exported.")
+                                            .withArgument(importedPackage, version));
                                 } else {
-                                    severeViolation(String.format("Package import %s cannot be satisified by AEM Version %s. Available package versions are (%s).",
-                                        importedPackage, version, result.availableVersions.stream().map(Version::toString).collect(Collectors.joining(", "))),
-                                        packageId);
+                                    reporting(violation -> violation
+                                            .withSeverity(Severity.SEVERE)
+                                            .withPackage(packageId)
+                                            .withDescription("Package import {0} cannot be satisified by AEM Version {1}. Available package versions are ({2}).")
+                                            .withArgument(importedPackage, version, result.availableVersions.stream()
+                                                    .map(Version::toString).collect(Collectors.joining(", "))));
                                 }
                             }
                         });
@@ -173,13 +184,13 @@ public final class ImportedPackages implements ProgressCheckFactory {
             });
         }
 
-        private void parseExportPackage(String header) {
+        static void parseExportPackage(String header, Consumer<String> callback) {
             if (header == null) {
                 return;
             }
             header = header.replaceAll(";uses:=\"[^\"]+\"", "");
             String[] parts = header.split(",");
-            Arrays.stream(parts).forEach(this::parseExportPackageClause);
+            Arrays.stream(parts).forEach(callback);
         }
 
         private void parseExportPackageClause(String clause) {
@@ -265,8 +276,8 @@ public final class ImportedPackages implements ProgressCheckFactory {
         private boolean optional;
         private VersionRange versionRange;
 
-        private static final Result OK = new Result();
-        private static final Result NO_EXPORTS = new Result(Collections.emptySet());
+        static final Result OK = new Result();
+        static final Result NO_EXPORTS = new Result(Collections.emptySet());
 
         Result satisfied(Map<String, Set<Version>> availablePackages) {
             if (optional || versionRange == null) {
