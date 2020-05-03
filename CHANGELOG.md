@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2265 Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+- #2287 - Report Builder pagination buttons not working when report has no Search Parameters configured.
 
 ## [4.5.2] - 2020-04-18
 
