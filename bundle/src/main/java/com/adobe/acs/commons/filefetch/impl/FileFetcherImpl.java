@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import com.adobe.acs.commons.filefetch.FileFetchConfiguration;
 import com.adobe.acs.commons.filefetch.FileFetcher;
-
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.Rendition;
@@ -72,6 +72,10 @@ public class FileFetcherImpl implements FileFetcher, Runnable {
   private static final String SERVICE_USER_NAME = "file-fetch";
 
   protected FileFetchConfiguration config;
+  
+  // Disable this feature on AEM as a Cloud Service
+  @Reference(target="(distribution=classic)")
+  RequireAem requireAem;
 
   @Reference
   private ResourceResolverFactory factory;

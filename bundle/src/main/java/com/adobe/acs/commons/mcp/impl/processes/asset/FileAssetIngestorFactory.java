@@ -21,6 +21,8 @@ package com.adobe.acs.commons.mcp.impl.processes.asset;
 
 import com.adobe.acs.commons.mcp.AuthorizedGroupProcessDefinitionFactory;
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.adobe.acs.commons.util.RequireAem;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -29,6 +31,10 @@ import org.apache.sling.commons.mime.MimeTypeService;
 @Component
 @Service(ProcessDefinitionFactory.class)
 public class FileAssetIngestorFactory extends AuthorizedGroupProcessDefinitionFactory<FileAssetIngestor> {
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference
     MimeTypeService mimetypeService;
