@@ -65,7 +65,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@Component(service = Servlet.class, immediate = true, property = {
+@Component(service = Servlet.class, property = {
         "sling.servlet.selectors=robots",
         "sling.servlet.extensions=txt",
         "sling.servlet.methods=GET"
@@ -119,38 +119,40 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     private void writeFromOsgiConfig(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         PrintWriter writer = response.getWriter();
 
-        rules.getGroups().forEach(group -> writeGroup(group, request, writer));
+        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        Page page = pageManager.getContainingPage(request.getResource());
+        if (page != null) {
+            rules.getGroups().forEach(group -> writeGroup(group, request.getResourceResolver(), page, writer));
 
-        rules.getSitemaps().stream().map(sitemap -> buildSitemapString(sitemap, request.getResourceResolver())).forEach(writer::println);
-        if(!rules.getSitemapProperties().isEmpty()) {
-            PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-            Page page = pageManager.getContainingPage(request.getResource());
-            addRulesFromPages(page, request.getResourceResolver(), rules.getSitemapProperties(), writer, this::buildSitemapString);
+            rules.getSitemaps().stream().map(sitemap -> buildSitemapString(sitemap, request.getResourceResolver())).forEach(writer::println);
+            if (!rules.getSitemapProperties().isEmpty()) {
+                addRulesFromPages(page, request.getResourceResolver(), rules.getSitemapProperties(), writer, this::buildSitemapString);
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
+
     }
 
-    private void writeGroup(RobotsRuleGroup group, SlingHttpServletRequest request, PrintWriter writer) {
+    private void writeGroup(RobotsRuleGroup group, ResourceResolver resourceResolver, Page page, PrintWriter writer) {
         if (printGroupingComments) {
             writer.println("# Start Group: " + group.getGroupName());
         }
 
-        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
-        Page page = pageManager.getContainingPage(request.getResource());
-
         group.getUserAgents().stream().map(this::buildUserAgentsString).forEach(writer::println);
 
-        group.getAllowed().stream().map(allowed -> buildAllowedString(allowed, request.getResourceResolver())).forEach(writer::println);
+        group.getAllowed().stream().map(allowed -> buildAllowedString(allowed, resourceResolver)).forEach(writer::println);
 
         List<String> allowProperties = group.getAllowProperties();
         if (!allowProperties.isEmpty()) {
-            addRulesFromPages(page, request.getResourceResolver(), allowProperties, writer, this::buildAllowedString);
+            addRulesFromPages(page, resourceResolver, allowProperties, writer, this::buildAllowedString);
         }
 
-        group.getDisallowed().stream().map(disallowed -> buildDisallowedString(disallowed, request.getResourceResolver())).forEach(writer::println);
+        group.getDisallowed().stream().map(disallowed -> buildDisallowedString(disallowed, resourceResolver)).forEach(writer::println);
 
         List<String> disallowProperties = group.getDisallowProperties();
         if (!disallowProperties.isEmpty()) {
-            addRulesFromPages(page, request.getResourceResolver(), disallowProperties, writer, this::buildDisallowedString);
+            addRulesFromPages(page, resourceResolver, disallowProperties, writer, this::buildDisallowedString);
         }
 
         if (printGroupingComments) {
@@ -180,15 +182,16 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     }
 
     private void writeFromJcrProperty(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
-        if (!robotsContentsPropertyPath.startsWith("/")) {
-            robotsContentsPropertyPath = request.getResource().getPath() + "/" + robotsContentsPropertyPath;
+        String absoluteRobotsContentsPropertyPath = robotsContentsPropertyPath;
+        if (!absoluteRobotsContentsPropertyPath.startsWith("/")) {
+            absoluteRobotsContentsPropertyPath = request.getResource().getPath() + "/" + robotsContentsPropertyPath;
         }
 
         Session session = request.getResourceResolver().adaptTo(Session.class);
         boolean written = false;
         try {
-            if (session.itemExists(robotsContentsPropertyPath)) {
-                Item item = session.getItem(robotsContentsPropertyPath);
+            if (session.itemExists(absoluteRobotsContentsPropertyPath)) {
+                Item item = session.getItem(absoluteRobotsContentsPropertyPath);
                 if (item instanceof Property) {
                     Property prop = (Property) item;
                     int propertyType = prop.getType();
@@ -201,16 +204,22 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
                     } else if (propertyType == PropertyType.STRING) {
                         response.getWriter().print(value.getString());
                         written = true;
+                    } else {
+                        log.warn("configured property {} found, but type {} is not String or Binary.", absoluteRobotsContentsPropertyPath, PropertyType.nameFromValue(propertyType));
                     }
+                } else {
+                    log.warn("Item found at configured property {}, but is not a property.", absoluteRobotsContentsPropertyPath);
                 }
+            } else {
+                log.warn("configured property {} does not exist.", absoluteRobotsContentsPropertyPath);
             }
 
             if (!written) {
-                log.error("no response was written while processing robots with jcr property {}", robotsContentsPropertyPath);
+                log.error("no response was written while processing robots with jcr property {}.", absoluteRobotsContentsPropertyPath);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (RepositoryException e) {
-            log.error("Repository Exception while processing robots with jcr property {}", robotsContentsPropertyPath, e);
+            log.error("Repository Exception while processing robots with jcr property {}", absoluteRobotsContentsPropertyPath, e);
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
