@@ -9,11 +9,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+## [4.6.2] - 2020-05-01
+
 ### Added
-- #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
 - #2243 - Added a servlet for serving robots.txt files
 
+### Changed
+- #2282 Certain services which are not compatible to AEM as a CloudService, should not be available there
+
+## [4.6.0] - 2020-05-01
+
+### Added
+- #2266 - InDesign "Dynamic Deck Dynamo"
+
 ### Fixed
+- #2265 Review ResourceChangeListener configuration
+- #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+
+## [4.5.2] - 2020-04-18
+
+### Added
+- #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
+
+### Fixed
+- #2241 - Automatic Package Replicator - Missing Service User
+- #2245 - Marketo Endpoint Protocol Documentation Issue
 - #2254 - Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
 - #2248 - Fixed issue with null values in Generic Lists
 
@@ -625,6 +645,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1039: Health Check Status E-mailer
 - #1041: QR Code to Publish in Page Editor
 - #1067: Vanity Path Web server re-writer mapping
+- #2212: Exclude Pages (by Template name or by page properties of boolean values) from Sitemap
 - Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 - Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work
