@@ -64,7 +64,7 @@ public final class BufferedServletOutput {
      * 
      * @param wrappedResponse the wrapped response
      * @param writer          the writer to use as buffer (may be {@code null} in case you don't want to buffer the writer)
-     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for {@link #getOutputStream()) (may be {@code null} in case
+     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for getOutputStream() (may be {@code null} in case
      *                            you don't want to buffer the output stream)
      */
     public BufferedServletOutput(ServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream) {

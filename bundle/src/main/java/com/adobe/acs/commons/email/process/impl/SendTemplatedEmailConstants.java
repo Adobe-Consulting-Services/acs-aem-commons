@@ -68,4 +68,10 @@ public final class SendTemplatedEmailConstants {
      * as: <code>${wfInitiator}</code>
      */
     public static final String WF_INITIATOR = "wfInitiator";
+
+    /**
+     * the most recent comment added to the granite work item
+     * as: <code>${wfStepComment}</code>
+     */
+    public static final String WF_STEP_COMMENT = "wfStepComment";
 }

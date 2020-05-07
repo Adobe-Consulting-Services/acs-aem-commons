@@ -61,6 +61,9 @@ public class GenericListAdapterFactoryTest {
     @Mock
     private Resource resourceTwo;
 
+    @Mock
+    private Resource resourceThree;
+
     private AdapterFactory adapterFactory;
 
     @Before
@@ -152,5 +155,33 @@ public class GenericListAdapterFactoryTest {
         assertEquals("french_title", items.get(1).getTitle(french));
         assertEquals("swiss_french_title", items.get(1).getTitle(swissFrench));
         assertEquals("french_title", items.get(1).getTitle(franceFrench));
+    }
+
+    @Test
+    public void test_that_returns_item_with_null_value() {
+        when(listResource.listChildren()).thenReturn(Arrays.asList(resourceOne, resourceTwo, resourceThree).iterator());
+        when(resourceThree.getValueMap()).thenAnswer(new Answer<ValueMap>() {
+            @SuppressWarnings("serial")
+            public ValueMap answer(InvocationOnMock invocation) throws Throwable {
+                return new ValueMapDecorator(new HashMap<String, Object>() {
+                    {
+                        put(NameConstants.PN_TITLE, "titlethree");
+                        put(GenericListImpl.PN_VALUE, null);
+
+                    }
+                });
+            }
+        });
+        GenericList list = adapterFactory.getAdapter(listPage, GenericList.class);
+        assertNotNull(list);
+        List<Item> items = list.getItems();
+        assertNotNull(items);
+        assertEquals(3, items.size());
+        assertEquals("titleone", items.get(0).getTitle());
+        assertEquals("valueone", items.get(0).getValue());
+        assertEquals("titletwo", items.get(1).getTitle());
+        assertEquals("valuetwo", items.get(1).getValue());
+        assertEquals("titlethree", items.get(2).getTitle());
+        assertEquals(null, items.get(2).getValue());
     }
 }

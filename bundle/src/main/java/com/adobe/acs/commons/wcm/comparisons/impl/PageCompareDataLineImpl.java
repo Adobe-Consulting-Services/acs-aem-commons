@@ -82,7 +82,7 @@ class PageCompareDataLineImpl implements PageCompareDataLine {
 
     @Override
     public String getUniqueName() {
-        return path.replace("/jcr:content", "").replaceAll("/","").replaceAll(":","-");
+        return path.replace("/jcr:content", "").replace("/","").replace(":","-");
     }
 
     @Override

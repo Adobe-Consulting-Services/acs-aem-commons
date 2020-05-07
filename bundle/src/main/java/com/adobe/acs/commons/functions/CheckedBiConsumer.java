@@ -22,6 +22,7 @@ package com.adobe.acs.commons.functions;
 import org.osgi.annotation.versioning.ConsumerType;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Created work-alike for functionality not introduced until Java 8

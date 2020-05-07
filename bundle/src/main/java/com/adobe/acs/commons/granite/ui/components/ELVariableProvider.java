@@ -33,7 +33,7 @@ import com.adobe.granite.ui.components.ExpressionCustomizer;
  * EL variables of all OSGi services implementing this interface are automatically available below
  * containers of type {@code /apps/acs-commons/touchui-widgets/enriched-el-container}.
  * 
- * @see {@link ExpressionCustomizer}
+ * {@link ExpressionCustomizer}
  * @see <a href="https://helpx.adobe.com/experience-manager/6-5/sites/developing/using/reference-materials/granite-ui/api/jcr_root/libs/granite/ui/docs/server/el.html">Granite Expression Language</a>
  */
 @ConsumerType

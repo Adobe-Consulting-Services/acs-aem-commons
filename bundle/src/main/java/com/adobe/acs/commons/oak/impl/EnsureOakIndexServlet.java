@@ -69,7 +69,7 @@ public class EnsureOakIndexServlet extends SlingAllMethodsServlet {
     private static final String PARAM_PATH = "path";
 
     @Reference
-    private EnsureOakIndexManager ensureOakIndexManager;
+    private transient EnsureOakIndexManager ensureOakIndexManager;
     //@formatter:on
 
     @Override

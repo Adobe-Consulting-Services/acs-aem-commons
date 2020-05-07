@@ -64,15 +64,13 @@ public final class PathInfoUtil {
     }
 
     /**
-     * <p>
      * Gets the selector at the supplied index.
-     * </p><p>
+     * <p>
      * Given: /content/page.selA.selB.html
-     * <br/>
-     * getSelector(request, 0) // --> "selA"
-     * <br/>
-     * getSelector(request, 1) // --> "selB"
-     * </p>
+     * <br>
+     * getSelector(request, 0) // --&gt; "selA"
+     * <br>
+     * getSelector(request, 1) // --&gt; "selB"
      *
      * @param request
      * @param index
@@ -88,10 +86,10 @@ public final class PathInfoUtil {
      * there is no selector at that index.
      * </p><p>
      * Given: /content/page.selA.html
-     * <br/>
-     * getSelector(request, 0, "default") // --> "selA"
-     * <br/>
-     * getSelector(request, 1, "default2") // --> "default2"
+     * <br>
+     * getSelector(request, 0, "default") // --&gt; "selA"
+     * <br>
+     * getSelector(request, 1, "default2") // --&gt; "default2"
      * </p>
      *
      * @param request the request
@@ -140,10 +138,10 @@ public final class PathInfoUtil {
      * Gets the suffix segment at the supplied index.
      * </p><p>
      * Given: /content/page.html/suffixA/suffixB
-     * <br/>
-     * getSuffixSegment(request, 0) // --> "suffixA"
-     * <br/>
-     * getSuffixSegment(request, 1) // --> "suffixB"
+     * <br>
+     * getSuffixSegment(request, 0) // --&gt; "suffixA"
+     * <br>
+     * getSuffixSegment(request, 1) // --&gt; "suffixB"
      * </p>
      *
      * @param request

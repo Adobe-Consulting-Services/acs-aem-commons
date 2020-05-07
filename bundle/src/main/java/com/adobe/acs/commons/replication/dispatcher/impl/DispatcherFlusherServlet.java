@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +62,10 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
     private static final Logger log = LoggerFactory.getLogger(DispatcherFlusherServlet.class);
 
     @Reference
-    private DispatcherFlusher dispatcherFlusher;
+    private transient DispatcherFlusher dispatcherFlusher;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private transient ResourceResolverFactory resourceResolverFactory;
 
     private static final boolean DEFAULT_FLUSH_WITH_ADMIN_RESOURCE_RESOLVER = true;
 
@@ -157,7 +159,7 @@ public class DispatcherFlusherServlet extends SlingAllMethodsServlet {
 
         private FlushResult(Agent agent, ReplicationResult result) {
             this.agentId = agent.getId();
-            this.success = result.isSuccess() && result.getCode() == SlingHttpServletResponse.SC_OK;
+            this.success = result.isSuccess() && result.getCode() == HttpServletResponse.SC_OK;
         }
 
         private final String agentId;

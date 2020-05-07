@@ -66,10 +66,10 @@ public class StatusServlet extends SlingAllMethodsServlet {
     private static final int DECIMAL_TO_PERCENT = 100;
 
     @Reference
-    private ThrottledTaskRunnerStats ttrs;
+    private transient ThrottledTaskRunnerStats ttrs;
 
     @Reference
-    private ActionManagerFactory actionManagerFactory;
+    private transient ActionManagerFactory actionManagerFactory;
 
     @Override
     @SuppressWarnings({"squid:S3776", "squid:S1192", "squid:S1872"})

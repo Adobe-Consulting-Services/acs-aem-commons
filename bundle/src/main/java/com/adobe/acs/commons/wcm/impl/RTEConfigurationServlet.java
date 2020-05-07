@@ -74,7 +74,7 @@ public final class RTEConfigurationServlet extends AbstractWidgetConfigurationSe
     private static final String DEFAULT_CONFIG_NAME = "default";
 
     @Reference
-    private XSSAPI xssApi;
+    private transient XSSAPI xssApi;
 
     private static final String DEFAULT_CONFIG
             = "/libs/foundation/components/text/dialog/items/tab1/items/text/rtePlugins";
