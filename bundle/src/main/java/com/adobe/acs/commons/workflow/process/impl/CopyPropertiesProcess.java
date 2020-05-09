@@ -53,6 +53,7 @@ public class CopyPropertiesProcess implements WorkflowProcess {
     private static final String PN_SKIP_EMPTY_SOURCE_PROPERTY = "SKIP_EMPTY_SOURCE_PROPERTY";
     private static final String SEPARATOR = "->";
     private static final String ALTERNATE_SEPARATOR = "=>";
+    private static final String EVENT_DATA = "acs-aem-commons.workflow.copy-properties";
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
@@ -75,9 +76,9 @@ public class CopyPropertiesProcess implements WorkflowProcess {
 
             if (resourceResolver.hasChanges()) {
                 try {
-                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.copy-properties");
+                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(EVENT_DATA);
                 } catch (RepositoryException e) {
-                    log.warn("Unable to set user-data to [ acs-aem-commons.copy-properties ]", e);
+                    log.warn("Unable to set user-data to [ " + EVENT_DATA + " ]", e);
                 }
             }
         } catch (RepositoryException e) {
