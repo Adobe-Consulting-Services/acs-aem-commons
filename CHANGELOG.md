@@ -9,12 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
-## [4.6.2] - 2020-05-01
+## [Unreleased]
+
+### Added
+- #2293 - Added Copy Properties Workflow Process
 
 ### Changed
-- #2282 Certain services which are not compatible to AEM as a CloudService, should not be available there
-
-
+- #2282 - Certain services which are not compatible to AEM as a CloudService, should not be available there
 
 ## [4.6.0] - 2020-05-01
 
@@ -22,7 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2266 - InDesign "Dynamic Deck Dynamo"
 
 ### Fixed
-- #2265 Review ResourceChangeListener configuration
+- #2265 - Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
 
 ## [4.5.2] - 2020-04-18
