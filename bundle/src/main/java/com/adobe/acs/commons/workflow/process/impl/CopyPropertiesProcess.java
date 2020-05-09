@@ -75,14 +75,18 @@ public class CopyPropertiesProcess implements WorkflowProcess {
             }
 
             if (resourceResolver.hasChanges()) {
-                try {
-                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(EVENT_DATA);
-                } catch (RepositoryException e) {
-                    log.warn("Unable to set user-data to [ " + EVENT_DATA + " ]", e);
-                }
+                setJcrSessionUserData(resourceResolver);
             }
         } catch (RepositoryException e) {
             throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
+        }
+    }
+
+    protected void setJcrSessionUserData(ResourceResolver resourceResolver) {
+        try {
+            resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(EVENT_DATA);
+        } catch (RepositoryException e) {
+            log.warn("Unable to set user-data to [ " + EVENT_DATA + " ]", e);
         }
     }
 
@@ -128,7 +132,7 @@ public class CopyPropertiesProcess implements WorkflowProcess {
 
             if (resource == null || StringUtils.isBlank(propertyName)) {
                 throw new WorkflowException(String.format("Unable to parse valid resource and property combination from [ %s + %s ]",
-                        new String[]{payload, mapProperty}));
+                       payload, mapProperty));
             }
         }
 
