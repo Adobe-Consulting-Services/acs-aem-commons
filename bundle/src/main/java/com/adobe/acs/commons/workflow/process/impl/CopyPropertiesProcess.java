@@ -20,137 +20,136 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import com.adobe.acs.commons.util.ParameterUtil;
+import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.cq.dam.api.Asset;
-import com.day.cq.dam.api.DamConstants;
-import com.day.cq.dam.commons.util.DamUtil;
-import com.day.cq.workflow.WorkflowException;
-import com.day.cq.workflow.WorkflowSession;
-import com.day.cq.workflow.exec.WorkItem;
-import com.day.cq.workflow.exec.WorkflowProcess;
-import com.day.cq.workflow.metadata.MetaDataMap;
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.WorkflowProcess;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.jackrabbit.vault.util.PathUtil;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - DAM Metadata Property Reset",
-        description = "Replaces DAM Asset metadata properties with other values from the metadata node"
+        service = WorkflowProcess.class,
+        property = "process.label=Copy properties"
 )
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "DAM Metadata Property Reset",
-                description = "Replaces DAM Asset metadata properties with other values from the metadata node"
-        )
-})
-@Service
-public class DamMetadataPropertyResetProcess implements WorkflowProcess {
-    private static final Logger log = LoggerFactory.getLogger(DamMetadataPropertyResetProcess.class);
+public class CopyPropertiesProcess implements WorkflowProcess {
+    private static final Logger log = LoggerFactory.getLogger(CopyPropertiesProcess.class);
+    private static final String PN_PROPERTY_MAP = "PROPERTY_MAP";
+    private static final String PN_SKIP_EMPTY_SOURCE_PROPERTY = "SKIP_EMPTY_SOURCE_PROPERTY";
+    private static final String SEPARATOR = "->";
+    private static final String ALTERNATE_SEPARATOR = "=>";
 
     @Reference
     private WorkflowPackageManager workflowPackageManager;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private WorkflowHelper workflowHelper;
 
     @Override
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
         String wfPayload = null;
 
-        try ( ResourceResolver resourceResolver = this.getResourceResolver(workflowSession.getSession()) ){
+        try (ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession)) {
             wfPayload = (String) workItem.getWorkflowData().getPayload();
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, wfPayload);
-            final Map<String, String> srcDestMap = this.getProcessArgsMap(metaDataMap);
 
             for (final String payload : payloads) {
+                copyProperties(metaDataMap, resourceResolver, payload);
+            }
 
-                final Asset asset = DamUtil.resolveToAsset(resourceResolver.getResource(payload));
-
-                if (asset == null) {
-                    log.debug("Payload path [ {} ] does not resolve to an asset", payload);
-                    continue;
-                }
-
-                String metadataPath = String.format("%s/%s/%s",asset.getPath(), JcrConstants.JCR_CONTENT, DamConstants.METADATA_FOLDER);
-                Resource metadataResource = resourceResolver.getResource(metadataPath);
-
-                if (metadataResource == null) {
-                    String msg = String.format("Could not find the metadata node for Asset [ %s ]", asset.getPath());
-                    throw new WorkflowException(msg);
-                }
-
-                final ModifiableValueMap mvm = metadataResource.adaptTo(ModifiableValueMap.class);
-
-                for (final Map.Entry<String, String> entry : srcDestMap.entrySet()) {
-                    final String srcProperty = entry.getValue();
-                    final String destProperty = entry.getKey();
-
-                    if(mvm.get(srcProperty) != null) {
-                        // Remove dest property first in case Types differ
-                        mvm.remove(destProperty);
-
-                        // If the src value is NOT null, update the dest property
-                        mvm.put(destProperty, mvm.get(srcProperty));
-                    } else if (mvm.containsKey(srcProperty)) {
-                        // Else if the src value IS null, AND the src property exists on the node, remove the dest property
-                        mvm.remove(destProperty);
-                    } 
-                    // Else leave the dest property alone since there is no source defined to overwrite it with
-
-                    // Remove the source
-                    mvm.remove(srcProperty);
+            if (resourceResolver.hasChanges()) {
+                try {
+                    resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData("acs-aem-commons.copy-properties");
+                } catch (RepositoryException e) {
+                    log.warn("Unable to set user-data to [ acs-aem-commons.copy-properties ]", e);
                 }
             }
-        } catch (LoginException e) {
-            throw new WorkflowException("Could not get a ResourceResolver object from the WorkflowSession", e);
         } catch (RepositoryException e) {
             throw new WorkflowException(String.format("Could not find the payload for '%s'", wfPayload), e);
         }
     }
 
-    private Map<String, String> getProcessArgsMap(MetaDataMap metaDataMap) {
-        final Map<String, String> map = new LinkedHashMap<String, String>();
-        final String processArgs = metaDataMap.get("PROCESS_ARGS", "");
-        final String[] lines = StringUtils.split(processArgs, ",");
+    protected void copyProperties(MetaDataMap metaDataMap, ResourceResolver resourceResolver, String payload) {
+        final Resource resource = workflowHelper.getPageOrAssetResource(resourceResolver, payload);
 
-        for (final String line : lines) {
-            final String[] entry = StringUtils.split(line, "=");
+        if (resource == null) {
+            log.debug("Could not process payload [ {} ] as it could be resolved to a Page or Asset", payload);
+            return;
+        }
 
-            if (entry.length == 2) {
-                map.put(entry[0], entry[1]);
+        final Boolean skipEmptyValue = metaDataMap.get(PN_SKIP_EMPTY_SOURCE_PROPERTY, Boolean.TRUE);
+        final String[] propertyMaps = metaDataMap.get(PN_PROPERTY_MAP, new String[]{});
+
+        for (String propertyMap : propertyMaps) {
+            propertyMap = StringUtils.replace(propertyMap, ALTERNATE_SEPARATOR, SEPARATOR);
+            Map.Entry<String, String> entry = ParameterUtil.toMapEntry(propertyMap, SEPARATOR);
+
+            try {
+                PropertyResource source = new PropertyResource(StringUtils.trim(entry.getKey()), resource.getPath(), resourceResolver);
+                PropertyResource destination = new PropertyResource(StringUtils.trim(entry.getValue()), resource.getPath(), resourceResolver);
+
+                destination.setValue(source.getValue(), skipEmptyValue);
+            } catch (WorkflowException e) {
+                log.error("Could not copy properties", e);
+            }
+        }
+    }
+
+    static class PropertyResource {
+        private final String propertyName;
+        private final Resource resource;
+
+        public PropertyResource(String mapProperty, String payload, ResourceResolver resourceResolver) throws WorkflowException {
+            String resourcePath = StringUtils.substringBeforeLast(mapProperty, "/");
+            propertyName = StringUtils.substringAfterLast(mapProperty, "/");
+
+            if (!StringUtils.startsWith(resourcePath, "/")) {
+                resourcePath = PathUtil.makePath(payload, resourcePath);
+            }
+
+            resource = resourceResolver.getResource(resourcePath);
+
+            if (resource == null || StringUtils.isBlank(propertyName)) {
+                throw new WorkflowException(String.format("Unable to parse valid resource and property combination from [ %s + %s ]",
+                        new String[]{payload, mapProperty}));
             }
         }
 
-        return map;
-    }
+        public Object getValue() {
+            return resource.getValueMap().get(propertyName);
+        }
 
-    private ResourceResolver getResourceResolver(Session session) throws LoginException {
-        final Map<String, Object> authInfo = new HashMap<String, Object>();
-        authInfo.put(JcrResourceConstants.AUTHENTICATION_INFO_SESSION, session);
-        return resourceResolverFactory.getResourceResolver(authInfo);
+        public void setValue(Object value, boolean skipEmptyValue) {
+            if (skipEmptyValue) {
+                if (value == null) { return; }
+                if ((value instanceof String) && StringUtils.isBlank((String) value)) { return; }
+                if ((value instanceof Object[]) && ((Object[])value).length == 0) { return; }
+            }
+
+            final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
+            if (properties != null) {
+                properties.put(propertyName, value);
+            } else {
+                log.error("Could not set [ {} ] to [ {} ] due to ModifiableValueMap being null for resource [ {} ]",
+                        propertyName, value, resource.getPath());
+            }
+        }
     }
 }
 
