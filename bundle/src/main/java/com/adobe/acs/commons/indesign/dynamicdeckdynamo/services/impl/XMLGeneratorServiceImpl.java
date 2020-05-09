@@ -42,6 +42,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -79,8 +80,10 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         }
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-
-            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); 
+            DocumentBuilder dBuilder = dbf.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlInputStream);
 
             /*
