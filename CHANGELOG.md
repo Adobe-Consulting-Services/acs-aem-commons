@@ -11,10 +11,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## [4.6.2] - 2020-05-01
 
+### Added
+- #2243 - Added a servlet for serving robots.txt files
+
 ### Changed
 - #2282 Certain services which are not compatible to AEM as a CloudService, should not be available there
-
-
 
 ## [4.6.0] - 2020-05-01
 
