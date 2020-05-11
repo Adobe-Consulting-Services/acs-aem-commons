@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2293 - Added Copy Properties Workflow Process
+- #2243 - Added a servlet for serving robots.txt files
 
 ### Changed
 - #2282 - Certain services which are not compatible to AEM as a CloudService, should not be available there
@@ -25,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2265 - Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+- #2287 - Report Builder pagination buttons not working when report has no Search Parameters configured.
 
 ## [4.5.2] - 2020-04-18
 

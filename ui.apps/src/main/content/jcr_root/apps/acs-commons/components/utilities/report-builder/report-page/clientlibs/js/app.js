@@ -105,7 +105,10 @@ angular.module('acs-commons-report-page-app', ['acsCoral', 'ACS.Commons.notifica
         $scope.run = function(page) {
         	var params = $('#report--form').serialize();
         	if(page){
-        		params += '&page=' + page;
+        		if (params) {
+        			params += "&";
+        		}
+        		params += 'page=' + page;
         	}
 			loadResults(params);
 		};
