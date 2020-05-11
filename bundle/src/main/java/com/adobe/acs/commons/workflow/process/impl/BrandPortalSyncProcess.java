@@ -20,6 +20,7 @@
 
 package com.adobe.acs.commons.workflow.process.impl;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.WorkflowHelper;
 import com.adobe.acs.commons.workflow.WorkflowPackageManager;
 import com.adobe.cq.dam.mac.sync.api.DAMSyncService;
@@ -62,6 +63,10 @@ import java.util.List;
 @Service
 public class BrandPortalSyncProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(BrandPortalSyncProcess.class);
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;    
 
     @Reference
     private WorkflowHelper workflowHelper;

@@ -139,6 +139,22 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
         return xstyle;
     }
 
+    int getColumnBlockSize() {
+        return 256;
+    }
+
+    int getMaxColumnBlockCount() {
+        return 120;
+    }
+
+    int getMinColumnBlockCount() {
+        return 20;
+    }
+
+    int getPreferredMinBlockCount() {
+        return 12;
+    }
+
     void autosize(Sheet sheet, int lastColumnIndex) {
         for (int i = 0; i <= lastColumnIndex; i++) {
             try {
@@ -149,10 +165,10 @@ public class ProcessErrorReportExcelServlet extends SlingSafeMethodsServlet {
             }
             int cw = sheet.getColumnWidth(i);
             // increase width to accommodate drop-down arrow in the header
-            if (cw / 256 < 20) {
-                sheet.setColumnWidth(i, 256 * 12);
-            } else if (cw / 256 > 120) {
-                sheet.setColumnWidth(i, 256 * 120);
+            if (cw / getColumnBlockSize() < getMinColumnBlockCount()) {
+                sheet.setColumnWidth(i, getColumnBlockSize() * getPreferredMinBlockCount());
+            } else if (cw / getColumnBlockSize() > getMaxColumnBlockCount()) {
+                sheet.setColumnWidth(i, getColumnBlockSize() * getMaxColumnBlockCount());
             }
         }
     }

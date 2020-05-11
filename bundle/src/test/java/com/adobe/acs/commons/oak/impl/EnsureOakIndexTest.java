@@ -38,6 +38,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
+import com.adobe.acs.commons.util.RequireAem;
 
 
 public class EnsureOakIndexTest {
@@ -51,6 +52,9 @@ public class EnsureOakIndexTest {
     @Mock
     Scheduler scheduler;
     
+    @Mock
+    RequireAem requireAem;
+    
     String[] indexManagerProps = {"managerProp1"};
     
     Map<String,Object> ensureOakIndexProperties = new HashMap<>();
@@ -63,6 +67,7 @@ public class EnsureOakIndexTest {
         context.registerService(ChecksumGenerator.class, new ChecksumGeneratorImpl());
         
         context.registerService(Scheduler.class, scheduler);
+        context.registerService(RequireAem.class, requireAem,"distribution","classic");
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_ENSURE_DEFINITIONS_PATH, "/apps/com/indexes");
         ensureOakIndexProperties.put(EnsureOakIndex.PROP_OAK_INDEXES_PATH, "/oak:index");
     }

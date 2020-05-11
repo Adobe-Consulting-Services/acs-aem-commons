@@ -65,6 +65,7 @@ import org.mockserver.model.HttpResponse;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -80,7 +81,6 @@ public class RemoteAssetsNodeSyncImplTest {
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
-
 
 //    private RemoteAssetsConfig remoteAssetsConfig;
 
@@ -100,8 +100,19 @@ public class RemoteAssetsNodeSyncImplTest {
         remoteAssetsConfigs.put("server.url", "http://localhost:" + mockServerRule.getPort());
         remoteAssetsConfigs.put("server.insecure", true);
         remoteAssetsConfigs.put("save.interval", 2);
+        
+        // does not work with a mock here
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
 
+        context.registerService(RequireAem.class,requireAem,"distribution","classic");
         context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
+
         RemoteAssetsNodeSyncImpl remoteAssetsNodeSyncImpl = spy(new RemoteAssetsNodeSyncImpl());
         remoteAssetsNodeSync = context.registerInjectActivateService(remoteAssetsNodeSyncImpl);
 
