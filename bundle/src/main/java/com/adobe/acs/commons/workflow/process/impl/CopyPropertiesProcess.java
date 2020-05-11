@@ -94,7 +94,7 @@ public class CopyPropertiesProcess implements WorkflowProcess {
         final Resource resource = workflowHelper.getPageOrAssetResource(resourceResolver, payload);
 
         if (resource == null) {
-            log.debug("Could not process payload [ {} ] as it could be resolved to a Page or Asset", payload);
+            log.warn("Could not process payload [ {} ] as it could be resolved to a Page or Asset", payload);
             return;
         }
 
