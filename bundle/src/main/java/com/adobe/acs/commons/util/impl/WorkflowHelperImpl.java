@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component(service = WorkflowHelper.class)
 public class WorkflowHelperImpl implements WorkflowHelper {
     private static final Logger log = LoggerFactory.getLogger(WorkflowHelperImpl.class);
 

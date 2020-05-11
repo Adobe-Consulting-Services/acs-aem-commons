@@ -86,7 +86,7 @@ public class CopyPropertiesProcess implements WorkflowProcess {
         try {
             resourceResolver.adaptTo(Session.class).getWorkspace().getObservationManager().setUserData(EVENT_DATA);
         } catch (RepositoryException e) {
-            log.warn("Unable to set user-data to [ " + EVENT_DATA + " ]", e);
+            log.warn("Unable to set user-data to [ {} ]", EVENT_DATA, e);
         }
     }
 
@@ -111,7 +111,8 @@ public class CopyPropertiesProcess implements WorkflowProcess {
 
                 destination.setValue(source.getValue(), skipEmptyValue);
             } catch (WorkflowException e) {
-                log.error("Could not copy properties", e);
+                log.error("Could not copy properties [ {} -> {} ] for payload [ {} ]",
+                        new String[]{entry.getKey(), entry.getValue(), resource.getPath()} , e);
             }
         }
     }
