@@ -35,11 +35,11 @@ import java.util.Map;
  * Here is an example to send an email with attachments:
  *
  *      String attachment1 = "This text should be in the attache txt file."
- *      Map<String, DataSource> attachments = new HashMap<>();
+ *      Map&lt;String, DataSource&gt; attachments = new HashMap&lt;&gt;();
  *      attachments.put("attachment1.txt", new ByteArrayDataSource(attachment1, "text/plain"));
  *      ...
  *      ...
- *      List<String> participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
+ *      List&lt;String&gt; participantList = emailService.sendEmail(htmlEmailTemplatePath, emailParams, attachments, key);
  */
 @ProviderType
 public interface EmailService {

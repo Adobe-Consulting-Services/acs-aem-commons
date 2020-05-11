@@ -139,7 +139,7 @@ public final class TextUtil {
     }
 
     /**
-     * Looks for <..> substrings in the parameter string. If any are found it assume Rich text.
+     * Looks for &lt;..&gt; substrings in the parameter string. If any are found it assume Rich text.
      *
      * @param str
      * @return

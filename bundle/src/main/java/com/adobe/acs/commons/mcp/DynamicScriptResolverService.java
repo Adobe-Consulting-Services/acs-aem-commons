@@ -37,7 +37,7 @@ public interface DynamicScriptResolverService {
     /**
      * Prepare a list of custom process definition factory instances
      * @param rr Resource resolver to use (note this will usually be the MCP service user, so make sure that doesn't cause ACL issues)
-     * @return Map of String (Path or identifier) -> ProessDefinitionFactory instances
+     * @return Map of String (Path or identifier) -&gt; ProessDefinitionFactory instances
      */
     Map<String, ProcessDefinitionFactory> getDetectedProcesDefinitionFactories(ResourceResolver rr);
 
@@ -55,7 +55,7 @@ public interface DynamicScriptResolverService {
      * Generate list of components needed to build the start dialog of a process
      * @param identifier JCR path or other applicable script identifier
      * @param sling Sling helper
-     * @return Map of String (variable name) -> FieldComponent for process if it exists (can be an empty map), null if process definition doesn't exist.
+     * @return Map of String (variable name) -&gt; FieldComponent for process if it exists (can be an empty map), null if process definition doesn't exist.
      * @throws ReflectiveOperationException If needed because reflection is used to generate this list
      */
     Map<String, FieldComponent> geFieldComponentsForProcessDefinition(String identifier, SlingScriptHelper sling) throws ReflectiveOperationException;

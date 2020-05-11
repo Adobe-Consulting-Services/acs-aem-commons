@@ -67,7 +67,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      *
      * @param session the session
      * @param path tthe root path to generate checksums for
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */
@@ -84,7 +84,7 @@ public class ChecksumGeneratorImpl implements ChecksumGenerator {
      * @param session the session
      * @param path the root path to generate checksums for
      * @param options the {@link ChecksumGeneratorOptions} that define the checksum generation
-     * @return the map of abs path ~> checksums
+     * @return the map of abs path ~&gt; checksums
      * @throws RepositoryException
      * @throws IOException
      */

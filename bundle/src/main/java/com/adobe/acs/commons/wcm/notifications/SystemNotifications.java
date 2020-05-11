@@ -48,8 +48,8 @@ public interface SystemNotifications {
 
     /**
      * Gets the notification message injecting the onTime into {{ onTime }} and offTime into {{ offTime }}.
-     * Also converts CRLF into <br/>
-     * @param message the raw message; may include HTML but CRLF are converted to <br/>
+     * Also converts CRLF into <br>
+     * @param message the raw message; may include HTML but CRLF are converted to <br>
      * @param onTime the string to be injected into {{ onTime }}
      * @param offTime the string to be injected into {{ offTime }}
      * @return The formatted message

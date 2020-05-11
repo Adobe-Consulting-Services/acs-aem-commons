@@ -29,13 +29,13 @@ import com.day.cq.wcm.api.WCMMode;
 
 /**
  * Implementation of the &lt;wcmmode:setMode&gt; tag, this sets the <code>WCMMode</code> to
- * the specified mode and restores it to the original mode.<br/>
+ * the specified mode and restores it to the original mode.<br>
  * The following attributes can be specified:
  * <ul>
  * <li>mode: to mode to be set</li>
  * <li>restore: must the original mode be restored (default true)</li>
  * </ul>
- * Example:<br/>
+ * Example:<br>
  * &lt;wcmmode:setMode mode="disabled"&gt;
  * ...
  * &lt;/wcmmode:setMode&gt;

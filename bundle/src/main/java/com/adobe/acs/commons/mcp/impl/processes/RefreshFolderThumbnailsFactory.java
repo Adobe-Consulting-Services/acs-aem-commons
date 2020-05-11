@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.contentsync.handler.util.RequestResponseFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -29,6 +30,11 @@ import org.apache.sling.engine.SlingRequestProcessor;
 @Component
 @Service(ProcessDefinitionFactory.class)
 public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<RefreshFolderTumbnails> {
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+
     @Reference
     private SlingRequestProcessor slingProcessor;
     

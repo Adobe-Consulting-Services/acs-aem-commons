@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.hc.impl;
 
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.mail.MailTemplate;
 import com.day.cq.mailer.MessageGateway;
 import com.day.cq.mailer.MessageGatewayService;
@@ -89,6 +90,10 @@ public class SMTPMailServiceHealthCheck implements HealthCheck {
     private static final String PROP_EMAIL = "email";
     private String toEmail;
 
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+    
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policyOption = ReferencePolicyOption.GREEDY)
     private MessageGatewayService messageGatewayService;
 

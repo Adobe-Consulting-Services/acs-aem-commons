@@ -338,12 +338,12 @@ public final class GQLToQueryBuilderConverter {
 
     /**
      * @param map
-     * @param predicateValue  => jcr:title
-     * @param predicate       => property
-     * @param predicateSuffix => value
-     * @param values          => [Square, Triangle]
-     * @param group           => ID
-     * @param or              => true/false
+     * @param predicateValue  =&gt; jcr:title
+     * @param predicate       =&gt; property
+     * @param predicateSuffix =&gt; value
+     * @param values          =&gt; [Square, Triangle]
+     * @param group           =&gt; ID
+     * @param or              =&gt; true/false
      * @return
      */
     public static Map<String, String> putAll(Map<String, String> map, String predicate, String predicateValue,
