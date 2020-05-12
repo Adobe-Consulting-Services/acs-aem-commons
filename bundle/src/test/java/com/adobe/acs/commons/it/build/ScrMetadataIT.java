@@ -105,7 +105,7 @@ public class ScrMetadataIT {
         // the following two values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1773
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.PlainXMLSerializerFactory:pipeline.type");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.XMLParserGeneratorFactory:pipeline.type");
-        
+
         // properties removed when updating to OSGi R6 annotations
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportCSVExportServlet:service.vendor");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportsRenderCondition:service.vendor");
@@ -187,7 +187,7 @@ public class ScrMetadataIT {
         List<String> problems = new ArrayList<>();
 
         current.properties.stream().filter(cp -> !PROPERTIES_TO_IGNORE.contains(cp.name))
-            .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
+                .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
             Optional<Property> fromLatest = latestRelease.properties.stream().filter(p -> p.name.equals(cp.name)).findFirst();
             if (fromLatest.isPresent()) {
                 Property lp = fromLatest.get();
@@ -203,7 +203,7 @@ public class ScrMetadataIT {
         });
 
         latestRelease.properties.stream().filter(lp -> !PROPERTIES_TO_IGNORE.contains(lp.name))
-            .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
+                .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
             Optional<Property> fromCurrent = current.properties.stream().filter(p -> p.name.equals(lp.name)).findFirst();
             if (!fromCurrent.isPresent()) {
                 problems.add(String.format("Property %s on component %s has been removed.", lp.name, latestRelease.name));
@@ -214,16 +214,16 @@ public class ScrMetadataIT {
     }
 
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
-        JsonObject packageDetails = (JsonObject) Request.Get("https://api.bintray.com/packages/acs/releases/acs-aem-commons").execute().handleResponse(responseHandler);
-        String latestVersion = packageDetails.get("latest_version").getAsString();
+        JsonObject packageDetails = (JsonObject) Request.Get("https://search.maven.org/solrsearch/select?q=g:%22com.adobe.acs%22+AND+a:%22acs-aem-commons-bundle%22&rows=1").execute().handleResponse(responseHandler);
+        String latestVersion = packageDetails.getAsJsonObject("response").getAsJsonArray("docs").get(0).getAsJsonObject().get("latestVersion").getAsString();
 
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         File cachedFile = new File(tempDir, String.format("acs-aem-commons-bundle-%s.jar", latestVersion));
         if (cachedFile.exists()) {
             System.out.printf("Using cached file %s\n", cachedFile);
         } else {
-            String url = String.format("https://dl.bintray.com/acs/releases/com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
 
+            String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
             System.out.printf("Fetching %s\n", url);
 
             InputStream content = Request.Get(url).execute().returnContent().asStream();
@@ -451,8 +451,5 @@ public class ScrMetadataIT {
         public boolean markSupported() {
             return zis.markSupported();
         }
-
     }
-
-
 }
