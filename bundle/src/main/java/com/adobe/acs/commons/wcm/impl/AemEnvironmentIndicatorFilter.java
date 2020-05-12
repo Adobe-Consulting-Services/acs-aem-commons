@@ -193,6 +193,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                             ? capturedResponse.getBufferedServletOutput().getBufferedString()
                             : null;
 
+            
+                            
             if (contents != null
                     && StringUtils.contains(response.getContentType(), "html")) {
 
@@ -209,6 +211,12 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     writeEnvironmentIndicator(css, innerHTML, titlePrefix, printWriter);
 
                     printWriter.write(contents.substring(bodyIndex));
+                } 
+            } else {
+                if (contents != null) {
+                    response.setContentLength(contents.length());
+                    final PrintWriter printWriter = response.getWriter();
+                    printWriter.write(contents);
                 }
             }
         }
