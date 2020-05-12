@@ -46,8 +46,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaffeineMemHttpCacheStoreImplTest {
@@ -98,7 +97,8 @@ public class CaffeineMemHttpCacheStoreImplTest {
         assertTrue("contains entry we just put in", caffeine.contains(key));
 
         CacheKey secondKey = mock(CacheKey.class);
-        when(key.isInvalidatedBy(secondKey)).thenReturn(true);
+        // Mockito believes this is unnecessary, but test fails without it.
+        lenient().when(key.isInvalidatedBy(secondKey)).thenReturn(true);
 
         caffeine.invalidate(secondKey);
 
