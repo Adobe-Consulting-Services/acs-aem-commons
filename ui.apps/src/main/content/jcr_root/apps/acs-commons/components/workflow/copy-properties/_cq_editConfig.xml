@@ -24,9 +24,4 @@
           cq:dialogMode="floating"
           cq:inherit="{Boolean}true"
           jcr:primaryType="cq:EditConfig">
-    <cq:formParameters
-            jcr:primaryType="nt:unstructured"
-            jcr:title="Copy Properties"
-            PROCESS="com.adobe.acs.commons.workflow.process.impl.CopyPropertiesProcess"
-            PROCESS_AUTO_ADVANCE="true"/>
 </jcr:root>

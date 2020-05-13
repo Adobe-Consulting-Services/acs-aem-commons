@@ -98,7 +98,6 @@ public class CopyPropertiesProcess implements WorkflowProcess {
             return;
         }
 
-        final Boolean skipEmptyValue = metaDataMap.get(PN_SKIP_EMPTY_SOURCE_PROPERTY, Boolean.TRUE);
         final String[] propertyMaps = metaDataMap.get(PN_PROPERTY_MAP, new String[]{});
 
         for (String propertyMap : propertyMaps) {
@@ -109,7 +108,25 @@ public class CopyPropertiesProcess implements WorkflowProcess {
                 PropertyResource source = new PropertyResource(StringUtils.trim(entry.getKey()), resource.getPath(), resourceResolver);
                 PropertyResource destination = new PropertyResource(StringUtils.trim(entry.getValue()), resource.getPath(), resourceResolver);
 
-                destination.setValue(source.getValue(), skipEmptyValue);
+                /**
+                 * IF the property exists on the source AND is empty on the source AND the property exists on the destination THEN set the destination property to empty.
+                 * IF the property exists on the source AND is empty on the source AND the property does not exist on the destination THEN do nothing (leave the destination alone)
+                 * IF the property doesn’t exist on the source, THEN remove the property from the destination
+                 * ELSE, copy the value from the source to the destination.
+                 */
+
+                if (source.propertyExists() && !source.hasValue() && destination.propertyExists()) {
+                    log.debug("Remove destination property during copy properties of [ {} -> {} ] because source property exists and has no value, and destination has the property", source, destination);
+                    destination.setValue(null);
+                } else if (!source.propertyExists() && destination.propertyExists()) {
+                    log.debug("Remove destination property during copy properties of [ {} -> {} ] because source property does not exists, and destination has the property", source, destination);
+                    destination.setValue(null);
+                } else if (source.propertyExists() && !source.hasValue() && !destination.propertyExists()) {
+                    log.debug("Do nothing. Skipping [ {} -> {} ] because source has no value, and destination is missing the property", source, destination);
+                } else {
+                    log.debug("Setting [ {} ] value during copy properties of [ {} -> {} ]", source.getValue(), source, destination);
+                    destination.setValue(source.getValue());
+                }
             } catch (WorkflowException e) {
                 log.error("Could not copy properties [ {} -> {} ] for payload [ {} ]",
                         new String[]{entry.getKey(), entry.getValue(), resource.getPath()} , e);
@@ -137,24 +154,40 @@ public class CopyPropertiesProcess implements WorkflowProcess {
             }
         }
 
+        public boolean propertyExists() {
+            return resource.getValueMap().containsKey(propertyName);
+        }
+
+        public boolean hasValue() {
+            final Object value = getValue();
+
+            if (value == null) { return false; }
+            if ((value instanceof String) && StringUtils.isBlank((String) value)) { return false; }
+            if ((value instanceof Object[]) && ((Object[])value).length == 0) { return false; }
+
+            return true;
+        }
+
         public Object getValue() {
             return resource.getValueMap().get(propertyName);
         }
 
-        public void setValue(Object value, boolean skipEmptyValue) {
-            if (skipEmptyValue) {
-                if (value == null) { return; }
-                if ((value instanceof String) && StringUtils.isBlank((String) value)) { return; }
-                if ((value instanceof Object[]) && ((Object[])value).length == 0) { return; }
-            }
-
+        public void setValue(Object value) {
             final ModifiableValueMap properties = resource.adaptTo(ModifiableValueMap.class);
             if (properties != null) {
-                properties.put(propertyName, value);
-            } else {
-                log.error("Could not set [ {} ] to [ {} ] due to ModifiableValueMap being null for resource [ {} ]",
-                        propertyName, value, resource.getPath());
+                if (value != null) {
+                    properties.put(propertyName, value);
+                } else if (properties.containsKey(propertyName)){
+                    properties.remove(propertyName);
+                }
             }
+        }
+
+        public String toString() {
+            return String.format("%s/%s (Property %s)", new String[] {
+                    resource.getPath(),
+                    propertyName,
+                    propertyExists() ? "exists" : "does not exist"});
         }
     }
 }
