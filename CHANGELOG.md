@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Fixed
+
+- #2300 - Fixed CopyProperties WF Process copy of empty properties
+
 ## [4.7.0] - 2020-05-12
 
 ### Added
