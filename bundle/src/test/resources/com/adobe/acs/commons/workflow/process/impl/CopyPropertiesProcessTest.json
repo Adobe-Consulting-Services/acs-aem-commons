@@ -1,0 +1,35 @@
+{
+  "one.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "monday",
+      "offTime": "sunday",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:offTime": "saturday"
+      }
+    }
+  },
+  "two.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "tuesday"
+      }
+    }
+  },
+  "three.png" : {
+    "jcr:primaryType" : "dam:Asset",
+    "jcr:content" : {
+      "jcr:primaryType" : "nt:unstructured",
+      "onTime": "wednesday",
+      "metadata" : {
+        "jcr:primaryType": "nt:unstructured",
+        "dam:onTime": "thursday"
+      }
+    }
+  }
+}

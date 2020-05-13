@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-@Version("1.0.0")
-package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services;
+@Version("4.6.0")
+package com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils;
 
 import org.osgi.annotation.versioning.Version;
