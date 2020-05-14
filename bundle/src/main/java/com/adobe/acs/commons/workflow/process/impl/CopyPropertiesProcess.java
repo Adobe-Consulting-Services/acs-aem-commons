@@ -50,7 +50,6 @@ import java.util.Map;
 public class CopyPropertiesProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(CopyPropertiesProcess.class);
     private static final String PN_PROPERTY_MAP = "PROPERTY_MAP";
-    private static final String PN_SKIP_EMPTY_SOURCE_PROPERTY = "SKIP_EMPTY_SOURCE_PROPERTY";
     private static final String SEPARATOR = "->";
     private static final String ALTERNATE_SEPARATOR = "=>";
     private static final String EVENT_DATA = "acs-aem-commons.workflow.copy-properties";
@@ -184,10 +183,10 @@ public class CopyPropertiesProcess implements WorkflowProcess {
         }
 
         public String toString() {
-            return String.format("%s/%s (Property %s)", new String[] {
+            return String.format("%s/%s (Property %s)",
                     resource.getPath(),
                     propertyName,
-                    propertyExists() ? "exists" : "does not exist"});
+                    propertyExists() ? "exists" : "does not exist");
         }
     }
 }
