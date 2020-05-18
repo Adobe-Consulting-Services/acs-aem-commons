@@ -166,10 +166,10 @@ public final class BufferedServletOutput {
     void close() throws IOException {
         if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) {
             wrappedResponse.getOutputStream().write(getBufferedBytes());
-        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null) {
+        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null && getBufferedString().length() > 0) {
             wrappedResponse.getWriter().write(getBufferedString());
         }
-        if (flushBuffer) {
+        if (flushBuffer && getBufferedString().length() > 0) {
             wrappedResponse.flushBuffer();
         }
     }

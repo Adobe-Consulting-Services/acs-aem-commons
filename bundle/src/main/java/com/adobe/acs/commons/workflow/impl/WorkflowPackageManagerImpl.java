@@ -88,10 +88,10 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
     private static final String[] DEFAULT_WF_PACKAGE_TYPES = {"cq:Page", "cq:PageContent", "dam:Asset"};
 
     private String[] workflowPackageTypes = DEFAULT_WF_PACKAGE_TYPES;
-    
+
     private static final String SERVICE_NAME = "workflowpackagemanager-service";
     private static final Map<String, Object> AUTH_INFO;
-    
+
     static {
         AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
     }
@@ -104,10 +104,10 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     private ResourceCollectionManager resourceCollectionManager;
-    
+
     @Reference
     ResourceResolverFactory resourceResolverFactory;
-    
+
     private String bucketPath;
 
     /**
@@ -128,7 +128,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-        
+
 
         if (StringUtils.isNotBlank(bucketSegment)) {
             bucketPath += "/" + bucketSegment;
@@ -173,7 +173,7 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
      * {@inheritDoc}
      */
     public final List<String> getPaths(final ResourceResolver resourceResolver,
-            final String path, final String[] nodeTypes) throws RepositoryException {
+                                       final String path, final String[] nodeTypes) throws RepositoryException {
         final List<String> collectionPaths = new ArrayList<String>();
 
         final Resource resource = resourceResolver.getResource(path);
@@ -297,6 +297,6 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
             // this service must not get activated
             throw new IllegalStateException(e);
         }
-        
+
     }
 }
