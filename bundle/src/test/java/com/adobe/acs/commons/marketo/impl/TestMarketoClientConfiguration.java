@@ -26,14 +26,13 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
+
 import org.apache.sling.caconfig.resource.ConfigurationResourceResolver;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.adobe.acs.commons.marketo.MarketoClientConfiguration;
-import com.adobe.acs.commons.marketo.MarketoClientConfigurationManager;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
@@ -51,7 +50,7 @@ public class TestMarketoClientConfiguration {
 
     configrr = Mockito.mock(ConfigurationResourceResolver.class);
     Mockito.when(configrr.getResourceCollection(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(Collections.singletonList(context.resourceResolver().getResource("/conf/test")));
+        .thenReturn(Collections.singletonList(context.resourceResolver().getResource("/conf/test/default")));
     context.registerService(ConfigurationResourceResolver.class, configrr);
 
   }
@@ -69,7 +68,7 @@ public class TestMarketoClientConfiguration {
   @Test
   public void testConfig() {
     MarketoClientConfiguration mcc = Optional
-        .ofNullable(context.resourceResolver().getResource("/conf/test/jcr:content"))
+        .ofNullable(context.resourceResolver().getResource("/conf/test/default/jcr:content"))
         .map(r -> r.adaptTo(MarketoClientConfiguration.class)).orElse(null);
     assertNotNull(mcc);
     assertEquals("123", mcc.getClientId());
@@ -80,9 +79,19 @@ public class TestMarketoClientConfiguration {
     assertEquals(48721, mcc.hashCode());
 
     MarketoClientConfiguration mcc2 = Optional
-        .ofNullable(context.resourceResolver().getResource("/conf/test/jcr:content"))
+        .ofNullable(context.resourceResolver().getResource("/conf/test/default/jcr:content"))
         .map(r -> r.adaptTo(MarketoClientConfiguration.class)).orElse(null);
     assertEquals(mcc, mcc2);
     assertNotEquals(mcc, null);
+  }
+
+
+  @Test
+  public void testHttps() {
+    MarketoClientConfiguration mcc = Optional
+        .ofNullable(context.resourceResolver().getResource("/conf/test/https/jcr:content"))
+        .map(r -> r.adaptTo(MarketoClientConfiguration.class)).orElse(null);
+    assertNotNull(mcc);
+    assertEquals("test.mktorest.com", mcc.getEndpointHost());
   }
 }

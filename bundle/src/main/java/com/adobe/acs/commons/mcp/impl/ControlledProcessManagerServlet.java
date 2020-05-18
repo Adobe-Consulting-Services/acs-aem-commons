@@ -77,7 +77,7 @@ public class ControlledProcessManagerServlet extends SlingAllMethodsServlet {
     private static final List<String> IGNORED_SERVLET_INPUTS = Arrays.asList("definition", "description", "action");
 
     @Reference
-    ControlledProcessManager manager;
+    transient ControlledProcessManager manager;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {

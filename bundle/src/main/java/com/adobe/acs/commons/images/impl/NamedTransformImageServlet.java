@@ -23,6 +23,7 @@ import com.adobe.acs.commons.dam.RenditionPatternPicker;
 import com.adobe.acs.commons.images.ImageTransformer;
 import com.adobe.acs.commons.images.NamedImageTransformer;
 import com.adobe.acs.commons.util.PathInfoUtil;
+import com.day.cq.commons.DownloadResource;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.Rendition;
@@ -61,6 +62,7 @@ import javax.imageio.ImageIO;
 import javax.jcr.RepositoryException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -153,17 +155,17 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
             value = DEFAULT_ASSET_RENDITION_PICKER_REGEX)
     private static final String PROP_ASSET_RENDITION_PICKER_REGEX = "prop.asset-rendition-picker-regex";
 
-    private final Map<String, NamedImageTransformer> namedImageTransformers =
+    private final transient Map<String, NamedImageTransformer> namedImageTransformers =
             new ConcurrentHashMap<String, NamedImageTransformer>();
 
-    private final Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
+    private final transient Map<String, ImageTransformer> imageTransformers = new ConcurrentHashMap<String, ImageTransformer>();
 
     @Reference
-    private MimeTypeService mimeTypeService;
+    private transient MimeTypeService mimeTypeService;
 
     private Pattern lastSuffixPattern = Pattern.compile(DEFAULT_FILENAME_PATTERN);
 
-    private RenditionPatternPicker renditionPatternPicker =
+    private transient RenditionPatternPicker renditionPatternPicker =
             new RenditionPatternPicker(Pattern.compile(DEFAULT_ASSET_RENDITION_PICKER_REGEX));
 
     /**
@@ -215,7 +217,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         Layer layer = getLayer(image);
         
         if (layer == null) {
-            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         
@@ -340,7 +342,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
                 || resource.isResourceType(JcrConstants.NT_RESOURCE)) {
             // For renditions; use the requested rendition
             final Image image = new Image(resource);
-            image.set(Image.PN_REFERENCE, resource.getPath());
+            image.set(DownloadResource.PN_REFERENCE, resource.getPath());
             return image;
         }
 
@@ -370,7 +372,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         Rendition rendition = asset.getRendition(renditionPatternPicker);
 
         if (rendition == null) {
-            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker.toString(),
+            log.warn("Could not find rendition [ {} ] for [ {} ]", renditionPatternPicker,
                     resource.getPath());
             rendition = asset.getOriginal();
         }
@@ -378,7 +380,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
         final Resource renditionResource = resource.getResourceResolver().getResource(rendition.getPath());
 
         final Image image = new Image(resource);
-        image.set(Image.PN_REFERENCE, renditionResource.getPath());
+        image.set(DownloadResource.PN_REFERENCE, renditionResource.getPath());
         return image;
     }
 
@@ -470,7 +472,7 @@ public class NamedTransformImageServlet extends SlingSafeMethodsServlet implemen
      * @return
      */
     protected final double getQuality(final String mimeType, final ValueMap transforms) {
-        final String key = "quality";
+        final String key = "quality"; // NOSONAR // replace with already existing constant
         final int defaultQuality = 82;
         final int maxQuality = 100;
         final int minQuality = 0;

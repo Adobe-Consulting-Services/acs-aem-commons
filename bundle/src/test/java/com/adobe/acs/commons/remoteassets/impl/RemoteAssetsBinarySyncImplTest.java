@@ -21,6 +21,8 @@ package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.remoteassets.RemoteAssetsBinarySync;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.acs.commons.util.RequireAem.Distribution;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -34,6 +36,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
@@ -112,6 +115,15 @@ public class RemoteAssetsBinarySyncImplTest {
         remoteAssetsConfigs.put("server.url", "http://localhost:" + mockServerRule.getPort());
         remoteAssetsConfigs.put("server.insecure", true);
 
+        // does not work with a Mock here :-(
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
+        context.registerService(RequireAem.class,requireAem,"distribution","classic");
         remoteAssetsConfig = spy(new RemoteAssetsConfigImpl());
         context.registerInjectActivateService(remoteAssetsConfig, remoteAssetsConfigs);
         remoteAssetsBinarySync = context.registerInjectActivateService(new RemoteAssetsBinarySyncImpl());

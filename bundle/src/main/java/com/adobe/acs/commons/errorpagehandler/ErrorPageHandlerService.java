@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.errorpagehandler;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -34,7 +36,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 @SuppressWarnings("squid:S1214")
 public interface ErrorPageHandlerService {
-    int DEFAULT_STATUS_CODE = SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    int DEFAULT_STATUS_CODE = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
     /**
      * Determines if this Service is "enabled". If it has been configured to be "Disabled" the Service still exists however it should not be used.

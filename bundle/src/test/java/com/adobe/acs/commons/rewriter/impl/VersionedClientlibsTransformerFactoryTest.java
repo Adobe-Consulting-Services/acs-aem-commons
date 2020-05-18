@@ -175,7 +175,7 @@ public class VersionedClientlibsTransformerFactoryTest {
         props.put("enforce.md5", Boolean.TRUE);
         when(componentContext.getProperties()).thenReturn(props);
         factory.activate(componentContext);
-        verify(bundleContext).registerService(eq(Filter.class.getName()), any(Object.class), any());
+        verify(bundleContext).registerService(eq(Filter.class), any(Filter.class), any());
     }
 
     @Test
@@ -393,6 +393,47 @@ public class VersionedClientlibsTransformerFactoryTest {
     }
 
     @Test
+    public void testProxiedStaticJavaScriptResource() throws Exception {
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.emptyMap());
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "src", "", "CDATA", PROXY_PATH + "/resources/some-resource.js");
+        in.addAttribute("", "type", "", "CDATA", "text/javascript");
+
+        transformer.startElement(null, "script", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("script"), isNull(),
+                attributesCaptor.capture());
+
+        verifyNoMoreInteractions(htmlLibraryManager);
+
+        assertEquals(PROXY_PATH + "/resources/some-resource.js", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
+    public void testProxiedStaticCssResource() throws Exception {
+        when(htmlLibraryManager.getLibraries()).thenReturn(Collections.emptyMap());
+
+        final AttributesImpl in = new AttributesImpl();
+        in.addAttribute("", "href", "", "CDATA", PROXY_PATH + "/resources/some-resource.css");
+        in.addAttribute("", "type", "", "CDATA", "text/css");
+        in.addAttribute("", "rel", "", "CDATA", "stylesheet");
+
+        transformer.startElement(null, "link", null, in);
+
+        ArgumentCaptor<Attributes> attributesCaptor = ArgumentCaptor.forClass(Attributes.class);
+
+        verify(handler, only()).startElement(isNull(), eq("link"), isNull(),
+                attributesCaptor.capture());
+
+        verifyNoMoreInteractions(htmlLibraryManager);
+
+        assertEquals(PROXY_PATH + "/resources/some-resource.css", attributesCaptor.getValue().getValue(0));
+    }
+
+    @Test
     public void testEventHandling() throws Exception {
         ClientLibrary clientLibrary = mock(ClientLibrary.class);
         when(clientLibrary.getTypes()).thenReturn(Collections.singleton(LibraryType.JS));
@@ -593,6 +634,20 @@ public class VersionedClientlibsTransformerFactoryTest {
     @Test
     public void doFilter_nonJsCss() throws Exception {
         when(slingRequest.getRequestURI()).thenReturn("/some_other/uri.html");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+        verifyNothingHappened();
+    }
+
+    @Test
+    public void doFilter_proxiedClientLibs_jsResource() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc.clientlibs/some-app/clientlibs/some-clientlib/resources/some-resource.js");
+        filter.doFilter(slingRequest, slingResponse, filterChain);
+        verifyNothingHappened();
+    }
+
+    @Test
+    public void doFilter_proxiedClientLibs_cssResource() throws Exception {
+        when(slingRequest.getRequestURI()).thenReturn("/etc.clientlibs/some-app/clientlibs/some-clientlib/resources/some-resource.css");
         filter.doFilter(slingRequest, slingResponse, filterChain);
         verifyNothingHappened();
     }

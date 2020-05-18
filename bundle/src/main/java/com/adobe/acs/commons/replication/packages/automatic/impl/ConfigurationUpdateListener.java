@@ -64,6 +64,7 @@ import com.day.cq.replication.Replicator;
 @Service(value = { ResourceChangeListener.class, AutomaticPackageReplicatorMBean.class })
 @Properties({
         @Property(name = "jmx.objectname", value = "com.adobe.acs.commons:type=Automatic Package Replicator"),
+        @Property(name=ResourceChangeListener.CHANGES, value= {"ADDED","CHANGED","REMOVED"}),
         @Property(name = ResourceChangeListener.PATHS, value = "glob:/etc/acs-commons/automatic-package-replication/**/jcr:content") })
 public class ConfigurationUpdateListener extends ResourceServiceManager
         implements ResourceChangeListener, ExternalResourceChangeListener, AutomaticPackageReplicatorMBean {

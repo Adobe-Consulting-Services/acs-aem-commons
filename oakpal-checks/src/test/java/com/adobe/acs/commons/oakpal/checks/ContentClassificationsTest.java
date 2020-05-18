@@ -19,21 +19,21 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arr;
-import static net.adamcin.oakpal.core.JavaxJson.key;
-import static net.adamcin.oakpal.core.JavaxJson.obj;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.core.CheckReport;
+import net.adamcin.oakpal.core.InitStage;
+import net.adamcin.oakpal.testing.TestPackageUtil;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
 
-import net.adamcin.oakpal.core.CheckReport;
-import net.adamcin.oakpal.core.InitStage;
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.testing.TestPackageUtil;
-import org.junit.Before;
-import org.junit.Test;
+import static net.adamcin.oakpal.api.JavaxJson.arr;
+import static net.adamcin.oakpal.api.JavaxJson.key;
+import static net.adamcin.oakpal.api.JavaxJson.obj;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ContentClassificationsTest extends CheckTestBase {
     public static final String NS_URI_SLING = "http://sling.apache.org/jcr/sling/1.0";
