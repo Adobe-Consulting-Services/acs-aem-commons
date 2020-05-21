@@ -151,8 +151,10 @@ public class WorkflowDelegationStep implements WorkflowProcess {
         final String foundWorkflowModelId = StringUtils.trim(inheritance.getInherited(propertyName, String.class));
         final WorkflowModel delegateWorkflowModel = getDelegateWorkflowModel(workflowSession, foundWorkflowModelId, defaultWorkflowModelId);
 
+        WorkflowData newProcessWfData = workflowSession.newWorkflowData("JCR_PATH", wfData.getPayload());
+
         if (delegateWorkflowModel != null) {
-            workflowSession.startWorkflow(delegateWorkflowModel, wfData);
+            workflowSession.startWorkflow(delegateWorkflowModel, newProcessWfData);
             log.info("Delegating payload [ {} ] to Workflow Model [ {} ]", wfData.getPayload(), delegateWorkflowModel.getId());
 
             if (terminateOnDelegation) {
