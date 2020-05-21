@@ -30,18 +30,18 @@ public interface LongFormTextComponent {
     String LONG_FORM_TEXT_PAR = "long-form-text-par-";
 
     /**
-     * Splits long form text into a series of "chunks" delimited &lt;/p>.
+     * Splits long form text into a series of "chunks" delimited.
      *
-     * Note: this method does not support intelligence for managing nested <p>'s in <p>'s
+     * Note: this method does not support intelligence for managing nested &lt;p&gt;'s in &lt;p&gt;'s
      *
      * @param text The HTML text to split
-     * @return A string array of HTML paragraphs including the surrounding <p>...</p>
+     * @return A string array of HTML paragraphs including the surrounding &lt;p&gt;...&lt;/p&gt;
      */
     String[] getTextParagraphs(String text);
 
     /**
      * Housekeeping for the Long Form Text responsible for merging dangling par resource up when
-     * the number of <p> decreases.
+     * the number of &lt;p&gt; decreases.
      *
      * @param resource the long form text resource
      * @param numParagraphCount the number of text paragraphs

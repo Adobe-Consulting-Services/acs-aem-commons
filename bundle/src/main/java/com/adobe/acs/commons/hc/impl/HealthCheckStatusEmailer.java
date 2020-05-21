@@ -21,6 +21,7 @@ package com.adobe.acs.commons.hc.impl;
 
 import com.adobe.acs.commons.email.EmailService;
 import com.adobe.acs.commons.util.ModeUtil;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.license.ProductInfo;
 import com.adobe.granite.license.ProductInfoService;
 import org.apache.commons.lang3.ArrayUtils;
@@ -81,6 +82,10 @@ public class HealthCheckStatusEmailer implements Runnable {
     private static final int HEALTH_CHECK_STATUS_PADDING = 20;
     private static final int NUM_DASHES = 100;
 
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
+    
     private volatile Calendar nextEmailTime = Calendar.getInstance();
 
     /* OSGi Properties */

@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -30,12 +31,18 @@ import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.RequireAem;
+
 /**
  * Servlet rendering the redirect map to a JSON Array
  */
 @SlingServlet(methods = { "GET" }, resourceTypes = { "acs-commons/components/utilities/redirectmappage" }, selectors = {
         "redirectentries" }, extensions = { "json" }, metatype = false)
 public class RedirectEntriesServlet extends SlingSafeMethodsServlet {
+  
+  // Disable this feature on AEM as a Cloud Service
+  @Reference(target="(distribution=classic)")
+  RequireAem requireAem;
 
     private static final long serialVersionUID = -2825679173210628699L;
     private static final Logger log = LoggerFactory.getLogger(RedirectEntriesServlet.class);

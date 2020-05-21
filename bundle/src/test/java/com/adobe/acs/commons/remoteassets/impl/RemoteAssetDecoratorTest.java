@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -73,6 +74,8 @@ public class RemoteAssetDecoratorTest {
         setupCreateRemoteAsset(nodeDam, "a", false);
         setupCreateRemoteAsset(nodeDam, "b", true);
         setupCreateRemoteAsset(nodeDam, "z", true);
+        
+        context.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
 
         remoteAssetDecorator = spy(new RemoteAssetDecorator());
         remoteAssetsBinarySync = mock(RemoteAssetsBinarySyncImpl.class);

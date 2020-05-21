@@ -10,8 +10,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Fixed
+- #2267 - Redirect Map Edit Wrong Entry
+- #2300 - Fixed CopyProperties WF Process copy of empty properties
 
+## [4.7.0] - 2020-05-12
+
+### Added
+- #2293 - Added Copy Properties Workflow Process
+- #2243 - Added a servlet for serving robots.txt files
+
+### Changed
+- #2282 - Certain services which are not compatible to AEM as a CloudService, should not be available there
+
+## [4.6.0] - 2020-05-01
+
+### Added
+- #2266 - InDesign "Dynamic Deck Dynamo"
+
+### Fixed
+- #2265 - Review ResourceChangeListener configuration
 - #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+- #2287 - Report Builder pagination buttons not working when report has no Search Parameters configured.
 
 ## [4.5.2] - 2020-04-18
 

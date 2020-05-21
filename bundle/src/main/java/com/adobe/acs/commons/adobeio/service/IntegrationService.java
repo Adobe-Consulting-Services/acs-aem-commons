@@ -23,8 +23,8 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service to communicate to Adobe I/O with regards to authentication. 
- * <br/>
- * Use the following command the generate the public/private keyfile:<br/>
+ * <br>
+ * Use the following command the generate the public/private keyfile:<br>
  * 
  * openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout private.key -out certificate_pub.crt
  *
