@@ -137,7 +137,7 @@ angular.module('acs-commons-redirectmappage-app', ['acsCoral', 'ACS.Commons.noti
 
         $scope.editItem = function(id){
             $scope.entries.forEach(function(el){
-                if(el.id == id){
+                if(el.id === id){
                     console.log('Editing entry: '+id);
                     document.querySelector('input[name=edit-source]').value = el.source;
                     document.querySelector('input[name=edit-target]').value = el.target;
