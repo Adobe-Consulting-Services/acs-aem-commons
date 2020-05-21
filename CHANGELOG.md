@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
 ### Fixed
-
+- #2267 - Redirect Map Edit Wrong Entry
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
 
 ## [4.7.0] - 2020-05-12
