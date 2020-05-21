@@ -75,15 +75,6 @@
                                     jcr:title="Properties to Copy"
                                     sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
                                 <items jcr:primaryType="nt:unstructured">
-                                    <skip-empty-property
-                                            jcr:primaryType="nt:unstructured"
-                                            sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                            text="Skip empty source properties"
-                                            fieldDescription="If the source property is empty or missing, leave the destination property alone."
-                                            named="./metadata/SKIP_EMPTY_SOURCE_PROPERTY"
-                                            checked="{Boolean}true"
-                                            value="{Boolean}true"
-                                            uncheckedValue="{Boolean}false"/>
                                     <properties
                                             jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
