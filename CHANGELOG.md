@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
+- #2311 - ResourceTypeHttpCacheConfigExtension does not work with multiple allowed paths
 
 ## [4.7.0] - 2020-05-12
 
