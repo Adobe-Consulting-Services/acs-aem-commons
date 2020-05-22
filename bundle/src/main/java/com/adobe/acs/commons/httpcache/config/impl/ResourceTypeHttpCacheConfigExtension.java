@@ -112,7 +112,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         }
   
         if (!checkContentPath(request.getResource().getPath())) {
-        	return false;
+          return false;
         }
         
         // Passed the content path test..
@@ -130,7 +130,7 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
     }
     
     private boolean checkContentPath(String contentPath) {
-    	return pathPatterns.stream().anyMatch( pattern -> pattern.matcher(contentPath).matches());
+        return pathPatterns.stream().anyMatch( pattern -> pattern.matcher(contentPath).matches());
     }
 
     private boolean checkResourceType(Resource candidateResource) {
