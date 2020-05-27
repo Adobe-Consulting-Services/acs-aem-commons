@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import io.wcm.testing.mock.aem.junit.AemContext;
@@ -29,17 +30,12 @@ import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -51,17 +47,9 @@ import java.util.Map;
 
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssets.IS_REMOTE_ASSET;
 import static com.adobe.acs.commons.remoteassets.impl.RemoteAssetsTestUtil.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class RemoteAssetDecoratorTest {
     private static String TEST_MOCK_SYNC = "mocksync";
@@ -86,6 +74,8 @@ public class RemoteAssetDecoratorTest {
         setupCreateRemoteAsset(nodeDam, "a", false);
         setupCreateRemoteAsset(nodeDam, "b", true);
         setupCreateRemoteAsset(nodeDam, "z", true);
+        
+        context.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
 
         remoteAssetDecorator = spy(new RemoteAssetDecorator());
         remoteAssetsBinarySync = mock(RemoteAssetsBinarySyncImpl.class);

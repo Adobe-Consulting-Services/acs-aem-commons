@@ -35,7 +35,7 @@ import java.util.List;
  * B  |  B
  * C  |  C
  * -  |  E
- * IDs are created with Function<T, Serializable>
+ * IDs are created with Function&lt;T, Serializable&gt;
  *
  * @param <T>
  */

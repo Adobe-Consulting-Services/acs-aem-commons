@@ -24,12 +24,15 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.adobe.acs.commons.util.RequireAem;
 
 /**
  * Servlet for removing a line from the redirect map text file
@@ -41,6 +44,10 @@ public class RemoveEntryServlet extends SlingAllMethodsServlet {
 
     private static final long serialVersionUID = -5963945855717054678L;
     private static final Logger log = LoggerFactory.getLogger(RemoveEntryServlet.class);
+    
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)

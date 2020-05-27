@@ -58,10 +58,10 @@ public interface ComponentHelper {
      * <p>
      * Normal use: inclusion at top of component JSP before any markup is output:
      * <p>
-     * <% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
+     * &lt;% if(WCMHelper.printEditBlockOrNothing(slingRequest, slingResponse, WCMEditType.NONE,
      * StringUtils.isNotBlank(properties.get("foo", ""))) {
      * return; // Stops execution of the JSP; leaving only the Edit Block rendered in Authoring Mode or nothing in non-Authoring Modes
-     * } %>
+     * } %&gt;
      *      *
      * @param request the request
      * @param response the response
