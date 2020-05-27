@@ -34,9 +34,9 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 
 /**
- * Generates a dialog out of @FormField annotations Ideally your sling model
- * should extend this class to inherit its features but you can also just use
- * the @DialogProvider annotation
+ * Generates a dialog out of @FormField annotations. Ideally your sling model
+ * should extend this class to inherit its API.  Otherwise if you just want
+ * a generated dialog apply the DialogProvider annotation to your class by itself.
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class},
