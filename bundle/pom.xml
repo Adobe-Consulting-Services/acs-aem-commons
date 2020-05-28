@@ -342,12 +342,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
                 <configuration>
                     <reuseForks>false</reuseForks>
                     <forkCount>1C</forkCount>
-                    <excludes>
-                        <exclude>com/adobe/acs/commons/mcp/form/DialogProviderAnnotationProcessor*</exclude>
-                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -361,6 +359,7 @@
                             <parallel>classes</parallel>
                             <threadCount>1</threadCount>
                             <perCoreThreadCount />
+                            <argLine>-Xverify:none -XX:-UseSplitVerifier</argLine>
                             <excludes>
                                 <exclude>com/adobe/acs/commons/mcp/form/DialogProviderAnnotationProcessor*</exclude>
                             </excludes>
@@ -727,6 +726,13 @@
                     <artifactId>oak-jcr</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+            <version>0.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
