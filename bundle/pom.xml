@@ -612,6 +612,12 @@
             <version>1.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.testing.compile</groupId>
+            <artifactId>compile-testing</artifactId>
+            <version>0.18</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Downgrade from 2.4 to 2.1 for AEM 6.4 support -->
         <dependency>
             <groupId>javax.xml.bind</groupId>

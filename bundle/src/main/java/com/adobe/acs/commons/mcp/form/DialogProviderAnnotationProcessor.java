@@ -83,7 +83,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             writeServiceStub(builderFile, serviceClassName, className);
         } else {
             if (LOG.isLoggable(Level.WARNING)) {
-                LOG.log(Level.INFO, String.format("Class %s declares or inherits the DialogProvider annotation but does not declare a resource type -- no resource provider generated.", className));
+                LOG.log(Level.WARNING, String.format("Class %s declares or inherits the DialogProvider annotation but does not declare a resource type -- no resource provider generated.", className));
             }
         }
     }

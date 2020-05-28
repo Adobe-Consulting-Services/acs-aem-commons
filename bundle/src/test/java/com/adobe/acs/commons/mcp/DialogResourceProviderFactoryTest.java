@@ -20,8 +20,14 @@
 package com.adobe.acs.commons.mcp;
 
 import com.adobe.acs.commons.mcp.form.DialogProvider;
+import com.adobe.acs.commons.mcp.form.DialogProviderAnnotationProcessor;
 import com.adobe.acs.commons.mcp.form.DialogResourceProvider;
+import com.adobe.acs.commons.mcp.impl.DialogResourceProviderFactoryImpl;
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -31,6 +37,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static com.google.testing.compile.Compiler.javac;
 import static org.junit.Assert.*;
 
 /**
@@ -40,15 +48,17 @@ public class DialogResourceProviderFactoryTest {
 
     @Rule
     public SlingContext slingContext = new SlingContextBuilder()
-                    .registerSlingModelsFromClassPath(false)
-                    .resourceResolverType(ResourceResolverType.JCR_MOCK)
-                    .build();
+            .registerSlingModelsFromClassPath(false)
+            .resourceResolverType(ResourceResolverType.JCR_MOCK)
+            .build();
 
     private static final String[] MODEL_CLASSES = {
-            "com.adobe.acs.commons.mcp.model.SimpleModelOne",
-            "com.adobe.acs.commons.mcp.model.SimpleModelTwo",
-            "com.adobe.acs.commons.mcp.model.SimpleModelThree"
+        "com.adobe.acs.commons.mcp.model.SimpleModelOne",
+        "com.adobe.acs.commons.mcp.model.SimpleModelTwo",
+        "com.adobe.acs.commons.mcp.model.SimpleModelThree"
     };
+
+    public Map<String, DialogResourceProvider> providers = new HashMap<>();
 
     @Before
     public void init() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -56,6 +66,7 @@ public class DialogResourceProviderFactoryTest {
         for (String className : MODEL_CLASSES) {
             DialogResourceProvider provider = (DialogResourceProvider) Class.forName(DialogResourceProvider.getServiceClassName(className)).newInstance();
             slingContext.registerService(DialogResourceProvider.class, provider);
+            providers.put(className, provider);
             provider.doActivate(slingContext.bundleContext());
         }
     }
@@ -91,6 +102,34 @@ public class DialogResourceProviderFactoryTest {
         assertTrue("Should resolve model three dialog items", resourceExists("/apps/test/model3/cq:dialog/content/items"));
     }
 
+    @Test
+    public void testDeactivation() {
+        assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+        providers.get("com.adobe.acs.commons.mcp.model.SimpleModelOne").doDeactivate();
+        assertFalse("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+    }
+
+    @Test
+    public void testFactoryDoesNothing() {
+        // The dialog provider factory is dead but still exists for backward compatiblity until 5.0
+        // Assert that it does nothing.
+        DialogResourceProviderFactory factory = new DialogResourceProviderFactoryImpl();
+        assertNull(factory.getActiveProviders());
+        // These would normally throw an exception on null data if they did anything.
+        factory.registerClass((Class) null);
+        factory.registerClass((String) null);
+        factory.unregisterClass((Class) null);
+        factory.unregisterClass((String) null);
+    }
+
+    @Test
+    public void testAnnotationProvider() {
+        Compilation compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("Example1", "@com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}"));
+        assertThat(compilation).succeededWithoutWarnings();
+    }
+
     private boolean resourceExists(String path) {
         return slingContext.resourceResolver().getResource(path) != null;
     }
@@ -103,6 +142,7 @@ public class DialogResourceProviderFactoryTest {
     @DialogProvider
     // This is annotated and provides a resource type, so a service SHOULD be created
     public static class ResourceTypeProvided {
+
         public static String getResourceType() {
             return "my.resource.type";
         }
