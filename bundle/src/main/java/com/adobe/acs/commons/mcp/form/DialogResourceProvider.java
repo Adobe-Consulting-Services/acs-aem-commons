@@ -37,6 +37,7 @@ import org.osgi.service.component.annotations.Deactivate;
  * the amount of generated code, as much of the underlying implementation is
  * here in default methods.
  */
+@SuppressWarnings("squid:S1214") // There are no constants declared here, not sure why this code smell is being detected
 public interface DialogResourceProvider {
     Class getTargetClass();
 
