@@ -45,10 +45,12 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
 
     @Override
     public void registerClass(String className) {
+        // Does nothing because this OSGi service is deprecated and going away
     }
 
     @Override
     public void registerClass(Class c) {
+        // Does nothing because this OSGi service is deprecated and going away
     }
 
     @SuppressWarnings("squid:S1149")
@@ -58,10 +60,12 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
 
     @Override
     public void unregisterClass(Class c) {
+        // Does nothing because this OSGi service is deprecated and going away
     }
 
     @Override
     public void unregisterClass(String c) {
+        // Does nothing because this OSGi service is deprecated and going away
     }
 
     @Override

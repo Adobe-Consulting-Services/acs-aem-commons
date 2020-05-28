@@ -34,16 +34,13 @@ import org.osgi.service.component.annotations.Deactivate;
  * here in default methods.
  */
 public interface DialogResourceProvider {
-
-    public static final String SERVICE_CLASS_SUFFIX = "_dialogResourceProvider";
-
     Class getTargetClass();
 
     default DialogProvider getDialogProvider() {
         return (DialogProvider) getTargetClass().getAnnotation(DialogProvider.class);
     }
 
-    static public Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
+    public static Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
 
     @Activate
     default void activate(BundleContext bundleContext) throws InstantiationException, IllegalAccessException {
@@ -69,12 +66,12 @@ public interface DialogResourceProvider {
     public static String getServiceClassName(String modelClass) {
         String[] parts = modelClass.split("\\.");
         String name = "";
-        char separator = '.';
+        String separator = ".";
         for (String part : parts) {
             char firstChar = part.charAt(0);
-            char newSeparator = separator;
-            if (firstChar >= 'A' && firstChar <= 'Z' && separator == '.') {
-                newSeparator = '$';
+            String newSeparator = separator;
+            if (firstChar >= 'A' && firstChar <= 'Z' && separator.equals(".")) {
+                newSeparator = "$";
                 name += ".impl";
             }
             if (name.length() > 0) {
@@ -83,7 +80,7 @@ public interface DialogResourceProvider {
             name += part;
             separator = newSeparator;
         }
-        return name + SERVICE_CLASS_SUFFIX;
+        return name + "_dialogResourceProvider";
     }
 
 }

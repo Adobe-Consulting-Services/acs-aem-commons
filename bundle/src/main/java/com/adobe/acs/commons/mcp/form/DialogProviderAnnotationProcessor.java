@@ -1,6 +1,9 @@
 /*
- * Copyright 2020 Adobe.
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
+ * Copyright (C) 2020 Adobe
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +15,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-package com.adobe.acs.commons.mcp.form;
+ * #L%
+ */package com.adobe.acs.commons.mcp.form;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,9 +44,8 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean success = false;
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(DialogProvider.class)) {
-            DialogProvider dialogAnnotation = annotatedElement.getAnnotation(DialogProvider.class);
             try {
-                success = success | processDialogProviderAnnotation(annotatedElement, roundEnv);
+                success = success || processDialogProviderAnnotation(annotatedElement);
             } catch (IOException ex) {
                 Logger.getLogger(DialogProviderAnnotationProcessor.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
@@ -62,12 +64,13 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         return SourceVersion.RELEASE_8;
     }
 
-    private boolean processDialogProviderAnnotation(Element element, RoundEnvironment roundEnv) throws IOException {
+    private boolean processDialogProviderAnnotation(Element element) throws IOException {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
         JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
-        System.out.println(String.format("Processing class %s, service is %s", className, serviceClassName));
+        Logger.getLogger(DialogProviderAnnotationProcessor.class.getName())
+                .log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
         writeServiceStub(builderFile, serviceClassName, className);
         return true;
     }
@@ -87,7 +90,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println(String.format("public class %s implements %s {", className, osgiService));
             out.println();
             out.println("    @Override");
-            out.println(String.format("    public Class getTargetClass() {\n        return %s.class;\n    }", targetClass));
+            out.println(String.format("    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
             out.println("}");
             out.flush();
         }
