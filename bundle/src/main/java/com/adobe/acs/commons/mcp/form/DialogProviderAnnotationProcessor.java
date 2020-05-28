@@ -48,7 +48,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         boolean success = false;
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(DialogProvider.class)) {
             try {
-                success = success || processDialogProviderAnnotation(annotatedElement);
+                success = processDialogProviderAnnotation(annotatedElement) || success;
             } catch (IOException ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 return false;
@@ -71,10 +71,10 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
-        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
         if (LOG.isLoggable(Level.INFO)) {
             LOG.log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
         }
+        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
         writeServiceStub(builderFile, serviceClassName, className);
         return true;
     }
