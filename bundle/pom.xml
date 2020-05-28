@@ -359,10 +359,6 @@
                             <parallel>classes</parallel>
                             <threadCount>1</threadCount>
                             <perCoreThreadCount />
-                            <argLine>-Xverify:none -XX:-UseSplitVerifier</argLine>
-                            <excludes>
-                                <exclude>com/adobe/acs/commons/mcp/form/DialogProviderAnnotationProcessor*</exclude>
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
