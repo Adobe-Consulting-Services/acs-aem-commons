@@ -45,16 +45,15 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        boolean success = false;
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(DialogProvider.class)) {
             try {
-                success = processDialogProviderAnnotation(annotatedElement) || success;
+                processDialogProviderAnnotation(annotatedElement);
             } catch (IOException ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 return false;
             }
         }
-        return success;
+        return true;
     }
 
     @Override
@@ -67,7 +66,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         return SourceVersion.RELEASE_8;
     }
 
-    private boolean processDialogProviderAnnotation(Element element) throws IOException {
+    private void processDialogProviderAnnotation(Element element) throws IOException {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
@@ -76,7 +75,6 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         }
         JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
         writeServiceStub(builderFile, serviceClassName, className);
-        return true;
     }
 
     private void writeServiceStub(JavaFileObject builderFile, String serviceClass, String targetClass) throws IOException {
