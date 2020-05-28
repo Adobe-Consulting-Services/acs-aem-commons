@@ -34,8 +34,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.models.annotations.Model;
-import org.osgi.annotation.versioning.ConsumerType;
-import org.osgi.service.component.annotations.Component;
 
 /**
  *
@@ -91,8 +89,8 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             String osgiService = DialogResourceProvider.class.getCanonicalName();
             out.println(String.format("package %s;", packageName));
             out.println();
-            out.println(String.format("import %s;", ConsumerType.class.getCanonicalName()));
-            out.println(String.format("import %s;", Component.class.getCanonicalName()));
+            out.println("import org.osgi.annotation.versioning.ConsumerType;");
+            out.println("import org.osgi.service.component.annotations.Component;");
             out.println();
             out.println("@ConsumerType");
             out.println(String.format("@Component(service = %s.class, immediate = true)", osgiService));
