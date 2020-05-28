@@ -16,7 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */package com.adobe.acs.commons.mcp.form;
+ */
+package com.adobe.acs.commons.mcp.form;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -40,6 +41,8 @@ import org.osgi.service.component.annotations.Component;
  */
 public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
+    private static final Logger LOG = Logger.getLogger(DialogProviderAnnotationProcessor.class.getName());
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean success = false;
@@ -47,7 +50,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             try {
                 success = success || processDialogProviderAnnotation(annotatedElement);
             } catch (IOException ex) {
-                Logger.getLogger(DialogProviderAnnotationProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
                 return false;
             }
         }
@@ -69,8 +72,9 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         String className = t.getQualifiedName().toString();
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
         JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
-        Logger.getLogger(DialogProviderAnnotationProcessor.class.getName())
-                .log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
+        }
         writeServiceStub(builderFile, serviceClassName, className);
         return true;
     }
