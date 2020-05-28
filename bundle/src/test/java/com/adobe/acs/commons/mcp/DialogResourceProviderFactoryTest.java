@@ -19,8 +19,11 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.DialogResourceProvider;
 import java.io.IOException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.junit.SlingContextBuilder;
@@ -57,6 +60,24 @@ public class DialogResourceProviderFactoryTest {
         }
     }
 
+    @Test(expected = ClassNotFoundException.class)
+    public void testAnnotationProcessorNegativeDiscrimination() throws ClassNotFoundException {
+        // This class should not exist and throw an error -- it doesn't provide a resource type and so it wouldn't be a candidate for a resource provider
+        Class.forName(DialogResourceProvider.getServiceClassName(NoResourceTypeProvided.class.getCanonicalName()));
+    }
+
+    @Test
+    public void testAnnotationProcessorPositiveDiscrimination() throws ClassNotFoundException {
+        // This class provides a resource type so it should have a corresponding OSGi service
+        Class.forName(DialogResourceProvider.getServiceClassName(ResourceTypeProvided.class.getCanonicalName()));
+    }
+
+    @Test
+    public void testAnnotationProcessorPositiveDiscriminationForModels() throws ClassNotFoundException {
+        // This class provides a resource type on the model annotation so it should have a corresponding OSGi service
+        Class.forName(DialogResourceProvider.getServiceClassName(ResourceTypeProvidedByModel.class.getCanonicalName()));
+    }
+
     @Test
     public void testResourceResolution() {
         // Quick parity check on test method
@@ -73,4 +94,24 @@ public class DialogResourceProviderFactoryTest {
     private boolean resourceExists(String path) {
         return slingContext.resourceResolver().getResource(path) != null;
     }
+
+    @DialogProvider
+    // This is annotated but does not provide a resource type, so a service should NOT be created
+    public static class NoResourceTypeProvided {
+    }
+
+    @DialogProvider
+    // This is annotated and provides a resource type, so a service SHOULD be created
+    public static class ResourceTypeProvided {
+        public static String getResourceType() {
+            return "my.resource.type";
+        }
+    }
+
+    @DialogProvider
+    @Model(adaptables = Resource.class, resourceType = "my.resource.type")
+    // This is annotated and provides a resource type via the model annotation, so a service SHOULD be created
+    public static class ResourceTypeProvidedByModel {
+    }
+
 }

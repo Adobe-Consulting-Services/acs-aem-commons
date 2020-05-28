@@ -33,6 +33,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.sling.models.annotations.Model;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.component.annotations.Component;
 
@@ -70,11 +71,17 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         TypeElement t = (TypeElement) element;
         String className = t.getQualifiedName().toString();
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
-        if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
+        if (providesResourceType(t)) {
+            if (LOG.isLoggable(Level.INFO)) {
+                LOG.log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
+            }
+            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
+            writeServiceStub(builderFile, serviceClassName, className);
+        } else {
+            if (LOG.isLoggable(Level.WARNING)) {
+                LOG.log(Level.INFO, String.format("Class %s declares or inherits the DialogProvider annotation but does not declare a resource type -- no resource provider will be created.", className, serviceClassName));
+            }
         }
-        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
-        writeServiceStub(builderFile, serviceClassName, className);
     }
 
     private void writeServiceStub(JavaFileObject builderFile, String serviceClass, String targetClass) throws IOException {
@@ -95,6 +102,27 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println(String.format("    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
             out.println("}");
             out.flush();
+        }
+    }
+
+    private boolean providesResourceType(TypeElement t) {
+        Model model = t.getAnnotation(Model.class);
+        if (model != null && model.resourceType() != null && model.resourceType().length > 0) {
+            return true;
+        } else {
+            return t.getEnclosedElements().stream().anyMatch(this::providesResourceType);
+        }
+    }
+
+    private boolean providesResourceType(Element t) {
+        switch (t.getKind()) {
+            case LOCAL_VARIABLE:
+            case FIELD:
+                return t.getSimpleName().contentEquals("resourceType");
+            case METHOD:
+                return t.getSimpleName().contentEquals("getResourceType");
+            default:
+                return false;
         }
     }
 }
