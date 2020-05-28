@@ -73,13 +73,13 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         String serviceClassName = DialogResourceProvider.getServiceClassName(className);
         if (providesResourceType(t)) {
             if (LOG.isLoggable(Level.INFO)) {
-                LOG.log(Level.INFO, String.format("Writing dialog generator service for class %s => %s", className, serviceClassName));
+                LOG.log(Level.INFO, String.format("Generated resource provider service for class %s => %s", className, serviceClassName));
             }
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(serviceClassName);
             writeServiceStub(builderFile, serviceClassName, className);
         } else {
             if (LOG.isLoggable(Level.WARNING)) {
-                LOG.log(Level.INFO, String.format("Class %s declares or inherits the DialogProvider annotation but does not declare a resource type -- no resource provider will be created.", className, serviceClassName));
+                LOG.log(Level.INFO, String.format("Class %s declares or inherits the DialogProvider annotation but does not declare a resource type -- no resource provider generated.", className));
             }
         }
     }
