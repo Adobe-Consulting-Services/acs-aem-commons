@@ -732,7 +732,6 @@
             <artifactId>org.jacoco.agent</artifactId>
             <classifier>runtime</classifier>
             <scope>test</scope>
-            <version>0.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
