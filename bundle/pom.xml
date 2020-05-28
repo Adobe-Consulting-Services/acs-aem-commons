@@ -345,6 +345,9 @@
                 <configuration>
                     <reuseForks>false</reuseForks>
                     <forkCount>1C</forkCount>
+                    <excludes>
+                        <exclude>com/adobe/acs/commons/mcp/form/DialogProviderAnnotationProcessor*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -358,6 +361,9 @@
                             <parallel>classes</parallel>
                             <threadCount>1</threadCount>
                             <perCoreThreadCount />
+                            <excludes>
+                                <exclude>com/adobe/acs/commons/mcp/form/DialogProviderAnnotationProcessor*</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

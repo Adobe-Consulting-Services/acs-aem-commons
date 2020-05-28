@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
@@ -42,6 +43,7 @@ import org.apache.sling.models.annotations.Model;
  * sling model either as part of the model annotation or by a property or getter
  * method.
  */
+@Generated("Don't run code coverage, JaCoco!")
 public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
     private static final Logger LOG = Logger.getLogger(DialogProviderAnnotationProcessor.class.getName());
@@ -93,10 +95,12 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             String osgiService = DialogResourceProvider.class.getCanonicalName();
             out.println(String.format("package %s;", packageName));
             out.println();
+            out.println("import javax.annotation.Generated;");
             out.println("import org.osgi.annotation.versioning.ConsumerType;");
             out.println("import org.osgi.framework.BundleContext;");
             out.println("import org.osgi.service.component.annotations.*;");
             out.println();
+            out.println("@Generated(\"Created by the ACS Commons DialogProviderAnnotationProcessor\")");
             out.println("@ConsumerType");
             out.println(String.format("@Component(service = %s.class, immediate = true)", osgiService));
             out.println(String.format("public class %s implements %s {", className, osgiService));
@@ -114,11 +118,11 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
         if (model != null && model.resourceType() != null && model.resourceType().length > 0) {
             return true;
         } else {
-            return t.getEnclosedElements().stream().anyMatch(this::providesResourceType);
+            return t.getEnclosedElements().stream().anyMatch(this::elementProvidesResourceType);
         }
     }
 
-    private boolean providesResourceType(Element t) {
+    private boolean elementProvidesResourceType(Element t) {
         switch (t.getKind()) {
             case LOCAL_VARIABLE:
             case FIELD:
