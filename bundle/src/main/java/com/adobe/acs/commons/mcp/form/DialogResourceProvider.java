@@ -25,8 +25,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -47,9 +45,8 @@ public interface DialogResourceProvider {
 
     public static Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
 
-    @Activate
     @SuppressWarnings("squid:S1149") // Yes HashTable sucks but it's required here.
-    default void activate(BundleContext bundleContext) throws InstantiationException, IllegalAccessException {
+    default void doActivate(BundleContext bundleContext) throws InstantiationException, IllegalAccessException {
         DialogResourceProviderImpl provider = new DialogResourceProviderImpl(getTargetClass(), getDialogProvider());
         @SuppressWarnings("UseOfObsoleteCollectionType")
         Dictionary<String, Object> props = new Hashtable<>();
@@ -60,8 +57,7 @@ public interface DialogResourceProvider {
         registeredProviders.put(getTargetClass(), providerRegistration);
     }
 
-    @Deactivate
-    default void deactivate() {
+    default void doDeactivate() {
         ServiceRegistration providerRegistration = registeredProviders.get(getTargetClass());
         if (providerRegistration != null) {
             providerRegistration.unregister();

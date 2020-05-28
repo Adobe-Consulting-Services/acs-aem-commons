@@ -56,7 +56,7 @@ public class DialogResourceProviderFactoryTest {
         for (String className : MODEL_CLASSES) {
             DialogResourceProvider provider = (DialogResourceProvider) Class.forName(DialogResourceProvider.getServiceClassName(className)).newInstance();
             slingContext.registerService(DialogResourceProvider.class, provider);
-            provider.activate(slingContext.bundleContext());
+            provider.doActivate(slingContext.bundleContext());
         }
     }
 

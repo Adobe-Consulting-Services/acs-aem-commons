@@ -29,7 +29,11 @@ import java.lang.annotation.Target;
  * Signifies a bean which gets an automatically-generated dialog. Note that this
  * will only work if you declare a resource type as well, see the
  * DialogResourceProviderImpl class for more details on setting the resource
- * type.
+ * type. If you declare this annotation without a resource type the annotation
+ * processor will produce a non-fatal warning and not generate a service. If you
+ * are declaring this on a base class, it is inherited and that warning can
+ * therefore be ignored.
+ *
  * @see com.adobe.acs.commons.mcp.form.impl.DialogResourceProviderImpl
  */
 @Retention(RetentionPolicy.RUNTIME)

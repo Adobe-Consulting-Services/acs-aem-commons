@@ -36,7 +36,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.sling.models.annotations.Model;
 
 /**
- *
+ * Processes the DialogProvider annotation, producing a corresponding OSGi
+ * service to provide the generated sling dialog resources. This annotation
+ * processor will skip any classes which do not identify their corresponding
+ * sling model either as part of the model annotation or by a property or getter
+ * method.
  */
 public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
@@ -90,14 +94,16 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println(String.format("package %s;", packageName));
             out.println();
             out.println("import org.osgi.annotation.versioning.ConsumerType;");
-            out.println("import org.osgi.service.component.annotations.Component;");
+            out.println("import org.osgi.framework.BundleContext;");
+            out.println("import org.osgi.service.component.annotations.*;");
             out.println();
             out.println("@ConsumerType");
             out.println(String.format("@Component(service = %s.class, immediate = true)", osgiService));
             out.println(String.format("public class %s implements %s {", className, osgiService));
             out.println();
-            out.println("    @Override");
-            out.println(String.format("    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
+            out.println(String.format("    @Override%n    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
+            out.println("    @Activate\n    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException {\n        this.doActivate(context);\n    }\n");
+            out.println("    @Deactivate\n    public void deactivate(BundleContext context) {\n        this.doDeactivate();\n    }");
             out.println("}");
             out.flush();
         }
