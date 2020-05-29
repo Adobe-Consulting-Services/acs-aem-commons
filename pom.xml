@@ -692,6 +692,7 @@
                             <cveValidForHours>24</cveValidForHours>
                             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
                             <skipProvidedScope>true</skipProvidedScope>
+                            <skipSystemScope>true</skipSystemScope>
                             <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
                         </configuration>
                     </plugin>
