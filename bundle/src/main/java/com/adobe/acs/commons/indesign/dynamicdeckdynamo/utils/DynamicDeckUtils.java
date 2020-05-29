@@ -30,10 +30,14 @@ import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.AssetManager;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.dam.api.Rendition;
-import com.day.cq.dam.api.collection.SmartCollection;
+import com.day.cq.dam.commons.util.DamUtil;
+import com.day.cq.search.Predicate;
+import com.day.cq.search.PredicateGroup;
 import com.day.cq.search.Query;
-import com.day.cq.search.result.SearchResult;
+import com.day.cq.search.QueryBuilder;
+import com.day.cq.search.eval.PathPredicateEvaluator;
 import com.day.cq.wcm.api.NameConstants;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jackrabbit.core.fs.FileSystem;
 import org.apache.sling.api.resource.*;
@@ -219,38 +223,21 @@ public final class DynamicDeckUtils {
      * @throws DynamicDeckDynamoException
      */
     public static List<Resource> fetchSmartCollectionResourceList(Resource smartCollectionResource) throws DynamicDeckDynamoException {
-
-        List<Resource> arrayList = new ArrayList<>();
-
-        SmartCollection smartResourceCollection = smartCollectionResource.adaptTo(SmartCollection.class);
-
-        if (null == smartResourceCollection) {
-            LOGGER.debug("Smart collection not found for {}", smartCollectionResource.getPath());
-            return Collections.emptyList();
-        }
-
-        Query query = null;
+        Query query;
         try {
-            query = smartResourceCollection.getQuery();
+            query = getQueryForSmartCollection(smartCollectionResource);
+
+            if (query == null) {
+                LOGGER.debug("Smart collection not found for {}", smartCollectionResource.getPath());
+                return Collections.emptyList();
+            }
         } catch (IOException | RepositoryException e) {
             throw new DynamicDeckDynamoException("Error while getting the collection query from smart collection resource", e);
         }
+
         query.setHitsPerPage(0);
-        SearchResult result = query.getResult();
-        Iterator<Resource> itr = result.getResources();
-        while (itr.hasNext()) {
-            arrayList.add(itr.next());
-        }
-        return arrayList;
-    }
 
-    public static Asset createUniqueAsset(Resource parent, String name, ResourceResolver resolver) {
-        AssetManager graniteAssetMgr = resolver.adaptTo(AssetManager.class);
-        if (graniteAssetMgr != null) {
-            return graniteAssetMgr.createAsset(parent.getPath() + "/" + name, null, DynamicDeckDynamoConstants.INDESIGN_MIME_TYPE, true);
-        }
-        return null;
-
+        return Lists.newArrayList(query.getResult().getResources());
     }
 
     /**
@@ -338,6 +325,62 @@ public final class DynamicDeckUtils {
         } else {
             LOGGER.error("JCR session object is null.");
         }
+    }
 
+    public static Asset createUniqueAsset(Resource parent, String name, ResourceResolver resolver) {
+        AssetManager graniteAssetMgr = resolver.adaptTo(AssetManager.class);
+        if (graniteAssetMgr != null) {
+            return graniteAssetMgr.createAsset(parent.getPath() + "/" + name, null, DynamicDeckDynamoConstants.INDESIGN_MIME_TYPE, true);
+        }
+        return null;
+    }
+
+    /*
+        https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/2298
+
+        The following methods to replace/bridge deprecated SmartCollection API.
+        These remove the deprecated dependency on `com.day.cq.dam.api.collection`.
+        These can be removed once a recommended AEM API is identified that can replace them.
+     */
+
+    private static Query getQueryForSmartCollection(final Resource resource) throws IOException, RepositoryException {
+        final QueryBuilder queryBuilder = resource.getResourceResolver().adaptTo(QueryBuilder.class);
+
+        Query query = queryBuilder.loadQuery(resource.getValueMap().get("dam:query", ""),
+                resource.getResourceResolver().adaptTo(Session.class));
+
+        PredicateGroup predicateGroup = query.getPredicates();
+        if (!hasPathPredicateForSmartCollection(predicateGroup)) {
+            predicateGroup.add(createPathPredicateForSmartCollection(resource));
+            return queryBuilder.createQuery(predicateGroup,  resource.getResourceResolver().adaptTo(Session.class));
+        } else {
+            return query;
+        }
+    }
+
+    private static boolean hasPathPredicateForSmartCollection(PredicateGroup predicateGroup) {
+        if (predicateGroup.size() == 1 || predicateGroup.allRequired()) {
+            for (Predicate p : predicateGroup) {
+                if (isPathPredicateForSmartCollection(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Predicate createPathPredicateForSmartCollection(final Resource resource) {
+        final Predicate pathPredicate = new Predicate(PathPredicateEvaluator.PATH, PathPredicateEvaluator.PATH);
+
+        pathPredicate.set(PathPredicateEvaluator.PATH, DamUtil.getTenantAssetsRoot(resource));
+
+        return pathPredicate;
+    }
+
+    private static boolean isPathPredicateForSmartCollection(final Predicate p) {
+        return PathPredicateEvaluator.PATH.equals(p.getType())
+                && p.hasNonEmptyValue(PathPredicateEvaluator.PATH)
+                && p.get(PathPredicateEvaluator.PATH).startsWith("/")
+                && !p.getBool(PathPredicateEvaluator.SELF);
     }
 }
