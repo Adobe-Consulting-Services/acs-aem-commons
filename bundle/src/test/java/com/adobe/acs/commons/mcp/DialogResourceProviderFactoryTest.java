@@ -106,7 +106,7 @@ public class DialogResourceProviderFactoryTest {
     public void testDeactivation() {
         assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
         providers.get("com.adobe.acs.commons.mcp.model.SimpleModelOne").doDeactivate();
-        assertFalse("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+        assertFalse("Should not resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
     }
 
     @Test
