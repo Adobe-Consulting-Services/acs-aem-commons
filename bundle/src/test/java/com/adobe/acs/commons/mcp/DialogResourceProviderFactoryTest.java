@@ -115,6 +115,7 @@ public class DialogResourceProviderFactoryTest {
         // Assert that it does nothing.
         DialogResourceProviderFactory factory = new DialogResourceProviderFactoryImpl();
         assertNull(factory.getActiveProviders());
+
         // These would normally throw an exception on null data if they did anything.
         factory.registerClass((Class) null);
         factory.registerClass((String) null);
@@ -127,6 +128,14 @@ public class DialogResourceProviderFactoryTest {
         Compilation compilation = javac()
                 .withProcessors(new DialogProviderAnnotationProcessor())
                 .compile(JavaFileObjects.forSourceString("a.Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}"));
+        assertThat(compilation).succeeded();
+        compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("a.Example2", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example2 {public String resourceType=\"my.type\";}"));
+        assertThat(compilation).succeeded();
+        compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("a.Example3", "package a; @org.apache.sling.models.annotations.Model(adaptables=org.apache.sling.api.resource.Resource.class, resourceType=\"my.type\") @com.adobe.acs.commons.mcp.form.DialogProvider public class Example3 {}"));
         assertThat(compilation).succeeded();
     }
 
@@ -153,5 +162,4 @@ public class DialogResourceProviderFactoryTest {
     // This is annotated and provides a resource type via the model annotation, so a service SHOULD be created
     public static class ResourceTypeProvidedByModel {
     }
-
 }

@@ -39,10 +39,6 @@ import org.osgi.service.metatype.annotations.Designate;
 @Deprecated
 public class DialogResourceProviderFactoryImpl implements DialogResourceProviderFactory {
 
-    public boolean isEnabled() {
-        return false;
-    }
-
     @Override
     public void registerClass(String className) {
         // Does nothing because this OSGi service is deprecated and going away
@@ -51,11 +47,6 @@ public class DialogResourceProviderFactoryImpl implements DialogResourceProvider
     @Override
     public void registerClass(Class c) {
         // Does nothing because this OSGi service is deprecated and going away
-    }
-
-    @SuppressWarnings("squid:S1149")
-    private ServiceRegistration<ResourceProvider> registerResourceProvider(DialogResourceProviderImpl provider) {
-        return null;
     }
 
     @Override
