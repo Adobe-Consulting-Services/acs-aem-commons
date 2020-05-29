@@ -126,7 +126,7 @@ public class DialogResourceProviderFactoryTest {
     public void testAnnotationProvider() {
         Compilation compilation = javac()
                 .withProcessors(new DialogProviderAnnotationProcessor())
-                .compile(JavaFileObjects.forSourceString("a.Example1", "@com.adobe.acs.commons.mcp.form.DialogProvider public class a.Example1 {public String getResourceType(){return \"my.type\";}}"));
+                .compile(JavaFileObjects.forSourceString("a.Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}"));
         assertThat(compilation).succeeded();
     }
 
