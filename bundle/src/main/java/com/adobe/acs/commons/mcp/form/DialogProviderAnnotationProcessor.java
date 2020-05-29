@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
@@ -43,7 +42,6 @@ import org.apache.sling.models.annotations.Model;
  * sling model either as part of the model annotation or by a property or getter
  * method.
  */
-@Generated("Don't run code coverage, JaCoco!")
 public class DialogProviderAnnotationProcessor extends AbstractProcessor {
 
     private static final Logger LOG = Logger.getLogger(DialogProviderAnnotationProcessor.class.getName());
