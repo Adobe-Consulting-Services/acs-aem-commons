@@ -20,15 +20,25 @@
 package com.adobe.acs.commons.mcp.form;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Signifies a bean which gets an automatically-generated dialog
+ * Signifies a bean which gets an automatically-generated dialog. Note that this
+ * will only work if you declare a resource type as well, see the
+ * DialogResourceProviderImpl class for more details on setting the resource
+ * type. If you declare this annotation without a resource type the annotation
+ * processor will produce a non-fatal warning and not generate a service. If you
+ * are declaring this on a base class, it is inherited and that warning can
+ * therefore be ignored.
+ *
+ * @see com.adobe.acs.commons.mcp.form.impl.DialogResourceProviderImpl
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Inherited
 public @interface DialogProvider {
 
     static enum DialogStyle {
@@ -46,7 +56,8 @@ public @interface DialogProvider {
     String propertiesTab() default "Properties";
 
     /**
-     * @return Style used (component is default and uses a dialog component, page is more generic)
+     * @return Style used (component is default and uses a dialog component,
+     * page is more generic)
      */
     DialogStyle style() default DialogStyle.COMPONENT;
 

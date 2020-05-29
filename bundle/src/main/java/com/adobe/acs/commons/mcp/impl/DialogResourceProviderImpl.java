@@ -42,6 +42,13 @@ import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Create a resource provider for a dialog, the resource type is identified in
+ * three ways: First it checks if the Model annotation is present and declares a
+ * resource type. Failing that it looks for a getter named getResourceType.
+ * Finally it looks for a public property named resourceType.
+ * If resource type cannot be determined then this class will throw an exception.
+ */
 public class DialogResourceProviderImpl extends ResourceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DialogResourceProviderImpl.class);
@@ -92,6 +99,8 @@ public class DialogResourceProviderImpl extends ResourceProvider {
                     Field field = FieldUtils.getField(originalClass, "resourceType", true);
                     if (field != null) {
                         resourceType = String.valueOf(field.get(originalClass.newInstance()));
+                    } else {
+                        throw new InstantiationException(String.format("No resource type present for %s", originalClass.getCanonicalName()));
                     }
                 }
             } catch (InvocationTargetException | IllegalAccessException ex) {

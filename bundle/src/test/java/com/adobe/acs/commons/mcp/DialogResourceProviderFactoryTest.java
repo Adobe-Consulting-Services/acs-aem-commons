@@ -19,22 +19,26 @@
  */
 package com.adobe.acs.commons.mcp;
 
+import com.adobe.acs.commons.mcp.form.DialogProvider;
+import com.adobe.acs.commons.mcp.form.DialogProviderAnnotationProcessor;
+import com.adobe.acs.commons.mcp.form.DialogResourceProvider;
 import com.adobe.acs.commons.mcp.impl.DialogResourceProviderFactoryImpl;
-import com.adobe.acs.commons.mcp.model.SimpleModelOne;
-import com.adobe.acs.commons.mcp.model.SimpleModelThree;
-import com.adobe.acs.commons.mcp.model.SimpleModelTwo;
+import com.google.testing.compile.Compilation;
+import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.sling.api.adapter.AdapterFactory;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.Model;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.apache.sling.testing.mock.sling.junit.SlingContextBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static com.google.testing.compile.Compiler.javac;
 import static org.junit.Assert.*;
 
 /**
@@ -44,46 +48,45 @@ public class DialogResourceProviderFactoryTest {
 
     @Rule
     public SlingContext slingContext = new SlingContextBuilder()
-                    .registerSlingModelsFromClassPath(false)
-                    .resourceResolverType(ResourceResolverType.JCR_MOCK)
-                    .build();
-
-    private DialogResourceProviderFactoryImpl dialogProvider;
+            .registerSlingModelsFromClassPath(false)
+            .resourceResolverType(ResourceResolverType.JCR_MOCK)
+            .build();
 
     private static final String[] MODEL_CLASSES = {
-            "com.adobe.acs.commons.mcp.model.SimpleModelOne",
-            "com.adobe.acs.commons.mcp.model.SimpleModelTwo",
-            "com.adobe.acs.commons.mcp.model.SimpleModelThree"
+        "com.adobe.acs.commons.mcp.model.SimpleModelOne",
+        "com.adobe.acs.commons.mcp.model.SimpleModelTwo",
+        "com.adobe.acs.commons.mcp.model.SimpleModelThree"
     };
 
+    public Map<String, DialogResourceProvider> providers = new HashMap<>();
+
     @Before
-    public void init() throws IOException {
-        dialogProvider = new DialogResourceProviderFactoryImpl();
+    public void init() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         slingContext.addModelsForClasses(MODEL_CLASSES);
-        slingContext.registerInjectActivateService(dialogProvider, "enabled", true);
+        for (String className : MODEL_CLASSES) {
+            DialogResourceProvider provider = (DialogResourceProvider) Class.forName(DialogResourceProvider.getServiceClassName(className)).newInstance();
+            slingContext.registerService(DialogResourceProvider.class, provider);
+            providers.put(className, provider);
+            provider.doActivate(slingContext.bundleContext());
+        }
+    }
+
+    @Test(expected = ClassNotFoundException.class)
+    public void testAnnotationProcessorNegativeDiscrimination() throws ClassNotFoundException {
+        // This class should not exist and throw an error -- it doesn't provide a resource type and so it wouldn't be a candidate for a resource provider
+        Class.forName(DialogResourceProvider.getServiceClassName(NoResourceTypeProvided.class.getCanonicalName()));
     }
 
     @Test
-    public void testResourceTypeDetection() throws IOException {
-        assertTrue("Should detect simpleModelOne", dialogProvider.getActiveProviders().containsKey(SimpleModelOne.class.getName()));
-        assertTrue("Should detect simpleModelTwo", dialogProvider.getActiveProviders().containsKey(SimpleModelTwo.class.getName()));
-        assertTrue("Should detect simpleModelThree", dialogProvider.getActiveProviders().containsKey(SimpleModelThree.class.getName()));
+    public void testAnnotationProcessorPositiveDiscrimination() throws ClassNotFoundException {
+        // This class provides a resource type so it should have a corresponding OSGi service
+        Class.forName(DialogResourceProvider.getServiceClassName(ResourceTypeProvided.class.getCanonicalName()));
     }
 
     @Test
-    public void testEnableSwitch() throws IOException {
-        assertTrue("Service should report being enabled", dialogProvider.isEnabled());
-        // Bumped to 4 due to addition of Dynamic Deck
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
-        dialogProvider.setEnabled(false);
-        assertFalse("Service should report being disabled", dialogProvider.isEnabled());
-        assertEquals("Should have 0 services registered", 0, dialogProvider.getActiveProviders().size());
-        assertFalse("Should not resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
-        dialogProvider.setEnabled(true);
-        assertTrue("Service should report being enabled", dialogProvider.isEnabled());
-        // Bumped to 4 due to addition of Dynamic Deck
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
-        assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+    public void testAnnotationProcessorPositiveDiscriminationForModels() throws ClassNotFoundException {
+        // This class provides a resource type on the model annotation so it should have a corresponding OSGi service
+        Class.forName(DialogResourceProvider.getServiceClassName(ResourceTypeProvidedByModel.class.getCanonicalName()));
     }
 
     @Test
@@ -100,23 +103,63 @@ public class DialogResourceProviderFactoryTest {
     }
 
     @Test
-    public void testDynamicRegistration() {
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
+    public void testDeactivation() {
+        assertTrue("Should resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+        providers.get("com.adobe.acs.commons.mcp.model.SimpleModelOne").doDeactivate();
+        assertFalse("Should not resolve model one dialog", resourceExists("/apps/test/model1/cq:dialog"));
+    }
 
-        AdapterFactory adapterFactory = Mockito.mock(AdapterFactory.class);
-        Map<String,Object> properties = new HashedMap<>();
-        properties.put("models.adapter.implementationClass", "com.adobe.acs.commons.mcp.model.SimpleModelFour");
-        dialogProvider.bind(adapterFactory, properties);
+    @Test
+    public void testFactoryDoesNothing() {
+        // The dialog provider factory is dead but still exists for backward compatiblity until 5.0
+        // Assert that it does nothing.
+        DialogResourceProviderFactory factory = new DialogResourceProviderFactoryImpl();
+        assertNull(factory.getActiveProviders());
 
-        assertEquals("Should have 4 services registered", 4, dialogProvider.getActiveProviders().size());
-        assertTrue("Should resolve model four dialog", resourceExists("/apps/test/model4/cq:dialog"));
+        // These would normally throw an exception on null data if they did anything.
+        factory.registerClass((Class) null);
+        factory.registerClass((String) null);
+        factory.unregisterClass((Class) null);
+        factory.unregisterClass((String) null);
+    }
 
-        dialogProvider.unbind(adapterFactory, properties);
-        assertEquals("Should have 3 services registered", 3, dialogProvider.getActiveProviders().size());
-        assertFalse("Should NOT resolve model four dialog", resourceExists("/apps/test/model4/cq:dialog"));
+    @Test
+    public void testAnnotationProvider() {
+        Compilation compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("a.Example1", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example1 {public String getResourceType(){return \"my.type\";}}"));
+        assertThat(compilation).succeeded();
+        compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("a.Example2", "package a; @com.adobe.acs.commons.mcp.form.DialogProvider public class Example2 {public String resourceType=\"my.type\";}"));
+        assertThat(compilation).succeeded();
+        compilation = javac()
+                .withProcessors(new DialogProviderAnnotationProcessor())
+                .compile(JavaFileObjects.forSourceString("a.Example3", "package a; @org.apache.sling.models.annotations.Model(adaptables=org.apache.sling.api.resource.Resource.class, resourceType=\"my.type\") @com.adobe.acs.commons.mcp.form.DialogProvider public class Example3 {}"));
+        assertThat(compilation).succeeded();
     }
 
     private boolean resourceExists(String path) {
         return slingContext.resourceResolver().getResource(path) != null;
+    }
+
+    @DialogProvider
+    // This is annotated but does not provide a resource type, so a service should NOT be created
+    public static class NoResourceTypeProvided {
+    }
+
+    @DialogProvider
+    // This is annotated and provides a resource type, so a service SHOULD be created
+    public static class ResourceTypeProvided {
+
+        public static String getResourceType() {
+            return "my.resource.type";
+        }
+    }
+
+    @DialogProvider
+    @Model(adaptables = Resource.class, resourceType = "my.resource.type")
+    // This is annotated and provides a resource type via the model annotation, so a service SHOULD be created
+    public static class ResourceTypeProvidedByModel {
     }
 }
