@@ -22,7 +22,6 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes.impl
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
-import com.adobe.aemds.guide.themes.GuideThemeConstants;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
@@ -64,6 +63,8 @@ import java.util.Arrays;
 @Component(service = WorkflowProcess.class, property = {"process.label=Dynamic Deck Dynamo Write Back Process"})
 public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckBackTrackProcess.class);
+    
+    private static String DAM_ROOT = "/content/dam";
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -246,10 +247,10 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
                         return;
                     }
                     String completeHrefValue = null;
-                    if (hrefValue.contains(GuideThemeConstants.CONTENT_DAM_ROOT)) {
+                    if (hrefValue.contains(DAM_ROOT)) {
                         String hrefEncodedValue = StringUtils.substringAfter(
-                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), GuideThemeConstants.CONTENT_DAM_ROOT);
-                        completeHrefValue = GuideThemeConstants.CONTENT_DAM_ROOT + hrefEncodedValue;
+                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), DAM_ROOT);
+                        completeHrefValue = DAM_ROOT + hrefEncodedValue;
                     }
                     if (null == completeHrefValue) {
                         LOGGER.error("Back track root path is not correct {}", hrefValue);
