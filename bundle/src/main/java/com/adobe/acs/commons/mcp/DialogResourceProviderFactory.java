@@ -23,6 +23,11 @@ import java.util.Map;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.framework.ServiceRegistration;
 
+/**
+ * Factory for dialog resource providers, removed after 4.7.0 by way of the new annotation processor.
+ * @deprecated Will be removed in 5.0 entirely, no longer needed
+ */
+@Deprecated
 public interface DialogResourceProviderFactory {
 
     void registerClass(String className);

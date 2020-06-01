@@ -34,9 +34,14 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 
 /**
- * Generates a dialog out of @FormField annotations Ideally your sling model
- * should extend this class to inherit its features but you can also just use
- * the @DialogProvider annotation
+ * Generates a dialog out of @FormField annotations. Ideally your sling model
+ * should extend this class to inherit its API. Otherwise if you just want a
+ * generated dialog without the methods in this class, apply the DialogProvider
+ * annotation to your class by itself. NOTE: Subclassing will only produce a
+ * dialog provider OSGi service if you declare the resourceType either in the
+ * Model annotation or via a getter or public property for resourceType. The
+ * DialogProvider annotation will also provide an OSGi service but under the
+ * same conditions that resourceType is defined by your class.
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class},

@@ -23,9 +23,10 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
- *
+ * @deprecated Will be removed in 5.0 entirely, no longer needed
  */
 @ObjectClassDefinition(name = "ACS AEM Commons - Dialog Resource Provider Configuration", description = "Service Configuration")
+@Deprecated
 public @interface DialogResourceProviderConfiguration {
   @AttributeDefinition(name = "Enable feature", description = "If checked, feature will be enabled")
   boolean enabled();

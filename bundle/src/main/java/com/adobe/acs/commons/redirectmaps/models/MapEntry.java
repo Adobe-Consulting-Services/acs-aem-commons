@@ -26,14 +26,14 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class MapEntry {
-    private int id;
+    private long id;
     private final String origin;
     private final String source;
     private String status;
     private final String target;
     private boolean valid = true;
 
-    public MapEntry(int id, String source, String target, String origin) {
+    public MapEntry(long id, String source, String target, String origin) {
         source = source.trim();
         this.source = source;
         this.target = target;
@@ -41,7 +41,7 @@ public class MapEntry {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
