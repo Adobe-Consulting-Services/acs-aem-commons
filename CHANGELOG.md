@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
+- #2324 - On-Deploy-Scripts are not supported on AEMaaCS
 
 ## [4.7.0] - 2020-05-12
 
