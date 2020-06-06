@@ -1,5 +1,5 @@
 language: java
-dist: bionic
+dist: xenial
 jdk: 
 - oraclejdk8
 - oraclejdk11
