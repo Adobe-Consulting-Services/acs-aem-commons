@@ -371,13 +371,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>com.adobe.aem</groupId>
-                <artifactId>uber-jar</artifactId>
-                <version>6.3.0</version>
-                <classifier>apis</classifier>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.2</version>
@@ -749,6 +742,36 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <id>classic</id>
+            <dependencyManagement>
+	            <dependencies>
+	                <dependency>
+		                <groupId>com.adobe.aem</groupId>
+		                <artifactId>uber-jar</artifactId>
+		                <version>6.3.0</version>
+		                <classifier>apis</classifier>
+		                <scope>provided</scope>
+		            </dependency>
+	            </dependencies>
+            </dependencyManagement>
+        </profile>
+        <profile>
+            <id>cloudservice</id>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.adobe.aem</groupId>
+                        <artifactId>aem-sdk-api</artifactId>
+                        <version>2020.6.3614.20200604T023048Z-200507</version>
+                        <scope>provided</scope>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+        </profile> 
     </profiles>
 
     <!--

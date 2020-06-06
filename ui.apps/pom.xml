@@ -324,11 +324,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
-        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
@@ -374,6 +369,28 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <id>classic</id>
+            <dependencies>
+	            <dependency>
+		            <groupId>com.adobe.aem</groupId>
+		            <artifactId>uber-jar</artifactId>
+		            <classifier>apis</classifier>
+	            </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>cloudservice</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.adobe.aem</groupId>
+                    <artifactId>aem-sdk-api</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>
