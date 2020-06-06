@@ -22,7 +22,9 @@ jobs:
        env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN"
      - jdk: oraclejdk8
        env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" PROFILE="-Pcloudservice"
-script: mvn help:active-profiles && mvn verify -B $PROFILE
+script: 
+  - mvn help:active-profiles
+  - mvn verify -B $PROFILE
 before_install:
   - cp .travis.settings.xml $HOME/.m2/settings.xml
 before_script:
