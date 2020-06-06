@@ -22,7 +22,6 @@ package com.adobe.acs.commons.indesign.dynamicdeckdynamo.workflow.processes.impl
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.constants.DynamicDeckDynamoConstants;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.exception.DynamicDeckDynamoException;
 import com.adobe.acs.commons.indesign.dynamicdeckdynamo.utils.DynamicDeckUtils;
-//import com.adobe.aemds.guide.themes.GuideThemeConstants;
 import com.adobe.granite.workflow.WorkflowException;
 import com.adobe.granite.workflow.WorkflowSession;
 import com.adobe.granite.workflow.exec.WorkItem;
