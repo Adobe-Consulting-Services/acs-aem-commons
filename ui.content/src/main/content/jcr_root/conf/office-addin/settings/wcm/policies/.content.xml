@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <wcm jcr:primaryType="nt:unstructured">
+        <foundation jcr:primaryType="nt:unstructured">
+            <components jcr:primaryType="nt:unstructured">
+                <responsivegrid jcr:primaryType="nt:unstructured">
+                    <office-addin
+                        jcr:description="Policy of the default root parsys for Office Addin"
+                        jcr:lastModified="{Date}2020-04-16T21:18:24.434Z"
+                        jcr:lastModifiedBy="admin"
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Office Addin Container Policy"
+                        sling:resourceType="wcm/core/components/policy/policy"
+                        components="[group:AEM Office Addin]">
+                        <jcr:content
+                            jcr:primaryType="nt:unstructured"
+                            mergeList="{Boolean}true"/>
+                    </office-addin>
+                </responsivegrid>
+            </components>
+        </foundation>
+    </wcm>
+    <acs-commons jcr:primaryType="nt:unstructured">
+        <components jcr:primaryType="nt:unstructured">
+            <office-addin jcr:primaryType="nt:unstructured">
+                <page jcr:primaryType="nt:unstructured">
+                    <office-addin
+                        jcr:lastModified="{Date}2020-04-16T20:53:56.788Z"
+                        jcr:lastModifiedBy="admin"
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Office Addin Page Policy"
+                        sling:resourceType="wcm/core/components/policy/policy"
+                        clientlibs="[wcm.foundation.components.page.responsive,office-addin.site]">
+                        <jcr:content jcr:primaryType="nt:unstructured"/>
+                    </office-addin>
+                </page>
+            </office-addin>
+        </components>
+    </acs-commons>
+</jcr:root>

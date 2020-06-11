@@ -1,0 +1,25 @@
+<h1>AEM Asset Selector Office Add-in</h1>
+
+<h2>Setup Instructions</h2>
+<ul>
+    <li>Create a page in your instance and add the 'Asset Selector' component
+	    <ul>
+		    <li>Usable sample provided at /content/office-addin/asset-selector</li>
+		</ul>
+	</li>
+	<li>In the component dialog you can change the root path if you want to point to specific folder</li>
+	<li>Copy the URL to this page</li>
+	<li>Update the manifest files to use this URL.
+	    <ul>
+		    <li>At line 19 change DefaultValue of SourceLocation to use this URL</li>
+			<li>At line 71 change the DefaultValue of Taskpane.Url to use this URL</li>
+		</ul>
+	</li>
+	<li>Now the add-ins are ready to install by following <a href='https://docs.microsoft.com/en-us/office/dev/add-ins/publish/publish'>these directions</a> to make the addin available in your organization.</li>
+</ul>
+
+<h2>Sample Manifest Files</h2>
+<ul>
+    <li><a href='./word_manifest.xml'>Word manifest file</a></li>
+	<li><a href='./powerpoint_manifest.xml'>Powerpoint manifest file</a></li>
+</ul>
