@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2314 - Fixed java.lang.IllegalStateException: Not a JSON Object for CQIncludePropertyNamespaceServlet
 - #2330 - Deactivated VersionedClientlibsTransformerFactory.VersionableClientlibsTransformer for static page exports
 
+### Changed
+- #2324 - On-Deploy-Scripts are not supported on AEMaaCS
+
 ## [4.7.0] - 2020-05-12
 
 ### Added
