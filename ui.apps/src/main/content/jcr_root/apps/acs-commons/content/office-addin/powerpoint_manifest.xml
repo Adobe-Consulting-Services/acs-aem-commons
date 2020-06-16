@@ -6,9 +6,9 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="AEM Images"/>
   <Description DefaultValue="Addin for impoting images from AEM Asset Seletor."/>
-  <IconUrl DefaultValue="http://localhost:4502/content/dam/officeAddin/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="http://localhost:4502/content/dam/officeAddin/icon-80.png"/>
-  <SupportUrl DefaultValue="https://www.ensemble.com"/>
+  <IconUrl DefaultValue="https://localhost:4502/content/dam/office-addin/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://localhost:4502/content/dam/office-addin/icon-80.png"/>
+  <SupportUrl DefaultValue="http://localhost:4502/apps/acs-commons/content/office-addin/readme.html"/>
   <AppDomains>
     <AppDomain>ensemble.com</AppDomain>
   </AppDomains>
@@ -16,7 +16,7 @@
     <Host Name="Presentation"/>
   </Hosts>  
   <DefaultSettings>
-    <SourceLocation DefaultValue="http://localhost:4502/content/officeAddin/en/asset-selector.html"/>
+    <SourceLocation DefaultValue="http://localhost:4502/content/office-addin/asset-selector.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -62,13 +62,13 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="http://localhost:4502/content/dam/officeAddin/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="http://localhost:4502/content/dam/officeAddin/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="http://localhost:4502/content/dam/officeAddin/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:4502/content/dam/office-addin/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:4502/content/dam/office-addin/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:4502/content/dam/office-addin/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812" />
-        <bt:Url id="Taskpane.Url" DefaultValue="http://localhost:4502/content/officeAddin/en/asset-selector.html" />   
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="http://localhost:4502/apps/acs-commons/content/office-addin/readme.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="http://localhost:4502/content/office-addin/asset-selector.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Import images from the Adobe AEM!" />
