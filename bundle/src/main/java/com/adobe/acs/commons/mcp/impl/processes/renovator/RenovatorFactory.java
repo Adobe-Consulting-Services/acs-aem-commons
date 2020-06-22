@@ -56,7 +56,7 @@ public class RenovatorFactory extends ProcessDefinitionFactory<Renovator> {
     
     /**
      * Used to inject mock services
-     * @param factory mock replicator service
+     * @param replicator mock replicator service
      */
     public void setReplicator(Replicator replicator) {
         this.replicator = replicator;

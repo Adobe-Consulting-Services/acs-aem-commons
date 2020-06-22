@@ -19,23 +19,24 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arrayOrEmpty;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.json.JsonObject;
-
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.ProgressCheckFactory;
-import net.adamcin.oakpal.core.SimpleProgressCheck;
-import net.adamcin.oakpal.core.Violation;
-import net.adamcin.oakpal.core.checks.Rule;
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.ProgressCheckFactory;
+import net.adamcin.oakpal.api.Rule;
+import net.adamcin.oakpal.api.Rules;
+import net.adamcin.oakpal.api.Severity;
+import net.adamcin.oakpal.api.SimpleProgressCheckFactoryCheck;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.vault.packaging.PackageId;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+
+import static net.adamcin.oakpal.api.JavaxJson.arrayOrEmpty;
 
 /**
  * Checks the authorizableId of imported {@link Authorizable} nodes to ensure they do not begin with "acs-commons".
@@ -53,20 +54,16 @@ public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressC
 
     @Override
     public ProgressCheck newInstance(final JsonObject config) {
-        final List<Rule> scopeIds = Rule.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
+        final List<Rule> scopeIds = Rules.fromJsonArray(arrayOrEmpty(config, CONFIG_SCOPE_IDS));
         return new Check(scopeIds);
     }
 
-    static final class Check extends SimpleProgressCheck {
+    static final class Check extends SimpleProgressCheckFactoryCheck<AcsCommonsAuthorizableCompatibilityCheck> {
         private final List<Rule> scopeIds;
 
         Check(final List<Rule> scopeIds) {
+            super(AcsCommonsAuthorizableCompatibilityCheck.class);
             this.scopeIds = new ArrayList<>(scopeIds);
-        }
-
-        @Override
-        public String getCheckName() {
-            return AcsCommonsAuthorizableCompatibilityCheck.class.getSimpleName();
         }
 
         @Override
@@ -82,17 +79,19 @@ public final class AcsCommonsAuthorizableCompatibilityCheck implements ProgressC
                     final String id = authz.getID();
 
                     // check for inclusion based on authorizableId
-                    Rule lastMatched = Rule.lastMatch(scopeIds, id);
+                    Rule lastMatched = Rules.lastMatch(scopeIds, id);
 
                     // if id is excluded, short circuit
                     if (lastMatched.isExclude()) {
                         return;
                     }
 
-                    if (authz.getID().startsWith("acs-commons")) {
-                        reportViolation(Violation.Severity.MAJOR,
-                                String.format("%s: reserved ID prefix [%s]", path, authz.getID()),
-                                packageId);
+                    if (id.startsWith("acs-commons")) {
+                        reporting(violation -> violation
+                                .withSeverity(Severity.MAJOR)
+                                .withPackage(packageId)
+                                .withDescription("{0}: reserved ID prefix [{1}]")
+                                .withArgument(path, id));
                     }
                 }
             }

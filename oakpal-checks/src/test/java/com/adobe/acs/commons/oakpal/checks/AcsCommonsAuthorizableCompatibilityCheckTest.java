@@ -19,19 +19,19 @@
  */
 package com.adobe.acs.commons.oakpal.checks;
 
-import static net.adamcin.oakpal.core.JavaxJson.arr;
-import static net.adamcin.oakpal.core.JavaxJson.key;
-import static net.adamcin.oakpal.core.JavaxJson.obj;
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-
+import net.adamcin.oakpal.api.ProgressCheck;
+import net.adamcin.oakpal.api.Rules;
 import net.adamcin.oakpal.core.CheckReport;
-import net.adamcin.oakpal.core.ProgressCheck;
-import net.adamcin.oakpal.core.checks.Rule;
 import net.adamcin.oakpal.testing.TestPackageUtil;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+
+import static net.adamcin.oakpal.api.JavaxJson.arr;
+import static net.adamcin.oakpal.api.JavaxJson.key;
+import static net.adamcin.oakpal.api.JavaxJson.obj;
+import static org.junit.Assert.assertEquals;
 
 public class AcsCommonsAuthorizableCompatibilityCheckTest extends CheckTestBase {
 
@@ -46,7 +46,7 @@ public class AcsCommonsAuthorizableCompatibilityCheckTest extends CheckTestBase 
     @Test
     public void testCheckNone() throws Exception {
         ProgressCheck check = new AcsCommonsAuthorizableCompatibilityCheck()
-                .newInstance(key("scopeIds", arr(Rule.DEFAULT_DENY)).get());
+                .newInstance(key("scopeIds", arr(Rules.DEFAULT_DENY)).get());
         CheckReport reportValid = scanWithCheck(check, pack);
         assertEquals("No violations when deny all authorizable ids.", 0, reportValid.getViolations().size());
     }

@@ -5,4 +5,8 @@
         jcr:primaryType="rep:GrantACE"
         rep:principalName="acs-commons-on-deploy-scripts-service"
         rep:privileges="{Name}[jcr:versionManagement,jcr:read,rep:write,jcr:lockManagement]"/>
+    <allow1
+        jcr:primaryType="rep:GrantACE"
+        rep:principalName="acs-commons-email-service"
+        rep:privileges="{Name}[jcr:read]"/>
 </jcr:root>

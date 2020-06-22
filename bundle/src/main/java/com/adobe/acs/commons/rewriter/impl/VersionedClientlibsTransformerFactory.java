@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.acs.commons.util.impl.AbstractGuavaCacheMBean;
 import com.adobe.acs.commons.util.impl.CacheMBean;
 import com.adobe.acs.commons.util.impl.exception.CacheMBeanException;
@@ -76,7 +77,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -134,6 +135,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private static final Pattern FILTER_PATTERN = Pattern.compile("(.*?)\\.(?:min.)?" + MD5_PREFIX + "([a-zA-Z0-9]+)\\.(js|css)");
 
     private static final String PROXY_PREFIX = "/etc.clientlibs/";
+    private static final String PROXIED_STATIC_RESOURCE_PATH = "/resources/";
 
     private Cache<VersionedClientLibraryMd5CacheKey, String> md5Cache;
 
@@ -145,8 +147,12 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     @Reference
     private HtmlLibraryManager htmlLibraryManager;
+    
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
-    private ServiceRegistration filterReg;
+    private ServiceRegistration<Filter> filterReg;
 
     public VersionedClientlibsTransformerFactory() throws NotCompliantMBeanException {
         super(CacheMBean.class);
@@ -166,7 +172,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             filterProps.put("sling.filter.scope", "REQUEST");
             filterProps.put("service.ranking", Integer.valueOf(0));
 
-            filterReg = bundleContext.registerService(Filter.class.getName(),
+            filterReg = bundleContext.registerService(Filter.class,
                     new BadMd5VersionedClientLibsFilter(), filterProps);
         }
     }
@@ -174,7 +180,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     @Deactivate
     protected void deactivate() {
         if (filterReg != null) {
-            filterReg.unregister();;
+            filterReg.unregister();
             filterReg = null;
         }
         this.md5Cache = null;
@@ -223,6 +229,10 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private String getVersionedPath(final String originalPath, final LibraryType libraryType, final ResourceResolver resourceResolver) {
+        if (originalPath.startsWith(PROXY_PREFIX) && originalPath.contains(PROXIED_STATIC_RESOURCE_PATH)) {
+            log.debug("Static resource accessed via the clientlib proxy: '{}'", originalPath);
+            return null;
+        }
         try {
             boolean appendMinSelector = false;
             String libraryPath = StringUtils.substringBeforeLast(originalPath, ".");
@@ -362,7 +372,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
 
     @Override
     protected long getBytesLength(String cacheObj) {
-        return cacheObj.getBytes(Charset.forName("UTF-8")).length;
+        return cacheObj.getBytes(StandardCharsets.UTF_8).length;
     }
 
     @Override
@@ -432,7 +442,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     try {
                         md5FromCache = getCacheEntry(uriInfo.cacheKey);
                     } catch (Exception e) {
-                        md5FromCache = null;
+                        log.debug("Failed to get cache entry for '{}'", uriInfo.cacheKey);
                     }
 
                     // this static value "Invalid cache key parameter." happens when the cache key can't be

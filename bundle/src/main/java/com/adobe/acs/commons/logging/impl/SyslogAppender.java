@@ -99,7 +99,7 @@ public final class SyslogAppender {
 
         final String[] loggers = PropertiesUtil.toStringArray(properties.get(PROP_LOGGERS), new String[] {ROOT});
         Dictionary<String, Object> props = new Hashtable<>();
-        props.put("loggers", loggers);
+        props.put(PROP_LOGGERS, loggers);
         appenderRegistration = ctx.registerService(Appender.class.getName(), appender, props);
     }
 

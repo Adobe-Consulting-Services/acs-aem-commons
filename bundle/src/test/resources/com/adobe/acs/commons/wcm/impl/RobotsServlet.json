@@ -1,0 +1,31 @@
+{
+  "en": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "robotsContents": "User-agent: *\nDisallow: /",
+      "allowRobots": true,
+      "isSiteMap": true
+    },
+    "no-bots": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "denyRobots": true
+      }
+    },
+    "events": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent"
+      }
+    },
+    "about": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "denyGoogle": true
+      }
+    }
+  }
+}

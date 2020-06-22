@@ -48,6 +48,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.adobe.acs.commons.util.RequireAem;
+
 /**
  * Configuration service for Remote Asset feature.
  */
@@ -148,6 +150,10 @@ public class RemoteAssetsConfigImpl {
     private Set<String> whitelistedServiceUsers = new HashSet<>();
 
     private Executor remoteAssetsHttpExecutor;
+
+    // Disable this feature on AEM as a Cloud Service
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;

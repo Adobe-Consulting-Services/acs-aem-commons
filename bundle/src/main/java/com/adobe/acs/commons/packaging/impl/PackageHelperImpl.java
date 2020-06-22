@@ -148,20 +148,20 @@ public final class PackageHelperImpl implements PackageHelper {
                 }
 
                 final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
-
-                log.debug(packageVersion.toString() + " compareTo " + latestVersion.toString()
-                        + " = " + packageVersion.compareTo(latestVersion));
+                
+                log.debug("{} compareTo {} = {}", new Object[]
+                    {packageVersion.toString(),latestVersion.toString(),packageVersion.compareTo(latestVersion)});
 
                 if (packageVersion.compareTo(latestVersion) >= 1) {
                     latestVersion = packageVersion;
-                    log.debug("Found a new latest version: {}", latestVersion.toString());
+                    log.debug("Found a new latest version: {}", latestVersion);
                 } else if (packageVersion.compareTo(configVersion) == 0) {
                     configVersionEligible = false;
                     log.debug("Found a package with the same version as the config version");
                 }
             }
 
-            log.debug("Current latest version: {}", latestVersion.toString());
+            log.debug("Current latest version: {}", latestVersion);
             if (configVersionEligible && latestVersion.equals(configVersion)) {
                 // If the config-specified version is newer than any existing package, jump to the config version
                 return configVersion;
@@ -219,7 +219,7 @@ public final class PackageHelperImpl implements PackageHelper {
             jcrPackage.getNode().remove();
             jcrPackage.getNode().getSession().save();
         } else {
-            log.debug("Nothing to remove at: ", packageId.getInstallationPath());
+            log.debug("Nothing to remove at: {} ", packageId.getInstallationPath());
         }
     }
 

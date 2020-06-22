@@ -163,7 +163,7 @@ public class FrozenAsset implements InvocationHandler {
                             frozenResource.getResourceResolver(),
                             r.getPath());
                 } catch (RepositoryException ex) {
-                    LOG.error("Error retrieving subasset from "+r.getPath(), ex);
+                    LOG.error("Error retrieving subasset from {}", r.getPath(), ex);
                 }
                 return null;
             }).collect(Collectors.toList());

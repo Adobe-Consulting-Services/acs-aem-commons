@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.adobe.acs</groupId>
 		<artifactId>acs-aem-commons</artifactId>
-		<version>4.5.1-SNAPSHOT</version>
+		<version>4.7.1-SNAPSHOT</version>
 	</parent>
 
 	<!-- ====================================================================== -->
@@ -95,7 +95,8 @@
 							com.adobe.acs.commons.wcm.comparisons.model,
 							com.adobe.acs.commons.workflow.bulk.execution.model,
 							com.adobe.acs.commons.mcp.model,
-							com.adobe.acs.commons.reports.models
+							com.adobe.acs.commons.reports.models,
+							com.adobe.acs.commons.indesign.dynamicdeckdynamo.models
 						</Sling-Model-Packages>
 					</instructions>
 				</configuration>

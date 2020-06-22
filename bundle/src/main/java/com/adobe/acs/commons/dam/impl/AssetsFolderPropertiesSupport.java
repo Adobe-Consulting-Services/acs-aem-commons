@@ -100,7 +100,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
      * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) to ensure that all OOTB behaviors are executed.
      */
     @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
-    private PostOperation folderShareHandler;
+    private transient PostOperation folderShareHandler;
 
     /**
      * This method is responsible for post processing POSTs to the FolderShareHandler PostOperation (:operation = dam.share.folder).
