@@ -110,13 +110,11 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         if (log.isDebugEnabled()) {
             log.debug("ResourceHttpCacheConfigExtension {} : ResourceType acceptance check on [ {} ~> {} ]", configName, request.getResource(), request.getResource().getResourceType());
         }
-
-        for (Pattern pattern : pathPatterns) {
-            Matcher m = pattern.matcher(request.getResource().getPath());
-            if (!m.matches()) {
-                return false;
-            }
+  
+        if (!checkContentPath(request.getResource().getPath())) {
+          return false;
         }
+        
         // Passed the content path test..
 
         Resource candidateResource = request.getResource();
@@ -129,6 +127,10 @@ public class ResourceTypeHttpCacheConfigExtension implements HttpCacheConfigExte
         log.debug("ResourceHttpCacheConfigExtension {} :  checking for resource type matches", configName);
         // Match resource types.
         return checkResourceType(candidateResource);
+    }
+    
+    private boolean checkContentPath(String contentPath) {
+        return pathPatterns.stream().anyMatch( pattern -> pattern.matcher(contentPath).matches());
     }
 
     private boolean checkResourceType(Resource candidateResource) {

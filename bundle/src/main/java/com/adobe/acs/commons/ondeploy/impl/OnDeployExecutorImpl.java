@@ -22,6 +22,7 @@ package com.adobe.acs.commons.ondeploy.impl;
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -100,6 +101,9 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+    
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private List<OnDeployScriptProvider> scriptProviders = new CopyOnWriteArrayList<>();

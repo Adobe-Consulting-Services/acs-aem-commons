@@ -128,7 +128,7 @@ public class RedirectEntriesUtils {
         res.addProperty("message", message);
 
         if (redirectMap != null) {
-            JsonElement entries = gson.toJsonTree(redirectMap.getEntries(), new TypeToken<List<MapEntry>>() {
+            JsonElement entries = gson.toJsonTree(redirectMap.getEntries(0), new TypeToken<List<MapEntry>>() {
             }.getType());
             res.add("entries", entries);
             res.add("invalidEntries", gson.toJsonTree(redirectMap.getInvalidEntries(), new TypeToken<List<MapEntry>>() {
