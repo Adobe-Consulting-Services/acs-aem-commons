@@ -164,7 +164,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         request.getRequestDispatcher(request.getResource(), options).forward(request, bufferedResponse);
 
         Gson gson = new Gson();
-         final JsonObject json = gson.toJsonTree(bufferedResponse.getBufferedServletOutput().getBufferedString()).getAsJsonObject();
+         final JsonObject json = gson.fromJson(bufferedResponse.getBufferedServletOutput().getBufferedString(), JsonElement.class).getAsJsonObject();
          final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
 
          propertyNamespaceUpdater.accept(json);
