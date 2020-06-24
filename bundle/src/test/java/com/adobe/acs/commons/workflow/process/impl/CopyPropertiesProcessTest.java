@@ -58,8 +58,12 @@ public class CopyPropertiesProcessTest {
         ctx.registerInjectActivateService(new CopyPropertiesProcess());
     }
 
+
+    /**
+     * IF the property doesn’t exist on the source, THEN do nothing (AEM will never remove a property entirely, so empty values are allowed after a property is created)
+     */
     @Test
-    public void copyProperties() {
+    public void copyProperties_sourceWithMissingProperty() {
         MetaDataMap metaDataMap = new SimpleMetaDataMap();
         metaDataMap.put("PROPERTY_MAP", new String[]{
                 "./jcr:content/onTime => ./jcr:content/metadata/dam:onTime",
@@ -68,31 +72,17 @@ public class CopyPropertiesProcessTest {
 
         CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
 
-        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/one.png/jcr:content");
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-without-destination-with.png/jcr:content");
 
-        assertEquals("monday", ctx.resourceResolver().getResource("/content/dam/one.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
-        assertEquals("sunday", ctx.resourceResolver().getResource("/content/dam/one.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
+        assertFalse("dam:onTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-without-destination-with.png/jcr:content/metadata").getValueMap().containsKey("dam:onTime"));
+        assertFalse("dam:offTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-without-destination-with.png/jcr:content/metadata").getValueMap().containsKey("dam:offTime"));
     }
 
+    /**
+     * IF the property exists on the source AND is empty on the source AND the property exists on the destination THEN set the destination property to empty.
+     */
     @Test
-    public void copyProperties_remove() {
-        MetaDataMap metaDataMap = new SimpleMetaDataMap();
-        metaDataMap.put("PROPERTY_MAP", new String[]{
-                "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
-                "./jcr:content/offTime => ./jcr:content/metadata/dam:offTime"
-        });
-        metaDataMap.put("SKIP_EMPTY_SOURCE_PROPERTY", Boolean.FALSE);
-
-        CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
-
-        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/two.png");
-
-        assertNull(ctx.resourceResolver().getResource("/content/dam/two.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
-        assertNull(ctx.resourceResolver().getResource("/content/dam/two.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
-    }
-
-    @Test
-    public void copyProperties_skipEmpty() {
+    public void copyProperties_sourceWithEmptyProperty() {
         MetaDataMap metaDataMap = new SimpleMetaDataMap();
         metaDataMap.put("PROPERTY_MAP", new String[]{
                 "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
@@ -101,16 +91,89 @@ public class CopyPropertiesProcessTest {
 
         CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
 
-        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/two.png");
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-empty-destination-with.png");
 
-        assertEquals("tuesday", ctx.resourceResolver().getResource("/content/dam/two.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
-        assertNull(ctx.resourceResolver().getResource("/content/dam/two.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
+        assertFalse("dam:onTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-with.png/jcr:content/metadata").getValueMap().containsKey("dam:onTime"));
+        assertFalse("dam:offTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-with.png/jcr:content/metadata").getValueMap().containsKey("dam:offTime"));
+
+        assertNull(ctx.resourceResolver().getResource("/content/dam/source-empty-destination-with.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
+        assertNull(ctx.resourceResolver().getResource("/content/dam/source-empty-destination-with.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
+    }
+
+    /**
+     * IF the property doesn’t exist on the source, THEN remove the property from the destination
+     */
+    @Test
+    public void copyProperties_sourceWithMissingProperty_destinationWithProperty() {
+        MetaDataMap metaDataMap = new SimpleMetaDataMap();
+        metaDataMap.put("PROPERTY_MAP", new String[]{
+                "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
+                "./jcr:content/offTime => ./jcr:content/metadata/dam:offTime"
+        });
+
+        CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
+
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-empty-destination-without.png");
+
+        assertFalse("dam:onTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-without.png/jcr:content/metadata").getValueMap().containsKey("dam:onTime"));
+        assertFalse("dam:offTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-without.png/jcr:content/metadata").getValueMap().containsKey("dam:offTime"));
+    }
+
+    /**
+     * IF the property exists on the source AND is empty on the source AND the property does not exist on the destination THEN do nothing (leave the destination alone)
+     */
+    @Test
+    public void copyProperties_sourceWithProperty_destinationWithoutProperty() {
+        MetaDataMap metaDataMap = new SimpleMetaDataMap();
+        metaDataMap.put("PROPERTY_MAP", new String[]{
+                "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
+                "./jcr:content/offTime => ./jcr:content/metadata/dam:offTime"
+        });
+
+        CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
+
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-empty-destination-without.png");
+
+        assertFalse("dam:onTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-without.png/jcr:content/metadata").getValueMap().containsKey("dam:onTime"));
+        assertFalse("dam:offTime property should be removed completely.", ctx.resourceResolver().getResource("/content/dam/source-empty-destination-without.png/jcr:content/metadata").getValueMap().containsKey("dam:offTime"));
+    }
+
+    @Test
+    public void copyProperties_sourceWithPropertyValue_destinationWithoutProperty() {
+        MetaDataMap metaDataMap = new SimpleMetaDataMap();
+        metaDataMap.put("PROPERTY_MAP", new String[]{
+                "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
+                "./jcr:content/offTime => ./jcr:content/metadata/dam:offTime"
+        });
+
+        CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
+
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-with-destination-without.png");
+
+        assertEquals("monday", ctx.resourceResolver().getResource("/content/dam/source-with-destination-without.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
+        assertEquals("thursday", ctx.resourceResolver().getResource("/content/dam/source-with-destination-without.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
+    }
+
+    @Test
+    public void copyProperties_sourceWithPropertyValue_destinationWithPropertyValue() {
+        MetaDataMap metaDataMap = new SimpleMetaDataMap();
+        metaDataMap.put("PROPERTY_MAP", new String[]{
+                "./jcr:content/onTime -> ./jcr:content/metadata/dam:onTime",
+                "./jcr:content/offTime => ./jcr:content/metadata/dam:offTime"
+        });
+
+        CopyPropertiesProcess workflowProcess = (CopyPropertiesProcess) ctx.getService(WorkflowProcess.class);
+
+        workflowProcess.copyProperties(metaDataMap, ctx.resourceResolver(), "/content/dam/source-with-destination-with.png/jcr:content");
+
+        assertEquals("monday", ctx.resourceResolver().getResource("/content/dam/source-with-destination-with.png/jcr:content/metadata").getValueMap().get("dam:onTime", String.class));
+        assertEquals("thursday", ctx.resourceResolver().getResource("/content/dam/source-with-destination-with.png/jcr:content/metadata").getValueMap().get("dam:offTime", String.class));
     }
 
     @Test
     public void propertyResource_absolutePath_getValue() throws WorkflowException {
         CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
-                "/content/dam/one.png/jcr:content/onTime", "/content/dam/two.png", ctx.resourceResolver());
+                "/content/dam/copy-properties.png/jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
 
         assertEquals("monday", actual.getValue());
     }
@@ -118,7 +181,7 @@ public class CopyPropertiesProcessTest {
     @Test
     public void propertyResource_relativePath_getValue() throws WorkflowException {
         CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
-                "./jcr:content/onTime", "/content/dam/one.png", ctx.resourceResolver());
+                "./jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
 
         assertEquals("monday", actual.getValue());
     }
@@ -126,18 +189,58 @@ public class CopyPropertiesProcessTest {
     @Test
     public void propertyResource_absolutePath_setValue() throws WorkflowException {
         CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
-                "/content/dam/one.png/jcr:content/onTime", "/content/dam/two.png", ctx.resourceResolver());
+                "/content/dam/copy-properties.png/jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
 
-        actual.setValue("friday", false);
-        assertEquals("friday", ctx.resourceResolver().getResource("/content/dam/one.png/jcr:content").getValueMap().get("onTime", String.class));
+        actual.setValue("friday");
+        assertEquals("friday", ctx.resourceResolver().getResource("/content/dam/copy-properties.png/jcr:content").getValueMap().get("onTime", String.class));
     }
 
     @Test
     public void propertyResource_relativePath_setValue() throws WorkflowException {
         CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
-                "./jcr:content/onTime", "/content/dam/one.png", ctx.resourceResolver());
+                "./jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
 
-        actual.setValue("friday", false);
-        assertEquals("friday", ctx.resourceResolver().getResource("/content/dam/one.png/jcr:content").getValueMap().get("onTime", String.class));
+        actual.setValue("friday");
+        assertEquals("friday", ctx.resourceResolver().getResource("/content/dam/copy-properties.png/jcr:content").getValueMap().get("onTime", String.class));
+    }
+
+    @Test
+    public void propertyResource_propertyExists_True() throws WorkflowException {
+        CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
+                "./jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
+
+        assertTrue(actual.propertyExists());
+    }
+
+    @Test
+    public void propertyResource_propertyExists_False() throws WorkflowException {
+        CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
+                "./jcr:content/missingTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
+
+        assertFalse(actual.propertyExists());
+    }
+
+    @Test
+    public void hasValue_True() throws WorkflowException {
+        CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
+                "./jcr:content/onTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
+
+        assertTrue(actual.hasValue());
+    }
+
+    @Test
+    public void hasValue_BlankFalse() throws WorkflowException {
+        CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
+                "./jcr:content/unknownTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
+
+        assertFalse(actual.hasValue());
+    }
+
+    @Test
+    public void hasValue_MissingFalse() throws WorkflowException {
+        CopyPropertiesProcess.PropertyResource actual = new CopyPropertiesProcess.PropertyResource(
+                "./jcr:content/missingTime", "/content/dam/copy-properties.png", ctx.resourceResolver());
+
+        assertFalse(actual.hasValue());
     }
 }
