@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #2241 Automatic Package Replicator - Missing Service User
+- #2264 Automatic Package Replicator - TouchUI Support
 
 ## [4.7.0] - 2020-05-12
 
