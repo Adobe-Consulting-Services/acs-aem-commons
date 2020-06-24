@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Added
+- #2339 - Microsoft Office Add-in for AEM Assets
+
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
