@@ -55,6 +55,7 @@ public class VanityURLServiceImpl implements VanityURLService {
         request.setAttribute(VANITY_DISPATCH_CHECK_ATTR, true);
 
         final String requestURI = request.getRequestURI();
+        // new PathInfo(resourceResolver, requestURI) performs the resourceResolver.map(..) on the resource path, to strip the prefix
         final RequestPathInfo mappedPathInfo = new PathInfo(request.getResourceResolver(), requestURI);
         final String candidateVanity = mappedPathInfo.getResourcePath();
         final String pathScope = StringUtils.removeEnd(requestURI, candidateVanity);
