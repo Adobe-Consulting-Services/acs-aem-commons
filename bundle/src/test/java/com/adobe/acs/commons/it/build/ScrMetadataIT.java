@@ -116,6 +116,9 @@ public class ScrMetadataIT {
         // properties removed for #2293 (Copy Properties workflow process implementation)
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.util.impl.WorkflowHelperImpl:service.vendor");
 
+        // properties removed for #2350 (Vanity Service)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.wcm.vanity.impl.VanityURLServiceImpl:service.vendor");
+
         // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/1852
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.topics");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.filter");
