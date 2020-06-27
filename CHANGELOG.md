@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2311 - ResourceTypeHttpCacheConfigExtension does not work with multiple allowed paths
 - #2314 - Fixed java.lang.IllegalStateException: Not a JSON Object for CQIncludePropertyNamespaceServlet
 
+### Changed
+
+- #2341 - Moved /var nodes and ACLS to be defined as Repoinit scripts
+
 ## [4.7.0] - 2020-05-12
 
 ### Added
