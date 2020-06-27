@@ -92,22 +92,6 @@
     <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy"/>
     <filter root="/var/acs-commons">
-            <include
-            pattern="/etc/acs-commons/reports(.*)?"
-            mode="merge"/>
-     </filter>
-    <!--
-    <filter root="/var/acs-commons">
-        <include pattern="/var/acs-commons/rep:policy"/>
-        <include pattern="/var/acs-commons/jcr:content"/>
-        <include pattern="/var/acs-commons/reports"/>
-        <include pattern="/var/acs-commons/reports/jcr:content"/>
-
-        <include pattern="/var/acs-commons/httpcache"/>
-        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
-        <include pattern="/var/acs-commons/mcp"/>
+            <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>
     </filter>
-    <filter root="/var/workflow/instances/rep:policy"/>
-    <filter root="/var/workflow/packages/rep:policy"/>
-    -->
 </workspaceFilter>
