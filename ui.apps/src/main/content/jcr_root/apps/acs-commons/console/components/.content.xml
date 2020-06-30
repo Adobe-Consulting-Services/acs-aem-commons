@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <description
+        granite:class="editor-DescriptionDialog"
+        jcr:primaryType="nt:unstructured"
+        jcr:title="Component Description"
+        sling:resourceType="granite/ui/components/coral/foundation/dialog">
+        <items jcr:primaryType="nt:unstructured">
+            <container
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <description
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="cq/gui/components/siteadmin/admin/components/component/description"
+                        path="${requestPathInfo.suffix}"/>
+                </items>
+            </container>
+        </items>
+    </description>
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="AEM Sites | Components"
+        sling:resourceType="granite/ui/components/shell/collectionpage"
+        consoleId="cq-sites-components-components"
+        contentPath="${requestPathInfo.suffix}"
+        currentView="${state[&quot;components.shell.collectionpage.layoutId&quot;].string}"
+        modeGroup="cq-siteadmin-admin-childpages"
+        pageURITemplate="/libs/wcm/core/content/sites/components.html"
+        targetCollection=".cq-siteadmin-admin-childpages">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[cq.common.wcm,cq.sites.collectionpage,cq.sites.components]"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Components"
+            sling:resourceType="granite/ui/components/shell/title"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <selection jcr:primaryType="nt:unstructured">
+                <viewproperties
+                    granite:rel="cq-siteadmin-admin-components-actions-properties-activator"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                    action="foundation.link"
+                    activeSelectionCount="single"
+                    icon="infoCircle"
+                    target=".cq-siteadmin-admin-childpages"
+                    text="Details"
+                    variant="actionBar">
+                    <data
+                        jcr:primaryType="nt:unstructured"
+                        href.uritemplate="/mnt/overlay/wcm/core/content/sites/components/properties.html{+item}"/>
+                </viewproperties>
+            </selection>
+        </actions>
+        <rails jcr:primaryType="nt:unstructured">
+            <search
+                granite:class="cq-rail-components-search"
+                jcr:primaryType="nt:unstructured"
+                jcr:title="Search"
+                sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel">
+                <items jcr:primaryType="nt:unstructured">
+                    <form
+                        granite:id="cq-siteadmin-admin-components-search-form"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/shell/search/form"
+                        action="/mnt/overlay/wcm/core/content/sites/components.html"
+                        consoleId="cq-sites-components"
+                        modeGroup="cq-siteadmin-admin-childpages"
+                        targetCollection="#cq-sites-search-result">
+                        <successresponse
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/form/responses/reload"/>
+                        <items jcr:primaryType="nt:unstructured">
+                            <type
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                name="type"
+                                value="cq:Component"/>
+                            <fulltext
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                fieldLabel="Enter Keyword"
+                                name="fulltext"/>
+                            <path
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                fieldLabel="Component Path"
+                                filter="hierarchyNotFile"
+                                name="path"/>
+                            <orderby
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/hidden"
+                                name="orderby"
+                                value="path"/>
+                            <groupcontainer
+                                granite:class="coral-Form-fieldwrapper"
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <group
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete"
+                                        emptyText="Choose Component Group"
+                                        forceSelection="{Boolean}false"
+                                        itemCounter="#cq-sites-components"
+                                        mode="contains"
+                                        multiple="{Boolean}true"
+                                        name="group">
+                                        <datasource
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="cq/gui/components/siteadmin/admin/components/groupdatasource"
+                                            autosubmit="{Boolean}true"
+                                            checked="${paramValues[&quot;group&quot;]}"
+                                            name="group"/>
+                                        <values
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete/tags"/>
+                                        <options
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/autocomplete/list"/>
+                                    </group>
+                                </items>
+                            </groupcontainer>
+                        </items>
+                        <result jcr:primaryType="nt:unstructured">
+                            <views jcr:primaryType="nt:unstructured">
+                                <list
+                                    granite:class="cq-components-list"
+                                    granite:id="cq-sites-search-result"
+                                    granite:rel="cq-siteadmin-admin-childpages"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/table"
+                                    layoutId="list"
+                                    limit="{Long}40"
+                                    modeGroup="cq-siteadmin-admin-childpages"
+                                    size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                                    src="/mnt/overlay/wcm/core/content/sites/components/_jcr_content/rails/search/items/form/result/views/list{.offset,limit}.html?${querystring}"
+                                    stateId="components.shell.collectionpage">
+                                    <columns jcr:primaryType="nt:unstructured">
+                                        <icon
+                                            jcr:primaryType="nt:unstructured"
+                                            select="{Boolean}true"/>
+                                        <title
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Title"
+                                            sortable="{Boolean}true"/>
+                                        <group
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Group"
+                                            sortable="{Boolean}true"/>
+                                        <rt
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Resource Type"
+                                            sortable="{Boolean}true"/>
+                                    </columns>
+                                    <datasource
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="cq/gui/components/siteadmin/admin/components/datasource"
+                                        groups="${paramValues[&quot;group&quot;]}"
+                                        itemResourceType="cq/gui/components/siteadmin/admin/components/row"
+                                        limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                                        offset="${empty requestPathInfo.selectors[1] ? &quot;0&quot; : requestPathInfo.selectors[1]}"
+                                        path="${param[&quot;path&quot;]}"
+                                        query="${param[&quot;fulltext&quot;]}"/>
+                                </list>
+                            </views>
+                        </result>
+                    </form>
+                </items>
+            </search>
+        </rails>
+        <views jcr:primaryType="nt:unstructured">
+            <list
+                granite:class="cq-components-list"
+                granite:rel="cq-siteadmin-admin-childpages"
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/table"
+                layoutId="list"
+                limit="{Long}40"
+                modeGroup="cq-siteadmin-admin-childpages"
+                path="${requestPathInfo.suffix}"
+                size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
+                src="/mnt/overlay/wcm/core/content/sites/components/jcr:content/views/list{.offset,limit}.html{+id}{?group,path,fulltext}"
+                stateId="components.shell.collectionpage">
+                <columns jcr:primaryType="nt:unstructured">
+                    <icon
+                        jcr:primaryType="nt:unstructured"
+                        select="{Boolean}true"/>
+                    <title
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Title"
+                        sortable="{Boolean}true"/>
+                    <group
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Group"
+                        sortable="{Boolean}true"/>
+                    <rt
+                        jcr:primaryType="nt:unstructured"
+                        jcr:title="Resource Type"
+                        sortable="{Boolean}true"/>
+                </columns>
+                <datasource
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/components/datasource"
+                    groups="${paramValues[&quot;group&quot;]}"
+                    itemResourceType="cq/gui/components/siteadmin/admin/components/row"
+                    limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
+                    offset="${requestPathInfo.selectors[0]}"/>
+            </list>
+        </views>
+    </jcr:content>
+    <details/>
+</jcr:root>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        jcr:primaryType="nt:unstructured"
+        jcr:title="AEM Sites | Component Properties"
+        sling:resourceType="granite/ui/components/shell/propertiespage"
+        backHref="${empty param.backHref ? (empty header.Referer ? granite:concat(&quot;/libs/wcm/core/content/sites/components.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 1))) : header.Referer) : param.backHref}"
+        consoleId="cq-sites-components-properties"
+        simpleSave="{Boolean}false">
+        <head jcr:primaryType="nt:unstructured">
+            <clientlibs
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                categories="[cq.sites.components]"/>
+        </head>
+        <title
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/components/component/title"
+            path="${requestPathInfo.suffix}"/>
+        <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="cq/gui/components/siteadmin/admin/viewproperties"
+            class="foundation-form"
+            foundation-form-ajax="{Boolean}true"
+            foundation-form-output-replace=".foundation-content"
+            foundation-mode-group="cq-commerce-catalogs-properties"
+            id="propertiesform"
+            page="${empty param.item ? requestPathInfo.suffix : param.item}"
+            redirectBaseUrl="/libs/commerce/gui/content/catalogs/properties.html">
+            <single jcr:primaryType="nt:unstructured">
+                <content
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/properties/form"
+                    path="${requestPathInfo.suffix}"
+                    style="vertical">
+                    <items jcr:primaryType="nt:unstructured">
+                        <content
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/container">
+                            <items jcr:primaryType="nt:unstructured">
+                                <tabs
+                                    granite:class="components-details"
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                                    maximized="{Boolean}true"
+                                    orientation="horizontal"
+                                    size="L">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fixedColumnContainer
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Properties"
+                                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <fixedColumn
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                                    <items jcr:primaryType="nt:unstructured">
+                                                        <properties
+                                                            granite:class="foundation-layout-table-components-properties"
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="cq/gui/components/siteadmin/admin/components/component/properties"
+                                                            path="${requestPathInfo.suffix}"/>
+                                                    </items>
+                                                </fixedColumn>
+                                            </items>
+                                        </fixedColumnContainer>
+                                        <policies
+                                            granite:class="foundation-layout-table-components-policies"
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Policies"
+                                            sling:resourceType="cq/gui/components/siteadmin/admin/components/component/empty"
+                                            path="${requestPathInfo.suffix}"/>
+                                        <liveusage
+                                            granite:class="foundation-layout-table-components-examples"
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Live Usage"
+                                            sling:resourceType="cq/gui/components/siteadmin/admin/components/component/empty"
+                                            limit="${empty requestPathInfo.selectors[1] ? 40 : requestPathInfo.selectors[1]}"
+                                            offset="${empty requestPathInfo.selectors[0] ? 0 : requestPathInfo.selectors[0]}"
+                                            path="${requestPathInfo.suffix}"/>
+                                        <documentation
+                                            granite:class="cq-siteadmin-components-details-documentation"
+                                            jcr:primaryType="nt:unstructured"
+                                            jcr:title="Documentation"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                                            <items jcr:primaryType="nt:unstructured">
+                                                <documentation
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="cq/gui/components/siteadmin/admin/components/component/documentation"
+                                                    path="${requestPathInfo.suffix}"/>
+                                            </items>
+                                            <granite:rendercondition
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/foundation/renderconditions/privilege"
+                                                path="${requestPathInfo.suffix}/README.md"
+                                                privileges="[jcr:read]"/>
+                                        </documentation>
+                                    </items>
+                                </tabs>
+                            </items>
+                        </content>
+                    </items>
+                </content>
+            </single>
+        </content>
+    </jcr:content>
+    <policies
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="cq/gui/components/siteadmin/admin/components/component/policies"/>
+    <liveusage
+        jcr:primaryType="nt:unstructured"
+        sling:resourceType="cq/gui/components/siteadmin/admin/components/component/examples"/>
+</jcr:root>
