@@ -309,7 +309,7 @@
             <datasource
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
-                exclude=""
+                exclude="/etc/acs-commons/(lists)(/.*)*"
                 limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
                 offset="${requestPathInfo.selectors[0]}"
                 path="${requestPathInfo.suffix}"/>

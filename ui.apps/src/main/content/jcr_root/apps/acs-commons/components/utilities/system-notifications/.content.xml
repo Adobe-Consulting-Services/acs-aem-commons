@@ -23,4 +23,5 @@
     cq:defaultView="html"
     jcr:primaryType="cq:Component"
     jcr:title="Maintenance Notification"
+    sling:resourceSuperType="acs-commons/components/utilities/page"
     componentGroup=".hidden"/>

@@ -4,6 +4,6 @@
     jcr:title="Content Packagers"
     jcr:description="Create Query, ACL and Authorizable packages."
     icon="archive"
-    href="/miscadmin#/etc/acs-commons/packagers"
+    href="/acs-commons.html/etc/acs-commons/packagers"
     id="acs-commons__content-packagers"
     target="_blank"/>

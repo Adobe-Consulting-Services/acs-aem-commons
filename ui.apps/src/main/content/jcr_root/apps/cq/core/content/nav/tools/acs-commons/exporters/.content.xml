@@ -4,6 +4,6 @@
     jcr:title="Users to CSV Exporter"
     jcr:description="Export AEM users to CSV for reporting."
     icon="usersShare"
-    href="/miscadmin#/etc/acs-commons/exporters"
+    href="/acs-commons.html/etc/acs-commons/exporters"
     id="acs-commons__exporters"
     target="_blank"/>
