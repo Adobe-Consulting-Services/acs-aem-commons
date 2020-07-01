@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Sites | Move Page"
+        jcr:title="ACS AEM Commons | Move Page"
         sling:resourceType="granite/ui/components/coral/foundation/page"
         consoleId="cq-sites-pages-move">
         <head jcr:primaryType="nt:unstructured">
@@ -173,7 +173,7 @@
                                     jcr:title="Select Destination"
                                     sling:resourceType="granite/ui/components/coral/foundation/wizard/lazycontainer"
                                     maximized="{Boolean}true"
-                                    src="/mnt/overlay/wcm/core/content/sites/movepagewizard/destination.html${granite:relativeParent(empty param.item ? requestPathInfo.suffix : param.item, 1)}">
+                                    src="/mnt/overlay/acs-commons/console/movepagewizard/destination.html${granite:relativeParent(empty param.item ? requestPathInfo.suffix : param.item, 1)}">
                                     <parentConfig jcr:primaryType="nt:unstructured">
                                         <next
                                             granite:class="foundation-wizard-control"
@@ -302,14 +302,14 @@
             loadAncestors="{Boolean}true"
             path="${requestPathInfo.suffix}"
             previewSrc="/libs/wcm/core/content/sites/pagecolumnpreview.html{+id}"
-            rootPath="/content"
+            rootPath="/etc/acs-commons"
             selectionCount="single"
-            size="{Long}40"
-            src="/mnt/overlay/wcm/core/content/sites/movepagewizard/destination/field{.offset,limit}.html{+id}">
+            size="{Long}5"
+            src="/mnt/overlay/acs-commons/console/movepagewizard/destination/field{.offset,limit}.html{+id}">
             <datasource
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
-                exclude="/content/(catalogs|dam|launches|mac|publications|usergenerated|communities|community-components|community-templates|forms|projects|phonegap|mobileapps|screens/(svc|blueprints))(/.*)*"
+                exclude=""
                 limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
                 offset="${requestPathInfo.selectors[0]}"
                 path="${requestPathInfo.suffix}"/>

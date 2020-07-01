@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Sites | Create Template"
+        jcr:title="ACS AEM Commons | Create Template"
         sling:resourceType="cq/gui/components/siteadmin/admin/createtemplatewizard/page"
         consoleId="cq-sites-templates-create">
         <head jcr:primaryType="nt:unstructured">

@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Sites | Template Properties"
+        jcr:title="ACS AEM Commons | Template Properties"
         sling:resourceType="granite/ui/components/shell/propertiespage"
         backHref="${granite:concat(&quot;/libs/wcm/core/content/sites/templates.html&quot;, granite:encodeURIPath(granite:relativeParent((empty param.item ? requestPathInfo.suffix : param.item), 1)))}"
         consoleId="cq-sites-templates-properties"

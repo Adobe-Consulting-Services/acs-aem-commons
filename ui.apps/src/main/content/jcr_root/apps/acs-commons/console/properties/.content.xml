@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Sites | Page Properties"
+        jcr:title="ACS AEM Commons | Page Properties"
         sling:resourceType="granite/ui/components/shell/propertiespage"
         backHref="${empty param.backHref ? (empty header.Referer ? granite:concat(&quot;/acs-commons.html&quot;, granite:encodeURIPath(granite:relativeParent(param.item, 1))) : header.Referer) : param.backHref}"
         consoleId="cq-sites-pages-properties"
@@ -22,148 +22,6 @@
             sling:resourceType="cq/gui/components/siteadmin/admin/properties/title"
             path="${param.item}"/>
         <actions jcr:primaryType="nt:unstructured">
-            <rollout
-                granite:class="cq-siteadmin-admin-properties-actions-blueprint hide"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                href="/mnt/overlay/wcm/msm/content/touch-ui/admin/rolloutdialog.html${granite:encodeURIPath(param.item)}"
-                icon="unmerge"
-                text="Rollout"
-                variant="actionBar">
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/isblueprint"
-                    path="${param.item}"/>
-            </rollout>
-            <livecopyoverview
-                granite:class="cq-siteadmin-admin-properties-actions-blueprint hide"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                href="/libs/wcm/msm/gui/content/livecopies.html${granite:encodeURIPath(param.item)}"
-                icon="feedManagement"
-                text="Live Copy Overview"
-                variant="actionBar">
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/isblueprint"
-                    path="${param.item}"/>
-            </livecopyoverview>
-            <sync
-                granite:class="cq-siteadmin-admin-properties-actions-livecopy hide"
-                granite:title="Synchronize Live Copy with Blueprint, keeping local modifications"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="wcm/msm/components/coral/touch-ui/propertiesdialog/livecopy/actions/rollout"
-                action="cq.wcm.msm.sync"
-                icon="sync"
-                text="Synchronize"
-                variant="actionBar">
-                <data
-                    jcr:primaryType="nt:unstructured"
-                    path="${param.item}"
-                    uri="/bin/wcmcommand"/>
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/islivecopy"
-                    ignoreIfCancelled="{Boolean}true"
-                    path="${param.item}"/>
-            </sync>
-            <reset
-                granite:class="cq-siteadmin-admin-properties-actions-livecopy hide"
-                granite:title="Reset Live Copy to state of Blueprint, removing local modifications"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="wcm/msm/components/coral/touch-ui/propertiesdialog/livecopy/actions/rollout"
-                action="cq.wcm.msm.reset"
-                icon="revert"
-                text="Reset"
-                variant="actionBar">
-                <data
-                    jcr:primaryType="nt:unstructured"
-                    path="${param.item}"
-                    uri="/bin/wcmcommand"/>
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/islivecopy"
-                    ignoreIfCancelled="{Boolean}true"
-                    path="${param.item}"/>
-            </reset>
-            <suspend
-                granite:class="cq-siteadmin-admin-properties-actions-livecopy hide"
-                granite:title="Suspend Live Copy from further rollout operations"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/coral/foundation/pulldown"
-                icon="linkOff"
-                text="Suspend"
-                variant="actionBar">
-                <items jcr:primaryType="nt:unstructured">
-                    <suspend
-                        granite:title="Suspend Live Copy from further rollout operations for this page only"
-                        jcr:primaryType="nt:unstructured"
-                        jcr:title="Suspend Live Copy"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                        action="cq.wcm.msm.suspend"
-                        text="Suspend"
-                        variant="actionBar">
-                        <data
-                            jcr:primaryType="nt:unstructured"
-                            uri="${param.item}/_jcr_content.msm.conf"/>
-                    </suspend>
-                    <suspendChildren
-                        granite:title="Suspend Live Copy from further rollout operations for this page and its children"
-                        jcr:primaryType="nt:unstructured"
-                        jcr:title="Suspend Live Copy"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/actionlink"
-                        action="cq.wcm.msm.suspend"
-                        text="Suspend with children"
-                        variant="actionBar">
-                        <data
-                            jcr:primaryType="nt:unstructured"
-                            deep="{Boolean}true"
-                            uri="${param.item}/_jcr_content.msm.conf"/>
-                    </suspendChildren>
-                </items>
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/islivecopy"
-                    ignoreIfCancelled="{Boolean}true"
-                    path="${param.item}"/>
-            </suspend>
-            <resume
-                granite:class="cq-siteadmin-admin-properties-actions-livecopy hide"
-                granite:title="Resume Live Copy"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="wcm/msm/components/coral/touch-ui/propertiesdialog/livecopy/actions/rollout"
-                action="cq.wcm.msm.resume"
-                icon="link"
-                text="Resume"
-                variant="actionBar">
-                <data
-                    jcr:primaryType="nt:unstructured"
-                    path="${param.item}"
-                    uri="${param.item}/_jcr_content.msm.conf"/>
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/islivecopy"
-                    ignoreIfNotCancelled="{Boolean}true"
-                    ignoreIfParentCancelled="{Boolean}true"
-                    path="${param.item}"/>
-            </resume>
-            <detach
-                granite:class="cq-siteadmin-admin-properties-actions-livecopy hide"
-                granite:title="Detach Live Copy from Blueprint"
-                jcr:primaryType="nt:unstructured"
-                sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                action="cq.wcm.msm.detach"
-                icon="cut"
-                text="Detach"
-                variant="actionBar">
-                <data
-                    jcr:primaryType="nt:unstructured"
-                    uri="${param.item}.msm.conf"/>
-                <granite:rendercondition
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wcm/msm/components/touch-ui/renderconditions/islivecopy"
-                    path="${param.item}"/>
-            </detach>
             <addPermissions
                 granite:class="js-cq-sites-PermissionsProperties-action js-cq-sites-AddPermissionsDialog-show hide"
                 granite:title="Create ACL Permissions"
@@ -298,7 +156,7 @@
                     orderable="{Boolean}false"
                     path="${empty param.item ? requestPathInfo.suffix : param.item}"
                     size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
-                    src="/mnt/overlay/wcm/core/content/sites/properties/tabs/permissions/items/closedUserGroupList{.offset,limit}.html{+id}">
+                    src="/mnt/overlay/acs-commons/console/properties/tabs/permissions/items/closedUserGroupList{.offset,limit}.html{+id}">
                     <columns jcr:primaryType="nt:unstructured">
                         <imageLabel
                             jcr:primaryType="nt:unstructured"
@@ -384,7 +242,7 @@
                         <acl
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/include"
-                            path="/mnt/overlay/wcm/core/content/sites/properties/accesscontrollist"/>
+                            path="/mnt/overlay/acs-commons/console/properties/accesscontrollist"/>
                     </items>
                     <footer jcr:primaryType="nt:unstructured">
                         <cancel
@@ -476,7 +334,7 @@
                         <acl
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/include"
-                            path="/mnt/overlay/wcm/core/content/sites/properties/accesscontrollist"/>
+                            path="/mnt/overlay/acs-commons/console/properties/accesscontrollist"/>
                     </items>
                     <footer jcr:primaryType="nt:unstructured">
                         <cancel

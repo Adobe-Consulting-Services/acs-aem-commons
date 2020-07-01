@@ -6,7 +6,7 @@
         sling:resourceType="cq/gui/components/siteadmin/admin/templates/pages"/>
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Sites | Templates"
+        jcr:title="ACS AEM Commons | Templates"
         sling:resourceType="granite/ui/components/shell/collectionpage"
         consoleId="cq-sites-templates-templates"
         contentPath="${requestPathInfo.suffix}"
@@ -34,7 +34,7 @@
                 path="${requestPathInfo.suffix}"
                 selectionMode="${state[&quot;templates.shell.collectionpage.selectionMode&quot;].boolean}"
                 size="${empty requestPathInfo.selectors[1] ? &quot;20&quot; : requestPathInfo.selectors[1]}"
-                src="/mnt/overlay/wcm/core/content/sites/templates/jcr:content/views/card{.offset,limit}.html{+id}"
+                src="/mnt/overlay/acs-commons/console/templates/jcr:content/views/card{.offset,limit}.html{+id}"
                 stateId="templates.shell.collectionpage">
                 <datasource
                     jcr:primaryType="nt:unstructured"
@@ -60,7 +60,7 @@
                 selectionMode="row"
                 size="${empty requestPathInfo.selectors[1] ? &quot;40&quot; : requestPathInfo.selectors[1]}"
                 sortMode="remote"
-                src="/mnt/overlay/wcm/core/content/sites/templates/jcr:content/views/list{.offset,limit}.html{+id}{?sortName,sortDir}"
+                src="/mnt/overlay/acs-commons/console/templates/jcr:content/views/list{.offset,limit}.html{+id}{?sortName,sortDir}"
                 stateId="templates.shell.collectionpage">
                 <columns jcr:primaryType="nt:unstructured">
                     <select
@@ -159,7 +159,7 @@
                     variant="actionBar">
                     <data
                         jcr:primaryType="nt:unstructured"
-                        href.uritemplate="/mnt/overlay/wcm/core/content/sites/templates/properties.html{?item*}"/>
+                        href.uritemplate="/mnt/overlay/acs-commons/console/templates/properties.html{?item*}"/>
                 </viewproperties>
                 <enabletemplate
                     granite:rel="cq-siteadmin-admin-actions-enable-activator"
@@ -208,7 +208,7 @@
                     <data
                         jcr:primaryType="nt:unstructured"
                         referenceSrc.url="/libs/wcm/core/content/reference.json?_charset_=utf-8{&amp;path*}"
-                        wizardSrc.uritemplate="/mnt/overlay/wcm/core/content/sites/publishtemplatewizard.html?_charset_=utf-8{&amp;item*}"/>
+                        wizardSrc.uritemplate="/mnt/overlay/acs-commons/console/publishtemplatewizard.html?_charset_=utf-8{&amp;item*}"/>
                 </publish>
                 <copy
                     granite:rel="cq-siteadmin-admin-actions-copy-activator"

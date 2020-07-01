@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Console | Publish Page"
+        jcr:title="ACS AEM Commons | Publish Page"
         sling:resourceType="granite/ui/components/coral/foundation/page"
         consoleId="cq-sites-pages-publish">
         <head jcr:primaryType="nt:unstructured">

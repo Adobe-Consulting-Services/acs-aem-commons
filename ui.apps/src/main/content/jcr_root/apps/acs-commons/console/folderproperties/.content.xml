@@ -3,12 +3,12 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Console | Folder Properties"
+        jcr:title="ACS AEM Commons | Folder Properties"
         sling:resourceType="granite/ui/components/shell/propertiespage"
         backHref="${empty header.Referer ? granite:concat(&quot;/acs-commons.html&quot;, granite:encodeURIPath(granite:relativeParent(empty param.item ? requestPathInfo.suffix : param.item, 1))) : header.Referer}"
-        consoleId="cq-console-folders-properties"
+        consoleId="cq-sites-folders-properties"
         coral2="{Boolean}true"
-        formId="cq-console-properties-form"
+        formId="cq-sites-properties-form"
         simpleSave="{Boolean}false">
         <head jcr:primaryType="nt:unstructured">
             <dialogclientlibs

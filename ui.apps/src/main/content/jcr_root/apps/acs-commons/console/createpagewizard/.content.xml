@@ -3,9 +3,9 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="nt:unstructured"
-        jcr:title="AEM Console | Create Page"
+        jcr:title="ACS AEM Commons | Create Page"
         sling:resourceType="cq/gui/components/siteadmin/admin/createpagewizard/page"
-        consoleId="cq-console-pages-create">
+        consoleId="cq-sites-pages-create">
         <head jcr:primaryType="nt:unstructured">
             <viewport
                 jcr:primaryType="nt:unstructured"
@@ -101,7 +101,7 @@
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Properties"
                                     sling:resourceType="granite/ui/components/coral/foundation/wizard/lazycontainer"
-                                    src="/mnt/overlay/wcm/core/content/sites/createpagewizard/properties.html{+template}">
+                                    src="/mnt/overlay/acs-commons/console/createpagewizard/properties.html{+template}">
                                     <parentConfig jcr:primaryType="nt:unstructured">
                                         <next
                                             granite:class="foundation-wizard-control"
