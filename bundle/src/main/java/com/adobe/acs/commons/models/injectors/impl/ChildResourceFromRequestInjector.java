@@ -52,7 +52,7 @@ import java.util.function.Function;
 @Component(
         service = {Injector.class},
         property = {
-                Constants.SERVICE_RANKING + "=3000"
+                Constants.SERVICE_RANKING + ":Integer=3000"
         }
 )
 public class ChildResourceFromRequestInjector implements Injector {
