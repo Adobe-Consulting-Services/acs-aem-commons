@@ -56,7 +56,7 @@
                     );
                 });
             } else {
-                console.error("Cannot complete selection because the browser is not operating in the context of a MS Office application. Please load this page in an MS Office application as an add-in.")
+                console.error("Cannot complete selection because the browser is not operating in the context of a MS Office application. Please load this page in an MS Office application as an add-in.");
             }
         }
 
