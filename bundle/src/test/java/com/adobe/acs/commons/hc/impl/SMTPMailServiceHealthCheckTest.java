@@ -43,12 +43,12 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 public class SMTPMailServiceHealthCheckTest {
 	@Mock
 	private MessageGatewayService messageGatewayService;
-	
-	@Mock 
+
+	@Mock
 	private MessageGateway<SimpleEmail> messageGateway;
 
-    @Rule
-    public AemContext ctx = new AemContext();
+	@Rule
+	public AemContext ctx = new AemContext();
 
 	@Before
 	public void setUp() {
@@ -60,10 +60,11 @@ public class SMTPMailServiceHealthCheckTest {
 	public void testExecute_MissingMessageGateway() throws Exception {
 		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck());
 
-		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
+		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, 
+				"(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
 		Result actual = healthCheck.execute();
-		
+
 		assertEquals(Result.Status.CRITICAL, actual.getStatus());
 	}
 
@@ -76,7 +77,7 @@ public class SMTPMailServiceHealthCheckTest {
 		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
 		Result actual = healthCheck.execute();
-		
+
 		assertEquals(Result.Status.WARN, actual.getStatus());
 	}
 
@@ -84,16 +85,19 @@ public class SMTPMailServiceHealthCheckTest {
 	public void testExecute_ExceedDailyAllowance() throws Exception {
 		doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);
 
-		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck(), "email", "ira@dog.com", "max.emails.per.day", "1");
+		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck(), 
+				"email", "ira@dog.com",
+				"max.emails.per.day", "1");
 
-		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
+		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, 
+				"(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
 		Result actual = healthCheck.execute();
-		
+
 		assertEquals(Result.Status.OK, actual.getStatus());
 
 		actual = healthCheck.execute();
-		
+
 		assertEquals(Result.Status.WARN, actual.getStatus());
 	}
 }
