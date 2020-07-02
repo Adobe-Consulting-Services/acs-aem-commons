@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #2324 - On-Deploy-Scripts are not supported on AEMaaCS
+- #2357 - Added safeguards to SMTPMailServiceHealthCheck to help avoid run-way email pings
 
 ## [4.7.0] - 2020-05-12
 
