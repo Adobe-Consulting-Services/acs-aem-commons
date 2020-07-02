@@ -28,6 +28,7 @@ import com.adobe.granite.ui.clientlibs.ClientLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibrary;
 import com.adobe.granite.ui.clientlibs.HtmlLibraryManager;
 import com.adobe.granite.ui.clientlibs.LibraryType;
+import com.day.cq.wcm.contentsync.PathRewriterOptions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -337,18 +338,23 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     private class VersionableClientlibsTransformer extends ContentHandlerBasedTransformer {
 
         private SlingHttpServletRequest request;
+        
+        private boolean enabled;
 
         @Override
         public void init(ProcessingContext context, ProcessingComponentConfiguration config) throws IOException {
             super.init(context, config);
             this.request = context.getRequest();
+            // versioned clientlibs are not supported for Page Exports with cq-wcm-content-sync
+            enabled = request.getAttribute(PathRewriterOptions.ATTRIBUTE_PATH_REWRITING_OPTIONS) == null;
         }
 
         public void startElement(final String namespaceURI, final String localName, final String qName,
                                  final Attributes attrs)
                 throws SAXException {
+            
             final Attributes nextAttributes;
-            if (disableVersioning) {
+            if (disableVersioning || !enabled) {
                 nextAttributes = attrs;
             } else {
                 nextAttributes = versionClientLibs(localName, attrs, request);

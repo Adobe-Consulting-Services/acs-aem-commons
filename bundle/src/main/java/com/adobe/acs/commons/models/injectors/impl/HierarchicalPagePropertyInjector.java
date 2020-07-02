@@ -38,7 +38,7 @@ import static com.adobe.acs.commons.models.injectors.impl.InjectorUtils.getResou
 
 @Component(
         property = {
-                Constants.SERVICE_RANKING + "=5502"
+                Constants.SERVICE_RANKING + ":Integer=5502"
         },
         service = Injector.class
 )

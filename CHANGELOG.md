@@ -17,6 +17,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
 - #2311 - ResourceTypeHttpCacheConfigExtension does not work with multiple allowed paths
 - #2314 - Fixed java.lang.IllegalStateException: Not a JSON Object for CQIncludePropertyNamespaceServlet
+- #2330 - Deactivated VersionedClientlibsTransformerFactory.VersionableClientlibsTransformer for static page exports
+- #2344 - Fixed Injectors ordering according to service.ranking property
+ 
+### Changed
+- #2324 - On-Deploy-Scripts are not supported on AEMaaCS
 
 ## [4.7.0] - 2020-05-12
 
