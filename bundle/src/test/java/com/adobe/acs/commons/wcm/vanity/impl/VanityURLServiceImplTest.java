@@ -19,8 +19,16 @@
  */
 package com.adobe.acs.commons.wcm.vanity.impl;
 
+import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.request.RequestDispatcherOptions;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.apache.sling.testing.mock.sling.servlet.MockRequestDispatcherFactory;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
@@ -32,81 +40,93 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 @RunWith(MockitoJUnitRunner.class)
 public class VanityURLServiceImplTest {
 
     @Rule
-    public final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
-
-    public MockSlingHttpServletRequest request;
-    public MockSlingHttpServletResponse response;
+    public final AemContext ctx = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     @Mock
     RequestDispatcher requestDispatcher;
 
-    @InjectMocks
-    VanityURLServiceImpl vanityURLService = new VanityURLServiceImpl();
-
+    VanityURLServiceImpl vanityURLService;
 
     @Before
     public void setUp() throws Exception {
-        request = new MockSlingHttpServletRequest(context.resourceResolver(), context.bundleContext());
-        response = new MockSlingHttpServletResponse();
+        ctx.request().setRequestDispatcherFactory(new MockRequestDispatcherFactory() {
+            @Override
+            public RequestDispatcher getRequestDispatcher(String path, RequestDispatcherOptions options) {
+                return requestDispatcher;
+            }
 
-        context.build().resource("/content")
-                .resource("sample")
-                .resource("vanity", "sling:vanityPath", "/my-vanity");
+            @Override
+            public RequestDispatcher getRequestDispatcher(Resource resource, RequestDispatcherOptions options) {
+                return requestDispatcher;
+            }
+        });
+
+        ctx.registerInjectActivateService(new VanityURLServiceImpl());
+
+        vanityURLService = (VanityURLServiceImpl) ctx.getService(VanityURLService.class);
+    }
+
+    @Test
+    public void nonExistingResourceBehavior() throws Exception {
+        Resource nonExisting = ctx.resourceResolver().resolve("/dev/null");
+        assertEquals("/dev/null", nonExisting.getPath());
     }
 
     @Test
     public void dispatch_NoMapping() throws Exception {
-        request.setServletPath("/my-vanity");
+        ctx.request().setServletPath("/my-vanity");
 
-        assertFalse(vanityURLService.dispatch(request, response));
-        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
+        assertFalse(vanityURLService.dispatch(ctx.request(), ctx.response()));
+        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(ctx.response()));
     }
 
     @Test
     public void dispatch_Loop() throws Exception {
-        request.setAttribute("acs-aem-commons__vanity-check-loop-detection", true);
+        ctx.request().setAttribute("acs-aem-commons__vanity-check-loop-detection", true);
 
-        assertFalse(vanityURLService.dispatch(request, response));
-        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(response));
+        assertFalse(vanityURLService.dispatch(ctx.request(), ctx.response()));
+        verify(requestDispatcher, times(0)).forward(any(ExtensionlessRequestWrapper.class), eq(ctx.response()));
     }
 
     @Test
     public void isVanityPath() throws Exception {
-        context.build().resource("/foo",
+        ctx.build().resource("/foo",
                 "jcr:primaryType", "sling:redirect",
                             "sling:target", "/content/bar");
 
-        assertTrue(vanityURLService.isVanityPath("/content", "/foo", request));
+        assertTrue(vanityURLService.isVanityPath("/content", "/foo", ctx.request()));
     }
 
     @Test
     public void isVanityPath_OutsideOfPathScope() throws Exception {
-        context.build().resource("/foo",
+        ctx.build().resource("/foo",
                 "jcr:primaryType", "sling:redirect",
                 "sling:target", "/bar");
 
-        assertFalse(vanityURLService.isVanityPath("/content", "/foo", request));
+        assertFalse(vanityURLService.isVanityPath("/content", "/foo", ctx.request()));
     }
 
     @Test
     public void isVanityPath_NotRedirectResource() throws Exception {
         // Redirect resources
-        context.build().resource("/foo",
+        ctx.build().resource("/foo",
                 "jcr:primaryType", "nt:unstructured");
 
-        assertFalse(vanityURLService.isVanityPath("/content", "/foo", request));
+        assertFalse(vanityURLService.isVanityPath("/content", "/foo", ctx.request()));
     }
 }
