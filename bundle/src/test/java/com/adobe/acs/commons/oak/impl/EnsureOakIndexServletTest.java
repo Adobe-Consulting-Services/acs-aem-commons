@@ -54,7 +54,6 @@ public class EnsureOakIndexServletTest {
     public void setup() {
         servlet = new EnsureOakIndexServlet();
         context.registerService(EnsureOakIndexManager.class, ensureOakIndexManager);
-//        context.registerService(ensureOakIndexManager);
         context.registerInjectActivateService(servlet);
     }
     
