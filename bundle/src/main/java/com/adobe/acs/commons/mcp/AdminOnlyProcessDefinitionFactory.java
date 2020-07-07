@@ -19,14 +19,20 @@
  */
 package com.adobe.acs.commons.mcp;
 
-import org.osgi.annotation.versioning.ConsumerType;
 import org.apache.jackrabbit.api.security.user.User;
-
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * ProcessDefinitionFactory which limits availablity of a process to the literal 'admin' user.
+ * ProcessDefinitionFactory which limits availablity of a process to the literal
+ * 'admin' user.
+ *
  * @param <P> Process definition class
+ * @deprecated Please use AdministratorsOnlyProcessDefinitionFactory as it is
+ * still sufficiently restrictive but more generally usable in environments
+ * where the admin account is impossible to attain. This class will still
+ * continue to work but is generally discouraged.
  */
+@Deprecated
 @ConsumerType
 public abstract class AdminOnlyProcessDefinitionFactory<P extends ProcessDefinition> extends ProcessDefinitionFactory<P> {
 

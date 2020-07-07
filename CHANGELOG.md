@@ -9,16 +9,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Changed
+- #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
 - #2311 - ResourceTypeHttpCacheConfigExtension does not work with multiple allowed paths
 - #2314 - Fixed java.lang.IllegalStateException: Not a JSON Object for CQIncludePropertyNamespaceServlet
 - #2330 - Deactivated VersionedClientlibsTransformerFactory.VersionableClientlibsTransformer for static page exports
+- #2350 - Fixed null check in VanityServiceUrlImpl
 - #2344 - Fixed Injectors ordering according to service.ranking property
  
 ### Changed
 - #2324 - On-Deploy-Scripts are not supported on AEMaaCS
+- #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
+- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
 
 ### Changed
 - #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.

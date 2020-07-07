@@ -116,6 +116,9 @@ public class ScrMetadataIT {
         // properties removed for #2293 (Copy Properties workflow process implementation)
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.util.impl.WorkflowHelperImpl:service.vendor");
 
+        // properties removed for #2350 (Vanity Service)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.wcm.vanity.impl.VanityURLServiceImpl:service.vendor");
+
         // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/1852
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.topics");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.filter");
@@ -127,6 +130,10 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.HierarchicalPagePropertyInjector:service.ranking");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.I18nInjector:service.ranking");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.JsonValueMapValueInjector:service.ranking");
+
+        // #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:felix.webconsole.title");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:service.vendor");
 
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
