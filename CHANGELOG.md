@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 - #2324 - On-Deploy-Scripts are not supported on AEMaaCS
 - #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
+- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
 
 ## [4.7.0] - 2020-05-12
 
