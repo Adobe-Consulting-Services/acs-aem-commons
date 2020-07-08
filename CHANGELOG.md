@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
 
-## 4.7.2 - 2020-08-07
+## 4.7.2 - 2020-07-08
 
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
