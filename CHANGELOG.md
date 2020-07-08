@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
 
+### Changed
+- #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
@@ -22,6 +25,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2324 - On-Deploy-Scripts are not supported on AEMaaCS
 - #2357 - Added safeguards to SMTPMailServiceHealthCheck to help avoid run-way email pings
 - #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
+- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
+
+### Changed
+- #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
 
 ## [4.7.0] - 2020-05-12
 
