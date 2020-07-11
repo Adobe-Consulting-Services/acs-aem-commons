@@ -285,22 +285,31 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
                 }
 
                 for (Entry<String, JsonElement> elem : jsonObject.entrySet()) {
-                    final String propertyName = elem.getKey();                    
-                    String value = elem.getValue().getAsString();
-                    if (!this.accept(propertyName, value)) {
-                        log.debug("Property [ {} ~> {} ] is not a namespace-able property name/value", propertyName, value);
-                        continue;
-                    }
+                    final JsonElement propertyValue = elem.getValue();
 
-                    if (value != null) {
-                        String prefix = "";
-                        if (StringUtils.startsWith(value, DOT_SLASH)) {
-                            value = StringUtils.removeStart(value, DOT_SLASH);
-                            prefix = DOT_SLASH;
+                    if (propertyValue.isJsonPrimitive()) {
+                        final String propertyName = elem.getKey();
+                        String value = propertyValue.getAsString();
+
+                        if (!this.accept(propertyName, value)) {
+                            log.debug(
+                                "Property [ {} ~> {} ] is not a namespace-able property name/value",
+                                propertyName,
+                                value
+                            );
+                            continue;
                         }
 
-                        if (StringUtils.isNotBlank(value)) {
-                            jsonObject.addProperty(propertyName, prefix + namespace + "/" + value);
+                        if (value != null) {
+                            String prefix = "";
+                            if (StringUtils.startsWith(value, DOT_SLASH)) {
+                                value = StringUtils.removeStart(value, DOT_SLASH);
+                                prefix = DOT_SLASH;
+                            }
+
+                            if (StringUtils.isNotBlank(value)) {
+                                jsonObject.addProperty(propertyName, prefix + namespace + "/" + value);
+                            }
                         }
                     }
                 }
