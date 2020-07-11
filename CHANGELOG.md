@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## 4.7.2 - 2020-07-08
 
+### Added
+- #2339 - Microsoft Office Add-in for AEM Assets
+
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry
 - #2298 - Removed dependency on com.day.cq.dam.api.collection
