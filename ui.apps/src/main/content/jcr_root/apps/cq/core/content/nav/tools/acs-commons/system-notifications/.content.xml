@@ -4,6 +4,6 @@
     jcr:title="System Notifications"
     jcr:description="Notify AEM users of important system events."
     icon="answer"
-    href="/miscadmin#/etc/acs-commons/notifications"
+    href="/acs-commons.html/etc/acs-commons/notifications"
     id="acs-commons__system-notifications"
     target="_blank"/>
