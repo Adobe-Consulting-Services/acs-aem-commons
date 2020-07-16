@@ -9,6 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+## 4.8.0 - 2020-07-16
+
+### Added
+
+- #2356 - Microsoft Office Asset Selector
+- #2355 - ACS AEM Commons TouchUI Web console
+
 ### Fixed
 
 - #2366 - Fixed UnsupportedOperationException for CQIncludePropertyNamespaceServlet
