@@ -36,8 +36,7 @@ import java.util.regex.Pattern;
 @Properties({
         @Property(
                 name = ResourceDefinitionBuilder.PROP_NAME,
-                value = LocalizedTitleDefinitionBuilderImpl.NAME,
-                propertyPrivate = true
+                value = LocalizedTitleDefinitionBuilderImpl.NAME
         )
 })
 @Service

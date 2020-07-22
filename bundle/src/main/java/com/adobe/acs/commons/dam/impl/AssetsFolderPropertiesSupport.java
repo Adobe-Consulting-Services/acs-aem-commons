@@ -55,35 +55,29 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component(
-        label = "ACS AEM Commons - Assets Folder Properties Support",
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
 @Properties({
         @Property(
                 name = "service.ranking",
-                intValue = -2000,
-                propertyPrivate = true
+                intValue = -2000
         ),
         @Property(
                 name = "sling.filter.scope",
-                value = "REQUEST",
-                propertyPrivate = true
+                value = "REQUEST"
         ),
         @Property(
                 name = "sling.filter.pattern",
-                value = "/content/dam/.*",
-                propertyPrivate = true
+                value = "/content/dam/.*"
         ),
         @Property(
                 name = "sling.servlet.methods",
-                value = "GET",
-                propertyPrivate = true
+                value = "GET"
         ),
         @Property(
                 name = "sling.servlet.resourceTypes",
-                value = "acs-commons/touchui-widgets/asset-folder-properties-support",
-                propertyPrivate = true
+                value = "acs-commons/touchui-widgets/asset-folder-properties-support"
         )
 })
 @Service
