@@ -4,6 +4,6 @@
     jcr:title="Redirect Maps"
     jcr:description="Define redirect Apache httpd redirect maps."
     icon="forward"
-    href="/miscadmin#/etc/acs-commons/redirect-maps"
+    href="/acs-commons.html/etc/acs-commons/redirect-maps"
     id="acs-commons__redirect-maps"
     target="_blank"/>

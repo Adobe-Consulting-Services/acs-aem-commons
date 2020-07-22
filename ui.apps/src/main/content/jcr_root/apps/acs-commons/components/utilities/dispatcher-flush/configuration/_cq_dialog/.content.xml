@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Image"
+          sling:resourceType="cq/gui/components/authoring/dialog"
+          extraClientlibs="[]"
+          helpPath="https://adobe-consulting-services.github.io/acs-aem-commons/features/dispatcher-flush-ui/index.html">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    maxmized="{Boolean}true">
+                <items jcr:primaryType="nt:unstructured">
+                    <general
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Configuration"
+                            sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                            margin="{Boolean}true">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+
+
+                                    <replication-action-type
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            fieldLabel="Flush method"
+                                            fieldDescription="Dispatcher flush method. This effects how cached files are effected (invalidate or delete)."
+                                            name="./replicationActionType">
+                                        <granite:data
+                                                jcr:primaryType="nt:unstructured"/>
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <activate
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Invalidate Cache"
+                                                    value="ACTIVATE"/>
+                                            <delete
+                                                    jcr:primaryType="nt:unstructured"
+                                                    text="Delete Cache"
+                                                    value="DELETE"/>                                        
+                                        </items>
+                                    </replication-action-type>
+
+                                    <asset-rendition
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            emptyText="Select an asset rendition to display"
+                                            fieldDescription="Select the rendition to use."
+                                            fieldLabel="Rendition"
+                                            allowedAssetRenditionTypes="[image]"
+                                            name="./renditionName">
+                                        <datasource
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="asset-share-commons/data-sources/asset-renditions"/>
+                                    </asset-rendition>
+
+                                    <paths
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                        fieldLabel="Paths to flush"
+                                        fieldDescription="Click the '+' to add a new paths to flush"
+                                        composite="{Boolean}false">
+                                    
+                                        <field
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                multiple="{Boolean}false"
+                                                rootPath="/"
+                                                filter="hierarchy"
+                                                name="./paths"/>
+                                    </paths>
+                                </items>
+                            </column>
+                        </items>
+                    </general>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>
