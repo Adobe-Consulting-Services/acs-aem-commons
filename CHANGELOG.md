@@ -9,9 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
-## 4.8.2 - 2020-07-23
+## 4.8.4 - 2020-07-23
 
-### Added
+v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
+
+## 4.8.2 - 2020-07-23
 
 ### Fixed
 - #2372 - EnvironmentFilter breaks HTTP Assets API (#2371)
