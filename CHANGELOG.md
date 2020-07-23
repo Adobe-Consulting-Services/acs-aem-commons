@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2372 - EnvironmentFilter breaks HTTP Assets API (#2371)
 
 ### Changed
-
+- #2369 - Fixed a bunch of SCR warnings
 
 ## 4.8.0 - 2020-07-16
 
