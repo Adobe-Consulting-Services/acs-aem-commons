@@ -38,6 +38,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -75,43 +77,31 @@ public class RobotsServletTest {
     }
 
     @Test
-    public void testWriteFromPageProperty() {
+    public void testWriteFromPageProperty() throws IOException, ServletException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "robotsContents");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperty.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperty.txt"), response);
     }
 
     @Test
-    public void testWriteFromAsset() {
+    public void testWriteFromAsset() throws ServletException, IOException {
         context.create().asset("/content/dam/geometrixx/robots.txt", getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), "text/plain");
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), response);
     }
 
     @Test
-    public void testWriteFromPageProperties() {
+    public void testWriteFromPageProperties() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -132,19 +122,13 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperties.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperties.txt"), response);
     }
 
     @Test
-    public void testWriteFromOsgiConfigSimple() {
+    public void testWriteFromOsgiConfigSimple() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -156,19 +140,13 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfigSimple.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfigSimple.txt"), response);
     }
 
     @Test
-    public void testWriteFromOsgiConfig() {
+    public void testWriteFromOsgiConfig() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -195,49 +173,31 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfig.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfig.txt"), response);
     }
 
     @Test
-    public void testWriteFromNonExistentPropertyAbsolute() {
+    public void testWriteFromNonExistentPropertyAbsolute() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet did not return the expected error", 404, response.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet did not return the expected error", 404, response.getStatus());
     }
 
     @Test
-    public void testWriteFromNonExistentPropertyRelative() {
+    public void testWriteFromNonExistentPropertyRelative() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "jcr:content/thisPropDoesntExist");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet did not return the expected error", 404, response.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet did not return the expected error", 404, response.getStatus());
     }
 
     private void assertResponse(InputStream resourceAsStream, MockSlingHttpServletResponse response) throws IOException {
