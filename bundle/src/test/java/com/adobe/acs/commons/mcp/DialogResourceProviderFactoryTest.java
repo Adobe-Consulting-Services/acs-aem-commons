@@ -22,7 +22,6 @@ package com.adobe.acs.commons.mcp;
 import com.adobe.acs.commons.mcp.form.DialogProvider;
 import com.adobe.acs.commons.mcp.form.DialogProviderAnnotationProcessor;
 import com.adobe.acs.commons.mcp.form.DialogResourceProvider;
-import com.adobe.acs.commons.mcp.impl.DialogResourceProviderFactoryImpl;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.IOException;
@@ -44,6 +43,7 @@ import static org.junit.Assert.*;
 /**
  * Test various aspects of the Dialog Resource Provider service
  */
+@SuppressWarnings("deprecation")
 public class DialogResourceProviderFactoryTest {
 
     @Rule
@@ -113,7 +113,7 @@ public class DialogResourceProviderFactoryTest {
     public void testFactoryDoesNothing() {
         // The dialog provider factory is dead but still exists for backward compatiblity until 5.0
         // Assert that it does nothing.
-        DialogResourceProviderFactory factory = new DialogResourceProviderFactoryImpl();
+        DialogResourceProviderFactory factory = new com.adobe.acs.commons.mcp.impl.DialogResourceProviderFactoryImpl();
         assertNull(factory.getActiveProviders());
 
         // These would normally throw an exception on null data if they did anything.

@@ -68,8 +68,10 @@ public class DispatcherFlushRulesImplTest {
     private DispatcherFlushRulesImpl dispatcherFlushRules = new DispatcherFlushRulesImpl();
 
     @Before
+    @SuppressWarnings("deprecation")
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        
         when(resourceResolverFactory.getAdministrativeResourceResolver(null)).thenReturn(mock(ResourceResolver.class));
     }
 

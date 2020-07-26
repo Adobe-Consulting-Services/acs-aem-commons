@@ -36,7 +36,7 @@ import org.osgi.service.metatype.annotations.Designate;
         immediate = true
 )
 @Designate(ocd = DialogResourceProviderConfiguration.class)
-@Deprecated
+@SuppressWarnings("deprecation")
 public class DialogResourceProviderFactoryImpl implements DialogResourceProviderFactory {
 
     @Override
