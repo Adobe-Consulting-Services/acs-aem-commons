@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Changed
+
+- #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
+
 ## 4.8.4 - 2020-07-23
 
 v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
