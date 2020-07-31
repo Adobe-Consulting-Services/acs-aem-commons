@@ -146,7 +146,7 @@ public class DataImporterTest {
         Calendar cal = values.get("date1", Calendar.class);
         assertEquals(1985, cal.get(Calendar.YEAR));
         assertEquals(Calendar.NOVEMBER, cal.get(Calendar.MONTH));
-        assertEquals((Long) 26L, new Long(cal.get(Calendar.DAY_OF_MONTH)));
+        assertEquals((Long) 26L, Long.valueOf(cal.get(Calendar.DAY_OF_MONTH)));
         cal = values.get("date2", Calendar.class);
         assertEquals(1985, cal.get(Calendar.YEAR));
         assertEquals(Calendar.NOVEMBER, cal.get(Calendar.MONTH));

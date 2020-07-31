@@ -215,7 +215,7 @@ public class TwitterAdapterFactoryTest {
         validOAuthConfig.put("oauth.client.secret", VALID_OAUTH_SECRET);
         this.validOauthValueMap = new ValueMapDecorator(validOAuthConfig);
 
-        when(bundleContext.registerService(eq(AdapterFactory.class), any(AdapterFactory.class), any())).thenAnswer(i -> {
+        lenient().when(bundleContext.registerService(eq(AdapterFactory.class), any(AdapterFactory.class), any())).thenAnswer(i -> {
             if (registeredFactory != null) {
                 throw new IllegalArgumentException("TwitterAdapterFactory already registered");
             }
