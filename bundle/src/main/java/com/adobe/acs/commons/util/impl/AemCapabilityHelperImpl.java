@@ -19,7 +19,6 @@
  */
 package com.adobe.acs.commons.util.impl;
 
-import com.adobe.acs.commons.util.AemCapabilityHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.annotations.Component;
@@ -36,8 +35,9 @@ import javax.jcr.RepositoryException;
  * @deprecated All supported AEM's run on Oak repositories now, so this will always return true.
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 @Component
-public class AemCapabilityHelperImpl implements AemCapabilityHelper {
+public class AemCapabilityHelperImpl implements com.adobe.acs.commons.util.AemCapabilityHelper {
     @Reference
     private transient SlingRepository slingRepository;
 

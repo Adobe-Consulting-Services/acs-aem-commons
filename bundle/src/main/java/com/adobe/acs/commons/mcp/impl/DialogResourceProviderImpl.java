@@ -59,11 +59,11 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private final Class originalClass;
     private final boolean isComponent;
 
-    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException {
+    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws RuntimeException, ReflectiveOperationException {
         originalClass = c;
         isComponent = annotation != null && annotation.style() == DialogProvider.DialogStyle.COMPONENT;
         if (GeneratedDialog.class.isAssignableFrom(c)) {
-            dialog = (GeneratedDialog) c.newInstance();
+            dialog = (GeneratedDialog) c.getDeclaredConstructor().newInstance();
         } else {
             dialog = new GeneratedDialogWrapper(c);
         }
@@ -94,16 +94,16 @@ public class DialogResourceProviderImpl extends ResourceProvider {
             try {
                 Method getter = MethodUtils.getMatchingAccessibleMethod(originalClass, "getResourceType", new Class[]{});
                 if (getter != null) {
-                    resourceType = String.valueOf(getter.invoke(originalClass.newInstance()));
+                    resourceType = String.valueOf(getter.invoke(originalClass.getDeclaredConstructor().newInstance()));
                 } else {
                     Field field = FieldUtils.getField(originalClass, "resourceType", true);
                     if (field != null) {
-                        resourceType = String.valueOf(field.get(originalClass.newInstance()));
+                        resourceType = String.valueOf(field.get(originalClass.getDeclaredConstructor().newInstance()));
                     } else {
                         throw new InstantiationException(String.format("No resource type present for %s", originalClass.getCanonicalName()));
                     }
                 }
-            } catch (InvocationTargetException | IllegalAccessException ex) {
+            } catch (RuntimeException | ReflectiveOperationException ex) {
                 LOGGER.debug("Unable to determine sling resource type for model bean: {} ", originalClass);
             }
         }

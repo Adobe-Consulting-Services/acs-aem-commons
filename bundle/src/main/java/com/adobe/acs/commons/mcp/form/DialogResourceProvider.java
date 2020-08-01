@@ -46,7 +46,7 @@ public interface DialogResourceProvider {
     public static Map<Class, ServiceRegistration> registeredProviders = Collections.synchronizedMap(new HashMap<>());
 
     @SuppressWarnings("squid:S1149") // Yes HashTable sucks but it's required here.
-    default void doActivate(BundleContext bundleContext) throws InstantiationException, IllegalAccessException {
+    default void doActivate(BundleContext bundleContext) throws RuntimeException, ReflectiveOperationException {
         DialogResourceProviderImpl provider = new DialogResourceProviderImpl(getTargetClass(), getDialogProvider());
         @SuppressWarnings("UseOfObsoleteCollectionType")
         Dictionary<String, Object> props = new Hashtable<>();
