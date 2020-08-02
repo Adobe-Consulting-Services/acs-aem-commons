@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 
+- #2383 - [trivial] fix exception message in MarketoFieldDataSource
+
 ### Added
 
 ### Changed
