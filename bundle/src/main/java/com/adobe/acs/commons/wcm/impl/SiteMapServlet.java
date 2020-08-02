@@ -87,7 +87,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final boolean DEFAULT_REMOVE_TRAILING_SLASH = false;
 
-    private static final boolean DEFAULT_DONT_USE_VANITY_URL = false;
+    private static final boolean DEFAULT_USE_VANITY_URL = true;
 
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
@@ -128,8 +128,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
     private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
 
-    @Property(boolValue = DEFAULT_DONT_USE_VANITY_URL, label = "Don't use Vanity URL", description = "Don't use the Vanity URL for generating the Page URL")
-    private static final String DONT_USE_VANITY_URL = "no.vanity";
+    @Property(boolValue = DEFAULT_USE_VANITY_URL, label = "Use Vanity URLs", description = "Use the Vanity URL for generating the Page URL")
+    private static final String USE_VANITY_URL = "use.vanity";
 
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
@@ -162,7 +162,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> excludedPageTemplates;
 
-    private boolean dontUseVanityUrl;
+    private boolean useVanityUrl;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -187,7 +187,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
         this.excludedPageTemplates = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
-        this.dontUseVanityUrl =  PropertiesUtil.toBoolean(properties.get(DONT_USE_VANITY_URL), DEFAULT_DONT_USE_VANITY_URL);
+        this.useVanityUrl =  PropertiesUtil.toBoolean(properties.get(USE_VANITY_URL), DEFAULT_USE_VANITY_URL);
     }
 
     @Override
@@ -277,7 +277,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeStartElement(NS, "url");
         String loc = "";
 
-        if (!dontUseVanityUrl && !StringUtils.isEmpty(page.getVanityUrl())) {
+        if (useVanityUrl && !StringUtils.isEmpty(page.getVanityUrl())) {
             loc = externalizer.externalLink(resolver, externalizerDomain, page.getVanityUrl());
         } else if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
