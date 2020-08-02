@@ -26,7 +26,6 @@ import static org.mockito.Mockito.doAnswer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,7 +42,6 @@ import com.adobe.acs.commons.mcp.impl.processes.TagReporter.ReportColumns;
 import com.adobe.acs.commons.mcp.util.StringUtil;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
-import junit.framework.Assert;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TagReportTest {

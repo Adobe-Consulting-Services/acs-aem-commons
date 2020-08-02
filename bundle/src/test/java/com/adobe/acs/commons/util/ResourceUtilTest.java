@@ -121,10 +121,10 @@ public class ResourceUtilTest {
 
     @Test
     public void testGetPropertyDouble() {
-        assertEquals(new Double(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop"));
-        assertEquals(new Double(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop_str"));
-        assertEquals(new Double(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop"));
-        assertEquals(new Double(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop_str"));
+        assertEquals(Double.valueOf(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop"));
+        assertEquals(Double.valueOf(1234.567d), ResourceUtil.getPropertyDouble(resource, "dbl_prop_str"));
+        assertEquals(Double.valueOf(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop"));
+        assertEquals(Double.valueOf(1234L), ResourceUtil.getPropertyDouble(resource, "long_prop_str"));
     }
 
     @Test
@@ -134,8 +134,8 @@ public class ResourceUtilTest {
 
     @Test
     public void testGetPropertyLong() {
-        assertEquals(new Long(1234L), ResourceUtil.getPropertyLong(resource, "long_prop"));
-        assertEquals(new Long(1234L), ResourceUtil.getPropertyLong(resource, "long_prop_str"));
+        assertEquals(Long.valueOf(1234L), ResourceUtil.getPropertyLong(resource, "long_prop"));
+        assertEquals(Long.valueOf(1234L), ResourceUtil.getPropertyLong(resource, "long_prop_str"));
     }
 
     @Test
