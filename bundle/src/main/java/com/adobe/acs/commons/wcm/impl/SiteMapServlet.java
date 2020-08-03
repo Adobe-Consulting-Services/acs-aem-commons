@@ -60,7 +60,6 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
-import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
@@ -87,6 +86,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private static final boolean DEFAULT_EXTENSIONLESS_URLS = false;
 
     private static final boolean DEFAULT_REMOVE_TRAILING_SLASH = false;
+
+    private static final boolean DEFAULT_USE_VANITY_URL = true;
 
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
@@ -127,6 +128,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
     private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
 
+    @Property(boolValue = DEFAULT_USE_VANITY_URL, label = "Use Vanity URLs", description = "Use the Vanity URL for generating the Page URL")
+    private static final String USE_VANITY_URL = "use.vanity";
+
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
@@ -158,6 +162,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> excludedPageTemplates;
 
+    private boolean useVanityUrl;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -181,6 +187,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
         this.excludedPageTemplates = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
+        this.useVanityUrl =  PropertiesUtil.toBoolean(properties.get(USE_VANITY_URL), DEFAULT_USE_VANITY_URL);
     }
 
     @Override
@@ -270,7 +277,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeStartElement(NS, "url");
         String loc = "";
 
-        if (!StringUtils.isEmpty(page.getVanityUrl())) {
+        if (useVanityUrl && !StringUtils.isEmpty(page.getVanityUrl())) {
             loc = externalizer.externalLink(resolver, externalizerDomain, page.getVanityUrl());
         } else if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));

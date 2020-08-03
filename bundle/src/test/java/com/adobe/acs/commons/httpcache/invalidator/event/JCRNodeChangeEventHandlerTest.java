@@ -79,6 +79,7 @@ public class JCRNodeChangeEventHandlerTest {
     assertEquals(1, aemContext.getServices(ResourceChangeListener.class, null).length);
   }
   
+  @SuppressWarnings("deprecation")
   @Test
   public void testLegacyObservation() {
     aemContext.registerInjectActivateService(eventHandler, EventConstants.EVENT_FILTER, "(|(path=/content*)(path=/etc*))");

@@ -377,8 +377,8 @@ public class ChecksumGeneratorImplTest {
         final Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         session.save();
 
@@ -460,8 +460,8 @@ public class ChecksumGeneratorImplTest {
         Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
         node.setProperty("sorted", new String[]{ "yelp", "arf" });
@@ -497,8 +497,8 @@ public class ChecksumGeneratorImplTest {
         Node node = session.getRootNode().addNode("page/jcr:content");
         node.setProperty("jcr:title", "My Title");
         node.setProperty("jcr:description", "This is my test node");
-        node.setProperty("long", new Long(100));
-        node.setProperty("double", new Double(99.99));
+        node.setProperty("long", Long.valueOf(100));
+        node.setProperty("double", Double.valueOf(99.99));
         node.setProperty("boolean", true);
         node.setProperty("unsorted", new String[]{ "woof", "bark", "howl" });
         node.setProperty("sorted", new String[]{ "yelp", "arf" });
