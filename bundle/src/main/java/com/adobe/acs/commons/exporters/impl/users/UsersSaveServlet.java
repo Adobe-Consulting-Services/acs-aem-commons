@@ -35,7 +35,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 
 @SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Save Servlet",
         methods = {"POST"},
         resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
         selectors = {"save"},

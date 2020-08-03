@@ -31,8 +31,7 @@ import org.apache.felix.scr.annotations.Service;
 @Properties({
         @Property(
                 name = ResourceDefinitionBuilder.PROP_NAME,
-                value = LowercaseWithDashesDefinitionBuilderImpl.NAME,
-                propertyPrivate = true
+                value = LowercaseWithDashesDefinitionBuilderImpl.NAME
         )
 })
 @Service

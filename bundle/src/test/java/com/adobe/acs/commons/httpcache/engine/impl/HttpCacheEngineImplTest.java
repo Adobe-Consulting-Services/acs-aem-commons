@@ -112,7 +112,7 @@ public class HttpCacheEngineImplTest {
         when(memCacheStore.getStoreType()).thenReturn(VALUE_MEM_CACHE_STORE_TYPE);
         when(jcrCacheStore.getStoreType()).thenReturn(VALUE_JCR_CACHE_STORE_TYPE);
 
-        doAnswer((Answer<Void>) invocationOnMock -> {
+        lenient().doAnswer((Answer<Void>) invocationOnMock -> {
             Runnable runnable = invocationOnMock.getArgument(0);
             runnable.run();
             return null;
@@ -177,7 +177,6 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         MockSlingHttpServletResponse response = new MockSlingHttpServletResponse();
 
@@ -204,7 +203,6 @@ public class HttpCacheEngineImplTest {
         when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
         when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         StringResponseWrapper response = new StringResponseWrapper(new MockSlingHttpServletResponse());
 
@@ -249,9 +247,6 @@ public class HttpCacheEngineImplTest {
 
         CacheContent mockedCacheContent = mock(CacheContent.class);
 
-        when(mockedCacheContent.getWriteMethod()).thenReturn(HttpCacheServletResponseWrapper.ResponseWriteMethod.PRINTWRITER);
-        when(mockedCacheContent.getInputDataStream()).thenReturn(getClass().getResourceAsStream("cachecontent.html"));
-        when(mockedCacheContent.getCharEncoding()).thenReturn("utf-8");
         //cacheConfig.buildCacheKey(request)
 
         headers.put("someResponseHeader", new String[]{"SomeValue"});
@@ -266,8 +261,6 @@ public class HttpCacheEngineImplTest {
 
         CacheKey mockedCacheKey = mock(CacheKey.class);
         when(jcrCacheConfig.buildCacheKey(request)).thenReturn(mockedCacheKey);
-        when(jcrCacheStore.contains(mockedCacheKey)).thenReturn(true);
-        when(jcrCacheStore.getIfPresent(mockedCacheKey)).thenReturn(mockedCacheContent);
         when(jcrCacheStore.createTempSink()).thenReturn(new MemTempSinkImpl());
 
 

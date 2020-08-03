@@ -41,25 +41,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component(
-        label = "ACS AEM Commons - QR Code Configuration Servlet",
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
 @Properties({
     @Property(
             name = "sling.servlet.methods",
-            value = "GET",
-            propertyPrivate = true
+            value = "GET"
     ),
     @Property(
             name = "sling.servlet.resourceTypes",
-            value = "acs-commons/components/utilities/qr-code/config",
-            propertyPrivate = true
+            value = "acs-commons/components/utilities/qr-code/config"
     ),
     @Property(
             name = "sling.servlet.extensions",
-            value = "json",
-            propertyPrivate = true
+            value = "json"
     )
 })
 @Service

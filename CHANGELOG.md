@@ -9,8 +9,46 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+## UNRELEASED
+
+### Fixed
+
+- #2383 - [trivial] fix exception message in MarketoFieldDataSource
+
+### Added
+
+### Changed
+
+- #2373 - Cleanup warnings in the unit tests
+- #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
+
+## 4.8.4 - 2020-07-23
+
+v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
+
+## 4.8.2 - 2020-07-23
+
+### Fixed
+- #2372 - EnvironmentFilter breaks HTTP Assets API (#2371)
+
+### Changed
+- #2369 - Fixed a bunch of SCR warnings
+
+## 4.8.0 - 2020-07-16
+
+### Added
+
+- #2356 - Microsoft Office Asset Selector
+- #2355 - ACS AEM Commons TouchUI Web console
+
+### Fixed
+
+- #2366 - Fixed UnsupportedOperationException for CQIncludePropertyNamespaceServlet
 
 ## 4.7.2 - 2020-07-08
+
+### Added
+- #2339 - Microsoft Office Add-in for AEM Assets
 
 ### Fixed
 - #2267 - Redirect Map Edit Wrong Entry

@@ -1,0 +1,20 @@
+<script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+
+<sly data-sly-use.clientlib="/libs/granite/sightly/templates/clientlib.html"
+	 data-sly-call="${clientlib.all @ categories='acs-commons.asset-selectors.ms-office'}"/>
+
+<div id="acs-commons__asset-selectors__ms-office--container">
+	<iframe 
+		id="acs-commons__asset-selectors__ms-office--iframe" 
+		src="/aem/assetpicker.html?mimetype=image/*&root=${properties.path}" 
+		gesture="media"
+		allow="encrypted-media" 
+		allowfullscreen></iframe>
+</div>
+
+<script>
+$('iframe').load(function() {
+    $(this).contents().find("button.asset-picker-clear").hide();
+    $(this).contents().find("foundation-autocomplete.granite-pickerdialog-searchfield").css('flex-wrap', 'nowrap');
+});
+</script>

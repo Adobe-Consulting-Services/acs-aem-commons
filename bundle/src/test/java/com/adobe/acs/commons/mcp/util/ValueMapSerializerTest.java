@@ -37,7 +37,7 @@ public class ValueMapSerializerTest {
      */
     @Test
     public void testSerializeToStringArray() {
-        Object value = Arrays.asList("one", "two", "three", 4, 5.0D, 6L, new Integer(7), new Long(8));
+        Object value = Arrays.asList("one", "two", "three", 4, 5.0D, 6L, Integer.valueOf(7), Long.valueOf(8));
         String[] expResult = new String[]{"one", "two", "three", "4", "5.0", "6", "7", "8"};
         String[] result = ValueMapSerializer.serializeToStringArray(value);
         assertArrayEquals(expResult, result);
