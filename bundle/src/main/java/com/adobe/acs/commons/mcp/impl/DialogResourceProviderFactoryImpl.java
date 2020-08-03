@@ -19,8 +19,6 @@
  */
 package com.adobe.acs.commons.mcp.impl;
 
-import com.adobe.acs.commons.mcp.DialogResourceProviderConfiguration;
-import com.adobe.acs.commons.mcp.DialogResourceProviderFactory;
 import java.util.Map;
 import org.apache.sling.spi.resource.provider.ResourceProvider;
 import org.osgi.framework.ServiceRegistration;
@@ -32,13 +30,13 @@ import org.osgi.service.metatype.annotations.Designate;
  * @deprecated Will be removed in 5.0 entirely, no longer needed
  */
 @Component(
-        service = DialogResourceProviderFactory.class,
+        service = com.adobe.acs.commons.mcp.DialogResourceProviderFactory.class,
         immediate = true
 )
-@Designate(ocd = DialogResourceProviderConfiguration.class)
+@Designate(ocd = com.adobe.acs.commons.mcp.DialogResourceProviderConfiguration.class)
 @SuppressWarnings("deprecation")
 @Deprecated
-public class DialogResourceProviderFactoryImpl implements DialogResourceProviderFactory {
+public class DialogResourceProviderFactoryImpl implements com.adobe.acs.commons.mcp.DialogResourceProviderFactory {
 
     @Override
     public void registerClass(String className) {
