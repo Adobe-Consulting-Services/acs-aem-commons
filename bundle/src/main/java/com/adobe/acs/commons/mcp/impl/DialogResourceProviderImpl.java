@@ -59,7 +59,7 @@ public class DialogResourceProviderImpl extends ResourceProvider {
     private final Class originalClass;
     private final boolean isComponent;
 
-    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws RuntimeException, ReflectiveOperationException {
+    public DialogResourceProviderImpl(Class c, DialogProvider annotation) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException  {
         originalClass = c;
         isComponent = annotation != null && annotation.style() == DialogProvider.DialogStyle.COMPONENT;
         if (GeneratedDialog.class.isAssignableFrom(c)) {
