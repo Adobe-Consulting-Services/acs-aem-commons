@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
-
 ## UNRELEASED
 
 ### Fixed
@@ -21,7 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Changed
 
 - #2373 - Cleanup warnings in the unit tests
-
+- #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
 
 ## 4.8.4 - 2020-07-23
 
