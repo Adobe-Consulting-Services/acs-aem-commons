@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 - #2316 - @ChildResourceFromRequest uses incomplete request wrapper
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
+- #2384 - Fix resource service manager NPEs when service content nodes are missing
 
 ### Added
 
