@@ -141,6 +141,38 @@ public class UrlAssetImportTest {
     }
 
     @Test
+    public void testFolderTitlePreserve() throws IOException, RepositoryException {
+        context.load().json("/com/adobe/acs/commons/mcp/impl/processes/asset-ingestor.json", "/content/dam/testfolder");
+        importProcess.init();
+        importProcess.preserveFolderTitles = true;
+        URL testImg = getClass().getResource("/img/test.png");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test", "rendition", "test.png");
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
+        importProcess.createFolders(actionManager);
+        assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+        context.currentResource("/content/dam/testfolder/jcr:content");
+        ValueMap vm = context.currentResource().getValueMap();
+        assertEquals("Test Folder", vm.get("jcr:title"));
+    }
+
+    @Test
+    public void testFolderNoTitlePreserve() throws IOException, RepositoryException {
+        context.load().json("/com/adobe/acs/commons/mcp/impl/processes/asset-ingestor.json", "/content/dam/testfolder");
+        importProcess.init();
+        importProcess.preserveFolderTitles = false;
+        URL testImg = getClass().getResource("/img/test.png");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test");
+        addImportRow(testImg.toString(), "/content/dam/testfolder/test", "rendition", "test.png");
+        importProcess.files = importProcess.extractFilesAndFolders(importProcess.fileData.getDataRowsAsCompositeVariants());
+        importProcess.createFolders(actionManager);
+        assertEquals(1, importProcess.getCount(importProcess.createdFolders));
+        context.currentResource("/content/dam/testfolder/jcr:content");
+        ValueMap vm = context.currentResource().getValueMap();
+        assertEquals("testfolder", vm.get("jcr:title"));
+    }
+
+    @Test
     public void testImportFile404() throws IOException, RepositoryException {
         importProcess.init();
         URL testImg = getClass().getResource("/img/test.png");
