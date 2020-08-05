@@ -40,7 +40,7 @@ public class ValueMapSerializer {
     public static void serializeToResource(Resource r, Object sourceObject) {
         Map<String, Object> map = r.adaptTo(ModifiableValueMap.class);
         if (map == null) {
-            LOG.error("Unable to get modifiable value map for resource " + r.getPath());
+            LOG.error("Unable to get modifiable value map for resource {}", r.getPath());
         } else {
             serializeToMap(map, sourceObject);
         }

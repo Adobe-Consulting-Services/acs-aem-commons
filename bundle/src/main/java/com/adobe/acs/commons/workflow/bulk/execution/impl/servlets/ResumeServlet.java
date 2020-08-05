@@ -48,7 +48,7 @@ import static com.adobe.acs.commons.json.JsonObjectUtil.*;
 public class ResumeServlet extends SlingAllMethodsServlet {
 
     @Reference
-    private BulkWorkflowEngine bulkWorkflowEngine;
+    private transient BulkWorkflowEngine bulkWorkflowEngine;
 
     @Override
     protected final void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)

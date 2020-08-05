@@ -191,11 +191,11 @@ public class ReflectionUtil {
 
             switch (type){
                 case "Long":
-                    return new Long(value);
+                    return Long.valueOf(value);
                 case "Integer":
-                    return new Integer(value);
+                    return Integer.valueOf(value);
                 case "Float":
-                    return new Float(value);
+                    return Float.valueOf(value);
                 case "Boolean":
                     if(value.equalsIgnoreCase("true")){
                         return Boolean.TRUE;
@@ -203,7 +203,7 @@ public class ReflectionUtil {
                         return Boolean.FALSE;
                     }
                 case "Double":
-                    return new Double(value);
+                    return Double.valueOf(value);
                 case "String":
                 default:
                     return allowedValue;

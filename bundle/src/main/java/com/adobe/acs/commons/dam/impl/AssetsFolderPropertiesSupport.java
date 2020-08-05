@@ -55,35 +55,29 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component(
-        label = "ACS AEM Commons - Assets Folder Properties Support",
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
 @Properties({
         @Property(
                 name = "service.ranking",
-                intValue = -2000,
-                propertyPrivate = true
+                intValue = -2000
         ),
         @Property(
                 name = "sling.filter.scope",
-                value = "REQUEST",
-                propertyPrivate = true
+                value = "REQUEST"
         ),
         @Property(
                 name = "sling.filter.pattern",
-                value = "/content/dam/.*",
-                propertyPrivate = true
+                value = "/content/dam/.*"
         ),
         @Property(
                 name = "sling.servlet.methods",
-                value = "GET",
-                propertyPrivate = true
+                value = "GET"
         ),
         @Property(
                 name = "sling.servlet.resourceTypes",
-                value = "acs-commons/touchui-widgets/asset-folder-properties-support",
-                propertyPrivate = true
+                value = "acs-commons/touchui-widgets/asset-folder-properties-support"
         )
 })
 @Service
@@ -100,7 +94,7 @@ public class AssetsFolderPropertiesSupport extends SlingSafeMethodsServlet imple
      * The is a reference to the OOTB AEM PostOperation that handles updates for Folder Properties; This is used below in process(..) to ensure that all OOTB behaviors are executed.
      */
     @Reference(target="&(sling.post.operation=dam.share.folder)(sling.servlet.methods=POST)")
-    private PostOperation folderShareHandler;
+    private transient PostOperation folderShareHandler;
 
     /**
      * This method is responsible for post processing POSTs to the FolderShareHandler PostOperation (:operation = dam.share.folder).

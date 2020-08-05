@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.dispatcher.impl;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -66,19 +68,19 @@ public class PermissionSensitiveCacheServlet extends SlingSafeMethodsServlet {
 
                 if( !ResourceUtil.isNonExistingResource( requestedResource ) ){
                     log.debug("Current Session has access to {}", requestUri );
-                    response.setStatus(SlingHttpServletResponse.SC_OK);
+                    response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     log.info("Current Session does not have access to {}", requestUri );
-                    response.setStatus(SlingHttpServletResponse.SC_UNAUTHORIZED);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 }
 
             } else {
                 log.debug( "Invalid URI {}", requestUri );
-                response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
+                response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
             }
         } catch(Exception e) {
             log.error("Authchecker servlet exception", e);
-            response.setStatus( SlingHttpServletResponse.SC_UNAUTHORIZED );
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED );
         }
     }
 

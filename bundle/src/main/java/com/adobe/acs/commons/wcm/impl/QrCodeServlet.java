@@ -36,28 +36,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 @Component(
-        label = "ACS AEM Commons - QR Code Configuration Servlet",
         policy = ConfigurationPolicy.REQUIRE,
         immediate = true
 )
 @Properties({
     @Property(
             name = "sling.servlet.methods",
-            value = "GET",
-            propertyPrivate = true
+            value = "GET"
     ),
     @Property(
             name = "sling.servlet.resourceTypes",
-            value = "acs-commons/components/utilities/qr-code/config",
-            propertyPrivate = true
+            value = "acs-commons/components/utilities/qr-code/config"
     ),
     @Property(
             name = "sling.servlet.extensions",
-            value = "json",
-            propertyPrivate = true
+            value = "json"
     )
 })
 @Service
@@ -70,7 +68,7 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
     private static final String JSON_KEY_PUBLISH_URL = "publishURL";
 
     @Reference
-    private Externalizer externalizer;
+    private transient Externalizer externalizer;
 
     @Override
     protected final void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) throws
@@ -80,7 +78,7 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
 
         if (externalizer == null) {
             log.warn("Externalizer is not configured. This is required for QR Code servlet to work.");
-            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
         } else if (request.getResource().getValueMap().get(PN_ENABLED, false)) {
             final JsonObject json = new JsonObject();
@@ -98,11 +96,11 @@ public class QrCodeServlet extends SlingSafeMethodsServlet {
                 response.getWriter().flush();
             } else {
                 log.warn("Externalizer configuration for AEM Publish did not yield a valid URL");
-                response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
             log.warn("Externalizer configuration for AEM Publish did not yield a valid URL");
-            response.setStatus(SlingHttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

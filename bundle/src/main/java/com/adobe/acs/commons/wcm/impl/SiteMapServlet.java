@@ -60,7 +60,6 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
-import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
@@ -88,6 +87,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final boolean DEFAULT_REMOVE_TRAILING_SLASH = false;
 
+    private static final boolean DEFAULT_USE_VANITY_URL = true;
+
     @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
@@ -106,7 +107,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "DAM Asset MIME Types", unbounded = PropertyUnbounded.ARRAY, description = "MIME types allowed for DAM assets.")
     private static final String PROP_DAM_ASSETS_TYPES = "damassets.types";
 
-    @Property(label = "Exclude from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap. Default value: hideInNav")
+    @Property(label = "Exclude Pages (by properties of boolean values) from Sitemap Property", description = "The boolean [cq:Page]/jcr:content property name which indicates if the Page should be hidden from the Sitemap.")
     private static final String PROP_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.property";
 
     @Property(label = "URL Rewrites", unbounded = PropertyUnbounded.ARRAY, description = "Colon separated URL rewrites to adjust the <loc> to match your dispatcher's apache rewrites")
@@ -124,10 +125,16 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Character Encoding", description = "If not set, the container's default is used (ISO-8859-1 for Jetty)")
     private static final String PROP_CHARACTER_ENCODING_PROPERTY = "character.encoding";
 
+    @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
+    private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
+
+    @Property(boolValue = DEFAULT_USE_VANITY_URL, label = "Use Vanity URLs", description = "Use the Vanity URL for generating the Page URL")
+    private static final String USE_VANITY_URL = "use.vanity";
+
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
-    private Externalizer externalizer;
+    private transient Externalizer externalizer;
 
     private String externalizerDomain;
 
@@ -143,7 +150,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> damAssetTypes;
 
-    private String excludeFromSiteMapProperty;
+    private List<String> excludeFromSiteMapProperty;
 
     private String characterEncoding;
 
@@ -152,6 +159,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     private Map<String, String> urlRewrites;
 
     private boolean removeTrailingSlash;
+
+    private List<String> excludedPageTemplates;
+
+    private boolean useVanityUrl;
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -167,14 +178,16 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.damAssetProperty = PropertiesUtil.toString(properties.get(PROP_DAM_ASSETS_PROPERTY), "");
         this.damAssetTypes = Arrays
                 .asList(PropertiesUtil.toStringArray(properties.get(PROP_DAM_ASSETS_TYPES), new String[0]));
-        this.excludeFromSiteMapProperty = PropertiesUtil.toString(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
-                NameConstants.PN_HIDE_IN_NAV);
+        this.excludeFromSiteMapProperty = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_EXCLUDE_FROM_SITEMAP_PROPERTY),
+                new String[0]));
         this.characterEncoding = PropertiesUtil.toString(properties.get(PROP_CHARACTER_ENCODING_PROPERTY), null);
         this.extensionlessUrls = PropertiesUtil.toBoolean(properties.get(PROP_EXTENSIONLESS_URLS),
                 DEFAULT_EXTENSIONLESS_URLS);
         this.urlRewrites = ParameterUtil.toMap(PropertiesUtil.toStringArray(properties.get(PROP_URL_REWRITES), new String[0]), ":", true, "");
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
+        this.excludedPageTemplates = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
+        this.useVanityUrl =  PropertiesUtil.toBoolean(properties.get(USE_VANITY_URL), DEFAULT_USE_VANITY_URL);
     }
 
     @Override
@@ -258,13 +271,13 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     @SuppressWarnings("squid:S1192")
     private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
-        if (isHidden(page)) {
+        if (isHiddenByPageProperty(page) || isHiddenByPageTemplate(page)) {
             return;
         }
         stream.writeStartElement(NS, "url");
         String loc = "";
 
-        if (!StringUtils.isEmpty(page.getVanityUrl())) {
+        if (useVanityUrl && !StringUtils.isEmpty(page.getVanityUrl())) {
             loc = externalizer.externalLink(resolver, externalizerDomain, page.getVanityUrl());
         } else if (!extensionlessUrls) {
             loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
@@ -298,8 +311,24 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
-    private boolean isHidden(final Page page) {
-        return page.getProperties().get(this.excludeFromSiteMapProperty, false);
+    private boolean isHiddenByPageProperty(Page page){
+        boolean flag = false;
+        if(this.excludeFromSiteMapProperty != null){
+            for(String pageProperty : this.excludeFromSiteMapProperty){
+                flag = flag || page.getProperties().get(pageProperty, Boolean.FALSE);
+            }
+        }
+        return flag;
+    }
+
+    private boolean isHiddenByPageTemplate(Page page) {
+        boolean flag = false;
+        if(this.excludedPageTemplates != null){
+            for(String pageTemplate : this.excludedPageTemplates){
+                flag = flag || page.getProperties().get("cq:template", StringUtils.EMPTY).equalsIgnoreCase(pageTemplate);
+            }
+        }
+        return flag;
     }
 
     private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {

@@ -56,7 +56,7 @@ public class PageRootProviderConfig {
 
     @Property(
             label = "Root page path pattern",
-            description = "Regex(es) used to select the root page root path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
+            description = "Regex(es) used to select the root page root path. Regex must contain at least one group (with index 1) which is used as page root. It is matched against the given path. Evaluates list top-down; first match wins. Defaults to [ " + DEFAULT_PAGE_ROOT_PATH + " ]",
             cardinality = Integer.MAX_VALUE,
             value = { DEFAULT_PAGE_ROOT_PATH })
     /* Page root property. */
@@ -84,7 +84,7 @@ public class PageRootProviderConfig {
             try {
                 Pattern p = Pattern.compile("^(" + regex + ")(|/.*)$");
                 patterns.add(p);
-                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p.toString());
+                log.debug("Added Page Root Pattern [ {} ] to PageRootProvider", p);
             } catch (Exception e) {
                 log.error("Could not compile regex [ {} ] to pattern. Skipping...", regex, e);
             }
@@ -97,7 +97,7 @@ public class PageRootProviderConfig {
     protected void deactivate() {
         if (this.pageRootPatterns != null) {
             for (Pattern p : this.pageRootPatterns) {
-                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p.toString());
+                log.debug("Removed Page Root Pattern [ {} ] from PageRootProvider", p);
             }
 
             this.pageRootPatterns = null;

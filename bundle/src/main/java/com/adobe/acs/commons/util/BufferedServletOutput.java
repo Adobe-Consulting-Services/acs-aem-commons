@@ -64,7 +64,7 @@ public final class BufferedServletOutput {
      * 
      * @param wrappedResponse the wrapped response
      * @param writer          the writer to use as buffer (may be {@code null} in case you don't want to buffer the writer)
-     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for {@link #getOutputStream()) (may be {@code null} in case
+     * @param outputStream    the {@link ByteArrayOutputStream} to use as buffer for getOutputStream() (may be {@code null} in case
      *                            you don't want to buffer the output stream)
      */
     public BufferedServletOutput(ServletResponse wrappedResponse, StringWriter writer, ByteArrayOutputStream outputStream) {
@@ -129,6 +129,21 @@ public final class BufferedServletOutput {
         }
         return writer.toString();
     }
+    
+    /**
+     * Finds if there's still data pending, which needs to be flushed. Could be implemented
+     * with "getBufferedString().length() > 0, but that throws exceptions we don't like here.
+     * @return true if there is data pending in this buffer
+     */
+    boolean hasPendingData() {
+        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod)) {
+            return false;
+        }
+        if (writer == null) {
+            return false;
+        }
+        return writer.toString().length() > 0;
+    }
 
     /**
      * 
@@ -166,10 +181,10 @@ public final class BufferedServletOutput {
     void close() throws IOException {
         if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) {
             wrappedResponse.getOutputStream().write(getBufferedBytes());
-        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null) {
+        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null && getBufferedString().length() > 0) {
             wrappedResponse.getWriter().write(getBufferedString());
         }
-        if (flushBuffer) {
+        if (flushBuffer && hasPendingData()) {
             wrappedResponse.flushBuffer();
         }
     }

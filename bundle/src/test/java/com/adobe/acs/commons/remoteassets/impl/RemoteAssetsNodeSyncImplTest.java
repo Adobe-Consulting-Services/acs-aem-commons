@@ -65,6 +65,7 @@ import org.mockserver.model.HttpResponse;
 
 import com.adobe.acs.commons.assets.FileExtensionMimeTypeConstants;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
@@ -80,7 +81,6 @@ public class RemoteAssetsNodeSyncImplTest {
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this);
     private MockServerClient mockServerClient;
-
 
 //    private RemoteAssetsConfig remoteAssetsConfig;
 
@@ -100,8 +100,19 @@ public class RemoteAssetsNodeSyncImplTest {
         remoteAssetsConfigs.put("server.url", "http://localhost:" + mockServerRule.getPort());
         remoteAssetsConfigs.put("server.insecure", true);
         remoteAssetsConfigs.put("save.interval", 2);
+        
+        // does not work with a mock here
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
 
+        context.registerService(RequireAem.class,requireAem,"distribution","classic");
         context.registerInjectActivateService(new RemoteAssetsConfigImpl(), remoteAssetsConfigs);
+
         RemoteAssetsNodeSyncImpl remoteAssetsNodeSyncImpl = spy(new RemoteAssetsNodeSyncImpl());
         remoteAssetsNodeSync = context.registerInjectActivateService(remoteAssetsNodeSyncImpl);
 
@@ -218,14 +229,14 @@ public class RemoteAssetsNodeSyncImplTest {
         Calendar testDate = new GregorianCalendar(2019, 0, 6, 18, 15, 24);
         testDate.setTimeZone(TimeZone.getTimeZone("GMT-06:00"));
         assertEquals(testDate.getTimeInMillis(), ((Calendar) tagA1a.getValueMap().get("testDate")).getTimeInMillis());
-        assertEquals(new BigDecimal("453.3218937128937"), tagA1a.getValueMap().get("testDecimal"));
-        assertEquals(new Long(4223), tagA1a.getValueMap().get("testLong"));
+        assertEquals(BigDecimal.valueOf(453.3218937128937), tagA1a.getValueMap().get("testDecimal"));
+        assertEquals(Long.valueOf(4223), tagA1a.getValueMap().get("testLong"));
         assertEquals(Arrays.asList("Hello", "World"), Arrays.asList((String[]) tagA1a.getValueMap().get("testArrayString")));
         assertEquals(Arrays.asList(Boolean.FALSE, Boolean.TRUE, Boolean.FALSE),
                 Arrays.asList((Boolean[]) tagA1a.getValueMap().get("testArrayBool")));
-        assertEquals(Arrays.asList(new BigDecimal("1.1"), new BigDecimal("28"), new BigDecimal("4.8972834")),
+        assertEquals(Arrays.asList(BigDecimal.valueOf(1.1), BigDecimal.valueOf(28), BigDecimal.valueOf(4.8972834)),
                 Arrays.asList((BigDecimal[]) tagA1a.getValueMap().get("testArrayDecimal")));
-        assertEquals(Arrays.asList(new Long(53), new Long(4), new Long(55425546)),
+        assertEquals(Arrays.asList(Long.valueOf(53), Long.valueOf(4), Long.valueOf(55425546)),
                 Arrays.asList((Long[]) tagA1a.getValueMap().get("testArrayLong")));
         assertNull(tagA1a.getValueMap().get(":testBinary"));
         assertNull(tagA1a.getValueMap().get("testArrayDecimalBadData"));

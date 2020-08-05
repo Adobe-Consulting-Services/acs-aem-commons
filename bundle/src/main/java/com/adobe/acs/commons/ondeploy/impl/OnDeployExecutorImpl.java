@@ -22,6 +22,7 @@ package com.adobe.acs.commons.ondeploy.impl;
 import com.adobe.acs.commons.ondeploy.OnDeployExecutor;
 import com.adobe.acs.commons.ondeploy.OnDeployScriptProvider;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScript;
+import com.adobe.acs.commons.util.RequireAem;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -76,12 +77,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * than once.  This also covers the scenario where a script is run a second
  * time after failing the first time.
  */
-@Component(
-        label = "ACS AEM Commons - On-Deploy Scripts Executor",
-        description = "Developer tool that triggers scripts (specified via an implementation of OnDeployScriptProvider) to execute on deployment.",
-        metatype = false, policy = ConfigurationPolicy.REQUIRE)
+@Component(metatype = false, policy = ConfigurationPolicy.REQUIRE)
 @Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
-        value = "com.adobe.acs.commons:type=On-Deploy Scripts", propertyPrivate = true) })
+        value = "com.adobe.acs.commons:type=On-Deploy Scripts") })
 @Service(value = {DynamicMBean.class, OnDeployExecutorMBean.class, OnDeployExecutor.class})
 public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDeployExecutorMBean, OnDeployExecutor {
     static final String SCRIPT_STATUS_JCR_FOLDER = "/var/acs-commons/on-deploy-scripts-status";
@@ -100,6 +98,9 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
+    
+    @Reference(target="(distribution=classic)")
+    RequireAem requireAem;
 
     @Reference(name = "scriptProvider", referenceInterface = OnDeployScriptProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     private List<OnDeployScriptProvider> scriptProviders = new CopyOnWriteArrayList<>();
@@ -110,7 +111,7 @@ public class OnDeployExecutorImpl extends AnnotatedStandardMBean implements OnDe
 
     static {
         try {
-            scriptsItemNames = new String[] { "_provider", "_script", "startDate", "endDate", "status" };
+            scriptsItemNames = new String[] { "_provider", "_script", SCRIPT_DATE_START, SCRIPT_DATE_END, SCRIPT_STATUS };
             scriptsCompositeType =
                     new CompositeType("Script Row", "single script status row", scriptsItemNames, new String[] {
                             "Provider", "Script", "Start Date", "End Date", "Status" },

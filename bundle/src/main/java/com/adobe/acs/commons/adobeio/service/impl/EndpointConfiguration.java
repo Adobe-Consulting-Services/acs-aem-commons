@@ -50,6 +50,6 @@ public @interface EndpointConfiguration {
     @AttributeDefinition(name = "Service specific Header", description = "name:value E.g.: x-product:app-name")
     String[] specificServiceHeaders();
 
-    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{id}</b><br/> {endpoint}";
+    String webconsole_configurationFactory_nameHint() default "Endpoint <b>{id}</b><br> {endpoint}";
 
 }

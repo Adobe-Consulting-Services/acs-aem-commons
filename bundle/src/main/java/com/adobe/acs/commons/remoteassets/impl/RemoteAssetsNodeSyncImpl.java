@@ -38,7 +38,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
-import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
 import org.apache.jackrabbit.vault.util.JcrConstants;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -48,7 +47,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -81,6 +79,8 @@ import java.util.regex.Pattern;
 )
 public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
 
+  private static final String REP_POLICY = "rep:policy";
+
     private static final Logger LOG = LoggerFactory.getLogger(RemoteAssetsNodeSyncImpl.class);
     private static final Pattern DATE_REGEX = Pattern
             .compile("[A-Za-z]{3}\\s[A-Za-z]{3}\\s\\d\\d\\s\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d\\sGMT[-+]\\d\\d\\d\\d");
@@ -92,7 +92,7 @@ public class RemoteAssetsNodeSyncImpl implements RemoteAssetsNodeSync {
             JcrConstants.JCR_ISCHECKEDOUT, JcrConstants.JCR_UUID, JcrConstants.JCR_PREDECESSORS
     ));
     private static final Set<String> PROTECTED_NODES = new HashSet<>(Arrays.asList(
-            DamConstants.THUMBNAIL_NODE, AccessControlConstants.REP_POLICY
+            DamConstants.THUMBNAIL_NODE, REP_POLICY
     ));
 
     @Reference

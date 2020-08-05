@@ -1,25 +1,153 @@
 # Change Log
 
-All notable changes to this project will be documented in this file. This format was adapated
+All notable changes to this project will be documented in this file. This format was adapted
 after the 3.9.0 release. All changes up until the 3.9.0 release can be found in https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ## Unreleased ([details][unreleased changes details])
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
-[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.3.2...HEAD
+[unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
-### Added
-- Added more granular control of the environment indicator css
+## UNRELEASED
 
 ### Fixed
-- #2082 - ETag filter never sends 304
-- #2148 - Bugfix for displaying sizes (adresses #2132)
-- #2146 - POI exception generating Excel file with too many references
-- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2316 - @ChildResourceFromRequest uses incomplete request wrapper
+- #2383 - [trivial] fix exception message in MarketoFieldDataSource
+- #2384 - Fix resource service manager NPEs when service content nodes are missing
+
+### Added
 
 ### Changed
+
+- #2373 - Cleanup warnings in the unit tests
+- #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
+
+## 4.8.4 - 2020-07-23
+
+v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
+
+## 4.8.2 - 2020-07-23
+
+### Fixed
+- #2372 - EnvironmentFilter breaks HTTP Assets API (#2371)
+
+### Changed
+- #2369 - Fixed a bunch of SCR warnings
+
+## 4.8.0 - 2020-07-16
+
+### Added
+
+- #2356 - Microsoft Office Asset Selector
+- #2355 - ACS AEM Commons TouchUI Web console
+
+### Fixed
+
+- #2366 - Fixed UnsupportedOperationException for CQIncludePropertyNamespaceServlet
+
+## 4.7.2 - 2020-07-08
+
+### Added
+- #2339 - Microsoft Office Add-in for AEM Assets
+
+### Fixed
+- #2267 - Redirect Map Edit Wrong Entry
+- #2298 - Removed dependency on com.day.cq.dam.api.collection
+- #2300 - Fixed CopyProperties WF Process copy of empty properties
+- #2311 - ResourceTypeHttpCacheConfigExtension does not work with multiple allowed paths
+- #2313 - Dialog Resource Provider throws StringIndexOutOfBounds exception
+- #2314 - Fixed java.lang.IllegalStateException: Not a JSON Object for CQIncludePropertyNamespaceServlet
+- #2330 - Deactivated VersionedClientlibsTransformerFactory.VersionableClientlibsTransformer for static page exports
+- #2344 - Fixed Injectors ordering according to service.ranking property
+- #2350 - Fixed null check in VanityServiceUrlImpl
+
+### Changed
+- #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+- #2317 - New annotation processor for dialog generation, OSGi manager service no longer needed
+- #2324 - On-Deploy-Scripts are not supported on AEMaaCS
+- #2357 - Added safeguards to SMTPMailServiceHealthCheck to help avoid run-way email pings
+- #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
+- #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
+- #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
+
+## [4.7.0] - 2020-05-12
+
+### Added
+- #2293 - Added Copy Properties Workflow Process
+- #2243 - Added a servlet for serving robots.txt files
+
+### Changed
+- #2282 - Certain services which are not compatible to AEM as a CloudService, should not be available there
+
+## [4.6.0] - 2020-05-01
+
+### Added
+- #2266 - InDesign "Dynamic Deck Dynamo"
+
+### Fixed
+- #2265 - Review ResourceChangeListener configuration
+- #2187 - Upgraded oakpal.version to 2.0.0. Eliminates transitive compile dependency on oak-core-spi.
+- #2287 - Report Builder pagination buttons not working when report has no Search Parameters configured.
+
+## [4.5.2] - 2020-04-18
+
+### Added
+- #2199 - Add read permission for acs-commons-email-service user in conf folder using rep policy
+
+### Fixed
+- #2241 - Automatic Package Replicator - Missing Service User
+- #2245 - Marketo Endpoint Protocol Documentation Issue
+- #2254 - Fixed unwanted versioned client library cache reload for static CSS/JS resources of a proxied clientlib
+- #2248 - Fixed issue with null values in Generic Lists
+
+## [4.5.0] - 2020-03-25
+
+### Added
+- #2215 - Added Parameterized granite include to support generic dialog snippets
+- #2252 - Make comment available as email template variable
+
+### Fixed
+- #2225 /etc/designs/acs-aem-commons no longer readable by everyone in AEM 6.4+
+- #2220 NPE in Audio component due to XSSApi adapter no longer available
+- #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
+- #2206 fix sonar warnings; some package versions had to be increased
+- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog
+- Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
+- #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
+
+### Changed
+- #2208 - Remove the WCMInbox webconsole plugin (#2205)
+
+## [4.4.2] - 2020-02-28
+
+### Added
+- #2202 - Added dynamic script resolution modular support to MCP
+- #2194 - Add actions of Quickpublish an Managepublication to Generic list console
+- #2174 - Added more granular control of the environment indicator css
+- #2164 - Content model framework now supports page create dialogs
+- #2160 - provide EL support for contextual root
+- #2190 - Added RequireAem OSGi Service that allows for enablement/disablement based on AEM as a Cloud Service or Classic (AMS/OnPrem)
+
+### Fixed
+- #2195 - Removed direct references to Oak API
+- #2185 - fix empty iconpicker and fontawesome files
+- #2182 - SMTPMailServiceHealthCheck does not dynamically bind MessageGateway Open
+- #2178 - Worked around a POI exception with MCP Asset Folder Creator, due to the underlying bundle upgrading from POI v3.x->POI v4.x in 6.5.3 (addresses #2177 & #2162)
+- #2169 - Fixed build warnings regarding baseline versions
+- #2146 - POI exception generating Excel file with too many references
+- #2145 - Added null value test to spreadsheet tests
+- #2142 - ETag filter: Correctly evaluate if-none-match header
+- #2137 - Updating maven plugins used for release to resolve release issues
+- #2132 - Fix display of byte sizes
+- #2082 - ETag filter never sends 304
+
+### Changed
+- #2181 - Only run dependency-check-maven-plugin in dedicated profile
+- #2172 - Updated maven central URL to HTTPS
+- #2170 - Changed human readable byte count method to private to minimize API surface
 - #2164 - Adding support for page create dialog to content model framework (aka dialog resource provider)
+- #2138 - Removed Joda-time library in favor of using standard Java Instant library
 - #2133 - Update test library dependencies
 
 
@@ -399,7 +527,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
-- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts
 
 ## [3.15.2] - 2018-04-25
 
@@ -566,7 +694,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Fixed
 
 - #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.
-- #1119: Fixed issue with timezone of on/off times on System Notifications  
+- #1119: Fixed issue with timezone of on/off times on System Notifications
 - #1110: Added package dependency on AEM 6.2 to ensure proper installation order.
 - #1128: Changed to SecureRandom for string generation in LinkedIn integration.
 - #1132: Fixed number of parameters in SharpenImageTransformerImpl
@@ -581,6 +709,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #1039: Health Check Status E-mailer
 - #1041: QR Code to Publish in Page Editor
 - #1067: Vanity Path Web server re-writer mapping
+- #2212: Exclude Pages (by Template name or by page properties of boolean values) from Sitemap
 - Managed Controlled Processes framework with 5 sample tools: Folder Relocator, Page Relocator, Asset Report (space usage), Deep Prune, Asset Ingestor (aka AntEater v2)
 - `com.adobe.acs.commons.fam.actions.ActionsBatch` for bundling Fast Action Manager actions so multiple changes can be retried if any of them fail and break the commit.
 - Fast Action Manager now has a halt feature in the API which instantly stops an action manager and any of its scheduled work

@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -146,7 +147,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         response.setCharacterEncoding("UTF-8");
 
         if (!this.accepts(request)) {
-            response.setStatus(SlingHttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("{}");
         }
 
@@ -163,7 +164,7 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
         request.getRequestDispatcher(request.getResource(), options).forward(request, bufferedResponse);
 
         Gson gson = new Gson();
-         final JsonObject json = gson.toJsonTree(bufferedResponse.getBufferedServletOutput().getBufferedString()).getAsJsonObject();
+         final JsonObject json = gson.fromJson(bufferedResponse.getBufferedServletOutput().getBufferedString(), JsonElement.class).getAsJsonObject();
          final PropertyNamespaceUpdater propertyNamespaceUpdater = new PropertyNamespaceUpdater(namespace);
 
          propertyNamespaceUpdater.accept(json);
@@ -284,22 +285,31 @@ public final class CQIncludePropertyNamespaceServlet extends SlingSafeMethodsSer
                 }
 
                 for (Entry<String, JsonElement> elem : jsonObject.entrySet()) {
-                    final String propertyName = elem.getKey();                    
-                    String value = elem.getValue().getAsString();
-                    if (!this.accept(propertyName, value)) {
-                        log.debug("Property [ {} ~> {} ] is not a namespace-able property name/value", propertyName, value);
-                        continue;
-                    }
+                    final JsonElement propertyValue = elem.getValue();
 
-                    if (value != null) {
-                        String prefix = "";
-                        if (StringUtils.startsWith(value, DOT_SLASH)) {
-                            value = StringUtils.removeStart(value, DOT_SLASH);
-                            prefix = DOT_SLASH;
+                    if (propertyValue.isJsonPrimitive()) {
+                        final String propertyName = elem.getKey();
+                        String value = propertyValue.getAsString();
+
+                        if (!this.accept(propertyName, value)) {
+                            log.debug(
+                                "Property [ {} ~> {} ] is not a namespace-able property name/value",
+                                propertyName,
+                                value
+                            );
+                            continue;
                         }
 
-                        if (StringUtils.isNotBlank(value)) {
-                            jsonObject.addProperty(propertyName, prefix + namespace + "/" + value);
+                        if (value != null) {
+                            String prefix = "";
+                            if (StringUtils.startsWith(value, DOT_SLASH)) {
+                                value = StringUtils.removeStart(value, DOT_SLASH);
+                                prefix = DOT_SLASH;
+                            }
+
+                            if (StringUtils.isNotBlank(value)) {
+                                jsonObject.addProperty(propertyName, prefix + namespace + "/" + value);
+                            }
                         }
                     }
                 }

@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
  */
 @Component(
         property = {
-                Constants.SERVICE_RANKING + "=5501"
+                Constants.SERVICE_RANKING + ":Integer=5501"
         },
         service = Injector.class
 )

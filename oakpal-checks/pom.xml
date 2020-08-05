@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.4.1-SNAPSHOT</version>
+        <version>4.8.5-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -267,18 +267,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>18.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>net.adamcin.oakpal</groupId>
-            <artifactId>oakpal-core</artifactId>
+            <artifactId>oakpal-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -287,6 +288,16 @@
         </dependency>
 
         <!-- Test Dependencies -->
+        <dependency>
+            <groupId>net.adamcin.oakpal</groupId>
+            <artifactId>oakpal-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

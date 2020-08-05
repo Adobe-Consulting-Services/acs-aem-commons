@@ -72,6 +72,9 @@ import com.adobe.acs.commons.httpcache.invalidator.CacheInvalidationJobConstants
                   description = "List of paths to watch. Entries with the 'glob:' prefix are interpreted as globs, "
                           + "i.e. the * and ** wildcards are supported.",
                   name = ResourceChangeListener.PATHS),
+        @Property(label = "Type of change to listen to",
+        value = {"ADDED", "REMOVED","CHANGED"},
+        name = ResourceChangeListener.CHANGES),
         @Property(name = "webconsole.configurationFactory.nameHint",
                     value = "JCR paths to watch for changes: {" + EventConstants.EVENT_FILTER + "} "
                             + "{" + ResourceChangeListener.PATHS + "}",
@@ -89,7 +92,7 @@ public class JCRNodeChangeEventHandler implements EventHandler, ResourceChangeLi
     private ServiceRegistration<?> registration;
     
     @Activate
-    @SuppressWarnings("squid:S1149")
+    @SuppressWarnings({"squid:S1149","deprecation"})
     protected void activate(BundleContext context, Map<String, Object> config) {
         String pathFilter = PropertiesUtil.toString(config.get(EventConstants.EVENT_FILTER), "");
         if (!pathFilter.isEmpty()) {
@@ -103,6 +106,7 @@ public class JCRNodeChangeEventHandler implements EventHandler, ResourceChangeLi
         } else {
             Dictionary<String, Object> properties = new Hashtable<>();
             properties.put(ResourceChangeListener.PATHS, config.get(ResourceChangeListener.PATHS));
+            properties.put(ResourceChangeListener.CHANGES, config.get(ResourceChangeListener.CHANGES));
             registration = context.registerService(ResourceChangeListener.class, this, properties);
         }
     }

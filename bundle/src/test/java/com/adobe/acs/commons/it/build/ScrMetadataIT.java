@@ -54,6 +54,27 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * The purpose of this test is to validate that SCR and Metatype properties are not inadvertantly changed between ACS AEM Commons releases.
+ * It does this by downloading the bundle from the latest release and comparing the SCR and Metatype XML files to the ones generated
+ * by the current build.
+ *
+ * In exceptional cases, there are use cases where changes are appropriate. These can be controlled by three sets defined in this class:
+ *
+ * <dl>
+ *   <dt>PROPERTIES_TO_IGNORE</dt>
+ *   <dd>These are properties which should be ignored on every component. These should be relatively rare.</dd>
+ *   <dt>COMPONENT_PROPERTIES_TO_IGNORE</dt>
+ *   <dd>These are properties to ignore on a specific component. The syntax for these values is the form PID:PROPERTY_NAME</dd>
+ *   <dt>COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE</dt>
+ *   <dd>These are properties to ignore specifically for type changes, but will still produce a test failure when the property value changes. Syntax is the same as COMPONENT_PROPERTIES_TO_IGNORE</dd>
+ * </dl>
+ *
+ * In addition, this test validates that all factory components have an OSGi Web Console name hint and all variables
+ * referenced from the name hint exist. Currently there is no affordance for ignoring components or variables for this
+ * aspect of the test.
+ *
+ */
 @SuppressWarnings("PMD.SystemPrintln")
 public class ScrMetadataIT {
 
@@ -84,16 +105,35 @@ public class ScrMetadataIT {
         // the following two values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/1773
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.PlainXMLSerializerFactory:pipeline.type");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.rewriter.impl.XMLParserGeneratorFactory:pipeline.type");
-        
+
         // properties removed when updating to OSGi R6 annotations
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportCSVExportServlet:service.vendor");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.reports.internal.ReportsRenderCondition:service.vendor");
+
+        // properties removed for #2190 (RequireAem implementation)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.util.impl.AemCapabilityHelperImpl:service.vendor");
+
+        // properties removed for #2293 (Copy Properties workflow process implementation)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.util.impl.WorkflowHelperImpl:service.vendor");
+
+        // properties removed for #2350 (Vanity Service)
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.wcm.vanity.impl.VanityURLServiceImpl:service.vendor");
 
         // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/1852
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.topics");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.httpcache.invalidator.event.JCRNodeChangeEventHandler:event.filter");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.packages.automatic.impl.ConfigurationUpdateListener:event.topics");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.replication.packages.automatic.impl.ConfigurationUpdateListener:event.filter");
+
+        // the following four values changed due to https://github.com/Adobe-Consulting-Services/acs-aem-commons/issues/2344
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.ChildResourceFromRequestInjector:service.ranking");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.HierarchicalPagePropertyInjector:service.ranking");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.I18nInjector:service.ranking");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.JsonValueMapValueInjector:service.ranking");
+
+        // #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:felix.webconsole.title");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:service.vendor");
 
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
@@ -160,7 +200,7 @@ public class ScrMetadataIT {
         List<String> problems = new ArrayList<>();
 
         current.properties.stream().filter(cp -> !PROPERTIES_TO_IGNORE.contains(cp.name))
-            .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
+                .filter(cp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(current.name + ":" + cp.name)).forEach(cp -> {
             Optional<Property> fromLatest = latestRelease.properties.stream().filter(p -> p.name.equals(cp.name)).findFirst();
             if (fromLatest.isPresent()) {
                 Property lp = fromLatest.get();
@@ -176,7 +216,7 @@ public class ScrMetadataIT {
         });
 
         latestRelease.properties.stream().filter(lp -> !PROPERTIES_TO_IGNORE.contains(lp.name))
-            .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
+                .filter(lp -> !COMPONENT_PROPERTIES_TO_IGNORE.contains(latestRelease.name + ":" + lp.name)).forEach(lp -> {
             Optional<Property> fromCurrent = current.properties.stream().filter(p -> p.name.equals(lp.name)).findFirst();
             if (!fromCurrent.isPresent()) {
                 problems.add(String.format("Property %s on component %s has been removed.", lp.name, latestRelease.name));
@@ -187,16 +227,16 @@ public class ScrMetadataIT {
     }
 
     private DescriptorList getDescriptorsFromLatestRelease() throws Exception {
-        JsonObject packageDetails = (JsonObject) Request.Get("https://api.bintray.com/packages/acs/releases/acs-aem-commons").execute().handleResponse(responseHandler);
-        String latestVersion = packageDetails.get("latest_version").getAsString();
+        JsonObject packageDetails = (JsonObject) Request.Get("https://search.maven.org/solrsearch/select?q=g:%22com.adobe.acs%22+AND+a:%22acs-aem-commons-bundle%22&rows=1").execute().handleResponse(responseHandler);
+        String latestVersion = packageDetails.getAsJsonObject("response").getAsJsonArray("docs").get(0).getAsJsonObject().get("latestVersion").getAsString();
 
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         File cachedFile = new File(tempDir, String.format("acs-aem-commons-bundle-%s.jar", latestVersion));
         if (cachedFile.exists()) {
             System.out.printf("Using cached file %s\n", cachedFile);
         } else {
-            String url = String.format("https://dl.bintray.com/acs/releases/com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
 
+            String url = String.format("https://search.maven.org/remotecontent?filepath=com/adobe/acs/acs-aem-commons-bundle/%s/acs-aem-commons-bundle-%s.jar", latestVersion, latestVersion);
             System.out.printf("Fetching %s\n", url);
 
             InputStream content = Request.Get(url).execute().returnContent().asStream();
@@ -424,8 +464,5 @@ public class ScrMetadataIT {
         public boolean markSupported() {
             return zis.markSupported();
         }
-
     }
-
-
 }

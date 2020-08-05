@@ -58,7 +58,6 @@ import java.util.Set;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 
 @SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Export Servlet",
         methods = {"GET"},
         resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
         selectors = {"export"},
@@ -84,7 +83,7 @@ public class UsersExportServlet extends SlingSafeMethodsServlet {
 
         final Parameters parameters = new Parameters(request);
 
-        log.debug("Users to CSV Export Parameters: {}", parameters.toString());
+        log.debug("Users to CSV Export Parameters: {}", parameters);
 
         final Csv csv = new Csv();
         final Writer writer = response.getWriter();

@@ -26,6 +26,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -129,7 +130,7 @@ public class AnnotatedFieldDeserializer {
             }
             FieldUtils.writeField(field, target, array, true);
         } else {
-            Collection c = (Collection) getInstantiatableListType(field.getType()).newInstance();
+            Collection c = (Collection) getInstantiatableListType(field.getType()).getDeclaredConstructor().newInstance();
             c.addAll(convertedValues);
             FieldUtils.writeField(field, target, c, true);
         }
@@ -201,10 +202,10 @@ public class AnnotatedFieldDeserializer {
                     FormField fieldDefinition = f.getAnnotation(FormField.class);
                     FieldComponent component;
                     try {
-                        component = fieldDefinition.component().newInstance();
+                        component = fieldDefinition.component().getDeclaredConstructor().newInstance();
                         component.setup(AccessibleObjectUtil.getFieldName(f), f, fieldDefinition, sling);
                         return component;
-                    } catch (InstantiationException | IllegalAccessException ex) {
+                    } catch (RuntimeException | ReflectiveOperationException ex) {
                         LOG.error("Unable to instantiate field component for " + f.toString(), ex);
                     }
                     return null;

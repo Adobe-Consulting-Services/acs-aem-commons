@@ -14,6 +14,8 @@
         <include pattern="/etc/acs-commons/dispatcher-flush/jcr:content"/>
         <include pattern="/etc/acs-commons/lists"/>
         <include pattern="/etc/acs-commons/lists/jcr:content"/>
+        <include pattern="/etc/acs-commons/lists/dynamic-deck-query-list" mode="merge"/>
+        <include pattern="/etc/acs-commons/lists/dynamic-deck-query-list/jcr:content" mode="merge"/>
         <include pattern="/etc/acs-commons/lists/sharethis-services"/>
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content"/>
         <include pattern="/etc/acs-commons/lists/sharethis-services/jcr:content/list"/>

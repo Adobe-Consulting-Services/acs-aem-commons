@@ -241,7 +241,7 @@ public final class TypeUtil {
     }
 
     /**
-     * Transforms a Map of <String, ?> into a ValueMap.
+     * Transforms a Map of &lgt;String, ?&gt; into a ValueMap.
      *
      * @param map
      * @return a ValueMap of the parameter map

@@ -20,6 +20,9 @@
 package com.adobe.acs.commons.remoteassets.impl;
 
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+import com.adobe.acs.commons.util.RequireAem.Distribution;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.serviceusermapping.impl.MappingConfigAmendment;
@@ -27,6 +30,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,6 +51,16 @@ public class RemoteAssetsConfigImplTest {
     @Before
     public final void setup() {
         setupRemoteAssetsServiceUser(context);
+        
+        // does not work with a Mock here
+        RequireAem requireAem = new RequireAem() {
+          
+          @Override
+          public Distribution getDistribution() {
+            return null;
+          }
+        };
+        context.registerService(RequireAem.class, requireAem, "distribution","classic");
     }
 
     @Test
@@ -141,8 +155,8 @@ public class RemoteAssetsConfigImplTest {
         assertEquals(TEST_SERVER_PASSWORD, config.getPassword());
         assertEquals(Arrays.asList(TEST_TAGS_PATH_A, TEST_TAGS_PATH_B), config.getTagSyncPaths());
         assertEquals(Arrays.asList(TEST_DAM_PATH_A, TEST_DAM_PATH_B), config.getDamSyncPaths());
-        assertEquals(new Integer(TEST_RETRY_DELAY), config.getRetryDelay());
-        assertEquals(new Integer(TEST_SAVE_INTERVAL), config.getSaveInterval());
+        assertEquals(Integer.valueOf(TEST_RETRY_DELAY), config.getRetryDelay());
+        assertEquals(Integer.valueOf(TEST_SAVE_INTERVAL), config.getSaveInterval());
         assertEquals(new HashSet<String>(Arrays.asList(TEST_WHITELISTED_SVC_USER_A, TEST_WHITELISTED_SVC_USER_B)), config.getWhitelistedServiceUsers());
 
         assertNotNull(config.getRemoteAssetsHttpExecutor());

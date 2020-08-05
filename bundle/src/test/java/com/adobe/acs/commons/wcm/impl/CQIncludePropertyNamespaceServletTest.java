@@ -30,7 +30,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.Json;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("checkstyle:abbreviationaswordinname")
 @RunWith(MockitoJUnitRunner.class)
@@ -74,6 +77,41 @@ public class CQIncludePropertyNamespaceServletTest {
         assertEquals("test/no dot slash", json.get("noDotSlash").getAsString());
     }
 
+    @Test
+    public void testNamePropertyUpdater_WidgetsWithSubNodes() throws Exception {
+        final Map<String, Object> config = new HashMap<String, Object>();
+        config.put(CQIncludePropertyNamespaceServlet.PROP_NAMESPACEABLE_PROPERTY_NAMES,
+            new String[]{"name"});
+
+        final CQIncludePropertyNamespaceServlet servlet = new CQIncludePropertyNamespaceServlet();
+        servlet.activate(config);
+
+        final CQIncludePropertyNamespaceServlet.PropertyNamespaceUpdater visitor =
+            servlet.new PropertyNamespaceUpdater("test");
+
+        final JsonObject json = new JsonObject();
+
+        json.addProperty(JcrConstants.JCR_PRIMARYTYPE, "cq:Widget");
+        json.addProperty("name", "./myValue");
+        json.addProperty("fileName", "./myFile");
+        json.addProperty("jcr:description", "words");
+
+        final JsonObject subNodes = new JsonObject();
+
+        subNodes.addProperty("option_1", "Value 1");
+        subNodes.addProperty("option_2", "Value 2");
+
+        json.add("options", subNodes);
+
+        visitor.accept(json);
+
+        assertEquals("./test/myValue", json.get("name").getAsString());
+        assertEquals("./test/myFile", json.get("fileName").getAsString());
+
+        assertNotNull(json.get("options").getAsJsonObject());
+        assertEquals("Value 1", json.get("options").getAsJsonObject().get("option_1").getAsString());
+        assertEquals("Value 2", json.get("options").getAsJsonObject().get("option_2").getAsString());
+    }
 
     @Test
     public void testNamePropertyUpdater_PropertyValuePatterns() throws Exception {
@@ -102,8 +140,6 @@ public class CQIncludePropertyNamespaceServletTest {
         assertEquals("words", json.get("jcr:description").getAsString());
         assertEquals("no dot slash", json.get("noDotSlash").getAsString());
     }
-
-
 
     @Test
     public void testNamePropertyUpdater_MultiLevel() throws Exception {

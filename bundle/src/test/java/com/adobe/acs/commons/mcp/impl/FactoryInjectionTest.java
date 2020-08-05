@@ -31,6 +31,7 @@ import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanup;
 import com.adobe.acs.commons.mcp.impl.processes.ProcessCleanupFactory;
 import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestor;
 import com.adobe.acs.commons.mcp.impl.processes.asset.S3AssetIngestorFactory;
+import com.adobe.acs.commons.util.RequireAem;
 import com.day.cq.replication.Replicator;
 import com.day.cq.wcm.api.PageManagerFactory;
 import org.apache.sling.event.jobs.JobManager;
@@ -111,6 +112,7 @@ public class FactoryInjectionTest {
         registerMock(JobManager.class);
         registerMock(PageManagerFactory.class);
         registerMock(Replicator.class);
+        slingContext.registerService(RequireAem.class,mock(RequireAem.class),"distribution","classic");
     }
 
     private <T> void registerMock(Class<T> clazz) {

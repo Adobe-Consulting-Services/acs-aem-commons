@@ -55,6 +55,8 @@ import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess1;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccess2;
 import com.adobe.acs.commons.ondeploy.scripts.OnDeployScriptTestExampleSuccessWithPause;
 import com.adobe.acs.commons.testutil.LogTester;
+import com.adobe.acs.commons.util.RequireAem;
+
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -62,6 +64,7 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class OnDeployExecutorImplTest {
     @Rule
@@ -70,13 +73,14 @@ public class OnDeployExecutorImplTest {
     @Before
     public void setup() throws RepositoryException {
         context.build().resource(OnDeployExecutorImpl.SCRIPT_STATUS_JCR_FOLDER).commit();
-
+        context.registerService(RequireAem.class, mock(RequireAem.class),"distribution","classic");
         LogTester.reset();
     }
 
     @Test
     public void testCloseResources() throws NotCompliantMBeanException {
         ResourceResolver resourceResolver = mock(ResourceResolver.class);
+        
 
         OnDeployExecutorImpl impl = spy(new OnDeployExecutorImpl());
         doReturn(resourceResolver).when(impl).logIn();

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,7 @@ import org.mockito.junit.MockitoRule;
 
 import com.adobe.acs.commons.analysis.jcrchecksum.ChecksumGenerator;
 import com.adobe.acs.commons.analysis.jcrchecksum.impl.ChecksumGeneratorImpl;
+import com.adobe.acs.commons.util.RequireAem;
 
 public class EnsureOakIndexManagerImplTest {
 
@@ -56,6 +58,9 @@ public class EnsureOakIndexManagerImplTest {
     
     @Mock
     Scheduler scheduler;
+    
+    @Mock
+    RequireAem requireAem;
     
     
     private static final String OAK_INDEX = "/oak:index";
@@ -69,10 +74,11 @@ public class EnsureOakIndexManagerImplTest {
         // setup test content in the repo
         context.build().resource(OAK_INDEX).commit();
         context.registerService(Scheduler.class,scheduler);
+        context.registerService(RequireAem.class,requireAem,"distribution","classic");
 
         ScheduleOptions options = mock(ScheduleOptions.class);
-        when(scheduler.NOW()).thenReturn(options);
-        when(scheduler.schedule(any(), any())).thenAnswer((InvocationOnMock invocation) -> {
+        lenient().when(scheduler.NOW()).thenReturn(options);
+        lenient().when(scheduler.schedule(any(), any())).thenAnswer((InvocationOnMock invocation) -> {
             EnsureOakIndexJobHandler handler = invocation.getArgument(0);
             handler.run();
             return true;
