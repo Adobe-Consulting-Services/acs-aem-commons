@@ -12,8 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ## UNRELEASED
 
 ### Fixed
-
+- #2316 - @ChildResourceFromRequest uses incomplete request wrapper
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
+- #2384 - Fix resource service manager NPEs when service content nodes are missing
 
 ### Added
 
@@ -60,7 +61,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2330 - Deactivated VersionedClientlibsTransformerFactory.VersionableClientlibsTransformer for static page exports
 - #2344 - Fixed Injectors ordering according to service.ranking property
 - #2350 - Fixed null check in VanityServiceUrlImpl
- 
+
 ### Changed
 - #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
 - #2317 - New annotation processor for dialog generation, OSGi manager service no longer needed
@@ -111,7 +112,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2220 NPE in Audio component due to XSSApi adapter no longer available
 - #2214 fix java.lang.NoClassDefFoundError: javax/xml/bind/DatatypeConverter in Adobe I/O API's on AEM 6.4
 - #2206 fix sonar warnings; some package versions had to be increased
-- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog 
+- #2213 - Show/Hide Dialog Field TouchUI Widget: Fix hidden required field not disabled to save the dialog
 - Fixed JcrJsonAdapter IllegalStateException when writing multi-valued JCR properties
 - #2228 - Fixed case where OverridePathSlingRequestWrapper would fail to be created if SlingBindings request attribute was null
 
@@ -138,7 +139,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2145 - Added null value test to spreadsheet tests
 - #2142 - ETag filter: Correctly evaluate if-none-match header
 - #2137 - Updating maven plugins used for release to resolve release issues
-- #2132 - Fix display of byte sizes 
+- #2132 - Fix display of byte sizes
 - #2082 - ETag filter never sends 304
 
 ### Changed
@@ -526,7 +527,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 
 ### Changed
 - #1343 - CodeClimate now checks for license header
-- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts  
+- #1354 - Added JMX Bean for monitoring and executing on-dploy scripts
 
 ## [3.15.2] - 2018-04-25
 
@@ -693,7 +694,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 ### Fixed
 
 - #1094: Fixed issue with QR Code where its on by default. This requires toggling QR Code on and off to reset the client lib category.
-- #1119: Fixed issue with timezone of on/off times on System Notifications  
+- #1119: Fixed issue with timezone of on/off times on System Notifications
 - #1110: Added package dependency on AEM 6.2 to ensure proper installation order.
 - #1128: Changed to SecureRandom for string generation in LinkedIn integration.
 - #1132: Fixed number of parameters in SharpenImageTransformerImpl
