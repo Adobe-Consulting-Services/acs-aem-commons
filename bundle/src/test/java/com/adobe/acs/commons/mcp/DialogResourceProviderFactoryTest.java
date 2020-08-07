@@ -61,7 +61,7 @@ public class DialogResourceProviderFactoryTest {
     public Map<String, DialogResourceProvider> providers = new HashMap<>();
 
     @Before
-    public void init() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void init() throws IOException, RuntimeException, ReflectiveOperationException {
         slingContext.addModelsForClasses(MODEL_CLASSES);
         for (String className : MODEL_CLASSES) {
             DialogResourceProvider provider = (DialogResourceProvider) Class.forName(DialogResourceProvider.getServiceClassName(className)).newInstance();

@@ -33,7 +33,7 @@ public class Parameters {
     this.path = Optional.ofNullable(request.getParameter("path"))
         .orElse(StringUtils.EMPTY);
     this.localized = Optional.ofNullable(request.getParameter("localized"))
-        .map(Boolean::new)
+        .map(Boolean::valueOf)
         .orElse(Boolean.FALSE);
     this.defaultLocalization = Optional.ofNullable(request.getParameter("defaultLocalization"))
         .filter(StringUtils::isNotBlank)
