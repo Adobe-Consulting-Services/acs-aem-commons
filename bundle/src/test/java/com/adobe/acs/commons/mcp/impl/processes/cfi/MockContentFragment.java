@@ -155,12 +155,10 @@ public class MockContentFragment implements ContentFragment {
         return null;
     }
 
-    
-    // Required for cloudservice
-	//@Override
-	public void removeVariation(String arg0) throws ContentFragmentException {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void removeVariation(String name) throws ContentFragmentException {
+      // TODO Auto-generated method stub
+      
+    }
     
 }
