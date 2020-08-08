@@ -4,21 +4,24 @@ jdk:
 - oraclejdk8
 - oraclejdk11
 env:
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true DEPENDENCY_CHECK=true
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE"
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES"
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR"
-- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US -Pclassic" POST_COVERAGE=true DEPENDENCY_CHECK=true
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=de -Duser.country=DE -Pclassic"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES -Pclassic"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR -Pclassic"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN -Pclassic"
+- MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=US -Pcloudservice"
 jobs:
    exclude:
      - jdk: oraclejdk11
-       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US" POST_COVERAGE=true DEPENDENCY_CHECK=true
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=en -Duser.country=US -Pclassic" POST_COVERAGE=true DEPENDENCY_CHECK=true
      - jdk: oraclejdk11
-       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES"
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=es -Duser.country=ES -Pclassic"
      - jdk: oraclejdk11
-       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR"
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=fr -Duser.country=FR -Pclassic"
      - jdk: oraclejdk11
-       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN"
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=IN -Pclassic"
+     - jdk: oraclejdk8
+       env: MAVEN_SKIP_RC=true MAVEN_OPTS="-Xmx512m -XX:MaxMetaspaceSize=512m -Duser.language=hi -Duser.country=US -Pcloudservice"
 script: mvn verify -B
 before_install:
   - cp .travis.settings.xml $HOME/.m2/settings.xml
