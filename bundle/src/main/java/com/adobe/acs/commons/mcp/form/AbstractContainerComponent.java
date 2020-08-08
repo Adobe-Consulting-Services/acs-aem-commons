@@ -22,6 +22,7 @@ package com.adobe.acs.commons.mcp.form;
 import com.adobe.acs.commons.mcp.util.AccessibleObjectUtil;
 import com.adobe.acs.commons.mcp.util.AnnotatedFieldDeserializer;
 import com.adobe.acs.commons.mcp.util.SyntheticResourceBuilder;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -96,8 +97,8 @@ public class AbstractContainerComponent extends FieldComponent {
 
     public FieldComponent generateDefaultChildComponent() {
         try {
-            return defaultChildComponent.newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
+            return defaultChildComponent.getDeclaredConstructor().newInstance();
+        } catch (RuntimeException | ReflectiveOperationException ex) {
             LOG.error("got exception", ex);
             return null;
         }

@@ -346,7 +346,7 @@ public final class DynamicDeckUtils {
     private static Query getQueryForSmartCollection(final Resource resource) throws IOException, RepositoryException {
         final QueryBuilder queryBuilder = resource.getResourceResolver().adaptTo(QueryBuilder.class);
 
-        Query query = queryBuilder.loadQuery(resource.getValueMap().get("dam:query", ""),
+        Query query = queryBuilder.loadQuery(resource.getPath() + "/dam:query",
                 resource.getResourceResolver().adaptTo(Session.class));
 
         PredicateGroup predicateGroup = query.getPredicates();

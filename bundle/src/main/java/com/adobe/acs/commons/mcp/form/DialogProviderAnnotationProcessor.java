@@ -104,7 +104,7 @@ public class DialogProviderAnnotationProcessor extends AbstractProcessor {
             out.println(String.format("public class %s implements %s {", className, osgiService));
             out.println();
             out.println(String.format("    @Override%n    public Class getTargetClass() {%n        return %s.class;%n    }", targetClass));
-            out.println("    @Activate\n    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException {\n        this.doActivate(context);\n    }\n");
+            out.println("    @Activate\n    public void activate(BundleContext context) throws InstantiationException, IllegalAccessException, ReflectiveOperationException {\n        this.doActivate(context);\n    }\n");
             out.println("    @Deactivate\n    public void deactivate(BundleContext context) {\n        this.doDeactivate();\n    }");
             out.println("}");
             out.flush();

@@ -47,9 +47,7 @@ import javax.servlet.ServletRequest;
  *
  * Get using @Reference annotation or via SlingScriptHelper's .getService(..) method
  */
-@Component(label = "ACS AEM Commons - Component Helper",
-        description = "Component Helper is a service used in the context of CQ Components for "
-                + "encapsulating common tasks and performing common checks.")
+@Component()
 @Service
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "squid:S1192"})
 public final class ComponentHelperImpl implements ComponentHelper {
