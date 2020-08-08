@@ -25,8 +25,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
 import org.apache.sling.models.spi.Injector;
+import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +54,14 @@ import java.util.function.Function;
 @Component(
         service = {Injector.class},
         property = {
-                Constants.SERVICE_RANKING + "=3000"
+                Constants.SERVICE_RANKING + ":Integer=3000"
         }
 )
 public class ChildResourceFromRequestInjector implements Injector {
     private static final Logger logger = LoggerFactory.getLogger(ChildResourceFromRequestInjector.class);
+
+    @Reference
+    private BindingsValuesProvidersByContext bindingsValuesProvidersByContext;
 
     public String getName() {
         return "child-resources-from-request";
@@ -95,7 +100,7 @@ public class ChildResourceFromRequestInjector implements Injector {
     private Object getValueForRequest(SlingHttpServletRequest request, String name, Type declaredType) {
         Resource child = request.getResource().getChild(name);
         return getValueSingleOrList(child, declaredType,
-                (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath()); });
+                (childResource) -> { return new OverridePathSlingRequestWrapper(request, childResource.getPath(), bindingsValuesProvidersByContext); });
     }
 
     private Object getValueForResource(Resource resource, String name, Type declaredType) {

@@ -22,18 +22,11 @@ package com.adobe.acs.commons.wcm.comparisons.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
-
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.version.Version;
-import javax.jcr.version.VersionIterator;
 import javax.jcr.version.VersionManager;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.sling.api.resource.Resource;
@@ -41,7 +34,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -49,9 +41,6 @@ import com.adobe.acs.commons.wcm.comparisons.VersionService;
 import com.google.common.collect.ImmutableMap;
 
 public final class VersionServiceImplTest {
-
-    private static final String MANY = "manyVersions";
-    private static final String ONE = "oneVersion";
 
     @Rule
     public SlingContext context = new SlingContext(ResourceResolverType.JCR_OAK);
@@ -88,20 +77,20 @@ public final class VersionServiceImplTest {
     }
     
     @Test
+    @SuppressWarnings("deprecation")
     public void lastVersion_oneVersion_returnVersion() throws Exception {
         Version lastVersion = underTest.lastVersion(context.resourceResolver().getResource("/oneVersion"));
         assertEquals(lastVersion.getUUID(), oneVersionVersion.getUUID());
     }
 
     @Test
-//    @Ignore
     public void lastVersion_noElement_returnNull() throws Exception {
         Version lastVersion = underTest.lastVersion(context.resourceResolver().getResource("/noVersion"));
         assertNull(lastVersion);
     }
 
     @Test
-//    @Ignore
+    @SuppressWarnings("deprecation")
     public void lastVersion_listOfVersion_returnLast() throws Exception {
         Version lastVersion = underTest.lastVersion(context.resourceResolver().getResource("/manyVersions"));
         assertEquals(lastVersion.getUUID(), manyVersionVersion.getUUID());

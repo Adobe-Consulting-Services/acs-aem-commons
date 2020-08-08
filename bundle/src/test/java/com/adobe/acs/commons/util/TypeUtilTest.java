@@ -91,7 +91,7 @@ public class TypeUtilTest {
         final JsonObject json = new JsonObject();
         json.addProperty("one", "uno");
         json.addProperty("two", 2);
-        json.addProperty("three", new Long(3));
+        json.addProperty("three", Long.valueOf(3));
 
         // TODO: Find a way to coerce GSON to not treat all numbers as Double, but that's what it does, unavoidably.
         final Map<String, Object> expResult = new HashMap<String, Object>();
@@ -128,17 +128,17 @@ public class TypeUtilTest {
 
     @Test
     public void testGetType_Double() {
-        assertEquals(TypeUtil.getType(new Double(10000.00001)), Double.class);
+        assertEquals(TypeUtil.getType(Double.valueOf(10000.00001)), Double.class);
     }
 
     @Test
     public void testGetType_Float() {
-        assertEquals(Double.class, TypeUtil.getType(new Float(100.001)));
+        assertEquals(Double.class, TypeUtil.getType(Float.valueOf((float) 100.001)));
     }
 
     @Test
     public void testGetType_Long() {
-        assertEquals(Long.class, TypeUtil.getType(new Long(100000000)));
+        assertEquals(Long.class, TypeUtil.getType(Long.valueOf(100000000)));
     }
 
     @Test
@@ -158,12 +158,12 @@ public class TypeUtilTest {
 
     @Test
     public void toObjectType_Double() {
-        assertEquals(new Double(10.01), TypeUtil.toObjectType("10.01", Double.class));
+        assertEquals(Double.valueOf(10.01), TypeUtil.toObjectType("10.01", Double.class));
     }
 
     @Test
     public void toObjectType_Long() {
-        assertEquals(new Long(10), TypeUtil.toObjectType("10", Long.class));
+        assertEquals(Long.valueOf(10L), TypeUtil.toObjectType("10", Long.class));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class TypeUtilTest {
     @Test
     public void toString_Double() {
         String expResult = "1000.0";
-        Double doubleValue = new Double(1000);
+        Double doubleValue = Double.valueOf(1000);
         try {
             assertEquals(expResult, TypeUtil.toString(doubleValue, Double.class));
         } catch (IllegalAccessException e) {
