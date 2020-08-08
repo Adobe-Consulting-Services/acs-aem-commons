@@ -154,5 +154,13 @@ public class MockContentFragment implements ContentFragment {
     public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
         return null;
     }
+
+    
+    // Required for cloudservice
+	//@Override
+	public void removeVariation(String arg0) throws ContentFragmentException {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
