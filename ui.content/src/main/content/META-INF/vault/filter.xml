@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/rep:policy"/>
-    <filter root="/conf/acs-commons/reports" mode="update">
-        <include pattern="/conf/acs-commons/reports/jcr:content" />
-        <include pattern="/conf/acs-commons/reports(.*)?" mode="merge" />
-    </filter>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
@@ -53,6 +49,9 @@
         <include pattern="/etc/acs-commons/instant-package/jcr:content"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/instant-package-image.png"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
+
+        <include pattern="/etc/acs-commons/reports/jcr:content" />
+        <include pattern="/etc/acs-commons/reports(.*)?" mode="merge" />
 
         <!-- Remove legacy /etc pages from prior version installs -->
         <include pattern="/etc/acs-commons/audit-log-search"/>
