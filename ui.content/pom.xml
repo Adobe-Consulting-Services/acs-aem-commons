@@ -365,9 +365,6 @@
         </profile>
         <profile>
         	<id>classic</id>
-        	<activation>
-    			<activeByDefault>true</activeByDefault>
-    		</activation>
         	<dependencies>
         		<dependency>
 		            <groupId>com.adobe.aem</groupId>

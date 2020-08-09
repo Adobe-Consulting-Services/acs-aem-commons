@@ -810,9 +810,6 @@
     <profiles>
     	<profile>
     		<id>classic</id>
-    		<activation>
-    			<activeByDefault>true</activeByDefault>
-    		</activation>
     		<dependencies>
     			<!-- put UberJar last so that more specific artifacts take precedence -->
 		        <dependency>
