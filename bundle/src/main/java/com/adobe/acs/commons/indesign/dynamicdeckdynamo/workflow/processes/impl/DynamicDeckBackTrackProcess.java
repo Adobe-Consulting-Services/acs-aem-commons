@@ -64,7 +64,7 @@ import java.util.Arrays;
 public class DynamicDeckBackTrackProcess implements WorkflowProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicDeckBackTrackProcess.class);
     
-    private static String DAM_ROOT = "/content/dam";
+    private static final String CONTENT_DAM_ROOT = "/content/dam";
 
     @Override
     public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) throws WorkflowException {
@@ -247,10 +247,10 @@ public class DynamicDeckBackTrackProcess implements WorkflowProcess {
                         return;
                     }
                     String completeHrefValue = null;
-                    if (hrefValue.contains(DAM_ROOT)) {
+                    if (hrefValue.contains(CONTENT_DAM_ROOT)) {
                         String hrefEncodedValue = StringUtils.substringAfter(
-                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), DAM_ROOT);
-                        completeHrefValue = DAM_ROOT + hrefEncodedValue;
+                                URLDecoder.decode(hrefValue, StandardCharsets.UTF_8.toString()), CONTENT_DAM_ROOT);
+                        completeHrefValue = CONTENT_DAM_ROOT + hrefEncodedValue;
                     }
                     if (null == completeHrefValue) {
                         LOGGER.error("Back track root path is not correct {}", hrefValue);

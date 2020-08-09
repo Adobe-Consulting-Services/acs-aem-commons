@@ -56,7 +56,7 @@
         <license.addJavaLicenseAfterPackage>false</license.addJavaLicenseAfterPackage>
         <sl4fj.version>1.7.21</sl4fj.version>
         <scr.plugin.version>1.26.0</scr.plugin.version>
-        <oakpal.version>2.0.0</oakpal.version>
+        <oakpal.version>2.1.0</oakpal.version>
 
         <!-- Supress CQRules:CQBP-84-\-dependencies -->
         <sonar.issue.ignore.multicriteria.e1.resourceKey>oakpal-checks/pom.xml</sonar.issue.ignore.multicriteria.e1.resourceKey>
@@ -311,6 +311,20 @@
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
             </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-help-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>show-profiles</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>active-profiles</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
 
@@ -368,13 +382,6 @@
                 <groupId>javax.jcr</groupId>
                 <artifactId>jcr</artifactId>
                 <version>2.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.adobe.aem</groupId>
-                <artifactId>uber-jar</artifactId>
-                <version>6.4.0</version>
-                <classifier>apis</classifier>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -748,6 +755,49 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+        	<id>cloudservice</id>
+        	<activation>
+        		<property>
+        			<name>profile</name>
+        			<value>cloudservice</value>
+        		</property>
+        	</activation>
+        	<dependencyManagement>
+        		<dependencies>
+        			<dependency>
+		                <groupId>com.adobe.aem</groupId>
+		                <artifactId>aem-sdk-api</artifactId>
+		                <version>2020.7.3981.20200731T205128Z-200604</version>
+		                <scope>provided</scope>
+		            </dependency>
+        		</dependencies>
+        	</dependencyManagement>
+        </profile>
+        <profile>
+        	<id>classic</id>
+        	<activation>
+        		<activeByDefault>true</activeByDefault>
+        		<property>
+        			<name>profile</name>
+        			<value>classic</value>
+        		</property>
+        	</activation>
+        	<properties>
+        		<buildmode>classic</buildmode>
+        	</properties>
+        	<dependencyManagement>
+        		<dependencies>
+        			<dependency>
+		                <groupId>com.adobe.aem</groupId>
+		                <artifactId>uber-jar</artifactId>
+		                <version>6.4.0</version>
+		                <classifier>apis</classifier>
+		                <scope>provided</scope>
+		            </dependency>
+        		</dependencies>
+        	</dependencyManagement>
         </profile>
     </profiles>
 

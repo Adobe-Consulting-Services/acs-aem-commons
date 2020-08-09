@@ -226,11 +226,19 @@ public class DesignHtmlLibraryManagerImplTest {
             return null;
         }
 
-        @Override
-        public void invalidateOutputCache() throws RepositoryException {
-          // TODO Auto-generated method stub
-          
-        }
+        // required for cloudservice
+		//@Override
+		public void ensureCached() throws IOException, RepositoryException {
+			// TODO Auto-generated method stub
+			
+		}
+
+        // required for cloudservice
+		//@Override
+		public void invalidateOutputCache() throws RepositoryException {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
 }

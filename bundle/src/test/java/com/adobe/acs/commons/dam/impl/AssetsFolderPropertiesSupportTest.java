@@ -20,11 +20,11 @@
 
 package com.adobe.acs.commons.dam.impl;
 
-import com.adobe.cq.commerce.common.ValueMapDecorator;
 import com.google.common.collect.ImmutableMap;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.jcr.resource.JcrResourceConstants;
 import org.apache.sling.servlets.post.PostOperation;
 import org.apache.sling.servlets.post.PostResponse;
