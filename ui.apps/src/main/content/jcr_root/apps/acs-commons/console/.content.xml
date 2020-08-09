@@ -52,7 +52,7 @@
                 <datasource
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
-                    exclude="/etc/acs-commons/(lists)(/.*)*"
+                    exclude="/etc/acs-commons/(lists|reports)(/.*)*"
                     itemResourceType="cq/gui/components/coral/admin/page/columnitem"
                     limit="${empty requestPathInfo.selectors[1] ? &quot;501&quot; : requestPathInfo.selectors[1] + 1}"
                     offset="${requestPathInfo.selectors[0]}"
@@ -74,7 +74,7 @@
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
                     applyWeighting="{Boolean}true"
-                    exclude="/etc/acs-commons/(lists)(/.*)*"
+                    exclude="/etc/acs-commons/(lists|reports)(/.*)*"
                     itemResourceType="cq/gui/components/coral/admin/page/card"
                     limit="${empty requestPathInfo.selectors[1] ? &quot;21&quot; : requestPathInfo.selectors[1] + 1}"
                     offset="${requestPathInfo.selectors[0]}"
@@ -107,7 +107,7 @@
                 <datasource
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="cq/gui/components/common/wcm/datasources/childpages"
-                    exclude="/etc/acs-commons/(lists)(/.*)*"
+                    exclude="/etc/acs-commons/(lists|reports)(/.*)*"
                     itemResourceType="cq/gui/components/coral/admin/page/row"
                     limit="${empty requestPathInfo.selectors[1] ? &quot;41&quot; : requestPathInfo.selectors[1] + 1}"
                     offset="${requestPathInfo.selectors[0]}"
