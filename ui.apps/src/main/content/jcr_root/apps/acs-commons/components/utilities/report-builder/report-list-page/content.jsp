@@ -21,7 +21,7 @@
 <%@taglib prefix="sling2" uri="http://sling.apache.org/taglibs/sling" %>
 <div ng-controller="MainCtrl" ng-init="init();">
    <div class="coral-Well">
-      <form action="/etc/acs-commons/reports" method="post" class="coral-Form--aligned" id="fn-acsCommons-add" ng-submit="createReport($event, 'fn-acsCommons-add')">
+      <form action="/conf/acs-commons/reports" method="post" class="coral-Form--aligned" id="fn-acsCommons-add" ng-submit="createReport($event, 'fn-acsCommons-add')">
          <input type="hidden" name="jcr:primaryType" value="cq:Page" />
          <input type="hidden" name="jcr:content/sling:resourceType" value="acs-commons/components/utilities/report-builder/report-page" />
          <input type="hidden" name="jcr:content/jcr:created" />

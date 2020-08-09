@@ -51,7 +51,7 @@
             <editor_1384214937
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="acs-commons/components/utilities/report-builder/columns/editor"
-                customEditor="http://localhost:4502/etc/acs-commons/reports/sample-component-instances.html?wcmmode=disabled#resourceType="
+                customEditor="http://localhost:4502/conf/acs-commons/reports/sample-component-instances.html?wcmmode=disabled#resourceType="
                 editor="custom"
                 heading="Component Instances"
                 useResourceType="true"/>
