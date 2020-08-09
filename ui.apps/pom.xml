@@ -188,19 +188,7 @@
                             </scanArtifacts>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            </summaryFiles>
-                        </configuration>
-                    </execution>
+
                 </executions>
             </plugin>
 
@@ -378,6 +366,9 @@
     				<value>classic</value>
     			</property>
     		</activation>
+    		<properties>
+    			<oakpal.skip.verify>false</oakpal.skip.verify>
+    		</properties>
     		<dependencies>
     			<!-- put UberJar last so that more specific artifacts take precedence -->
 		        <dependency>
@@ -386,9 +377,36 @@
 		            <classifier>apis</classifier>
 		        </dependency>
     		</dependencies>
+    		<build>
+    			<plugins>
+    				<plugin>
+    				    <groupId>net.adamcin.oakpal</groupId>
+                		<artifactId>oakpal-maven-plugin</artifactId>
+                		<executions>
+                			<execution>
+		                        <id>oakpal-verify</id>
+		                        <goals>
+		                            <goal>verify</goal>
+		                        </goals>
+		                        <configuration>
+		                        	<skip>${oakpal.skip.verify}</skip>
+		                            <summaryFiles>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+		                            </summaryFiles>
+		                        </configuration>
+		                    </execution>
+                		</executions>
+    				</plugin>
+    			</plugins>
+    		</build>
     	</profile>
     	<profile>
     		<id>cloudservice</id>
+    		<properties>
+    			<oakpal.skip.verify>true</oakpal.skip.verify>
+    		</properties>
     		<dependencies>
     			<!-- put UberJar last so that more specific artifacts take precedence -->
 		        <dependency>

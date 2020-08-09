@@ -827,6 +827,12 @@
     	</profile>
     	<profile>
     		<id>cloudservice</id>
+    		<activation>
+    			<property>
+    				<name>profile</name>
+    				<value>cloudservice</value>
+    			</property>
+    		</activation>
     		<dependencies>
     			<!-- put UberJar last so that more specific artifacts take precedence -->
 		        <dependency>
