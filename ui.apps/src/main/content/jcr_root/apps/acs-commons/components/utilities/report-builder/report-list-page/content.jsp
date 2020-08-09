@@ -55,7 +55,7 @@
          </tr>
       </thead>
       <tbody is="coral-table-body">
-         <sling2:findResources query="SELECT * FROM [cq:Page] AS s WHERE (ISDESCENDANTNODE([/var/acs-commons/reports]) OR ISDESCENDANTNODE([/etc/acs-commons/reports])) AND [jcr:primaryType]='cq:Page'" language="JCR-SQL2" var="reports" />
+         <sling2:findResources query="SELECT * FROM [nt:base] AS s WHERE (ISDESCENDANTNODE([/var/acs-commons/reports]) OR ISDESCENDANTNODE([/conf/acs-commons/reports])) AND [jcr:primaryType]='cq:Page'" language="JCR-SQL2" var="reports" />
          <c:forEach var="report" items="${reports}">
             <tr is="coral-table-row">
                <sling2:getResource base="${report}" path="jcr:content" var="reportContent" />
