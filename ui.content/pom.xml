@@ -365,6 +365,12 @@
         </profile>
         <profile>
         	<id>classic</id>
+        	<activation>
+        		<property>
+        			<name>profile</name>
+        			<value>classic</value>
+        		</property>
+        	</activation>
         	<dependencies>
         		<dependency>
 		            <groupId>com.adobe.aem</groupId>
