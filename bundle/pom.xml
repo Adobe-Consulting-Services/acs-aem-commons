@@ -342,7 +342,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
                 <configuration>
                     <reuseForks>false</reuseForks>
                     <forkCount>1C</forkCount>
@@ -769,12 +768,7 @@
             <version>4.0.6</version>
             <scope>provided</scope>
         </dependency>
-        <!-- put UberJar last so that more specific artifacts take precedence -->
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
+
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -812,4 +806,41 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    
+    <profiles>
+    	<profile>
+    		<id>classic</id>
+    		<activation>
+    			<property>
+    				<name>profile</name>
+    				<value>classic</value>
+    			</property>
+    		</activation>
+    		<dependencies>
+    			<!-- put UberJar last so that more specific artifacts take precedence -->
+		        <dependency>
+		            <groupId>com.adobe.aem</groupId>
+		            <artifactId>uber-jar</artifactId>
+		            <classifier>apis</classifier>
+		        </dependency>
+    		</dependencies>
+    	</profile>
+    	<profile>
+    		<id>cloudservice</id>
+    		<activation>
+    			<property>
+    				<name>profile</name>
+    				<value>cloudservice</value>
+    			</property>
+    		</activation>
+    		<dependencies>
+    			<!-- put UberJar last so that more specific artifacts take precedence -->
+		        <dependency>
+		            <groupId>com.adobe.aem</groupId>
+		            <artifactId>aem-sdk-api</artifactId>
+		        </dependency>
+    		</dependencies>
+    	</profile>
+    </profiles>
+    
 </project>

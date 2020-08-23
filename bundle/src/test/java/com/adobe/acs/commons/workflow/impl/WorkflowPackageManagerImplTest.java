@@ -213,5 +213,12 @@ public final class WorkflowPackageManagerImplTest {
         public String getPath() {
             return WORKFLOW_PACKAGE_PATH;
         }
+
+        // required for cloudservice
+		//@Override
+		public boolean hasNode(String arg0) {
+			// TODO Auto-generated method stub
+			return false;
+		}
     };
 }

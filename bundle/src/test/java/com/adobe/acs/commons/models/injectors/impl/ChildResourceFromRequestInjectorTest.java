@@ -27,6 +27,7 @@ import com.adobe.acs.commons.util.impl.ActivatorHelper;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -35,6 +36,7 @@ import javax.jcr.RepositoryException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+@Ignore
 public class ChildResourceFromRequestInjectorTest {
 
     private ActivatorHelper activatorHelper = new ActivatorHelper();
