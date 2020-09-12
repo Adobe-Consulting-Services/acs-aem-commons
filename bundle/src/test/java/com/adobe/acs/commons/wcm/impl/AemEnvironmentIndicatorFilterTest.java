@@ -242,11 +242,12 @@ public class AemEnvironmentIndicatorFilterTest {
         String[] excludedWcmModes = {
             "edit"
         };
-    
         // WCMMode does not exist in array
         assertFalse(filter.isDisallowedWcmMode(WCMMode.DESIGN, excludedWcmModes));
         // WCMMode exists in array
         assertTrue(filter.isDisallowedWcmMode(WCMMode.EDIT, excludedWcmModes));
+        assertFalse(filter.isDisallowedWcmMode(WCMMode.EDIT, null));
+        assertTrue(filter.isDisallowedWcmMode(null, null));
     }
   
     @Test
