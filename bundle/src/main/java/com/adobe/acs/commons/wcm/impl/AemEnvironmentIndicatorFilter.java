@@ -189,7 +189,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         try (BufferedHttpServletResponse capturedResponse =
                 new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
-        	request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.TRUE);
+            request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.TRUE);
         	
             log.debug("Executing the rest of the filter chain");
             filterChain.doFilter(request, capturedResponse);
@@ -201,8 +201,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                             ? capturedResponse.getBufferedServletOutput().getBufferedString()
                             : null;
 
-            
-                            
             if (contents != null
                     && StringUtils.contains(response.getContentType(), "html")
                     && innerFilterAcceptsInjection(request)) {
@@ -232,7 +230,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
     
     boolean innerFilterAcceptsInjection (HttpServletRequest request) {
-    	return request.getAttribute(INJECT_INDICATOR_PARAMETER).equals(Boolean.TRUE);
+        return request.getAttribute(INJECT_INDICATOR_PARAMETER).equals(Boolean.TRUE);
     }
 
     void writeEnvironmentIndicator(String css, String innerHTML, String titlePrefix,
