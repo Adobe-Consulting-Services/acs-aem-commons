@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.wcm.api.WCMMode;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.engine.EngineConstants;
 import org.apache.sling.xss.XSSAPI;
@@ -53,6 +57,20 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/**
+ * 
+ * The Environment filter consists of 2 filters:
+ * * the environment filter, which is registered directly to the HTTP whiteboard, and which can cover
+ *   also non-Sling applications (like CRXDE and the OSGI webconsole)
+ * * a Sling filter, which is required for the filtering based on the WCM modes.
+ * 
+ * The environment indicator output is written by the "outer" filter, but its decision might be overwritten
+ * by the Sling Filter. The status is stored as a request attribute.
+ * 
+ *
+ */
+
 
 @Component(
         label = "ACS AEM Commons - AEM Environment Indicator",
@@ -390,8 +408,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     }
 
     WCMMode getWcmMode(HttpServletRequest request) {
-        return (WCMMode) request.getAttribute(
-                WCMMode.REQUEST_ATTRIBUTE_NAME);
+        return WCMMode.fromRequest(request);
     }
 
     /*
@@ -411,9 +428,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     
     
     private class InnerEnvironmentIndicatorFilter implements Filter {
-    	
+
     	String[] excludedWcmModes;
-    	
+
     	public InnerEnvironmentIndicatorFilter(String[] excludedWcmModes) {
 			this.excludedWcmModes = excludedWcmModes;
 		}
@@ -427,10 +444,15 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
+
+		    SlingHttpServletRequest req = (SlingHttpServletRequest) request;
 			
 			WCMMode mode = WCMMode.fromRequest(request);
 			if (isDisallowedWcmMode(mode, excludedWcmModes)) {
 				request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.FALSE);
+				String msg = String.format("reject inclusion of environment indicator, found wcmmode '%s' in exclusion list %s",
+				        mode.name(), ArrayUtils.toString(excludedWcmModes));
+				req.getRequestProgressTracker().log(msg);
 			}
 			chain.doFilter(request, response);
 		}
