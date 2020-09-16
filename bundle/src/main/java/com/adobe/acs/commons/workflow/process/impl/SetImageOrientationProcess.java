@@ -106,7 +106,8 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                         Resource metadataResource = getMetadataResource(assetResource);
                         Tag[] currentTags = tagManager.getTags(metadataResource);
                         Tag[] updatedTags = (Tag[]) ArrayUtils.add(currentTags, tagManager.resolve(tagId));
-                        tagManager.setTags(metadataResource, updatedTags);
+                        tagManager.setTags(metadataResource, updatedTags, true);
+                        log.debug("Orientation tag set");
                     }
                 }
 
