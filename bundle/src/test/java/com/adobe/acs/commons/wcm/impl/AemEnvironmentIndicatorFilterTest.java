@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -44,6 +46,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import com.day.cq.wcm.api.WCMMode;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.xss.XSSAPI;
 import org.junit.Before;
 import org.junit.Rule;
@@ -236,20 +239,7 @@ public class AemEnvironmentIndicatorFilterTest {
         // is /cf
         assertTrue(filter.hasAemEditorReferrer("/cf", "/does-not-matter"));
     }
-  
-    @Test
-    public void testIsDisallowedWcmMode() {
-        String[] excludedWcmModes = {
-            "edit"
-        };
-        // WCMMode does not exist in array
-        assertFalse(filter.isDisallowedWcmMode(WCMMode.DESIGN, excludedWcmModes));
-        // WCMMode exists in array
-        assertTrue(filter.isDisallowedWcmMode(WCMMode.EDIT, excludedWcmModes));
-        assertFalse(filter.isDisallowedWcmMode(WCMMode.EDIT, null));
-        assertTrue(filter.isDisallowedWcmMode(null, null));
-    }
-  
+
     @Test
     public void testActivate() {
         when(filter.shouldUseBaseCss(anyBoolean(), any(), any())).thenReturn(false);
@@ -319,4 +309,18 @@ public class AemEnvironmentIndicatorFilterTest {
         // "alwaysInclude is false, css not blank
         assertFalse(filter.shouldUseColorCss(false, "css", "color"));
     }
+
+    @Test
+    public void testInnerFilter() throws IOException, ServletException {
+        Filter innerFilter = new AemEnvironmentIndicatorFilter.InnerEnvironmentIndicatorFilter(
+                new String[] { "design" });
+        FilterChain mockChain = mock(FilterChain.class);
+        SlingHttpServletRequest req = spy(context.request());
+        doReturn(mock(RequestProgressTracker.class)).when(req).getRequestProgressTracker();
+        context.request().setAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME, WCMMode.valueOf("DESIGN"));
+        innerFilter.doFilter(req, context.response(), mockChain);
+        assertEquals(Boolean.FALSE, req.getAttribute(AemEnvironmentIndicatorFilter.INJECT_INDICATOR_PARAMETER));
+
+    }
+
 }
