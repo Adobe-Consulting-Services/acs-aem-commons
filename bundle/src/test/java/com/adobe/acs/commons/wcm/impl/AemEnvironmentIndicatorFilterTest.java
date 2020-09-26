@@ -171,37 +171,37 @@ public class AemEnvironmentIndicatorFilterTest {
   
     @Test
     public void testAcceptGetRequest() {
-    	context.registerInjectActivateService(filter,props); 
-    	assertTrue(filter.accepts(context.request()));
+        context.registerInjectActivateService(filter,props); 
+        assertTrue(filter.accepts(context.request()));
     }
     
     @Test
     public void testRejectPostRequests() {
-    	context.registerInjectActivateService(filter,props);
-    	context.request().setMethod("POST");
-    	assertFalse(filter.accepts(context.request()));
+        context.registerInjectActivateService(filter, props);
+        context.request().setMethod("POST");
+        assertFalse(filter.accepts(context.request()));
     }
     
     @Test
-    public void testRejectXHRRequests() {
-    	context.registerInjectActivateService(filter,props);
-    	context.request().setHeader("X-Requested-With", "XMLHttpRequest");
-    	assertFalse(filter.accepts(context.request()));
+    public void testRejectXhrRequests() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setHeader("X-Requested-With", "XMLHttpRequest");
+        assertFalse(filter.accepts(context.request()));
     }
     
     @Test
     public void testRejectEditorModeRequestClassic() {
-    	context.registerInjectActivateService(filter,props);
-    	context.request().setHeader("Referer", "/cf");
-    	assertFalse(filter.accepts(context.request()));
+        context.registerInjectActivateService(filter, props);
+        context.request().setHeader("Referer", "/cf");
+        assertFalse(filter.accepts(context.request()));
     }
     
     @Test
     public void testRejectEditorModeRequestTouch() {
-    	context.registerInjectActivateService(filter,props);
-    	context.request().setPathInfo("/content/we-retail.html");
-    	context.request().setHeader("Referer", "/editor.html/content/we-retail.html");
-    	assertFalse(filter.accepts(context.request()));
+        context.registerInjectActivateService(filter, props);
+        context.request().setPathInfo("/content/we-retail.html");
+        context.request().setHeader("Referer", "/editor.html/content/we-retail.html");
+        assertFalse(filter.accepts(context.request()));
     }
     
   

@@ -208,7 +208,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
             request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.TRUE);
-        	
+
             log.debug("Executing the rest of the filter chain");
             filterChain.doFilter(request, capturedResponse);
             log.debug("Executing the rest of the filter chain");
@@ -247,7 +247,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         }
     }
     
-    boolean innerFilterAcceptsInjection (HttpServletRequest request) {
+    boolean innerFilterAcceptsInjection(HttpServletRequest request) {
         return request.getAttribute(INJECT_INDICATOR_PARAMETER).equals(Boolean.TRUE);
     }
 
