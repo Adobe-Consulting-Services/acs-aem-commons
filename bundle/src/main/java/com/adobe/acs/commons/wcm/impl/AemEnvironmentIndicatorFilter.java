@@ -396,8 +396,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterRegistration = null;
         }
         if (innerFilterRegistration != null) {
-        	innerFilterRegistration.unregister();
-        	innerFilterRegistration = null;
+            innerFilterRegistration.unregister();
+            innerFilterRegistration = null;
         }
 
         // Reset CSS variable
@@ -423,36 +423,37 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
     	String[] excludedWcmModes;
 
-    	public InnerEnvironmentIndicatorFilter(String[] excludedWcmModes) {
-			this.excludedWcmModes = excludedWcmModes;
-		}
+        public InnerEnvironmentIndicatorFilter(String[] excludedWcmModes) {
+            this.excludedWcmModes = excludedWcmModes;
+        }
 
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			// ignore
-			
-		}
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+            // ignore
 
-		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+        }
 
-		    SlingHttpServletRequest req = (SlingHttpServletRequest) request;
-			
-			WCMMode mode = WCMMode.fromRequest(request);
-			if (isDisallowedWcmMode(mode, excludedWcmModes)) {
-				request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.FALSE);
-				String msg = String.format("reject inclusion of environment indicator, found wcmmode '%s' in exclusion list %s",
-				        mode.name(), ArrayUtils.toString(excludedWcmModes));
-				req.getRequestProgressTracker().log(msg);
-			}
-			chain.doFilter(request, response);
-		}
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
 
-		@Override
-		public void destroy() {
-			// ignore
-		}
+            SlingHttpServletRequest req = (SlingHttpServletRequest) request;
+
+            WCMMode mode = WCMMode.fromRequest(request);
+            if (isDisallowedWcmMode(mode, excludedWcmModes)) {
+                request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.FALSE);
+                String msg = String.format(
+                        "reject inclusion of environment indicator, found wcmmode '%s' in exclusion list %s",
+                        mode.name(), ArrayUtils.toString(excludedWcmModes));
+                req.getRequestProgressTracker().log(msg);
+            }
+            chain.doFilter(request, response);
+        }
+
+        @Override
+        public void destroy() {
+            // ignore
+        }
     	
     }
     
