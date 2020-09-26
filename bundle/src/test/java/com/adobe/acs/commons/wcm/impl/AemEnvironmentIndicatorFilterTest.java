@@ -170,33 +170,40 @@ public class AemEnvironmentIndicatorFilterTest {
     }
   
     @Test
-    public void testAccept() {
-        AemEnvironmentIndicatorFilter filter = mock(AemEnvironmentIndicatorFilter.class);
-        // remember to call the real .accepts() method
-        when(filter.accepts(any())).thenCallRealMethod();
-    
-        when(filter.isImproperlyConfigured(any(), any()))
-            .thenReturn(true, false);
-        when(filter.isUnsupportedRequestMethod(any()))
-            .thenReturn(true, false);
-        when(filter.isXhr(any()))
-            .thenReturn(true, false);
-        when(filter.hasAemEditorReferrer(any(), any()))
-            .thenReturn(true, false);
-    
-        SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
-    
-        // isImproperlyConfigured returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isUnsupportedRequestMethod returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isAnXhrRequest returns true
-        assertFalse(filter.accepts(mockRequest));
-        // hasAemEditorReferrer returns true
-        assertFalse(filter.accepts(mockRequest));
-        // all checks return false
-        assertTrue(filter.accepts(mockRequest));
+    public void testAcceptGetRequest() {
+    	context.registerInjectActivateService(filter,props); 
+    	assertTrue(filter.accepts(context.request()));
     }
+    
+    @Test
+    public void testRejectPostRequests() {
+    	context.registerInjectActivateService(filter,props);
+    	context.request().setMethod("POST");
+    	assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectXHRRequests() {
+    	context.registerInjectActivateService(filter,props);
+    	context.request().setHeader("X-Requested-With", "XMLHttpRequest");
+    	assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectEditorModeRequestClassic() {
+    	context.registerInjectActivateService(filter,props);
+    	context.request().setHeader("Referer", "/cf");
+    	assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectEditorModeRequestTouch() {
+    	context.registerInjectActivateService(filter,props);
+    	context.request().setPathInfo("/content/we-retail.html");
+    	context.request().setHeader("Referer", "/editor.html/content/we-retail.html");
+    	assertFalse(filter.accepts(context.request()));
+    }
+    
   
     @Test
     public void testIsImproperlyConfigured() {
