@@ -135,6 +135,9 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:felix.webconsole.title");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:service.vendor");
 
+        // https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2382
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl:sling.filter.resourceTypes");
+
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");
