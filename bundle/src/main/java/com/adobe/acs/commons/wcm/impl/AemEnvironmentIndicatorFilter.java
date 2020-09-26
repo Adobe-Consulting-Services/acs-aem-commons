@@ -421,7 +421,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     
     private class InnerEnvironmentIndicatorFilter implements Filter {
 
-    	String[] excludedWcmModes;
+        String[] excludedWcmModes;
 
         public InnerEnvironmentIndicatorFilter(String[] excludedWcmModes) {
             this.excludedWcmModes = excludedWcmModes;
