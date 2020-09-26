@@ -119,11 +119,8 @@ public class AemEnvironmentIndicatorFilterTest {
     
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
-        // assertThat(response).startsWith(
-        // "<html><body>somebody<style>#acs-commons-env-indicator");
         assertTrue(startsWith("<html><body>somebody<style>#acs-commons-env-indicator")
             .matches(response));
-        // assertThat(response).contains("background-color:blue");
         assertTrue(containsString("background-color:blue").matches(response));
     }
   
@@ -186,8 +183,6 @@ public class AemEnvironmentIndicatorFilterTest {
             .thenReturn(true, false);
         when(filter.hasAemEditorReferrer(any(), any()))
             .thenReturn(true, false);
-        when(filter.isDisallowedWcmMode(any(), any()))
-            .thenReturn(true, false);
     
         SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
     
@@ -198,8 +193,6 @@ public class AemEnvironmentIndicatorFilterTest {
         // isAnXhrRequest returns true
         assertFalse(filter.accepts(mockRequest));
         // hasAemEditorReferrer returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isDisallowedWcmMode returns true
         assertFalse(filter.accepts(mockRequest));
         // all checks return false
         assertTrue(filter.accepts(mockRequest));

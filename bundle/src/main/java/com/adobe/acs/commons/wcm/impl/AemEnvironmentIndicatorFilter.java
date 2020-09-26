@@ -285,11 +285,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         } else if (hasAemEditorReferrer(request.getHeader("Referer"), request.getRequestURI())) {
             log.debug("Request was for a page in an editor");
             return false;
-        } else if (isDisallowedWcmMode(getWcmMode(request), excludedWCMModes)) {
-            log.debug("WCMMode was a disallowed mode");
-            return false;
         }
-
+        // Checking for WcmMode does not make sense, it is not available here
         log.debug("All checks pass, filter can execute");
         return true;
     }
@@ -362,9 +359,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     this, filterProps);
             
             // Register the innerFilter so it is invoked after the WcmRequestFilter (Ranking = 2000)
-            Dictionary<String, String> innerFilterProps = new Hashtable<String, String>();
+            Dictionary<String, Object> innerFilterProps = new Hashtable<>();
             innerFilterProps.put(EngineConstants.SLING_FILTER_SCOPE,EngineConstants.FILTER_SCOPE_REQUEST);
-            innerFilterProps.put(Constants.SERVICE_RANKING, "1000");
+            innerFilterProps.put(Constants.SERVICE_RANKING, 1000);
             Filter innerFilter = new InnerEnvironmentIndicatorFilter(excludedWCMModes);
             innerFilterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), innerFilter, innerFilterProps);
         }
@@ -421,11 +418,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     String getTitlePrefix() {
         return titlePrefix;
     }
-
-    String[] getExcludedWCMModes() {
-        return excludedWCMModes;
-    }
-    
     
     private class InnerEnvironmentIndicatorFilter implements Filter {
 
