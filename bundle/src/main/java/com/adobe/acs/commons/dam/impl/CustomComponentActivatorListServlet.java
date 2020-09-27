@@ -31,7 +31,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
