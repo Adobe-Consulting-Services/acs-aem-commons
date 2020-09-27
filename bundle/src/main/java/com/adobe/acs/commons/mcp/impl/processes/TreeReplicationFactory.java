@@ -21,34 +21,31 @@ package com.adobe.acs.commons.mcp.impl.processes;
 
 import com.adobe.acs.commons.mcp.ProcessDefinitionFactory;
 import com.adobe.acs.commons.util.RequireAem;
-import com.day.cq.contentsync.handler.util.RequestResponseFactory;
+import com.day.cq.replication.Replicator;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.sling.engine.SlingRequestProcessor;
+import org.apache.felix.scr.annotations.Service;
 
 @Component
 @Service(ProcessDefinitionFactory.class)
-public class RefreshFolderThumbnailsFactory extends ProcessDefinitionFactory<RefreshFolderTumbnails> {
+public class TreeReplicationFactory extends ProcessDefinitionFactory<TreeReplication> {
 
     // Disable this feature on AEM as a Cloud Service
     @Reference(target="(distribution=classic)")
     RequireAem requireAem;
 
     @Reference
-    private SlingRequestProcessor slingProcessor;
-    
-    @Reference
-    RequestResponseFactory reqRspFactory;
-    
+    Replicator replicator;
+
+
     @Override
     public String getName() {
-        return "Refresh asset folder thumbnails";
+        return "Tree Activation";
     }
 
     @Override
-    protected RefreshFolderTumbnails createProcessDefinitionInstance() {
-        return new RefreshFolderTumbnails(reqRspFactory, slingProcessor);
+    protected TreeReplication createProcessDefinitionInstance() {
+        return new TreeReplication(replicator);
     }
-    
+
 }
