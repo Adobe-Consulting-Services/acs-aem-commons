@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2373 - Cleanup warnings in the unit tests
 - #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
 - #2411 - Robots.txt servlet should better support multi-tenancy
+- #2414 - Sitemap.xml servlet should better support multi-tenancy
 
 ## 4.8.4 - 2020-07-23
 
