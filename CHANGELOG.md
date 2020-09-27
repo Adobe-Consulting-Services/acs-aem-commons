@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
+- #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
+
 
 ### Added
 
