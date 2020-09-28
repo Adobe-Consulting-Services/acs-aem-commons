@@ -27,12 +27,15 @@ import com.adobe.acs.commons.mcp.form.CheckboxComponent;
 import com.adobe.acs.commons.mcp.form.FormField;
 import com.adobe.acs.commons.mcp.form.PathfieldComponent;
 import com.adobe.acs.commons.mcp.form.SelectComponent;
+import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -88,6 +91,13 @@ public class TreeReplication extends ProcessDefinition {
     )
     private ReplicationFilter publishFilter = ReplicationFilter.FOLDERS_ONLY;
 
+    @FormField(name = "Agents",
+            component = TextfieldComponent.class,
+            description = "Publish agents to use, if blank then all default agents will be used. Multiple agents can be listed using commas or regex.")
+    private String agents = null;
+    List<String> agentList = new ArrayList<>();
+    AgentFilter replicationAgentFilter;
+
     @FormField(name = "Queueing Method",
             component = SelectComponent.EnumerationSelector.class,
             description = "For small publishing tasks, standard is sufficient.  For large folder trees, MCP is recommended.",
@@ -119,6 +129,12 @@ public class TreeReplication extends ProcessDefinition {
         instance.defineCriticalAction("Activate tree structure", rr, this::activateTreeStructure);
         if (publishFilter != ReplicationFilter.FOLDERS_ONLY) {
             instance.defineAction("Activiate content", rr, this::activateContent);
+        }
+        if (agents == null || agents.isEmpty()) {
+            replicationAgentFilter = AgentFilter.DEFAULT;
+        } else {
+            agentList = Arrays.asList(agents.toLowerCase().split(","));
+            replicationAgentFilter = agent -> agentList.stream().anyMatch(p -> p.matches(agent.getId().toLowerCase()));
         }
     }
 
@@ -191,6 +207,7 @@ public class TreeReplication extends ProcessDefinition {
     private void performSynchronousReplication(ActionManager t, String path) {
         ReplicationOptions options = new ReplicationOptions();
         options.setSynchronous(true);
+        options.setFilter(replicationAgentFilter);
         scheduleReplication(t, options, path);
         record(path, "Replicate", "Synchronous replication");
     }
@@ -198,6 +215,7 @@ public class TreeReplication extends ProcessDefinition {
     private void performAsynchronousReplication(ActionManager t, String path) {
         ReplicationOptions options = new ReplicationOptions();
         options.setSynchronous(false);
+        options.setFilter(replicationAgentFilter);
         scheduleReplication(t, options, path);
         record(path, "Replicate", "Asynchronous replication");
     }
