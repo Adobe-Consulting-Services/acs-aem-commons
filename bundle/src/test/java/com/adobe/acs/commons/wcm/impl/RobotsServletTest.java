@@ -20,8 +20,13 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.PageManagerFactory;
+
+import io.wcm.testing.mock.aem.MockPageManagerFactory;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -68,6 +73,9 @@ public class RobotsServletTest {
         context.load().json(getClass().getResourceAsStream("RobotsServlet.json"), "/content/geometrixx");
 
         context.registerService(Externalizer.class, externalizer);
+        // as upgrade to AEM Mocks 3.0+ is blocked by https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2260
+        // inject own PageManagerFactory (similar to https://github.com/wcm-io/wcm-io-testing/blob/develop/aem-mock/core/src/main/java/io/wcm/testing/mock/aem/MockPageManagerFactory.java)
+        context.registerService(PageManagerFactory.class, new MockPageManagerFactory());
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en/jcr:content"));
 
 
