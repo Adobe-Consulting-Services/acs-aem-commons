@@ -91,18 +91,19 @@ public class TreeReplication extends ProcessDefinition {
     )
     private ReplicationFilter publishFilter = ReplicationFilter.FOLDERS_ONLY;
 
-    @FormField(name = "Agents",
-            component = TextfieldComponent.class,
-            description = "Publish agents to use, if blank then all default agents will be used. Multiple agents can be listed using commas or regex.")
-    private String agents = null;
-    List<String> agentList = new ArrayList<>();
-    AgentFilter replicationAgentFilter;
-
     @FormField(name = "Queueing Method",
             component = SelectComponent.EnumerationSelector.class,
             description = "For small publishing tasks, standard is sufficient.  For large folder trees, MCP is recommended.",
             options = "default=USE_MCP_QUEUE")
     QueueMethod queueMethod = QueueMethod.USE_MCP_QUEUE;
+
+    @FormField(name = "Agents",
+            component = TextfieldComponent.class,
+            hint = "(leave blank for default agents)",
+            description = "Publish agents to use, if blank then all default agents will be used. Multiple agents can be listed using commas or regex.")
+    private String agents = null;
+    List<String> agentList = new ArrayList<>();
+    AgentFilter replicationAgentFilter;
 
     @FormField(name = "Dry Run",
             component = CheckboxComponent.class,
@@ -162,7 +163,7 @@ public class TreeReplication extends ProcessDefinition {
 
     // Should match nt:folder, sling:OrderedFolder, sling:UnorderedFolder, etc
     public static Boolean isFolder(Resource res) {
-        String primaryType = String.valueOf(res.getResourceMetadata().get("jcr:primaryType"));
+        String primaryType = String.valueOf(res.getResourceType());
         return (primaryType.toLowerCase().contains("folder"));
     }
 
@@ -171,7 +172,7 @@ public class TreeReplication extends ProcessDefinition {
         visitor.setResourceVisitorChecked((resource, u) -> {
             String path = resource.getPath();
             if (publishFilter.shouldReplicate(resource)) {
-                t.deferredWithResolver(rr -> performReplication(t, path));
+                t.withResolver(rr -> performReplication(t, path));
             } else {
                 record(path, "Skip", "Skipping folder");
             }
