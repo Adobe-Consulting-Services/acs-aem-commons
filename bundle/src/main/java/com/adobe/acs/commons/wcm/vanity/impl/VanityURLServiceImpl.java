@@ -52,7 +52,7 @@ public class VanityURLServiceImpl implements VanityURLService {
             policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private VanityUrlAdjuster vanityUrlAdjuster;
+    private volatile VanityUrlAdjuster vanityUrlAdjuster;
 
     public boolean dispatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException, RepositoryException {
         if (request.getAttribute(VANITY_DISPATCH_CHECK_ATTR) != null) {
