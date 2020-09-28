@@ -30,3 +30,4 @@ bundle/mockserver.log
 
 #VS Code
 .vscode
+.history
