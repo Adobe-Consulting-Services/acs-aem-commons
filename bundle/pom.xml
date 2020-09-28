@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.8.5-SNAPSHOT</version>
+        <version>4.9.0-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -15,92 +15,103 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-bundle</artifactId>
-    <packaging>bundle</packaging>
     <name>ACS AEM Commons Bundle</name>
-    <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
+    <description>Core ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
     <!-- ====================================================================== -->
     <!-- B U I L D D E F I N I T I O N -->
     <!-- ====================================================================== -->
     <build>
-
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>sling-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>generate-scr-metadata-for-unittests</id>
+                        <id>bnd-process</id>
                         <goals>
-                            <goal>manifest</goal>
+                            <goal>bnd-process</goal>
                         </goals>
-                        <phase>process-classes</phase>
                         <configuration>
-                            <exportScr>true</exportScr>
-                            <instructions>
-                                <_dsannotations>*</_dsannotations>
-                                <_metatypeannotations>*</_metatypeannotations>
-                            </instructions>
+                            <bnd><![CDATA[
+Bundle-Name: ACS AEM Commons - Core
+Bundle-Activator: com.adobe.acs.commons.util.impl.Activator
+Bundle-SymbolicName: com.adobe.acs.acs-aem-commons-bundle
+Bundle-Category: asset-share-commons
+Import-Package: com.adobe.cq.dialogconversion;resolution:=optional,
+                com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 Ingestor --> \
+                com.github.jknack.handlebars;resolution:=optional, <!-- only required for Report Builder --> \
+                com.day.cq.replication;version="[6.4,7)", <!-- using a wider version range for forward compatibility --> \
+                org.apache.poi.ss.usermodel;version="[3.0,6)",  <!-- using a wider version range for forward compatibility --> \
+                org.apache.poi.ss.util;version="[3.0,6)", \
+                org.apache.poi.xssf.usermodel;version="[2.0,6)", \
+                twitter4j*;version="[3.0.5,4)";resolution:=optional, \
+                org.apache.sling.xss;version="[1.1,3)", <!-- using a wider version range for forward compatibility --> \
+                com.github.benmanes.caffeine*;resolution:=optional, \
+                com.fasterxml.jackson.core;version="[2.8,3)";resolution:=optional, \
+                com.fasterxml.jackson.databind;version="[2.8,3)";resolution:=optional, \
+                <!-- wider version range: use 2.1 as AEM 6.4 still uses it, 2.2 is for AEM 6.5 --> \
+                <!-- required for jwt library used by Adobe I/O APIs --> \
+                javax.xml.bind;version="[2.1,3)", \
+                <!-- this explicit import can be removed when we no longer support \
+                a version of AEM that supports java versions before 11 --> \
+                javax.annotation;version=0.0.0, \
+                !com.google.errorprone.annotations, \
+                !com.google.errorprone.annotations.concurrent, \
+                !org.bouncycastle.jce.*, \
+                !org.checkerframework.checker.nullness.qual, \
+                !android.util.*, \
+                <!-- shaded libraries --> \
+                !com.google.common.*, \
+                !com.google.thirdparty.*, \
+                !com.jcraft.*, \
+                !io.jsonwebtoken.*, \
+                *
+-exportcontents: ${packages;VERSIONED}
+-snapshot: ${tstamp;yyyyMMddHHmmssSSS}
+Bundle-DocURL:
+-plugin org.apache.sling.caconfig.bndplugin.ConfigurationClassScannerPlugin
+-plugin org.apache.sling.bnd.models.ModelsScannerPlugin
+                                ]]></bnd>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <supportIncrementalBuild>true</supportIncrementalBuild>
-                    <exportScr>true</exportScr>
-                    <instructions>
-                        <Bundle-Activator>com.adobe.acs.commons.util.impl.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>com.adobe.acs.acs-aem-commons-bundle</Bundle-SymbolicName>
-                        <Import-Package>
-                            com.adobe.cq.dialogconversion;resolution:=optional,
-                            com.amazonaws.*;resolution:=optional, <!-- only required for MCP S3 
-								Ingestor -->
-                            com.github.jknack.handlebars;resolution:=optional, <!-- only required 
-								for Report Builder -->
-                            com.day.cq.replication;version="[6.4,7)", <!-- using a wider version 
-								range for forward compatibility -->
-                            org.apache.poi.ss.usermodel;version="[3.0,6)",  <!-- using a wider version 
-								range for forward compatibility -->
-                            org.apache.poi.ss.util;version="[3.0,6)",
-                            org.apache.poi.xssf.usermodel;version="[2.0,6)",
-                            twitter4j*;version="[3.0.5,4)";resolution:=optional,
-                            org.apache.sling.xss;version="[1.1,3)", <!-- using a wider version 
-								range for forward compatibility -->
-                            com.github.benmanes.caffeine*;resolution:=optional,
-                            com.fasterxml.jackson.core;version="[2.8,3)";resolution:=optional,
-                            com.fasterxml.jackson.databind;version="[2.8,3)";resolution:=optional,
-                            <!-- wider version range: use 2.1 as AEM 6.4 still uses it, 2.2 is for AEM 6.5 -->
-                            <!-- required for jwt library used by Adobe I/O APIs -->
-                            javax.xml.bind;version="[2.1,3)",
-                            <!-- this explicit import can be removed when we no longer support 
-                            a version of AEM that supports java versions before 11 -->
-                            javax.annotation;version=0.0.0,
-                            !com.google.errorprone.annotations,
-                            !com.google.errorprone.annotations.concurrent,
-                            !org.bouncycastle.jce.*,
-                            !org.checkerframework.checker.nullness.qual,
-                            !android.util.*,
-                            <!-- shaded libraries -->
-                            !com.google.common.*,
-                            !com.google.thirdparty.*,
-                            !com.jcraft.*,
-                            !io.jsonwebtoken.*,
-                            *
-                        </Import-Package>
-                        <Sling-Model-Packages>
-                            com.adobe.acs.commons.cloudconfig,
-                            com.adobe.acs.commons.marketo,
-                            com.adobe.acs.commons.redirectmaps.models,
-                            com.adobe.acs.commons.version.model,
-                            com.adobe.acs.commons.wcm.comparisons.model,
-                            com.adobe.acs.commons.workflow.bulk.execution.model,
-                            com.adobe.acs.commons.mcp.model,
-                            com.adobe.acs.commons.reports.models,
-                            com.adobe.acs.commons.indesign.dynamicdeckdynamo.models
-                        </Sling-Model-Packages>
-                    </instructions>
-                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.sling</groupId>
+                        <artifactId>org.apache.sling.caconfig.bnd-plugin</artifactId>
+                        <version>1.0.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.sling</groupId>
+                        <artifactId>org.apache.sling.bnd.models</artifactId>
+                        <version>1.0.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
+                <version>${bnd.version}</version>
+                <configuration>
+                    <failOnMissing>false</failOnMissing>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>baseline</id>
+                        <goals>
+                            <goal>baseline</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
             <!-- This bit of ugliness is because both the OSGi standard annotation 
             process (in the bundle plugin) and the legacy SCR process (in the scr plugin) 
             both blow away the current target/classes/OSGI-INF directory. So what happens 
@@ -362,6 +373,15 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -400,7 +420,6 @@
             <artifactId>hamcrest-all</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -768,8 +787,6 @@
             <version>4.0.6</version>
             <scope>provided</scope>
         </dependency>
-
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
@@ -811,6 +828,8 @@
     	<profile>
     		<id>classic</id>
     		<activation>
+                <!-- Keep in sync with reactor pom.xml -->
+                <activeByDefault>true</activeByDefault>
     			<property>
     				<name>profile</name>
     				<value>classic</value>
