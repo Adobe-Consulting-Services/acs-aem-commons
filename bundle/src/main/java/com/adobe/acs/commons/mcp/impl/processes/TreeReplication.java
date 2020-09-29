@@ -89,7 +89,7 @@ public class TreeReplication extends ProcessDefinition {
     @FormField(name = "Starting Path",
             component = PathfieldComponent.FolderSelectComponent.class,
             description = "This item and its descendants will be published/unpublished")
-    private String startingPath = "/content/dam";
+    private String startingPath = null;
 
     @FormField(name = "What to Publish",
             component = SelectComponent.EnumerationSelector.class,
