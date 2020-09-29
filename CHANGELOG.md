@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 
 ### Added
+- #1060 - New tree activation MCP utility
 
 ### Changed
 
