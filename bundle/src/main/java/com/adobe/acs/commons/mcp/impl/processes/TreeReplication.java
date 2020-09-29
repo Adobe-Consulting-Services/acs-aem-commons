@@ -30,10 +30,12 @@ import com.adobe.acs.commons.mcp.form.SelectComponent;
 import com.adobe.acs.commons.mcp.form.TextfieldComponent;
 import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.replication.AgentFilter;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationOptions;
 import com.day.cq.replication.Replicator;
+import com.day.cq.wcm.api.NameConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,6 +48,7 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 
 /**
  * Replace folder thumbnails under a user-definable set of circumstances As a
@@ -56,7 +59,7 @@ public class TreeReplication extends ProcessDefinition {
 
     protected static enum ReplicationFilter {
         ALL(r -> true),
-        FOLDERS_ONLY(TreeReplication::isFolder);
+        FOLDERS_AND_PAGES_ONLY(TreeReplication::isFolderOrPage);
 
         CheckedFunction<Resource, Boolean> test;
 
@@ -75,21 +78,25 @@ public class TreeReplication extends ProcessDefinition {
         USE_PUBLISH_QUEUE, USE_MCP_QUEUE, MCP_AFTER_10K
     }
 
+    protected static enum ReplicationAction {
+        PUBLISH, UNPUBLISH
+    }
+
     public static int ASYNC_LIMIT = 10000;
 
-    private Replicator replicatorService;
+    Replicator replicatorService;
 
     @FormField(name = "Starting Path",
             component = PathfieldComponent.FolderSelectComponent.class,
-            description = "This folder and all its subfolders will be published")
+            description = "This item and its descendants will be published/unpublished")
     private String startingPath = "/content/dam";
 
     @FormField(name = "What to Publish",
             component = SelectComponent.EnumerationSelector.class,
-            description = "Publish only folders or all content inside of folders",
-            options = "default=FOLDERS_ONLY"
+            description = "Publish only folders/pages or all content inside of folders (assets, etc) -- Unpublish will unpublish everything",
+            options = "default=FOLDERS_AND_PAGES_ONLY"
     )
-    private ReplicationFilter publishFilter = ReplicationFilter.FOLDERS_ONLY;
+    private ReplicationFilter publishFilter = ReplicationFilter.FOLDERS_AND_PAGES_ONLY;
 
     @FormField(name = "Queueing Method",
             component = SelectComponent.EnumerationSelector.class,
@@ -104,6 +111,12 @@ public class TreeReplication extends ProcessDefinition {
     private String agents = null;
     List<String> agentList = new ArrayList<>();
     AgentFilter replicationAgentFilter;
+
+    @FormField(name = "Action",
+            component = SelectComponent.EnumerationSelector.class,
+            description = "Publish or Unpublish?",
+            options = "default=PUBLISH")
+    ReplicationAction action = ReplicationAction.PUBLISH;
 
     @FormField(name = "Dry Run",
             component = CheckboxComponent.class,
@@ -124,18 +137,23 @@ public class TreeReplication extends ProcessDefinition {
     @Override
     public void buildProcess(ProcessInstance instance, ResourceResolver rr) throws LoginException, RepositoryException {
         instance.getInfo().setDescription(startingPath + "; "
+                + action.name() + " "
                 + publishFilter.name() + "; "
                 + queueMethod.name()
                 + (dryRun ? " (dry run)" : ""));
-        instance.defineCriticalAction("Activate tree structure", rr, this::activateTreeStructure);
-        if (publishFilter != ReplicationFilter.FOLDERS_ONLY) {
-            instance.defineAction("Activiate content", rr, this::activateContent);
-        }
-        if (agents == null || agents.isEmpty()) {
-            replicationAgentFilter = AgentFilter.DEFAULT;
+        if (action == ReplicationAction.PUBLISH) {
+            instance.defineCriticalAction("Activate tree structure", rr, this::activateTreeStructure);
+            if (publishFilter != ReplicationFilter.FOLDERS_AND_PAGES_ONLY) {
+                instance.defineAction("Activiate content", rr, this::activateContent);
+            }
+            if (agents == null || agents.isEmpty()) {
+                replicationAgentFilter = AgentFilter.DEFAULT;
+            } else {
+                agentList = Arrays.asList(agents.toLowerCase().split(","));
+                replicationAgentFilter = agent -> agentList.stream().anyMatch(p -> p.matches(agent.getId().toLowerCase()));
+            }
         } else {
-            agentList = Arrays.asList(agents.toLowerCase().split(","));
-            replicationAgentFilter = agent -> agentList.stream().anyMatch(p -> p.matches(agent.getId().toLowerCase()));
+            instance.defineCriticalAction("Deactivate tree structure", rr, this::deactivateTreeStructure);
         }
     }
 
@@ -162,13 +180,13 @@ public class TreeReplication extends ProcessDefinition {
     }
 
     // Should match nt:folder, sling:OrderedFolder, sling:UnorderedFolder, etc
-    public static Boolean isFolder(Resource res) {
-        String primaryType = String.valueOf(res.getResourceType());
-        return (primaryType.toLowerCase().contains("folder"));
+    public static Boolean isFolderOrPage(Resource res) {
+        String primaryType = String.valueOf(res.getResourceType()).toLowerCase();
+        return (primaryType.contains("folder") || primaryType.equalsIgnoreCase(NameConstants.NT_PAGE));
     }
 
     private void activateTreeStructure(ActionManager t) {
-        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
+        TreeFilteringResourceVisitor visitor = createFolderPageVisitor();
         visitor.setResourceVisitorChecked((resource, u) -> {
             String path = resource.getPath();
             if (publishFilter.shouldReplicate(resource)) {
@@ -180,8 +198,14 @@ public class TreeReplication extends ProcessDefinition {
         t.deferredWithResolver(rr -> visitor.accept(rr.getResource(startingPath)));
     }
 
+    private void deactivateTreeStructure(ActionManager t) {
+        t.deferredWithResolver(rr -> {
+            performAsynchronousReplication(t, startingPath);
+        });
+    }
+
     private void activateContent(ActionManager t) {
-        TreeFilteringResourceVisitor visitor = new TreeFilteringResourceVisitor();
+        TreeFilteringResourceVisitor visitor = createFolderPageVisitor();
         visitor.setLeafVisitorChecked((resource, u) -> {
             String path = resource.getPath();
             if (publishFilter.shouldReplicate(resource)) {
@@ -206,27 +230,43 @@ public class TreeReplication extends ProcessDefinition {
     }
 
     private void performSynchronousReplication(ActionManager t, String path) {
-        ReplicationOptions options = new ReplicationOptions();
+        ReplicationOptions options = buildOptions();
         options.setSynchronous(true);
-        options.setFilter(replicationAgentFilter);
         scheduleReplication(t, options, path);
-        record(path, "Replicate", "Synchronous replication");
+        record(path, action == ReplicationAction.PUBLISH ? "Publish" : "Unpublish", "Synchronous replication");
     }
 
     private void performAsynchronousReplication(ActionManager t, String path) {
-        ReplicationOptions options = new ReplicationOptions();
+        ReplicationOptions options = buildOptions();
         options.setSynchronous(false);
-        options.setFilter(replicationAgentFilter);
         scheduleReplication(t, options, path);
-        record(path, "Replicate", "Asynchronous replication");
+        record(path, action == ReplicationAction.PUBLISH ? "Publish" : "Unpublish", "Asynchronous replication");
+    }
+
+    private ReplicationOptions buildOptions() {
+        ReplicationOptions options = new ReplicationOptions();
+        options.setFilter(replicationAgentFilter);
+        return options;
     }
 
     private void scheduleReplication(ActionManager t, ReplicationOptions options, String path) {
         if (!dryRun) {
             t.deferredWithResolver(rr -> {
                 Session session = rr.adaptTo(Session.class);
-                replicatorService.replicate(session, ReplicationActionType.ACTIVATE, path, options);
+                replicatorService.replicate(session, action == ReplicationAction.PUBLISH ? ReplicationActionType.ACTIVATE : ReplicationActionType.DEACTIVATE, path, options);
             });
         }
     }
+
+    static final String[] FOLDERS_AND_PAGES = {
+        JcrConstants.NT_FOLDER,
+        JcrResourceConstants.NT_SLING_FOLDER,
+        JcrResourceConstants.NT_SLING_ORDERED_FOLDER,
+        NameConstants.NT_PAGE
+    };
+
+    static TreeFilteringResourceVisitor createFolderPageVisitor() {
+        return new TreeFilteringResourceVisitor(FOLDERS_AND_PAGES);
+    }
+
 }
