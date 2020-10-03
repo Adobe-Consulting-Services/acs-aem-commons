@@ -564,7 +564,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-osgi</artifactId>
-            <version>1.10.76</version>
+            <version>1.11.875</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
