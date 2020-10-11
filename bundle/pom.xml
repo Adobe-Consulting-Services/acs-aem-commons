@@ -177,23 +177,14 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>sling-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>install-bundle</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>install</goal>
-                        </goals>
-                        <configuration>
-                            <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
-                            <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-                            <deploymentMethod>SlingPostServlet</deploymentMethod>
-                            <user>${crx.user}</user>
-                            <password>${crx.password}</password>
-                            <failOnError>true</failOnError>
-                        </configuration>
-                    </execution>
-                </executions>
+		<configuration>
+		    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+		    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+		    <deploymentMethod>SlingPostServlet</deploymentMethod>
+		    <user>${crx.user}</user>
+		    <password>${crx.password}</password>
+		    <failOnError>true</failOnError>
+		</configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
