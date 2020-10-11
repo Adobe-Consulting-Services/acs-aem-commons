@@ -253,7 +253,8 @@
                                     <includes>
                                         <include>com.google.guava:guava</include>
                                         <include>com.google.guava:failureaccess</include>
-                                        <include>io.jsonwebtoken:jjwt</include>
+                                        <include>io.jsonwebtoken:jjwt-api</include>
+                                        <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
                                     </includes>
@@ -282,7 +283,8 @@
                                     <include>com.google.guava:failureaccess</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
-                                    <include>io.jsonwebtoken:jjwt</include>
+                                    <include>io.jsonwebtoken:jjwt-api</include>
+                                    <include>io.jsonwebtoken:jjwt-impl</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -329,7 +331,13 @@
                                     </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>io.jsonwebtoken:jjwt</artifact>
+                                    <artifact>io.jsonwebtoken:jjwt-api</artifact>
+                                    <includes>
+                                        <include>io/jsonwebtoken/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>io.jsonwebtoken:jjwt-impl</artifact>
                                     <includes>
                                         <include>io/jsonwebtoken/**</include>
                                     </includes>
@@ -772,7 +780,12 @@
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
+            <artifactId>jjwt-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
