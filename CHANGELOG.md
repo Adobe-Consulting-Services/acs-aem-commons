@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
+- #2432 - AemEnvironmentFilter: use chunked encoding (fixes #2425)
 
 ### Added
 
