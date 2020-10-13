@@ -176,12 +176,15 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>maven-sling-plugin</artifactId>
-                <configuration>
-                    <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/repository/crx.default</slingUrl>
-                    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-                    <deploymentMethod>WebDAV</deploymentMethod>
-                </configuration>
+                <artifactId>sling-maven-plugin</artifactId>
+		<configuration>
+		    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+		    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+		    <deploymentMethod>SlingPostServlet</deploymentMethod>
+		    <user>${crx.user}</user>
+		    <password>${crx.password}</password>
+		    <failOnError>true</failOnError>
+		</configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
