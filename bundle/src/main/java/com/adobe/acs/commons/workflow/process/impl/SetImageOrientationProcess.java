@@ -76,6 +76,11 @@ public class SetImageOrientationProcess implements WorkflowProcess {
             "<0.9 properties:orientation/portrait\r\n" +
             "default properties:orientation/square";
 
+
+    private static final String DEFAULT = "default";
+    private static final String LT = "<";
+    private static final String GT = ">";
+
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) {
 
         Configuration config = new Configuration(metaDataMap);
@@ -85,6 +90,10 @@ public class SetImageOrientationProcess implements WorkflowProcess {
             ResourceResolver resourceResolver = workflowHelper.getResourceResolver(workflowSession);
 
             TagManager tagManager = resourceResolver.adaptTo(TagManager.class);
+            if (tagManager == null) {
+                log.error("Unable to adapt to Tag Manager. This step can't do it's work");
+                return;
+            }
 
             final List<String> payloads = workflowPackageManager.getPaths(resourceResolver, (String) workItem.getWorkflowData().getPayload());
             for (final String payload : payloads) {
@@ -110,6 +119,8 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                         } else {
                             log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
                         }
+                    } else {
+                        log.warn("Unable to set tag.");
                     }
                 }
 
@@ -147,28 +158,38 @@ public class SetImageOrientationProcess implements WorkflowProcess {
 
         log.debug("Width {} Height {}", width, height);
 
+        String tagId = null;
+
         if (width > 0 && height > 0) {
             float ratio = (float) width / height;
 
             log.debug("Ratio is {}", ratio);
 
-            for (ConfigRule rule : config.getConfig()) {
-                if (rule.operator.equals(">") && ratio > rule.limit) {
-                    return rule.tagId;
-                }
-                if (rule.operator.equals("<") && ratio < rule.limit) {
-                    return rule.tagId;
-                }
-
-                if (rule.operator.equals("default")) {
-                    return rule.tagId;
-                }
-
-            }
+            tagId = getTagId(config, ratio);
         }
 
         // Asset doesn't have width/height so we can't decide correct orientation
-        log.debug("Couldn't calculate orientation");
+        if (tagId == null) {
+            log.debug("Couldn't calculate orientation");
+        }
+
+        return tagId;
+    }
+
+    private String getTagId(Configuration config, float ratio) {
+        for (ConfigRule rule : config.getConfig()) {
+            if (rule.operator.equals(GT) && ratio > rule.limit) {
+                return rule.tagId;
+            }
+            if (rule.operator.equals(LT) && ratio < rule.limit) {
+                return rule.tagId;
+            }
+
+            if (rule.operator.equals(DEFAULT)) {
+                return rule.tagId;
+            }
+
+        }
         return null;
     }
 
@@ -188,11 +209,11 @@ public class SetImageOrientationProcess implements WorkflowProcess {
 
             // Parse configuration line by line
             for (String arg : processArgs.split("\r\n")) {
-                String tagId = arg.substring(arg.indexOf(" ") + 1);
-                String firstPart = arg.substring(0, arg.indexOf(" "));
+                String tagId = arg.substring(arg.indexOf(' ') + 1);
+                String firstPart = arg.substring(0, arg.indexOf(' '));
                 float limit = 1;
                 String operator;
-                if (firstPart.equals("default")) {
+                if (firstPart.equals(DEFAULT)) {
                     operator = firstPart;
                 } else {
                     operator = arg.substring(0, 1);
@@ -203,7 +224,7 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                 config.add(rule);
 
                 // Default must be always the last config line
-                if (operator.equals("default")) {
+                if (operator.equals(DEFAULT)) {
                     break;
                 }
             }
