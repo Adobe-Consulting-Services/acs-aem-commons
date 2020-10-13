@@ -72,8 +72,8 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     @Reference
     private WorkflowHelper workflowHelper;
 
-    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\n" +
-            "<0.9 properties:orientation/portrait\n" +
+    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\r\n" +
+            "<0.9 properties:orientation/portrait\r\n" +
             "default properties:orientation/square";
 
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) {
@@ -103,11 +103,13 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                     log.debug("Orientation tag is {}", tagId);
 
                     if (tagId != null) {
-                        Resource metadataResource = getMetadataResource(assetResource);
-                        Tag[] currentTags = tagManager.getTags(metadataResource);
-                        Tag[] updatedTags = (Tag[]) ArrayUtils.add(currentTags, tagManager.resolve(tagId));
-                        tagManager.setTags(metadataResource, updatedTags, true);
-                        log.debug("Orientation tag set");
+                        Tag tag = tagManager.resolve(tagId);
+                        if (tag != null) {
+                            addTagToResource(assetResource, tag, tagManager);
+                            log.debug("Orientation tag set");
+                        } else {
+                            log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
+                        }
                     }
                 }
 
@@ -118,6 +120,15 @@ public class SetImageOrientationProcess implements WorkflowProcess {
         }
 
     }
+
+    private void addTagToResource(Resource resource, Tag tag, TagManager tagManager) {
+        Resource metadataResource = getMetadataResource(resource);
+        Tag[] currentTags = tagManager.getTags(metadataResource);
+        Tag[] updatedTags = (Tag[]) ArrayUtils.add(currentTags, tag);
+        tagManager.setTags(metadataResource, updatedTags, true);
+
+    }
+
 
     private Resource getMetadataResource(Resource resource) {
         return resource.getChild(JcrConstants.JCR_CONTENT + "/" + DamConstants.METADATA_FOLDER);
@@ -176,7 +187,7 @@ public class SetImageOrientationProcess implements WorkflowProcess {
             config = new ArrayList<>();
 
             // Parse configuration line by line
-            for (String arg : processArgs.split("\n")) {
+            for (String arg : processArgs.split("\r\n")) {
                 String tagId = arg.substring(arg.indexOf(" ") + 1);
                 String firstPart = arg.substring(0, arg.indexOf(" "));
                 float limit = 1;

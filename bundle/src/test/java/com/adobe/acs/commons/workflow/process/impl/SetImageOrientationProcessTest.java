@@ -151,11 +151,9 @@ public class SetImageOrientationProcessTest {
         assertEquals("properties:orientation/portrait", getTagId());
     }
 
-
-
     @Test
     public void testCustomConfiguration_superwide_orientation() throws Exception {
-        metadataMap.put("PROCESS_ARGS", ">5 properties:orientation/superwide\ndefault properties:orientation/default");
+        metadataMap.put("PROCESS_ARGS", ">5 properties:orientation/superwide\r\ndefault properties:orientation/default");
         tagManager.createTag("properties:orientation/superwide", "Superwide", "");
         tagManager.createTag("properties:orientation/default", "Default", "");
 
@@ -171,7 +169,7 @@ public class SetImageOrientationProcessTest {
 
     @Test
     public void testCustomConfiguration_default_orientation() throws Exception {
-        metadataMap.put("PROCESS_ARGS", ">5 properties:orientation/superwide\ndefault properties:orientation/default");
+        metadataMap.put("PROCESS_ARGS", ">5 properties:orientation/superwide\r\ndefault properties:orientation/default");
         tagManager.createTag("properties:orientation/superwide", "Superwide", "");
         tagManager.createTag("properties:orientation/default", "Default", "");
 
