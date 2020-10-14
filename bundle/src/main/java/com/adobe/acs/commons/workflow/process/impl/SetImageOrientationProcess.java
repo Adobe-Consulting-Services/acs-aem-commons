@@ -35,7 +35,11 @@ import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.resource.details.AssetDetails;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -72,9 +76,9 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     @Reference
     private WorkflowHelper workflowHelper;
 
-    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\r\n" +
-            "<0.9 properties:orientation/portrait\r\n" +
-            "default properties:orientation/square";
+    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\r\n"
+            + "<0.9 properties:orientation/portrait\r\n"
+            + "default properties:orientation/square";
 
 
     private static final String DEFAULT = "default";

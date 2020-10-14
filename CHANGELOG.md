@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #1060 - New tree activation MCP utility
+- #New workflow process step "Set Image Orientation"
 
 ### Changed
 
