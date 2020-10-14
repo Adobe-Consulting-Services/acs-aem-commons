@@ -439,6 +439,9 @@ public class Renovator extends ProcessDefinition {
                                 discoveredReferences.addAndGet(childNode.getAllReferences().size());
                                 if (detailedReport) {
                                     note(childNode.getSourcePath(), Report.all_references, childNode.getAllReferences().size());
+                                    if (childNode.getAllReferences() !=null && childNode.getAllReferences().size()>0) {
+                                     	note(childNode.getSourcePath(), Report.referred_in, childNode.getAllReferences().toString());	
+                                     }
                                     note(childNode.getSourcePath(), Report.published_references, childNode.getPublishedReferences().size());
                                 }
                             });
@@ -627,7 +630,7 @@ public class Renovator extends ProcessDefinition {
 
     @SuppressWarnings("squid:S00115")
     enum Report {
-        misc, target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time
+        misc, target, acl_check, all_references, published_references, move_time, activate_time, deactivate_time, referred_in
     }
 
     private final Map<String, EnumMap<Report, Object>> reportData = new LinkedHashMap<>();
