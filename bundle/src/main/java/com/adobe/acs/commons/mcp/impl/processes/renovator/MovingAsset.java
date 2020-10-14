@@ -58,7 +58,7 @@ public class MovingAsset extends MovingNode {
     public boolean isAbleToHaveChildren() {
         return false;
     }
-    
+
     @Override
     public void move(ReplicatorQueue replicatorQueue, ResourceResolver rr) throws IllegalAccessException, MovingException {
          Session session = rr.adaptTo(Session.class);
