@@ -575,7 +575,7 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.sling</groupId>
-                        <artifactId>maven-sling-plugin</artifactId>
+                        <artifactId>sling-maven-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>install-bundle</id>
