@@ -73,6 +73,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.adobe.acs.commons.mcp.impl.processes.renovator.Util.*;
 import static com.day.cq.commons.jcr.JcrConstants.JCR_PRIMARYTYPE;
@@ -84,6 +86,7 @@ public class Renovator extends ProcessDefinition {
 
     private static final String DESTINATION_COL = "destination";
     private static final String SOURCE_COL = "source";
+    private static final transient Logger LOG = LoggerFactory.getLogger(Renovator.class);
 
     public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator) {
         this.pageManagerFactory = pageManagerFactory;
@@ -519,22 +522,22 @@ public class Renovator extends ProcessDefinition {
     }
 
     // Move assets and pages, and in some cases folders that were not already moved in the previous step
-    protected void moveTree(ActionManager manager) {
-        manager.deferredWithResolver(rr -> {
-            moves.forEach(node -> {
-                manager.deferredWithResolver(rr2 -> {
-                    node.visit(childNode -> {
-                        if (!childNode.isCopiedBeforeMove() || !resourceExists(rr2, childNode.getDestinationPath())) {
-                            manager.deferredWithResolver(rr3 -> {
-                                Actions.setCurrentItem("Moving " + childNode.getSourcePath());
-                                childNode.move(replicatorQueue, rr3);
-                            });
-                        }
-                    });
-                });
-            });
-        });
-    }
+	protected void moveTree(ActionManager manager) {
+		manager.deferredWithResolver(rr -> {
+			moves.forEach(node -> {
+				node.visit(childNode -> {
+					if (!childNode.isCopiedBeforeMove() || !resourceExists(rr, childNode.getDestinationPath())) {
+						Actions.setCurrentItem("Moving " + childNode.getSourcePath());
+						try {
+							childNode.move(replicatorQueue, rr);
+						} catch (IllegalAccessException | MovingException e) {
+							LOG.error("Fatal uncaught error in moveTree {}", e);
+						}
+					}
+				});
+			});
+		});
+	}
 
     protected void activateTreeStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
