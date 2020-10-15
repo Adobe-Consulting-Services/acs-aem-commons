@@ -68,13 +68,13 @@ public class MovingAsset extends MovingNode {
             session.move(getSourcePath(), getDestinationPath());
             session.save();
             if (session.nodeExists(getDestinationPath())) {
- 				Node originalAssetJcrContentNode = session
- 						.getNode(getDestinationPath() + "/" + JcrConstants.JCR_CONTENT);
+                Node originalAssetJcrContentNode = session
+                        .getNode(getDestinationPath() + "/" + JcrConstants.JCR_CONTENT);
 
-  				JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
- 				JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
- 						DEFAULT_LAST_MODIFIED_BY);
- 			}
+                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
+                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
+                        DEFAULT_LAST_MODIFIED_BY);
+            }
             updateReferences(replicatorQueue, rr);
         } catch (RepositoryException e) {
             throw new MovingException(getSourcePath(), e);
