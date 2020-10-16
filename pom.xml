@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>4.7.1-SNAPSHOT</version>
+    <version>4.8.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -49,6 +49,9 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
+        <crx.user>admin</crx.user>
+        <crx.password>admin</crx.password>
+        <crx.protocol>http</crx.protocol>
         <crx.contextRoot />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -177,8 +180,8 @@
 
                 <plugin>
                     <groupId>org.apache.sling</groupId>
-                    <artifactId>maven-sling-plugin</artifactId>
-                    <version>2.3.8</version>
+                    <artifactId>sling-maven-plugin</artifactId>
+                    <version>2.4.2</version>
                 </plugin>
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
@@ -251,7 +254,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>5.1.1</version>
+                    <version>6.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -542,10 +545,18 @@
                 <scope>provided</scope>
             </dependency>
 
+             <!-- Due to the split of the JJWT library into api and impl we need both 
+                  packages: the api for compilation and the impl for embedding -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
-                <version>0.9.1</version>
+                <artifactId>jjwt-api</artifactId>
+                <version>0.11.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>0.11.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

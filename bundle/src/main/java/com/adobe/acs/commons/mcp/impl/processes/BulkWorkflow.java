@@ -61,9 +61,11 @@ public class BulkWorkflow extends ProcessDefinition implements Serializable {
         SUCCESS, FAILURE
     }
 
+    
     public enum QueryLanguage {
         QUERY_BUILDER(QueryHelperImpl.QUERY_BUILDER),
         LIST(QueryHelperImpl.LIST),
+        @SuppressWarnings("deprecation")
         XPATH(Query.XPATH),
         JCR_SQL2(Query.JCR_SQL2),
         JCR_SQL("JCR-SQL");

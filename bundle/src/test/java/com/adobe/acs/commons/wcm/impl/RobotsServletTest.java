@@ -20,8 +20,13 @@
 package com.adobe.acs.commons.wcm.impl;
 
 import com.day.cq.commons.Externalizer;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.PageManagerFactory;
+
+import io.wcm.testing.mock.aem.MockPageManagerFactory;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
@@ -38,11 +43,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 
 public class RobotsServletTest {
@@ -67,51 +73,42 @@ public class RobotsServletTest {
         context.load().json(getClass().getResourceAsStream("RobotsServlet.json"), "/content/geometrixx");
 
         context.registerService(Externalizer.class, externalizer);
+        // as upgrade to AEM Mocks 3.0+ is blocked by https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2260
+        // inject own PageManagerFactory (similar to https://github.com/wcm-io/wcm-io-testing/blob/develop/aem-mock/core/src/main/java/io/wcm/testing/mock/aem/MockPageManagerFactory.java)
+        context.registerService(PageManagerFactory.class, new MockPageManagerFactory());
         request.setResource(context.resourceResolver().getResource("/content/geometrixx/en/jcr:content"));
 
 
-        when(externalizer.externalLink(eq(context.resourceResolver()), eq("publish"), anyString())).then(i -> "https://www.geometrixx.com" + i.getArgument(2));
+        lenient().when(externalizer.externalLink(eq(context.resourceResolver()), eq("publish"), anyString())).then(i -> "https://www.geometrixx.com" + i.getArgument(2));
 
     }
 
     @Test
-    public void testWriteFromPageProperty() {
+    public void testWriteFromPageProperty() throws IOException, ServletException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "robotsContents");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperty.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperty.txt"), response);
     }
 
     @Test
-    public void testWriteFromAsset() {
+    public void testWriteFromAsset() throws ServletException, IOException {
         context.create().asset("/content/dam/geometrixx/robots.txt", getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), "text/plain");
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), response);
     }
 
     @Test
-    public void testWriteFromPageProperties() {
+    public void testWriteFromPageProperties() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -132,19 +129,13 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperties.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromPageProperties.txt"), response);
     }
 
     @Test
-    public void testWriteFromOsgiConfigSimple() {
+    public void testWriteFromOsgiConfigSimple() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -156,19 +147,13 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfigSimple.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfigSimple.txt"), response);
     }
 
     @Test
-    public void testWriteFromOsgiConfig() {
+    public void testWriteFromOsgiConfig() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -195,49 +180,31 @@ public class RobotsServletTest {
         });
 
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet returned an error", 200, response.getStatus());
-            assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfig.txt"), response);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet returned an error", 200, response.getStatus());
+        assertResponse(getClass().getResourceAsStream("RobotsServlet_testWriteFromOsgiConfig.txt"), response);
     }
 
     @Test
-    public void testWriteFromNonExistentPropertyAbsolute() {
+    public void testWriteFromNonExistentPropertyAbsolute() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "/content/dam/geometrixx/robots.txt/jcr:content/renditions/original/jcr:content/jcr:data");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet did not return the expected error", 404, response.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet did not return the expected error", 404, response.getStatus());
     }
 
     @Test
-    public void testWriteFromNonExistentPropertyRelative() {
+    public void testWriteFromNonExistentPropertyRelative() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
         props.put("robots.content.property.path", "jcr:content/thisPropDoesntExist");
         RobotsServlet robotsServlet = context.registerInjectActivateService(new RobotsServlet(), props);
-
-        try {
-            robotsServlet.doGet(request, response);
-            assertEquals("servlet did not return the expected error", 404, response.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.getMessage());
-        }
+        robotsServlet.doGet(request, response);
+        assertEquals("servlet did not return the expected error", 404, response.getStatus());
     }
 
     private void assertResponse(InputStream resourceAsStream, MockSlingHttpServletResponse response) throws IOException {

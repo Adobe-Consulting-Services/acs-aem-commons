@@ -43,7 +43,6 @@ import java.util.Arrays;
 import static com.adobe.acs.commons.exporters.impl.users.Constants.*;
 
 @SlingServlet(
-        label = "ACS AEM Commons - Users to CSV - Init Servlet",
         methods = {"GET"},
         resourceTypes = {"acs-commons/components/utilities/exporters/users-to-csv"},
         selectors = {"init"},

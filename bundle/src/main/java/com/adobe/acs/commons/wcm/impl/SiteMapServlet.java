@@ -53,6 +53,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.day.cq.commons.Externalizer;
 import com.day.cq.commons.inherit.HierarchyNodeInheritanceValueMap;
@@ -60,7 +62,6 @@ import com.day.cq.commons.inherit.InheritanceValueMap;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.Asset;
 import com.day.cq.dam.api.DamConstants;
-import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
@@ -76,6 +77,8 @@ import com.day.cq.wcm.api.PageManager;
         @Property(name = "webconsole.configurationFactory.nameHint", value = "Site Map for: {externalizer.domain}, on resource types: [{sling.servlet.resourceTypes}]") })
 public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
+    private static final Logger log = LoggerFactory.getLogger(SiteMapServlet.class);
+
     private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd");
 
     private static final boolean DEFAULT_INCLUDE_LAST_MODIFIED = false;
@@ -88,7 +91,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private static final boolean DEFAULT_REMOVE_TRAILING_SLASH = false;
 
-    @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
+    private static final boolean DEFAULT_USE_VANITY_URL = true;
+
+    @Property(value = DEFAULT_EXTERNALIZER_DOMAIN, label = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component. If blank the externalization will prepend the current request's scheme combined with the current request's host header.")
     private static final String PROP_EXTERNALIZER_DOMAIN = "externalizer.domain";
 
     @Property(boolValue = DEFAULT_INCLUDE_LAST_MODIFIED, label = "Include Last Modified", description = "If true, the last modified value will be included in the sitemap.")
@@ -127,6 +132,9 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     @Property(label = "Exclude Pages (by Template) from Sitemap", description = "Excludes pages that have a matching value at [cq:Page]/jcr:content@cq:Template")
     private static final String TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY = "exclude.templates";
 
+    @Property(boolValue = DEFAULT_USE_VANITY_URL, label = "Use Vanity URLs", description = "Use the Vanity URL for generating the Page URL")
+    private static final String USE_VANITY_URL = "use.vanity";
+
     private static final String NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
     @Reference
@@ -158,6 +166,8 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
 
     private List<String> excludedPageTemplates;
 
+    private boolean useVanityUrl;
+
     @Activate
     protected void activate(Map<String, Object> properties) {
         this.externalizerDomain = PropertiesUtil.toString(properties.get(PROP_EXTERNALIZER_DOMAIN),
@@ -181,6 +191,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         this.removeTrailingSlash = PropertiesUtil.toBoolean(properties.get(PROP_REMOVE_TRAILING_SLASH),
                 DEFAULT_REMOVE_TRAILING_SLASH);
         this.excludedPageTemplates = Arrays.asList(PropertiesUtil.toStringArray(properties.get(TEMPLATE_EXCLUDE_FROM_SITEMAP_PROPERTY),new String[0]));
+        this.useVanityUrl =  PropertiesUtil.toBoolean(properties.get(USE_VANITY_URL), DEFAULT_USE_VANITY_URL);
     }
 
     @Override
@@ -195,23 +206,24 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         Page page = pageManager.getContainingPage(request.getResource());
 
         XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
+        XMLStreamWriter stream = null;
         try {
-            XMLStreamWriter stream = outputFactory.createXMLStreamWriter(response.getWriter());
+            stream = outputFactory.createXMLStreamWriter(response.getWriter());
             stream.writeStartDocument("1.0");
 
             stream.writeStartElement("", "urlset", NS);
             stream.writeNamespace("", NS);
 
             // first do the current page
-            write(page, stream, resourceResolver);
+            write(page, stream, request);
 
             for (Iterator<Page> children = page.listChildren(new PageFilter(false, true), true); children.hasNext();) {
-                write(children.next(), stream, resourceResolver);
+                write(children.next(), stream, request);
             }
 
             if (damAssetTypes.size() > 0 && damAssetProperty.length() > 0) {
                 for (Resource assetFolder : getAssetFolders(page, resourceResolver)) {
-                    writeAssets(stream, assetFolder, resourceResolver);
+                    writeAssets(stream, assetFolder, request);
                 }
             }
 
@@ -220,6 +232,17 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
             stream.writeEndDocument();
         } catch (XMLStreamException e) {
             throw new IOException(e);
+        } finally {
+            if (stream != null) {
+                try
+                {
+                    stream.close();
+                }
+                catch ( XMLStreamException e )
+                {
+                    log.warn("Can not close xml stream writer", e);
+                }
+            }
         }
     }
 
@@ -263,20 +286,20 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
     }
 
     @SuppressWarnings("squid:S1192")
-    private void write(Page page, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+    private void write(Page page, XMLStreamWriter stream, SlingHttpServletRequest request) throws XMLStreamException {
         if (isHiddenByPageProperty(page) || isHiddenByPageTemplate(page)) {
             return;
         }
         stream.writeStartElement(NS, "url");
         String loc = "";
 
-        if (!StringUtils.isEmpty(page.getVanityUrl())) {
-            loc = externalizer.externalLink(resolver, externalizerDomain, page.getVanityUrl());
+        if (useVanityUrl && !StringUtils.isEmpty(page.getVanityUrl())) {
+            loc = externalizeUri(request, page.getVanityUrl());
         } else if (!extensionlessUrls) {
-            loc = externalizer.externalLink(resolver, externalizerDomain, String.format("%s.html", page.getPath()));
+            loc = externalizeUri(request, String.format("%s.html", page.getPath()));
         } else {
             String urlFormat = removeTrailingSlash ? "%s" : "%s/";
-            loc = externalizer.externalLink(resolver, externalizerDomain, String.format(urlFormat, page.getPath()));
+            loc = externalizeUri(request, String.format(urlFormat, page.getPath()));
         }
 
         loc = applyUrlRewrites(loc);
@@ -324,10 +347,19 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         return flag;
     }
 
-    private void writeAsset(Asset asset, XMLStreamWriter stream, ResourceResolver resolver) throws XMLStreamException {
+    private String externalizeUri(SlingHttpServletRequest request, String path) {
+        if (StringUtils.isNotBlank(externalizerDomain)) {
+            return externalizer.externalLink(request.getResourceResolver(), externalizerDomain, path);
+        } else {
+            log.debug("No externalizer domain configured, take into account current host header {} and current scheme {}", request.getServerName(), request.getScheme());
+            return externalizer.absoluteLink(request, request.getScheme(), path);
+        }
+    }
+
+    private void writeAsset(Asset asset, XMLStreamWriter stream, SlingHttpServletRequest request) throws XMLStreamException {
         stream.writeStartElement(NS, "url");
 
-        String loc = externalizer.externalLink(resolver, externalizerDomain, asset.getPath());
+        String loc = externalizeUri(request, asset.getPath());
         writeElement(stream, "loc", loc);
 
         if (includeLastModified) {
@@ -354,7 +386,7 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
         stream.writeEndElement();
     }
 
-    private void writeAssets(final XMLStreamWriter stream, final Resource assetFolder, final ResourceResolver resolver)
+    private void writeAssets(final XMLStreamWriter stream, final Resource assetFolder, final SlingHttpServletRequest request)
             throws XMLStreamException {
         for (Iterator<Resource> children = assetFolder.listChildren(); children.hasNext();) {
             Resource assetFolderChild = children.next();
@@ -362,10 +394,10 @@ public final class SiteMapServlet extends SlingSafeMethodsServlet {
                 Asset asset = assetFolderChild.adaptTo(Asset.class);
 
                 if (damAssetTypes.contains(asset.getMimeType())) {
-                    writeAsset(asset, stream, resolver);
+                    writeAsset(asset, stream, request);
                 }
             } else {
-                writeAssets(stream, assetFolderChild, resolver);
+                writeAssets(stream, assetFolderChild, request);
             }
         }
     }

@@ -123,6 +123,7 @@ public interface BaseSessionIWrap<S extends Session> extends Session {
         return wrapSession(unwrapSession().impersonate(credentials));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     default Node getNodeByUUID(final String uuid) throws ItemNotFoundException, RepositoryException {
         return wrapItem(unwrapSession().getNodeByUUID(uuid));
@@ -298,16 +299,19 @@ public interface BaseSessionIWrap<S extends Session> extends Session {
         return unwrapSession().isLive();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     default void addLockToken(final String lt) {
         unwrapSession().addLockToken(lt);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     default String[] getLockTokens() {
         return unwrapSession().getLockTokens();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     default void removeLockToken(final String lt) {
         unwrapSession().removeLockToken(lt);

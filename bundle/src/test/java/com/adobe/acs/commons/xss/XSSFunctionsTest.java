@@ -35,7 +35,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  * Note - these do not test the actual XSS functionality. They only test that
  * the EL functions pass through to XSSAPI correctly.
  */
-@SuppressWarnings("checkstyle:abbreviationaswordinname")
+@SuppressWarnings({"checkstyle:abbreviationaswordinname","deprecation"})
 @RunWith(MockitoJUnitRunner.class)
 public class XSSFunctionsTest {
 

@@ -27,3 +27,7 @@ content/src/main/content/jcr_root/etc/clientlibs/.content.xml
 
 node_modules
 bundle/mockserver.log
+
+#VS Code
+.vscode
+.history

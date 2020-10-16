@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.7.1-SNAPSHOT</version>
+        <version>4.8.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -176,12 +176,15 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>maven-sling-plugin</artifactId>
-                <configuration>
-                    <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/repository/crx.default</slingUrl>
-                    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-                    <deploymentMethod>WebDAV</deploymentMethod>
-                </configuration>
+                <artifactId>sling-maven-plugin</artifactId>
+		<configuration>
+		    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+		    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+		    <deploymentMethod>SlingPostServlet</deploymentMethod>
+		    <user>${crx.user}</user>
+		    <password>${crx.password}</password>
+		    <failOnError>true</failOnError>
+		</configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -253,7 +256,8 @@
                                     <includes>
                                         <include>com.google.guava:guava</include>
                                         <include>com.google.guava:failureaccess</include>
-                                        <include>io.jsonwebtoken:jjwt</include>
+                                        <include>io.jsonwebtoken:jjwt-api</include>
+                                        <include>io.jsonwebtoken:jjwt-impl</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
                                     </includes>
@@ -282,7 +286,8 @@
                                     <include>com.google.guava:failureaccess</include>
                                     <include>com.jcraft:jsch</include>
                                     <include>com.jcraft:jzlib</include>
-                                    <include>io.jsonwebtoken:jjwt</include>
+                                    <include>io.jsonwebtoken:jjwt-api</include>
+                                    <include>io.jsonwebtoken:jjwt-impl</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -329,7 +334,13 @@
                                     </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>io.jsonwebtoken:jjwt</artifact>
+                                    <artifact>io.jsonwebtoken:jjwt-api</artifact>
+                                    <includes>
+                                        <include>io/jsonwebtoken/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>io.jsonwebtoken:jjwt-impl</artifact>
                                     <includes>
                                         <include>io/jsonwebtoken/**</include>
                                     </includes>
@@ -778,7 +789,12 @@
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
+            <artifactId>jjwt-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
