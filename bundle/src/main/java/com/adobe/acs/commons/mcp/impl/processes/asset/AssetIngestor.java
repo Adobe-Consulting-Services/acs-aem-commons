@@ -123,6 +123,13 @@ public abstract class AssetIngestor extends ProcessDefinition {
             options = "checked"
     )
     boolean preserveFileName = true;
+    @FormField(
+        name = "Preserve Folder Titles",
+        description = "If checked, existing folder titles will not be changed.",
+        component = CheckboxComponent.class,
+        options = "checked"
+    )
+    boolean preserveFolderTitles = true;
 
     @FormField(
             name = "Target JCR Folder",
@@ -388,12 +395,12 @@ public abstract class AssetIngestor extends ProcessDefinition {
                     && folderContentNode.hasProperty(JcrConstants.JCR_TITLE)
                     && folderContentNode.getProperty(JcrConstants.JCR_TITLE).getString().equals(name))) {
                 return false;
-            } else {
+            } else if (!preserveFolderTitles) {
                 setFolderTitle(folderNode, name);
                 r.commit();
                 r.refresh();
-                return true;
             }
+            return true;
         } else {
             HierarchicalElement parent = el.getParent();
             String parentPath;

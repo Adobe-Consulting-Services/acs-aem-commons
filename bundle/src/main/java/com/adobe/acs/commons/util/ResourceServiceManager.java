@@ -22,6 +22,12 @@ package com.adobe.acs.commons.util;
 import com.adobe.acs.commons.util.mbeans.ResourceServiceManagerMBean;
 import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.commons.jcr.JcrConstants;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import javax.management.NotCompliantMBeanException;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -38,13 +44,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.NotCompliantMBeanException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Base class for services to extend which want to manage other services based
@@ -140,6 +139,10 @@ public abstract class ResourceServiceManager extends AnnotatedStandardMBean
         try ( ResourceResolver resolver = getResourceResolver()) {
 
             Resource aprRoot = resolver.getResource(getRootPath());
+            if (aprRoot == null) {
+                log.error("Root path for service resource not found: {}", getRootPath());
+                return;
+            }
             List<String> configuredIds = new ArrayList<String>();
             for (Resource child : aprRoot.getChildren()) {
                 if (!JcrConstants.JCR_CONTENT.equals(child.getName())) {

@@ -128,13 +128,13 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
         final Session session = resourceResolver.adaptTo(Session.class);
         final PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
 
-
+        String workflowPackagePath = bucketPath;
 
         if (StringUtils.isNotBlank(bucketSegment)) {
-            bucketPath += "/" + bucketSegment;
+            workflowPackagePath += "/" + bucketSegment;
         }
 
-        final Node shardNode = JcrUtils.getOrCreateByPath(bucketPath,
+        final Node shardNode = JcrUtils.getOrCreateByPath(workflowPackagePath,
                 NT_SLING_FOLDER, NT_SLING_FOLDER, session, false);
         final Page page = pageManager.create(shardNode.getPath(), JcrUtil.createValidName(name),
                 WORKFLOW_PACKAGE_TEMPLATE, name, false);

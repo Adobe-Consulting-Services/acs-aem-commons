@@ -49,6 +49,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.ContentHandler;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("deprecation")
 public class BaseSessionIWrapTest {
 
     @Mock

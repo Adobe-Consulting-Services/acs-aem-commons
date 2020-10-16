@@ -42,10 +42,8 @@ import java.io.IOException;
         service = Filter.class,
         configurationPolicy = ConfigurationPolicy.OPTIONAL,
         property= {
-                EngineConstants.SLING_FILTER_SCOPE+"="+ EngineConstants.FILTER_SCOPE_INCLUDE,
-                "sling.filter.resourceTypes=" + IncludeDecoratorFilterImpl.RESOURCE_TYPE
+                EngineConstants.SLING_FILTER_SCOPE+"="+ EngineConstants.FILTER_SCOPE_INCLUDE
         }
-        
 )
 public class IncludeDecoratorFilterImpl implements Filter {
 
@@ -78,58 +76,62 @@ public class IncludeDecoratorFilterImpl implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
 
-   
         ValueMap parameters = ValueMap.EMPTY;
 
         if(servletRequest instanceof SlingHttpServletRequest){
             
             SlingHttpServletRequest request = (SlingHttpServletRequest) servletRequest;
 
-            @CheckForNull Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
-            if(parameterResource != null){
-                parameters = parameterResource.getValueMap();
+            if(request.getResourceResolver().isResourceType(request.getResource(), RESOURCE_TYPE)){
+                performFilter(request, servletResponse, chain, parameters);
+                return;
             }
-
-            ValueMap includeProperties = request.getResource().getValueMap();
-
-            Object existingNamespace = request.getAttribute(REQ_ATTR_NAMESPACE);
-            boolean hasExistingNamespace = existingNamespace != null;
-            boolean hasNamespaceInInclude = includeProperties.containsKey(PN_NAMESPACE);
-
-            if(MapUtils.isNotEmpty(parameters)){
-                parameters.forEach((key, object) -> {
-                    request.setAttribute(PREFIX + key, object);
-                });
-            }
-
-            if(hasNamespaceInInclude && hasExistingNamespace){
-                request.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace + "/" + includeProperties.get(PN_NAMESPACE, String.class));
-            }else if(hasNamespaceInInclude){
-                request.setAttribute(REQ_ATTR_NAMESPACE, includeProperties.get(PN_NAMESPACE, String.class));
-            }
-
-            chain.doFilter(request, servletResponse);
-
-            if(MapUtils.isNotEmpty(parameters)){
-                parameters.forEach((key, object) -> {
-                    request.removeAttribute(PREFIX + key);
-                });
-            }
-
-            if(existingNamespace != null){
-                servletRequest.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace);
-            }else{
-                servletRequest.removeAttribute(REQ_ATTR_NAMESPACE);
-            }
-
-            return;
             
         }
     
         chain.doFilter(servletRequest, servletResponse);
     }
-    
-    
+
+    private void performFilter(SlingHttpServletRequest request, ServletResponse servletResponse, FilterChain chain, ValueMap parameters) throws IOException, ServletException {
+        @CheckForNull Resource parameterResource = request.getResource().getChild(NN_PARAMETERS);
+        if(parameterResource != null){
+            parameters = parameterResource.getValueMap();
+        }
+
+        ValueMap includeProperties = request.getResource().getValueMap();
+
+        Object existingNamespace = request.getAttribute(REQ_ATTR_NAMESPACE);
+        boolean hasExistingNamespace = existingNamespace != null;
+        boolean hasNamespaceInInclude = includeProperties.containsKey(PN_NAMESPACE);
+
+        if(MapUtils.isNotEmpty(parameters)){
+            parameters.forEach((key, object) -> {
+                request.setAttribute(PREFIX + key, object);
+            });
+        }
+
+        if(hasNamespaceInInclude && hasExistingNamespace){
+            request.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace + "/" + includeProperties.get(PN_NAMESPACE, String.class));
+        }else if(hasNamespaceInInclude){
+            request.setAttribute(REQ_ATTR_NAMESPACE, includeProperties.get(PN_NAMESPACE, String.class));
+        }
+
+        chain.doFilter(request, servletResponse);
+
+        if(MapUtils.isNotEmpty(parameters)){
+            parameters.forEach((key, object) -> {
+                request.removeAttribute(PREFIX + key);
+            });
+        }
+
+        if(existingNamespace != null){
+            request.setAttribute(REQ_ATTR_NAMESPACE, existingNamespace);
+        }else{
+            request.removeAttribute(REQ_ATTR_NAMESPACE);
+        }
+    }
+
+
     @Override
     public void destroy() {
         // no-op
