@@ -24,13 +24,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -41,6 +45,12 @@ import javax.jcr.query.QueryResult;
 import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ReportExecutor;
+import com.adobe.acs.commons.reports.api.ResultsPage;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -49,12 +59,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.ReportExecutor;
-import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
 
 /**
  * Model for executing report requests.
@@ -78,11 +82,9 @@ public class QueryReportExecutor implements ReportExecutor {
 
   private ResultsPage fetchResults(int limit, int offset) throws ReportException {
     prepareStatement();
-    ResourceResolver resolver = request.getResourceResolver();
-    Session session = resolver.adaptTo(Session.class);
-    List<Object> results = new ArrayList<>();
     try {
-      QueryManager queryMgr = Optional.ofNullable(session)
+      ResourceResolver resolver = request.getResourceResolver();
+      QueryManager queryMgr = Optional.ofNullable(resolver.adaptTo(Session.class))
           .orElseThrow(() -> new ReportException("Failed to get JCR Session")).getWorkspace().getQueryManager();
 
       Query query = queryMgr.createQuery(statement, config.getQueryLanguage());
@@ -95,15 +97,18 @@ public class QueryReportExecutor implements ReportExecutor {
         log.debug("Fetching all results");
       }
       QueryResult result = query.execute();
+
       NodeIterator nodes = result.getNodes();
 
-      while (nodes.hasNext()) {
-        results.add(resolver.getResource(nodes.nextNode().getPath()));
-      }
+      Spliterator<Node> spliterator = Spliterators.spliteratorUnknownSize(nodes,
+          Spliterator.ORDERED | Spliterator.NONNULL);
+
+      Stream<Resource> results = StreamSupport.stream(spliterator, false).map(n -> getResource(n, resolver));
+
+      return new ResultsPage(results, config.getPageSize(), page, nodes.getSize());
     } catch (RepositoryException re) {
       throw new ReportException("Exception executing search results", re);
     }
-    return new ResultsPage(results, config.getPageSize(), page);
   }
 
   @Override
@@ -166,6 +171,15 @@ public class QueryReportExecutor implements ReportExecutor {
     return StringUtils.join(params, "&");
   }
 
+  private Resource getResource(Node node, ResourceResolver resolver) {
+    try {
+      return resolver.getResource(node.getPath());
+    } catch (RepositoryException e) {
+      log.warn("Failed to get path from node: {}", node, e);
+      return null;
+    }
+  }
+
   @Override
   public ResultsPage getResults() throws ReportException {
     return fetchResults(config.getPageSize(), config.getPageSize() * page);
@@ -174,7 +188,7 @@ public class QueryReportExecutor implements ReportExecutor {
   private void prepareStatement() throws ReportException {
     try {
       Map<String, String> parameters = getParamPatternMap(request);
-      Template template =  new Handlebars().compileInline(config.getQuery());
+      Template template = new Handlebars().compileInline(config.getQuery());
       statement = template.apply(parameters);
       log.trace("Loaded statement: {}", statement);
     } catch (IOException ioe) {
