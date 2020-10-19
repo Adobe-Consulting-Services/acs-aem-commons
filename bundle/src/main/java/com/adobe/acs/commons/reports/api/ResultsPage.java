@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.reports.api;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,25 +66,5 @@ public final class ResultsPage {
 
   public long getResultSize() {
     return resultSize;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-
-    if (!(o instanceof ResultsPage)) {
-      return false;
-    }
-
-    final ResultsPage that = (ResultsPage) o;
-
-    return pageSize == that.pageSize && page == that.page && Objects.equals(results, that.results);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(results, pageSize, page);
   }
 }
