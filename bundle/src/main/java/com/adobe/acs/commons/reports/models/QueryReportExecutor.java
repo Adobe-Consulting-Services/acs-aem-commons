@@ -103,14 +103,7 @@ public class QueryReportExecutor implements ReportExecutor {
       Spliterator<Node> spliterator = Spliterators.spliteratorUnknownSize(nodes,
           Spliterator.ORDERED | Spliterator.NONNULL);
 
-      Stream<Resource> results = StreamSupport.stream(spliterator, false).map(n -> {
-        try {
-          return resolver.getResource(n.getPath());
-        } catch (RepositoryException e) {
-          log.warn("Failed to get path from node: {}", n, e);
-          return null;
-        }
-      });
+      Stream<Resource> results = StreamSupport.stream(spliterator, false).map(n -> getResource(n, resolver));
 
       return new ResultsPage(results, config.getPageSize(), page, nodes.getSize());
     } catch (RepositoryException re) {
@@ -176,6 +169,15 @@ public class QueryReportExecutor implements ReportExecutor {
       }
     }
     return StringUtils.join(params, "&");
+  }
+
+  private Resource getResource(Node node, ResourceResolver resolver) {
+    try {
+      return resolver.getResource(node.getPath());
+    } catch (RepositoryException e) {
+      log.warn("Failed to get path from node: {}", node, e);
+      return null;
+    }
   }
 
   @Override

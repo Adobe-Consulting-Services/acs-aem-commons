@@ -22,6 +22,8 @@ package com.adobe.acs.commons.reports.api;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -72,6 +74,15 @@ public class ResultsPageTest {
     log.info("testGetResults");
     ResultsPage results = new ResultsPage(RESULTS, 4, 1, -1);
     assertEquals(RESULTS, results.getResults());
+    log.info("Test successful!");
+  }
+
+  @Test
+  public void testGetResultsList() {
+    log.info("testGetResultsList");
+    List<Object> resList = RESULTS.collect(Collectors.toList());
+    ResultsPage results = new ResultsPage(resList.stream(), 4, 1, -1);
+    assertEquals(resList, results.getResultsList());
     log.info("Test successful!");
   }
 
