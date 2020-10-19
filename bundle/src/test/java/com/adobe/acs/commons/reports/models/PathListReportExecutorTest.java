@@ -19,25 +19,23 @@
  */
 package com.adobe.acs.commons.reports.models;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ResultsPage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.ResultsPage;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 public class PathListReportExecutorTest {
 
@@ -184,6 +182,17 @@ public class PathListReportExecutorTest {
         assertEquals(0, executor.currentPage);
     }
 
+    @Test
+    public void testSetPageReturnsPositiveNumbers() {
+        PathListReportExecutor executor = new PathListReportExecutor();
+
+        executor.setPage(10);
+        assertEquals(10, executor.currentPage);
+        executor.setPage(0);
+        assertEquals(0, executor.currentPage);
+    }
+
+
     private class ResultsTestObject {
         private final List<String> providedPaths;
         private final List<String> expectedPaths;
@@ -200,8 +209,8 @@ public class PathListReportExecutorTest {
             this.expectedPaths = expectedPaths;
         }
 
-        ResultsPage getResultsPage() {
-            return resultsPage;
+        ResultsPage getResultsPage() throws ReportException {
+            return reportExecutor.getResults();
         }
 
         PathListReportExecutor getReportExecutor() {
