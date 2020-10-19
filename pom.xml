@@ -7,7 +7,7 @@
 
     <groupId>com.adobe.acs</groupId>
     <artifactId>acs-aem-commons</artifactId>
-    <version>4.8.5-SNAPSHOT</version>
+    <version>4.8.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ACS AEM Commons - Reactor Project</name>
@@ -49,6 +49,9 @@
     <properties>
         <crx.host>localhost</crx.host>
         <crx.port>4502</crx.port>
+        <crx.user>admin</crx.user>
+        <crx.password>admin</crx.password>
+        <crx.protocol>http</crx.protocol>
         <crx.contextRoot />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -177,8 +180,8 @@
 
                 <plugin>
                     <groupId>org.apache.sling</groupId>
-                    <artifactId>maven-sling-plugin</artifactId>
-                    <version>2.3.8</version>
+                    <artifactId>sling-maven-plugin</artifactId>
+                    <version>2.4.2</version>
                 </plugin>
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>

@@ -239,7 +239,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 } 
             } else {
                 if (contents != null) {
-                    response.setContentLength(contents.length());
                     final PrintWriter printWriter = response.getWriter();
                     printWriter.write(contents);
                 }
