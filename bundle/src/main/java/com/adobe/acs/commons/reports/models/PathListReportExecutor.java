@@ -19,20 +19,6 @@
  */
 package com.adobe.acs.commons.reports.models;
 
-import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.ReportExecutor;
-import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.injectorspecific.Self;
-import org.apache.sling.models.annotations.injectorspecific.SlingObject;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +28,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.adobe.acs.commons.reports.api.ReportException;
+import com.adobe.acs.commons.reports.api.ReportExecutor;
+import com.adobe.acs.commons.reports.api.ResultsPage;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 @Model(adaptables = SlingHttpServletRequest.class)
 public class PathListReportExecutor implements ReportExecutor {
@@ -83,23 +83,21 @@ public class PathListReportExecutor implements ReportExecutor {
 
     @Override
     public ResultsPage getAllResults() throws ReportException {
-        return new ResultsPage(getResources(extractPaths()), config.getPageSize(), currentPage);
+        List<Object> results = getResources(extractPaths());
+        return new ResultsPage(results.stream(), config.getPageSize(), currentPage, (long) results.size());
     }
 
     @Override
     public ResultsPage getResults() throws ReportException {
         final List<String> paths = extractPaths();
         List<String> sublistPaths = paths.subList(getFrom(currentPage), getTo(paths.size()));
-        return new ResultsPage(getResources(sublistPaths), config.getPageSize(), currentPage);
+        List<Object> results = getResources(sublistPaths);
+        return new ResultsPage(results.stream(), config.getPageSize(), currentPage, (long) results.size());
     }
 
     List<Object> getResources(final List<String> paths) {
-        return Optional.ofNullable(paths)
-                       .map(Collection::stream)
-                       .orElseGet(Stream::empty)
-                       .map(path -> resourceResolver.getResource(path))
-                       .filter(Objects::nonNull)
-                       .collect(Collectors.toList());
+        return Optional.ofNullable(paths).map(Collection::stream).orElseGet(Stream::empty)
+                .map(path -> resourceResolver.getResource(path)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private int getFrom(final int page) {

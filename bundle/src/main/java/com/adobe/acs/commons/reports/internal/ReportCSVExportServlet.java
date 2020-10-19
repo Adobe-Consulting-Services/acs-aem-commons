@@ -26,12 +26,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
+import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ReportExecutor;
+import com.adobe.acs.commons.reports.api.ResultsPage;
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.text.csv.Csv;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -43,13 +50,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.adobe.acs.commons.reports.api.ReportCellCSVExporter;
-import com.adobe.acs.commons.reports.api.ReportException;
-import com.adobe.acs.commons.reports.api.ReportExecutor;
-import com.adobe.acs.commons.reports.api.ResultsPage;
-import com.day.cq.commons.jcr.JcrConstants;
-import com.day.text.csv.Csv;
 
 /**
  * Servlet for exporting the results of the report to CSV.
@@ -71,7 +71,7 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
     log.trace("doGet");
 
     // set response parameters
-    response.setContentType("text/csv");
+    response.setContentType("text/csv;charset=UTF-8");
     response.setHeader("Content-disposition",
         "attachment; filename="
             + URLEncoder.encode(request.getResource().getValueMap().get(JcrConstants.JCR_TITLE, "report"), "UTF-8")
@@ -88,7 +88,6 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       List<ReportCellCSVExporter> exporters = writeHeaders(request, csv);
 
       Resource configCtr = request.getResource().getChild("config");
-
       if (configCtr != null && configCtr.listChildren().hasNext()) {
         Iterator<Resource> children = configCtr.listChildren();
         while (children.hasNext()) {
@@ -105,13 +104,11 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       } else {
         throw new IOException("No configurations found for " + request.getResource());
       }
-
     } catch (ReportException e) {
       throw new ServletException("Exception extracting report to CSV", e);
     } finally {
       IOUtils.closeQuietly(writer);
     }
-
   }
 
   private List<ReportCellCSVExporter> writeHeaders(SlingHttpServletRequest request, final Csv csv) throws IOException {
@@ -122,9 +119,9 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
       if (!StringUtils.isEmpty(className)) {
         try {
           log.debug("Finding ReportCellCSVExporter for {}", className);
-          @SuppressWarnings({"unchecked", "squid:S2658"}) // class name is from a trusted source
-          Class<ReportCellCSVExporter> clazz =
-                  (Class<ReportCellCSVExporter>) Class.forName(className, true, dynamicClassLoaderManager.getDynamicClassLoader());
+          @SuppressWarnings({ "unchecked", "squid:S2658" }) // class name is from a trusted source
+          Class<ReportCellCSVExporter> clazz = (Class<ReportCellCSVExporter>) Class.forName(className, true,
+              dynamicClassLoaderManager.getDynamicClassLoader());
           ReportCellCSVExporter exporter = column.adaptTo(clazz);
           log.debug("Loaded ReportCellCSVExporter {}", exporter);
           if (exporter != null) {
@@ -147,29 +144,28 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
     Class<?> executorClass = ReportExecutorProvider.INSTANCE.getReportExecutor(dynamicClassLoaderManager, config);
 
     ReportExecutor executor = Optional.ofNullable(request.adaptTo(executorClass))
-        .filter(model -> model instanceof ReportExecutor)
-        .map(model -> (ReportExecutor) model)
+        .filter(model -> model instanceof ReportExecutor).map(model -> (ReportExecutor) model)
         .orElseThrow(() -> new ReportException("Failed to get report executor"));
 
     executor.setConfiguration(config);
     log.debug("Retrieved executor {}", executor);
 
     ResultsPage queryResult = executor.getAllResults();
-    List<? extends Object> results = queryResult.getResults();
-    log.debug("Retrieved {} results", results.size());
+    Stream<? extends Object> results = queryResult.getResults();
+    log.debug("Retrieved {} results", queryResult.getResultSize());
 
-    for (Object result : results) {
+    results.forEach(r -> {
       List<String> row = new ArrayList<>();
       try {
         for (ReportCellCSVExporter exporter : exporters) {
-          row.add(exporter.getValue(result));
+          row.add(exporter.getValue(r));
         }
         csv.writeRow(row.toArray(new String[row.size()]));
         writer.flush();
       } catch (Exception e) {
         log.warn("Exception writing row: " + row, e);
       }
-    }
+    });
 
     log.debug("Results written successfully");
 
