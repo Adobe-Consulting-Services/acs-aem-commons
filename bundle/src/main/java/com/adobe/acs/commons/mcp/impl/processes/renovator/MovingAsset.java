@@ -67,13 +67,15 @@ public class MovingAsset extends MovingNode {
             session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
             session.move(getSourcePath(), getDestinationPath());
             session.save();
-            if (session.nodeExists(getDestinationPath())) {
+            if (Util.resourceExists(rr, getDestinationPath())) {
                 Node originalAssetJcrContentNode = session
                         .getNode(getDestinationPath() + "/" + JcrConstants.JCR_CONTENT);
-
-                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
-                JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
-                        DEFAULT_LAST_MODIFIED_BY);
+                if (originalAssetJcrContentNode!=null) {
+                     JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
+                     JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
+                             DEFAULT_LAST_MODIFIED_BY);
+                }
+               
             }
             updateReferences(replicatorQueue, rr);
         } catch (RepositoryException e) {
