@@ -86,7 +86,7 @@ public class MovingAsset extends MovingNode {
             if (val != null && val.equals(getSourcePath())) {
                 map.put(key, getDestinationPath());
                 changedProperty.set(true);
-            } else if (val instanceof Object[]) {
+            } else if (val instanceof String[]) {
                 updateMultiValuedReferences(key, val, session, map, changedProperty, ref);
             }
         });
