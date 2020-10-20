@@ -80,6 +80,10 @@ public class ReportCSVExportServlet extends SlingSafeMethodsServlet {
     Writer writer = null;
     try {
       writer = response.getWriter();
+
+      // write the BOM to indicate this is a UTF-8 file
+      writer.write("\uFEFF");
+
       // initialize the csv
       final Csv csv = new Csv();
       csv.writeInit(writer);
