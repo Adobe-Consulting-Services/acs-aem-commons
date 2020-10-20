@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2441 - Memory Exhaustion with Large Report Download
+- #2450 - Non-Latin letters shown as "?" in the downloaded report
+- #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
 
 ## 4.8.6 - 2020-10-13
 
