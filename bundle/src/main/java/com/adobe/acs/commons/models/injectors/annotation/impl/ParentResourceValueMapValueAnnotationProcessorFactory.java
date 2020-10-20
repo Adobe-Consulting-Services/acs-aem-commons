@@ -47,6 +47,7 @@ public class ParentResourceValueMapValueAnnotationProcessorFactory implements St
 
     private static class ParentResourceValueMapValueAnnotationProcessor extends AbstractInjectAnnotationProcessor2 {
         private final ParentResourceValueMapValue annotation;
+
         public ParentResourceValueMapValueAnnotationProcessor(final ParentResourceValueMapValue annotation) {
             this.annotation = annotation;
         }
