@@ -287,13 +287,13 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
         Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
 
-        for (String key : map.keySet()) {
-            String matchingPatternString = map.get(key);
+        for (Map.Entry<String,String> entry : map.entrySet()) {
+            String matchingPatternString = entry.getValue();
             try {
                 Pattern compiled = Pattern.compile(matchingPatternString);
-                result.put(key, compiled);
+                result.put(entry.getKey(), compiled);
             } catch (Exception e) {
-                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
+                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, entry.getKey());
             }
         }
         return result;
