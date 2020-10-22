@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2020 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package com.adobe.acs.commons.models.injectors.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.ParentResourceValueMapValue;
 import com.day.cq.wcm.api.NameConstants;
-import com.day.cq.wcm.foundation.forms.MergedValueMap;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.spi.DisposalCallbackRegistry;
@@ -31,8 +31,6 @@ import org.osgi.service.component.annotations.Component;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Injects the parent component property
@@ -47,7 +45,12 @@ public class ParentResourceValueMapValueInjector implements Injector {
 
     @Override
     public Object getValue(Object adaptable, String name, Type type, AnnotatedElement annotatedElement, DisposalCallbackRegistry disposalCallbackRegistry) {
+        if (!annotatedElement.isAnnotationPresent(ParentResourceValueMapValue.class)) {
+            return null;
+        }
+
         Integer maxLevel = annotatedElement.getAnnotation(ParentResourceValueMapValue.class).maxLevel();
+
         if (adaptable instanceof Resource) {
             return getInheritedProperty((Resource)adaptable, name, type, maxLevel);
 
@@ -67,12 +70,14 @@ public class ParentResourceValueMapValueInjector implements Injector {
      * @return Object
      */
     private Object getInheritedProperty(Resource resource, String propertyName, Type declaredType, Integer maxLevel) {
-        List<Resource> parentResources = new ArrayList<>();
         int count = 0;
         Resource parentResource = resource.getParent();
         do {
             if (parentResource != null && !parentResource.getResourceType().equals(NameConstants.NT_PAGE)) {
-                parentResources.add(resource.getParent());
+                Object value = parentResource.getValueMap().get(propertyName, (Class<?>)declaredType);
+                if (ObjectUtils.anyNotNull(value)) {
+                    return value;
+                }
                 count++;
             } else {
                 break;
@@ -80,6 +85,6 @@ public class ParentResourceValueMapValueInjector implements Injector {
             parentResource = parentResource.getParent();
         }
         while (count < maxLevel || maxLevel <= 0);
-        return new MergedValueMap(parentResources).get(propertyName, (Class<?>) declaredType);
+        return null;
     }
 }

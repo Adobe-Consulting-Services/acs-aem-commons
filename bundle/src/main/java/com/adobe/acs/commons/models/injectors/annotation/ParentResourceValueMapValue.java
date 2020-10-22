@@ -2,7 +2,7 @@
  * #%L
  * ACS AEM Commons Bundle
  * %%
- * Copyright (C) 2018 Adobe
+ * Copyright (C) 2020 Adobe
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Source(ParentResourceValueMapValue.SOURCE)
 public @interface ParentResourceValueMapValue {
 
-    String SOURCE = "inherited-property";
+    String SOURCE = "parent-valuemap-value";
 
     InjectionStrategy injectionStrategy();
 
