@@ -35,6 +35,9 @@ public class TestParentResourceValueMapValueModelImpl implements TestParentResou
     @ParentResourceValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, maxLevel = 1)
     private String stringProperty;
 
+    @ParentResourceValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, maxLevel = 1)
+    private String stringLevel2Property;
+
     @ParentResourceValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL)
     private Boolean booleanProperty;
 
@@ -44,6 +47,11 @@ public class TestParentResourceValueMapValueModelImpl implements TestParentResou
     @Override
     public String getStringProperty() {
         return stringProperty;
+    }
+
+    @Override
+    public String getStringLevel2Property() {
+        return stringLevel2Property;
     }
 
     @Override

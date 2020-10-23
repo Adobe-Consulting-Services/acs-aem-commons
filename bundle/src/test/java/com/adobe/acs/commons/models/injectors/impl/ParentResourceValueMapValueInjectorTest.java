@@ -41,7 +41,7 @@ public class ParentResourceValueMapValueInjectorTest {
         this.aemContext.registerInjectActivateService(new ParentResourceValueMapValueInjector());
         this.aemContext.create().page("/content/mysite/en/mypage");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3", "prop", "val3");
-        this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2", "booleanProperty", true);
+        this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2", "booleanProperty", true, "stringLevel2Property", "stringLevel2Value");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1", "stringProperty", "stringValue");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1/mycomponent", "property1", "value1", "property2", "value2");
         this.aemContext.currentResource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1/mycomponent");
@@ -53,7 +53,11 @@ public class ParentResourceValueMapValueInjectorTest {
         TestParentResourceValueMapValueModel model = this.aemContext.currentResource().adaptTo(TestParentResourceValueMapValueModel.class);
         assertNotNull(model);
         assertEquals("stringValue", model.getStringProperty());
+        // Return null if the max-level is specified as 1 but the property is available at level 2
+        assertNull(model.getStringLevel2Property());
+        // Returns the property by iterating through all the parent resources if the max-level is not specified and set to default (-1)
         assertTrue(model.getBooleanProperty());
+        // Returns null if the property is not found
         assertNull(model.getStringProperties());
     }
 
@@ -62,6 +66,7 @@ public class ParentResourceValueMapValueInjectorTest {
         TestParentResourceValueMapValueModel model = this.aemContext.request().adaptTo(TestParentResourceValueMapValueModel.class);
         assertNotNull(model);
         assertEquals("stringValue", model.getStringProperty());
+        assertNull(model.getStringLevel2Property());
         assertTrue(model.getBooleanProperty());
         assertNull(model.getStringProperties());
     }
