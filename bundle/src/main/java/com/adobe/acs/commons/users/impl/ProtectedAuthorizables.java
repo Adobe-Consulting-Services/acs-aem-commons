@@ -159,6 +159,7 @@ public final class ProtectedAuthorizables {
                 "acs-commons-review-task-asset-mover-service",
                 "acs-commons-httpcache-jcr-storage-service",
                 "acs-commons-manage-controlled-processes-service",
+                "acs-commons-resource-type-dispatcher-header-filter",
 
                 /** AEM Groups **/
 
