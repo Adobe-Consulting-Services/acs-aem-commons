@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.models.injectors.annotation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.Source;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotation;
@@ -43,7 +44,9 @@ public @interface ParentResourceValueMapValue {
 
     String SOURCE = "parent-valuemap-value";
 
-    InjectionStrategy injectionStrategy();
+    String name() default StringUtils.EMPTY;
+
+    InjectionStrategy injectionStrategy() default InjectionStrategy.DEFAULT;
 
     int maxLevel() default -1;
 }

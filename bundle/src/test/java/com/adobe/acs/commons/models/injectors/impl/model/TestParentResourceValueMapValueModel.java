@@ -25,6 +25,8 @@ public interface TestParentResourceValueMapValueModel {
 
     String getStringLevel2Property();
 
+    String getTitle();
+
     Boolean getBooleanProperty();
 
     String[] getStringProperties();

@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.models.injectors.annotation.impl;
 
 import com.adobe.acs.commons.models.injectors.annotation.ParentResourceValueMapValue;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.models.annotations.injectorspecific.InjectionStrategy;
 import org.apache.sling.models.spi.injectorspecific.AbstractInjectAnnotationProcessor2;
 import org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessor2;
@@ -50,6 +51,11 @@ public class ParentResourceValueMapValueAnnotationProcessorFactory implements St
 
         public ParentResourceValueMapValueAnnotationProcessor(final ParentResourceValueMapValue annotation) {
             this.annotation = annotation;
+        }
+
+        @Override
+        public String getName() {
+            return StringUtils.isNotBlank(annotation.name()) ? annotation.name() : super.getName();
         }
 
         @Override

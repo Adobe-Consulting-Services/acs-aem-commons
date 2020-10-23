@@ -41,7 +41,7 @@ public class ParentResourceValueMapValueInjectorTest {
         this.aemContext.registerInjectActivateService(new ParentResourceValueMapValueInjector());
         this.aemContext.create().page("/content/mysite/en/mypage");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3", "prop", "val3");
-        this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2", "booleanProperty", true, "stringLevel2Property", "stringLevel2Value");
+        this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2", "booleanProperty", true, "stringLevel2Property", "stringLevel2Value", "jcr:title","Parent 2 Resource Title");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1", "stringProperty", "stringValue");
         this.aemContext.create().resource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1/mycomponent", "property1", "value1", "property2", "value2");
         this.aemContext.currentResource("/content/mysite/en/mypage/jcr:content/parent3/parent2/parent1/mycomponent");
@@ -55,6 +55,8 @@ public class ParentResourceValueMapValueInjectorTest {
         assertEquals("stringValue", model.getStringProperty());
         // Return null if the max-level is specified as 1 but the property is available at level 2
         assertNull(model.getStringLevel2Property());
+        // Testing with name parameter of the annotation
+        assertEquals("Parent 2 Resource Title", model.getTitle());
         // Returns the property by iterating through all the parent resources if the max-level is not specified and set to default (-1)
         assertTrue(model.getBooleanProperty());
         // Returns null if the property is not found
@@ -67,6 +69,7 @@ public class ParentResourceValueMapValueInjectorTest {
         assertNotNull(model);
         assertEquals("stringValue", model.getStringProperty());
         assertNull(model.getStringLevel2Property());
+        assertEquals("Parent 2 Resource Title", model.getTitle());
         assertTrue(model.getBooleanProperty());
         assertNull(model.getStringProperties());
     }
