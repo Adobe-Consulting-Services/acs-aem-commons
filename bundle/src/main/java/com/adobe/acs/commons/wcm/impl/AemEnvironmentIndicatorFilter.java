@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.adobe.acs.commons.util.BufferedHttpServletResponse;
 import com.adobe.acs.commons.util.BufferedServletOutput.ResponseWriteMethod;
 import com.day.cq.wcm.api.WCMMode;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -44,13 +46,31 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.engine.EngineConstants;
 import org.apache.sling.xss.XSSAPI;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/**
+ * 
+ * The Environment filter consists of 2 filters:
+ * * the environment filter, which is registered directly to the HTTP whiteboard, and which can cover
+ *   also non-Sling applications (like CRXDE and the OSGI webconsole)
+ * * a Sling filter, which is required for the filtering based on the WCM modes.
+ * 
+ * The environment indicator output is written by the "outer" filter, but its decision might be overwritten
+ * by the Sling Filter. The status is stored as a request attribute.
+ * 
+ *
+ */
+
 
 @Component(
         label = "ACS AEM Commons - AEM Environment Indicator",
@@ -61,6 +81,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AemEnvironmentIndicatorFilter.class);
 
     private static final String DIV_ID = "acs-commons-env-indicator";
+    
+    static final String INJECT_INDICATOR_PARAMETER = "AemEnvironmentIndicatorFilter.includeIndicator";
 
     private static final String BASE_DEFAULT_STYLE =
             ";background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NDkxMSwgMjAxMy8xMC8yOS0xMTo0NzoxNiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5ZmViMDk1Ni00MTMwLTQ0NGMtYWM3Ny02MjU0NjY0OTczZWIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MDk4RTBGQkYzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MDk4RTBGQkUzMjA5MTFFNDg5MDFGQzVCQkEyMjY0NDQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6Mjc5NmRkZmItZDVlYi00N2RlLWI1NDMtNDgxNzU2ZjIwZDc1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjlmZWIwOTU2LTQxMzAtNDQ0Yy1hYzc3LTYyNTQ2NjQ5NzNlYiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ps64/vsAAAAkSURBVHjaYvz//z8DGjBmAAkiYWOwInQBZEFjZB0YAiAMEGAAVBk/wkPTSYQAAAAASUVORK5CYII=');"
@@ -155,6 +177,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     private String css = "";
 
     private ServiceRegistration filterRegistration;
+    
+    private ServiceRegistration innerFilterRegistration;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -183,6 +207,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         try (BufferedHttpServletResponse capturedResponse =
                 new BufferedHttpServletResponse(response, new StringWriter(), null)) {
 
+            request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.TRUE);
+
             log.debug("Executing the rest of the filter chain");
             filterChain.doFilter(request, capturedResponse);
             log.debug("Executing the rest of the filter chain");
@@ -193,10 +219,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                             ? capturedResponse.getBufferedServletOutput().getBufferedString()
                             : null;
 
-            
-                            
             if (contents != null
-                    && StringUtils.contains(response.getContentType(), "html")) {
+                    && StringUtils.contains(response.getContentType(), "html")
+                    && innerFilterAcceptsInjection(request)) {
 
                 final int bodyIndex = contents.indexOf("</body>");
 
@@ -214,12 +239,15 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 } 
             } else {
                 if (contents != null) {
-                    response.setContentLength(contents.length());
                     final PrintWriter printWriter = response.getWriter();
                     printWriter.write(contents);
                 }
             }
         }
+    }
+    
+    boolean innerFilterAcceptsInjection(HttpServletRequest request) {
+        return request.getAttribute(INJECT_INDICATOR_PARAMETER).equals(Boolean.TRUE);
     }
 
     void writeEnvironmentIndicator(String css, String innerHTML, String titlePrefix,
@@ -256,11 +284,8 @@ public class AemEnvironmentIndicatorFilter implements Filter {
         } else if (hasAemEditorReferrer(request.getHeader("Referer"), request.getRequestURI())) {
             log.debug("Request was for a page in an editor");
             return false;
-        } else if (isDisallowedWcmMode(getWcmMode(request), excludedWCMModes)) {
-            log.debug("WCMMode was a disallowed mode");
-            return false;
         }
-
+        // Checking for WcmMode does not make sense, it is not available here
         log.debug("All checks pass, filter can execute");
         return true;
     }
@@ -282,11 +307,6 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                 || StringUtils.endsWith(headerValue, "/cf");
     }
     
-    boolean isDisallowedWcmMode(WCMMode currentMode, String[] excludedWcmModes) {
-        return currentMode == null
-                || StringUtils.equalsAnyIgnoreCase(currentMode.name(), excludedWcmModes);
-    }
-
     @Activate
     @SuppressWarnings("squid:S1149")
     protected final void activate(ComponentContext ctx) {
@@ -320,6 +340,9 @@ public class AemEnvironmentIndicatorFilter implements Filter {
 
         titlePrefix = xss.encodeForJSString(
                 PropertiesUtil.toString(config.get(PROP_TITLE_PREFIX), "").toString());
+        
+        excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
+                DEFAULT_EXCLUDED_WCMMODES);
 
         if (StringUtils.isNotBlank(css) || StringUtils.isNotBlank(titlePrefix)) {
             Dictionary<String, String> filterProps = new Hashtable<String, String>();
@@ -328,10 +351,14 @@ public class AemEnvironmentIndicatorFilter implements Filter {
                     "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             filterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(),
                     this, filterProps);
+            
+            // Register the innerFilter so it is invoked after the WcmRequestFilter (Ranking = 2000)
+            Dictionary<String, Object> innerFilterProps = new Hashtable<>();
+            innerFilterProps.put(EngineConstants.SLING_FILTER_SCOPE,EngineConstants.FILTER_SCOPE_REQUEST);
+            innerFilterProps.put(Constants.SERVICE_RANKING, 1000);
+            Filter innerFilter = new InnerEnvironmentIndicatorFilter(excludedWCMModes);
+            innerFilterRegistration = ctx.getBundleContext().registerService(Filter.class.getName(), innerFilter, innerFilterProps);
         }
-
-        excludedWCMModes = PropertiesUtil.toStringArray(config.get(PROP_EXCLUDED_WCMMODES),
-                DEFAULT_EXCLUDED_WCMMODES);
     }
 
     String createBaseCss() {
@@ -362,6 +389,10 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterRegistration.unregister();
             filterRegistration = null;
         }
+        if (innerFilterRegistration != null) {
+            innerFilterRegistration.unregister();
+            innerFilterRegistration = null;
+        }
 
         // Reset CSS variable
         css = "";
@@ -381,8 +412,46 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     String getTitlePrefix() {
         return titlePrefix;
     }
+    
+    protected static class InnerEnvironmentIndicatorFilter implements Filter {
 
-    String[] getExcludedWCMModes() {
-        return excludedWCMModes;
+        String[] excludedWcmModes;
+
+        public InnerEnvironmentIndicatorFilter(String[] excludedWcmModes) {
+            this.excludedWcmModes = excludedWcmModes;
+        }
+
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+            // ignore
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+
+            SlingHttpServletRequest req = (SlingHttpServletRequest) request;
+
+            WCMMode mode = WCMMode.fromRequest(request);
+            if (isDisallowedWcmMode(mode, excludedWcmModes)) {
+                request.setAttribute(INJECT_INDICATOR_PARAMETER, Boolean.FALSE);
+                String msg = String.format(
+                        "reject inclusion of environment indicator, found wcmmode '%s' in exclusion list %s",
+                        mode.name(), ArrayUtils.toString(excludedWcmModes));
+                req.getRequestProgressTracker().log(msg);
+            }
+            chain.doFilter(request, response);
+        }
+
+        boolean isDisallowedWcmMode(WCMMode currentMode, String[] excludedWcmModes) {
+            return currentMode == null || StringUtils.equalsAnyIgnoreCase(currentMode.name(), excludedWcmModes);
+        }
+
+        @Override
+        public void destroy() {
+            // ignore
+        }
+
     }
+    
 }
