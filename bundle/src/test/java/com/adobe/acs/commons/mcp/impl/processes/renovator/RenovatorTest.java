@@ -39,6 +39,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import javax.jcr.RepositoryException;
@@ -172,6 +174,23 @@ public class RenovatorTest {
         asset.updateReferences(queue, rr, "/test");
         assertEquals("/target", test1.get("attr1"));
         assertEquals("/target", test2.get("attr2"));
+    }
+    
+    @Test
+    public void testUpdateMultiValuedReferences() throws RepositoryException, PersistenceException, LoginException, IllegalAccessException {
+        final ModifiableValueMap test1 = rr.resolve("/test").adaptTo(ModifiableValueMap.class);
+        final ModifiableValueMap test2 = rr.resolve("/test/child1").adaptTo(ModifiableValueMap.class);
+        final Session session = rr.adaptTo(Session.class);
+        final AtomicBoolean changedProperty = new AtomicBoolean(false);
+        MovingAsset asset = new MovingAsset();
+        asset.setSourcePath("/source");
+        asset.setDestinationPath("/target");
+        test1.put("attr1", new String[] {"/source", "/someOtherPath1"});
+        test2.put("attr2", new String[] {"/someOtherPath1", "/source", "/someOtherPath2"});
+        asset.updateMultiValuedReferences("attr1", test1.get("attr1"), session, test1, changedProperty, "/test");
+        asset.updateMultiValuedReferences("attr2", test2.get("attr2"), session, test2, changedProperty, "/test");
+        assertTrue(Arrays.asList((String[]) test1.get("attr1")).contains("/target"));
+        assertTrue(Arrays.asList((String[]) test2.get("attr2")).contains("/target"));
     }
 
     @Test

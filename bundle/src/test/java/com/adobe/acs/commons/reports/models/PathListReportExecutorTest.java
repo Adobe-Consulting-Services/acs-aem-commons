@@ -21,16 +21,15 @@ package com.adobe.acs.commons.reports.models;
 
 import com.adobe.acs.commons.reports.api.ReportException;
 import com.adobe.acs.commons.reports.api.ResultsPage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +77,8 @@ public class PathListReportExecutorTest {
         testExtractedPaths(HANDLEBARS_PARAM, params);
     }
 
-    private void testExtractedPaths(final String pathAreaContent, final HashMap<String, String> params) throws ReportException {
+    private void testExtractedPaths(final String pathAreaContent, final HashMap<String, String> params)
+            throws ReportException {
         PathListReportExecutor reportExecutor = spy(new PathListReportExecutor());
         doReturn(params).when(reportExecutor).getParamPatternMap(any());
 
@@ -93,31 +93,49 @@ public class PathListReportExecutorTest {
     @Test
     public void testGetAllResults() throws ReportException {
         ResultsTestObject resultsTestObject = new ResultsTestObject(50, 0, TEST_PATHS, TEST_PATHS).configure();
-        assertEquals(resultsTestObject.getResultsPage(), resultsTestObject.getReportExecutor().getAllResults());
+        ResultsPage results = resultsTestObject.getResultsPage();
+        assertEquals(5, results.getResultSize());
+        assertEquals(-1, results.getNextPage());
+        assertEquals(-1, results.getPreviousPage());
     }
 
     @Test
     public void testGetResultsAllItemsInFirstPage() throws ReportException {
         ResultsTestObject resultsTestObject = new ResultsTestObject(50, 0, TEST_PATHS, TEST_PATHS).configure();
-        assertEquals(resultsTestObject.getResultsPage(), resultsTestObject.getReportExecutor().getResults());
+        ResultsPage results = resultsTestObject.getResultsPage();
+        assertEquals(5, results.getResultSize());
+        assertEquals(-1, results.getNextPage());
+        assertEquals(-1, results.getPreviousPage());
     }
 
     @Test
     public void testGetResultsFirstPageWhenMoreAvailable() throws ReportException {
-        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 0, TEST_PATHS, TEST_PATHS.subList(0, 2)).configure();
-        assertEquals(resultsTestObject.getResultsPage(), resultsTestObject.getReportExecutor().getResults());
+        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 0, TEST_PATHS, TEST_PATHS.subList(0, 2))
+                .configure();
+        ResultsPage results = resultsTestObject.getResultsPage();
+        assertEquals(2, results.getResultSize());
+        assertEquals(1, results.getNextPage());
+        assertEquals(-1, results.getPreviousPage());
     }
 
     @Test
     public void testGetResultsLastPageWhenMoreAvailable() throws ReportException {
-        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 2, TEST_PATHS, TEST_PATHS.subList(4, 5)).configure();
-        assertEquals(resultsTestObject.getResultsPage(), resultsTestObject.getReportExecutor().getResults());
+        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 2, TEST_PATHS, TEST_PATHS.subList(4, 5))
+                .configure();
+        ResultsPage results = resultsTestObject.getResultsPage();
+        assertEquals(1, results.getResultSize());
+        assertEquals(-1, results.getNextPage());
+        assertEquals(1, results.getPreviousPage());
     }
 
     @Test
     public void testGetResultsMiddlePageWhenMoreAvailable() throws ReportException {
-        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 1, TEST_PATHS, TEST_PATHS.subList(2, 4)).configure();
-        assertEquals(resultsTestObject.getResultsPage(), resultsTestObject.getReportExecutor().getResults());
+        ResultsTestObject resultsTestObject = new ResultsTestObject(2, 1, TEST_PATHS, TEST_PATHS.subList(2, 4))
+                .configure();
+        ResultsPage results = resultsTestObject.getResultsPage();
+        assertEquals(2, results.getResultSize());
+        assertEquals(2, results.getNextPage());
+        assertEquals(0, results.getPreviousPage());
     }
 
     @Test
@@ -164,6 +182,17 @@ public class PathListReportExecutorTest {
         assertEquals(0, executor.currentPage);
     }
 
+    @Test
+    public void testSetPageReturnsPositiveNumbers() {
+        PathListReportExecutor executor = new PathListReportExecutor();
+
+        executor.setPage(10);
+        assertEquals(10, executor.currentPage);
+        executor.setPage(0);
+        assertEquals(0, executor.currentPage);
+    }
+
+
     private class ResultsTestObject {
         private final List<String> providedPaths;
         private final List<String> expectedPaths;
@@ -172,17 +201,16 @@ public class PathListReportExecutorTest {
         private int pageSize;
         private final int expectedCurrentPage;
 
-        ResultsTestObject(final int pageSize, final int expectedCurrentPage,
-                          final List<String> providedPaths, final List<String> expectedPaths) {
+        ResultsTestObject(final int pageSize, final int expectedCurrentPage, final List<String> providedPaths,
+                final List<String> expectedPaths) {
             this.pageSize = pageSize;
             this.expectedCurrentPage = expectedCurrentPage;
             this.providedPaths = providedPaths;
             this.expectedPaths = expectedPaths;
         }
 
-
-        ResultsPage getResultsPage() {
-            return resultsPage;
+        ResultsPage getResultsPage() throws ReportException {
+            return reportExecutor.getResults();
         }
 
         PathListReportExecutor getReportExecutor() {
@@ -202,7 +230,8 @@ public class PathListReportExecutorTest {
                 expectedResources.add(resource);
             }
 
-            resultsPage = new ResultsPage(expectedResources, pageSize, expectedCurrentPage);
+            resultsPage = new ResultsPage(expectedResources.stream(), pageSize, expectedCurrentPage,
+                    expectedResources.size());
 
             reportExecutor = new PathListReportExecutor() {
                 @Override
