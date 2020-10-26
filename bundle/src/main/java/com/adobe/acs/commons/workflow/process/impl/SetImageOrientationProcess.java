@@ -81,10 +81,6 @@ public class SetImageOrientationProcess implements WorkflowProcess {
             + "default properties:orientation/square";
 
 
-    private static final String DEFAULT = "default";
-    private static final String LT = "<";
-    private static final String GT = ">";
-
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) {
 
         Configuration config = new Configuration(metaDataMap);
@@ -182,14 +178,14 @@ public class SetImageOrientationProcess implements WorkflowProcess {
 
     private String getTagId(Configuration config, float ratio) {
         for (ConfigRule rule : config.getConfig()) {
-            if (rule.operator.equals(GT) && ratio > rule.limit) {
+            if (rule.operator.equals(Configuration.GT) && ratio > rule.limit) {
                 return rule.tagId;
             }
-            if (rule.operator.equals(LT) && ratio < rule.limit) {
+            if (rule.operator.equals(Configuration.LT) && ratio < rule.limit) {
                 return rule.tagId;
             }
 
-            if (rule.operator.equals(DEFAULT)) {
+            if (rule.operator.equals(Configuration.DEFAULT)) {
                 return rule.tagId;
             }
 
@@ -201,7 +197,11 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     /**
      * Inner class for parsing and storing workflow step configuration
      */
-    static class Configuration {
+    public class Configuration {
+
+        public static final String DEFAULT = "default";
+        public static final String LT = "<";
+        public static final String GT = ">";
 
         private final List<ConfigRule> config;
 
