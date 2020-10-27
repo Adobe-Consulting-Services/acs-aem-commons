@@ -56,14 +56,19 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractDispatcherCacheHeaderFilter.class);
 
     public static final String PROP_FILTER_PATTERN = "filter.pattern";
-    public static final String PROP_IGNORE_PARAMS = "ignore.params";
+    public static final String PROP_ALLOW_ALL_PARAMS = "allow.all.params";
+    public static final String PROP_PASS_THROUGH_PARAMS = "pass.through.params";
+    public static final String PROP_BLOCK_PARAMS = "block.params";
 
     protected static final String SERVER_AGENT_NAME = "Server-Agent";
 
     protected static final String DISPATCHER_AGENT_HEADER_VALUE = "Communique-Dispatcher";
 
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
-    private List<String> ignoreParams;
+
+    private boolean allowAllParams;
+    private List<String> passThroughParams;
+    private List<String> blockParams;
 
     /**
      * Get the value to place in the Cache-Control header.
@@ -78,15 +83,6 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
      * @return the value of the Cache-Control header
      */
     protected abstract String getHeaderValue();
-
-    /**
-     * Parameters that still allows the cache header to be served
-     *
-     * @return A list of optional parameters that can be ignored when serving the expires / cache control header
-     */
-    protected List<String> getIgnoreParams() {
-        return ignoreParams;
-    }
 
 
     /*
@@ -145,7 +141,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         // - No Params
         // - From Dispatcher
         if (StringUtils.equalsIgnoreCase("get", request.getMethod())
-                && hasNoParameters(request)
+                && hasValidParameters(request)
                 && serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
 
             return true;
@@ -153,8 +149,11 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         return false;
     }
 
-    private boolean hasNoParameters(HttpServletRequest request) {
-        return request.getParameterMap().isEmpty() || getIgnoreParams().containsAll(request.getParameterMap().keySet());
+    private boolean hasValidParameters(HttpServletRequest request) {
+        if (allowAllParams) {
+            return blockParams.stream().noneMatch(blockParam -> request.getParameterMap().containsKey(blockParam));
+        }
+        return request.getParameterMap().isEmpty() || passThroughParams.containsAll(request.getParameterMap().keySet());
     }
 
     @Activate
@@ -169,7 +168,9 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             throw new ConfigurationException(PROP_FILTER_PATTERN, "At least one filter pattern must be specified.");
         }
 
-        ignoreParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_IGNORE_PARAMS), new String[0]));
+        allowAllParams = PropertiesUtil.toBoolean(properties.get(PROP_ALLOW_ALL_PARAMS), false);
+        passThroughParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_BLOCK_PARAMS), new String[0]));
+        blockParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_BLOCK_PARAMS), new String[0]));
 
         for (String pattern : filters) {
             Dictionary<String, Object> filterProps = new Hashtable<String, Object>();

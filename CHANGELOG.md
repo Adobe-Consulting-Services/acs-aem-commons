@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2441 - Memory Exhaustion with Large Report Download
 - #2450 - Non-Latin letters shown as "?" in the downloaded report
 - #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
-- #2457 - Allow ignore params to be defined for dispatcher ttl files
+- #2457 - Allow pass through params, block params and allow all params to be defined for serving dispatcher ttl files
 
 ## 4.8.6 - 2020-10-13
 
