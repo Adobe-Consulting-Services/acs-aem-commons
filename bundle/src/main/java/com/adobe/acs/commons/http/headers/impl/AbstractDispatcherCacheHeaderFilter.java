@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -55,26 +56,38 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(AbstractDispatcherCacheHeaderFilter.class);
 
     public static final String PROP_FILTER_PATTERN = "filter.pattern";
+    public static final String PROP_IGNORE_PARAMS = "ignore.params";
 
     protected static final String SERVER_AGENT_NAME = "Server-Agent";
 
     protected static final String DISPATCHER_AGENT_HEADER_VALUE = "Communique-Dispatcher";
 
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
+    private List<String> ignoreParams;
 
     /**
      * Get the value to place in the Cache-Control header.
-     * 
+     *
      * @return the value of the Cache-Control header
      */
     protected abstract String getHeaderName();
 
     /**
      * Get the value to place in the Cache-Control header.
-     * 
+     *
      * @return the value of the Cache-Control header
      */
     protected abstract String getHeaderValue();
+
+    /**
+     * Parameters that still allows the cache header to be served
+     *
+     * @return A list of optional parameters that can be ignored when serving the expires / cache control header
+     */
+    protected List<String> getIgnoreParams() {
+        return ignoreParams;
+    }
+
 
     /*
      * Allow sub-classes to process their own activation logic.
@@ -90,7 +103,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
     @Override
     public final void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
-            final FilterChain filterChain) throws IOException, ServletException {
+                               final FilterChain filterChain) throws IOException, ServletException {
 
         if (!(servletRequest instanceof HttpServletRequest) || !(servletResponse instanceof HttpServletResponse)) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -132,12 +145,16 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         // - No Params
         // - From Dispatcher
         if (StringUtils.equalsIgnoreCase("get", request.getMethod())
-                && request.getParameterMap().isEmpty()
+                && hasNoParameters(request)
                 && serverAgents.contains(DISPATCHER_AGENT_HEADER_VALUE)) {
 
             return true;
         }
         return false;
+    }
+
+    private boolean hasNoParameters(HttpServletRequest request) {
+        return request.getParameterMap().isEmpty() || getIgnoreParams().containsAll(request.getParameterMap().keySet());
     }
 
     @Activate
@@ -152,8 +169,10 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             throw new ConfigurationException(PROP_FILTER_PATTERN, "At least one filter pattern must be specified.");
         }
 
+        ignoreParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_IGNORE_PARAMS), new String[0]));
+
         for (String pattern : filters) {
-            Dictionary<String, String> filterProps = new Hashtable<String, String>();
+            Dictionary<String, Object> filterProps = new Hashtable<String, Object>();
 
             log.debug("Adding filter ({}) to pattern: {}", this, pattern);
             filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
@@ -163,10 +182,11 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         }
     }
 
+
     @Deactivate
     protected final void deactivate(ComponentContext context) {
 
-        for(Iterator<ServiceRegistration> it = filterRegistrations.iterator(); it.hasNext(); ) {
+        for (Iterator<ServiceRegistration> it = filterRegistrations.iterator(); it.hasNext(); ) {
             ServiceRegistration registration = it.next();
             registration.unregister();
             it.remove();
