@@ -169,7 +169,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
         }
 
         allowAllParams = PropertiesUtil.toBoolean(properties.get(PROP_ALLOW_ALL_PARAMS), false);
-        passThroughParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_BLOCK_PARAMS), new String[0]));
+        passThroughParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_PASS_THROUGH_PARAMS), new String[0]));
         blockParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_BLOCK_PARAMS), new String[0]));
 
         for (String pattern : filters) {
