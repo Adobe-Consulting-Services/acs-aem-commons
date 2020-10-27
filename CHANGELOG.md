@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Added
+- #2442 - @ParentResourceValueMapValue injector and annotation
+
 ### Fixed
 - #2441 - Memory Exhaustion with Large Report Download
 - #2450 - Non-Latin letters shown as "?" in the downloaded report
