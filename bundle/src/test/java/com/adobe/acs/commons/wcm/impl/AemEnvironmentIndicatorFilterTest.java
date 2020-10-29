@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -44,6 +46,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import com.day.cq.wcm.api.WCMMode;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.request.RequestProgressTracker;
 import org.apache.sling.xss.XSSAPI;
 import org.junit.Before;
 import org.junit.Rule;
@@ -119,11 +122,8 @@ public class AemEnvironmentIndicatorFilterTest {
     
         filter.doFilter(context.request(), context.response(), chain);
         String response = context.response().getOutputAsString();
-        // assertThat(response).startsWith(
-        // "<html><body>somebody<style>#acs-commons-env-indicator");
         assertTrue(startsWith("<html><body>somebody<style>#acs-commons-env-indicator")
             .matches(response));
-        // assertThat(response).contains("background-color:blue");
         assertTrue(containsString("background-color:blue").matches(response));
     }
   
@@ -173,37 +173,40 @@ public class AemEnvironmentIndicatorFilterTest {
     }
   
     @Test
-    public void testAccept() {
-        AemEnvironmentIndicatorFilter filter = mock(AemEnvironmentIndicatorFilter.class);
-        // remember to call the real .accepts() method
-        when(filter.accepts(any())).thenCallRealMethod();
-    
-        when(filter.isImproperlyConfigured(any(), any()))
-            .thenReturn(true, false);
-        when(filter.isUnsupportedRequestMethod(any()))
-            .thenReturn(true, false);
-        when(filter.isXhr(any()))
-            .thenReturn(true, false);
-        when(filter.hasAemEditorReferrer(any(), any()))
-            .thenReturn(true, false);
-        when(filter.isDisallowedWcmMode(any(), any()))
-            .thenReturn(true, false);
-    
-        SlingHttpServletRequest mockRequest = mock(SlingHttpServletRequest.class);
-    
-        // isImproperlyConfigured returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isUnsupportedRequestMethod returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isAnXhrRequest returns true
-        assertFalse(filter.accepts(mockRequest));
-        // hasAemEditorReferrer returns true
-        assertFalse(filter.accepts(mockRequest));
-        // isDisallowedWcmMode returns true
-        assertFalse(filter.accepts(mockRequest));
-        // all checks return false
-        assertTrue(filter.accepts(mockRequest));
+    public void testAcceptGetRequest() {
+        context.registerInjectActivateService(filter,props); 
+        assertTrue(filter.accepts(context.request()));
     }
+    
+    @Test
+    public void testRejectPostRequests() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setMethod("POST");
+        assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectXhrRequests() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setHeader("X-Requested-With", "XMLHttpRequest");
+        assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectEditorModeRequestClassic() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setHeader("Referer", "/cf");
+        assertFalse(filter.accepts(context.request()));
+    }
+    
+    @Test
+    public void testRejectEditorModeRequestTouch() {
+        context.registerInjectActivateService(filter, props);
+        context.request().setPathInfo("/content/we-retail.html");
+        context.request().setHeader("Referer", "/editor.html/content/we-retail.html");
+        assertFalse(filter.accepts(context.request()));
+    }
+    
   
     @Test
     public void testIsImproperlyConfigured() {
@@ -236,19 +239,7 @@ public class AemEnvironmentIndicatorFilterTest {
         // is /cf
         assertTrue(filter.hasAemEditorReferrer("/cf", "/does-not-matter"));
     }
-  
-    @Test
-    public void testIsDisallowedWcmMode() {
-        String[] excludedWcmModes = {
-            "edit"
-        };
-    
-        // WCMMode does not exist in array
-        assertFalse(filter.isDisallowedWcmMode(WCMMode.DESIGN, excludedWcmModes));
-        // WCMMode exists in array
-        assertTrue(filter.isDisallowedWcmMode(WCMMode.EDIT, excludedWcmModes));
-    }
-  
+
     @Test
     public void testActivate() {
         when(filter.shouldUseBaseCss(anyBoolean(), any(), any())).thenReturn(false);
@@ -318,4 +309,18 @@ public class AemEnvironmentIndicatorFilterTest {
         // "alwaysInclude is false, css not blank
         assertFalse(filter.shouldUseColorCss(false, "css", "color"));
     }
+
+    @Test
+    public void testInnerFilter() throws IOException, ServletException {
+        Filter innerFilter = new AemEnvironmentIndicatorFilter.InnerEnvironmentIndicatorFilter(
+                new String[] { "design" });
+        FilterChain mockChain = mock(FilterChain.class);
+        SlingHttpServletRequest req = spy(context.request());
+        doReturn(mock(RequestProgressTracker.class)).when(req).getRequestProgressTracker();
+        context.request().setAttribute(WCMMode.REQUEST_ATTRIBUTE_NAME, WCMMode.valueOf("DESIGN"));
+        innerFilter.doFilter(req, context.response(), mockChain);
+        assertEquals(Boolean.FALSE, req.getAttribute(AemEnvironmentIndicatorFilter.INJECT_INDICATOR_PARAMETER));
+
+    }
+
 }

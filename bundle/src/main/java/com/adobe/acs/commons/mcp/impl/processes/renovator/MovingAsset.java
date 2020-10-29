@@ -88,13 +88,23 @@ public class MovingAsset extends MovingNode {
     }
 
     void updateReferences(ReplicatorQueue rep, ResourceResolver rr, String ref) {
+        Session session = rr.adaptTo(Session.class);
+        try {
+            session.refresh(true);
+        } catch (RepositoryException e1) {
+            LOG.error("RepositoryException", ref, e1);
+        }
+        rr.refresh();
         Resource res = rr.getResource(ref);
         ModifiableValueMap map = res.adaptTo(ModifiableValueMap.class);
         AtomicBoolean changedProperty = new AtomicBoolean(false);
-        map.forEach((key,val)-> {
+        AtomicBoolean changedMultiValuedProperty = new AtomicBoolean(false);
+        map.forEach((key, val) -> {
             if (val != null && val.equals(getSourcePath())) {
                 map.put(key, getDestinationPath());
                 changedProperty.set(true);
+            } else if (val instanceof Object[]) {
+                updateMultiValuedReferences(key, val, session, map, changedMultiValuedProperty, ref);
             }
         });
         
@@ -105,11 +115,32 @@ public class MovingAsset extends MovingNode {
         }
         
         try {
-            if (changedProperty.get()) {
+            if (changedProperty.get() || changedMultiValuedProperty.get()) {
                 rep.replicate(null, ReplicationActionType.ACTIVATE, ref);
             }
         } catch (ReplicationException ex) {
             LOG.error("Cannot replicate '{}'", ref, ex);
+        }
+    }
+    
+    void updateMultiValuedReferences(String key, Object val, Session session, ModifiableValueMap map, AtomicBoolean changedMultiValuedProperty, String ref) {
+        Object[] valList = (Object[]) val;
+        for (int index = 0; index < valList.length; index++) {
+            Object itm = valList[index];
+            if (itm.equals(getSourcePath())) {
+                valList[index] = getDestinationPath();
+                changedMultiValuedProperty.set(true);
+                map.put(key, valList);
+            }
+        }
+        if (changedMultiValuedProperty.get()) {
+            try {
+                session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
+                session.refresh(true);
+                session.save();
+            } catch (RepositoryException e) {
+                LOG.error("RepositoryException", ref, e);
+            }
         }
     }
 }

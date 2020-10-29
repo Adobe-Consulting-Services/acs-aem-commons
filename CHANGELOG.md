@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Added
+- #2442 - @ParentResourceValueMapValue injector and annotation
+
+### Fixed
+- #2441 - Memory Exhaustion with Large Report Download
+- #2450 - Non-Latin letters shown as "?" in the downloaded report
+- #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
+
 ## 4.8.6 - 2020-10-13
 
 ### Fixed
@@ -16,6 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
+- #2432 - AemEnvironmentFilter: use chunked encoding (fixes #2425)
 - #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
 
 
