@@ -35,11 +35,9 @@ import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.resource.details.AssetDetails;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Reference;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -52,19 +50,10 @@ import java.util.List;
 
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Set Image Orientation",
-        description = "Determine image orientation from width/height and update image tags"
+        property = {
+                "process.label=ACS AEM Commons - Workflow Process - Set Image Orientation",
+        }
 )
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Set Image Orientation",
-                description = "Determine image orientation from width/height and update image tags"
-        )
-})
-@Service
 public class SetImageOrientationProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SetImageOrientationProcess.class);
 
@@ -103,7 +92,11 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                 Resource payloadResource = resourceResolver.resolve(payload);
 
                 Asset asset = DamUtil.resolveToAsset(payloadResource);
-                Resource assetResource = asset.adaptTo(Resource.class);
+                Resource assetResource = null;
+                if (asset != null) {
+                    assetResource = asset.adaptTo(Resource.class);
+                }
+
                 if (assetResource != null) {
                     AssetDetails assetDetails = new AssetDetails(assetResource);
 
@@ -120,14 +113,16 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                             log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
                         }
                     } else {
-                        log.warn("Unable to set tag.");
+                        log.warn("Unable to set orientation tag on asset [ {} ]", asset.getPath());
                     }
+                } else {
+                    log.warn("Unable to access asset resource for payload [ {} ]", payload);
                 }
 
             }
 
         } catch (RepositoryException re) {
-            log.error("Repository Exception", re);
+            log.error("Unable to apply orientation tags for workflow payload [ {} ]", workItem.getWorkflowData().getPayload(), re);
         }
 
     }
@@ -197,7 +192,7 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     /**
      * Inner class for parsing and storing workflow step configuration
      */
-    public class Configuration {
+    private class Configuration {
 
         public static final String DEFAULT = "default";
         public static final String LT = "<";
