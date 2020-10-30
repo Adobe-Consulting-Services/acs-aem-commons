@@ -183,6 +183,35 @@
                     <artifactId>sling-maven-plugin</artifactId>
                     <version>2.4.2</version>
                 </plugin>
+                  <!-- Jackrabbit FileVault Package Plugin -->
+                <plugin>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>filevault-package-maven-plugin</artifactId>
+                    <extensions>true</extensions>
+                    <version>1.1.4</version>
+                    <configuration>
+                        <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                        <properties>
+                            <cloudManagerTarget>none</cloudManagerTarget>
+                        </properties>
+                        <validatorsSettings>
+                            <jackrabbit-nodetypes>
+                                <options>
+                                    <!-- use the nodetypes and namespaces from the aem-nodetypes.jar provided in the plugin dependencies -->
+                                    <cnds>tccl:aem.cnd</cnds>
+                                </options>
+                            </jackrabbit-nodetypes>
+                        </validatorsSettings>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>biz.netcentric.aem</groupId>
+                            <artifactId>aem-nodetypes</artifactId>
+                            <version>6.5.5.0</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <!-- Content Package Plugin -->
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
@@ -795,7 +824,9 @@
     <modules>
         <module>bundle</module>
         <module>oakpal-checks</module>
+        <module>ui.apps.structure</module>
         <module>ui.apps</module>
+        <module>ui.config</module>
         <module>ui.content</module>
         <module>content</module>
     </modules>

@@ -79,20 +79,38 @@
                     <execution>
                         <id>default-package</id>
                         <configuration>
-                            <subPackages>
-                                <subPackage>
+                            <embeddeds>
+                        
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-bundle</artifactId>
+                                    <type>jar</type>
+                                    <filter>true</filter>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>                            
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.config</artifactId>
+                                    <type>zip</type>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>                                
+
+
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <type>zip</type>
                                     <scope>runtime</scope> <!-- this is hacky, but seems to be the easiest way to include the min artifacts since there's no way to specify a blank classifier -->
-                                    <filter>true</filter>
-                                </subPackage>
-                                <subPackage>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
-                                    <scope>runtime</scope>
-                                    <filter>true</filter>
-                                </subPackage>
-                            </subPackages>
+                                    <type>zip</type>
+                                    <scope>runtime</scope> <!-- this is hacky, but seems to be the easiest way to include the min artifacts since there's no way to specify a blank classifier -->
+                                    <target>/apps/acs-commons-packages/content/install</target>
+                                </embedded>                                
+                            </embeddeds>
                         </configuration>
                     </execution>
                     <execution>
@@ -103,20 +121,36 @@
                         </goals>
                         <configuration>
                             <finalName>${project.build.finalName}-min</finalName>
-                            <subPackages>
-                                <subPackage>
+                            <embeddeds>
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>acs-aem-commons-ui.apps</artifactId>
+                                    <artifactId>acs-aem-commons-bundle</artifactId>                                    
+                                    <type>jar</type>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>                            
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.config</artifactId>
+                                    <type>zip</type>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>                                 
+                  
+                                  <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>acs-aem-commons-ui.apps</artifactId>                                    
                                     <classifier>min</classifier>
-                                    <filter>true</filter>
-                                </subPackage>
-                                <subPackage>
+                                    <type>zip</type>
+                                    <target>/apps/acs-commons-packages/application/install</target>
+                                </embedded>
+                                <embedded>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.content</artifactId>
                                     <classifier>min</classifier>
-                                    <filter>true</filter>
-                                </subPackage>
-                            </subPackages>
+                                    <type>zip</type>
+                                    <target>/apps/acs-commons-packages/content/install</target>
+                                </embedded>
+
+                            </embeddeds>
                         </configuration>
                     </execution>
                 </executions>
@@ -275,6 +309,13 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-bundle</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>           
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-ui.apps</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
@@ -301,6 +342,13 @@
             <classifier>min</classifier>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.config</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
+        </dependency>        
     </dependencies>
 
     <profiles>

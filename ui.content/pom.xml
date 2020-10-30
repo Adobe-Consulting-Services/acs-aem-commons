@@ -19,6 +19,7 @@
     <packaging>content-package</packaging>
 
     <build>
+    <!--
         <resources>
             <resource>
                 <directory>src/main/content/jcr_root</directory>
@@ -44,7 +45,7 @@
                 <targetPath>../vault-work/META-INF</targetPath>
             </resource>
         </resources>
-
+-->
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>

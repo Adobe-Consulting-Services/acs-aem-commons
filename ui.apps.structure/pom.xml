@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ====================================================================== -->
+    <!-- P A R E N T  P R O J E C T  D E S C R I P T I O N                      -->
+    <!-- ====================================================================== -->
+    <parent>
+        <groupId>com.adobe.acs</groupId>
+        <artifactId>acs-aem-commons</artifactId>
+        <version>4.8.7-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!-- ====================================================================== -->
+    <!-- P R O J E C T  D E S C R I P T I O N                                   -->
+    <!-- ====================================================================== -->
+    <artifactId>acs-aem-commons-ui.apps.structure</artifactId>
+    <packaging>content-package</packaging>
+    <name>ACS AEM Commons UI.Apps Structure Package</name>
+    <description>
+        Empty package that defines the structure of the Adobe Experience Manager repository the Code packages in this project deploy into.
+        Any roots in the Code packages of this project should have their parent enumerated in the Filters list below.
+    </description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
+                <configuration>
+                    <filters>
+
+                        <!-- /apps root -->
+                        <filter><root>/apps</root></filter>
+                        <filter><root>/apps/acs-commons</root></filter>
+
+                        <!-- Common overlay roots -->
+                        <filter><root>/apps/cq</root></filter>
+                        <filter><root>/apps/cq/core</root></filter>
+                        <filter><root>/apps/cq/core/content</root></filter>
+                        <filter><root>/apps/cq/core/content/nav</root></filter>
+                        <filter><root>/apps/cq/core/content/nav/tools</root></filter>
+                        <filter><root>/apps/cq/core/content/nav/tools/acs-commons</root></filter>
+                        
+                        <filter><root>/apps/cq/core/content/nav/tools/cloudservices</root></filter>
+                        <filter><root>/apps/cq/core/content/nav/tools/cloudservices/marketo</root></filter>
+
+                        <filter><root>/apps/dam</root></filter>
+                        <filter><root>/apps/dam/gui</root></filter>
+                        <filter><root>/apps/dam/gui/content</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl</root></filter>
+
+                        <!-- Immutable context-aware configurations -->
+                        <filter><root>/apps/settings</root></filter>
+                        <filter><root>/apps/settings/dam</root></filter>
+                        <filter><root>/apps/settings/dam/indesign</root></filter>
+                        <filter><root>/apps/settings/dam/indesign/scripts</root></filter>
+                    
+                    </filters>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>            
+        </plugins>
+    </build>
+</project>

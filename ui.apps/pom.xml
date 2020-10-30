@@ -75,13 +75,6 @@
                         <acHandling>merge</acHandling>
                     </properties>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <embeddeds>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>acs-aem-commons-bundle</artifactId>
-                            <target>/apps/acs-commons/install</target>
-                        </embedded>
-                    </embeddeds>
                     <dependencies>
                         <dependency>
                             <group>day/cq60/product</group>
