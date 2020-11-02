@@ -98,23 +98,7 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                 }
 
                 if (assetResource != null) {
-                    AssetDetails assetDetails = new AssetDetails(assetResource);
-
-                    String tagId = getOrientation(assetDetails, config);
-
-                    log.debug("Orientation tag is {}", tagId);
-
-                    if (tagId != null) {
-                        Tag tag = tagManager.resolve(tagId);
-                        if (tag != null) {
-                            addTagToResource(assetResource, tag, tagManager);
-                            log.debug("Orientation tag set");
-                        } else {
-                            log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
-                        }
-                    } else {
-                        log.warn("Unable to set orientation tag on asset [ {} ]", asset.getPath());
-                    }
+                    processAsset(assetResource, config, tagManager);
                 } else {
                     log.warn("Unable to access asset resource for payload [ {} ]", payload);
                 }
@@ -125,6 +109,26 @@ public class SetImageOrientationProcess implements WorkflowProcess {
             log.error("Unable to apply orientation tags for workflow payload [ {} ]", workItem.getWorkflowData().getPayload(), re);
         }
 
+    }
+
+    private void processAsset(Resource assetResource, Configuration config, TagManager tagManager) {
+        AssetDetails assetDetails = new AssetDetails(assetResource);
+
+        String tagId = getOrientation(assetDetails, config);
+
+        log.debug("Orientation tag is {}", tagId);
+
+        if (tagId != null) {
+            Tag tag = tagManager.resolve(tagId);
+            if (tag != null) {
+                addTagToResource(assetResource, tag, tagManager);
+                log.debug("Orientation tag set");
+            } else {
+                log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
+            }
+        } else {
+            log.warn("Unable to set orientation tag on asset [ {} ]", assetResource.getPath());
+        }
     }
 
     private void addTagToResource(Resource resource, Tag tag, TagManager tagManager) {
