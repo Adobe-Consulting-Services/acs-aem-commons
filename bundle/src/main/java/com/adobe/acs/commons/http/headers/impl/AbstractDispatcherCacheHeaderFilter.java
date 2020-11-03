@@ -66,9 +66,9 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
 
-    private boolean allowAllParams;
-    private List<String> passThroughParams;
-    private List<String> blockParams;
+    private boolean allowAllParams = false;
+    private List<String> passThroughParams = new ArrayList<String>();
+    private List<String> blockParams = new ArrayList<String>();
 
     /**
      * Get the value to place in the Cache-Control header.
