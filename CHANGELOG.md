@@ -9,11 +9,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Added
+- #2442 - @ParentResourceValueMapValue injector and annotation
+
 ### Fixed
 - #2425 - Call to setContentLength truncates UTF-8 encoded responses
 - #2441 - Memory Exhaustion with Large Report Download
 - #2450 - Non-Latin letters shown as "?" in the downloaded report
 - #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
+- #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
 - #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
 
 ### Added
