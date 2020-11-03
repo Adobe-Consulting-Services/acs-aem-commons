@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
 - #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
+- ##2429 - Add ability to use attribute names that contain a colon for the StaticReferenceRewriteTransformerFactory
 
 
 ### Added
