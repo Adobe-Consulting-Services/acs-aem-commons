@@ -19,10 +19,15 @@
  */
 package com.adobe.acs.commons.mcp.impl.processes.renovator;
 
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.wcm.api.NameConstants;
+
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.apache.sling.api.resource.ModifiableValueMap;
@@ -37,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class MovingAsset extends MovingNode {
 
     private static final Logger LOG = LoggerFactory.getLogger(MovingAsset.class);
+    private static final String DEFAULT_LAST_MODIFIED_BY = "Renovator";
 
     @Override
     public boolean isCopiedBeforeMove() {
@@ -61,6 +67,16 @@ public class MovingAsset extends MovingNode {
             session.getWorkspace().getObservationManager().setUserData("changedByWorkflowProcess");
             session.move(getSourcePath(), getDestinationPath());
             session.save();
+            if (Util.resourceExists(rr, getDestinationPath())) {
+                Node originalAssetJcrContentNode = session
+                        .getNode(getDestinationPath() + "/" + JcrConstants.JCR_CONTENT);
+                if (originalAssetJcrContentNode!=null) {
+                     JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LASTMODIFIED, new Date());
+                     JcrUtil.setProperty(originalAssetJcrContentNode, JcrConstants.JCR_LAST_MODIFIED_BY,
+                             DEFAULT_LAST_MODIFIED_BY);
+                }
+               
+            }
             updateReferences(replicatorQueue, rr);
         } catch (RepositoryException e) {
             throw new MovingException(getSourcePath(), e);
