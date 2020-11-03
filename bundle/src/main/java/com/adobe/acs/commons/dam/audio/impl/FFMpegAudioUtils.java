@@ -67,6 +67,9 @@ class FFMpegAudioUtils {
     }
 
     static File createTempDir(File parentDir) throws IOException {
+        if(parentDir == null) {
+            return Files.createTempDirectory("cqdam").toFile();
+        }
         return Files.createTempDirectory(parentDir.toPath(), "cqdam").toFile();
     }
 }
