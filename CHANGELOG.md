@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2450 - Non-Latin letters shown as "?" in the downloaded report
 - #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
 - #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
+- #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
 
 ### Added
 - #2442 - @ParentResourceValueMapValue injector and annotation
