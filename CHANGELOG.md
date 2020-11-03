@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2386 - Make folder titles overwrite optional for asset ingestor
 - #2432 - AemEnvironmentFilter: use chunked encoding (fixes #2425)
 - #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
-- Add possibility to use attribute names that contain a colon for the StaticReferenceRewriteTransformerFactory
+- ##2429 - Add ability to use attribute names that contain a colon for the StaticReferenceRewriteTransformerFactory
 
 
 ### Added
