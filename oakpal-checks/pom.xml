@@ -16,7 +16,7 @@
 
     <artifactId>acs-aem-commons-oakpal-checks</artifactId>
     <packaging>jar</packaging>
-    <name>ACS AEM Commons Oakpal Checks</name>
+    <name>ACS AEM Commons - Oakpal Checks</name>
     <description>AEM Oakpal Checks for ACS AEM Commons Package.</description>
 
     <!-- ====================================================================== -->

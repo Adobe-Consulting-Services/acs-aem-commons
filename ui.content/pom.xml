@@ -15,7 +15,7 @@
     <!-- ====================================================================== -->
 
     <artifactId>acs-aem-commons-ui.content</artifactId>
-    <name>ACS AEM Commons UI.Content Package</name>
+    <name>ACS AEM Commons - UI.Content</name>
     <packaging>content-package</packaging>
 
     <build>

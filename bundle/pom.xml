@@ -16,7 +16,7 @@
 
     <artifactId>acs-aem-commons-bundle</artifactId>
     <packaging>bundle</packaging>
-    <name>ACS AEM Commons Bundle</name>
+    <name>ACS AEM Commons - Bundle (Core)</name>
     <description>Main ACS AEM Commons OSGi Bundle. Includes commons utilities.</description>
 
     <!-- ====================================================================== -->
