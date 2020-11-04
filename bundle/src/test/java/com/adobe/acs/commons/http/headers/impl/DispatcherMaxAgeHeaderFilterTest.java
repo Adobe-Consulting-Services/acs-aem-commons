@@ -104,7 +104,7 @@ public class DispatcherMaxAgeHeaderFilterTest {
         when(componentContext.getProperties()).thenReturn(properties);
 
         filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue());
+        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
     }
 
     @Test(expected = ConfigurationException.class)
@@ -120,7 +120,7 @@ public class DispatcherMaxAgeHeaderFilterTest {
         when(componentContext.getProperties()).thenReturn(properties);
 
         filter.doActivate(componentContext);
-        assertEquals("max-age=" + maxage, filter.getHeaderValue());
+        assertEquals("max-age=" + maxage, filter.getHeaderValue(request));
         verify(componentContext).getProperties();
         verifyNoMoreInteractions(componentContext);
 

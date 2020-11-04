@@ -82,7 +82,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
      *
      * @return the value of the Cache-Control header
      */
-    protected abstract String getHeaderValue();
+    protected abstract String getHeaderValue(HttpServletRequest request);
 
 
     /*
@@ -111,7 +111,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
         if (this.accepts(request)) {
             String header = getHeaderName();
-            String val = getHeaderValue();
+            String val = getHeaderValue(request);
             String attributeName = AbstractDispatcherCacheHeaderFilter.class.getName() + ".header." + header;
             if (request.getAttribute(attributeName) == null) {
                 log.debug("Adding header {}: {}", header, val);
