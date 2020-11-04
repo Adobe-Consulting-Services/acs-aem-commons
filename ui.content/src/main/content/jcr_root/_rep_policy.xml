@@ -35,7 +35,7 @@
             rep:privileges="{Name}[jcr:read]"/>
     <allow6
             jcr:primaryType="rep:GrantACE"
-            rep:principalName="acs-commons-page-property-dispatcher-header-filter"
+            rep:principalName="acs-commons-property-based-dispatcher-header-filter	"
             rep:privileges="{Name}[jcr:read]"/>
     <!--
     <allow4

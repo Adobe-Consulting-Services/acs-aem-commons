@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="9e26cf9f-9cc6-3c34-91d0-082fe1b451d2"
+    rep:authorizableId="acs-commons-property-based-dispatcher-header-filter"
+    rep:principalName="acs-commons-property-based-dispatcher-header-filter"/>

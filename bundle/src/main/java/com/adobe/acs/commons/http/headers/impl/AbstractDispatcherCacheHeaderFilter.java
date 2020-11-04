@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -176,6 +177,7 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             Dictionary<String, Object> filterProps = new Hashtable<String, Object>();
 
             log.debug("Adding filter ({}) to pattern: {}", this, pattern);
+            filterProps.put(Constants.SERVICE_RANKING, PropertiesUtil.toInteger(properties.get(Constants.SERVICE_RANKING), 0));
             filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
             filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
             ServiceRegistration filterReg = context.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
