@@ -27,7 +27,11 @@ import org.osgi.service.component.ComponentContext;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.TimeZone;
 
 /**
  * Provides standard functionality to specify an Expires header for Dispatcher Cache rules.
@@ -46,7 +50,7 @@ public abstract class AbstractExpiresHeaderFilter extends AbstractDispatcherCach
     /**
      * Sublcass implementations will adjust the date of the specified calendar to the
      * next point at which content should expire.
-     * <p>
+     *
      * The calendar passed will be the set to the correct time the current day.
      * Concrete implementations are required to update the Calendar to the correct <i>next</i> expiration time.
      *
