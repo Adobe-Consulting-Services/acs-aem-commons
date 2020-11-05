@@ -35,7 +35,9 @@ import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.resource.details.AssetDetails;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -48,19 +50,10 @@ import java.util.List;
 
 
 @Component(
-        metatype = true,
-        label = "ACS AEM Commons - Workflow Process - Set Image Orientation",
-        description = "Determine image orientation from width/height and update image tags"
+        property = {
+                "process.label=ACS AEM Commons - Workflow Process - Set Image Orientation",
+        }
 )
-@Properties({
-        @Property(
-                label = "Workflow Label",
-                name = "process.label",
-                value = "Set Image Orientation",
-                description = "Determine image orientation from width/height and update image tags"
-        )
-})
-@Service
 public class SetImageOrientationProcess implements WorkflowProcess {
     private static final Logger log = LoggerFactory.getLogger(SetImageOrientationProcess.class);
 
@@ -72,14 +65,10 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     @Reference
     private WorkflowHelper workflowHelper;
 
-    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\r\n" +
-            "<0.9 properties:orientation/portrait\r\n" +
-            "default properties:orientation/square";
+    private static final String DEFAULT_CONFIG = ">1.1 properties:orientation/landscape\r\n"
+            + "<0.9 properties:orientation/portrait\r\n"
+            + "default properties:orientation/square";
 
-
-    private static final String DEFAULT = "default";
-    private static final String LT = "<";
-    private static final String GT = ">";
 
     public final void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap) {
 
@@ -103,33 +92,43 @@ public class SetImageOrientationProcess implements WorkflowProcess {
                 Resource payloadResource = resourceResolver.resolve(payload);
 
                 Asset asset = DamUtil.resolveToAsset(payloadResource);
-                Resource assetResource = asset.adaptTo(Resource.class);
+                Resource assetResource = null;
+                if (asset != null) {
+                    assetResource = asset.adaptTo(Resource.class);
+                }
+
                 if (assetResource != null) {
-                    AssetDetails assetDetails = new AssetDetails(assetResource);
-
-                    String tagId = getOrientation(assetDetails, config);
-
-                    log.debug("Orientation tag is {}", tagId);
-
-                    if (tagId != null) {
-                        Tag tag = tagManager.resolve(tagId);
-                        if (tag != null) {
-                            addTagToResource(assetResource, tag, tagManager);
-                            log.debug("Orientation tag set");
-                        } else {
-                            log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
-                        }
-                    } else {
-                        log.warn("Unable to set tag.");
-                    }
+                    processAsset(assetResource, config, tagManager);
+                } else {
+                    log.warn("Unable to access asset resource for payload [ {} ]", payload);
                 }
 
             }
 
         } catch (RepositoryException re) {
-            log.error("Repository Exception", re);
+            log.error("Unable to apply orientation tags for workflow payload [ {} ]", workItem.getWorkflowData().getPayload(), re);
         }
 
+    }
+
+    private void processAsset(Resource assetResource, Configuration config, TagManager tagManager) {
+        AssetDetails assetDetails = new AssetDetails(assetResource);
+
+        String tagId = getOrientation(assetDetails, config);
+
+        log.debug("Orientation tag is {}", tagId);
+
+        if (tagId != null) {
+            Tag tag = tagManager.resolve(tagId);
+            if (tag != null) {
+                addTagToResource(assetResource, tag, tagManager);
+                log.debug("Orientation tag set");
+            } else {
+                log.warn("Unable to resolve tag {} - check configuration for Set Image Orientation workflow step", tagId);
+            }
+        } else {
+            log.warn("Unable to set orientation tag on asset [ {} ]", assetResource.getPath());
+        }
     }
 
     private void addTagToResource(Resource resource, Tag tag, TagManager tagManager) {
@@ -178,14 +177,14 @@ public class SetImageOrientationProcess implements WorkflowProcess {
 
     private String getTagId(Configuration config, float ratio) {
         for (ConfigRule rule : config.getConfig()) {
-            if (rule.operator.equals(GT) && ratio > rule.limit) {
+            if (rule.operator.equals(Configuration.GT) && ratio > rule.limit) {
                 return rule.tagId;
             }
-            if (rule.operator.equals(LT) && ratio < rule.limit) {
+            if (rule.operator.equals(Configuration.LT) && ratio < rule.limit) {
                 return rule.tagId;
             }
 
-            if (rule.operator.equals(DEFAULT)) {
+            if (rule.operator.equals(Configuration.DEFAULT)) {
                 return rule.tagId;
             }
 
@@ -197,7 +196,11 @@ public class SetImageOrientationProcess implements WorkflowProcess {
     /**
      * Inner class for parsing and storing workflow step configuration
      */
-    static class Configuration {
+    private class Configuration {
+
+        public static final String DEFAULT = "default";
+        public static final String LT = "<";
+        public static final String GT = ">";
 
         private final List<ConfigRule> config;
 
