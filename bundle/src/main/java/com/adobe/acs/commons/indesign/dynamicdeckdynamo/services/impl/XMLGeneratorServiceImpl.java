@@ -1,20 +1,21 @@
 /*
- * ACS AEM Commons
- *
+ * #%L
+ * ACS AEM Commons Bundle
+ * %%
  * Copyright (C) 2020 Adobe
- *
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * #L%
  */
 
 package com.adobe.acs.commons.indesign.dynamicdeckdynamo.services.impl;
@@ -82,7 +83,7 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); 
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             DocumentBuilder dBuilder = dbf.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlInputStream);
 
@@ -115,8 +116,8 @@ public class XMLGeneratorServiceImpl implements XMLGeneratorService {
                         DynamicDeckDynamoConstants.XML_MIME_TYPE, true);
                 LOGGER.debug("XML stored at {}", processXmlAsset.getPath());
             } else {
-                throw new DynamicDeckDynamoException("Asset subfolder is null, where processed xml asset needs to be created " +
-                        deckResource.getPath());
+                throw new DynamicDeckDynamoException("Asset subfolder is null, where processed xml asset needs to be created "
+                        + deckResource.getPath());
             }
 
 
