@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2442 - @ParentResourceValueMapValue injector and annotation
+- #2434 - New workflow process step "Set Image Orientation"
 
 ### Fixed
 - #2425 - Call to setContentLength truncates UTF-8 encoded responses
@@ -25,10 +26,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2457 - Allow pass through params, block params and allow all params to be defined for serving dispatcher ttl files
 - #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
 - #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
-
-### Added
-- #2442 - @ParentResourceValueMapValue injector and annotation
-- #2434 - New workflow process step "Set Image Orientation"
 
 ## 4.8.6 - 2020-10-13
 
