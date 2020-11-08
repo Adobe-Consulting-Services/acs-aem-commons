@@ -57,10 +57,6 @@
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
-
-                    <filters>
-                        <filter root="/apps/acs-commons/osgiconfig"/>
-                    </filters>
                 
                 </configuration>
             </plugin>
