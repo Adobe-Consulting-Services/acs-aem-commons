@@ -19,7 +19,16 @@
  */
 package com.adobe.acs.commons.http.headers.impl;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
@@ -44,19 +53,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-
-import com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 
@@ -295,7 +298,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
 
         verify(request).getHeaders(AbstractDispatcherCacheHeaderFilter.SERVER_AGENT_NAME);
         verify(request).getMethod();
-        verify(request).getParameterMap();
+        verify(request, times(2)).getParameterMap(); 
         verifyNoMoreInteractions(request, this.request, response, chain);
     }
 
