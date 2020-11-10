@@ -274,8 +274,8 @@ public class SyntheticWorkflowRunnerImpl implements SyntheticWorkflowRunner {
                             session.save();
                         }
 
-                        log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ {} ] ms", 
-                                new Object[] {workflowStep.getId(), payloadPath,String.valueOf(System.currentTimeMillis() - start)});
+                        log.debug("Executed synthetic workflow process [ {} ] on [ {} ] in [ {} ] ms", //NOPMD - Flagged as false positive
+                                new Object[]{workflowStep.getId(), payloadPath, String.valueOf(System.currentTimeMillis() - start)});
                     } catch (RepositoryException e) {
                         String msg = String.format("Could not save at end of synthetic workflow process execution"
                                 + " [ %s ] for payload path [ %s ]", workflowStep.getId(), payloadPath);

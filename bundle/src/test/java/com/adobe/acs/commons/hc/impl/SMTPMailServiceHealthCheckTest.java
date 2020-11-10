@@ -41,63 +41,63 @@ import io.wcm.testing.mock.aem.junit.AemContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SMTPMailServiceHealthCheckTest {
-	@Mock
-	private MessageGatewayService messageGatewayService;
+    @Mock
+    private MessageGatewayService messageGatewayService;
 
-	@Mock
-	private MessageGateway<SimpleEmail> messageGateway;
+    @Mock
+    private MessageGateway<SimpleEmail> messageGateway;
 
-	@Rule
-	public AemContext ctx = new AemContext();
+    @Rule
+    public AemContext ctx = new AemContext();
 
-	@Before
-	public void setUp() {
-		ctx.registerService(RequireAem.class, new RequireAemImpl(), "distribution", "classic");
-		ctx.registerService(MessageGatewayService.class, messageGatewayService);
-	}
+    @Before
+    public void setUp() {
+        ctx.registerService(RequireAem.class, new RequireAemImpl(), "distribution", "classic");
+        ctx.registerService(MessageGatewayService.class, messageGatewayService);
+    }
 
-	@Test
-	public void testExecute_MissingMessageGateway() throws Exception {
-		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck());
+    @Test
+    public void testExecute_MissingMessageGateway() throws Exception {
+        ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck());
 
-		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, 
-				"(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
+        HealthCheck healthCheck = ctx.getServices(HealthCheck.class,
+                "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
-		Result actual = healthCheck.execute();
+        Result actual = healthCheck.execute();
 
-		assertEquals(Result.Status.CRITICAL, actual.getStatus());
-	}
+        assertEquals(Result.Status.CRITICAL, actual.getStatus());
+    }
 
-	@Test
-	public void testExecute_DefaultEmail() throws Exception {
-		doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);
+    @Test
+    public void testExecute_DefaultEmail() throws Exception {
+        doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);
 
-		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck());
+        ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck());
 
-		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
+        HealthCheck healthCheck = ctx.getServices(HealthCheck.class, "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
-		Result actual = healthCheck.execute();
+        Result actual = healthCheck.execute();
 
-		assertEquals(Result.Status.WARN, actual.getStatus());
-	}
+        assertEquals(Result.Status.WARN, actual.getStatus());
+    }
 
-	@Test
-	public void testExecute_ExceedDailyAllowance() throws Exception {
-		doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);
+    @Test
+    public void testExecute_ExceedDailyAllowance() throws Exception {
+        doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);
 
-		ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck(), 
-				"email", "ira@dog.com",
-				"max.emails.per.day", "1");
+        ctx.registerInjectActivateService(new SMTPMailServiceHealthCheck(),
+                "email", "ira@dog.com",
+                "max.emails.per.day", "1");
 
-		HealthCheck healthCheck = ctx.getServices(HealthCheck.class, 
-				"(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
+        HealthCheck healthCheck = ctx.getServices(HealthCheck.class,
+                "(" + HealthCheck.NAME + "=SMTP Mail Service)")[0];
 
-		Result actual = healthCheck.execute();
+        Result actual = healthCheck.execute();
 
-		assertEquals(Result.Status.OK, actual.getStatus());
+        assertEquals(Result.Status.OK, actual.getStatus());
 
-		actual = healthCheck.execute();
+        actual = healthCheck.execute();
 
-		assertEquals(Result.Status.WARN, actual.getStatus());
-	}
+        assertEquals(Result.Status.WARN, actual.getStatus());
+    }
 }

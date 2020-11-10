@@ -37,15 +37,16 @@ import java.io.OutputStream;
  */
 public class ProgressiveJpeg {
 
-    private ProgressiveJpeg() {}
+    private ProgressiveJpeg() {
+    }
 
     /**
      * For JPEG images, this method behaves similar to {@link Layer#write(String, double, OutputStream)}. The major
      * difference is that it uses progressive encoding.
      *
-     * @param layer the layer with the image to write to the output stream
+     * @param layer   the layer with the image to write to the output stream
      * @param quality JPEG compression quality between 0 and 1
-     * @param out target output stream
+     * @param out     target output stream
      * @throws IOException if anything goes wrong
      */
     public static void write(Layer layer, double quality, OutputStream out) throws IOException {

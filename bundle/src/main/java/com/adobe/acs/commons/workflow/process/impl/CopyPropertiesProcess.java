@@ -127,7 +127,7 @@ public class CopyPropertiesProcess implements WorkflowProcess {
                     destination.setValue(source.getValue());
                 }
             } catch (WorkflowException e) {
-                log.error("Could not copy properties [ {} -> {} ] for payload [ {} ]",
+                log.error("Could not copy properties [ {} -> {} ] for payload [ {} ]", //NOPMD - Flagged as false positive
                         new String[]{entry.getKey(), entry.getValue(), resource.getPath()} , e);
             }
         }

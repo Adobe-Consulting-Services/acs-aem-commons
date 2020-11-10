@@ -51,7 +51,8 @@ public class SendTemplatedEmailUtils {
 
     private static final String PN_USER_EMAIL = "profile/email";
 
-    private SendTemplatedEmailUtils() {}
+    private SendTemplatedEmailUtils() {
+    }
 
     /***
      * Tests whether the payload is a DAM asset or a cq:Page for DAM asset
@@ -102,7 +103,7 @@ public class SendTemplatedEmailUtils {
      * else an array of emails for each individual in the group
      *
      * @param resourceResolver
-     * @param principleOrPath name of a user or group or the path to such
+     * @param principleOrPath  name of a user or group or the path to such
      * @return String[] of email(s) associated with account
      */
     protected static final String[] getEmailAddrsFromPathOrName(ResourceResolver resourceResolver, String principleOrPath) {
@@ -127,8 +128,7 @@ public class SendTemplatedEmailUtils {
      * array emails for each individual in the group
      *
      * @param resourceResolver
-     * @param principlePath
-     *            path to a CQ user or group
+     * @param principlePath    path to a CQ user or group
      * @return String[] of email(s) associated with account
      */
     @SuppressWarnings({"squid:S3776"})
