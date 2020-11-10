@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Fixed
 - #2425 - AEM start page is not rendering with AemEnvironmentIndicatorFilter
+- #2466 - Fixing issues reported by CodeClimate. No functional changes.
 
 ## 4.9.0 - 2020-11-03
 

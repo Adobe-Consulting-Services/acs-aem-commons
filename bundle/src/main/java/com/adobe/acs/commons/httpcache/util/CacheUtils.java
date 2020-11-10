@@ -46,7 +46,8 @@ public class CacheUtils {
     static final String COOKIEPREFIX_SECURE = "__Secure-";
     static final String HEADERKEY_COOKIE = "Set-Cookie";
 
-    private CacheUtils() {}
+    private CacheUtils() {
+    }
 
     /**
      * Create a temporary file for taking copy of servlet response stream.
@@ -81,18 +82,18 @@ public class CacheUtils {
     }
 
     public static List<String> filterCookieHeaders(SlingHttpServletResponse response, List<String> excludedCookieKeys, String headerName) {
-        if(!headerName.equals(HEADERKEY_COOKIE)){
+        if (!headerName.equals(HEADERKEY_COOKIE)) {
             return new ArrayList<>(response.getHeaders(headerName));
         }
         //for set-cookie we apply another exclusion filter.
         return new ArrayList<>(response.getHeaders(headerName)).stream().filter(
                 header -> {
                     String key;
-                    if(header.startsWith(COOKIEPREFIX_HOST)){
-                        key = StringUtils.removeStart( header,COOKIEPREFIX_HOST);
-                    }else if(header.startsWith(COOKIEPREFIX_SECURE)){
-                        key = StringUtils.removeStart( header, COOKIEPREFIX_SECURE);
-                    }else{
+                    if (header.startsWith(COOKIEPREFIX_HOST)) {
+                        key = StringUtils.removeStart(header, COOKIEPREFIX_HOST);
+                    } else if (header.startsWith(COOKIEPREFIX_SECURE)) {
+                        key = StringUtils.removeStart(header, COOKIEPREFIX_SECURE);
+                    } else {
                         key = header;
                     }
                     key = StringUtils.substringBefore(key, "=");
