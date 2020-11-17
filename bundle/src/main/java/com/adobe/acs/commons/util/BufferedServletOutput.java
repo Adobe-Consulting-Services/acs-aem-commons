@@ -196,7 +196,7 @@ public final class BufferedServletOutput {
      */
     public void flushBuffer() throws IOException {
         if (isBuffered()) {
-            log.warn("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
+            log.debug("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
             if (log.isDebugEnabled()) {
                 Throwable t = new Throwable("");
                 log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
@@ -207,8 +207,13 @@ public final class BufferedServletOutput {
         }
     }
 
+    /**
+     * 
+     * @return {@code true} for responses which are already buffered or potentially buffered (not yet clear because neither
+     * {@link #getWriter()} nor {@link #getOutputStream()} have been called yet!
+     */
     private boolean isBuffered() {
-        return ((ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) 
+        return (writeMethod == null || (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) 
                 || (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null));
     }
 }

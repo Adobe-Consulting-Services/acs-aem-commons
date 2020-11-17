@@ -53,7 +53,7 @@ public interface HierarchicalElement {
     String getName();
 
     String getItemName();
-    
+
     String getSourcePath();
 
     Source getSource();
@@ -142,10 +142,11 @@ public interface HierarchicalElement {
 
 
     class UriHelper {
-        private static String SFTP_URL_ENCODING = "utf-8";
-        private static int FIRST_SUB_PATH_INDEX = 3;
+        private static final String SFTP_URL_ENCODING = "utf-8";
+        private static final int FIRST_SUB_PATH_INDEX = 3;
 
-        private UriHelper(){}
+        private UriHelper() {
+        }
 
         static String encodeUriParts(final String uri) throws UnsupportedEncodingException {
             String[] uriParts = uri.split("/");

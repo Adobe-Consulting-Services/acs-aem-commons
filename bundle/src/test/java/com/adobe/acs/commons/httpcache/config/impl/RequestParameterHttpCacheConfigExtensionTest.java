@@ -36,7 +36,7 @@ public class RequestParameterHttpCacheConfigExtensionTest {
     @Rule
     public AemContext ctx = new AemContext();
 
-    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameter = new RequestParameterHttpCacheConfigExtension.Config(){
+    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameter = new RequestParameterHttpCacheConfigExtension.Config() {
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -63,7 +63,7 @@ public class RequestParameterHttpCacheConfigExtensionTest {
         }
     };
 
-    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameterValues = new RequestParameterHttpCacheConfigExtension.Config(){
+    RequestParameterHttpCacheConfigExtension.Config configWithRequestParameterValues = new RequestParameterHttpCacheConfigExtension.Config() {
         @Override
         public Class<? extends Annotation> annotationType() {
             return null;
@@ -94,7 +94,8 @@ public class RequestParameterHttpCacheConfigExtensionTest {
 
 
     @Before
-    public void setUp(){ }
+    public void setUp() {
+    }
 
     @Test
     public void test_WithOnlyNameMatch() {

@@ -12,10 +12,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - Add possibility to do page property based dispatcher ttl cache headers
 
+## 4.9.2 - 2020-11-10
+
+### Fixed
+- #2425 - AEM start page is not rendering with AemEnvironmentIndicatorFilter
+- #2466 - Fixing issues reported by CodeClimate. No functional changes.
+
 ## 4.9.0 - 2020-11-03
 
 ### Added
 - #2442 - @ParentResourceValueMapValue injector and annotation
+- #2434 - New workflow process step "Set Image Orientation"
 
 ### Fixed
 - #2425 - Call to setContentLength truncates UTF-8 encoded responses
@@ -25,10 +32,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2457 - Allow pass through params, block params and allow all params to be defined for serving dispatcher ttl files
 - #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
 - #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
-
-### Added
-- #2442 - @ParentResourceValueMapValue injector and annotation
-- #2434 - New workflow process step "Set Image Orientation"
 
 ## 4.8.6 - 2020-10-13
 
