@@ -65,6 +65,10 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
     protected static final String DISPATCHER_AGENT_HEADER_VALUE = "Communique-Dispatcher";
 
+    public static final String PROP_DISPATCHER_FILTER_ENGINE = "dispatcher.filter.engine";
+    public static final String PROP_DISPATCHER_FILTER_ENGINE_SLING = "sling";
+    public static final String PROP_DISPATCHER_FILTER_ENGINE_HTTP_WHITEBOARD = "http-whiteboard";
+
     private List<ServiceRegistration> filterRegistrations = new ArrayList<ServiceRegistration>();
 
     private boolean allowAllParams = false;
@@ -169,6 +173,8 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
             throw new ConfigurationException(PROP_FILTER_PATTERN, "At least one filter pattern must be specified.");
         }
 
+        String filterEngine = PropertiesUtil.toString(properties.get(PROP_DISPATCHER_FILTER_ENGINE), PROP_DISPATCHER_FILTER_ENGINE_HTTP_WHITEBOARD);
+
         allowAllParams = PropertiesUtil.toBoolean(properties.get(PROP_ALLOW_ALL_PARAMS), false);
         passThroughParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_PASS_THROUGH_PARAMS), new String[0]));
         blockParams = Arrays.asList(PropertiesUtil.toStringArray(properties.get(PROP_BLOCK_PARAMS), new String[0]));
@@ -178,8 +184,17 @@ public abstract class AbstractDispatcherCacheHeaderFilter implements Filter {
 
             log.debug("Adding filter ({}) to pattern: {}", this, pattern);
             filterProps.put(Constants.SERVICE_RANKING, PropertiesUtil.toInteger(properties.get(Constants.SERVICE_RANKING), 0));
-            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
-            filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)");
+
+            // If you want the filter ranking to work, all dispatcher filters have to be type "sling",
+            // else the http-whiteboard will always have precedence
+            if ("sling".equals(filterEngine)) {
+                filterProps.put("sling.filter.scope", "REQUEST");
+                filterProps.put("sling.filter.request.pattern", pattern);
+            } else {
+                filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX, pattern);
+                filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=org.apache.sling)");
+            }
+
             ServiceRegistration filterReg = context.getBundleContext().registerService(Filter.class.getName(), this, filterProps);
             filterRegistrations.add(filterReg);
         }

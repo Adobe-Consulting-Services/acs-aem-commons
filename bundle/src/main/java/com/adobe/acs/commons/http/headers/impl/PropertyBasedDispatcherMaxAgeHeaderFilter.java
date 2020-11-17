@@ -6,12 +6,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -19,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Map;
+
+import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
+import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE_SLING;
 
 @Component(
         label = "ACS AEM Commons - Dispacher Cache Control Header Property Based - Max Age",
@@ -34,7 +33,10 @@ import java.util.Map;
                 name = "webconsole.configurationFactory.nameHint",
                 value = "Property name: {property.name}. Fallback Max Age: {max.age} ",
                 propertyPrivate = true),
-        @Property(name = "sling.filter.scope", value = {"REQUEST", "FORWARD"})
+        @Property(
+                name = PROP_DISPATCHER_FILTER_ENGINE,
+                value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
+                propertyPrivate = true)
 })
 public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeHeaderFilter {
 
@@ -50,16 +52,6 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
 
     private String propertyName;
     private String inheritPropertyValue;
-    private static final String SERVICE_NAME = "property-based-dispatcher-header-filter";
-
-    private static final Map<String, Object> AUTH_INFO;
-
-    static {
-        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-    }
-
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -68,8 +60,9 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
             log.debug("Not accepting request because it is not coming from the dispatcher.");
             return false;
         }
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            Resource resource = getResource(request, resourceResolver);
+        if (request instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+            Resource resource = getResource(request, slingRequest.getResourceResolver());
             if (resource == null) {
                 log.debug("Could not find resource for request, not accepting");
                 return false;
@@ -81,22 +74,19 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
             }
             log.debug("PResource property is blank or INHERIT, not taking this filter ");
             return false;
-        } catch (LoginException e) {
-            log.error("Could not get resource resolver", e);
         }
         return false;
     }
 
     @Override
     protected String getHeaderValue(HttpServletRequest request) {
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            Resource resource = getResource(request, resourceResolver);
+        if (request instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+            Resource resource = getResource(request, slingRequest.getResourceResolver());
             if (resource != null) {
                 String headerValue = resource.getValueMap().get(propertyName, String.class);
                 return HEADER_PREFIX + headerValue;
             }
-        } catch (LoginException e) {
-            log.error("Could not get resource resolver", e);
         }
         log.debug("An error occurred, falling back to the default max age value of this filter");
         return super.getHeaderValue(request);

@@ -33,10 +33,6 @@
             jcr:primaryType="rep:GrantACE"
             rep:principalName="acs-commons-on-deploy-scripts-service"
             rep:privileges="{Name}[jcr:read]"/>
-    <allow6
-            jcr:primaryType="rep:GrantACE"
-            rep:principalName="acs-commons-property-based-dispatcher-header-filter"
-            rep:privileges="{Name}[jcr:read]"/>
     <!--
     <allow4
             jcr:primaryType="rep:GrantACE"
