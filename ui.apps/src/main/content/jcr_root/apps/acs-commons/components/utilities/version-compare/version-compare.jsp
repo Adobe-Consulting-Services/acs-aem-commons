@@ -4,6 +4,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %>
 <cq:defineObjects />
 <sling:adaptTo var="model" adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.version.model.EvolutionModel"/>
 
@@ -28,7 +29,7 @@
 
         <div class="page" role="main"
                  ng-controller="MainCtrl"
-                 ng-init="app.resource = '${model.resourcePath}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
+                 ng-init="app.resource = '${xss:encodeForJSString(xssAPI, model.resourcePath)}'; app.home = '${request.contextPath}${currentPage.path}.html'; init();">
 
             <div ng-show="notifications.length > 0"
                  class="notifications">
