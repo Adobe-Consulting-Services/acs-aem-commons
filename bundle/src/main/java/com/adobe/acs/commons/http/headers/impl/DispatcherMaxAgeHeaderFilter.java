@@ -24,6 +24,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -60,7 +61,7 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
             description = "Max age value (in seconds) to put in Cache Control header.")
     public static final String PROP_MAX_AGE = "max.age";
 
-    private static final String HEADER_PREFIX = "max-age=";
+    protected static final String HEADER_PREFIX = "max-age=";
 
     private long maxage;
 
@@ -70,7 +71,7 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     }
 
     @Override
-    protected String getHeaderValue() {
+    protected String getHeaderValue(HttpServletRequest request) {
         return HEADER_PREFIX + maxage;
     }
 
@@ -84,6 +85,6 @@ public class DispatcherMaxAgeHeaderFilter extends AbstractDispatcherCacheHeaderF
     }
 
     public String toString() {
-        return this.getClass().getName() + "[" + getHeaderValue() + "]";
+        return this.getClass().getName() + "[" + getHeaderValue(null) + "]";
     }
 }
