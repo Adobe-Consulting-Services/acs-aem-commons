@@ -49,8 +49,9 @@ public final class BufferedServletOutput {
     private final PrintWriter printWriter;
     private final ByteArrayOutputStream outputStream;
     private final ServletOutputStream servletOutputStream;
-    private boolean flushBuffer;
+    private boolean flushWrappedBuffer;
     private ResponseWriteMethod writeMethod;
+    private boolean flushBufferOnClose = true;
 
     /** 
      * Creates a new servlet output buffering both the underlying writer and output stream.
@@ -174,17 +175,28 @@ public final class BufferedServletOutput {
     }
 
     /** 
-     * Closing leads to spooling the buffered output stream or writer to the underlying/wrapped response.
+     * Influences the behavior of the buffered data during calling {@link #close()}.
+     * If {@code flushBufferOnClose} is {@code true} (default setting) the buffer is flushed to the wrapped response, otherwise the buffer is discarded.
+     * @param flushBufferOnClose
+     */
+    public void setFlushBufferOnClose(boolean flushBufferOnClose) {
+        this.flushBufferOnClose = flushBufferOnClose;
+    }
+
+    /** 
+     * Closing leads to flushing the buffered output stream or writer to the underlying/wrapped response but only in case {@link #flushBufferOnClose} is set to {@code true}.
      * Also this will automatically commit the response in case {@link #flushBuffer} has been called previously!
      * 
      * @throws IOException */
     void close() throws IOException {
-        if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) {
-            wrappedResponse.getOutputStream().write(getBufferedBytes());
-        } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null && getBufferedString().length() > 0) {
-            wrappedResponse.getWriter().write(getBufferedString());
+        if (flushBufferOnClose) {
+            if (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null && getBufferedBytes().length > 0) {
+                wrappedResponse.getOutputStream().write(getBufferedBytes());
+            } else if (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null && getBufferedString().length() > 0) {
+                wrappedResponse.getWriter().write(getBufferedString());
+            }
         }
-        if (flushBuffer && hasPendingData()) {
+        if (flushWrappedBuffer) {
             wrappedResponse.flushBuffer();
         }
     }
@@ -201,7 +213,7 @@ public final class BufferedServletOutput {
                 Throwable t = new Throwable("");
                 log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
             }
-            flushBuffer = true;
+            flushWrappedBuffer = true;
         } else {
             wrappedResponse.flushBuffer();
         }
