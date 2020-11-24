@@ -12,6 +12,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
 
+## 4.10.0 - 2020-11-19
+
+### Added
+- Add possibility to do page property based dispatcher ttl cache headers
+
+## 4.9.2 - 2020-11-10
+
+### Fixed
+- #2425 - AEM start page is not rendering with AemEnvironmentIndicatorFilter
+- #2466 - Fixing issues reported by CodeClimate. No functional changes.
+
+## 4.9.0 - 2020-11-03
+
+### Added
+- #2442 - @ParentResourceValueMapValue injector and annotation
+- #2434 - New workflow process step "Set Image Orientation"
+
+### Fixed
+- #2425 - Call to setContentLength truncates UTF-8 encoded responses
+- #2441 - Memory Exhaustion with Large Report Download
+- #2450 - Non-Latin letters shown as "?" in the downloaded report
+- #2446 - One page is displayed in multiple lines in Report Builder export CSV file 
+- #2457 - Allow pass through params, block params and allow all params to be defined for serving dispatcher ttl files
+- #2392 - Fixed bug with Audio Encode process that would throw a null pointer exception
+- #2459 - BufferedServletResponse should only defer flushing if the output is really buffered
+
 ## 4.8.6 - 2020-10-13
 
 ### Fixed
@@ -20,6 +46,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
 - #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
+- ##2429 - Add ability to use attribute names that contain a colon for the StaticReferenceRewriteTransformerFactory
 
 
 ### Added

@@ -28,12 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Utilties tied to user groups and authentication.
+ * Utilities tied to user groups and authentication.
  */
 public class UserUtils {
-    private UserUtils() {}
+    private UserUtils() {
+    }
 
-    /** User id for anonymous requests */
+    /**
+     * User id for anonymous requests
+     */
     public static final String USER_ID_ANONYMOUS = "anonymous";
 
     /**

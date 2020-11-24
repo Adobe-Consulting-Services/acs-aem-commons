@@ -28,7 +28,8 @@ import java.security.SecureRandom;
  */
 public class SecureRandomStringUtils {
 
-    private SecureRandomStringUtils() {}
+    private SecureRandomStringUtils() {
+    }
 
     /**
      * <p>Random object used by random method. This has to be not local

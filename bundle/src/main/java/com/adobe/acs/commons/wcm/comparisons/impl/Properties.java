@@ -26,7 +26,8 @@ import java.util.Date;
 
 class Properties {
 
-    private Properties() {}
+    private Properties() {
+    }
 
     static Date lastModified(Resource resource) {
         if (resource != null) {

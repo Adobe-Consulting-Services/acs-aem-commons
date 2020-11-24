@@ -31,3 +31,6 @@ bundle/mockserver.log
 #VS Code
 .vscode
 .history
+
+#Jenv
+.java-version
