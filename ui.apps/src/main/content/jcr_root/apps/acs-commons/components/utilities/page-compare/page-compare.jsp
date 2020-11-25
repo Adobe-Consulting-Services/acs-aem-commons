@@ -23,6 +23,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="xss" uri="http://www.adobe.com/consulting/acs-aem-commons/xss" %>
 <cq:defineObjects />
 <sling:adaptTo adaptable="${slingRequest}" adaptTo="com.adobe.acs.commons.wcm.comparisons.model.PageCompareModel" var="model"/>
 
@@ -67,7 +68,7 @@
 
     <div class="page" role="main"
          ng-controller="MainCtrl"
-         ng-init="app.resource = '${model.pathA}'; app.resourceB = '${model.pathB}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${model.versionA}'; app.b = '${model.versionB}'; init();">
+         ng-init="app.resource = '${xss:encodeForJSString(xssAPI, model.pathA)}'; app.resourceB = '${xss:encodeForJSString(xssAPI, model.pathB)}'; app.home = '${request.contextPath}${currentPage.path}.html'; app.a = '${model.versionA}'; app.b = '${model.versionB}'; init();">
 
         <div class="content">
             <div class="content-container">

@@ -148,9 +148,8 @@ public final class PackageHelperImpl implements PackageHelper {
                 }
 
                 final Version packageVersion = jcrPackage.getDefinition().getId().getVersion();
-                
-                log.debug("{} compareTo {} = {}", new Object[]
-                    {packageVersion.toString(),latestVersion.toString(),packageVersion.compareTo(latestVersion)});
+
+                log.debug("{} compareTo {} = {}", packageVersion.toString(), latestVersion.toString(), packageVersion.compareTo(latestVersion));
 
                 if (packageVersion.compareTo(latestVersion) >= 1) {
                     latestVersion = packageVersion;

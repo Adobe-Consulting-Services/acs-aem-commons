@@ -26,9 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransientWorkflowUtil {
-    private static final Logger log  = LoggerFactory.getLogger(TransientWorkflowUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(TransientWorkflowUtil.class);
 
-    private TransientWorkflowUtil() {}
+    private TransientWorkflowUtil() {
+    }
 
     public static boolean isTransient(ResourceResolver resourceResolver, String workflowModelId) {
             Resource resource = resourceResolver.getResource(workflowModelId);

@@ -88,6 +88,12 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
+    @Property(label = "Tag Attribute Separator", description = "Separator to split the tag name from the attribute name", value = ":")
+    private static final String PROP_TAG_ATTRIBUTE_SEPARATOR = "tag.attribute.separator";
+
+    @Property(label = "List Separator", description = "Separator to split the different tags", value = ",")
+    private static final String PROP_LIST_SEPARATOR = "list.separator";
+
     @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
             "img:src", "link:href", "script:src" })
     private static final String PROP_ATTRIBUTES = "attributes";
@@ -133,8 +139,8 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             String hostNumberString = Integer.toString(fileHash);
             if (hostNumberString.length() >= 2) {
                 // get the 2nd digit as the 1st digit will not contain "0"
-                Character c = hostNumberString.charAt(1);
-                hostNumberString = c.toString();
+                char c = hostNumberString.charAt(1);
+                hostNumberString = Character.toString(c);
                 // If there are more than 10 hosts, convert it back to base10
                 // so we do not have alpha
                 hostNumberString = Integer.toString(Integer.parseInt(hostNumberString, shardCount));
@@ -256,9 +262,12 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     protected void activate(final ComponentContext componentContext) {
         final Dictionary<?, ?> properties = componentContext.getProperties();
 
+        final String tagAttributeSeparator = PropertiesUtil.toString(properties.get(PROP_TAG_ATTRIBUTE_SEPARATOR), ":");
+        final String listSeparator = PropertiesUtil.toString(properties.get(PROP_LIST_SEPARATOR), ",");
+
         final String[] attrProp = PropertiesUtil
                 .toStringArray(properties.get(PROP_ATTRIBUTES), DEFAULT_ATTRIBUTES);
-        this.attributes = ParameterUtil.toMap(attrProp, ":", ",");
+        this.attributes = ParameterUtil.toMap(attrProp, tagAttributeSeparator, listSeparator);
 
         final String[] matchingPatternsProp = PropertiesUtil.toStringArray(properties.get(PROP_MATCHING_PATTERNS));
         this.matchingPatterns = initializeMatchingPatterns(matchingPatternsProp);
@@ -268,25 +277,23 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
         this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
 
-        if (!this.replaceHost && !matchingPatterns.values().stream().anyMatch(str -> str.toString().startsWith("^"))) {
+        if (!this.replaceHost && matchingPatterns.values().stream().noneMatch(str -> str.toString().startsWith("^"))) {
             log.warn("BEWARE! Replace host is false and your regex is not anchored to the start of the string, this may result in a double host.");
         }
     }
 
     private static Map<String, Pattern> initializeMatchingPatterns(String[] matchingPatternsProp) {
-        Map<String, Pattern> result = new HashMap<String, Pattern>();
+        Map<String, Pattern> result = new HashMap<>();
 
         Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
 
-        Iterator<String> iterator = map.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            String matchingPatternString = map.get(key);
+        for (Map.Entry<String,String> entry : map.entrySet()) {
+            String matchingPatternString = entry.getValue();
             try {
                 Pattern compiled = Pattern.compile(matchingPatternString);
-                result.put(key, compiled);
+                result.put(entry.getKey(), compiled);
             } catch (Exception e) {
-                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, key);
+                log.warn("Could not compile pattern {} for {}. Ignoring it", matchingPatternString, entry.getKey());
             }
         }
         return result;
@@ -306,7 +313,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     };
 
     @SuppressWarnings("squid:S1604")
-    private ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
+    private final ShardNameProvider lookupShardNameProvider = new ShardNameProvider() {
 
         @Override
         public String lookup(int idx) {

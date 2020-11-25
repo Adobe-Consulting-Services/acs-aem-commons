@@ -190,14 +190,30 @@ public final class BufferedServletOutput {
     }
 
     /**
-     * Will not commit the response, but only make sure that the wrapped response's {@code flushBuffer()} is executed, once this {@link #close()} is called
+     * Will not commit the response, but only make sure that the wrapped response's {@code flushBuffer()} is executed, once this {@link #close()} is called.
+     * This only affects output which is buffered, i.e. for unbuffered output the flush is not deferred.
+     * @throws IOException 
      */
-    public void flushBuffer() {
-        log.warn("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
-        if (log.isDebugEnabled()) {
-            Throwable t = new Throwable("");
-            log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
+    public void flushBuffer() throws IOException {
+        if (isBuffered()) {
+            log.debug("Prevent committing the response, it will be committed deferred, i.e. once this buffered response is closed");
+            if (log.isDebugEnabled()) {
+                Throwable t = new Throwable("");
+                log.debug("Stacktrace which triggered ServletResponse.flushBuffer()", t);
+            }
+            flushBuffer = true;
+        } else {
+            wrappedResponse.flushBuffer();
         }
-        flushBuffer = true;
+    }
+
+    /**
+     * 
+     * @return {@code true} for responses which are already buffered or potentially buffered (not yet clear because neither
+     * {@link #getWriter()} nor {@link #getOutputStream()} have been called yet!
+     */
+    private boolean isBuffered() {
+        return (writeMethod == null || (ResponseWriteMethod.OUTPUTSTREAM.equals(this.writeMethod) && outputStream != null) 
+                || (ResponseWriteMethod.WRITER.equals(this.writeMethod) && writer != null));
     }
 }

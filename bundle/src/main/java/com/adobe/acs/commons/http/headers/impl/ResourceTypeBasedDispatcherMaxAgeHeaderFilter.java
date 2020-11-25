@@ -1,35 +1,12 @@
-/*
- * #%L
- * ACS AEM Commons Bundle
- * %%
- * Copyright (C) 2013 - 2015 Adobe
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package com.adobe.acs.commons.http.headers.impl;
 
-import com.day.cq.commons.PathInfo;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.jackrabbit.JcrConstants;
-import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -37,9 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Map;
+
+import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
+import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE_SLING;
 
 @Component(
         label = "ACS AEM Commons - Dispacher Cache Control Header Resource Type Based - Max Age",
@@ -52,7 +30,10 @@ import java.util.Map;
                 name = "webconsole.configurationFactory.nameHint",
                 value = "Max Age: {max.age} for Resource Types: [{resource.types}]",
                 propertyPrivate = true),
-        @Property(name = "sling.filter.scope", value = {"REQUEST", "FORWARD"})
+        @Property(
+                name = PROP_DISPATCHER_FILTER_ENGINE,
+                value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
+                propertyPrivate = true)
 })
 public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeHeaderFilter {
 
@@ -65,16 +46,6 @@ public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMax
 
     private String[] resourceTypes;
 
-    private static final String SERVICE_NAME = "resource-type-dispatcher-header-filter";
-    private static final Map<String, Object> AUTH_INFO;
-
-    static {
-        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, (Object) SERVICE_NAME);
-    }
-
-    @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
     @Override
     @SuppressWarnings("unchecked")
     protected boolean accepts(final HttpServletRequest request) {
@@ -82,22 +53,21 @@ public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMax
             log.debug("Not accepting request because it is not coming from the dispatcher.");
             return false;
         }
-
-        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO)) {
-            PathInfo pathInfo = new PathInfo(request.getRequestURI());
-            Resource reqResource = resourceResolver.getResource(pathInfo.getResourcePath());
-            if (reqResource != null) {
-                Resource childResource = reqResource.getChild(JcrConstants.JCR_CONTENT);
-                if (childResource != null) {
-                    return verifyResourceType(childResource);
-                }
-            }
-
-        } catch (LoginException e) {
-            log.error("Could not get resource resolver", e);
+        if (request instanceof SlingHttpServletRequest) {
+            SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
+            Resource resource = getResource(slingRequest);
+            return verifyResourceType(resource);
         }
-
         return false;
+    }
+
+    private Resource getResource(SlingHttpServletRequest slingRequest) {
+        if (slingRequest.getResource().isResourceType("cq:Page")) {
+            log.trace("Found page resource, checking page content resource type");
+            return slingRequest.getResource().getChild(JcrConstants.JCR_CONTENT);
+        }
+        log.trace("Found non-page resource, checking request resource type");
+        return slingRequest.getResource();
     }
 
     private boolean verifyResourceType(Resource resource) {
