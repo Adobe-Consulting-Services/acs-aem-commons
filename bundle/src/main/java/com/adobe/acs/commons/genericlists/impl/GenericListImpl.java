@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.google.gson.annotations.SerializedName;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
@@ -39,6 +41,7 @@ public final class GenericListImpl implements GenericList {
 
     public static final class ItemImpl implements Item {
 
+        @SerializedName("text")
         private final String title;
         private final String value;
         private final ValueMap props;
