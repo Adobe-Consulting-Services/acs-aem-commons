@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Fixed
+- #2479 - Modified JSON output format for the generic list items to use text/value instead of title/value to conform to requirement of the asset metadata schema forms.
 
 ## 4.10.0 - 2020-11-19
 
