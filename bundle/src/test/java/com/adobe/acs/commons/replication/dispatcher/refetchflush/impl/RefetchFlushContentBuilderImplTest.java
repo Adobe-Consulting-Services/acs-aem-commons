@@ -73,7 +73,7 @@ public class RefetchFlushContentBuilderImplTest {
     private final String[] paths = new String[]{"/content/foo", "/content/bar.html"};
 
     @Before
-    public void Before() {
+    public void setUp() {
         refetchFlushContentBuilder = new RefetchFlushContentBuilderImpl();
         MockitoAnnotations.initMocks(this);
     }
@@ -156,6 +156,7 @@ public class RefetchFlushContentBuilderImplTest {
             reset(factory);
         }
     }
+
     @Test
     public void testDeactivationCreate() {
         when(replicationAction.getConfig()).thenReturn(config);
@@ -181,6 +182,7 @@ public class RefetchFlushContentBuilderImplTest {
 
     @Test
     public void testActivationPathNotMatchedCreate() throws Exception {
+        when(config.getSerializationType()).thenReturn("flush_refetch");
         when(replicationAction.getConfig()).thenReturn(config);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
 
@@ -200,6 +202,7 @@ public class RefetchFlushContentBuilderImplTest {
 
     @Test
     public void testActivationWrongRegexCreate() throws Exception {
+        when(config.getSerializationType()).thenReturn("flush_refetch");
         when(replicationAction.getConfig()).thenReturn(config);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
 

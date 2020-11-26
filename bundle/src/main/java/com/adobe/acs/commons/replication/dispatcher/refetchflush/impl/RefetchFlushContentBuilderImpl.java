@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.replication.dispatcher.refetchflush.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
-import com.adobe.granite.logging.LogLevel;
-import com.day.cq.replication.AgentConfig;
 import com.day.cq.replication.ContentBuilder;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
@@ -47,9 +45,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Session;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,346 +60,362 @@ import java.util.regex.PatternSyntaxException;
  * Custom dispatcher flush content builder that sends a list of URIs to be re-fetched immediately upon flushing a page.
  */
 @Component(
-		label = "ACS AEM Commons - Dispatcher Flush with Re-Fetch",
-		description = "Instead of deleting pages from the Dispatcher cache, update the last modified time (.stat) "
-				+ "of the targeted file, and trigger an immediate request of the page.",
-		configurationFactory = true,
-		metatype = true,
-		policy = ConfigurationPolicy.REQUIRE
+    label = "ACS AEM Commons - Dispatcher Flush with Re-Fetch",
+    description = "Instead of deleting pages from the Dispatcher cache, update the last modified time (.stat) "
+                + "of the targeted file, and trigger an immediate request of the page.",
+    configurationFactory = true,
+    metatype = true,
+    policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
-		@Property(name = Constants.SERVICE_DESCRIPTION, value="ACS Commons Re-Fetch Flush Content Builder"),
-		@Property(name = ContentBuilder.PROPERTY_NAME, value= RefetchFlushContentBuilderImpl.NAME,
-				label = "Read Only Name", description = "Service Name for Dispatcher Flush Re-Fetch"),
-		@Property(
-				name = "webconsole.configurationFactory.nameHint",
-				value = "Extension Mapping: [{prop.extension-pairs}] Match: [{prop.match-paths}]"
-		)
+    @Property(name = Constants.SERVICE_DESCRIPTION, value="ACS Commons Re-Fetch Flush Content Builder"),
+    @Property(name = ContentBuilder.PROPERTY_NAME, value= RefetchFlushContentBuilderImpl.NAME,
+              label = "Read Only Name", description = "Service Name for Dispatcher Flush Re-Fetch"),
+    @Property(
+              name = "webconsole.configurationFactory.nameHint",
+              value = "Extension Mapping: [{prop.extension-pairs}] Match: [{prop.match-paths}]"
+    )
 })
 @Service(ContentBuilder.class)
 public class RefetchFlushContentBuilderImpl implements ContentBuilder {
 
-	private final Logger logger = LoggerFactory.getLogger(RefetchFlushContentBuilderImpl.class);
-	private ReplicationLog replicationLog;
+    private static final Logger logger = LoggerFactory.getLogger(RefetchFlushContentBuilderImpl.class);
+    private ReplicationLog replicationLog;
 
-	public static final String NAME = "flush_refetch";
-	public static final String TITLE = "Dispatcher Flush Re-fetch";
+    public static final String NAME = "flush_refetch";
+    public static final String TITLE = "Dispatcher Flush Re-fetch";
 
-	private Map<String, String[]> extensionPairs = new LinkedHashMap<>();
-	private String[] pathMatches = DEFAULT_MATCH_PATH;
+    private Map<String, String[]> extensionPairs = new LinkedHashMap<>();
+    private String[] pathMatches = DEFAULT_MATCH_PATH;
 
-	/* Regex to indicate which paths to re-fetch. */
-	private static final String[] DEFAULT_MATCH_PATH = {"*"};
-	@Property(
-			label = "Path Pattern",
-			description = "Specify a regex to match paths to be included in the re-fetch flush "
-					+ "(i.e. * for all paths, /content/.* for all paths under /content, .*.html for all paths "
-					+ "with html as its extension)",
-			cardinality = Integer.MAX_VALUE,
-			value = {"*"})
-	private static final String PROP_MATCH_PATH = "prop.match-paths";
+    /* Regex to indicate which paths to re-fetch. */
+    private static final String[] DEFAULT_MATCH_PATH = {"*"};
+    @Property(
+            label = "Path Pattern",
+            description = "Specify a regex to match paths to be included in the re-fetch flush "
+                    + "(i.e. * for all paths, /content/.* for all paths under /content, .*.html for all paths "
+                    + "with html as its extension)",
+            cardinality = Integer.MAX_VALUE,
+            value = {"*"})
+    private static final String PROP_MATCH_PATH = "prop.match-paths";
 
-	/* Extension Pairs */
-	private static final String[] DEFAULT_EXTENSION_PAIRS = {};
-	@Property(
-			label = "Extension Pairs",
-			description = "To activate paired pages with re-fetch, specify the original extension (i.e. html) and "
-					+ "map it to any other extensions (i.e. header_include.html)",
-			cardinality = Integer.MAX_VALUE)
-	private static final String PROP_EXTENSION_PAIRS = "prop.extension-pairs";
+    /* Extension Pairs */
+    private static final String[] DEFAULT_EXTENSION_PAIRS = {};
+    @Property(
+            label = "Extension Pairs",
+            description = "To activate paired pages with re-fetch, specify the original extension (i.e. html) and "
+                    + "map it to any other extensions (i.e. header_include.html)",
+            cardinality = Integer.MAX_VALUE)
+    private static final String PROP_EXTENSION_PAIRS = "prop.extension-pairs";
 
-	private static final String SERVICE_NAME = "flush_refetch";
-	protected static final Map<String, Object> AUTH_INFO;
-	static {
-		AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
-	}
+    private static final String SERVICE_NAME = "flush_refetch";
+    protected static final Map<String, Object> AUTH_INFO;
 
-	@Activate
-	protected void activate(final Map<String, Object> properties) {
-		this.extensionPairs = this.configureExtensions(ParameterUtil.toMap(
-				PropertiesUtil.toStringArray(properties.get(PROP_EXTENSION_PAIRS),
-						DEFAULT_EXTENSION_PAIRS), "=", false, null, false));
+    static {
+        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+    }
 
-		logMessage("Extension Pairs [" +  mapToString(this.extensionPairs) + "]", LogLevel.INFO);
+    @Activate
+    protected void activate(final Map<String, Object> properties) {
+        this.extensionPairs = this.formatExtensions(ParameterUtil.toMap(
+                PropertiesUtil.toStringArray(properties.get(PROP_EXTENSION_PAIRS),
+                        DEFAULT_EXTENSION_PAIRS), "=", false, null, false));
 
-		ArrayList<String> validMatches = new ArrayList<>();
-		String[] matchProps = PropertiesUtil.toStringArray(properties.get(PROP_MATCH_PATH), DEFAULT_MATCH_PATH);
-		if (matchProps.length > 0) {
-			for (String match : matchProps) {
-				if (StringUtils.isNotEmpty(match)) {
-					validMatches.add(match);
-				}
-			}
-		}
+        logInfoMessage("Extension Pairs [" +  mapToString(this.extensionPairs) + "]");
 
-		this.pathMatches = validMatches.toArray(new String[0]);
+        ArrayList<String> validMatches = new ArrayList<>();
+        String[] matchProps = PropertiesUtil.toStringArray(properties.get(PROP_MATCH_PATH), DEFAULT_MATCH_PATH);
+        if (matchProps.length > 0) {
+            for (String match : matchProps) {
+                if (StringUtils.isNotEmpty(match)) {
+                    validMatches.add(match);
+                }
+            }
+        }
 
-		logMessage("Match Path Patterns [" +  String.join(",", this.pathMatches) + "]", LogLevel.INFO);
-	}
+        this.pathMatches = validMatches.toArray(new String[0]);
 
-	@SuppressWarnings("unused")
-	@Deactivate
-	protected final void deactivate(final Map<String, Object> properties) {
-		this.extensionPairs = new HashMap<>();
-		this.pathMatches = DEFAULT_MATCH_PATH;
-	}
+        logInfoMessage("Match Path Patterns [" +  String.join(",", this.pathMatches) + "]");
+    }
 
-	private Map<String, String[]> configureExtensions(final Map<String, String> configuredExtensions) {
-		final Map<String, String[]> extensions = new LinkedHashMap<>();
+    @SuppressWarnings("unused")
+    @Deactivate
+    protected final void deactivate(final Map<String, Object> properties) {
+        this.extensionPairs = new HashMap<>();
+        this.pathMatches = DEFAULT_MATCH_PATH;
+    }
 
-		for (final Map.Entry<String, String> entry : configuredExtensions.entrySet()) {
-			final String ext = entry.getKey().trim();
-			extensions.put(ext, entry.getValue().trim().split("&"));
-		}
+    /**
+     * Take the mapped extensions and organize them by individual extension.
+     * @param configuredExtensions Map of extension mappings
+     * @return Map with extension as keys
+     */
+    private Map<String, String[]> formatExtensions(final Map<String, String> configuredExtensions) {
+        final Map<String, String[]> extensions = new LinkedHashMap<>();
 
-		return extensions;
-	}
+        for (final Map.Entry<String, String> entry : configuredExtensions.entrySet()) {
+            final String ext = entry.getKey().trim();
+            extensions.put(ext, entry.getValue().trim().split("&"));
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public ReplicationContent create(Session session, ReplicationAction replicationAction,
-									 ReplicationContentFactory factory, Map<String, Object> options)
-			throws ReplicationException {
-		return create(session, replicationAction, factory);
-	}
+        return extensions;
+    }
 
-	public ReplicationContent create(Session session, ReplicationAction action, ReplicationContentFactory factory)
-			throws ReplicationException {
-		replicationLog = action.getLog();
-		if (replicationLog == null) {
-			AgentConfig config = action.getConfig();
-			logMessage("No replication log found on agent " +
-							(config == null || config.getAgentId() == null ? "." : action.getConfig().getAgentId()),
-					LogLevel.WARN);
-		}
+    /**
+     * {@inheritDoc}
+     */
+    public ReplicationContent create(Session session, ReplicationAction replicationAction,
+                                     ReplicationContentFactory factory, Map<String, Object> options)
+            throws ReplicationException {
+        return create(session, replicationAction, factory);
+    }
 
-		if (action.getType() != ReplicationActionType.ACTIVATE &&
-				action.getType() != ReplicationActionType.TEST) {
-			logMessage("No re-fetch handling for replication action " + action.getType().getName(),
-					LogLevel.ERROR);
-			throw new ReplicationException("No re-fetch handling for replication action " +
-					action.getType().getName());
-		}
+    public ReplicationContent create(Session session, ReplicationAction action, ReplicationContentFactory factory)
+            throws ReplicationException {
+        String path = action.getPath();
+        replicationLog = action.getLog();
+        if (replicationLog == null) {
+            logWarnMessage("No replication log found on agent " + NAME);
+        }
 
-		String path = action.getPath();
-		if (StringUtils.isEmpty(path)) {
-			logMessage("No path found for re-fetch replication.", LogLevel.ERROR);
-			throw new ReplicationException("No path found for re-fetch replication.");
-		}
-		String[] uris;
+        /* Check if the action is valid, and whether it should be ignored. */
+        checkValidity(action, path);
+        if (shouldIgnore(action, path)) {
+            return ReplicationContent.VOID;
+        }
 
-		if (!pathMatchesFilter(this.pathMatches, path)) {
-			logMessage("Path does not match filters provided. IGNORING " + path, LogLevel.INFO);
-			return ReplicationContent.VOID;
-		}
+        logInfoMessage("Content builder invoked for path " + path + ", with replication action "
+                + action.getType() + " and serialization type " +  action.getConfig().getSerializationType());
 
-		if (!NAME.equals(action.getConfig().getSerializationType())) {
-			String message = "Serialization type " + action.getConfig().getSerializationType()
-					+ " not supported by Flush Re-Fetch Content Builder.";
-			logMessage(message, LogLevel.ERROR);
-			throw new ReplicationException(message);
-		}
+        String[] uris;
+        int extSep = path.indexOf('.', path.lastIndexOf('/'));
+        if (extSep == -1) {
+            // If no extension, let the path be activated.
+            uris = new String[]{path};
+        } else {
+            try {
+                ArrayList<String> paths = new ArrayList<>();
+                paths.add(path);
+                // If instructed, copy the path and replace the extension with the provided substitute.
+                if (extensionPairs != null && extensionPairs.size() != 0) {
+                    String extension = FilenameUtils.getExtension(path);
+                    String[] values = extensionPairs.get(extension);
+                    if (values != null && values.length != 0) {
+                        String withoutExt = FilenameUtils.removeExtension(path) + ".";
+                        for (String next: values) {
+                            paths.add(withoutExt + next);
+                        }
+                    }
+                }
 
-		if (action.getType() == ReplicationActionType.TEST) {
-			return ReplicationContent.VOID;
-		}
+                uris = paths.toArray(new String[0]);
+            } catch (Exception e) {
+                logErrorMessage("Replicated cancelled: " + e.getMessage());
+                return ReplicationContent.VOID;
+            }
+        }
 
-		logMessage("Content builder invoked for path " + path + ", with replication action "
-						+ action.getType() + " and serialization type " +  action.getConfig().getSerializationType(),
-				LogLevel.INFO);
+        logInfoMessage("Replicating with Re-Fetch: " + Arrays.toString(uris));
+        return createContent(factory, uris);
+    }
 
-		int pathSep = path.lastIndexOf('/');
-		if (pathSep < 0) {
-			logMessage("Activation on a non-path value.  IGNORING: " + path, LogLevel.WARN);
-			return ReplicationContent.VOID;
-		}
+    /**
+     * Create the replication content, containing one or more URIs to be re-fetched
+     * immediately upon flushing a page.
+     *
+     * @param factory ReplicationContentFactory
+     * @param uris    URIs to re-fetch
+     * @return replication content
+     *
+     * @throws ReplicationException if an error occurs
+     */
+    private ReplicationContent createContent(ReplicationContentFactory factory, String[] uris)
+            throws ReplicationException {
 
-		int extSep = path.indexOf('.', pathSep);
-		if (extSep == -1) {
-			// If no extension, let the path be activated.
-			uris = new String[]{path};
-		} else {
-			try {
-/*						Resource res = rr.getResource(path);
-				if (res != null) {
-					Node node = res.adaptTo(Node.class);
-					if (node != null && NT_DAM_ASSET.equals(node.getPrimaryNodeType().getName())) {
-						logMessage("Skipped request to replicate " + path + " as it was a dam:Asset.",
-						LogLevel.WARN);
-						return ReplicationContent.VOID;
-					}
-				}*/
-				ArrayList<String> paths = new ArrayList<>();
-				paths.add(path);
-				if (extensionPairs != null && extensionPairs.size() != 0) {
-					String extension = FilenameUtils.getExtension(path);
-					String[] values = extensionPairs.get(extension);
-					if (values != null && values.length != 0) {
-						String withoutExt = FilenameUtils.removeExtension(path) + ".";
-						for (String next: values) {
-							paths.add(withoutExt + next);
-						}
-					}
-				}
+        Path tmpFile;
+        BufferedWriter out = null;
 
-				uris = paths.toArray(new String[0]);
-			} catch (Exception e) {
-				logMessage("Replicated cancelled: " + e.getMessage(), LogLevel.ERROR);
-				return ReplicationContent.VOID;
-			}
-		}
+        try {
+            tmpFile = Files.createTempFile("cq5", ".post");
+        } catch (IOException e) {
+            throw new ReplicationException("Unable to create temp file", e);
+        }
 
-		logMessage("Replicating with Re-Fetch: " + Arrays.toString(uris), LogLevel.INFO);
-		return createContent(factory, uris);
-	}
+        try {
+            out = Files.newBufferedWriter(tmpFile);
+            for (String nextUri: uris) {
+                out.write(nextUri);
+                out.newLine();
+                logDebugMessage("TempFile: adding " + nextUri);
+            }
+            out.close();
+            return factory.create("text/plain", tmpFile.toFile(), true);
+        } catch (IOException e) {
+            try {
+                Files.delete(tmpFile);
+            } catch(Exception exception) {
+                logDebugMessage("Could not delete repository content temporary file: " + tmpFile.toString());
+            }
+            throw new ReplicationException("Unable to create (temporary) repository content", e);
+        } finally {
+            if (out != null) {
+                IOUtils.closeQuietly(out);
+            }
+        }
+    }
 
-	/**
-	 * Create the replication content, containing one or more URIs to be re-fetched
-	 * immediately upon flushing a page.
-	 *
-	 * @param factory ReplicationContentFactory
-	 * @param uris    URIs to re-fetch
-	 * @return replication content
-	 *
-	 * @throws ReplicationException if an error occurs
-	 */
-	private ReplicationContent createContent(ReplicationContentFactory factory, String[] uris)
-			throws ReplicationException {
+    /**
+     * Log methods to use Replication Log is available.  If not, use this class's logger.  Do not duplicate
+     * log entries.
+     * @param message A simple string to use as the log entry.
+     */
+    private void logErrorMessage(String message){
+        if (replicationLog != null) {
+            replicationLog.error(message);
+        } else if (logger != null) {
+            logger.error(message);
+        }
+    }
+    private void logWarnMessage(String message) {
+        if (replicationLog != null) {
+            replicationLog.warn(message);
+        } else if (logger != null) {
+            logger.warn(message);
+        }
+    }
+    private void logInfoMessage(String message) {
+        if (replicationLog != null) {
+            replicationLog.info(message);
+        } else if (logger != null) {
+            logger.info(message);
+        }
+    }
+    private void logDebugMessage(String message) {
+        if (replicationLog != null) {
+            replicationLog.debug(message);
+        } else if (logger != null) {
+            logger.debug(message);
+        }
+    }
 
-		File tmpFile;
-		BufferedWriter out = null;
+    /**
+     * Check the validity of the parameters received for this activation.
+     * @param action The replication action specifying properties of the activation.
+     * @param path The path to the item to be activated.
+     * @throws ReplicationException Throws a replication exception if invalid.
+     */
+    private void checkValidity(ReplicationAction action, String path) throws ReplicationException {
+        if (action.getType() != ReplicationActionType.ACTIVATE && action.getType() != ReplicationActionType.TEST) {
+            logErrorMessage("No re-fetch handling for replication action " + action.getType().getName());
+            throw new ReplicationException("No re-fetch handling for replication action "
+                    + action.getType().getName());
+        }
 
-		try {
-			tmpFile = File.createTempFile("cq5", ".post");
-		} catch (IOException e) {
-			throw new ReplicationException("Unable to create temp file", e);
-		}
+        if (StringUtils.isEmpty(path)) {
+            logErrorMessage("No path found for re-fetch replication.");
+            throw new ReplicationException("No path found for re-fetch replication.");
+        }
 
-		try {
-			out = new BufferedWriter(new FileWriter(tmpFile));
-			for (String nextUri: uris) {
-				out.write(nextUri);
-				out.newLine();
-				logMessage("TempFile: adding " + nextUri, LogLevel.DEBUG);
-			}
-			out.close();
-			IOUtils.closeQuietly(out);
-			out = null;
-			return factory.create("text/plain", tmpFile, true);
-		} catch (IOException e) {
-			if (out != null) {
-				IOUtils.closeQuietly(out);
-			}
-			if (!tmpFile.delete()) {
-				logMessage("Could not delete repository content temporary file: " + tmpFile.getName(),
-						LogLevel.DEBUG);
-			}
-			throw new ReplicationException("Unable to create (temporary) repository content", e);
-		}
-	}
+        if (!NAME.equals(action.getConfig().getSerializationType())) {
+            String message = "Serialization type '" + action.getConfig().getSerializationType()
+                    + "' not supported by Flush Re-Fetch Content Builder.";
+            logErrorMessage(message);
+            throw new ReplicationException(message);
+        }
+    }
 
-	private void logMessage(String message, LogLevel level) {
-		if (level == LogLevel.ERROR) {
-			if (replicationLog != null) {
-				replicationLog.error(message);
-			} else if (logger != null) {
-				logger.error(message);
-			}
-		} else if (level == LogLevel.WARN) {
-			if (replicationLog != null) {
-				replicationLog.warn(message);
-			} else if (logger != null) {
-				logger.warn(message);
-			}
-		} else if (level == LogLevel.DEBUG) {
-			if (replicationLog != null) {
-				replicationLog.debug(message);
-			} else if (logger != null) {
-				logger.debug(message);
-			}
-		} else {
-			if (replicationLog != null) {
-				replicationLog.info(message);
-			} else if (logger != null) {
-				logger.info(message);
-			}
-		}
-	}
+    private boolean shouldIgnore(ReplicationAction action, String path) {
+        if (!pathMatchesFilter(this.pathMatches, path)) {
+            logInfoMessage("Path does not match filters provided. IGNORING " + path);
+            return true;
+        }
 
-	private String mapToString(Map<String, String[]> map) {
-		StringBuilder output = new StringBuilder();
-		boolean first = true;
-		for (Map.Entry<String, String[]> entry : map.entrySet()) {
-			if (!first) {
-				output.append(",");
-			}
-			first = false;
+        if (action.getType() == ReplicationActionType.TEST) {
+            return true;
+        }
 
-			output.append(entry.getKey());
-			output.append("=[");
-			boolean firstValue = true;
-			String[] values = entry.getValue();
-			for (String nextValue: values) {
-				if (!firstValue) {
-					output.append(",");
-				}
-				firstValue = false;
+        int pathSep = path.lastIndexOf('/');
+        if (pathSep < 0) {
+            logWarnMessage("Activation on a non-path value.  IGNORING: " + path);
+            return true;
+        }
 
-				output.append(nextValue);
-			}
-			output.append("]");
-		}
+        return false;
+    }
 
-		return output.toString();
-	}
+    private String mapToString(Map<String, String[]> map) {
+        StringBuilder output = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String[]> entry : map.entrySet()) {
+            if (!first) {
+                output.append(",");
+            }
+            first = false;
 
-	/**
-	 * See if any of the provided filter patterns match the current path.  TRUE, if no filters are received.
-	 * @param filters An array of string making up the regex to match with the path.  They should never
-	 *                be empty since there is a DEFAULT value.
-	 * @param path The path to interrogate.
-	 * @return true (match found) or false (no match)
-	 */
-	private boolean pathMatchesFilter(final String[] filters, String path) {
-		boolean matches = false;
-		for (String filter: filters) {
-			try {
-				if (filter.equals("*") || path.matches(filter)) {
-					matches = true;
-					break;
-				}
-			} catch(PatternSyntaxException ex) {
-				logMessage("Ignoring invalid regex filter: [" + filter + "].  Reason: " + ex.getMessage(),
-						LogLevel.ERROR);
-			}
-		}
+            output.append(entry.getKey());
+            output.append("=[");
+            boolean firstValue = true;
+            String[] values = entry.getValue();
+            for (String nextValue: values) {
+                if (!firstValue) {
+                    output.append(",");
+                }
+                firstValue = false;
 
-		return matches;
-	}
+                output.append(nextValue);
+            }
+            output.append("]");
+        }
 
-	final Map<String, String[]> getExtensionPairs() {
-		return this.extensionPairs;
-	}
-	final String[] getPathMatches() {
-		return this.pathMatches;
-	}
+        return output.toString();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @return {@value #NAME}
-	 */
-	public String getName() {
-		return NAME;
-	}
+    /**
+     * See if any of the provided filter patterns match the current path.  TRUE, if no filters are received.
+     * @param filters An array of string making up the regex to match with the path.  They should never
+     *                be empty since there is a DEFAULT value.
+     * @param path The path to interrogate.
+     * @return true (match found) or false (no match)
+     */
+    private boolean pathMatchesFilter(final String[] filters, String path) {
+        boolean matches = false;
+        for (String filter: filters) {
+            try {
+                if (filter.equals("*") || path.matches(filter)) {
+                    matches = true;
+                    break;
+                }
+            } catch(PatternSyntaxException ex) {
+                logErrorMessage("Ignoring invalid regex filter: [" + filter + "].  Reason: " + ex.getMessage());
+            }
+        }
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @return {@value #TITLE}
-	 */
-	public String getTitle() {
-		return TITLE;
-	}
+        return matches;
+    }
+
+    final Map<String, String[]> getExtensionPairs() {
+        return this.extensionPairs;
+    }
+
+    final String[] getPathMatches() {
+        return this.pathMatches;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@value #NAME}
+     */
+    public String getName() {
+        return NAME;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@value #TITLE}
+     */
+    public String getTitle() {
+        return TITLE;
+    }
 }
