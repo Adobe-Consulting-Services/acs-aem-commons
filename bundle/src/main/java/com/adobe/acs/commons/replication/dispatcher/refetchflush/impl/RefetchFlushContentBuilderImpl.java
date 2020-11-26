@@ -27,8 +27,10 @@ import com.day.cq.replication.ReplicationContent;
 import com.day.cq.replication.ReplicationContentFactory;
 import com.day.cq.replication.ReplicationException;
 import com.day.cq.replication.ReplicationLog;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -187,24 +189,17 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
         logInfoMessage("Content builder invoked for path " + path + ", with replication action "
                 + action.getType() + " and serialization type " +  action.getConfig().getSerializationType());
 
-        String[] uris;
+        String[] uris = new String[]{path};
         int extSep = path.indexOf('.', path.lastIndexOf('/'));
-        if (extSep == -1) {
-            // If no extension, let the path be activated.
-            uris = new String[]{path};
-        } else {
+        if (extSep > 0 && MapUtils.isNotEmpty(extensionPairs)) {
             try {
                 ArrayList<String> paths = new ArrayList<>();
                 paths.add(path);
-                // If instructed, copy the path and replace the extension with the provided substitute.
-                if (extensionPairs != null && extensionPairs.size() != 0) {
-                    String extension = FilenameUtils.getExtension(path);
-                    String[] values = extensionPairs.get(extension);
-                    if (values != null && values.length != 0) {
-                        String withoutExt = FilenameUtils.removeExtension(path) + ".";
-                        for (String next: values) {
-                            paths.add(withoutExt + next);
-                        }
+                String[] values = getExtensionPairs(path);
+                if (ArrayUtils.isNotEmpty(values)) {
+                    String withoutExt = FilenameUtils.removeExtension(path) + ".";
+                    for (String next: values) {
+                        paths.add(withoutExt + next);
                     }
                 }
 
@@ -265,8 +260,8 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
     }
 
     /**
-     * Log methods to use Replication Log is available.  If not, use this class's logger.  Do not duplicate
-     * log entries.
+     * Log methods to use Replication Log if available.  If not, use this class's logger.  Do not duplicate
+     * log entries. (ReplicationLog does not extend Logger.)
      * @param message A simple string to use as the log entry.
      */
     private void logErrorMessage(String message){
@@ -276,6 +271,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
             logger.error(message);
         }
     }
+
     private void logWarnMessage(String message) {
         if (replicationLog != null) {
             replicationLog.warn(message);
@@ -283,6 +279,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
             logger.warn(message);
         }
     }
+
     private void logInfoMessage(String message) {
         if (replicationLog != null) {
             replicationLog.info(message);
@@ -290,6 +287,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
             logger.info(message);
         }
     }
+
     private void logDebugMessage(String message) {
         if (replicationLog != null) {
             replicationLog.debug(message);
@@ -391,6 +389,16 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
         }
 
         return matches;
+    }
+
+    /**
+     * Get extension values for the provided path.
+     * @param path The path to extract the extension from.  The extension will be the key.
+     * @return The extension pairs, if any.
+     */
+    private String[] getExtensionPairs(String path) {
+        String extension = FilenameUtils.getExtension(path);
+        return extensionPairs.get(extension);
     }
 
     final Map<String, String[]> getExtensionPairs() {
