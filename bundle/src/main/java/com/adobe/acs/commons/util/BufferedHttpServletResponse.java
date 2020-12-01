@@ -76,5 +76,12 @@ public class BufferedHttpServletResponse extends HttpServletResponseWrapper impl
     public BufferedServletOutput getBufferedServletOutput() {
         return bufferedOutput;
     }
+    
+    /** 
+     * Calls {@link BufferedServletOutput#setFlushBufferOnClose(boolean)}.
+     */
+    public void setFlushBufferOnClose(boolean flushBufferOnClose) {
+        bufferedOutput.setFlushBufferOnClose(flushBufferOnClose);
+    }
 
 }
