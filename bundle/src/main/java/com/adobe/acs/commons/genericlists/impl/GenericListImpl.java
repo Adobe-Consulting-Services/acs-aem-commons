@@ -41,6 +41,8 @@ public final class GenericListImpl implements GenericList {
 
     public static final class ItemImpl implements Item {
 
+        // Title and Text are always the exact same value,
+        // text is really only used by json resources, but need to keep title for Backwards Compatability
         private final String title;
         private final String text;
         private final String value;
