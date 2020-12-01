@@ -10,7 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
 ### Fixed
+- #2475 - Content rendered twice on publisher when environment indicator is enabled
 - #2479 - Modified JSON output format for the generic list items to use text/value instead of title/value to conform to requirement of the asset metadata schema forms.
+
 
 ## 4.10.0 - 2020-11-19
 
