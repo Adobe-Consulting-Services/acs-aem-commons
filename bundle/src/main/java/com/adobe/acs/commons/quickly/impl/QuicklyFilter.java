@@ -104,7 +104,7 @@ public class QuicklyFilter implements Filter {
                 final int bodyIndex = contents.indexOf("</body>");
                 if (bodyIndex != -1) {
                     // prevent the captured response from being given out a 2nd time via the implicit close()
-                    capturedResponse.resetBuffer();
+                    capturedResponse.setFlushBufferOnClose(false);
                     final PrintWriter printWriter = response.getWriter();
     
                     printWriter.write(contents.substring(0, bodyIndex));
