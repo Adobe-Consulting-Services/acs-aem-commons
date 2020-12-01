@@ -41,13 +41,14 @@ public final class GenericListImpl implements GenericList {
 
     public static final class ItemImpl implements Item {
 
-        @SerializedName("text")
         private final String title;
+        private final String text;
         private final String value;
         private final ValueMap props;
 
         public ItemImpl(String t, String v, ValueMap props) {
             this.title = t;
+            this.text = t;
             this.value = v;
             this.props = props;
         }
