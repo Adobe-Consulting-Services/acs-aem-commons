@@ -85,7 +85,7 @@ public abstract class AbstractHtmlRequestInjector implements Filter {
                 
                 if (injectionIndex != -1) {
                     // prevent the captured response from being given out a 2nd time via the implicit close()
-                    originalResponse.resetBuffer();
+                    originalResponse.setFlushBufferOnClose(false);
                     final PrintWriter printWriter = response.getWriter();
 
                     // Write all content up to the injection index

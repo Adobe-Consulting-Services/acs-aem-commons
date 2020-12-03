@@ -47,7 +47,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.engine.EngineConstants;
 import org.apache.sling.xss.XSSAPI;
@@ -112,7 +111,7 @@ public class AemEnvironmentIndicatorFilter implements Filter {
     @Property(label = "Color",
             description = "The color of the indicator bar; takes any valid value"
                     + " for CSS's 'background-color' attribute."
-                    + " This is ignored if a Style Override is provided.",
+                    + " This is only effective if no 'CSS Override' is provided or 'Always Include Color CSS' is set to true.",
             value = "")
     public static final String PROP_COLOR = "css-color";
 
@@ -213,34 +212,26 @@ public class AemEnvironmentIndicatorFilter implements Filter {
             filterChain.doFilter(request, capturedResponse);
             log.debug("Executing the rest of the filter chain");
 
-            // Get contents
-            final String contents = capturedResponse.getBufferedServletOutput()
-                    .getWriteMethod() == ResponseWriteMethod.WRITER
-                            ? capturedResponse.getBufferedServletOutput().getBufferedString()
-                            : null;
+            if (StringUtils.contains(response.getContentType(), "html") && innerFilterAcceptsInjection(request)) {
+                // Get contents
+                final String contents = capturedResponse.getBufferedServletOutput()
+                        .getWriteMethod() == ResponseWriteMethod.WRITER
+                                ? capturedResponse.getBufferedServletOutput().getBufferedString()
+                                : null;
 
-            if (contents != null
-                    && StringUtils.contains(response.getContentType(), "html")
-                    && innerFilterAcceptsInjection(request)) {
-
-                final int bodyIndex = contents.indexOf("</body>");
-
-                if (bodyIndex != -1) {
-                    // prevent the captured response from being given out a 2nd time via the
-                    // implicit close()
-                    capturedResponse.resetBuffer();
-                    final PrintWriter printWriter = response.getWriter();
-
-                    printWriter.write(contents.substring(0, bodyIndex));
-
-                    writeEnvironmentIndicator(css, innerHTML, titlePrefix, printWriter);
-
-                    printWriter.write(contents.substring(bodyIndex));
-                } 
-            } else {
                 if (contents != null) {
-                    final PrintWriter printWriter = response.getWriter();
-                    printWriter.write(contents);
+                    final int bodyIndex = contents.indexOf("</body>");
+
+                    if (bodyIndex != -1) {
+                        // prevent the captured response from being given out a 2nd time via the implicit close()
+                        capturedResponse.setFlushBufferOnClose(false);
+                        final PrintWriter printWriter = response.getWriter();
+                        printWriter.write(contents.substring(0, bodyIndex));
+
+                        writeEnvironmentIndicator(css, innerHTML, titlePrefix, printWriter);
+
+                        printWriter.write(contents.substring(bodyIndex));
+                    }
                 }
             }
         }
