@@ -290,6 +290,7 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #1893 - add javax.annotation dependency (removed in JDK 11)
 - #1904 - Dialog resource provider generates cq:dialog for you (note: disabled by default)
 - #1920 - Add @ChildResourceFromRequest annotation to substitute for @ChildResource when a child model object requires a SlingHttpServletRequest to adapt from.
+- #1944 - Added Templated Dialogs feature
 - #1872 - Added support for oakpal:webster, creating a process to keep checklists, nodetypes, and privileges up-to-date.
 
 ### Fixed
