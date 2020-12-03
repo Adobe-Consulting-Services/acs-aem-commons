@@ -23,6 +23,7 @@ import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -163,7 +164,10 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
             } else {
                 host = getShardValue(value, staticHostPattern.length, lookupShardNameProvider);
             }
-            return String.format("%s://%s%s", staticHostScheme, host, value);
+            if(StringUtils.isNotBlank(staticHostScheme)) {
+                return String.format("%s://%s%s", staticHostScheme, host, value);
+            }
+            return String.format("//%s%s", host, value);
         } else {
             return value;
         }
