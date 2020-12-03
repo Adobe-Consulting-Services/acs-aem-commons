@@ -70,7 +70,7 @@ public class RefetchFlushContentBuilderImplTest {
     @Mock
     private ReplicationLog replicationLog;
 
-    private final String[] PATHS = new String[]{"/content/foo", "/content/bar.html"};
+    private final String[] paths = new String[]{"/content/foo", "/content/bar.html"};
 
     private RefetchFlushContentBuilderImpl refetchFlushContentBuilder;
 
@@ -89,6 +89,7 @@ public class RefetchFlushContentBuilderImplTest {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         ContentBuilder actual = ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
         assertEquals("flush_refetch", actual.getName());
         assertEquals("Dispatcher Flush Re-fetch", actual.getTitle());
     }
@@ -101,11 +102,13 @@ public class RefetchFlushContentBuilderImplTest {
 
         ContentBuilder actual = ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn(actual.getName());
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
 
             actual.create(ctx.resourceResolver().adaptTo(Session.class), replicationAction, replicationContentFactory, null);
@@ -122,11 +125,13 @@ public class RefetchFlushContentBuilderImplTest {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn(refetchFlushContentBuilder.getName());
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.TEST);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
             ReplicationContent content = actual.create(ctx.resourceResolver().adaptTo(Session.class), replicationAction, replicationContentFactory, null);
             assertEquals(ReplicationContent.VOID, content);
@@ -140,12 +145,14 @@ public class RefetchFlushContentBuilderImplTest {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn("WrongType");
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
         when(replicationAction.getLog()).thenReturn(replicationLog);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
 
             boolean replicationExceptionThrown = false;
@@ -167,10 +174,12 @@ public class RefetchFlushContentBuilderImplTest {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(replicationAction.getType()).thenReturn(ReplicationActionType.DEACTIVATE);
         when(replicationAction.getLog()).thenReturn(replicationLog);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
 
             boolean replicationExceptionThrown = false;
@@ -193,11 +202,13 @@ public class RefetchFlushContentBuilderImplTest {
         "match.paths", new String[]{"/content/dam/.*"});
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn("flush_refetch");
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
 
             ReplicationContent content = actual.create(ctx.resourceResolver().adaptTo(Session.class), replicationAction, replicationContentFactory, null);
@@ -213,11 +224,13 @@ public class RefetchFlushContentBuilderImplTest {
         "match.paths", new String[]{"*.k)"});
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn("flush_refetch");
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
 
-        for (String path: PATHS) {
+        for (String path: paths) {
             when(replicationAction.getPath()).thenReturn(path);
 
             ReplicationContent content = actual.create(ctx.resourceResolver().adaptTo(Session.class), replicationAction, replicationContentFactory, null);
@@ -232,6 +245,8 @@ public class RefetchFlushContentBuilderImplTest {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
 
+        assertNotNull(actual);
+
         when(agentConfig.getSerializationType()).thenReturn(actual.getName());
         when(replicationAction.getConfig()).thenReturn(agentConfig);
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
@@ -245,6 +260,8 @@ public class RefetchFlushContentBuilderImplTest {
     public void testActivationNoPathCreate() {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
+
+        assertNotNull(actual);
 
         final String[] paths = new String[]{"", null};
         when(replicationAction.getType()).thenReturn(ReplicationActionType.ACTIVATE);
@@ -271,11 +288,12 @@ public class RefetchFlushContentBuilderImplTest {
     public void testActivateWithProperties() {
         String lhs = "html";
         String rhs = "header_include.html";
-
         ctx.registerInjectActivateService(refetchFlushContentBuilder,
-            "extension.pairs", "html=header_include.html",
+            "extension.pairs", lhs + "=" + rhs,
             "match.paths", "/content/.*");
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
+
+        assertNotNull(actual);
 
         Map<String, String[]> extensionPairs = actual.getExtensionPairs();
         String[] lhsResult = extensionPairs.get(lhs);
@@ -293,6 +311,8 @@ public class RefetchFlushContentBuilderImplTest {
     public void testActivateEmptyProperties() {
         ctx.registerInjectActivateService(refetchFlushContentBuilder);
         RefetchFlushContentBuilderImpl actual = (RefetchFlushContentBuilderImpl) ctx.getService(ContentBuilder.class);
+
+        assertNotNull(actual);
 
         Map<String, String[]> extensionPairs = actual.getExtensionPairs();
         assertNotNull(extensionPairs);
