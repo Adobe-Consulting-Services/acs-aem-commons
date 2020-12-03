@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #2478 - Choice of performing Dispatcher Flush using Re-Fetch technique. 
 
+### Fixed
+- #2475 - Content rendered twice on publisher when environment indicator is enabled
+
 ## 4.10.0 - 2020-11-19
 
 ### Added

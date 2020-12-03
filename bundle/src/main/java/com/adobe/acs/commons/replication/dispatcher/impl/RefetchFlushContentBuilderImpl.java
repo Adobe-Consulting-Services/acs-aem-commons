@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.replication.dispatcher.refetchflush.impl;
+package com.adobe.acs.commons.replication.dispatcher.impl;
 
 import com.adobe.acs.commons.util.ParameterUtil;
 import com.day.cq.replication.ContentBuilder;
@@ -32,16 +32,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +49,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
@@ -61,72 +56,59 @@ import java.util.regex.PatternSyntaxException;
 /**
  * Custom dispatcher flush content builder that sends a list of URIs to be re-fetched immediately upon flushing a page.
  */
+@Designate(ocd = RefetchFlushContentBuilderImpl.Config.class)
 @Component(
-    label = "ACS AEM Commons - Dispatcher Flush with Re-Fetch",
-    description = "Instead of deleting pages from the Dispatcher cache, update the last modified time (.stat) "
-                + "of the targeted file, and trigger an immediate request of the page.",
-    configurationFactory = true,
-    metatype = true,
-    policy = ConfigurationPolicy.REQUIRE
+        service = { ContentBuilder.class },
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        property = {
+            Constants.SERVICE_DESCRIPTION + "=ACS Commons Re-fetch Flush Content Builder",
+            "webconsole.configurationFactory.nameHint=Extension Mapping: [{extension.pairs}] Match: [{match.paths}]",
+            "name=" + RefetchFlushContentBuilderImpl.SERVICE_NAME
+        },
+        immediate = true
 )
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value="ACS Commons Re-Fetch Flush Content Builder"),
-    @Property(name = ContentBuilder.PROPERTY_NAME, value= RefetchFlushContentBuilderImpl.NAME,
-              label = "Read Only Name", description = "Service Name for Dispatcher Flush Re-Fetch"),
-    @Property(
-              name = "webconsole.configurationFactory.nameHint",
-              value = "Extension Mapping: [{prop.extension-pairs}] Match: [{prop.match-paths}]"
-    )
-})
-@Service(ContentBuilder.class)
 public class RefetchFlushContentBuilderImpl implements ContentBuilder {
+    private static final Logger log = LoggerFactory.getLogger(RefetchFlushContentBuilderImpl.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(RefetchFlushContentBuilderImpl.class);
     private ReplicationLog replicationLog;
 
-    public static final String NAME = "flush_refetch";
+    private static final String CONTENT_BUILDER_NAME = "flush_refetch";
     public static final String TITLE = "Dispatcher Flush Re-fetch";
-
-    private Map<String, String[]> extensionPairs = new LinkedHashMap<>();
-    private String[] pathMatches = DEFAULT_MATCH_PATH;
-
-    /* Regex to indicate which paths to re-fetch. */
+    public static final String SERVICE_NAME = CONTENT_BUILDER_NAME;
     private static final String[] DEFAULT_MATCH_PATH = {"*"};
-    @Property(
-            label = "Path Pattern",
-            description = "Specify a regex to match paths to be included in the re-fetch flush "
-                    + "(i.e. * for all paths, /content/.* for all paths under /content, .*.html for all paths "
-                    + "with html as its extension)",
-            cardinality = Integer.MAX_VALUE,
-            value = {"*"})
-    private static final String PROP_MATCH_PATH = "prop.match-paths";
+    private String[] pathMatches = DEFAULT_MATCH_PATH;
+    private Map<String, String[]> extensionPairs = new LinkedHashMap<>();
 
-    /* Extension Pairs */
-    private static final String[] DEFAULT_EXTENSION_PAIRS = {};
-    @Property(
-            label = "Extension Pairs",
-            description = "To activate paired pages with re-fetch, specify the original extension (i.e. html) and "
-                    + "map it to any other extensions (i.e. header_include.html)",
-            cardinality = Integer.MAX_VALUE)
-    private static final String PROP_EXTENSION_PAIRS = "prop.extension-pairs";
+    @ObjectClassDefinition(
+        name = "ACS AEM Commons - Dispatcher Flush with Re-fetch",
+        description = "Instead of deleting pages from the Dispatcher cache, update the last modified time (.stat) of the targeted file, and trigger an immediate request of the page."
+    )
+    @interface Config {
+        @AttributeDefinition(
+                name = "Path Pattern",
+                description = "Specify a regex to match paths to be included in the re-fetch flush (i.e. * for all paths, /content/.* for all paths under /content, .*.html for all paths with html as its extension)",
+                cardinality = Integer.MAX_VALUE
+        )
+        String[] match_paths() default {"*"}; // DEFAULT_MATCH_PATH
 
-    private static final String SERVICE_NAME = "flush_refetch";
-    protected static final Map<String, Object> AUTH_INFO;
-
-    static {
-        AUTH_INFO = Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME);
+        @AttributeDefinition(
+            name = "Extension Pairs",
+            description = "To activate paired pages with re-fetch, specify the original extension (i.e. html) and map it to any other extensions (i.e. header_include.html)",
+            cardinality = Integer.MAX_VALUE
+        )
+        String[] extension_pairs() default {}; // DEFAULT_EXTENSION_PAIRS
     }
 
     @Activate
-    protected void activate(final Map<String, Object> properties) {
-        this.extensionPairs = this.formatExtensions(ParameterUtil.toMap(
-                PropertiesUtil.toStringArray(properties.get(PROP_EXTENSION_PAIRS),
-                        DEFAULT_EXTENSION_PAIRS), "=", false, null, false));
+    protected void activate(Config config) {
+        this.extensionPairs = this.formatExtensions(ParameterUtil.toMap(config.extension_pairs(), "=", false, null, false));
 
         logInfoMessage("Extension Pairs [" +  mapToString(this.extensionPairs) + "]");
 
         ArrayList<String> validMatches = new ArrayList<>();
-        String[] matchProps = PropertiesUtil.toStringArray(properties.get(PROP_MATCH_PATH), DEFAULT_MATCH_PATH);
+
+        String[] matchProps = config.match_paths();
+
         if (matchProps.length > 0) {
             for (String match : matchProps) {
                 if (StringUtils.isNotEmpty(match)) {
@@ -138,13 +120,6 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
         this.pathMatches = validMatches.toArray(new String[0]);
 
         logInfoMessage("Match Path Patterns [" +  String.join(",", this.pathMatches) + "]");
-    }
-
-    @SuppressWarnings("unused")
-    @Deactivate
-    protected final void deactivate(final Map<String, Object> properties) {
-        this.extensionPairs = new HashMap<>();
-        this.pathMatches = DEFAULT_MATCH_PATH;
     }
 
     /**
@@ -172,12 +147,15 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
         return create(session, replicationAction, factory);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ReplicationContent create(Session session, ReplicationAction action, ReplicationContentFactory factory)
             throws ReplicationException {
         String path = action.getPath();
         replicationLog = action.getLog();
         if (replicationLog == null) {
-            logWarnMessage("No replication log found on agent " + NAME);
+            logWarnMessage("No replication log found on agent " + CONTENT_BUILDER_NAME);
         }
 
         /* Check if the action is valid, and whether it should be ignored. */
@@ -226,17 +204,11 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
      */
     private ReplicationContent createContent(ReplicationContentFactory factory, String[] uris)
             throws ReplicationException {
-
-        Path tmpFile;
+        Path tmpFile = null;
         BufferedWriter out = null;
 
         try {
             tmpFile = Files.createTempFile("cq5", ".post");
-        } catch (IOException e) {
-            throw new ReplicationException("Unable to create temp file", e);
-        }
-
-        try {
             out = Files.newBufferedWriter(tmpFile);
             for (String nextUri: uris) {
                 out.write(nextUri);
@@ -247,11 +219,13 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
             return factory.create("text/plain", tmpFile.toFile(), true);
         } catch (IOException e) {
             try {
-                Files.delete(tmpFile);
+                if (tmpFile != null) {
+                    Files.delete(tmpFile);
+                }
             } catch(Exception exception) {
-                logDebugMessage("Could not delete repository content temporary file: " + tmpFile.toString());
+                logInfoMessage("Could not delete repository content temporary file: " + tmpFile.toString());
             }
-            throw new ReplicationException("Unable to create (temporary) repository content", e);
+            throw new ReplicationException("Error with temporary repository content", e);
         } finally {
             if (out != null) {
                 IOUtils.closeQuietly(out);
@@ -267,37 +241,38 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
     private void logErrorMessage(String message){
         if (replicationLog != null) {
             replicationLog.error(message);
-        } else if (logger != null) {
-            logger.error(message);
+        } else if (log != null) {
+            log.error(message);
         }
     }
 
     private void logWarnMessage(String message) {
         if (replicationLog != null) {
             replicationLog.warn(message);
-        } else if (logger != null) {
-            logger.warn(message);
+        } else if (log != null) {
+            log.warn(message);
         }
     }
 
     private void logInfoMessage(String message) {
         if (replicationLog != null) {
             replicationLog.info(message);
-        } else if (logger != null) {
-            logger.info(message);
+        } else if (log != null) {
+            log.info(message);
         }
     }
 
     private void logDebugMessage(String message) {
         if (replicationLog != null) {
             replicationLog.debug(message);
-        } else if (logger != null) {
-            logger.debug(message);
+        } else if (log != null) {
+            log.debug(message);
         }
     }
 
     /**
      * Check the validity of the parameters received for this activation.
+     *
      * @param action The replication action specifying properties of the activation.
      * @param path The path to the item to be activated.
      * @throws ReplicationException Throws a replication exception if invalid.
@@ -314,7 +289,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
             throw new ReplicationException("No path found for re-fetch replication.");
         }
 
-        if (!NAME.equals(action.getConfig().getSerializationType())) {
+        if (!CONTENT_BUILDER_NAME.equals(action.getConfig().getSerializationType())) {
             String message = "Serialization type '" + action.getConfig().getSerializationType()
                     + "' not supported by Flush Re-Fetch Content Builder.";
             logErrorMessage(message);
@@ -370,6 +345,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
 
     /**
      * See if any of the provided filter patterns match the current path.  TRUE, if no filters are received.
+     *
      * @param filters An array of string making up the regex to match with the path.  They should never
      *                be empty since there is a DEFAULT value.
      * @param path The path to interrogate.
@@ -393,6 +369,7 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
 
     /**
      * Get extension values for the provided path.
+     *
      * @param path The path to extract the extension from.  The extension will be the key.
      * @return The extension pairs, if any.
      */
@@ -412,10 +389,10 @@ public class RefetchFlushContentBuilderImpl implements ContentBuilder {
     /**
      * {@inheritDoc}
      *
-     * @return {@value #NAME}
+     * @return {@value #CONTENT_BUILDER_NAME}
      */
     public String getName() {
-        return NAME;
+        return CONTENT_BUILDER_NAME;
     }
 
     /**
