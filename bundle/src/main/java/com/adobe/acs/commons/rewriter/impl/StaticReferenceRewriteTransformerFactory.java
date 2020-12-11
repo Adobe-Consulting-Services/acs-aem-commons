@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,11 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
+import com.adobe.acs.commons.util.ParameterUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -46,12 +41,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
-import com.adobe.acs.commons.util.ParameterUtil;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Rewriter pipeline component which rewrites static references.
- *
  */
 @Component(
         label = "ACS AEM Commons - Static Reference Rewriter",
@@ -60,12 +57,12 @@ import com.adobe.acs.commons.util.ParameterUtil;
         metatype = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(
-            name = "pipeline.type", label = "Rewriter Pipeline Type",
-            description = "Type identifier to be referenced in rewriter pipeline configuration."),
-    @Property(
-            name = "webconsole.configurationFactory.nameHint",
-            value = "Pipeline: {pipeline.type}")
+        @Property(
+                name = "pipeline.type", label = "Rewriter Pipeline Type",
+                description = "Type identifier to be referenced in rewriter pipeline configuration."),
+        @Property(
+                name = "webconsole.configurationFactory.nameHint",
+                value = "Pipeline: {pipeline.type}")
 })
 
 public final class StaticReferenceRewriteTransformerFactory implements TransformerFactory {
@@ -84,7 +81,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
     private static final String CLASS_NOSTATIC = "nostatic";
 
-    private static final String[] DEFAULT_ATTRIBUTES = new String[] { "img:src", "link:href", "script:src" };
+    private static final String[] DEFAULT_ATTRIBUTES = new String[]{"img:src", "link:href", "script:src"};
 
     private static final int DEFAULT_HOST_COUNT = 1;
 
@@ -95,7 +92,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private static final String PROP_LIST_SEPARATOR = "list.separator";
 
     @Property(label = "Rewrite Attributes", description = "List of element/attribute pairs to rewrite", value = {
-            "img:src", "link:href", "script:src" })
+            "img:src", "link:href", "script:src"})
     private static final String PROP_ATTRIBUTES = "attributes";
 
     @Property(label = "Matching Patterns", description = "List of patterns how to find url to prepend host to for more complex values. The url must be the first matching group within the pattern.")
@@ -108,6 +105,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     @Property(label = "Static Host Pattern", description = "Pattern for generating static host domain names. "
             + "'{}' will be replaced with the host number. If more than one is provided, the host count is ignored.", unbounded = PropertyUnbounded.ARRAY)
     private static final String PROP_HOST_NAME_PATTERN = "host.pattern";
+
+    @Property(label = "Static Host Scheme", description = "(optional) Host scheme to use if you don't want to use the host scheme of the request")
+    private static final String PROP_HOST_SCHEME = "host.scheme";
 
     @Property(unbounded = PropertyUnbounded.ARRAY, label = "Path Prefixes",
             description = "Path prefixes to rewrite.")
@@ -125,6 +125,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
     private int staticHostCount;
 
     private String[] staticHostPattern;
+    private String staticHostScheme;
 
     private boolean replaceHost;
 
@@ -162,6 +163,9 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                 host = staticHostPattern[0].replace("{}", hostNum);
             } else {
                 host = getShardValue(value, staticHostPattern.length, lookupShardNameProvider);
+            }
+            if(StringUtils.isNotBlank(staticHostScheme)) {
+                return String.format("%s://%s%s", staticHostScheme, host, value);
             }
             return String.format("//%s%s", host, value);
         } else {
@@ -240,7 +244,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
                     if (this.replaceHost) {
                         int index = attrValue.indexOf("://");
                         sb.setLength(0);
-                        sb.append(attrValue,0, index + 1);
+                        sb.append(attrValue, 0, index + 1);
                         sb.append(url);
                     } else {
                         m.appendReplacement(sb, Matcher.quoteReplacement(url));
@@ -274,6 +278,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
         this.prefixes = PropertiesUtil.toStringArray(properties.get(PROP_PREFIXES), new String[0]);
         this.staticHostPattern = PropertiesUtil.toStringArray(properties.get(PROP_HOST_NAME_PATTERN), null);
+        this.staticHostScheme = PropertiesUtil.toString(properties.get(PROP_HOST_SCHEME), "");
         this.staticHostCount = PropertiesUtil.toInteger(properties.get(PROP_HOST_COUNT), DEFAULT_HOST_COUNT);
         this.replaceHost = PropertiesUtil.toBoolean(properties.get(PROP_REPLACE_HOST), false);
 
@@ -287,7 +292,7 @@ public final class StaticReferenceRewriteTransformerFactory implements Transform
 
         Map<String, String> map = ParameterUtil.toMap(matchingPatternsProp, ";");
 
-        for (Map.Entry<String,String> entry : map.entrySet()) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             String matchingPatternString = entry.getValue();
             try {
                 Pattern compiled = Pattern.compile(matchingPatternString);

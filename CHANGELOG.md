@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Added
+- #2478 - Choice of performing Dispatcher Flush using Re-Fetch technique. 
+
 ### Fixed
 - #2475 - Content rendered twice on publisher when environment indicator is enabled
 - #2479 - Modified JSON output format for the generic list items to use text/value instead of title/value to conform to requirement of the asset metadata schema forms.
