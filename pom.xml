@@ -216,6 +216,12 @@
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
                     <version>0.0.24</version>
+                     <configuration>
+                         <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
+                        <failOnError>true</failOnError>
+                        <userId>${crx.user}</userId>
+                        <password>${crx.password}</password>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
