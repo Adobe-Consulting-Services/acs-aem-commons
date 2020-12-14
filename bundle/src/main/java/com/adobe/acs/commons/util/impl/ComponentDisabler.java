@@ -20,17 +20,21 @@
 package com.adobe.acs.commons.util.impl;
 
 import java.util.Arrays;
-import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicyOption;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,28 +57,34 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-@org.apache.felix.scr.annotations.Component(immediate = true, metatype = true,
-        label = "ACS AEM Commons - OSGI Component Disabler", description = "Disables components by configuration",
-        policy = ConfigurationPolicy.REQUIRE)
-@Service()
-@Property(name = "event.topics", value = { "org/osgi/framework/BundleEvent/STARTED",
-        "org/osgi/framework/ServiceEvent/REGISTERED" }, propertyPrivate = true)
+@Component(immediate = true, 
+        configurationPolicy = ConfigurationPolicy.REQUIRE, 
+        property = { 
+            EventConstants.EVENT_TOPIC + "=org/osgi/framework/BundleEvent/STARTED",
+            EventConstants.EVENT_TOPIC + "=org/osgi/framework/ServiceEvent/REGISTERED"
+        })
+@Designate(ocd = ComponentDisabler.Configuration.class)
 public class ComponentDisabler implements EventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ComponentDisabler.class);
 
-    @Reference(policyOption = ReferencePolicyOption.GREEDY)
-    private ComponentDisablerDriver componentDisablerDriver;
-
-    @Property(label = "Disabled components", description = "The names of the components/services you want to disable",
-            cardinality = Integer.MAX_VALUE)
-    private static final String DISABLED_COMPONENTS = "components";
-
     private String[] disabledComponents;
+    private BundleContext bundleContext;
+    
+    @Reference
+    private ServiceComponentRuntime scr;
+    
+    @ObjectClassDefinition(name = "ACS AEM Commons - OSGI Component Disabler", description =  "Disables components by configuration")
+    public @interface Configuration {
+
+        @AttributeDefinition(name = "Disabled components", description = "The names of the components/services you want to disable")
+        String[] components();
+    }
 
     @Activate
-    protected void activate(Map<String, Object> properties) {
-        disabledComponents = PropertiesUtil.toStringArray(properties.get(DISABLED_COMPONENTS), new String[0]);
+    public void activate(BundleContext bundleContext, Configuration configuration) {
+        disabledComponents = configuration.components();
+        this.bundleContext = bundleContext;
         handleEvent(null);
     }
 
@@ -85,7 +95,17 @@ public class ComponentDisabler implements EventHandler {
         log.trace("Disabling components and services {}", Arrays.toString(disabledComponents));
 
         for (String component : disabledComponents) {
-            componentDisablerDriver.disable(component);
+            disable(component);
+        }
+    }
+
+    public void disable(String componentName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            ComponentDescriptionDTO dto = scr.getComponentDescriptionDTO(bundle, componentName);
+            if (dto != null && scr.isComponentEnabled(dto)) {
+                log.info("Component {} disabled by configuration.", dto.implementationClass);
+                scr.disableComponent(dto);
+            }
         }
     }
 }

@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.twitter.impl;
 
 import com.adobe.acs.commons.twitter.TwitterClient;
-import com.adobe.cq.commerce.common.ValueMapDecorator;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.webservicesupport.ConfigurationConstants;
 import com.day.cq.wcm.webservicesupport.ConfigurationManager;
@@ -29,6 +28,7 @@ import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.testing.osgi.MockBundleContext;
 import org.junit.Before;
 import org.junit.Rule;
