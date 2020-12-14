@@ -96,6 +96,9 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2339 - Microsoft Office Add-in for AEM Assets
 
 ### Fixed
+
+- #2241 Automatic Package Replicator - Missing Service User
+- #2264 Automatic Package Replicator - TouchUI Support
 - #2267 - Redirect Map Edit Wrong Entry
 - #2298 - Removed dependency on com.day.cq.dam.api.collection
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
@@ -114,6 +117,10 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2350 - Added hook for VanityUrlAdjuster in VanityServiceUrlImpl
 - #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
 - #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
+
+### Changed
+
+- #2341 - Moved /var nodes and ACLS to be defined as Repoinit scripts
 
 ## [4.7.0] - 2020-05-12
 

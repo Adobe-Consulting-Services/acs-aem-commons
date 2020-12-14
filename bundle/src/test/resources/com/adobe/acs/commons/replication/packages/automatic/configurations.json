@@ -1,0 +1,83 @@
+{
+    "jcr:primaryType": "sling:OrderedFolder",
+    "jcr:content": {
+        "jcr:primaryType": "nt:unstructured",
+        "jcr:title": "Automatic Package Replication"
+    },
+    "missingTrigger": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "packagePath": "/etc/packages/adobe/aem6/we.retail.config-4.0.0.zip",
+            "cronTrigger": "* * * * ? *"
+        }
+    },
+    "missingPackage": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "trigger": "cron",
+            "cronTrigger": "* * * * ? *"
+        }
+    },
+    "missingCronTrigger": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "packagePath": "/etc/packages/adobe/aem6/we.retail.config-4.0.0.zip",
+            "trigger": "cron"
+        }
+    },
+    "validCronTrigger": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "packagePath": "/etc/packages/adobe/aem6/we.retail.config-4.0.0.zip",
+            "trigger": "cron",
+            "cronTrigger": "* * * * ? *"
+        }
+    },
+    "validEventTrigger": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "packagePath": "/etc/packages/adobe/aem6/we.retail.config-4.0.0.zip",
+            "trigger": "event",
+            "eventTopic": "testTopic"
+        }
+    },
+    "validFilteredEventTrigger": {
+        "jcr:primaryType": "cq:Page",
+        "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "jcr:title": "test",
+            "cq:template": "/apps/acs-commons/templates/utilities/automatic-package-replication",
+            "sling:resourceType": "acs-commons/components/utilities/automatic-package-replication",
+            "cq:designPath": "/etc/designs/acs-commons",
+            "packagePath": "/etc/packages/adobe/aem6/we.retail.config-4.0.0.zip",
+            "trigger": "event",
+            "eventFilter": "testFilter",
+            "eventTopic": "testTopic"
+        }
+    }
+}

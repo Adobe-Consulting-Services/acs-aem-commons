@@ -200,19 +200,7 @@
                             </scanArtifacts>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            </summaryFiles>
-                        </configuration>
-                    </execution>
+
                 </executions>
             </plugin>
 
@@ -304,12 +292,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
         </dependency>
@@ -318,53 +300,31 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.day.cq.wcm</groupId>
-            <artifactId>cq-wcm-taglib</artifactId>
-            <version>5.6.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.scripting.jsp.taglib</artifactId>
-            <version>2.1.8</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.day.commons</groupId>
-            <artifactId>day-commons-jstl</artifactId>
-            <version>1.1.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.adobe.aem</groupId>
-            <artifactId>uber-jar</artifactId>
-            <classifier>apis</classifier>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
         </dependency>
+        <!-- Testing Dependencies -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-oakpal-checks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
         </dependency>
+        <!-- put UberJar last so that more specific artifacts take precedence -->
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-            <scope>provided</scope>
+            <groupId>${aemSdk.groupId}</groupId>
+            <artifactId>${aemSdk.artifactId}</artifactId>
+            <classifier>${aemSdk.classifier}</classifier>
         </dependency>
-
     </dependencies>
     <profiles>
         <profile>
@@ -387,5 +347,48 @@
                 </plugins>
             </build>
         </profile>
+    	<profile>
+    		<id>classic</id>
+    		<activation>
+    			<property>
+    				<name>profile</name>
+    				<value>classic</value>
+    			</property>
+    		</activation>
+    		<properties>
+    			<oakpal.skip.verify>false</oakpal.skip.verify>
+    		</properties>
+    		<build>
+    			<plugins>
+    				<plugin>
+    				    <groupId>net.adamcin.oakpal</groupId>
+                		<artifactId>oakpal-maven-plugin</artifactId>
+                		<executions>
+                			<execution>
+		                        <id>oakpal-verify</id>
+		                        <goals>
+		                            <goal>verify</goal>
+		                        </goals>
+		                        <configuration>
+		                        	<skip>${oakpal.skip.verify}</skip>
+		                            <summaryFiles>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+		                            </summaryFiles>
+		                        </configuration>
+		                    </execution>
+                		</executions>
+    				</plugin>
+    			</plugins>
+    		</build>
+    	</profile>
+    	<profile>
+    		<id>cloudservice</id>
+    		<properties>
+    			<oakpal.skip.verify>true</oakpal.skip.verify>
+    		</properties>
+    	</profile>
     </profiles>
+    
 </project>

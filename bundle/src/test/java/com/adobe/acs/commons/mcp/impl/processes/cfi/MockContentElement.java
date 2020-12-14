@@ -22,6 +22,7 @@ package com.adobe.acs.commons.mcp.impl.processes.cfi;
 import com.adobe.cq.dam.cfm.ContentElement;
 import com.adobe.cq.dam.cfm.ContentFragmentException;
 import com.adobe.cq.dam.cfm.ContentVariation;
+import com.adobe.cq.dam.cfm.FragmentData;
 import com.adobe.cq.dam.cfm.VariationTemplate;
 import com.adobe.cq.dam.cfm.VersionDef;
 import com.adobe.cq.dam.cfm.VersionedContent;
@@ -109,6 +110,18 @@ public class MockContentElement implements ContentElement {
     @Override
     public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
         return null;
+    }
+
+    @Override
+    public FragmentData getValue() {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public void setValue(FragmentData object) throws ContentFragmentException {
+      // TODO Auto-generated method stub
+      
     }
 
 }

@@ -154,5 +154,11 @@ public class MockContentFragment implements ContentFragment {
     public <AdapterType> AdapterType adaptTo(@Nonnull Class<AdapterType> aClass) {
         return null;
     }
+
+    @Override
+    public void removeVariation(String name) throws ContentFragmentException {
+      // TODO Auto-generated method stub
+      
+    }
     
 }

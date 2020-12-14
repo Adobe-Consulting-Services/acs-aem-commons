@@ -25,6 +25,7 @@ import groovy.json.JsonOutput
 //println properties['aemVersion']
 
 def baseUrl = "http://${properties['crx.host']}:${properties['crx.port']}"
+println("Retrieving bundle information from ${baseUrl}...")
 
 def http = new HTTPBuilder(baseUrl)
 
@@ -90,3 +91,4 @@ outputFile.getParentFile().mkdirs()
 outputFile.newWriter().withWriter { w ->
     w << exportsOutput
 }
+println("Written bundle information to ${outputFile}.")

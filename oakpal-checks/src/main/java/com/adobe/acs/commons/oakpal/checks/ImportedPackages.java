@@ -63,7 +63,7 @@ import java.util.zip.ZipInputStream;
 public final class ImportedPackages implements ProgressCheckFactory {
 
     private static final String CONFIG_VERSION = "aemVersion";
-    private static final List<String> DEFAULT_VERSIONS = Arrays.asList("6.3", "6.4");
+    private static final List<String> DEFAULT_VERSIONS = Arrays.asList( "6.4", "aemcs-2020.7.3902");
 
 
     @Override

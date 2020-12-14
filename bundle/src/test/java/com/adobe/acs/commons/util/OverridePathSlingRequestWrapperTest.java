@@ -32,6 +32,7 @@ import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.sling.scripting.api.BindingsValuesProvidersByContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -53,6 +54,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Ignore
 public class OverridePathSlingRequestWrapperTest {
     private static final String RESOURCE_PATH = "/content/child";
     private static final String PAGE_PATH = "/content/childPage";
