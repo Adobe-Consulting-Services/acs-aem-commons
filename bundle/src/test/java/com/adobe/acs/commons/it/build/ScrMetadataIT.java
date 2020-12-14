@@ -19,22 +19,6 @@
  */
 package com.adobe.acs.commons.it.build;
 
-import com.adobe.acs.commons.http.JsonObjectResponseHandler;
-import com.google.gson.JsonObject;
-import junit.framework.TestCase;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.fluent.Request;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.osgi.framework.Constants;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +36,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.fluent.Request;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.osgi.framework.Constants;
+
+import com.adobe.acs.commons.http.JsonObjectResponseHandler;
+import com.google.gson.JsonObject;
+
+import junit.framework.TestCase;
 
 /**
  * The purpose of this test is to validate that SCR and Metatype properties are not inadvertantly changed between ACS AEM Commons releases.
@@ -94,7 +96,7 @@ public class ScrMetadataIT {
         PROPERTIES_TO_IGNORE = new HashSet<>();
         PROPERTIES_TO_IGNORE.add(Constants.SERVICE_PID);
         PROPERTIES_TO_IGNORE.add(PROP_NAMEHINT);
-        //PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
+        PROPERTIES_TO_IGNORE.add(Constants.SERVICE_VENDOR);
 
         COMPONENT_PROPERTIES_TO_IGNORE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.genericlists.impl.GenericListJsonResourceProvider:provider.roots");
@@ -131,6 +133,13 @@ public class ScrMetadataIT {
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.I18nInjector:service.ranking");
         COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.models.injectors.impl.JsonValueMapValueInjector:service.ranking");
 
+        // #2303 - EnsureOakIndexServlet (exposed via the OSGi Console) should be invokable via an inline HTML form
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:felix.webconsole.title");
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.oak.impl.EnsureOakIndexServlet:service.vendor");
+
+        // https://github.com/Adobe-Consulting-Services/acs-aem-commons/pull/2382
+        COMPONENT_PROPERTIES_TO_IGNORE.add("com.adobe.acs.commons.granite.ui.components.impl.include.IncludeDecoratorFilterImpl:sling.filter.resourceTypes");
+
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE = new HashSet<>();
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.cpu");
         COMPONENT_PROPERTIES_TO_IGNORE_FOR_TYPE_CHANGE.add("com.adobe.acs.commons.fam.impl.ThrottledTaskRunnerImpl:max.heap");
@@ -140,6 +149,7 @@ public class ScrMetadataIT {
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.1.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.2.0");
         ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.3.0");
+        ALLOWED_SCR_NS_URIS.add("http://www.osgi.org/xmlns/scr/v1.4.0");
 
         EXTRACT_VARIABLES = Pattern.compile("\\{([^}]+)}");
     }

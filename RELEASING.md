@@ -28,6 +28,7 @@ The password should only be [stored encryptedly](http://maven.apache.org/guides/
 These credentials are used to deploy to [OSSRH][OSSRH].
 
 In addition you need to setup [GPG](https://central.sonatype.org/pages/working-with-pgp-signatures.html) to create OpenPGP signatures. After installing https://www.gnupg.org/download/ you need to create key pair (if you don't have one yet) and make sure that the public key is distributed via hkp://pool.sks-keyservers.net.
+e.g. `gpg2 --keyserver hkp://pool.sks-keyservers.net --send-keys YOUR_KEY_ID_HERE` -- OSSRH also checks hkp://keys.openpgp.org and hkp://keyserver.ubuntu.com as backups so it might be a good idea to upload there.
 
 It is recommended that your private key is protected with a passphrase. You can persist the passphrase in the settings.xml as well
 
@@ -56,13 +57,15 @@ if you are releasing 3.18.0, create 3.20.0 and 3.18.2.
 
 5. Make sure that the issues and pull requests are associated with the proper milestone -- anything open for the current release should be moved to the next release, either minor or patch depending on the nature of the issue.
 
-6. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.
+6. Ensure **Java 8** is active (Java 11 breaks on the JavaDocs build in `mvn release:perform`)
 
-7. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
+7. Run the release: `mvn release:prepare` followed by `mvn release:perform`. You may need to pass `-Dgpg.passphrase=****` if your passphrase is not persisted in your `settings.xml`.  If you want to enter your passphrase manually at a prompt, add this to .bashrc or execute prior to mvn release: `export GPG_TTY=$(tty)` and you can verify it works via `echo "test" | gpg --clearsign`
 
-8. Log into https://oss.sonatype.org/ and close the staging repository. Closing the staging repo will automatically push the artifacts to Maven Central after a small delay (4 hours for all mirrors to catch up)
+8. Go to https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases and edit the release tag, using the CHANGELOG data as the release text and attaching the content package zip files (both min and regular) to the release.
 
-9. Add a release announcement (and any other docs) to the documentation site.
+9. Log into https://oss.sonatype.org/ and close the staging repository. Closing the staging repo will automatically push the artifacts to Maven Central after a small delay (4 hours for all mirrors to catch up)
+
+10. Add a release announcement (and any other docs) to the documentation site.
 
 11. If this is a minor release, check out the release tag and run the script `copy-javadoc.sh` to update the JavaDoc on the documentation site. Commit and push the changes the script makes.  Note: This script assumes you have the docs site checked out in a directory called `adobe-consulting-services.github.io`
 

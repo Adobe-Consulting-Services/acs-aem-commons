@@ -33,8 +33,7 @@ import org.apache.felix.scr.annotations.Service;
 @Properties({
         @Property(
                 name = ResourceDefinitionBuilder.PROP_NAME,
-                value = JcrValidNameDefinitionBuilderImpl.NAME,
-                propertyPrivate = true
+                value = JcrValidNameDefinitionBuilderImpl.NAME
         )
 })
 @Service

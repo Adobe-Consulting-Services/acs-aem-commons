@@ -43,7 +43,7 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 
 @Component
 @Properties({ @Property(label = "MBean Name", name = "jmx.objectname",
-        value = "com.adobe.acs.commons:type=Ensure Service User", propertyPrivate = true) })
+        value = "com.adobe.acs.commons:type=Ensure Service User") })
 @References({ @Reference(referenceInterface = EnsureAuthorizable.class, policy = ReferencePolicy.DYNAMIC,
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
 @Service(value = DynamicMBean.class)
