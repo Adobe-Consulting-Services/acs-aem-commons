@@ -119,7 +119,7 @@ public class AbstractDispatcherCacheHeaderFilterTest {
             }
 
             @Override
-            protected String getHeaderValue() {
+            protected String getHeaderValue(HttpServletRequest request) {
                 return headerValue;
             }
 
