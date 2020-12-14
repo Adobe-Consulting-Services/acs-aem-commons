@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.8.5-SNAPSHOT</version>
+        <version>4.8.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -176,12 +176,15 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.sling</groupId>
-                <artifactId>maven-sling-plugin</artifactId>
-                <configuration>
-                    <slingUrl>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/repository/crx.default</slingUrl>
-                    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
-                    <deploymentMethod>WebDAV</deploymentMethod>
-                </configuration>
+                <artifactId>sling-maven-plugin</artifactId>
+		<configuration>
+		    <slingUrl>${crx.protocol}://${crx.host}:${crx.port}${crx.contextRoot}</slingUrl>
+		    <slingUrlSuffix>/apps/acs-commons/install</slingUrlSuffix>
+		    <deploymentMethod>SlingPostServlet</deploymentMethod>
+		    <user>${crx.user}</user>
+		    <password>${crx.password}</password>
+		    <failOnError>true</failOnError>
+		</configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -235,6 +238,31 @@
                             <proc>
                                 none
                             </proc>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-banned-dependencies</id>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <!-- here we need to explicitly list the set of dependencies which 
+                                    are allowed with scope=compile -->
+                                    <includes>
+                                        <include>com.google.guava:guava</include>
+                                        <include>com.google.guava:failureaccess</include>
+                                        <include>io.jsonwebtoken:jjwt-api</include>
+                                        <include>io.jsonwebtoken:jjwt-impl</include>
+                                        <include>com.jcraft:jsch</include>
+                                        <include>com.jcraft:jzlib</include>
+                                    </includes>
+                                </bannedDependencies>
+                            </rules>
                         </configuration>
                     </execution>
                 </executions>
@@ -710,6 +738,47 @@
             <scope>test</scope>
         </dependency>
         <!-- some of the following dependences don't have necessary impl classes in the aemSdk -->
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.0.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- put UberJar last so that more specific artifacts take precedence -->
+        <dependency>
+            <groupId>com.adobe.aem</groupId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.8.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.8.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.8.4</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

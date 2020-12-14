@@ -9,7 +9,6 @@
     <audit-log-search/>
 
     <content-packagers/>
-    <automatic-package-replication/>
     <dispatcher-flush/>
     <redirect-maps/>
     <version-replicator/>

@@ -9,20 +9,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
-## UNRELEASED
+## 4.8.6 - 2020-10-13
 
 ### Fixed
 - #2316 - @ChildResourceFromRequest uses incomplete request wrapper
 - #2383 - [trivial] fix exception message in MarketoFieldDataSource
 - #2384 - Fix resource service manager NPEs when service content nodes are missing
 - #2386 - Make folder titles overwrite optional for asset ingestor
+- #2416 - Fixing workflow package path calculation in WorkflowPackageManager service
+
 
 ### Added
+- #1060 - New tree activation MCP utility
 
 ### Changed
 
 - #2373 - Cleanup warnings in the unit tests
 - #2377 - Added an option to Disable Vanity URLs for SiteMap Generation
+- #2411 - Robots.txt servlet should better support multi-tenancy
+- #2414 - Sitemap.xml servlet should better support multi-tenancy
 
 ## 4.8.4 - 2020-07-23
 
@@ -53,6 +58,9 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2339 - Microsoft Office Add-in for AEM Assets
 
 ### Fixed
+
+- #2241 Automatic Package Replicator - Missing Service User
+- #2264 Automatic Package Replicator - TouchUI Support
 - #2267 - Redirect Map Edit Wrong Entry
 - #2298 - Removed dependency on com.day.cq.dam.api.collection
 - #2300 - Fixed CopyProperties WF Process copy of empty properties
