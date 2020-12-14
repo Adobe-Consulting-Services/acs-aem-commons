@@ -944,6 +944,15 @@
     "com.day.cq.wcm.command.api": [
         "1.1.0"
     ],
+    "com.adobe.cq.wcm.core.components.models": [
+        "12.2.0"
+    ],
+    "com.adobe.cq.wcm.core.components.models.form": [
+        "14.2.0"
+    ],
+    "com.adobe.cq.wcm.core.components.extension.contentfragment.models": [
+        "1.0.0"
+    ],
     "com.adobe.cq.sightly": [
         "3.2.0"
     ],
@@ -7888,6 +7897,12 @@
     ],
     "com.adobe.cq.smartcontent": [
         "1.0.0"
+    ],
+    "we.retail.core.model": [
+        "8.1.1"
+    ],
+    "we.retail.core.model.handler": [
+        "2.0.0"
     ],
     "com.adobe.xfa": [
         "0.0.0"
