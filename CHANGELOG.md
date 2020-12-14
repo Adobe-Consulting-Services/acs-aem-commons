@@ -80,6 +80,10 @@ v4.8.2 failed to release properly. v4.8.4 is a re-release of v4.8.2
 - #2359 - Deprecated AdminOnlyProcessDefinitionFactory in favor of recommending AdministratorsOnlyProcessDefinitionFactory, updated Deep Prune to allow all administrators group.
 - #2298 - Removed DynamicDeck dependency on deprecated package com.day.cq.dam.api.collection which causes problems w/ AEM CS deployments.
 
+### Changed
+
+- #2341 - Moved /var nodes and ACLS to be defined as Repoinit scripts
+
 ## [4.7.0] - 2020-05-12
 
 ### Added
