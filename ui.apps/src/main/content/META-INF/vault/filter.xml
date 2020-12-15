@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/acs-commons">
+    <!--
         <exclude pattern="/apps/acs-commons/components/utilities/designer/clientlibsmanager/clientlibs/less/generated"/>
         <exclude pattern="/apps/acs-commons/components/content/column-control/clientlib/css/generated"/>
         <exclude pattern="/apps/acs-commons/widgets/source/css/generated"/>
@@ -12,6 +13,7 @@
         <include pattern="/apps/acs-commons/components/utilities/version-compare(.*)?"/>
         <exclude pattern="/apps/acs-commons/components/utilities/version-compare/clientlibs/css/generated"/>
     </filter>
+    -->å
     <filter root="/apps/cq/core/content/nav/tools/acs-commons"/>
     <filter root="/apps/settings/dam/indesign/scripts"/>
     <filter root="/apps/cq/core/content/nav/tools/cloudservices/marketo"/>
