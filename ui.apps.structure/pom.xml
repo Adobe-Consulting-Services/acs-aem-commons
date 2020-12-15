@@ -50,6 +50,7 @@
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl</root></filter>
 
                         <!-- Immutable context-aware configurations -->

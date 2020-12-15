@@ -82,26 +82,42 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
+
+          <plugin>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
+
                 <configuration>
                     <group>adobe/consulting</group>
-                    <properties>
-                        <description>ACS AEM Commons content package containing code (/apps).</description>
-                        <!-- overwrite rep:ACE nodes defining policies for acs-aem-commons-owned service principals -->
-                        <acHandling>merge</acHandling>
-                    </properties>
+                    <description>ACS AEM Commons content package containing code (/apps).</description>
+                    <packageType>application</packageType>
+                    <accessControlHandling>merge</accessControlHandling>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+
+                    <repositoryStructurePackages>
+                        <repositoryStructurePackage>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>acs-aem-commons-ui.apps.structure</artifactId>
+                        </repositoryStructurePackage>
+                    </repositoryStructurePackages>
+
                     <dependencies>
                         <dependency>
                             <group>day/cq60/product</group>
                             <name>cq-content</name>
                             <version>[6.3.64,)</version>
-                        </dependency>
+                        </dependency>                    
                     </dependencies>
-                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <verbose>true</verbose>
+                    <failOnError>true</failOnError>
                 </configuration>
             </plugin>
 
@@ -289,6 +305,13 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>acs-aem-commons-bundle</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+            <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.apps.structure</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
             <scope>provided</scope>
         </dependency>
         <dependency>

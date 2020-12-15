@@ -63,17 +63,18 @@
                 </configuration>
             </plugin>
 
+
             <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <extensions>true</extensions>
+
                 <configuration>
                     <group>adobe/consulting</group>
-                    <properties>
-                        <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps and acs-aem-commons-ui.content.</description>
-                    </properties>
+                    <description>ACS AEM Commons container content package which delivers acs-aem-commons-ui.apps and acs-aem-commons-ui.content.</description>
+                    <packageType>container</packageType>
+                    <accessControlHandling>merge</accessControlHandling>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
-                    <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                 </configuration>
                 <executions>
                     <execution>
@@ -99,7 +100,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.config</artifactId>
                                     <type>zip</type>
-                                    <target>/apps/acs-commons-packages/application/install</target>
+                                    <target>/apps/acs-commons-packages/container/install</target>
                                 </embedded>                                 
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
@@ -137,7 +138,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>acs-aem-commons-ui.config</artifactId>
                                     <type>zip</type>
-                                    <target>/apps/acs-commons-packages/application/install</target>
+                                    <target>/apps/acs-commons-packages/container/install</target>
                                 </embedded>  
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>
@@ -151,7 +152,15 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <verbose>true</verbose>
+                    <failOnError>true</failOnError>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>

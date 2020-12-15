@@ -225,7 +225,7 @@
                 <plugin>
                     <groupId>com.day.jcr.vault</groupId>
                     <artifactId>content-package-maven-plugin</artifactId>
-                    <version>0.0.24</version>
+                    <version>1.0.2</version>
                      <configuration>
                          <targetURL>http://${crx.host}:${crx.port}${crx.contextRoot}/crx/packmgr/service.jsp</targetURL>
                         <failOnError>true</failOnError>
