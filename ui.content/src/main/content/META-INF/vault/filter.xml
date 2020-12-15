@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/conf/rep:policy"/>
+    <filter root="/conf/acs-commons/reports" mode="update">
+        <include pattern="/conf/acs-commons/reports/jcr:content" />
+        <include pattern="/conf/acs-commons/reports(.*)?" mode="merge" />
+    </filter>
     <filter root="/content/dam/rep:policy"/>
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
@@ -32,6 +36,7 @@
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
         <include pattern="/etc/acs-commons/redirect-maps"/>
         <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
+        <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>      
         <include pattern="/etc/acs-commons/exporters"/>
         <include pattern="/etc/acs-commons/exporters/jcr:content"/>
         <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
@@ -88,8 +93,5 @@
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/oak:index/rep:policy"/>
-    <filter root="/rep:policy"/>
-    <filter root="/var/acs-commons">
-            <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>
-    </filter>
+    <filter root="/rep:policy" />
 </workspaceFilter>
