@@ -8,6 +8,7 @@
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
         <version>4.11.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>        
     </parent>
 
     <!-- ====================================================================== -->
@@ -50,8 +51,11 @@
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl</root></filter>
+                        <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/dialogpublishurl/items</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items</root></filter>
                         <filter><root>/apps/dam/gui/content/assets/metadataeditor/jcr:content/content/items/col1/items/copypublishurl</root></filter>
+
+
 
                         <!-- Immutable context-aware configurations -->
                         <filter><root>/apps/settings</root></filter>

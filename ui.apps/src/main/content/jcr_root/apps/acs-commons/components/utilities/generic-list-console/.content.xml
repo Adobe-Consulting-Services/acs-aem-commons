@@ -305,7 +305,8 @@
                 sling:resourceType="granite/ui/components/coral/foundation/panel/railpanel"/>
         </rails>
     </jcr:content>
-    <createlistwizard/>
+    <createlistwizard
+        jcr:primaryType="nt:unstructured"/>
     <pagecolumnpreview
         jcr:primaryType="nt:unstructured"
         sling:resourceType="cq/gui/components/coral/admin/page/columnpreview"

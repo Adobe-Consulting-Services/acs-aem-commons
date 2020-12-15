@@ -82,7 +82,6 @@
                 </configuration>
             </plugin>
 
-
           <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
                 <artifactId>filevault-package-maven-plugin</artifactId>
@@ -312,7 +311,6 @@
             <artifactId>acs-aem-commons-ui.apps.structure</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>

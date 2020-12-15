@@ -72,7 +72,7 @@
                 <configuration>
                     <group>adobe/consulting</group>
                     <description>ACS AEM Commons content package containing content and configuration.</description>
-                    <packageType>application</packageType>
+                    <packageType>content</packageType>
                     <accessControlHandling>merge</accessControlHandling>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
 
