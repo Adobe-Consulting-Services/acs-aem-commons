@@ -31,6 +31,7 @@ import org.apache.commons.mail.SimpleEmail;
 import org.apache.sling.hc.api.HealthCheck;
 import org.apache.sling.hc.api.Result;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +82,7 @@ public class SMTPMailServiceHealthCheckTest {
 		assertEquals(Result.Status.WARN, actual.getStatus());
 	}
 
+	@Ignore
 	@Test
 	public void testExecute_ExceedDailyAllowance() throws Exception {
 		doReturn(messageGateway).when(messageGatewayService).getGateway(SimpleEmail.class);

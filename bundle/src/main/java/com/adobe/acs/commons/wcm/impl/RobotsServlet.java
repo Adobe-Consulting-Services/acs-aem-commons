@@ -23,12 +23,15 @@ import com.day.cq.commons.Externalizer;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.PageManagerFactory;
+import com.day.text.Text;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -42,13 +45,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Binary;
-import javax.jcr.Item;
-import javax.jcr.Property;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -62,7 +58,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Component(service = Servlet.class, property = {
@@ -73,6 +68,8 @@ import java.util.function.Function;
 @Designate(ocd = RobotsServlet.RobotsServletConfig.class, factory = true)
 public final class RobotsServlet extends SlingSafeMethodsServlet {
 
+    private static final long serialVersionUID = 1L;
+    
     private static final Logger log = LoggerFactory.getLogger(RobotsServlet.class);
     private static final String ALLOW = "Allow: ";
     private static final String USER_AGENT = "User-agent: ";
@@ -89,6 +86,9 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     @Reference
     private Externalizer externalizer;
+
+    @Reference
+    private PageManagerFactory pageManagerFactory;
 
     @Activate
     protected void activate(RobotsServletConfig config) {
@@ -110,7 +110,7 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
 
     private void write(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         if (StringUtils.isNotBlank(robotsContentsPropertyPath)) {
-            writeFromJcrProperty(request, response);
+            writeFromBinaryProperty(request, response);
         } else {
             writeFromOsgiConfig(request, response);
         }
@@ -119,14 +119,15 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
     private void writeFromOsgiConfig(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         PrintWriter writer = response.getWriter();
 
-        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        PageManager pageManager = pageManagerFactory.getPageManager(request.getResourceResolver());
         Page page = pageManager.getContainingPage(request.getResource());
         if (page != null) {
             rules.getGroups().forEach(group -> writeGroup(group, request.getResourceResolver(), page, writer));
 
-            rules.getSitemaps().stream().map(sitemap -> buildSitemapString(sitemap, request.getResourceResolver())).forEach(writer::println);
+            rules.getSitemaps().stream().map(sitemap -> buildSitemapDirective(sitemap, request, pageManager, request.getResourceResolver())).forEach(writer::println);
             if (!rules.getSitemapProperties().isEmpty()) {
-                addRulesFromPages(page, request.getResourceResolver(), rules.getSitemapProperties(), writer, this::buildSitemapString);
+                addRuleForPageHavingBooleanProperty(page, rules.getSitemapProperties(), writer, 
+                                                    (currentPage) -> buildSitemapDirective(currentPage.getPath(), request, pageManager, request.getResourceResolver()));
             }
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -139,20 +140,21 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
             writer.println("# Start Group: " + group.getGroupName());
         }
 
-        group.getUserAgents().stream().map(this::buildUserAgentsString).forEach(writer::println);
+        PageManager pageManager = page.getPageManager();
+        group.getUserAgents().stream().map(this::buildUserAgentsDirective).forEach(writer::println);
 
-        group.getAllowed().stream().map(allowed -> buildAllowedString(allowed, resourceResolver)).forEach(writer::println);
+        group.getAllowed().stream().map(allowed -> buildAllowedOrDisallowedDirective(true, allowed, pageManager, resourceResolver)).forEach(writer::println);
 
         List<String> allowProperties = group.getAllowProperties();
         if (!allowProperties.isEmpty()) {
-            addRulesFromPages(page, resourceResolver, allowProperties, writer, this::buildAllowedString);
+            addRuleForPageHavingBooleanProperty(page, allowProperties, writer, (currentPage) -> buildAllowedOrDisallowedDirective(true, currentPage.getPath(), pageManager, resourceResolver));
         }
 
-        group.getDisallowed().stream().map(disallowed -> buildDisallowedString(disallowed, resourceResolver)).forEach(writer::println);
+        group.getDisallowed().stream().map(disallowed -> buildAllowedOrDisallowedDirective(false, disallowed, page.getPageManager(), resourceResolver)).forEach(writer::println);
 
         List<String> disallowProperties = group.getDisallowProperties();
         if (!disallowProperties.isEmpty()) {
-            addRulesFromPages(page, resourceResolver, disallowProperties, writer, this::buildDisallowedString);
+            addRuleForPageHavingBooleanProperty(page, disallowProperties, writer,  (currentPage) -> buildAllowedOrDisallowedDirective(false, currentPage.getPath(), pageManager, resourceResolver));
         }
 
         if (printGroupingComments) {
@@ -160,13 +162,21 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         }
     }
 
-    private void addRulesFromPages(Page page, ResourceResolver resourceResolver, List<String> propNames, PrintWriter writer, BiFunction<Page, ResourceResolver, String> ruleBuilderFunc) {
+    /**
+     * Recursively calls {@code ruleBuilderFunc} for the current page and all its children where one of the given propNames is having the boolean value {@code true}
+     * @param page the page from which to  start
+     * @param resourceResolver the resourceResolver to use
+     * @param propNames the list of property names on the page to evaluate
+     * @param writer contains the generated output
+     * @param ruleBuilderFunc generates the rule which is added to {@code writer}
+     */
+    private void addRuleForPageHavingBooleanProperty(Page page, List<String> propNames, PrintWriter writer, Function<Page, String> ruleBuilderFunc) {
         ValueMap pageProps = page.getProperties();
         boolean added = false;
         for (String prop : propNames) {
             boolean shouldAdd = pageProps.get(prop, false);
             if (shouldAdd) {
-                String rule = ruleBuilderFunc.apply(page, resourceResolver);
+                String rule = ruleBuilderFunc.apply(page);
                 writer.println(rule);
                 added = true;
                 break;
@@ -176,104 +186,89 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         if (!added) {
             //since the rules are added to (dis)allow a page and it's children, we only need to recurse if no rule is added for the current page.
             Iterator<Page> pageIterator = page.listChildren(new PageFilter(false, true), false);
-            pageIterator.forEachRemaining(child -> addRulesFromPages(child, resourceResolver, propNames, writer, ruleBuilderFunc));
+            pageIterator.forEachRemaining(child -> addRuleForPageHavingBooleanProperty(child, propNames, writer, ruleBuilderFunc));
         }
 
     }
 
-    private void writeFromJcrProperty(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
+    private void writeFromBinaryProperty(SlingHttpServletRequest request, SlingHttpServletResponse response) throws IOException {
         String absoluteRobotsContentsPropertyPath = robotsContentsPropertyPath;
         if (!absoluteRobotsContentsPropertyPath.startsWith("/")) {
             absoluteRobotsContentsPropertyPath = request.getResource().getPath() + "/" + robotsContentsPropertyPath;
         }
 
-        Session session = request.getResourceResolver().adaptTo(Session.class);
         boolean written = false;
-        try {
-            if (session.itemExists(absoluteRobotsContentsPropertyPath)) {
-                Item item = session.getItem(absoluteRobotsContentsPropertyPath);
-                if (item instanceof Property) {
-                    Property prop = (Property) item;
-                    int propertyType = prop.getType();
-                    Value value = prop.getValue();
-                    if (propertyType == PropertyType.BINARY) {
-                        Binary binary = value.getBinary();
-                        InputStream stream = binary.getStream();
-                        ByteStreams.copy(stream, response.getOutputStream());
+        // separate resource path from property path
+        int separator = absoluteRobotsContentsPropertyPath.lastIndexOf('/');
+        if (separator == -1 || separator == absoluteRobotsContentsPropertyPath.length()-1) {
+            log.warn("no '/' separator found in configured property path or it ends with a separator : {}.", absoluteRobotsContentsPropertyPath);
+        } else {
+            String resourcePath = absoluteRobotsContentsPropertyPath.substring(0, separator);
+            String propertyName = absoluteRobotsContentsPropertyPath.substring(separator+1);
+            Resource resource = request.getResourceResolver().getResource(resourcePath);
+            if (resource != null) {
+                Object property = resource.getValueMap().get(propertyName);
+                if (property != null) {
+                    if (property instanceof String) {
+                        response.getWriter().print(String.class.cast(property));
                         written = true;
-                    } else if (propertyType == PropertyType.STRING) {
-                        response.getWriter().print(value.getString());
-                        written = true;
+                    } else if (property instanceof InputStream) {
+                        try (InputStream stream = (InputStream)property) {
+                            ByteStreams.copy(stream, response.getOutputStream());
+                            written = true;
+                        }
                     } else {
-                        log.warn("configured property {} found, but type {} is not String or Binary.", absoluteRobotsContentsPropertyPath, PropertyType.nameFromValue(propertyType));
+                        log.warn("configured property {} found, but type {} is not String or Binary.", absoluteRobotsContentsPropertyPath, property.getClass());
                     }
                 } else {
-                    log.warn("Item found at configured property {}, but is not a property.", absoluteRobotsContentsPropertyPath);
+                    log.warn("configured property {} does not exist below {}.", propertyName, resourcePath);
                 }
             } else {
-                log.warn("configured property {} does not exist.", absoluteRobotsContentsPropertyPath);
+                log.warn("configured resource {} does not exist.", resourcePath);
             }
-
-            if (!written) {
-                log.error("no response was written while processing robots with jcr property {}.", absoluteRobotsContentsPropertyPath);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            }
-        } catch (RepositoryException e) {
-            log.error("Repository Exception while processing robots with jcr property {}", absoluteRobotsContentsPropertyPath, e);
+        }
+        if (!written) {
+            log.error("no response was written while processing robots with jcr property {}.", absoluteRobotsContentsPropertyPath);
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    private String buildUserAgentsString(String agent) {
+    private String buildUserAgentsDirective(String agent) {
         return USER_AGENT + agent;
     }
 
-    private String buildSitemapString(String sitemap, ResourceResolver resourceResolver) {
-        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        Page page = pageManager.getContainingPage(sitemap);
-        if (page != null) {
-           return buildSitemapString(page, resourceResolver);
-        } else {
-            return SITEMAP + sitemap;
+    private String buildSitemapDirective(String sitemap, SlingHttpServletRequest request, PageManager pageManager, ResourceResolver resourceResolver) {
+        String sitemapPagePath = sitemap;
+        if (!sitemapPagePath.startsWith("/")) {
+            Page currentPage = pageManager.getContainingPage(request.getResource());
+            sitemapPagePath = Text.fullFilePath(currentPage.getPath(), sitemap);
         }
-    }
-
-    private String buildSitemapString(Page page, ResourceResolver resourceResolver) {
-        String sitemapRule = externalizer.externalLink(resourceResolver, externalizerDomain, page.getPath()) + ".sitemap.xml";
-
-        return SITEMAP + sitemapRule;
-    }
-
-    private String buildAllowedString(String allowedRule, ResourceResolver resourceResolver) {
-        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        Page page = pageManager.getContainingPage(allowedRule);
+        Page page = pageManager.getContainingPage(sitemapPagePath);
         if (page != null) {
-            return buildAllowedString(page, resourceResolver);
-        } else {
-            return ALLOW + allowedRule;
+            log.debug("Found page at {}. Generate sitemap directive based on that.", sitemapPagePath);
+            sitemap = getSitemapUrl(request, page, resourceResolver);
         }
+        return SITEMAP + sitemap;
     }
 
-    private String buildAllowedString(Page page, ResourceResolver resourceResolver) {
-        String allowedRule = resourceResolver.map(page.getPath()) + "/";
-
-        return ALLOW + allowedRule;
+    private String getSitemapUrl(SlingHttpServletRequest request, Page page, ResourceResolver resourceResolver) {
+        final String sitemapRule;
+        String sitemapRequestPath = page.getPath() + ".sitemap.xml";
+        if (StringUtils.isNotBlank(externalizerDomain)) {
+            log.debug("No externalizer domain configured, take into account current host header {} and current scheme {}", request.getServerName(), request.getScheme());
+            sitemapRule = externalizer.externalLink(resourceResolver, externalizerDomain, sitemapRequestPath);
+        } else {
+            sitemapRule = externalizer.absoluteLink(request, request.getScheme(), sitemapRequestPath);
+        }
+        return sitemapRule;
     }
 
-    private String buildDisallowedString(String disallowedRule, ResourceResolver resourceResolver) {
-        PageManager pageManager = resourceResolver.adaptTo(PageManager.class);
-        Page page = pageManager.getContainingPage(disallowedRule);
+    private String buildAllowedOrDisallowedDirective(boolean isAllowed, String allowedOrDisallowedRule, PageManager pageManager, ResourceResolver resourceResolver) {
+        Page page = pageManager.getContainingPage(allowedOrDisallowedRule);
         if (page != null) {
-            return buildDisallowedString(page, resourceResolver);
-        } else {
-            return DISALLOW + disallowedRule;
+            allowedOrDisallowedRule = resourceResolver.map(page.getPath()) + "/";
         }
-    }
-
-    private String buildDisallowedString(Page page, ResourceResolver resourceResolver) {
-        String disallowedRule = resourceResolver.map(page.getPath()) + "/";
-
-        return DISALLOW + disallowedRule;
+        return (isAllowed ? ALLOW : DISALLOW) + allowedOrDisallowedRule;
     }
 
     @ObjectClassDefinition(name = "ACS AEM Commons - Robots Servlet")
@@ -294,22 +289,22 @@ public final class RobotsServlet extends SlingSafeMethodsServlet {
         @AttributeDefinition(name = "Allow Directives", description = "A set of Allow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<allowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
         String[] allow_directives() default {};
 
-        @AttributeDefinition(name = "Allow Property Names", description = "A list of page properties used to generate the allow directives.  Any directives added through this method are in addition to those specified in the allow.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
+        @AttributeDefinition(name = "Allow Property Names", description = "A list of boolean page properties which enable generation of an allow directive for that page. Any directives added through this method are in addition to those specified in the allow.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
         String[] allow_property_names() default {};
 
         @AttributeDefinition(name = "Disallow Directives", description = "A set of Disallow directives to add to the robots file. Each directive is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<disallowed path>. If the specified path is a valid cq page, resourceResolver.map() will be called prior to adding the rule.")
         String[] disallow_directives() default {};
 
-        @AttributeDefinition(name = "Disallow Property Names", description = "A list of page properties used to generate the disallow directives.  Any directives added through this method are in addition to those specified in the disallowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
+        @AttributeDefinition(name = "Disallow Property Names", description = "A list of boolean page properties wich enable generation of a disallow directive for that page. Any directives added through this method are in addition to those specified in the disallowed.directives property. Each property name is optionally pre-fixed with a ruleGroupName. Syntax: [<ruleGroupName>:]<propertyName>")
         String[] disallow_property_names() default {};
 
-        @AttributeDefinition(name = "Sitemap Directives", description = "A set of Sitemap directives to add to the robots file. If the specified path is a valid cq page, externalizer is called with the specified Externalizer Domain to generate an absolute url to that page's .sitemap.xml, which will resolve to the ACS Commons Site Map Servlet.")
+        @AttributeDefinition(name = "Sitemap Directives", description = "A set of Sitemap directives to add to the robots file. If the specified path is a valid AEM page path (either absolute or relative to the current page), externalizer is called with the specified Externalizer Domain to generate an absolute url to that page's .sitemap.xml, which will resolve to the ACS Commons Site Map Servlet.")
         String[] sitemap_directives() default {};
 
-        @AttributeDefinition(name = "Sitemap Property Names", description = "A list of page properties used to generate the sitemap directives.  Any directives added through this method are in addition to those specified in the sitemap.directives property.")
+        @AttributeDefinition(name = "Sitemap Property Names", description = "A list of boolean page properties which enable generation of the sitemap directive for that page. Any directives added through this method are in addition to those specified in the sitemap.directives property.")
         String[] sitemap_property_names() default {};
 
-        @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component.")
+        @AttributeDefinition(name = "Externalizer Domain", description = "Must correspond to a configuration of the Externalizer component. If blank the externalization will prepend the current request's scheme combined with the current request's host header.")
         String externalizer_domain() default "publish";
 
         @AttributeDefinition(name = "Print Grouping Comments", description = "When enabled, comments are printed to the file for start and end of each rule group. This is primarily for debugging purposes.")

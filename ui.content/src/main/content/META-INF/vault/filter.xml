@@ -9,8 +9,6 @@
     <filter root="/content/rep:policy"/>
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/jcr:content"/>
-        <include pattern="/etc/acs-commons/automatic-package-replication"/>
-        <include pattern="/etc/acs-commons/automatic-package-replication/jcr:content"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager/jcr:content"/>
         <include pattern="/etc/acs-commons/twitter-rate-limit-checker(.*)?"/>
@@ -38,6 +36,7 @@
         <include pattern="/etc/acs-commons/packagers/jcr:content"/>
         <include pattern="/etc/acs-commons/redirect-maps"/>
         <include pattern="/etc/acs-commons/redirect-maps/jcr:content"/>
+        <include pattern="/etc/acs-commons/reports(.*)?" mode="merge"/>      
         <include pattern="/etc/acs-commons/exporters"/>
         <include pattern="/etc/acs-commons/exporters/jcr:content"/>
         <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter"/>
@@ -95,13 +94,4 @@
     <filter root="/home/users/system/acs-commons"/>
     <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy" />
-    <filter root="/var/acs-commons">
-        <include pattern="/var/acs-commons/rep:policy"/>
-        <include pattern="/var/acs-commons/jcr:content"/>
-        <include pattern="/var/acs-commons/httpcache"/>
-        <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
-        <include pattern="/var/acs-commons/mcp"/>
-    </filter>
-    <filter root="/var/workflow/instances/rep:policy"/>
-    <filter root="/var/workflow/packages/rep:policy"/>
 </workspaceFilter>

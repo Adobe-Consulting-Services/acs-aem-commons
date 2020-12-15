@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.adobe.acs</groupId>
         <artifactId>acs-aem-commons</artifactId>
-        <version>4.8.5-SNAPSHOT</version>
+        <version>4.8.7-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -244,19 +244,6 @@
                             </scanArtifacts>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>oakpal-verify</id>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <summaryFiles>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
-                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
-                            </summaryFiles>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 
@@ -323,6 +310,32 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+        	<id>classic</id>
+        	<build>
+        		<plugins>
+        			<plugin>
+        				<groupId>net.adamcin.oakpal</groupId>
+                		<artifactId>oakpal-maven-plugin</artifactId>
+        				<executions>
+        					<execution>
+		                        <id>oakpal-verify</id>
+		                        <goals>
+		                            <goal>verify</goal>
+		                        </goals>
+		                        <configuration>
+		                            <summaryFiles>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem64.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/content-class-aem65.json</summaryFile>
+		                                <summaryFile>${project.build.directory}/oakpal-plugin/reports/oakpal-summary-min.json</summaryFile>
+		                            </summaryFiles>
+		                        </configuration>
+		                    </execution>
+        				</executions>
+        			</plugin>
+        		</plugins>
+        	</build>
         </profile>
     </profiles>
 </project>
