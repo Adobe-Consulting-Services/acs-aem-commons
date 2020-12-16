@@ -67,8 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.sling.discovery.TopologyEvent;
-import org.apache.sling.discovery.TopologyEventListener;
+
+import org.apache.sling.discovery.DiscoveryService;
 
 @Component(
         label = "ACS AEM Commons - Package Replication Status Updater",
@@ -99,7 +99,7 @@ import org.apache.sling.discovery.TopologyEventListener;
         )
 })
 @Service
-public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler, TopologyEventListener {
+public class JcrPackageReplicationStatusEventHandler implements JobConsumer, EventHandler {
     private static final Logger log = LoggerFactory.getLogger(JcrPackageReplicationStatusEventHandler.class);
 
     private static final String FALLBACK_REPLICATION_USER_ID = "Package Replication";
@@ -160,7 +160,8 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Reference
     private JobManager jobManager;
 
-    private boolean isLeader = false;
+    @Reference
+    private DiscoveryService discoveryService;
 
     // Previously "Package Replication"
     private static final String DEFAULT_REPLICATED_BY_OVERRIDE = "";
@@ -198,7 +199,7 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
     @Override
     @SuppressWarnings("squid:S3776")
     public final void handleEvent(final Event event) {
-        if (this.isLeader) {
+        if (discoveryService.getTopology().getLocalInstance().isLeader()) {
             // Only run on master
             final Map<String, Object> jobConfig = getInfoFromEvent(event);
             final String[] paths = (String[]) jobConfig.get(PROPERTY_PATHS);
@@ -496,10 +497,5 @@ public class JcrPackageReplicationStatusEventHandler implements JobConsumer, Eve
         log.info("Package Replication Status - Replicated By Override User: [ {} ]", this.replicatedByOverride);
         log.info("Package Replication Status - Replicated At: [ {} ]", this.replicatedAt);
         log.info("Package Replication Status - Node Types and Path Restrictions: [ {} ]", pathRestrictionByNodeType);
-    }
-
-    @Override
-    public void handleTopologyEvent(TopologyEvent te) {
-        this.isLeader = te.getNewView().getLocalInstance().isLeader();
     }
 }
