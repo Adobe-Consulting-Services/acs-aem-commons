@@ -33,90 +33,95 @@ public class SaxElementUtilsTest {
 
     @Test
     public void testIsCss() throws Exception {
-        assertTrue("CSS Happy Path", 
+        assertTrue("CSS Happy Path",
                 SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
-        
-        assertFalse("CSS - not a link", 
+
+        assertFalse("CSS - not a link",
                 SaxElementUtils.isCss("notlink",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/css")));
-        
-        assertFalse("CSS - not a path to css file", 
+
+        assertFalse("CSS - not a path to css file",
                 SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.notcss",
                                 "type", "text/css")));
 
-        assertFalse("CSS - relative path", 
+        assertFalse("CSS - relative path",
                 SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "css.css",
                                 "type", "text/css")));
 
-        assertFalse("CSS - external path", 
+        assertFalse("CSS - external path",
                 SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "http://www.adobe.com/css.css",
                                 "type", "text/css")));
 
-        
-        assertFalse("CSS - wrongtype", 
+
+        assertFalse("CSS - wrongtype",
                 SaxElementUtils.isCss("link",
                         makeAtts(
                                 "href", "/css.css",
                                 "type", "text/notcss")));
     }
-    
+
     @Test
     public void testIsJavascript() throws Exception {
-        assertTrue("JS Happy Path", 
+        assertTrue("JS Happy Path",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.js",
                                 "type", SaxElementUtils.JS_TYPE)));
-        
-        assertFalse("JS - not a link", 
+
+        assertTrue("JS Happy Path - Optional Type Attribute",
+                SaxElementUtils.isJavaScript("script",
+                        makeAtts(
+                                "src", "/js.js")));
+
+        assertFalse("JS - not a link",
                 SaxElementUtils.isJavaScript("notscript",
                         makeAtts(
                                 "src", "/js.js",
                                 "type", SaxElementUtils.JS_TYPE)));
-        
-        assertFalse("JS - not a path to js file", 
+
+        assertFalse("JS - not a path to js file",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.notjs",
                                 "type", SaxElementUtils.JS_TYPE)));
 
-        assertFalse("JS - relative path", 
+        assertFalse("JS - relative path",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "js.js",
                                 "type", SaxElementUtils.JS_TYPE)));
 
-        assertFalse("JS - external path", 
+        assertFalse("JS - external path",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "http://www.adobe.com/js.js",
                                 "type", SaxElementUtils.JS_TYPE)));
 
-        
-        assertFalse("JS - wrongtype", 
+
+        assertFalse("JS - wrongtype",
                 SaxElementUtils.isJavaScript("script",
                         makeAtts(
                                 "src", "/js.js",
                                 "type", "not" + SaxElementUtils.JS_TYPE)));
     }
-    
+
     private Attributes makeAtts( String... strings ) {
         AttributesImpl atts = new AttributesImpl();
         for( int i = 0; i < strings.length/2; i++) {
             String key = strings[i*2];
             String value = strings[i*2 + 1];
-            atts.addAttribute("", key, "", "CDATA", value); 
+            atts.addAttribute("", key, "", "CDATA", value);
         }
         return atts;
     }
