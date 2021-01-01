@@ -78,8 +78,8 @@
 
                      <dependencies>
                         <dependency>
-                            <group>adobe/consulting</group>
-                            <name>acs-aem-commons-ui.apps</name>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>acs-aem-commons-ui.apps</artifactId>
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
@@ -350,6 +350,12 @@
             <artifactId>acs-aem-commons-oakpal-checks</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>acs-aem-commons-ui.apps</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
         </dependency>
     </dependencies>
     <profiles>

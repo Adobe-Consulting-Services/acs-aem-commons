@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/conf/rep:policy"/>
+
     <filter root="/conf/acs-commons/reports" mode="update">
         <include pattern="/conf/acs-commons/reports/jcr:content" />
-        <include pattern="/conf/acs-commons/reports(.*)?" mode="merge" />
     </filter>
-    <filter root="/content/dam/rep:policy(/.*)?"/>
-    <filter root="/content/rep:policy(/.*)?"/>
+
+    <filter root="/conf/acs-commons/reports" mode="merge">
+        <include pattern="/conf/acs-commons/reports/(.*)?"/>
+        <include pattern="/conf/acs-commons/reports/jcr:content"/>
+    </filter>
+
+    <filter root="/etc/acs-commons">  
+        <!-- the user specific configuration should not be touched -->
+        <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config(/.*)?"/>
+
+        <!-- the user specific configuration should not be touched -->
+        <exclude pattern="/etc/acs-commons/instant-package/jcr:content/config(/.*)?"/>
+    </filter>
+
+    <filter root="/etc/acs-commons/lists/dynamic-deck-query-list" mode="merge"/>
+    <filter root="/etc/acs-commons/reports" mode="merge"/>
+
+    <!--
     <filter root="/etc/acs-commons">
         <include pattern="/etc/acs-commons/jcr:content"/>
         <include pattern="/etc/acs-commons/bulk-workflow-manager"/>
@@ -44,13 +59,13 @@
         <include pattern="/etc/acs-commons/exporters/jcr:content"/>
         <include pattern="/etc/acs-commons/exporters/tag-to-csv-exporter(/.*)?"/>
          <include pattern="/etc/acs-commons/qr-code/jcr:content(/.*)?"/>
-        <!-- the user specific configuration should not be touched -->
+        <!- - the user specific configuration should not be touched - ->
         <exclude pattern="/etc/acs-commons/qr-code/jcr:content/config(/.*)?"/>
         <include pattern="/etc/acs-commons/instant-package/jcr:content(/.*)?"/>
-        <!-- the user specific configuration should not be touched -->
+        <!- - the user specific configuration should not be touched - ->
         <exclude pattern="/etc/acs-commons/instant-package/jcr:content/config(/.*)?"/>
 
-        <!-- Remove legacy /etc pages from prior version installs -->
+        <!- - Remove legacy /etc pages from prior version installs - ->
         <include pattern="/etc/acs-commons/audit-log-search"/>
         <include pattern="/etc/acs-commons/jcr-compare"/>
         <include pattern="/etc/acs-commons/manage-controlled-processes"/>
@@ -61,37 +76,33 @@
         <include pattern="/etc/acs-commons/version-replicator"/>
         <include pattern="/etc/acs-commons/workflow-remover"/>
     </filter>
+    -->
+
     <!-- only create the initial config once -->
-    <filter root="/etc/acs-commons/instant-package/jcr:content/config" mode="merge" />
-    <filter root="/etc/acs-commons/qr-code/jcr:content/config" mode="merge" />    
+    <filter root="/etc/acs-commons/instant-package" mode="merge">
+        <include pattern="/etc/acs-commons/instant-package/jcr:content/config"/>
+    </filter>
+    <filter root="/etc/acs-commons/qr-code" mode="merge">   
+        <include pattern="/etc/acs-commons/qr-code/jcr:content/config" />   
+    </filter> 
     <filter root="/etc/clientlibs/acs-commons"/>
-    <filter root="/etc/cloudservices/dtm">
+
+    <filter root="/etc/cloudservices">
+        <include pattern="/etc/cloudservices/dtm"/>
         <include pattern="/etc/cloudservices/dtm/jcr:content"/>
-        <include pattern="/etc/cloudservices/dtm/rep:policy(/.*)?"/>
-    </filter>
-    <filter root="/etc/cloudservices/sharethis">
+
+        <include pattern="/etc/cloudservices/sharethis"/>
         <include pattern="/etc/cloudservices/sharethis/jcr:content"/>
-        <include pattern="/etc/cloudservices/sharethis/rep:policy(/.*)?"/>
-    </filter>
-    <filter root="/etc/cloudservices/typekit">
+    
+        <include pattern="/etc/cloudservices/typekit"/>
         <include pattern="/etc/cloudservices/typekit/jcr:content"/>
-        <include pattern="/etc/cloudservices/typekit/rep:policy(/.*)?"/>
     </filter>
+
     <filter root="/etc/dam/video/flacmono"/>
     <filter root="/etc/dam/video/mp3hq"/>
     <filter root="/etc/dam/video/ogghq"/>
     <filter root="/etc/designs/acs-commons"/>
     <filter root="/etc/notification/email">
-        <include pattern="/etc/notification/email/rep:policy(/.*)?"/>
         <include pattern="/etc/notification/email/acs-commons(/.*)?"/>
     </filter>
-    <filter root="/etc/packages/rep:policy"/>
-    <filter root="/etc/rep:policy"/>
-    <filter root="/etc/workflow/instances/rep:policy"/>
-    <filter root="/etc/workflow/packages/rep:policy"/>
-    <filter root="/home/groups/rep:policy"/>
-    <filter root="/home/users/rep:policy"/>
-    <filter root="/home/users/system/acs-commons"/>
-    <filter root="/oak:index/rep:policy"/>
-    <filter root="/rep:policy" />
 </workspaceFilter>
