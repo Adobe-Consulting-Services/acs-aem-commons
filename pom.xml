@@ -217,7 +217,7 @@
                         <dependency>
                             <groupId>biz.netcentric.aem</groupId>
                             <artifactId>aem-nodetypes</artifactId>
-                            <version>6.5.5.0</version>
+                            <version>2020.11.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
