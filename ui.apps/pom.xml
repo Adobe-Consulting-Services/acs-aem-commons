@@ -144,10 +144,12 @@
                                 </rules>
                             </config>
                         </check>
+                        <!-- Removing with #2456 / Moved ACLs to RepoInit Scripts -->
+                        <!--
                         <check>
                             <name>verify-acls-on-apps</name>
                             <template>basic/expectAces</template>
-                            <!-- enforces resolution of issue #2048 -->
+                            <!- - enforces resolution of issue #2048 - ->
                             <config>
                                 <principals>
                                     <principal>acs-commons-ensure-oak-index-service</principal>
@@ -159,6 +161,7 @@
                                 </expectedAces>
                             </config>
                         </check>
+                        -->
                     </checks>
 
                     <websterTargets>

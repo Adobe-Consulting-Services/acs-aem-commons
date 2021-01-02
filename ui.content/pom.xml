@@ -149,11 +149,13 @@
                                 </expectedPaths>
                             </config>
                         </check>
+                        <!-- Removing with #2456 / Moved ACLs to RepoInit Scripts -->
+                        <!-- 
                         <check>
                             <name>verify-acls-on-root</name>
                             <template>basic/expectAces</template>
-                            <!-- since the root rep:policy node will obviously exist regardless, we should be more
-                            specific for these acl entries -->
+                            <!- - since the root rep:policy node will obviously exist regardless, we should be more
+                            specific for these acl entries - ->
                             <config>
                                 <expectedAces>
                                     <expectedAce>
@@ -179,6 +181,7 @@
                                 </expectedAces>
                             </config>
                         </check>
+                        -->
                     </checks>
 
                     <!-- assume that we are installing into an instance where utility pages and configs have already
