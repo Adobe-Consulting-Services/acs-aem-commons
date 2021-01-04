@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
 ### Fixed
+- #2496 - Upgrade shaded Guava dependency to 30.1
 - #2498 - Potential NPE in RunnableOnMaster
 - #2492 - NPE in JcrPackageReplicationStatusEventHandler
 
