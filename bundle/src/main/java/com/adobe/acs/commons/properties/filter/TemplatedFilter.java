@@ -32,9 +32,13 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.engine.EngineConstants;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +49,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Component(
         service = Filter.class,
@@ -59,6 +66,7 @@ import java.util.Map;
         },
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
+@Designate(ocd = TemplatedFilter.Config.class)
 public class TemplatedFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(TemplatedFilter.class);
@@ -67,6 +75,8 @@ public class TemplatedFilter implements Filter {
     private PropertyAggregatorService propertyAggregatorService;
 
     private Map<String, Object> properties;
+    private List<Pattern> includePatterns;
+    private List<Pattern> excludePatterns;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -76,7 +86,7 @@ public class TemplatedFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         RequestPathInfo currentPathInfo = ((SlingHttpServletRequest) servletRequest).getRequestPathInfo();
-        if (StringUtils.equals(currentPathInfo.getExtension(), "json")) {
+        if (StringUtils.equals(currentPathInfo.getExtension(), "json") && shouldProcess(((SlingHttpServletRequest) servletRequest).getPathInfo())) {
             CapturingResponseWrapper capturingResponseWrapper = new CapturingResponseWrapper((SlingHttpServletResponse) servletResponse);
             filterChain.doFilter(servletRequest, capturingResponseWrapper);
 
@@ -100,6 +110,30 @@ public class TemplatedFilter implements Filter {
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
+    }
+
+    private boolean shouldProcess(String urlPath) {
+        if (includePatterns.isEmpty() && excludePatterns.isEmpty()) {
+            log.debug("Include and Exclude patterns are empty, processing all requests");
+            return true;
+        }
+        boolean shouldProcess = false;
+        for (Pattern pattern : includePatterns) {
+            if (pattern.matcher(urlPath).matches()) {
+                log.debug("URL path {} matches INCLUDE pattern {}", urlPath, pattern.toString());
+                shouldProcess = true;
+                break;
+            }
+        }
+        for (Pattern pattern : excludePatterns) {
+            if (pattern.matcher(urlPath).matches()) {
+                log.debug("URL path {} matches EXCLUDE pattern {}", urlPath, pattern.toString());
+                shouldProcess = false;
+                break;
+            }
+        }
+        log.debug("URL path {} is processed: {}", urlPath, shouldProcess);
+        return shouldProcess;
     }
 
     private void replaceInElements(JsonNode node) {
@@ -157,5 +191,42 @@ public class TemplatedFilter implements Filter {
     @Override
     public void destroy() {
 
+    }
+
+    @Activate
+    protected void activate(Config config) {
+        includePatterns = new ArrayList<>();
+        excludePatterns = new ArrayList<>();
+
+        for (String item : config.includes()) {
+            if (StringUtils.isBlank(item)) {
+                continue;
+            }
+            try {
+                includePatterns.add(Pattern.compile(item));
+            } catch (PatternSyntaxException e) {
+                log.error("Error adding includePattern. Invalid syntax in {}", item);
+            }
+        }
+        for (String item : config.excludes()) {
+            if (StringUtils.isBlank(item)) {
+                continue;
+            }
+            try {
+                excludePatterns.add(Pattern.compile(item));
+            } catch (PatternSyntaxException e) {
+                log.error("Error adding excludePattern. Invalid syntax in {}", item);
+            }
+        }
+    }
+
+    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration")
+    @interface Config {
+
+        @AttributeDefinition(name = "Patterns to include")
+        String[] includes() default {"(.*).model.(.*)"};
+
+        @AttributeDefinition(name = "Patterns to exclude")
+        String[] excludes();
     }
 }
