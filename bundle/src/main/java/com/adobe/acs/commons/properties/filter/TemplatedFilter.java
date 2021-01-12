@@ -103,7 +103,7 @@ public class TemplatedFilter implements Filter {
                     toReturn = currentTree.toString();
                 }
             } catch (Exception e) {
-                log.error("Error", e);
+                log.error("Exception during JSON property replacement", e);
             } finally {
                 servletResponse.getWriter().write(toReturn);
             }
@@ -220,13 +220,17 @@ public class TemplatedFilter implements Filter {
         }
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration")
+    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration", description = "JSON Rewriting" +
+            " Filter for supporting Templated Property replacement in JSON responses. This filter only applies to" +
+            " /content/* and *.json requests. Additional filtering options are available below.")
     @interface Config {
 
-        @AttributeDefinition(name = "Patterns to include")
+        @AttributeDefinition(name = "Include Patterns", description = "Regex patterns to for URL paths to INCLUDE in " +
+                "the JSON rewriting.")
         String[] includes() default {"(.*).model.(.*)"};
 
-        @AttributeDefinition(name = "Patterns to exclude")
+        @AttributeDefinition(name = "Exclude Patterns", description = "Regex patterns to for URL paths to EXCLUDE in " +
+                "the JSON rewriting. Exclusions hold priority over inclusions.")
         String[] excludes();
     }
 }
