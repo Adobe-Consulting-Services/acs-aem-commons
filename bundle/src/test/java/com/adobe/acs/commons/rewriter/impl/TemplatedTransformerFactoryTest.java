@@ -173,48 +173,6 @@ public class TemplatedTransformerFactoryTest {
         assertEquals("/content/page.html?title=inheritedValue", out.getValue(0));
     }
 
-    @Test
-    public void testCustomModelReplacement() throws Exception {
-        Map<String, Object> config = defaultConfigMap();
-        config.put("additional.data", "test_model|com.adobe.acs.commons.properties.impl.PropertyAggregatorTestModel");
-        context.addModelsForClasses(PropertyAggregatorTestModel.class);
-        context.registerInjectActivateService(new PropertyAggregatorServiceImpl(), config);
-        reinitTransformer(false);
-
-        String input = "{{test_model.title}}";
-        String output = "Arctic Surfing In Lofoten Test";
-        transformer.characters(input.toCharArray(), 0, input.length());
-
-        ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
-        ArgumentCaptor<Integer> lengthCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(handler, atLeast(1)).characters(charCaptor.capture(), eq(0), lengthCaptor.capture());
-
-        String outputTitle = new String(charCaptor.getValue());
-        assertEquals(output, outputTitle);
-        assertEquals(Integer.valueOf(output.length()), lengthCaptor.getValue());
-    }
-
-    @Test
-    public void testCustomModelAndOotbReplacement() throws Exception {
-        Map<String, Object> config = defaultConfigMap();
-        config.put("additional.data", "test_model|com.adobe.acs.commons.properties.impl.PropertyAggregatorTestModel");
-        context.addModelsForClasses(PropertyAggregatorTestModel.class);
-        context.registerInjectActivateService(new PropertyAggregatorServiceImpl(), config);
-        reinitTransformer(false);
-
-        String input = "{{test_model.title}} {{inherited_page_properties.inheritedProperty}}";
-        String output = "Arctic Surfing In Lofoten Test inheritedValue";
-        transformer.characters(input.toCharArray(), 0, input.length());
-
-        ArgumentCaptor<char[]> charCaptor = ArgumentCaptor.forClass(char[].class);
-        ArgumentCaptor<Integer> lengthCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(handler, atLeast(1)).characters(charCaptor.capture(), eq(0), lengthCaptor.capture());
-
-        String outputTitle = new String(charCaptor.getValue());
-        assertEquals(output, outputTitle);
-        assertEquals(Integer.valueOf(output.length()), lengthCaptor.getValue());
-    }
-
     private void reinitTransformer(boolean defaultService) throws Exception {
         if (defaultService) {
             defaultService(context);

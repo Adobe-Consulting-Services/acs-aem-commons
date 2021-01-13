@@ -105,28 +105,15 @@ public class PropertyAggregatorServiceImplTest {
     public void testPropertyExclusion() {
         Map<String, Object> config = defaultConfigMap();
         config.put("exclude.list", new String[]{"cq:(.*)", "jcr:(.*)"});
-        service = context.registerInjectActivateService(new PropertyAggregatorServiceImpl(), config);
+        context.registerInjectActivateService(new PropertyConfigServiceImpl(), config);
+        context.registerInjectActivateService(new AllPagePropertiesContentVariableProvider());
+        service = context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
         Map<String, Object> properties = service.getProperties(lofoten);
         Map<String, Object> expected = new HashMap<>();
         expected.put("inherited_page_properties.inheritedProperty", "inheritedValue");
         expected.put("page_properties.sling:resourceType", "weretail/components/structure/page");
-        assertEquals(expected, properties);
-    }
-
-    @Test
-    public void testAdditionalData() {
-        Map<String, Object> config = defaultConfigMap();
-        config.put("additional.data", "test_model|com.adobe.acs.commons.properties.impl.PropertyAggregatorTestModel");
-        service = context.registerInjectActivateService(new PropertyAggregatorServiceImpl(), config);
-
-        context.addModelsForClasses(PropertyAggregatorTestModel.class);
-        Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
-        Map<String, Object> properties = service.getProperties(lofoten);
-        Map<String, Object> expected = defaultPropertyMap();
-        // Adding expected sling model added property
-        expected.put("test_model.title", "Arctic Surfing In Lofoten Test");
         assertEquals(expected, properties);
     }
 
