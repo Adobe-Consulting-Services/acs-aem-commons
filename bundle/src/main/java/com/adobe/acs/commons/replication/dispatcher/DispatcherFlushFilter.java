@@ -130,13 +130,13 @@ public class DispatcherFlushFilter implements AgentFilter {
     }
 
     /**
-     * Checks if the agent has a "flush" serialization type.
+     * Checks if the agent's serialization type starts with "flush" .
      *
      * @param agent Agent to check
-     * @return true if the Agent's serialization type is "flush"
+     * @return true if the Agent's serialization type starts with "flush"
      */
     private boolean isFlushingAgent(final Agent agent) {
-        return StringUtils.equals(SERIALIZATION_TYPE, agent.getConfiguration().getSerializationType());
+        return StringUtils.startsWith(agent.getConfiguration().getSerializationType(), SERIALIZATION_TYPE);
     }
 
     /**
