@@ -20,5 +20,5 @@
 /**
  * Service for viewing generic list of key/value pairs.
  */
-@org.osgi.annotation.versioning.Version("1.0.3")
+@org.osgi.annotation.versioning.Version("1.1.0")
 package com.adobe.acs.commons.genericlists;
