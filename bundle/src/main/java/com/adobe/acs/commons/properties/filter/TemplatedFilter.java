@@ -60,7 +60,7 @@ import java.util.regex.PatternSyntaxException;
 @Component(
         service = Filter.class,
         property = {
-                Constants.SERVICE_RANKING + ":Integer=2000",
+                Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE,
                 EngineConstants.SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
                 EngineConstants.SLING_FILTER_PATTERN + "=/content/.*"
         },
