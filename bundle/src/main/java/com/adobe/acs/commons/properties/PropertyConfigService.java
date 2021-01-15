@@ -21,7 +21,20 @@ package com.adobe.acs.commons.properties;
 
 public interface PropertyConfigService {
 
+    /**
+     * Checks whether the passed property name should be excluded or not. This check is based on the OSGi
+     * configuration for the service.
+     *
+     * @param propertyName current property name
+     * @return whether to exclude or not
+     */
     boolean isNotExcluded(final String propertyName);
 
+    /**
+     * Checks if the property value is of an allowed type. Currently only supports String and Long values.
+     *
+     * @param object current property value
+     * @return whether it is allowed or not
+     */
     boolean isAllowedType(Object object);
 }

@@ -29,6 +29,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
+/**
+ * Response Wrapper used to allow for full output of the current response data so that it can be manipulated
+ * and rewritten.
+ */
 public class CapturingResponseWrapper extends HttpServletResponseWrapper {
 
     private final ByteArrayOutputStream capture;
