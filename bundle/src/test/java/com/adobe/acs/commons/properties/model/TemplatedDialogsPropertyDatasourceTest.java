@@ -27,9 +27,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;

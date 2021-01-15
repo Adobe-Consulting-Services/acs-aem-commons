@@ -19,12 +19,9 @@
  */
 package com.adobe.acs.commons.properties.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.adobe.acs.commons.properties.PropertyAggregatorService;
 import com.day.cq.wcm.api.Page;
-
+import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -32,9 +29,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import io.wcm.testing.mock.aem.junit.AemContext;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultConfigMap;
 import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
@@ -69,6 +67,18 @@ public class PropertyAggregatorServiceImplTest {
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
         Map<String, Object> properties = service.getProperties(lofoten);
         Map<String, Object> expected = defaultPropertyMap();
+        assertEquals(expected, properties);
+    }
+
+
+    @Test
+    public void testAggregationOfNonPageResource() {
+        service = defaultService(context);
+        context.load().json(getClass().getResourceAsStream("PropertyAggregatorServiceAppsContent.json"), "/apps/templated/components/accordion");
+
+        Resource componentResource = context.resourceResolver().getResource("/apps/templated/components/accordion");
+        Map<String, Object> properties = service.getProperties(componentResource);
+        Map<String, Object> expected = new HashMap<>();
         assertEquals(expected, properties);
     }
 
