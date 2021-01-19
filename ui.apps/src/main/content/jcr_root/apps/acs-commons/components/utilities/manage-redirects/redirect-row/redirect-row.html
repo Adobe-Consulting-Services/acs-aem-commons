@@ -1,0 +1,16 @@
+<tr is="coral-table-row" id="${resource.name}" data-path="${resource.path}">
+   <td is="coral-table-cell">
+      <a class="coral-Link edit-redirect-rule" href="#" target="_blank"><coral-icon icon="edit" size="XS"></coral-icon></a>
+   </td>
+   <td is="coral-table-cell" class="source" data-value="${properties.source}" >
+      ${properties.source}
+   </td>
+   <td is="coral-table-cell" class="target" data-value="${properties.target}">
+      ${properties.target}
+   </td>
+   <td is="coral-table-cell" class="statusCode" data-value="${properties.statusCode}" style="width:50px;">${properties.statusCode}</td>
+   <td is="coral-table-cell" class="untilDate" data-value="${properties.untilDate}" style="width:100px;">${properties.untilDate}</td>
+   <td is="coral-table-cell">
+      <button is="coral-button" type="button" variant="minimal" icon="dragHandle" coral-table-roworder></button>
+   </td>
+</tr>
