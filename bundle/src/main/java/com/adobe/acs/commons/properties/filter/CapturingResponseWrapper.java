@@ -75,7 +75,7 @@ public class CapturingResponseWrapper extends HttpServletResponseWrapper {
 
                 @Override
                 public void setWriteListener(WriteListener writeListener) {
-
+                    // do nothing
                 }
             };
         }

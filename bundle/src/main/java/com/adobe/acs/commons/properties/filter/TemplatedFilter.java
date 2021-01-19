@@ -66,7 +66,7 @@ import java.util.regex.PatternSyntaxException;
         },
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd = TemplatedFilter.Config.class)
+@Designate(ocd = com.adobe.acs.commons.properties.filter.TemplatedFilter.Config.class)
 public class TemplatedFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(TemplatedFilter.class);
@@ -112,6 +112,12 @@ public class TemplatedFilter implements Filter {
         }
     }
 
+    /**
+     * Checks the current URL path against the included and excluded patterns. Exclusions hold priority.
+     *
+     * @param urlPath Current request path
+     * @return if the request should be processed
+     */
     private boolean shouldProcess(String urlPath) {
         if (includePatterns.isEmpty() && excludePatterns.isEmpty()) {
             log.debug("Include and Exclude patterns are empty, processing all requests");
@@ -136,40 +142,69 @@ public class TemplatedFilter implements Filter {
         return shouldProcess;
     }
 
+    /**
+     * Delegate replacement to different object types.
+     *
+     * @param node Input JSON node
+     */
     private void replaceInElements(JsonNode node) {
         if (node.isArray()) {
-            if (node.get(0) != null && node.get(0).isTextual()) {
-                List<String> updated = new LinkedList<>();
-                for (JsonNode arrayItem : node) {
-                    String current = arrayItem.asText();
-                    updated.add(replaceInString(current));
-                }
-                ((ArrayNode) node).removeAll();
-                for (int i = 0; i < updated.size(); i++) {
-                    ((ArrayNode) node).insert(i, updated.get(i));
-                }
-            } else if (node.get(0) != null && node.get(0).isContainerNode()) {
-                for (JsonNode arrayItem : node) {
-                    replaceInElements(arrayItem);
-                }
-            }
+            replaceInArray(node);
         } else if (node.isObject()) {
-            Iterator<String> fieldNames = node.fieldNames();
-            while (fieldNames.hasNext()) {
-                String name = fieldNames.next();
-                if (node.get(name).isContainerNode()) {
-                    replaceInElements(node.get(name));
-                } else if (node.get(name).isTextual()) {
-                    String current = node.get(name).asText();
-                    String replaced = replaceInString(current);
-                    if (!StringUtils.equals(current, replaced)) {
-                        ((ObjectNode) node).put(name, replaced);
-                    }
+            replaceInObject(node);
+        }
+    }
+
+    /**
+     * Iterates through array items and replaces any placeholders found.
+     *
+     * @param node Array node
+     */
+    private void replaceInArray(JsonNode node) {
+        if (node.get(0) != null && node.get(0).isTextual()) {
+            List<String> updated = new LinkedList<>();
+            for (JsonNode arrayItem : node) {
+                String current = arrayItem.asText();
+                updated.add(replaceInString(current));
+            }
+            ((ArrayNode) node).removeAll();
+            for (int i = 0; i < updated.size(); i++) {
+                ((ArrayNode) node).insert(i, updated.get(i));
+            }
+        } else if (node.get(0) != null && node.get(0).isContainerNode()) {
+            for (JsonNode arrayItem : node) {
+                replaceInElements(arrayItem);
+            }
+        }
+    }
+
+    /**
+     * Iterates over keys to replace any placeholders in the values.
+     *
+     * @param node Object node
+     */
+    private void replaceInObject(JsonNode node) {
+        Iterator<String> fieldNames = node.fieldNames();
+        while (fieldNames.hasNext()) {
+            String name = fieldNames.next();
+            if (node.get(name).isContainerNode()) {
+                replaceInElements(node.get(name));
+            } else if (node.get(name).isTextual()) {
+                String current = node.get(name).asText();
+                String replaced = replaceInString(current);
+                if (!StringUtils.equals(current, replaced)) {
+                    ((ObjectNode) node).put(name, replaced);
                 }
             }
         }
     }
 
+    /**
+     * Reusable method to replace placeholders in the input string./
+     *
+     * @param input String input
+     * @return The replaced or original String
+     */
     private String replaceInString(String input) {
         if (TemplateReplacementUtil.hasPlaceholder(input)) {
 
@@ -190,11 +225,11 @@ public class TemplatedFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // do nothing
     }
 
     @Activate
-    protected void activate(Config config) {
+    protected void activate(com.adobe.acs.commons.properties.filter.TemplatedFilter.Config config) {
         includePatterns = new ArrayList<>();
         excludePatterns = new ArrayList<>();
 
@@ -220,17 +255,17 @@ public class TemplatedFilter implements Filter {
         }
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration", description = "JSON Rewriting" +
-            " Filter for supporting Templated Property replacement in JSON responses. This filter only applies to" +
-            " /content/* and *.json requests. Additional filtering options are available below.")
+    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration", description = "JSON Rewriting"
+            + " Filter for supporting Templated Property replacement in JSON responses. This filter only applies to"
+            + " /content/* and *.json requests. Additional filtering options are available below.")
     @interface Config {
 
-        @AttributeDefinition(name = "Include Patterns", description = "Regex patterns to for URL paths to INCLUDE in " +
-                "the JSON rewriting.")
+        @AttributeDefinition(name = "Include Patterns", description = "Regex patterns to for URL paths to INCLUDE in "
+                + "the JSON rewriting.")
         String[] includes() default {"(.*).model.(.*)"};
 
-        @AttributeDefinition(name = "Exclude Patterns", description = "Regex patterns to for URL paths to EXCLUDE in " +
-                "the JSON rewriting. Exclusions hold priority over inclusions.")
+        @AttributeDefinition(name = "Exclude Patterns", description = "Regex patterns to for URL paths to EXCLUDE in "
+                + "the JSON rewriting. Exclusions hold priority over inclusions.")
         String[] excludes();
     }
 }

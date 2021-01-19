@@ -50,27 +50,29 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     public Map<String, Object> getProperties(final Resource resource) {
         Map<String, Object> map = new HashMap<>();
 
-        if (resource != null) {
-            PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
-            if (pageManager != null) {
-                Page currentPage = pageManager.getContainingPage(resource);
+        if (resource == null) {
+            return map;
+        }
+        PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
+        if (pageManager == null) {
+            return map;
+        }
+        Page currentPage = pageManager.getContainingPage(resource);
 
-                if (currentPage == null) {
-                    log.warn("No containing page found for resource at {}", resource.getPath());
-                    return map;
-                }
+        if (currentPage == null) {
+            log.warn("No containing page found for resource at {}", resource.getPath());
+            return map;
+        }
 
-                for (ContentVariableProvider variableProvider : variableProviders) {
-                    int sizeBefore = map.size();
-                    if (variableProvider.accepts(currentPage)) {
-                        variableProvider.addProperties(map, currentPage);
-                    } else {
-                        log.debug(variableProvider.getClass().getName() + " does not accept request for page at {}.", currentPage.getPath());
-                    }
-                    if (map.size() == sizeBefore) {
-                        log.debug(variableProvider.getClass().getName() + " did not add any properties.");
-                    }
-                }
+        for (ContentVariableProvider variableProvider : variableProviders) {
+            int sizeBefore = map.size();
+            if (variableProvider.accepts(currentPage)) {
+                variableProvider.addProperties(map, currentPage);
+            } else {
+                log.debug(variableProvider.getClass().getName() + " does not accept request for page at {}.", currentPage.getPath());
+            }
+            if (map.size() == sizeBefore) {
+                log.debug(variableProvider.getClass().getName() + " did not add any properties.");
             }
         }
 
