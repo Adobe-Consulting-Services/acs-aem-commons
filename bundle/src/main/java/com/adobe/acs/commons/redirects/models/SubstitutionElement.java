@@ -92,7 +92,6 @@ public abstract class SubstitutionElement {
                     elements.add(new StaticElement(value));
                     log.info("invalid back reference at pos({}): {}", dollarPos, targetPath);
                     break;
-                    // throw new IllegalArgumentException(targetPath);
                 }
                 if (pos < dollarPos) {
                     // Static text
@@ -110,7 +109,6 @@ public abstract class SubstitutionElement {
                     pos = dollarPos + 2;
                     elements.add(new StaticElement(value));
                     log.info("invalid back reference at pos({}): {}", dollarPos, targetPath);
-                    //throw new IllegalArgumentException(targetPath + ": missing digit or curly brace.");
                 }
             }
         }

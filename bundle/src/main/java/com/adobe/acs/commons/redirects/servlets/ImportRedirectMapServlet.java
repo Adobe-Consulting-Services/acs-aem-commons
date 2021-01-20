@@ -20,7 +20,11 @@
 package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -100,11 +104,12 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         int idx = 0;
         for (RedirectRule rule : rules) {
             Map<String, Object> props = new HashMap<>();
-            props.put(RedirectRule.SOURCE, rule.getSource());
-            props.put(RedirectRule.TARGET, rule.getTarget());
-            props.put(RedirectRule.STATUS_CODE, String.valueOf(rule.getStatusCode()));
-            if (rule.getUntilDate() != null)
-                props.put(RedirectRule.UNTIL_DATE, rule.getUntilDate());
+            props.put(RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource());
+            props.put(RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget());
+            props.put(RedirectRule.STATUS_CODE_PROPERTY_NAME, String.valueOf(rule.getStatusCode()));
+            if (rule.getUntilDate() != null) {
+                props.put(RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate());
+            }
             props.put(PROPERTY_RESOURCE_TYPE, REDIRECT_RULE_RESOURCE_TYPE);
             props.put(JCR_CREATED, Calendar.getInstance());
             props.put(JCR_CREATED_BY, resolver.getUserID());

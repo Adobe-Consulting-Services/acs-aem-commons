@@ -26,6 +26,8 @@ import com.adobe.granite.jmx.annotation.AnnotatedStandardMBean;
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -50,11 +52,23 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.openmbean.*;
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -95,8 +109,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Enable Redirect Filter", description = "Indicates whether the redirect filter is enabled or not.", type = AttributeType.BOOLEAN)
         boolean enabled() default true;
 
-        @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. " +
-                "Use if Location header should rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
+        @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. "
+                + "Use if Location header should rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
         boolean rewriteUrls() default true;
 
         @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
@@ -111,8 +125,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Storage Path", description = "The path in the repository to store redirect configurations", type = AttributeType.STRING)
         String storagePath() default DEFAULT_STORAGE_PATH;
 
-        @AttributeDefinition(name = "On Delivery Headers", description = "Optional On-Delivery headers in the name:value format,"+
-                " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
+        @AttributeDefinition(name = "On Delivery Headers", description = "Optional On-Delivery headers in the name:value format,"
+                + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
         String[] onDeliveryHeaders() default {};
     }
 
@@ -129,7 +143,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     private boolean enabled;
     private boolean rewriteUrls;
     private boolean preserveQueryString;
-    private Map<String, String> onDeliveryHeaders;
+    private List<Header> onDeliveryHeaders;
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
     private Collection<String> exts;
     private Collection<String> paths;
@@ -144,7 +158,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        // no op
     }
 
     @Activate
@@ -157,7 +171,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
             rewriteUrls = config.rewriteUrls();
             storagePath = config.storagePath();
-            onDeliveryHeaders = new LinkedHashMap<>();
+            onDeliveryHeaders = new ArrayList<>();
             for(String kv : config.onDeliveryHeaders()){
                 int idx = kv.indexOf(':');
                 if(idx == -1 || idx > kv.length() - 1) {
@@ -166,7 +180,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 }
                 String name = kv.substring(0, idx).trim();
                 String value = kv.substring(idx + 1).trim();
-                onDeliveryHeaders.put(name, value);
+                onDeliveryHeaders.add(new BasicHeader(name, value));
             }
             preserveQueryString = config.preserveQueryString();
             log.debug("exts: {}, paths: {}, rewriteUrls: {}, storagePath: {}",
@@ -193,6 +207,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             executor.submit(() -> refreshCache());
         }
     }
+
     @Override
     public void onChange(List<ResourceChange> changes) {
         boolean changed = changes.stream().anyMatch(e -> e.getPath().startsWith(getStoragePath()));
@@ -204,8 +219,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void refreshCache() {
-        Map<String, RedirectRule> pathRules = new HashMap<>();
-        Map<Pattern, RedirectRule> patternRules = new LinkedHashMap<>();
+        Map<String, RedirectRule> pathMatchingRules = new HashMap<>();
+        Map<Pattern, RedirectRule> patternMatchingRules = new LinkedHashMap<>();
         long t0 = System.currentTimeMillis();
         try (ResourceResolver resolver = resourceResolverFactory.getServiceResourceResolver(
                 Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, SERVICE_NAME))) {
@@ -214,9 +229,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 Collection<RedirectRule> rules = getRules(storageResource);
                 for (RedirectRule rule : rules) {
                     if (rule.getRegex() != null) {
-                        patternRules.put(rule.getRegex(), rule);
+                        patternMatchingRules.put(rule.getRegex(), rule);
                     } else {
-                        pathRules.put(rule.getSource(), rule);
+                        pathMatchingRules.put(rule.getSource(), rule);
                     }
                 }
             }
@@ -224,10 +239,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
             log.error("Failed to get resolver for {}", SERVICE_NAME, e);
         }
         synchronized (this) {
-            this.pathRules = pathRules;
-            this.patternRules = patternRules;
+            this.pathRules = pathMatchingRules;
+            this.patternRules = patternMatchingRules;
         }
-        log.debug("{} rules loaded in {} ms", pathRules.size() + patternRules.size(),
+        log.debug("{} rules loaded in {} ms", pathMatchingRules.size() + patternMatchingRules.size(),
                 System.currentTimeMillis() - t0);
     }
 
@@ -251,11 +266,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
             if(REDIRECT_RULE_RESOURCE_TYPE.equals(res.getResourceType())){
-                try {
-                    rules.add(new RedirectRule(res.getValueMap()));
-                } catch (Exception e) {
-                    log.error("Invalid redirect configuration:  {}", resource.getPath(), e);
-                }
+                rules.add(new RedirectRule(res.getValueMap()));
             }
         }
         return rules;
@@ -308,8 +319,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
                         String queryString = slingRequest.getQueryString();
                         if (queryString != null) {
                             int idx = location.indexOf('?');
-                            if (idx == -1) idx = location.indexOf("#");
-                            if (idx != -1) location = location.substring(0, idx);
+                            if (idx == -1) {
+                                idx = location.indexOf('#');
+                            }
+                            if (idx != -1) {
+                                location = location.substring(0, idx);
+                            }
 
                             location += "?" + queryString;
                         }
@@ -323,9 +338,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 log.info("Redirecting {} to {}, statusCode: {}",
                         resourcePath, location, redirectRule.getStatusCode());
                 slingResponse.setHeader("Location", location);
-                for(String name : onDeliveryHeaders.keySet()){
-                    String value = onDeliveryHeaders.get(name);
-                    slingResponse.setHeader(name, value);
+                for(Header header : onDeliveryHeaders){
+                    slingResponse.addHeader(header.getName(), header.getValue());
                 }
                 slingResponse.setStatus(redirectRule.getStatusCode());
                 redirected = true;
@@ -340,6 +354,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Override
     public void destroy() {
+        // no op
     }
 
     protected boolean rewriteUrls() {
@@ -367,6 +382,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     protected Collection<String> getMethods() {
         return methods;
+    }
+
+    protected List<Header> getOnDeliveryHeaders() {
+        return onDeliveryHeaders;
     }
 
     /**
@@ -481,25 +500,33 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     @Override
     public TabularData getRedirectConfigurations() throws OpenDataException {
-        CompositeType cacheEntryType = new CompositeType("Redirect Rules", "Redirect Rules",
-                new String[]{"Source Url", "Target Url", "Status Code"},
-                new String[]{"Source Url", "Target Url", "Status Code"},
+        String sourceUrl = "Source Url";
+        String targetUrl = "Target Url";
+        String statusCode = "Status Code";
+        String redirectRules = "Redirect Rules";
+        CompositeType cacheEntryType = new CompositeType(redirectRules, redirectRules,
+                new String[]{sourceUrl, targetUrl, statusCode},
+                new String[]{sourceUrl, targetUrl, statusCode},
                 new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER});
 
         TabularDataSupport tabularData = new TabularDataSupport(
-                new TabularType("Redirect Rules", "Redirect Rules", cacheEntryType, new String[]{"Source Url"}));
+                new TabularType(redirectRules, redirectRules, cacheEntryType, new String[]{sourceUrl}));
 
         Collection<RedirectRule> rules = new ArrayList<>();
-        if (pathRules != null)
+        Map<String, RedirectRule> pathRules = getPathRules();
+        if (pathRules != null) {
             rules.addAll(pathRules.values());
-        if (patternRules != null)
+        }
+        Map<Pattern, RedirectRule> patternRules = getPatternRules();
+        if (patternRules != null) {
             rules.addAll(patternRules.values());
+        }
         for (RedirectRule rule : rules) {
             Map<String, Object> row = new LinkedHashMap<>();
 
-            row.put("Source Url", rule.getSource());
-            row.put("Target Url", rule.getTarget());
-            row.put("Status Code", rule.getStatusCode());
+            row.put(sourceUrl, rule.getSource());
+            row.put(targetUrl, rule.getTarget());
+            row.put(statusCode, rule.getStatusCode());
             tabularData.put(new CompositeDataSupport(cacheEntryType, row));
         }
         return tabularData;

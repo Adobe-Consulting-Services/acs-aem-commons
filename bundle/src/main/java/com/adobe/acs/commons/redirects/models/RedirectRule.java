@@ -41,10 +41,10 @@ import java.util.regex.PatternSyntaxException;
 public class RedirectRule {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    public static final String SOURCE = "source";
-    public static final String TARGET = "target";
-    public static final String STATUS_CODE = "statusCode";
-    public static final String UNTIL_DATE = "untilDate";
+    public static final String SOURCE_PROPERTY_NAME = "source";
+    public static final String TARGET_PROPERTY_NAME = "target";
+    public static final String STATUS_CODE_PROPERTY_NAME = "statusCode";
+    public static final String UNTIL_DATE_PROPERTY_NAME = "untilDate";
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
     @Inject
@@ -63,8 +63,8 @@ public class RedirectRule {
     private SubstitutionElement[] substitutions;
 
     public RedirectRule(ValueMap resource) {
-        this(resource.get(SOURCE, ""), resource.get(TARGET, ""),
-                resource.get(STATUS_CODE, 0), resource.get(UNTIL_DATE, String.class));
+        this(resource.get(SOURCE_PROPERTY_NAME, ""), resource.get(TARGET_PROPERTY_NAME, ""),
+                resource.get(STATUS_CODE_PROPERTY_NAME, 0), resource.get(UNTIL_DATE_PROPERTY_NAME, String.class));
     }
 
     public RedirectRule(String source, String target, int statusCode, String untilStr) {
@@ -117,21 +117,19 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return "RedirectRule{" +
-                "source='" + source + '\'' +
-                ", target='" + target + '\'' +
-                ", statusCode=" + statusCode +
-                ", untilDate=" + untilDate +
-                '}';
+        return String.format("RedirectRule{" +
+                "source='%s', target='%s', statusCode=%s, untilDate=%s}",
+                source, target, statusCode, untilDate);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-
+        }
         RedirectRule that = (RedirectRule) o;
 
         return source != null ? source.equals(that.source) : that.source == null;
@@ -143,7 +141,7 @@ public class RedirectRule {
     }
 
     public String evaluate(Matcher matcher) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = 0; i < substitutions.length; i++) {
             buf.append(substitutions[i].evaluate(matcher));
         }
@@ -155,8 +153,9 @@ public class RedirectRule {
         try {
             ptrn = Pattern.compile(src);
             int groupCount = ptrn.matcher("").groupCount();
-            if (groupCount == 0)
+            if (groupCount == 0) {
                 ptrn = null;
+            }
         } catch (PatternSyntaxException e) {
             log.info("invalid regex: {}", src);
             ptrn = null;

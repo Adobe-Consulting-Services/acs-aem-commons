@@ -37,12 +37,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
+import static com.adobe.acs.commons.redirects.filter.RedirectFilter.getRules;
 import static org.junit.Assert.assertEquals;
 
 public class ImportRedirectMapServletTest {
@@ -59,7 +58,7 @@ public class ImportRedirectMapServletTest {
     private List<RedirectRule> excelRules = Arrays.asList(
             new RedirectRule("/content/1", "/en/we-retail", 301, "16 February 1974"),
             new RedirectRule("/content/2", "/en/we-retail", 301, "16-02-1974"),
-            new RedirectRule("/content/3", "/en/we-retail", 301, null)
+            new RedirectRule("/content/three", "/en/we-retail", 301, null)
     );
     private byte[] excelBytes;
 
@@ -71,10 +70,10 @@ public class ImportRedirectMapServletTest {
         for (RedirectRule rule : savedRules) {
             rb.resource("redirect-" + (++idx),
                     "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                    RedirectRule.SOURCE, rule.getSource(),
-                    RedirectRule.TARGET, rule.getTarget(),
-                    RedirectRule.STATUS_CODE, rule.getStatusCode(),
-                    RedirectRule.UNTIL_DATE, rule.getUntilDate()
+                    RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource(),
+                    RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
+                    RedirectRule.STATUS_CODE_PROPERTY_NAME, rule.getStatusCode(),
+                    RedirectRule.UNTIL_DATE_PROPERTY_NAME, rule.getUntilDate()
             );
         }
         context.request().addRequestParameter("path", redirectStoragePath);
@@ -97,26 +96,29 @@ public class ImportRedirectMapServletTest {
         servlet.doPost(request, response);
 
         Resource storage = context.resourceResolver().getResource(redirectStoragePath);
-        int count = 0;
-        for (Resource r : storage.getChildren()) {
-            RedirectRule rule = new RedirectRule(r.getValueMap());
-            switch (rule.getSource()) {
-                case "/content/one":
-                    assertEquals("16 February 1974", rule.getUntilDate());
-                    assertEquals(rule.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule.getUntilDateTime()));
-                    break;
-                case "/content/not-here-1":
-                    assertEquals("22 November 1976", rule.getUntilDate());
-                    assertEquals(rule.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule.getUntilDateTime()));
-                    break;
-                case "/content/not-here-2":
-                    assertEquals("Invalid Date", rule.getUntilDate());
-                    assertEquals(null, rule.getUntilDateTime());
-                    break;
-            }
-            count++;
-        }
-        assertEquals("number of redirects ",savedRules.size() + excelRules.size(), count);
+        Map<String, RedirectRule> rules = getRules(storage)
+                .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules keyed by source
+        assertEquals("number of redirects after import ",4, rules.size());
+
+        RedirectRule rule1 = rules.get("/content/one");
+        assertEquals("/content/two", rule1.getTarget());
+        assertEquals("16 February 1974", rule1.getUntilDate());
+        assertEquals(rule1.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule1.getUntilDateTime()));
+
+        RedirectRule rule2 = rules.get("/content/three");
+        assertEquals("/en/we-retail", rule2.getTarget());
+        assertEquals(301, rule2.getStatusCode());
+
+        RedirectRule rule3 = rules.get("/content/1");
+        assertEquals("/en/we-retail", rule3.getTarget());
+        assertEquals("16 February 1974", rule3.getUntilDate());
+        assertEquals(rule3.getUntilDate(), RedirectRule.DATE_FORMATTER.format(rule3.getUntilDateTime()));
+
+        RedirectRule rule4 = rules.get("/content/2");
+        assertEquals("/en/we-retail", rule3.getTarget());
+        assertEquals(null, rule4.getUntilDateTime());
+
     }
 
     @Test

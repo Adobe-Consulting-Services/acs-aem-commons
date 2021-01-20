@@ -19,13 +19,18 @@
  */
 package com.adobe.acs.commons.redirects.filter;
 
+import com.adobe.acs.commons.redirects.LocationHeaderAdjuster;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
+import com.day.cq.replication.ReplicationAction;
 import com.day.cq.wcm.api.WCMMode;
+import org.apache.http.Header;
+import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.junit.SlingContext;
@@ -34,13 +39,21 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.service.event.Event;
 import org.powermock.reflect.Whitebox;
 
+import javax.management.openmbean.TabularData;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -71,15 +84,14 @@ public class RedirectFilterTest {
         when(resourceResolverFactory.getServiceResourceResolver(anyMapOf(String.class, Object.class)))
                 .thenReturn(context.resourceResolver());
         Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
-        // Mockito 1.0 does not support filling default values in interfaces. Mockito
-        // 2.0 does.
+
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
         when(configuration.rewriteUrls()).thenReturn(true);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.storagePath()).thenReturn(redirectStoragePath);
         when(configuration.paths()).thenReturn(contentRoots);
-        when(configuration.onDeliveryHeaders()).thenReturn(new String[]{"Cache-Control: no-cache"});
+        when(configuration.onDeliveryHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
         filter.activate(configuration);
 
         filterChain = mock(FilterChain.class);
@@ -88,7 +100,7 @@ public class RedirectFilterTest {
         doAnswer(invocation -> {
             String path = invocation.getArgument(0, String.class);
             // /content/we-retail/en/page.html --> /en/page
-            if(path.startsWith("/content/we-retail/")) {
+            if (path.startsWith("/content/we-retail/")) {
                 return path
                         .replace("/content/we-retail/", "/")
                         .replace(".html", "");
@@ -103,8 +115,9 @@ public class RedirectFilterTest {
         MockSlingHttpServletRequest request = context.request();
         MockSlingHttpServletResponse response = context.response();
         int idx = resourcePath.lastIndexOf('.');
-        if (idx > 0)
+        if (idx > 0) {
             context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
+        }
         context.requestPathInfo().setResourcePath(resourcePath);
         request.setResource(context.create().resource(resourcePath));
 
@@ -120,6 +133,11 @@ public class RedirectFilterTest {
         assertEquals(new HashSet<>(), filter.getExtensions());
         assertEquals(new HashSet<>(Arrays.asList(contentRoots)), filter.getPaths());
         assertEquals(Arrays.asList("GET", "HEAD"), filter.getMethods());
+        List<Header> headers = filter.getOnDeliveryHeaders();
+        assertEquals(1, headers.size());
+        Header header = headers.iterator().next();
+        assertEquals("Cache-Control", header.getName());
+        assertEquals("no-cache", header.getValue());
     }
 
     @Test
@@ -134,14 +152,15 @@ public class RedirectFilterTest {
         for (RedirectRule rule : savedRules) {
             rb.resource("redirect-" + (++idx),
                     "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
-                    RedirectRule.SOURCE, rule.getSource(),
-                    RedirectRule.TARGET, rule.getTarget(),
-                    RedirectRule.STATUS_CODE, rule.getStatusCode());
+                    RedirectRule.SOURCE_PROPERTY_NAME, rule.getSource(),
+                    RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
+                    RedirectRule.STATUS_CODE_PROPERTY_NAME, rule.getStatusCode());
         }
+        rb.resource("redirect-invalid-1");
 
         Resource resource = context.resourceResolver().getResource(redirectStoragePath);
         Collection<RedirectRule> rules = getRules(resource);
-        // assertEquals(3, rules.size());
+        assertEquals(3, rules.size());
         Iterator<RedirectRule> it = rules.iterator();
         RedirectRule rule1 = it.next();
         assertEquals("/content/we-retail/en/one", rule1.getSource());
@@ -370,20 +389,50 @@ public class RedirectFilterTest {
         MockSlingHttpServletResponse response = navigate("/content/we-retail/en/research/page1.html");
 
         assertEquals(null, response.getHeader("Location"));
-
+        assertEquals(0, filter.getPathRules().size());
+        assertEquals(0, filter.getPatternRules().size());
         context.build()
                 .resource(redirectStoragePath)
                 .siblingsMode()
-                .resource("redirect-4",
+                .resource("redirect-1",
+                        "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
+                        "source", "/content/we-retail/en/one",
+                        "target", "/content/we-retail/en/moved/page", "statusCode", 301)
+                .resource("redirect-2",
                         "sling:resourceType", REDIRECT_RULE_RESOURCE_TYPE,
                         "source", "/content/we-retail/en/research/*",
-                        "target", "/content/we-retail/en/moved/page", "statusCode", 301, "untilDate", null);
+                        "target", "/content/we-retail/en/moved/page", "statusCode", 302);
         filter.refreshCache();
+        assertEquals(1, filter.getPathRules().size());
+        assertEquals(1, filter.getPatternRules().size());
 
         filter.doFilter(context.request(), response, filterChain);
-        assertEquals(301, response.getStatus());
+        assertEquals(302, response.getStatus());
         assertEquals("/en/moved/page", response.getHeader("Location"));
     }
+
+    @Test
+    public void testInvalidateOnChange() throws Exception {
+        verify(filter, times(1)).refreshCache(); // refreshCache is called in @Activate
+
+        filter.onChange(Arrays.asList(new ResourceChange(ResourceChange.ChangeType.ADDED, redirectStoragePath + "/redirect-1",
+                false, null, null, null)));
+        verify(filter, times(1)).refreshCache();
+
+    }
+
+    @Test
+    public void testInvalidateOnReplication() throws Exception {
+        verify(filter, times(1)).refreshCache(); // refreshCache is called in @Activate
+
+        Event event = new Event(ReplicationAction.EVENT_TOPIC,
+                Collections.singletonMap(SlingConstants.PROPERTY_PATH, redirectStoragePath + "/redirect-1"));
+
+        filter.handleEvent(event);
+        verify(filter, times(1)).refreshCache();
+
+    }
+
 
     @Test
     public void testNoopRewrite() throws Exception {
@@ -495,5 +544,34 @@ public class RedirectFilterTest {
 
     }
 
+    @Test
+    public void testLocationAdjuster() throws Exception {
+        LocationHeaderAdjuster urlAdjuster = new LocationHeaderAdjuster() {
+            @Override
+            public String adjust(SlingHttpServletRequest request, String location) {
+                return location.replace(".html", ".adjusted.html");
+            }
+        };
+        Whitebox.setInternalState(filter, "urlAdjuster", urlAdjuster);
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
+                        302, null));
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/content/geometrixx/en/two.adjusted.html", response.getHeader("Location"));
+    }
+
+    @Test
+    public void testJxmTabularData() throws Exception {
+        withRules(
+                new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
+                        302, null),
+                new RedirectRule("/content/geometrixx/en/contact-us", "/content/geometrixx/en/contact-them",
+                        302, null));
+
+        TabularData data = filter.getRedirectConfigurations();
+        assertEquals(2, data.size());
+    }
 
 }

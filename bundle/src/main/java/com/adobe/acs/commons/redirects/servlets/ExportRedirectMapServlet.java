@@ -21,7 +21,13 @@ package com.adobe.acs.commons.redirects.servlets;
 
 import com.adobe.acs.commons.redirects.filter.RedirectFilter;
 import com.adobe.acs.commons.redirects.models.RedirectRule;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -79,7 +85,6 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
 
     static XSSFWorkbook export(Collection<RedirectRule> rules) {
         XSSFWorkbook wb = new XSSFWorkbook();
-        Sheet sheet = wb.createSheet("Redirects");
         XSSFCellStyle headerStyle = wb.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -93,14 +98,15 @@ public class ExportRedirectMapServlet extends SlingSafeMethodsServlet {
 
         Row headerRow;
         int rownum = 0;
+        Sheet sheet = wb.createSheet("Redirects");
         headerRow = sheet.createRow(rownum++);
         headerRow.createCell(0).setCellValue("Source Url");
         headerRow.createCell(1).setCellValue("Target Url");
         headerRow.createCell(2).setCellValue("Status Code");
         headerRow.createCell(3).setCellValue("Until Date");
-        for (Cell cell : headerRow)
+        for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
-
+        }
         for (RedirectRule rule : rules) {
             Row row = sheet.createRow(rownum++);
             row.createCell(0).setCellValue(rule.getSource());
