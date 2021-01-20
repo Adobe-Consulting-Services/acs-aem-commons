@@ -37,7 +37,6 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.engine.EngineConstants;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -150,7 +149,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Activate
     @Modified
-    protected final void activate(Configuration config, BundleContext bundleContext) {
+    protected final void activate(Configuration config) {
         enabled = config.enabled();
         if (enabled) {
             exts = config.extensions() == null ? Collections.emptySet()
@@ -339,12 +338,12 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return resourceResolver.map(url);
     }
 
-    boolean rewriteUrls() {
-        return rewriteUrls;
-    }
-
     @Override
     public void destroy() {
+    }
+
+    protected boolean rewriteUrls() {
+        return rewriteUrls;
     }
 
     /**

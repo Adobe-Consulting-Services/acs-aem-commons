@@ -31,7 +31,6 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -85,7 +84,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromPageProperty() throws IOException, ServletException {
         Map<String, Object> props = new HashMap<>();
         props.put("sling.servlet.resourceTypes", "geometrixx/components/structure/page");
@@ -97,7 +95,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromAsset() throws ServletException, IOException {
         context.create().asset("/content/dam/geometrixx/robots.txt", getClass().getResourceAsStream("RobotsServlet_testWriteFromAsset.txt"), "text/plain");
 
@@ -111,7 +108,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromPageProperties() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
@@ -139,7 +135,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromOsgiConfigSimple() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
@@ -158,7 +153,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromOsgiConfig() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
@@ -192,7 +186,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromNonExistentPropertyAbsolute() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
@@ -204,7 +197,6 @@ public class RobotsServletTest {
     }
 
     @Test
-    @Ignore
     public void testWriteFromNonExistentPropertyRelative() throws ServletException, IOException {
 
         Map<String, Object> props = new HashMap<>();
