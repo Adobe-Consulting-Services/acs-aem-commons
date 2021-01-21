@@ -32,8 +32,8 @@ public interface ContentVariableProvider {
      * Method to add the properties to the passed map. This will be overridden to run custom logic and add properties to
      * the Map.
      *
-     * @param map  the current set of properties (may or may not be empty)
-     * @param page the current page to add properties from
+     * @param map  The current set of properties (may or may not be empty)
+     * @param page The page used as the context to add properties. Typically the page currently being requested.
      */
     void addProperties(Map<String, Object> map, Page page);
 
@@ -41,8 +41,8 @@ public interface ContentVariableProvider {
      * Determines whether or not the current ContentVariableProvider will accept the request. This can limit what
      * providers to use and allow for more contextual content variables in a multi-tenant situation.
      *
-     * @param page the current page from the request
-     * @return whether the ContentVariableProvider should add variables to the property map
+     * @param page The current page from the request
+     * @return Whether the ContentVariableProvider should add variables to the property map
      */
     boolean accepts(Page page);
 }
