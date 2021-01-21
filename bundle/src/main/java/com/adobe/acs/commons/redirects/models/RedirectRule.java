@@ -78,8 +78,9 @@ public class RedirectRule {
         }
         ptrn = toRegex(regex);
         substitutions = SubstitutionElement.parse(this.target);
-        if (StringUtils.isNotBlank(untilStr))
+        if (StringUtils.isNotBlank(untilStr)) {
             untilDate = untilStr.trim();
+        }
     }
 
     public String getSource() {
@@ -117,8 +118,7 @@ public class RedirectRule {
 
     @Override
     public String toString() {
-        return String.format("RedirectRule{" +
-                "source='%s', target='%s', statusCode=%s, untilDate=%s}",
+        return String.format("RedirectRule{source='%s', target='%s', statusCode=%s, untilDate=%s}",
                 source, target, statusCode, untilDate);
     }
 

@@ -60,7 +60,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.NotCompliantMBeanException;
-import javax.management.openmbean.*;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
@@ -87,7 +94,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
-import static org.osgi.framework.Constants.*;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_RANKING;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
 /**

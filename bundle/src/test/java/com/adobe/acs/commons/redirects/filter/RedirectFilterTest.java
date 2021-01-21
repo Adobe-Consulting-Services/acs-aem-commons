@@ -113,7 +113,6 @@ public class RedirectFilterTest {
 
     private MockSlingHttpServletResponse navigate(String resourcePath) throws IOException, ServletException {
         MockSlingHttpServletRequest request = context.request();
-        MockSlingHttpServletResponse response = context.response();
         int idx = resourcePath.lastIndexOf('.');
         if (idx > 0) {
             context.requestPathInfo().setExtension(resourcePath.substring(idx + 1));
@@ -121,6 +120,7 @@ public class RedirectFilterTest {
         context.requestPathInfo().setResourcePath(resourcePath);
         request.setResource(context.create().resource(resourcePath));
 
+        MockSlingHttpServletResponse response = context.response();
         filter.doFilter(request, response, filterChain);
 
         return response;
