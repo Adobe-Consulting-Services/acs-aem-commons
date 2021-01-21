@@ -32,7 +32,9 @@ public class SubstitutionElementTest {
 
     public String toString(SubstitutionElement[] el) {
         StringBuilder out = new StringBuilder();
-        for (SubstitutionElement e : el) out.append(e.toString());
+        for (SubstitutionElement e : el) {
+            out.append(e.toString());
+        }
         return out.toString();
     }
 

@@ -39,7 +39,16 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.engine.EngineConstants;
-import org.osgi.service.component.annotations.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -69,6 +78,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Hashtable;
+import java.util.Dictionary;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -76,8 +87,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.sling.engine.EngineConstants.SLING_FILTER_SCOPE;
-import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
-import static org.osgi.framework.Constants.SERVICE_RANKING;
+import static org.osgi.framework.Constants.*;
+import static org.osgi.framework.Constants.SERVICE_ID;
 
 /**
  * A request filter that implements support for virtual redirects.
@@ -87,22 +98,21 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
         SERVICE_RANKING + ":Integer=10000",
         "jmx.objectname=" + "com.adobe.acs.commons:type=Redirect Manager",
-        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC,
-        ResourceChangeListener.CHANGES + "={ADDED, REMOVED, CHANGED}"
+        EventConstants.EVENT_TOPIC + "=" + ReplicationAction.EVENT_TOPIC
 
 })
 @Designate(ocd = RedirectFilter.Configuration.class)
 public class RedirectFilter extends AnnotatedStandardMBean
         implements Filter, EventHandler, ResourceChangeListener, RedirectFilterMBean {
 
-    public static final String DEFAULT_STORAGE_PATH = "/var/acs-commons/redirects";
+    public static final String DEFAULT_STORAGE_PATH = "/conf/acs-commons/redirects";
     public static final String ACS_REDIRECTS_RESOURCE_TYPE = "acs-commons/components/utilities/manage-redirects";
     public static final String REDIRECT_RULE_RESOURCE_TYPE = ACS_REDIRECTS_RESOURCE_TYPE + "/redirect-row";
 
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    static final String SERVICE_NAME = "redirect-manager";
+    private static final String SERVICE_NAME = "redirect-manager";
 
     @ObjectClassDefinition(name = "ACS Commons Redirect Filter")
     public @interface Configuration {
@@ -111,7 +121,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
         @AttributeDefinition(name = "Rewrite Location Header", description = "Apply Sling Resource Mappings (/etc/map) to Location header. "
                 + "Use if Location header should rewritten using ResourceResolver#map", type = AttributeType.BOOLEAN)
-        boolean rewriteUrls() default true;
+        boolean mapUrls() default true;
 
         @AttributeDefinition(name = "Request Extensions", description = "List of extensions for which redirection is allowed", type = AttributeType.STRING)
         String[] extensions() default {};
@@ -125,9 +135,9 @@ public class RedirectFilter extends AnnotatedStandardMBean
         @AttributeDefinition(name = "Storage Path", description = "The path in the repository to store redirect configurations", type = AttributeType.STRING)
         String storagePath() default DEFAULT_STORAGE_PATH;
 
-        @AttributeDefinition(name = "On Delivery Headers", description = "Optional On-Delivery headers in the name:value format,"
+        @AttributeDefinition(name = "Additional Response Headers", description = "Optional response headers in the name:value format to apply on delivery,"
                 + " e.g. Cache-Control: max-age=3600", type = AttributeType.STRING)
-        String[] onDeliveryHeaders() default {};
+        String[] additionalHeaders() default {};
     }
 
     @Reference
@@ -140,6 +150,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     )
     private LocationHeaderAdjuster urlAdjuster;
 
+    private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
     private boolean rewriteUrls;
     private boolean preserveQueryString;
@@ -163,16 +174,22 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Activate
     @Modified
-    protected final void activate(Configuration config) {
+    protected final void activate(Configuration config, BundleContext context) {
         enabled = config.enabled();
+
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(ResourceChangeListener.PATHS, config.storagePath());
+        listenerRegistration = context.registerService(ResourceChangeListener.class, this, properties);
+        log.debug("Registered {}:{}", SERVICE_ID, listenerRegistration.getReference().getProperty(SERVICE_ID));
+
         if (enabled) {
             exts = config.extensions() == null ? Collections.emptySet()
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
-            rewriteUrls = config.rewriteUrls();
+            rewriteUrls = config.mapUrls();
             storagePath = config.storagePath();
             onDeliveryHeaders = new ArrayList<>();
-            for(String kv : config.onDeliveryHeaders()){
+            for(String kv : config.additionalHeaders()){
                 int idx = kv.indexOf(':');
                 if(idx == -1 || idx > kv.length() - 1) {
                     log.error("invalid on-delivery header: {}", kv);
@@ -191,9 +208,22 @@ public class RedirectFilter extends AnnotatedStandardMBean
         }
     }
 
+    @Modified
+    protected void modify(BundleContext context, Configuration config) {
+        deactivate();
+        activate(config, context);
+    }
+
+
     @Deactivate
     public void deactivate() {
         executor.shutdown();
+
+        if (listenerRegistration != null) {
+            log.debug("unregistering ... ");
+            listenerRegistration.unregister();
+            listenerRegistration = null;
+        }
     }
 
     @Override
@@ -256,7 +286,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     /**
      * Read redirect configurations from the repository, i.e.
-     *  /var/acs-commons/redirects --> Collection<RedirectRule>
+     *  /conf/acs-commons/redirects --> Collection<RedirectRule>
      *
      * @param resource the parent resource containing redirect configurations
      * @return a list of redirect configurations . Can be empty if no redirects are
@@ -265,7 +295,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
     public static Collection<RedirectRule> getRules(Resource resource) {
         Collection<RedirectRule> rules = new ArrayList<>();
         for (Resource res : resource.getChildren()) {
-            if(REDIRECT_RULE_RESOURCE_TYPE.equals(res.getResourceType())){
+            if(res.isResourceType(REDIRECT_RULE_RESOURCE_TYPE)){
                 rules.add(new RedirectRule(res.getValueMap()));
             }
         }
@@ -406,7 +436,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
      */
     private boolean doesRequestMatch(SlingHttpServletRequest request) {
         WCMMode wcmMode = WCMMode.fromRequest(request);
-        if (WCMMode.EDIT == wcmMode || WCMMode.PREVIEW == wcmMode || WCMMode.DESIGN == wcmMode) {
+        if (wcmMode != null && wcmMode != WCMMode.DISABLED) {
             log.trace("Request in author mode: {}, no redirection.", wcmMode);
             return false;
         }
@@ -513,13 +543,13 @@ public class RedirectFilter extends AnnotatedStandardMBean
                 new TabularType(redirectRules, redirectRules, cacheEntryType, new String[]{sourceUrl}));
 
         Collection<RedirectRule> rules = new ArrayList<>();
-        Map<String, RedirectRule> pathRules = getPathRules();
-        if (pathRules != null) {
-            rules.addAll(pathRules.values());
+        Map<String, RedirectRule> pathMatchingRules = getPathRules();
+        if (pathMatchingRules != null) {
+            rules.addAll(pathMatchingRules.values());
         }
-        Map<Pattern, RedirectRule> patternRules = getPatternRules();
-        if (patternRules != null) {
-            rules.addAll(patternRules.values());
+        Map<Pattern, RedirectRule> patternMatchingRules = getPatternRules();
+        if (patternMatchingRules != null) {
+            rules.addAll(patternMatchingRules.values());
         }
         for (RedirectRule rule : rules) {
             Map<String, Object> row = new LinkedHashMap<>();

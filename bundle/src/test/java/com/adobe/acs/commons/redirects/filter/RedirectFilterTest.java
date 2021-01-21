@@ -71,7 +71,7 @@ public class RedirectFilterTest {
 
     private RedirectFilter filter;
     private FilterChain filterChain;
-    private String redirectStoragePath = "/var/redirects";
+    private String redirectStoragePath = "/conf/acs-commons/redirects";
 
     private String[] contentRoots = new String[]{
             "/content/we-retail", "/content/geometrixx", "/content/dam/we-retail"};
@@ -86,13 +86,13 @@ public class RedirectFilterTest {
         Whitebox.setInternalState(filter, "resourceResolverFactory", resourceResolverFactory);
 
         RedirectFilter.Configuration configuration = mock(RedirectFilter.Configuration.class);
-        when(configuration.rewriteUrls()).thenReturn(true);
+        when(configuration.mapUrls()).thenReturn(true);
         when(configuration.enabled()).thenReturn(true);
         when(configuration.preserveQueryString()).thenReturn(true);
         when(configuration.storagePath()).thenReturn(redirectStoragePath);
         when(configuration.paths()).thenReturn(contentRoots);
-        when(configuration.onDeliveryHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
-        filter.activate(configuration);
+        when(configuration.additionalHeaders()).thenReturn(new String[]{"Cache-Control: no-cache", "Invalid"});
+        filter.activate(configuration, context.bundleContext());
 
         filterChain = mock(FilterChain.class);
 
@@ -156,7 +156,7 @@ public class RedirectFilterTest {
                     RedirectRule.TARGET_PROPERTY_NAME, rule.getTarget(),
                     RedirectRule.STATUS_CODE_PROPERTY_NAME, rule.getStatusCode());
         }
-        rb.resource("redirect-invalid-1");
+        rb.resource("redirect-invalid-1","sling:resourceType", "cq:Page");
 
         Resource resource = context.resourceResolver().getResource(redirectStoragePath);
         Collection<RedirectRule> rules = getRules(resource);

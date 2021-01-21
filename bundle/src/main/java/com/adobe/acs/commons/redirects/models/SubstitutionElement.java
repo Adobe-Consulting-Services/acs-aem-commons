@@ -90,7 +90,7 @@ public abstract class SubstitutionElement {
                 if (dollarPos + 1 == targetPath.length()) {
                     String value = targetPath.substring(pos, dollarPos + 1);
                     elements.add(new StaticElement(value));
-                    log.info("invalid back reference at pos({}): {}", dollarPos, targetPath);
+                    log.warn("invalid back reference at pos({}): {}", dollarPos, targetPath);
                     break;
                 }
                 if (pos < dollarPos) {
@@ -108,7 +108,7 @@ public abstract class SubstitutionElement {
                     String value = targetPath.substring(pos, dollarPos+2);
                     pos = dollarPos + 2;
                     elements.add(new StaticElement(value));
-                    log.info("invalid back reference at pos({}): {}", dollarPos, targetPath);
+                    log.warn("invalid back reference at pos({}): {}", dollarPos, targetPath);
                 }
             }
         }

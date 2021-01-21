@@ -77,10 +77,12 @@ public class ImportRedirectMapServlet extends SlingAllMethodsServlet {
         Map<String, RedirectRule> jcrRules = getRules(storageRoot)
                 .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules stored in crx
-        Map<String, RedirectRule> xlsRules = readEntries(getFile(request))
-                .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules read from excel
-
+        Map<String, RedirectRule> xlsRules;
+        try (InputStream is = getFile(request)) {
+            xlsRules = readEntries(is)
+                    .stream().collect(Collectors.toMap(RedirectRule::getSource, r -> r,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // rules read from excel
+        }
         ArrayList<RedirectRule> rules = new ArrayList<>();
         for (RedirectRule jcrRule : jcrRules.values()) {
             if (xlsRules.containsKey(jcrRule.getSource())) {

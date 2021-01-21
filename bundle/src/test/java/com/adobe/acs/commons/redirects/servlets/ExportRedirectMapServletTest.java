@@ -52,7 +52,7 @@ public class ExportRedirectMapServletTest {
             ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ExportRedirectMapServlet servlet;
-    private String redirectStoragePath = "/var/redirects";
+    private String redirectStoragePath = "/conf/acs-commons/redirects";
 
     @Before
     public void setUp() {

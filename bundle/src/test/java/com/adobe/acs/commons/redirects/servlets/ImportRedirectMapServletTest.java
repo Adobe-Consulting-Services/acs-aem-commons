@@ -37,7 +37,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static com.adobe.acs.commons.redirects.filter.RedirectFilter.REDIRECT_RULE_RESOURCE_TYPE;
@@ -50,7 +55,7 @@ public class ImportRedirectMapServletTest {
             ResourceResolverType.RESOURCERESOLVER_MOCK);
 
     private ImportRedirectMapServlet servlet;
-    private String redirectStoragePath = "/var/redirects";
+    private String redirectStoragePath = "/conf/acs-commons/redirects";
     private List<RedirectRule> savedRules = Arrays.asList(
             new RedirectRule("/content/one", "/content/two", 302, "16 February 1974"),
             new RedirectRule("/content/three", "/content/four", 301, null)
