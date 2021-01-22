@@ -28,7 +28,6 @@ import org.apache.commons.lang.StringUtils;
 public class TemplateReplacementUtil {
 
     private TemplateReplacementUtil() {
-        throw new IllegalStateException("TemplateReplacementUtil is a utility class, it should not be instantiated.");
     }
 
     private static final String PLACHOLDER_BEGIN = "{{";

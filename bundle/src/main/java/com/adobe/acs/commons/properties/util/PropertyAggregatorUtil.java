@@ -29,7 +29,6 @@ import java.util.Set;
 public class PropertyAggregatorUtil {
 
     private PropertyAggregatorUtil() {
-        throw new IllegalStateException("PropertyAggregatorUtil is a utility class, it should not be instantiated.");
     }
 
     /**
