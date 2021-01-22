@@ -28,7 +28,7 @@ public interface PropertyConfigService {
      * @param propertyName current property name
      * @return whether to exclude or not
      */
-    boolean isNotExcluded(final String propertyName);
+    boolean isAllowed(final String propertyName);
 
     /**
      * Checks if the property value is of an allowed type. Currently only supports String and Long values.

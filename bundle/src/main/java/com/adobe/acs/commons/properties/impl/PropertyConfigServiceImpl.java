@@ -38,7 +38,7 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
     private List<Pattern> exclusionList;
 
     @Override
-    public boolean isNotExcluded(final String propertyName) {
+    public boolean isAllowed(final String propertyName) {
         for (Pattern pattern : exclusionList) {
             if (pattern.matcher(propertyName).matches()) {
                 return false;

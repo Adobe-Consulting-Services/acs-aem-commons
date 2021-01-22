@@ -59,7 +59,7 @@ public class PropertyAggregatorUtil {
     public static void addPropertiesToMap(Map<String, Object> map, Set<Map.Entry<String, Object>> entries,
                                           String prefix, PropertyConfigService propertyConfigService) {
         for (Map.Entry<String, Object> entry : entries) {
-            if (propertyConfigService.isNotExcluded(entry.getKey())
+            if (propertyConfigService.isAllowed(entry.getKey())
                     && propertyConfigService.isAllowedType(entry.getValue())) {
                 map.put(prefix + "." + entry.getKey(), entry.getValue());
             }
