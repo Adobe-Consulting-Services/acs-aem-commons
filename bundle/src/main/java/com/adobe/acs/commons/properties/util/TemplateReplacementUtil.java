@@ -90,6 +90,6 @@ public class TemplateReplacementUtil {
      * @return The key present inside the placeholder
      */
     public static String getKey(String placeholder) {
-        return placeholder.replace(PLACHOLDER_BEGIN,"").replace(PLACHOLDER_END,"");
+        return placeholder.replace(PLACHOLDER_BEGIN, "").replace(PLACHOLDER_END, "");
     }
 }

@@ -187,10 +187,11 @@ public class TemplatedFilter implements Filter {
         Iterator<String> fieldNames = node.fieldNames();
         while (fieldNames.hasNext()) {
             String name = fieldNames.next();
-            if (node.get(name).isContainerNode()) {
-                replaceInElements(node.get(name));
-            } else if (node.get(name).isTextual()) {
-                String current = node.get(name).asText();
+            JsonNode nodeValue = node.get(name);
+            if (nodeValue.isContainerNode()) {
+                replaceInElements(nodeValue);
+            } else if (nodeValue.isTextual()) {
+                String current = nodeValue.asText();
                 String replaced = replaceInString(current);
                 if (!StringUtils.equals(current, replaced)) {
                     ((ObjectNode) node).put(name, replaced);
@@ -234,23 +235,21 @@ public class TemplatedFilter implements Filter {
         excludePatterns = new ArrayList<>();
 
         for (String item : config.includes()) {
-            if (StringUtils.isBlank(item)) {
-                continue;
-            }
-            try {
-                includePatterns.add(Pattern.compile(item));
-            } catch (PatternSyntaxException e) {
-                log.error("Error adding includePattern. Invalid syntax in {}", item);
+            if (StringUtils.isNotBlank(item)) {
+                try {
+                    includePatterns.add(Pattern.compile(item));
+                } catch (PatternSyntaxException e) {
+                    log.error("Error adding includePattern. Invalid syntax in {}", item);
+                }
             }
         }
         for (String item : config.excludes()) {
-            if (StringUtils.isBlank(item)) {
-                continue;
-            }
-            try {
-                excludePatterns.add(Pattern.compile(item));
-            } catch (PatternSyntaxException e) {
-                log.error("Error adding excludePattern. Invalid syntax in {}", item);
+            if (StringUtils.isNotBlank(item)) {
+                try {
+                    excludePatterns.add(Pattern.compile(item));
+                } catch (PatternSyntaxException e) {
+                    log.error("Error adding excludePattern. Invalid syntax in {}", item);
+                }
             }
         }
     }
