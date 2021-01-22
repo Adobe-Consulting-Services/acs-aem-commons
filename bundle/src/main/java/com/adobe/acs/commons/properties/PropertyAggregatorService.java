@@ -39,7 +39,7 @@ public interface PropertyAggregatorService {
     /**
      * Overloaded method from above. Passes the content resource of the page.
      *
-     * @param page The current page
+     * @param page The page to gather properties from
      * @return The map of properties
      */
     Map<String, Object> getProperties(Page page);
