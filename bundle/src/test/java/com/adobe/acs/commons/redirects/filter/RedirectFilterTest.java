@@ -107,7 +107,7 @@ public class RedirectFilterTest {
             } else {
                 return path;
             }
-        }).when(filter).rewriteUrl(anyString(), any(ResourceResolver.class));
+        }).when(filter).mapUrl(anyString(), any(ResourceResolver.class));
 
     }
 
@@ -237,7 +237,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/we-retail/en/one", "/content/we-retail/en/two",
                         302, null));
-        when(filter.rewriteUrls()).thenReturn(false); // turn off resolver.map() in osgi config
+        when(filter.mapUrls()).thenReturn(false); // turn off resolver.map() in osgi config
 
         MockSlingHttpServletResponse response = navigate("/content/we-retail/en/one.html");
 
@@ -252,7 +252,9 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/geometrixx/en/one", "/content/geometrixx/en/two",
                         302, null));
-        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html?a=1&b=2");
+
+        context.request().setQueryString("a=1&b=2");
+        MockSlingHttpServletResponse response = navigate("/content/geometrixx/en/one.html");
 
         assertEquals(302, response.getStatus());
         assertEquals("/content/geometrixx/en/two.html?a=1&b=2", response.getHeader("Location"));
@@ -459,7 +461,7 @@ public class RedirectFilterTest {
     @Test
     public void testPathRewrite3() throws Exception {
         withRules(new RedirectRule("/content/geometrixx/(en)/(.*?/?)contact-us", "/content/geometrixx/us/$2contact-us", 302, null));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/us/contact-us", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
         assertEquals("/content/geometrixx/us/1/contact-us", navigate("/content/geometrixx/en/1/contact-us").getHeader("Location"));
         assertEquals("/content/geometrixx/us/1/2/contact-us", navigate("/content/geometrixx/en/1/2/contact-us").getHeader("Location"));
@@ -468,21 +470,21 @@ public class RedirectFilterTest {
     @Test
     public void testPathRewrite4() throws Exception {
         withRules(new RedirectRule("/content/geometrixx/(en)/(.+)/contact-us", "/content/geometrixx/us/$2/contact-us#section", 302, null));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/us/1/contact-us#section", navigate("/content/geometrixx/en/1/contact-us").getHeader("Location"));
     }
 
     @Test
     public void testPathRewrite5() throws Exception {
         withRules(new RedirectRule("/content/geometrixx/en/research/(.*)", "/content/geometrixx/en/search?keywords=talent-management", 302, null));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/en/search?keywords=talent-management", navigate("/content/geometrixx/en/research/doc").getHeader("Location"));
     }
 
     @Test
     public void testPathRewrite6() throws Exception {
         withRules(new RedirectRule("/content/geometrixx/(.+)/contact-us#anchor", "/content/geometrixx/$1/contact-us#updated", 302, null));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/en/about/contact-us#updated", navigate("/content/geometrixx/en/about/contact-us#anchor").getHeader("Location"));
     }
 
@@ -491,7 +493,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/we-retail/(.+", "/content/we-retail/$a", 302, null),
                 new RedirectRule("/content/we-retail-events/(.+", "/content/we-retail/$", 302, null));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals(null, navigate("/content/we-retail/en/about/contact-us").getHeader("Location"));
         assertEquals(null, navigate("/content/we-retail-events/en/about/contact-us").getHeader("Location"));
     }
@@ -502,7 +504,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/we-retail/en/contact-us", "/content/we-retail/en/contact-them",
                         302, RedirectRule.DATE_FORMATTER.format(dateInPast)));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals(null, navigate("/content/we-retail/en/contact-us").getHeader("Location"));
     }
 
@@ -512,7 +514,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/geometrixx/en/contact-us", "/content/geometrixx/en/contact-them",
                         302, RedirectRule.DATE_FORMATTER.format(dateInFuture)));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
     }
 
@@ -522,7 +524,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/geometrixx/en/contact-us", "/content/geometrixx/en/contact-them",
                         302, RedirectRule.DATE_FORMATTER.format(today)));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
     }
 
@@ -531,7 +533,7 @@ public class RedirectFilterTest {
         withRules(
                 new RedirectRule("/content/geometrixx/en/contact-us", "/content/geometrixx/en/contact-them",
                         302, "2018-02-Invalid"));
-        doReturn(false).when(filter).rewriteUrls();
+        doReturn(false).when(filter).mapUrls();
         assertEquals("/content/geometrixx/en/contact-them", navigate("/content/geometrixx/en/contact-us").getHeader("Location"));
     }
 

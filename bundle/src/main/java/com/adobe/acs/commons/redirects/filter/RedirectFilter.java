@@ -160,7 +160,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
-    private boolean rewriteUrls;
+    private boolean mapUrls;
     private boolean preserveQueryString;
     private List<Header> onDeliveryHeaders;
     private Collection<String> methods = Arrays.asList("GET", "HEAD");
@@ -194,7 +194,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             exts = config.extensions() == null ? Collections.emptySet()
                     : Arrays.stream(config.extensions()).filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
             paths = config.paths() == null ? Collections.emptySet() : Arrays.stream(config.paths()).filter(path -> !path.isEmpty()).collect(Collectors.toSet());
-            rewriteUrls = config.mapUrls();
+            mapUrls = config.mapUrls();
             storagePath = config.storagePath();
             onDeliveryHeaders = new ArrayList<>();
             for(String kv : config.additionalHeaders()){
@@ -209,7 +209,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
             }
             preserveQueryString = config.preserveQueryString();
             log.debug("exts: {}, paths: {}, rewriteUrls: {}, storagePath: {}",
-                    exts, paths, rewriteUrls, storagePath);
+                    exts, paths, mapUrls, storagePath);
             executor = Executors.newSingleThreadExecutor();
 
             refreshCache();
@@ -350,8 +350,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
                     if (ext != null && !location.endsWith(ext)) {
                         location += "." + ext;
                     }
-                    if (rewriteUrls()) {
-                        location = rewriteUrl(location, slingRequest.getResourceResolver());
+                    if (mapUrls()) {
+                        location = mapUrl(location, slingRequest.getResourceResolver());
                     }
                     if(preserveQueryString) {
                         String queryString = slingRequest.getQueryString();
@@ -386,7 +386,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         return redirected;
     }
 
-    String rewriteUrl(String url, ResourceResolver resourceResolver) {
+    String mapUrl(String url, ResourceResolver resourceResolver) {
         return resourceResolver.map(url);
     }
 
@@ -395,8 +395,8 @@ public class RedirectFilter extends AnnotatedStandardMBean
         // no op
     }
 
-    protected boolean rewriteUrls() {
-        return rewriteUrls;
+    protected boolean mapUrls() {
+        return mapUrls;
     }
 
     /**
@@ -526,7 +526,7 @@ public class RedirectFilter extends AnnotatedStandardMBean
         String resourcePath = getResourcePath(slingRequest.getRequestPathInfo());
         RedirectMatch rule = match(resourcePath);
         if (rule == null) {
-            rule = match(rewriteUrl(resourcePath, slingRequest.getResourceResolver()));
+            rule = match(mapUrl(resourcePath, slingRequest.getResourceResolver()));
         }
         return rule;
     }
