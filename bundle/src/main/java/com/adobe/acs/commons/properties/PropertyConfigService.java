@@ -19,6 +19,11 @@
  */
 package com.adobe.acs.commons.properties;
 
+/**
+ * Configuration service used to store property exclusions for the {@link PropertyAggregatorService} processes. Contains
+ * helper methods to determine if a property should be added to the properties aggregated based on the property name or
+ * type.
+ */
 public interface PropertyConfigService {
 
     /**

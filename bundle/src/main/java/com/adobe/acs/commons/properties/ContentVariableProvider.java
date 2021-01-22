@@ -24,7 +24,8 @@ import com.day.cq.wcm.api.Page;
 import java.util.Map;
 
 /**
- *
+ * Extensible interface allowing pluggable content variables to be used in the {@link PropertyAggregatorService} to allow
+ * for replacement in content responses.
  */
 public interface ContentVariableProvider {
 

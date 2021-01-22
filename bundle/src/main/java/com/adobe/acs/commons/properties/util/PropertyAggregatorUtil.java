@@ -26,6 +26,9 @@ import org.apache.sling.api.resource.ValueMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Util class with helpers defined to add properties to the {@link Map} being constructed.
+ */
 public class PropertyAggregatorUtil {
 
     private PropertyAggregatorUtil() {

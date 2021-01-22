@@ -25,6 +25,9 @@ import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * Util class used to provide helper methods for finding and replacing the tokens used in this feature.
+ */
 public class TemplateReplacementUtil {
 
     private TemplateReplacementUtil() {

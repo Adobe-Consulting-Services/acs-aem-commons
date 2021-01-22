@@ -42,6 +42,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+/**
+ * {@link org.apache.sling.rewriter.Transformer} used to process HTML requests and replace content tokens found in the
+ * rendered HTML.
+ */
 public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
     private static final Logger log = LoggerFactory.getLogger(TemplatedTransformer.class);

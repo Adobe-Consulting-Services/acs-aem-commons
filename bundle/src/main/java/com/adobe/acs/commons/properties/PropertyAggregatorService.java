@@ -25,6 +25,10 @@ import com.day.cq.wcm.api.Page;
 
 import org.apache.sling.api.resource.Resource;
 
+/**
+ * Service used to aggregate property keys and values into a {@link Map}, given the context of a {@link Page}, that can
+ * be used to replace these tokens in content responses.
+ */
 public interface PropertyAggregatorService {
 
     /**

@@ -28,6 +28,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link TransformerFactory} defined to create new {@link TemplatedTransformer} objects and pass in the reference to
+ * the service used to aggregate properties.
+ */
 @Component(service = TransformerFactory.class, property = {
         "pipeline.type=templated-transformer"
 })
