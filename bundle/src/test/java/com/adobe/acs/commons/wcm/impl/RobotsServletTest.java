@@ -208,9 +208,12 @@ public class RobotsServletTest {
     }
 
     private void assertResponse(InputStream resourceAsStream, MockSlingHttpServletResponse response) throws IOException {
-        String output = response.getOutputAsString();
-        String expected = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8.name());
+        String output = normalizeLineEndings(response.getOutputAsString());
+        String expected = normalizeLineEndings(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8.name()));
         assertEquals(expected, output);
     }
 
+    private String normalizeLineEndings(String txt){
+        return txt.replaceAll("\r?\n", "\n");
+    }
 }
