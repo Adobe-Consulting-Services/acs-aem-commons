@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+    <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'acs-commons.sort-nodes']}"
+     data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"/>
+
+<coral-shell-header aria-hidden="false" aria-label="Header Bar"
+                    class="coral--dark granite-shell-header coral3-Shell-header"
+                    role="region">
+    <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/" role="heading">
+        <a class="coral3-Shell-homeAnchor" href="/"
+           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
+           style="display: inline-block; padding-right: 0;">
+            <coral-icon
+                    aria-label="adobe experience manager color"
+                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM"
+                    icon="adobeExperienceManagerColor" role="img"
+                    size="M"></coral-icon>
+            <coral-shell-homeanchor-label>Adobe Experience Manager
+            </coral-shell-homeanchor-label>
+        </a>
+        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
+    </coral-shell-header-home>
+</coral-shell-header>
+
+
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-header">
+        <betty-titlebar>
+            <betty-titlebar-title>
+                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
+            </betty-titlebar-title>
+            <betty-titlebar-primary></betty-titlebar-primary>
+            <betty-titlebar-secondary>
+            </betty-titlebar-secondary>
+        </betty-titlebar>
+    </div>
+    <div class="content-container-inner" style="width:60%; margin:0 auto;">
+
+
+
+        <form id="sort-nodes-form" action="" enctype="multipart/form-data" method="post" novalidate=""
+              class="coral-Form coral-Form--vertical foundation-layout-util-vmargin foundation-form" data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
+            <input type="hidden" name=":http-equiv-accept" value="application/json"/>
+            <input type="hidden" name=":operation" value="sort"/>
+            <section  class="coral-Form-fieldset">
+                <div  class="coral-Form-fieldwrapper">
+                    <label class="coral-Form-fieldlabel">Path *</label>
+                    <span  class="coral-Form-field coral-PathBrowser" data-init="pathbrowser" data-root-path="/content" data-option-loader="granite.ui.pathBrowser.pages.folder"
+                           data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile" data-crumb-root="content" data-picker-multiselect="false" data-root-path-valid-selection="true">
+    <span class="coral-InputGroup coral-InputGroup--block">
+        <input  class="coral-InputGroup-input js-coral-pathbrowser-input" type="text" name="./destinationPath" autocomplete="off" is="coral-textfield" placeholder="/content/someFolder">
+        <span class="coral-InputGroup-button">
+            <button  class="js-coral-pathbrowser-button" type="button" title="Browse" is="coral-button" icon="folderSearch" iconsize="S"></button>
+        </span>
+    </span>
+</span>
+                </div>
+
+                <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                    <coral-checkbox  data-allowBulkEdit="true" name="./:byTitle" value="true" class="coral-Form-field">
+                        <coral-checkbox-label>Sort By Title</coral-checkbox-label>
+                    </coral-checkbox>
+                </div>
+                <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
+                    <coral-checkbox  data-allowBulkEdit="true" name="./:caseSensitive" value="true" class="coral-Form-field">
+                        <coral-checkbox-label>Case Sensitive</coral-checkbox-label>
+                    </coral-checkbox>
+                </div>
+
+            </section>
+
+            <coral-actionbar-item class="coral3-ActionBar-item">
+                <button class="coral3-Button coral3-Button--primary sort-nodes-button" icon="checkCircle" iconsize="S"
+                        is="coral-button"
+                        size="M" variant="primary">
+                    <coral-icon alt="" class="coral3-Icon coral3-Icon--sizeS coral3-Icon--checkCircle" icon="reorder"
+                                size="S"></coral-icon>
+                    <coral-button-label>
+                        Sort Nodes
+                    </coral-button-label>
+                </button>
+            </coral-actionbar-item>
+        </form>
+    </div>
+</div>
+</body>
