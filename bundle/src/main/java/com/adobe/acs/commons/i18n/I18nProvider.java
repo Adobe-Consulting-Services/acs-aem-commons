@@ -51,7 +51,7 @@ public interface I18nProvider {
      */
     default String translate(String key, Resource resource, boolean localeIgnoreContent){
         return translate(key, resource);
-    };
+    }
 
     /**
      * Provides the translated value based on resource
@@ -89,7 +89,7 @@ public interface I18nProvider {
      */
     default I18n i18n(Resource resource, boolean localeIgnoreContent){
         return i18n(resource);
-    };
+    }
 
     /**
      * Provides the i18n map based on the underlying resource

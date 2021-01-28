@@ -63,15 +63,15 @@ public final class I18nProviderImplTest {
                                 LOCALE_ALTERNATE = Locale.FRENCH;
 
     private static final String I18N_KEY = "i18nKey";
-    private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!",
-                                TRANSLATED_FROM_FRENCH = "Bonjour!";
+    private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!";
+    private static final String TRANSLATED_FROM_FRENCH = "Bonjour!";
 
     private final I18nProviderImpl i18nProvider = spy(new I18nProviderImpl());
-    private final HashMap<String, Object> resourceBundleProviderProps = new HashMap<>(),
-                                          resourceBundleProviderPropsAlternatve = new HashMap<>();
+    private final HashMap<String, Object> resourceBundleProviderProps = new HashMap<>();
+    private final HashMap<String, Object> resourceBundleProviderPropsAlternatve = new HashMap<>();
 
-    private final Map<String, String> i18nMap = new HashMap<>(),
-                                      i18nMapAlternate = new HashMap<>();
+    private final Map<String, String> i18nMap = new HashMap<>();
+    private final Map<String, String> i18nMapAlternate = new HashMap<>();
 
     @Mock
     private Config config;
@@ -140,7 +140,8 @@ public final class I18nProviderImplTest {
 
     @Test
     public void test_translate_resource() {
-        final I18n mocked = mock(I18n.class), mockedAlternate = mock(I18n.class);
+        final I18n mocked = mock(I18n.class);
+        final I18n mockedAlternate = mock(I18n.class);
         when(mocked.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_ENGLISH);
         when(mockedAlternate.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_FRENCH);
 
