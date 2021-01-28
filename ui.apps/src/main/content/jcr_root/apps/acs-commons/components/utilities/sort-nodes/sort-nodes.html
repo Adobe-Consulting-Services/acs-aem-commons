@@ -44,29 +44,31 @@
         <form id="sort-nodes-form" action="" enctype="multipart/form-data" method="post" novalidate=""
               class="coral-Form coral-Form--vertical foundation-layout-util-vmargin foundation-form" data-foundation-form-ajax="true" data-foundation-form-loadingmask="true">
             <input type="hidden" name=":http-equiv-accept" value="application/json"/>
-            <input type="hidden" name=":operation" value="sort"/>
+            <input type="hidden" name=":operation" value="acs-commons:sortNodes"/>
             <section  class="coral-Form-fieldset">
                 <div  class="coral-Form-fieldwrapper">
                     <label class="coral-Form-fieldlabel">Path *</label>
                     <span  class="coral-Form-field coral-PathBrowser" data-init="pathbrowser" data-root-path="/content" data-option-loader="granite.ui.pathBrowser.pages.folder"
-                           data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile" data-crumb-root="content" data-picker-multiselect="false" data-root-path-valid-selection="true">
-    <span class="coral-InputGroup coral-InputGroup--block">
-        <input  class="coral-InputGroup-input js-coral-pathbrowser-input" type="text" name="./destinationPath" autocomplete="off" is="coral-textfield" placeholder="/content/someFolder">
-        <span class="coral-InputGroup-button">
-            <button  class="js-coral-pathbrowser-button" type="button" title="Browse" is="coral-button" icon="folderSearch" iconsize="S"></button>
-        </span>
-    </span>
-</span>
+                           data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile"
+                           data-crumb-root="content" data-picker-multiselect="false" data-root-path-valid-selection="true">
+                        <span class="coral-InputGroup coral-InputGroup--block">
+                            <input  class="coral-InputGroup-input js-coral-pathbrowser-input" type="text" name="./destinationPath" autocomplete="off"
+                                    is="coral-textfield" placeholder="/content/someFolder">
+                            <span class="coral-InputGroup-button">
+                                <button  class="js-coral-pathbrowser-button" type="button" title="Browse" is="coral-button" icon="folderSearch" iconsize="S"></button>
+                            </span>
+                        </span>
+                    </span>
                 </div>
 
                 <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
                     <coral-checkbox  data-allowBulkEdit="true" name="./:byTitle" value="true" class="coral-Form-field">
-                        <coral-checkbox-label>Sort By Title</coral-checkbox-label>
+                        <coral-checkbox-label>Sort By Title. If unchecked nodes will be sorted by name</coral-checkbox-label>
                     </coral-checkbox>
                 </div>
                 <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
                     <coral-checkbox  data-allowBulkEdit="true" name="./:caseSensitive" value="true" class="coral-Form-field">
-                        <coral-checkbox-label>Case Sensitive</coral-checkbox-label>
+                        <coral-checkbox-label>Case Sensitive Sort</coral-checkbox-label>
                     </coral-checkbox>
                 </div>
 

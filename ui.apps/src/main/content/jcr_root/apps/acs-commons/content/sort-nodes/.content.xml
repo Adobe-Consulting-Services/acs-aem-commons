@@ -3,6 +3,6 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         jcr:primaryType="cq:PageContent"
-        jcr:title="Sort Nodes"
+        jcr:title="Sort JCR Nodes"
         sling:resourceType="acs-commons/components/utilities/sort-nodes"/>
 </jcr:root>

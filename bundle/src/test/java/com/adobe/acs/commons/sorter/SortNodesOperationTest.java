@@ -19,6 +19,7 @@
  */
 package com.adobe.acs.commons.sorter;
 
+import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.servlets.post.PostResponse;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -27,10 +28,12 @@ import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Spy;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class SortNodesOperationTest {
     @Rule
@@ -67,7 +71,7 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByNameCaseInsensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(false, false);
+        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,false, false);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -76,11 +80,24 @@ public class SortNodesOperationTest {
     }
 
     /**
+     * don't move non-hierarchy nodes to the top, sort them along with other nodes
+     */
+    @Test
+    public void testDisableNonHierarchyFirst() throws RepositoryException {
+        Comparator<Node> comparator =  SortNodesOperation.createComparator(false,false, false);
+        Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
+        List<Node> list = sorter.getSortedNodes(node, comparator);
+
+        assertSortOrder(Arrays.asList("jcr:content", "page1", "page2", "Page3", "rep:policy"), list);
+
+    }
+
+    /**
      * by node name, case sensitive
      */
     @Test
     public void testSortByNameCaseSensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(false, true);
+        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,false, true);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -93,7 +110,7 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByTitleCaseInsensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true, false);
+        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,true, false);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -106,7 +123,7 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByTitleCaseSensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true, true);
+        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,true, true);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -114,7 +131,7 @@ public class SortNodesOperationTest {
     }
 
     @Test
-    public void testDefaultRequestParameters() throws RepositoryException {
+    public void testDefaultRequestParameters() {
         Resource resource  = context.resourceResolver().getResource("/sortable");
         MockSlingHttpServletRequest request = context.request();
         request.setResource(resource);
@@ -127,7 +144,7 @@ public class SortNodesOperationTest {
     }
 
     @Test
-    public void testRequestParameters() throws RepositoryException {
+    public void testRequestParameters()  {
         Resource resource  = context.resourceResolver().getResource("/sortable");
         MockSlingHttpServletRequest request = context.request();
         request.addRequestParameter(SortNodesOperation.RP_SORT_BY_TITLE, "true");
@@ -139,6 +156,40 @@ public class SortNodesOperationTest {
         resource.getChildren().forEach(r -> children.add(r.adaptTo(Node.class)));
 
         assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page2" /*A: Page-2*/, "Page3" /*C: Page-3*/, "page1" /*a: Page-1*/), children);
+    }
+
+    @Test
+    public void testInvalidTargetResource()  {
+        String targetPath = "/unknown";
+        PostResponse response = mock(PostResponse.class);
+        MockSlingHttpServletRequest request = context.request();
+        request.setResource(new NonExistingResource(context.resourceResolver(), targetPath));
+        ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
+        sorter.run(request, response, null);
+
+        verify(response).setStatus(statusCaptor.capture(), msgCaptor.capture());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, (int)statusCaptor.getValue());
+        assertEquals("Missing target node to sort: " + targetPath, msgCaptor.getValue());
+    }
+
+    @Test
+    public void testNotSortableTarget()  {
+        String targetPath = "/invalid";
+        context.build()
+                .resource(targetPath, JCR_PRIMARYTYPE, "sling:Folder")
+                .resource(targetPath + "/node1", JCR_PRIMARYTYPE, "sling:Folder")
+                .resource(targetPath + "/node1", JCR_PRIMARYTYPE, "sling:Folder")
+                .resource(targetPath + "/jcr:content", JCR_PRIMARYTYPE, "nt:unstructured");
+        PostResponse response = mock(PostResponse.class);
+        MockSlingHttpServletRequest request = context.request();
+        request.setResource(context.resourceResolver().getResource(targetPath));
+        ArgumentCaptor<Throwable> errCaptor = ArgumentCaptor.forClass(Throwable.class);
+        sorter.run(request, response, null);
+
+        verify(response).setError(errCaptor.capture());
+        assertEquals("Child node ordering is not supported on this node",
+                errCaptor.getValue().getMessage());
     }
 
     private static void assertSortOrder(List<String> expected, List<Node> list){
