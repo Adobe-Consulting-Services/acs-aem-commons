@@ -59,8 +59,8 @@ import com.day.cq.wcm.api.Page;
 @RunWith(MockitoJUnitRunner.class)
 public final class I18nProviderImplTest {
 
-    private static final Locale LOCALE = Locale.US,
-                                LOCALE_ALTERNATE = Locale.FRENCH;
+    private static final Locale LOCALE = Locale.US;
+    private static final Locale LOCALE_ALTERNATE = Locale.FRENCH;
 
     private static final String I18N_KEY = "i18nKey";
     private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!";
@@ -80,7 +80,9 @@ public final class I18nProviderImplTest {
     private ResourceBundleProvider resourceBundleProvider;
 
     @Mock
-    private ResourceBundle resourceBundle, resourceBundleAlternate;
+    private ResourceBundle resourceBundle;
+    @Mock
+    private ResourceBundle resourceBundleAlternate;
 
     @Mock
     private Resource resource;
