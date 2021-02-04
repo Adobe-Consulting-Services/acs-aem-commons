@@ -103,6 +103,4 @@
         <include pattern="/var/acs-commons/on-deploy-scripts-status"/>
         <include pattern="/var/acs-commons/mcp"/>
     </filter>
-    <filter root="/var/workflow/instances/rep:policy"/>
-    <filter root="/var/workflow/packages/rep:policy"/>
 </workspaceFilter>
