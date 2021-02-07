@@ -89,7 +89,6 @@
     <filter root="/home/groups/rep:policy"/>
     <filter root="/home/users/rep:policy"/>
     <filter root="/home/users/system/acs-commons"/>
-    <filter root="/oak:index/rep:policy"/>
     <filter root="/rep:policy"/>
     <filter root="/var/acs-commons">
         <include pattern="/var/acs-commons/rep:policy"/>
