@@ -208,7 +208,8 @@ public class RobotsServletTest {
     }
 
     private void assertResponse(InputStream resourceAsStream, MockSlingHttpServletResponse response) throws IOException {
-        String output = response.getOutputAsString();
+        // convert the platform dependent server's response to Unix line separators
+        String output = response.getOutputAsString().replaceAll("\\r\\n", "\n");
         String expected = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8.name());
         assertEquals(expected, output);
     }
