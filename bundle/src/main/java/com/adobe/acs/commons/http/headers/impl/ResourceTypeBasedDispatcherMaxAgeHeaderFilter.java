@@ -4,7 +4,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.commons.osgi.PropertiesUtil;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
@@ -35,7 +35,7 @@ import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHea
                 value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
                 propertyPrivate = true)
 })
-public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeHeaderFilter {
+public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceTypeBasedDispatcherMaxAgeHeaderFilter.class);
 
@@ -56,18 +56,14 @@ public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMax
         if (request instanceof SlingHttpServletRequest) {
             SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
             Resource resource = getResource(slingRequest);
-            return verifyResourceType(resource);
+            if (resource == null) {
+                log.debug("Could not find resource for request, not accepting");
+                return false;
+            } else {
+                return verifyResourceType(resource);
+            }
         }
         return false;
-    }
-
-    private Resource getResource(SlingHttpServletRequest slingRequest) {
-        if (slingRequest.getResource().isResourceType("cq:Page")) {
-            log.trace("Found page resource, checking page content resource type");
-            return slingRequest.getResource().getChild(JcrConstants.JCR_CONTENT);
-        }
-        log.trace("Found non-page resource, checking request resource type");
-        return slingRequest.getResource();
     }
 
     private boolean verifyResourceType(Resource resource) {
@@ -91,4 +87,7 @@ public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends DispatcherMax
         }
     }
 
+    public String toString() {
+        return this.getClass().getName() + "[resource-types:" + Arrays.asList(resourceTypes) + ",fallback-max-age:" + super.getHeaderValue(null) + "]";
+    }
 }
