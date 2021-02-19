@@ -261,7 +261,7 @@ public class TemplatedFilter implements Filter {
 
         @AttributeDefinition(name = "Include Patterns", description = "Regex patterns to for URL paths to INCLUDE in "
                 + "the JSON rewriting.")
-        String[] includes() default {"(.*).model.(.*)"};
+        String[] includes() default {".*\\.model\\..*"};
 
         @AttributeDefinition(name = "Exclude Patterns", description = "Regex patterns to for URL paths to EXCLUDE in "
                 + "the JSON rewriting. Exclusions hold priority over inclusions.")

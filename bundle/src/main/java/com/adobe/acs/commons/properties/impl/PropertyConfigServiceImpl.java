@@ -76,6 +76,6 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
                 description = "List of properties to exclude, accepts regex.",
                 type = AttributeType.STRING
         )
-        String[] exclude_list() default {"cq:(.*)"};
+        String[] exclude_list() default {"cq:.*"};
     }
 }
