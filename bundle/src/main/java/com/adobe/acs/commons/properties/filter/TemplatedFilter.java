@@ -207,8 +207,8 @@ public class TemplatedFilter implements Filter {
      * @return The replaced or original String
      */
     private String replaceInString(String input) {
-        if (TemplateReplacementUtil.hasPlaceholder(input)) {
-
+        // iterate over input instead
+        while (TemplateReplacementUtil.hasPlaceholder(input)) {
             // Get the current placeholder in the string
             String placeholder = TemplateReplacementUtil.getPlaceholder(input);
 
