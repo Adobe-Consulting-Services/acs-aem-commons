@@ -43,6 +43,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.NonExistingResource;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -272,8 +274,24 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     private HtmlLibrary getLibrary(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
-        String resolvedLibraryPath = resolvePathIfProxied(libraryType, libraryPath, resourceResolver);
+        String resolvedLibraryPath = resolvePath(libraryType, libraryPath, resourceResolver);
         return resolvedLibraryPath == null ? null : htmlLibraryManager.getLibrary(libraryType, resolvedLibraryPath);
+    }
+
+    private String resolvePath(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
+        String clientLibraryPath = resolvePathIfJcrMapping(libraryPath, resourceResolver);
+        if (StringUtils.isEmpty(clientLibraryPath)) {
+            clientLibraryPath = resolvePathIfProxied(libraryType, libraryPath, resourceResolver);
+        }
+        return clientLibraryPath;
+    }
+
+    private String resolvePathIfJcrMapping(String libraryPath, ResourceResolver resourceResolver) {
+        Resource libraryResource = resourceResolver.resolve(libraryPath);
+        if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
+            return libraryResource.getPath();
+        }
+        return null;
     }
 
     private String resolvePathIfProxied(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
