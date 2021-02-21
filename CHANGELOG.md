@@ -9,10 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+## 4.11.2 - 2021-01-05
+
 ### Fixed
 - #2496 - Upgrade shaded Guava dependency to 30.1
 - #2498 - Potential NPE in RunnableOnMaster
 - #2492 - NPE in JcrPackageReplicationStatusEventHandler
+- #2494 - Fixed issue with Versioned ClientLib incompatibility on 6.5.7
 
 ## 4.11.0 - 2020-12-11
 
