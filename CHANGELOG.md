@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 ### Added
 - #2518 - Extended the I18N provider / injector mechanism with more options 
 
+### Fixed
+- #2529 - Unable to find an implementation for interface acscommons.io.jsonwebtoken.io.Serializer using java.util.ServiceLoader
+
 ## 4.11.2 - 2021-01-05
 
 ### Fixed
