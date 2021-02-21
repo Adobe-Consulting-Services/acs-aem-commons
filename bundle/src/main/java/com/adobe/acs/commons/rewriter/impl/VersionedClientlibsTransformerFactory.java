@@ -216,7 +216,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
             libraryPath = path.substring(contextPath.length());
         }
 
-        String versionedPath = this.getVersionedPath(libraryPath, libraryType, request.getResourceResolver());
+        String versionedPath = this.getVersionedPath(libraryPath, libraryType, request);
 
         if (StringUtils.isNotBlank(versionedPath)) {
             if(StringUtils.isNotBlank(contextPath)) {
@@ -231,7 +231,8 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         return newAttributes;
     }
 
-    private String getVersionedPath(final String originalPath, final LibraryType libraryType, final ResourceResolver resourceResolver) {
+    private String getVersionedPath(final String originalPath, final LibraryType libraryType,
+            final SlingHttpServletRequest request) {
         if (originalPath.startsWith(PROXY_PREFIX) && originalPath.contains(PROXIED_STATIC_RESOURCE_PATH)) {
             log.debug("Static resource accessed via the clientlib proxy: '{}'", originalPath);
             return null;
@@ -244,7 +245,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 libraryPath = StringUtils.substringBeforeLast(libraryPath, ".");
             }
 
-            final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, resourceResolver);
+            final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, request);
 
             if (htmlLibrary != null) {
                 StringBuilder builder = new StringBuilder();
@@ -273,25 +274,17 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
         }
     }
 
-    private HtmlLibrary getLibrary(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
-        String resolvedLibraryPath = resolvePath(libraryType, libraryPath, resourceResolver);
+    private HtmlLibrary getLibrary(LibraryType libraryType, String libraryPath, SlingHttpServletRequest request) {
+        String resolvedLibraryPath = resolvePath(libraryType, libraryPath, request);
         return resolvedLibraryPath == null ? null : htmlLibraryManager.getLibrary(libraryType, resolvedLibraryPath);
     }
 
-    private String resolvePath(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
-        String clientLibraryPath = resolvePathIfJcrMapping(libraryPath, resourceResolver);
-        if (StringUtils.isEmpty(clientLibraryPath)) {
-            clientLibraryPath = resolvePathIfProxied(libraryType, libraryPath, resourceResolver);
-        }
-        return clientLibraryPath;
-    }
-
-    private String resolvePathIfJcrMapping(String libraryPath, ResourceResolver resourceResolver) {
-        Resource libraryResource = resourceResolver.resolve(libraryPath);
+    private String resolvePath(LibraryType libraryType, String libraryPath, SlingHttpServletRequest request) {
+        Resource libraryResource = request.getResourceResolver().resolve(request, libraryPath);
         if (libraryResource != null && !(libraryResource instanceof NonExistingResource)) {
             return libraryResource.getPath();
         }
-        return null;
+        return resolvePathIfProxied(libraryType, libraryPath, request.getResourceResolver());
     }
 
     private String resolvePathIfProxied(LibraryType libraryType, String libraryPath, ResourceResolver resourceResolver) {
@@ -420,7 +413,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
     }
 
     @Nonnull
-    UriInfo getUriInfo(@Nullable final String uri, @Nonnull ResourceResolver resourceResolver) {
+    UriInfo getUriInfo(@Nullable final String uri, @Nonnull SlingHttpServletRequest request) {
         if (uri != null) {
             Matcher matcher = FILTER_PATTERN.matcher(uri);
             if (matcher.matches()) {
@@ -435,7 +428,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                     libraryType = LibraryType.JS;
                 }
 
-                final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, resourceResolver);
+                final HtmlLibrary htmlLibrary = getLibrary(libraryType, libraryPath, request);
                 return new UriInfo(libraryPath + "." + extension, md5, libraryType, htmlLibrary);
             }
         }
@@ -454,7 +447,7 @@ public final class VersionedClientlibsTransformerFactory extends AbstractGuavaCa
                 final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
                 final SlingHttpServletResponse slingResponse = (SlingHttpServletResponse) response;
                 String uri = slingRequest.getRequestURI();
-                UriInfo uriInfo = getUriInfo(uri, slingRequest.getResourceResolver());
+                UriInfo uriInfo = getUriInfo(uri, slingRequest);
                 if (uriInfo.cacheKey != null) {
                     if ("".equals(uriInfo.md5)) {
                         log.debug("MD5 is blank for '{}' in Versioned ClientLibs cache, allowing {} to pass", uriInfo.cleanedUri, uri);
