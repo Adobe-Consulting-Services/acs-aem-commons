@@ -58,6 +58,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.gson.io.GsonSerializer;
+import io.jsonwebtoken.security.InvalidKeyException;
 
 //scheduler is set to once per hour
 //you can use cronmaker.com for generating cron expressions
@@ -148,18 +150,13 @@ public class IntegrationServiceImpl implements IntegrationService, Runnable {
         return token;
     }
 
-    protected String getJwtToken() {
-        String jwtToken = StringUtils.EMPTY;
-        try {
-            jwtToken = Jwts
+    protected String getJwtToken() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String jwtToken = Jwts
                     .builder()
                     .setClaims(getJwtClaims())
-                    .signWith(RS256, getPrivateKey())
+                    .signWith(getPrivateKey(), RS256)
+                    .serializeToJsonWith(new GsonSerializer())
                     .compact();
-        } catch (Exception e) {
-            LOGGER.error("JWT claims {}", getJwtClaims());
-            LOGGER.error(e.getMessage());
-        }
         LOGGER.info("JWT Token : \n {}", jwtToken);
         return jwtToken;
     }

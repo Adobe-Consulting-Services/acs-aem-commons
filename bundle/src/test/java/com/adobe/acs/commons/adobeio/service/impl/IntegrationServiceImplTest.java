@@ -22,8 +22,13 @@ package com.adobe.acs.commons.adobeio.service.impl;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import io.jsonwebtoken.security.InvalidKeyException;
 
 public class IntegrationServiceImplTest {
    
@@ -73,13 +78,14 @@ public class IntegrationServiceImplTest {
    }
    
    @Test
-   public void testJwtToken() {
+   public void testJwtToken() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
       String jwt = impl.getJwtToken();
       assertNotNull(jwt);
+      assertFalse(jwt.isEmpty());
    }
    
    @Test
-   public void testConifg() {impl.activate(config);
+   public void testConfig() {impl.activate(config);
       assertEquals(config, impl.jwtServiceConfig);
    }
    
