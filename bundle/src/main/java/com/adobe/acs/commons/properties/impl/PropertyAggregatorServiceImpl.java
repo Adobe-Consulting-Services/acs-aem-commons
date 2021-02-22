@@ -21,9 +21,7 @@ package com.adobe.acs.commons.properties.impl;
 
 import com.adobe.acs.commons.properties.ContentVariableProvider;
 import com.adobe.acs.commons.properties.PropertyAggregatorService;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
@@ -47,31 +45,15 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
     private List<ContentVariableProvider> variableProviders;
 
     @Override
-    public Map<String, Object> getProperties(final Resource resource) {
+    public Map<String, Object> getProperties(final SlingHttpServletRequest request) {
         Map<String, Object> map = new HashMap<>();
-
-        if (resource == null) {
-            log.warn("Resource was null, skipping properties.");
-            return map;
-        }
-        PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
-        if (pageManager == null) {
-            log.warn("PageManager was null, skipping properties.");
-            return map;
-        }
-        Page currentPage = pageManager.getContainingPage(resource);
-
-        if (currentPage == null) {
-            log.warn("No containing page found for resource at {}", resource.getPath());
-            return map;
-        }
 
         for (ContentVariableProvider variableProvider : variableProviders) {
             int sizeBefore = map.size();
-            if (variableProvider.accepts(currentPage)) {
-                variableProvider.addProperties(map, currentPage);
+            if (variableProvider.accepts(request)) {
+                variableProvider.addProperties(map, request);
             } else {
-                log.debug(variableProvider.getClass().getName() + " does not accept request for page at {}.", currentPage.getPath());
+                log.debug(variableProvider.getClass().getName() + " does not accept request for request at {}.", request.getPathInfo());
             }
             if (map.size() == sizeBefore) {
                 log.debug(variableProvider.getClass().getName() + " either did not add any properties or replaced existing ones.");
@@ -79,10 +61,5 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
         }
 
         return map;
-    }
-
-    @Override
-    public Map<String, Object> getProperties(final Page page) {
-        return getProperties(page.getContentResource());
     }
 }

@@ -20,7 +20,6 @@
 package com.adobe.acs.commons.properties.impl;
 
 import com.adobe.acs.commons.properties.PropertyAggregatorService;
-import com.day.cq.wcm.api.Page;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -55,7 +54,8 @@ public class PropertyAggregatorServiceImplTest {
         service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
-        Map<String, Object> properties = service.getProperties(lofoten);
+        context.request().setResource(lofoten);
+        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = defaultPropertyMap();
         assertEquals(expected, properties);
     }
@@ -65,7 +65,8 @@ public class PropertyAggregatorServiceImplTest {
         service = defaultService(context);
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
-        Map<String, Object> properties = service.getProperties(lofoten);
+        context.request().setResource(lofoten);
+        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = defaultPropertyMap();
         assertEquals(expected, properties);
     }
@@ -77,20 +78,9 @@ public class PropertyAggregatorServiceImplTest {
         context.load().json(getClass().getResourceAsStream("PropertyAggregatorServiceAppsContent.json"), "/apps/templated/components/accordion");
 
         Resource componentResource = context.resourceResolver().getResource("/apps/templated/components/accordion");
-        Map<String, Object> properties = service.getProperties(componentResource);
+        context.request().setResource(componentResource);
+        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = new HashMap<>();
-        assertEquals(expected, properties);
-    }
-
-
-    @Test
-    public void testAggregationOfPage() {
-        service = defaultService(context);
-
-        Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
-        Page lofotenPage = lofoten.adaptTo(Page.class);
-        Map<String, Object> properties = service.getProperties(lofotenPage);
-        Map<String, Object> expected = defaultPropertyMap();
         assertEquals(expected, properties);
     }
 
@@ -102,7 +92,8 @@ public class PropertyAggregatorServiceImplTest {
         ModifiableValueMap modifiableValueMap = lofoten.adaptTo(ModifiableValueMap.class);
         // Put in the 'inheritedProperty' value onto the lofoten node itself to be pulled instead of inheriting
         modifiableValueMap.put("inheritedProperty", "newValue");
-        Map<String, Object> properties = service.getProperties(lofoten);
+        context.request().setResource(lofoten);
+        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = defaultPropertyMap();
         // Remove old inherited value from default expected
         expected.remove("inherited_page_properties.inheritedProperty");
@@ -120,7 +111,8 @@ public class PropertyAggregatorServiceImplTest {
         service = context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
-        Map<String, Object> properties = service.getProperties(lofoten);
+        context.request().setResource(lofoten);
+        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = new HashMap<>();
         expected.put("inherited_page_properties.inheritedProperty", "inheritedValue");
         expected.put("page_properties.sling:resourceType", "weretail/components/structure/page");

@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.properties;
 
-import com.day.cq.wcm.api.Page;
+import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.util.Map;
 
@@ -33,17 +33,17 @@ public interface ContentVariableProvider {
      * Method to add the properties to the passed map. This will be overridden to run custom logic and add properties to
      * the Map.
      *
-     * @param map  The current set of properties (may or may not be empty)
-     * @param page The page used as the context to add properties. Typically the page currently being requested.
+     * @param map     The current set of properties (may or may not be empty)
+     * @param request The request used as the context to add properties.
      */
-    void addProperties(Map<String, Object> map, Page page);
+    void addProperties(Map<String, Object> map, SlingHttpServletRequest request);
 
     /**
      * Determines whether or not the current ContentVariableProvider will accept the request. This can limit what
      * providers to use and allow for more contextual content variables in a multi-tenant situation.
      *
-     * @param page The current page from the request
+     * @param request The current request
      * @return Whether the ContentVariableProvider should add variables to the property map
      */
-    boolean accepts(Page page);
+    boolean accepts(SlingHttpServletRequest request);
 }

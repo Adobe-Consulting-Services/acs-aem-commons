@@ -23,8 +23,13 @@ import com.adobe.acs.commons.properties.ContentVariableProvider;
 import com.adobe.acs.commons.properties.PropertyConfigService;
 import com.adobe.acs.commons.properties.util.PropertyAggregatorUtil;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +38,8 @@ import java.util.Set;
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(AllPagePropertiesContentVariableProvider.class);
+
     public static final String PAGE_PROP_PREFIX = "page_properties";
     private static final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
 
@@ -40,7 +47,21 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     private PropertyConfigService propertyConfigService;
 
     @Override
-    public void addProperties(Map<String, Object> map, Page page) {
+    public void addProperties(Map<String, Object> map, SlingHttpServletRequest request) {
+        Resource resource = request.getResource();
+
+        PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
+        if (pageManager == null) {
+            log.warn("PageManager was null, skipping properties.");
+            return;
+        }
+        Page page = pageManager.getContainingPage(resource);
+
+        if (page == null) {
+            log.warn("No containing page found for resource at {}", resource.getPath());
+            return;
+        }
+
         // Add current page properties
         PropertyAggregatorUtil.addPagePropertiesToMap(map, page, PAGE_PROP_PREFIX, propertyConfigService);
 
@@ -72,7 +93,13 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     }
 
     @Override
-    public boolean accepts(Page page) {
+    public boolean accepts(SlingHttpServletRequest request) {
+        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
+        if (pageManager == null) {
+            log.warn("PageManager is null, not accepting this request.");
+            return false;
+        }
+        Page page = pageManager.getContainingPage(request.getResource());
         return page != null && page.getPath().startsWith("/content");
     }
 }

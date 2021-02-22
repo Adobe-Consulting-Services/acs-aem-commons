@@ -95,7 +95,7 @@ public class TemplatedFilter implements Filter {
             String currentResponse = capturingResponseWrapper.getCaptureAsString();
             String toReturn = currentResponse;
             try {
-                properties = propertyAggregatorService.getProperties(slingHttpServletRequest.getResource());
+                properties = propertyAggregatorService.getProperties(slingHttpServletRequest);
                 if (properties.size() > 0) {
                     ObjectMapper objectMapper = new ObjectMapper();
                     JsonNode currentTree = objectMapper.readTree(currentResponse);

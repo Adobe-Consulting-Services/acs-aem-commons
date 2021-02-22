@@ -19,15 +19,13 @@
  */
 package com.adobe.acs.commons.properties;
 
+import org.apache.sling.api.SlingHttpServletRequest;
+
 import java.util.Map;
 
-import com.day.cq.wcm.api.Page;
-
-import org.apache.sling.api.resource.Resource;
-
 /**
- * Service used to aggregate property keys and values into a {@link Map}, given the context of a {@link Page}, that can
- * be used to replace these tokens in content responses.
+ * Service used to aggregate property keys and values into a {@link Map}, given the context of a
+ * {@link SlingHttpServletRequest}, that can be used to replace these tokens in content responses.
  */
 public interface PropertyAggregatorService {
 
@@ -35,16 +33,8 @@ public interface PropertyAggregatorService {
      * Iterates up the content tree to aggregate all the current page properties and inherited
      * page properties. Assigns the appropriate namespace to the properties as well.
      *
-     * @param resource The content resource of a page
+     * @param request The currently scoped request
      * @return The map of properties
      */
-    Map<String, Object> getProperties(Resource resource);
-
-    /**
-     * Overloaded method from above. Passes the content resource of the page.
-     *
-     * @param page The page to gather properties from
-     * @return The map of properties
-     */
-    Map<String, Object> getProperties(Page page);
+    Map<String, Object> getProperties(SlingHttpServletRequest request);
 }

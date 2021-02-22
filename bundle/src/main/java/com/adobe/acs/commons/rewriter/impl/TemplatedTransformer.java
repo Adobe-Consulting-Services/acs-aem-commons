@@ -19,20 +19,9 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-
 import com.adobe.acs.commons.properties.PropertyAggregatorService;
 import com.adobe.acs.commons.properties.util.TemplateReplacementUtil;
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
-import com.adobe.granite.rest.Constants;
-import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.api.PageManager;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
@@ -41,6 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@link org.apache.sling.rewriter.Transformer} used to process HTML requests and replace content tokens found in the
@@ -63,13 +56,8 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
     @Override
     public void init(ProcessingContext processingContext, ProcessingComponentConfiguration processingComponentConfiguration) throws IOException {
         SlingHttpServletRequest request = processingContext.getRequest();
-        PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
 
-        // Get the combined properties via service
-        Page page = pageManager.getContainingPage(request.getResource());
-        if (page != null) {
-            properties = aggregatorService.getProperties(page);
-        }
+        properties = aggregatorService.getProperties(request);
     }
 
     public void startElement(String uri, String localName, String quaName, Attributes atts) throws SAXException {
