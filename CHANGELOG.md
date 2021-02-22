@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Added
+- #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
+
 ### Fixed
 - #2529 - Unable to find an implementation for interface acscommons.io.jsonwebtoken.io.Serializer using java.util.ServiceLoader
 
