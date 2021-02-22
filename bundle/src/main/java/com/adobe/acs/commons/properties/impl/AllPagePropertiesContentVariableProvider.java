@@ -73,6 +73,6 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
 
     @Override
     public boolean accepts(Page page) {
-        return true;
+        return page != null && page.getPath().startsWith("/content");
     }
 }
