@@ -74,7 +74,7 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
                 log.debug(variableProvider.getClass().getName() + " does not accept request for page at {}.", currentPage.getPath());
             }
             if (map.size() == sizeBefore) {
-                log.debug(variableProvider.getClass().getName() + " did not add any properties.");
+                log.debug(variableProvider.getClass().getName() + " either did not add any properties or replaced existing ones.");
             }
         }
 
