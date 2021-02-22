@@ -76,7 +76,7 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
         if (shouldRun() && localName.equals("a")) {
             AttributesImpl newAttrs = new AttributesImpl(atts);
             for (int i = 0; i < newAttrs.getLength(); i++) {
-                String currentAttribute = decode(newAttrs.getValue(i));
+                String currentAttribute = newAttrs.getValue(i);
                 if (TemplateReplacementUtil.hasPlaceholder(currentAttribute)) {
 
                     // Get the current placeholder in the string
@@ -88,7 +88,7 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
                     // If the placeholder key is in the map then replace it
                     if (properties.containsKey(key)) {
                         String replaceValue = (String) properties.get(key);
-                        newAttrs.setValue(i, currentAttribute.replace(placeholder, encode(replaceValue)));
+                        newAttrs.setValue(i, currentAttribute.replace(placeholder, replaceValue));
                     }
                 }
             }
@@ -128,23 +128,5 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
     private boolean shouldRun() {
         return aggregatorService != null && properties != null;
-    }
-
-    private String decode(String input) {
-        try {
-            input = URLDecoder.decode(input, Constants.DEFAULT_CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            log.error("Error decoding object");
-        }
-        return input;
-    }
-
-    private String encode(String input) {
-        try {
-            input = URLEncoder.encode(input, Constants.DEFAULT_CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            log.error("Error encoding object");
-        }
-        return input;
     }
 }

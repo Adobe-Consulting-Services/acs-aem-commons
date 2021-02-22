@@ -144,21 +144,6 @@ public class TemplatedTransformerFactoryTest {
     }
 
     @Test
-    public void testHrefReplacementEncoded() throws Exception {
-        reinitTransformer(true);
-
-        AttributesImpl attributes = new AttributesImpl();
-        attributes.addAttribute(null, "href", null, "CDATA", "/content/page.html?title={{page_properties.jcr:title}}");
-        transformer.startElement(null, "a", null, attributes);
-
-        ArgumentCaptor<AttributesImpl> attributesCaptor = ArgumentCaptor.forClass(AttributesImpl.class);
-        verify(handler, atLeast(1)).startElement(isNull(String.class), eq("a"), isNull(String.class), attributesCaptor.capture());
-
-        Attributes out = attributesCaptor.getValue();
-        assertEquals("/content/page.html?title=Arctic+Surfing+In+Lofoten", out.getValue(0));
-    }
-
-    @Test
     public void testHrefReplacementNotEncoded() throws Exception {
         reinitTransformer(true);
 
