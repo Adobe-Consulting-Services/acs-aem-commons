@@ -85,12 +85,11 @@ public class TemplatedFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        RequestPathInfo currentPathInfo = ((SlingHttpServletRequest) servletRequest).getRequestPathInfo();
-        if (StringUtils.equals(currentPathInfo.getExtension(), "json") && shouldProcess(((SlingHttpServletRequest) servletRequest).getPathInfo())) {
+        SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) servletRequest;
+        RequestPathInfo currentPathInfo = slingHttpServletRequest.getRequestPathInfo();
+        if (StringUtils.equals(currentPathInfo.getExtension(), "json") && shouldProcess(slingHttpServletRequest.getPathInfo())) {
             CapturingResponseWrapper capturingResponseWrapper = new CapturingResponseWrapper((SlingHttpServletResponse) servletResponse);
             filterChain.doFilter(servletRequest, capturingResponseWrapper);
-
-            SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) servletRequest;
 
             String currentResponse = capturingResponseWrapper.getCaptureAsString();
             String toReturn = currentResponse;
