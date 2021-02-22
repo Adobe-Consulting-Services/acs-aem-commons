@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.properties.impl;
 
 import com.adobe.acs.commons.properties.PropertyConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -56,7 +57,9 @@ public class PropertyConfigServiceImpl implements PropertyConfigService {
     protected void activate(Config config) {
         List<Pattern> excludeList = new ArrayList<>();
         for (String exclude : config.exclude_list()) {
-            excludeList.add(Pattern.compile(exclude));
+            if (StringUtils.isNotBlank(exclude)) {
+                excludeList.add(Pattern.compile(exclude));
+            }
         }
         this.exclusionList = excludeList;
     }
