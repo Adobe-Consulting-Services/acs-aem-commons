@@ -259,6 +259,7 @@
                                         <include>com.google.guava:failureaccess</include>
                                         <include>io.jsonwebtoken:jjwt-api</include>
                                         <include>io.jsonwebtoken:jjwt-impl</include>
+                                        <include>io.jsonwebtoken:jjwt-gson</include>
                                         <include>com.jcraft:jsch</include>
                                         <include>com.jcraft:jzlib</include>
                                     </includes>
@@ -289,6 +290,7 @@
                                     <include>com.jcraft:jzlib</include>
                                     <include>io.jsonwebtoken:jjwt-api</include>
                                     <include>io.jsonwebtoken:jjwt-impl</include>
+                                    <include>io.jsonwebtoken:jjwt-gson</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -342,6 +344,12 @@
                                 </filter>
                                 <filter>
                                     <artifact>io.jsonwebtoken:jjwt-impl</artifact>
+                                    <includes>
+                                        <include>io/jsonwebtoken/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>io.jsonwebtoken:jjwt-gson</artifact>
                                     <includes>
                                         <include>io/jsonwebtoken/**</include>
                                     </includes>
@@ -796,6 +804,11 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-gson</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>

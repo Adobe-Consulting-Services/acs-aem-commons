@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 
 ### Added
 - #2512 - Added Templated Dialogs feature
+- #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
+
+### Fixed
+- #2529 - Unable to find an implementation for interface acscommons.io.jsonwebtoken.io.Serializer using java.util.ServiceLoader
 
 ## 4.11.2 - 2021-01-05
 
