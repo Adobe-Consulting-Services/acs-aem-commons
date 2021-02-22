@@ -51,10 +51,12 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
         Map<String, Object> map = new HashMap<>();
 
         if (resource == null) {
+            log.warn("Resource was null, skipping properties.");
             return map;
         }
         PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
         if (pageManager == null) {
+            log.warn("PageManager was null, skipping properties.");
             return map;
         }
         Page currentPage = pageManager.getContainingPage(resource);
