@@ -25,8 +25,6 @@ import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
 import org.apache.sling.rewriter.ProcessingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -40,8 +38,6 @@ import java.util.Map;
  * rendered HTML.
  */
 public class TemplatedTransformer extends ContentHandlerBasedTransformer {
-
-    private static final Logger log = LoggerFactory.getLogger(TemplatedTransformer.class);
 
     private Map<String, Object> properties;
     private PropertyAggregatorService aggregatorService;
