@@ -100,13 +100,13 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
     public void characters(char[] ch, int start, int length) throws SAXException {
         String currentString = new String(ch);
-        int placeLength = length;
+        int chunkLength = length;
 
         if (shouldRun()) {
-            String currentPlace = currentString.substring(start, start + length);
+            String currentChunk = currentString.substring(start, start + length);
 
             // Get the current placeholders in the string
-            final List<String> placeholders = TemplateReplacementUtil.getPlaceholders(currentPlace);
+            final List<String> placeholders = TemplateReplacementUtil.getPlaceholders(currentChunk);
 
             for (String placeholder : placeholders) {
                 // Transform it to the key in the property map
@@ -114,16 +114,16 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
                 // If the placeholder key is in the map then replace it
                 if (properties.containsKey(key)) {
-                    final String replaceValue = String.valueOf(properties.get(key));
-                    final String replace = currentPlace.replace(placeholder, replaceValue);
-                    placeLength = replace.length();
-                    currentString = currentString.replace(currentPlace, replace);
-                    currentPlace = replace;
+                    final String placeholderReplacement = String.valueOf(properties.get(key));
+                    final String replacedChunk = currentChunk.replace(placeholder, placeholderReplacement);
+                    chunkLength = replacedChunk.length();
+                    currentString = currentString.replace(currentChunk, replacedChunk);
+                    currentChunk = replacedChunk;
                 }
             }
         }
 
-        getContentHandler().characters(currentString.toCharArray(), start, placeLength);
+        getContentHandler().characters(currentString.toCharArray(), start, chunkLength);
     }
 
     private boolean shouldRun() {
