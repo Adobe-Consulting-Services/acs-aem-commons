@@ -74,7 +74,6 @@ public class TemplatedFilter implements Filter {
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
 
-    private Map<String, Object> properties;
     private List<Pattern> includePatterns;
     private List<Pattern> excludePatterns;
 
@@ -94,11 +93,11 @@ public class TemplatedFilter implements Filter {
             String currentResponse = capturingResponseWrapper.getCaptureAsString();
             String toReturn = currentResponse;
             try {
-                properties = propertyAggregatorService.getProperties(slingHttpServletRequest);
-                if (properties.size() > 0) {
+                Map<String, Object> contentVariableReplacements = propertyAggregatorService.getProperties(slingHttpServletRequest);
+                if (contentVariableReplacements.size() > 0) {
                     ObjectMapper objectMapper = new ObjectMapper();
                     JsonNode currentTree = objectMapper.readTree(currentResponse);
-                    replaceInElements(currentTree);
+                    replaceInElements(currentTree, contentVariableReplacements);
                     toReturn = currentTree.toString();
                 }
             } catch (Exception e) {
@@ -145,12 +144,13 @@ public class TemplatedFilter implements Filter {
      * Delegate replacement to different object types.
      *
      * @param node Input JSON node
+     * @param contentVariableReplacements current map of content variables
      */
-    private void replaceInElements(JsonNode node) {
+    private void replaceInElements(JsonNode node, Map<String, Object> contentVariableReplacements) {
         if (node.isArray()) {
-            replaceInArray(node);
+            replaceInArray(node, contentVariableReplacements);
         } else if (node.isObject()) {
-            replaceInObject(node);
+            replaceInObject(node, contentVariableReplacements);
         }
     }
 
@@ -158,13 +158,14 @@ public class TemplatedFilter implements Filter {
      * Iterates through array items and replaces any placeholders found.
      *
      * @param node Array node
+     * @param contentVariableReplacements current map of content variables
      */
-    private void replaceInArray(JsonNode node) {
+    private void replaceInArray(JsonNode node, Map<String, Object> contentVariableReplacements) {
         if (node.get(0) != null && node.get(0).isTextual()) {
             List<String> updated = new LinkedList<>();
             for (JsonNode arrayItem : node) {
                 String current = arrayItem.asText();
-                updated.add(replaceInString(current));
+                updated.add(replaceInString(current, contentVariableReplacements));
             }
             ((ArrayNode) node).removeAll();
             for (int i = 0; i < updated.size(); i++) {
@@ -172,7 +173,7 @@ public class TemplatedFilter implements Filter {
             }
         } else if (node.get(0) != null && node.get(0).isContainerNode()) {
             for (JsonNode arrayItem : node) {
-                replaceInElements(arrayItem);
+                replaceInElements(arrayItem, contentVariableReplacements);
             }
         }
     }
@@ -181,17 +182,18 @@ public class TemplatedFilter implements Filter {
      * Iterates over keys to replace any placeholders in the values.
      *
      * @param node Object node
+     * @param contentVariableReplacements current map of content variables
      */
-    private void replaceInObject(JsonNode node) {
+    private void replaceInObject(JsonNode node, Map<String, Object> contentVariableReplacements) {
         Iterator<String> fieldNames = node.fieldNames();
         while (fieldNames.hasNext()) {
             String name = fieldNames.next();
             JsonNode nodeValue = node.get(name);
             if (nodeValue.isContainerNode()) {
-                replaceInElements(nodeValue);
+                replaceInElements(nodeValue, contentVariableReplacements);
             } else if (nodeValue.isTextual()) {
                 String current = nodeValue.asText();
-                String replaced = replaceInString(current);
+                String replaced = replaceInString(current, contentVariableReplacements);
                 if (!StringUtils.equals(current, replaced)) {
                     ((ObjectNode) node).put(name, replaced);
                 }
@@ -203,9 +205,10 @@ public class TemplatedFilter implements Filter {
      * Reusable method to replace placeholders in the input string./
      *
      * @param input String input
+     * @param contentVariableReplacements current map of content variables
      * @return The replaced or original String
      */
-    private String replaceInString(String input) {
+    private String replaceInString(String input, Map<String, Object> contentVariableReplacements) {
         final List<String> placeholders = TemplateReplacementUtil.getPlaceholders(input);
         for (String placeholder : placeholders) {
 
@@ -213,8 +216,8 @@ public class TemplatedFilter implements Filter {
             String key = TemplateReplacementUtil.getKey(placeholder);
 
             // If the placeholder key is in the map then replace it
-            if (properties.containsKey(key)) {
-                String replaceValue = (String) properties.get(key);
+            if (contentVariableReplacements.containsKey(key)) {
+                String replaceValue = (String) contentVariableReplacements.get(key);
                 input = input.replace(placeholder, replaceValue);
             }
         }

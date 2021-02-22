@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class TemplatedTransformer extends ContentHandlerBasedTransformer {
 
-    private Map<String, Object> properties;
+    private Map<String, Object> contentVariableReplacements;
     private PropertyAggregatorService aggregatorService;
 
     public TemplatedTransformer() {
@@ -53,7 +53,7 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
     public void init(ProcessingContext processingContext, ProcessingComponentConfiguration processingComponentConfiguration) throws IOException {
         SlingHttpServletRequest request = processingContext.getRequest();
 
-        properties = aggregatorService.getProperties(request);
+        contentVariableReplacements = aggregatorService.getProperties(request);
     }
 
     public void startElement(String uri, String localName, String quaName, Attributes atts) throws SAXException {
@@ -70,8 +70,8 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
                     String key = TemplateReplacementUtil.getKey(placeholder);
 
                     // If the placeholder key is in the map then replace it
-                    if (properties.containsKey(key)) {
-                        String replaceValue = (String) properties.get(key);
+                    if (contentVariableReplacements.containsKey(key)) {
+                        String replaceValue = (String) contentVariableReplacements.get(key);
                         newAttrs.setValue(i, currentAttribute.replace(placeholder, replaceValue));
                     }
                 }
@@ -97,8 +97,8 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
                 final String key = TemplateReplacementUtil.getKey(placeholder);
 
                 // If the placeholder key is in the map then replace it
-                if (properties.containsKey(key)) {
-                    final String placeholderReplacement = String.valueOf(properties.get(key));
+                if (contentVariableReplacements.containsKey(key)) {
+                    final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
                     final String replacedChunk = currentChunk.replace(placeholder, placeholderReplacement);
                     chunkLength = replacedChunk.length();
                     currentString = currentString.replace(currentChunk, replacedChunk);
@@ -111,6 +111,6 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
     }
 
     private boolean shouldRun() {
-        return aggregatorService != null && properties != null;
+        return aggregatorService != null && contentVariableReplacements != null;
     }
 }
