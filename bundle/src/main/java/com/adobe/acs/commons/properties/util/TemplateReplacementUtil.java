@@ -33,8 +33,8 @@ public class TemplateReplacementUtil {
     private TemplateReplacementUtil() {
     }
 
-    private static final String PLACHOLDER_BEGIN = "{{";
-    private static final String PLACHOLDER_END = "}}";
+    private static final String PLACEHOLDER_BEGIN = "{{";
+    private static final String PLACEHOLDER_END = "}}";
 
     /**
      * Checks the current string for whether or not it contains a placeholder.
@@ -43,8 +43,8 @@ public class TemplateReplacementUtil {
      * @return Whether or not the string contains the placeholder values
      */
     public static boolean hasPlaceholder(String string) {
-        return string.contains(PLACHOLDER_BEGIN) && string.contains(PLACHOLDER_END)
-                && string.indexOf(PLACHOLDER_BEGIN) < string.indexOf(PLACHOLDER_END);
+        return string.contains(PLACEHOLDER_BEGIN) && string.contains(PLACEHOLDER_END)
+                && string.indexOf(PLACEHOLDER_BEGIN) < string.indexOf(PLACEHOLDER_END);
     }
 
     /**
@@ -55,8 +55,8 @@ public class TemplateReplacementUtil {
      */
     public static String getPlaceholder(String string) {
         return string.substring(
-                string.indexOf(PLACHOLDER_BEGIN),
-                string.indexOf(PLACHOLDER_END) + PLACHOLDER_END.length());
+                string.indexOf(PLACEHOLDER_BEGIN),
+                string.indexOf(PLACEHOLDER_END) + PLACEHOLDER_END.length());
     }
 
     /**
@@ -68,13 +68,13 @@ public class TemplateReplacementUtil {
     public static List<String> getPlaceholders(String string) {
         String[] placeholders = StringUtils.substringsBetween(
                 StringUtils.defaultString(string),
-                PLACHOLDER_BEGIN,
-                PLACHOLDER_END);
+                PLACEHOLDER_BEGIN,
+                PLACEHOLDER_END);
 
         // StringUtils strips off the delimiters so add them back
         if (placeholders != null) {
             for (int i = 0; i < placeholders.length; i++) {
-                placeholders[i] = PLACHOLDER_BEGIN + placeholders[i] + PLACHOLDER_END;
+                placeholders[i] = PLACEHOLDER_BEGIN + placeholders[i] + PLACEHOLDER_END;
             }
         }
 
@@ -90,6 +90,6 @@ public class TemplateReplacementUtil {
      * @return The key present inside the placeholder
      */
     public static String getKey(String placeholder) {
-        return placeholder.replace(PLACHOLDER_BEGIN, "").replace(PLACHOLDER_END, "");
+        return placeholder.replace(PLACEHOLDER_BEGIN, "").replace(PLACEHOLDER_END, "");
     }
 }
