@@ -158,7 +158,7 @@ public class TemplatedFilterTest {
     @Test
     public void testExcludeConfig() throws IOException, ServletException {
         Map<String, Object> config = new HashMap<>();
-        config.put("excludes", new String[]{"(.*).model.(.*)"});
+        config.put("excludes", new String[]{".*\\.model\\..*"});
         initServices(config);
         context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
         context.request().setResource(context.currentResource());

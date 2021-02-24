@@ -32,13 +32,12 @@ public class TemplatedDialogTestUtil {
 
     public static  Map<String, Object> defaultConfigMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("exclude.list", "cq:(.*)");
+        map.put("exclude.list", "cq:.*");
         return map;
     }
 
     public static PropertyAggregatorService defaultService(AemContext context) {
-        Map<String, Object> config = defaultConfigMap();
-        context.registerInjectActivateService(new PropertyConfigServiceImpl(), config);
+        context.registerInjectActivateService(new PropertyConfigServiceImpl(), defaultConfigMap());
         context.registerInjectActivateService(new AllPagePropertiesContentVariableProvider());
         return context.registerInjectActivateService(new PropertyAggregatorServiceImpl());
     }
