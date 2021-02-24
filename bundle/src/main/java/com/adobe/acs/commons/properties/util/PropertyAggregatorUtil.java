@@ -20,8 +20,6 @@
 package com.adobe.acs.commons.properties.util;
 
 import com.adobe.acs.commons.properties.PropertyConfigService;
-import com.day.cq.wcm.api.Page;
-import org.apache.sling.api.resource.ValueMap;
 
 import java.util.Map;
 import java.util.Set;
@@ -32,21 +30,6 @@ import java.util.Set;
 public class PropertyAggregatorUtil {
 
     private PropertyAggregatorUtil() {
-    }
-
-    /**
-     * Add the properties of a page to the given map.  Excluded properties are found in the
-     * {@link PropertyConfigService} service.
-     *
-     * @param map                   the map that should be updated with the properties and their values
-     * @param page                  the page containing properties
-     * @param prefix                the prefix to apply to the
-     * @param propertyConfigService the {@link PropertyConfigService} used to check type and exclusion
-     */
-    public static void addPagePropertiesToMap(Map<String, Object> map, Page page, String prefix,
-                                              PropertyConfigService propertyConfigService) {
-        ValueMap pageProperties = page.getProperties();
-        addPropertiesToMap(map, pageProperties.entrySet(), prefix, propertyConfigService);
     }
 
     /**

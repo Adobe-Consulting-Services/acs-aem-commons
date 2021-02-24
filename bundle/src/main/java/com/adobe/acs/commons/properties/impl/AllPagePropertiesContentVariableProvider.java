@@ -21,11 +21,11 @@ package com.adobe.acs.commons.properties.impl;
 
 import com.adobe.acs.commons.properties.ContentVariableProvider;
 import com.adobe.acs.commons.properties.PropertyConfigService;
-import com.adobe.acs.commons.properties.util.PropertyAggregatorUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static com.adobe.acs.commons.properties.util.PropertyAggregatorUtil.addPropertiesToMap;
 
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {
@@ -63,13 +65,13 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
         }
 
         // Add current page properties
-        PropertyAggregatorUtil.addPagePropertiesToMap(map, page, PAGE_PROP_PREFIX, propertyConfigService);
+        addPagePropertiesToMap(map, page, PAGE_PROP_PREFIX, propertyConfigService);
 
         // Add inherited page properties
         Page parent = page.getParent();
         while (parent != null) {
             Map<String, Object> inheritedMap = new HashMap<>();
-            PropertyAggregatorUtil.addPagePropertiesToMap(inheritedMap, parent, INHERITED_PAGE_PROP_PREFIX, propertyConfigService);
+            addPagePropertiesToMap(inheritedMap, parent, INHERITED_PAGE_PROP_PREFIX, propertyConfigService);
             Set<Map.Entry<String, Object>> entries = inheritedMap.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 if (shouldAddInherited(map, entry.getKey())) {
@@ -90,6 +92,21 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     private boolean shouldAddInherited(Map<String, Object> map, String propertyName) {
         return !map.containsKey(propertyName.replace(INHERITED_PAGE_PROP_PREFIX, PAGE_PROP_PREFIX))
                 && !map.containsKey(propertyName);
+    }
+
+    /**
+     * Add the properties of a page to the given map.  Excluded properties are found in the
+     * {@link PropertyConfigService} service.
+     *
+     * @param map                   the map that should be updated with the properties and their values
+     * @param page                  the page containing properties
+     * @param prefix                the prefix to apply to the
+     * @param propertyConfigService the {@link PropertyConfigService} used to check type and exclusion
+     */
+    private void addPagePropertiesToMap(Map<String, Object> map, Page page, String prefix,
+                                              PropertyConfigService propertyConfigService) {
+        ValueMap pageProperties = page.getProperties();
+        addPropertiesToMap(map, pageProperties.entrySet(), prefix, propertyConfigService);
     }
 
     @Override
