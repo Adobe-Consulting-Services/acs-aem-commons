@@ -331,6 +331,7 @@ public class DataImporter extends ProcessDefinition {
             if (!dryRunMode) {
                 rr.commit();
             }
+            rr.revert();
             rr.refresh();
         } else {
             if (detailedReport) {
