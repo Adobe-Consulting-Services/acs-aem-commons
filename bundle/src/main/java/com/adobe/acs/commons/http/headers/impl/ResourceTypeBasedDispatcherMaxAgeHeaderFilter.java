@@ -20,7 +20,6 @@
 
 package com.adobe.acs.commons.http.headers.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -34,41 +33,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE;
 import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHeaderFilter.PROP_DISPATCHER_FILTER_ENGINE_SLING;
 
 @Component(
-        label = "ACS AEM Commons - Dispacher Cache Control Header Property Based - Max Age",
-        description = "Adds a Cache-Control max-age header to content based on property value to enable Dispatcher TTL support.",
+        label = "ACS AEM Commons - Dispacher Cache Control Header Resource Type Based - Max Age",
+        description = "Adds a Cache-Control max-age header to content based on resource type to enable Dispatcher TTL support.",
         metatype = true,
         configurationFactory = true,
         policy = ConfigurationPolicy.REQUIRE)
 @Properties({
         @Property(
                 name = "webconsole.configurationFactory.nameHint",
-                value = "Property name: {property.name}. Fallback Max Age: {max.age} ",
+                value = "Max Age: {max.age} for Resource Types: [{resource.types}]",
                 propertyPrivate = true),
         @Property(
                 name = PROP_DISPATCHER_FILTER_ENGINE,
                 value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
                 propertyPrivate = true)
 })
-public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
+public class ResourceTypeBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(PropertyBasedDispatcherMaxAgeHeaderFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceTypeBasedDispatcherMaxAgeHeaderFilter.class);
 
-    @Property(label = "Property name",
-            description = "Property to check on how long you want to cache this request")
-    public static final String PROP_PROPERTY_NAME = "property.name";
+    @Property(label = "Resource types",
+            description = "Resource types the page should have to use this filter.",
+            cardinality = Integer.MAX_VALUE)
+    public static final String PROP_RESOURCE_TYPES = "resource.types";
 
-    @Property(label = "Inherit property value",
-            description = "Property value to skip this filter and inherit another lower service ranking dispatcher ttl filter")
-    public static final String PROP_INHERIT_PROPERTY_VALUE = "inherit.property.value";
-
-    private String propertyName;
-    private String inheritPropertyValue;
+    private String[] resourceTypes;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -83,30 +79,21 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDisp
             if (resource == null) {
                 log.debug("Could not find resource for request, not accepting");
                 return false;
+            } else {
+                return verifyResourceType(resource);
             }
-            String headerValue = resource.getValueMap().get(propertyName, String.class);
-            if (!StringUtils.isBlank(headerValue) && !inheritPropertyValue.equals(headerValue)) {
-                log.debug("Found a max age header value for request {} that is not the inherit value, accepting", resource.getPath());
-                return true;
-            }
-            log.debug("Resource property is blank or INHERIT, not taking this filter ");
-            return false;
         }
         return false;
     }
 
-    @Override
-    protected String getHeaderValue(HttpServletRequest request) {
-        if (request instanceof SlingHttpServletRequest) {
-            SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
-            Resource resource = getResource(slingRequest);
-            if (resource != null) {
-                String headerValue = resource.getValueMap().get(propertyName, String.class);
-                return HEADER_PREFIX + headerValue;
+    private boolean verifyResourceType(Resource resource) {
+        for (String resourceType : resourceTypes) {
+            if (resource.isResourceType(resourceType)) {
+                log.debug("Accepting request for resource: {} with resource type: {}.", resource.getPath(), resourceType);
+                return true;
             }
         }
-        log.debug("An error occurred, falling back to the default max age value of this filter");
-        return super.getHeaderValue(request);
+        return false;
     }
 
     @SuppressWarnings("squid:S1149")
@@ -114,15 +101,13 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDisp
         super.doActivate(context);
         Dictionary<?, ?> properties = context.getProperties();
 
-        propertyName = PropertiesUtil.toString(properties.get(PROP_PROPERTY_NAME), null);
-        if (propertyName == null) {
-            throw new ConfigurationException(PROP_PROPERTY_NAME, "Property name should be specified.");
+        resourceTypes = PropertiesUtil.toStringArray(properties.get(PROP_RESOURCE_TYPES));
+        if (resourceTypes == null || resourceTypes.length == 0) {
+            throw new ConfigurationException(PROP_RESOURCE_TYPES, "At least one resource type must be specified.");
         }
-        inheritPropertyValue = PropertiesUtil.toString(properties.get(PROP_INHERIT_PROPERTY_VALUE), "INHERIT");
     }
 
     public String toString() {
-        return this.getClass().getName() + "[property-name:" + propertyName + ",fallback-max-age:" + super.getHeaderValue(null) + "]";
+        return this.getClass().getName() + "[resource-types:" + Arrays.asList(resourceTypes) + ",fallback-max-age:" + super.getHeaderValue(null) + "]";
     }
-
 }
