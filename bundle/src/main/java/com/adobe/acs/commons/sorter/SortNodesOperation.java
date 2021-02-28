@@ -113,10 +113,10 @@ public class SortNodesOperation implements PostOperation {
     @Override
     public void run(SlingHttpServletRequest slingRequest, PostResponse response, SlingPostProcessor[] processors) {
         try {
-            long t0 = System.currentTimeMillis();
-            boolean byTitle = Boolean.parseBoolean(slingRequest.getParameter(RP_SORT_BY_TITLE));
-            boolean caseSensitive = Boolean.parseBoolean(slingRequest.getParameter(RP_CASE_SENSITIVE));
-            boolean nonHierarchyFirst = slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST) == null || Boolean.parseBoolean(slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST));
+            final long t0 = System.currentTimeMillis();
+            final boolean byTitle = Boolean.parseBoolean(slingRequest.getParameter(RP_SORT_BY_TITLE));
+            final boolean caseSensitive = Boolean.parseBoolean(slingRequest.getParameter(RP_CASE_SENSITIVE));
+            final boolean nonHierarchyFirst = slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST) == null || Boolean.parseBoolean(slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST));
 
             Node targetNode = slingRequest.getResource().adaptTo(Node.class);
             if (targetNode == null) {
@@ -125,7 +125,9 @@ public class SortNodesOperation implements PostOperation {
             }
             response.setPath(targetNode.getPath());
             response.setLocation(targetNode.getPath());
-            if(targetNode.getParent() != null) response.setParentLocation(targetNode.getParent().getPath());
+            if(targetNode.getParent() != null) {
+                response.setParentLocation(targetNode.getParent().getPath());
+            }
 
             Comparator<Node> comparator = createComparator(nonHierarchyFirst, byTitle, caseSensitive);
             List<Node> children = getSortedNodes(targetNode, comparator);
@@ -199,9 +201,13 @@ public class SortNodesOperation implements PostOperation {
             comparator = comparator.thenComparing((n1, n2) -> {
                 try {
                     String title1 = new JcrLabeledResource(n1).getTitle();
-                    if (title1 == null) title1 = n1.getName();
+                    if (title1 == null) {
+                        title1 = n1.getName();
+                    }
                     String title2 = new JcrLabeledResource(n2).getTitle();
-                    if (title2 == null) title2 = n2.getName();
+                    if (title2 == null) {
+                        title2 = n2.getName();
+                    }
                     return caseSensitive ? title1.compareTo(title2) :
                             title1.compareToIgnoreCase(title2);
                 } catch (RepositoryException e) {
