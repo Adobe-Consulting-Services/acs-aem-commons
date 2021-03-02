@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.filter;
+package com.adobe.acs.commons.ccvar.filter;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
+import static com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil.defaultService;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TemplatedFilterTest {
+public class ContentVariableFilterTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
@@ -56,11 +56,11 @@ public class TemplatedFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    private TemplatedFilter filter;
+    private ContentVariableFilter filter;
 
     @Before
     public void setup() throws IOException, ServletException {
-        context.load().json(getClass().getResourceAsStream("TemplatedFilterContent.json"), "/content/we-retail/language-masters/en/experience");
+        context.load().json(getClass().getResourceAsStream("ContentVariableFilterContent.json"), "/content/we-retail/language-masters/en/experience");
         context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
     }
 
@@ -252,9 +252,9 @@ public class TemplatedFilterTest {
     private void initServices(Map<String, Object> config) {
         defaultService(context);
         if (config != null) {
-            filter = context.registerInjectActivateService(new TemplatedFilter(), config);
+            filter = context.registerInjectActivateService(new ContentVariableFilter(), config);
         } else {
-            filter = context.registerInjectActivateService(new TemplatedFilter());
+            filter = context.registerInjectActivateService(new ContentVariableFilter());
         }
     }
 

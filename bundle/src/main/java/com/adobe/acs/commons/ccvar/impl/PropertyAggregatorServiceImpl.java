@@ -17,10 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.impl;
+package com.adobe.acs.commons.ccvar.impl;
 
-import com.adobe.acs.commons.properties.ContentVariableProvider;
-import com.adobe.acs.commons.properties.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.ContentVariableProvider;
+import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;

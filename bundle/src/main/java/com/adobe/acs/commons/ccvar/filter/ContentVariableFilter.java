@@ -18,10 +18,10 @@
  * #L%
  */
 
-package com.adobe.acs.commons.properties.filter;
+package com.adobe.acs.commons.ccvar.filter;
 
-import com.adobe.acs.commons.properties.PropertyAggregatorService;
-import com.adobe.acs.commons.properties.util.TemplateReplacementUtil;
+import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -66,10 +66,10 @@ import java.util.regex.PatternSyntaxException;
         },
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd = com.adobe.acs.commons.properties.filter.TemplatedFilter.Config.class)
-public class TemplatedFilter implements Filter {
+@Designate(ocd = ContentVariableFilter.Config.class)
+public class ContentVariableFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(TemplatedFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(ContentVariableFilter.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
@@ -209,11 +209,11 @@ public class TemplatedFilter implements Filter {
      * @return The replaced or original String
      */
     private String replaceInString(String input, Map<String, Object> contentVariableReplacements) {
-        final List<String> placeholders = TemplateReplacementUtil.getPlaceholders(input);
+        final List<String> placeholders = ContentVariableReplacementUtil.getPlaceholders(input);
         for (String placeholder : placeholders) {
 
             // Transform it to the key in the property map
-            String key = TemplateReplacementUtil.getKey(placeholder);
+            String key = ContentVariableReplacementUtil.getKey(placeholder);
 
             // If the placeholder key is in the map then replace it
             if (contentVariableReplacements.containsKey(key)) {
@@ -230,7 +230,7 @@ public class TemplatedFilter implements Filter {
     }
 
     @Activate
-    protected void activate(com.adobe.acs.commons.properties.filter.TemplatedFilter.Config config) {
+    protected void activate(ContentVariableFilter.Config config) {
         includePatterns = new ArrayList<>();
         excludePatterns = new ArrayList<>();
 

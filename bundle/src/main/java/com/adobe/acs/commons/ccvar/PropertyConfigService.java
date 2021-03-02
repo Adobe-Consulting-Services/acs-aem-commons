@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties;
+package com.adobe.acs.commons.ccvar;
 
 /**
  * Configuration service used to store property exclusions for the {@link PropertyAggregatorService} processes. Contains

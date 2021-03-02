@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.impl;
+package com.adobe.acs.commons.ccvar.impl;
 
-import com.adobe.acs.commons.properties.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 import io.wcm.testing.mock.aem.junit.AemContext;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -33,8 +33,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultConfigMap;
-import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
+import static com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil.defaultConfigMap;
+import static com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)

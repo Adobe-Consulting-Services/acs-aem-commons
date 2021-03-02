@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.properties.filter;
+package com.adobe.acs.commons.ccvar.filter;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.impl;
+package com.adobe.acs.commons.ccvar.impl;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

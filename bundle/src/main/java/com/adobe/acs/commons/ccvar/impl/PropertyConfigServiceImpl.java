@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.impl;
+package com.adobe.acs.commons.ccvar.impl;
 
-import com.adobe.acs.commons.properties.PropertyConfigService;
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

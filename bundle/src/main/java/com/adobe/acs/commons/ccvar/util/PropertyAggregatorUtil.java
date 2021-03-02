@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.util;
+package com.adobe.acs.commons.ccvar.util;
 
-import com.adobe.acs.commons.properties.PropertyConfigService;
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 
 import java.util.Map;
 import java.util.Set;

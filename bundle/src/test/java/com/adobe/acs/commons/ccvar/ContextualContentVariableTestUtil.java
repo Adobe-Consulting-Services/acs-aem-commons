@@ -17,18 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties;
+package com.adobe.acs.commons.ccvar;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.adobe.acs.commons.properties.impl.AllPagePropertiesContentVariableProvider;
-import com.adobe.acs.commons.properties.impl.PropertyAggregatorServiceImpl;
+import com.adobe.acs.commons.ccvar.impl.AllPagePropertiesContentVariableProvider;
+import com.adobe.acs.commons.ccvar.impl.PropertyAggregatorServiceImpl;
 
-import com.adobe.acs.commons.properties.impl.PropertyConfigServiceImpl;
+import com.adobe.acs.commons.ccvar.impl.PropertyConfigServiceImpl;
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-public class TemplatedDialogTestUtil {
+public class ContextualContentVariableTestUtil {
 
     public static  Map<String, Object> defaultConfigMap() {
         Map<String, Object> map = new HashMap<>();

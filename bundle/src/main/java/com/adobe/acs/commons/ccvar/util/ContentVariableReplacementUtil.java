@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.util;
+package com.adobe.acs.commons.ccvar.util;
 
 import java.util.List;
 
@@ -28,9 +28,9 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Util class used to provide helper methods for finding and replacing the tokens used in this feature.
  */
-public class TemplateReplacementUtil {
+public class ContentVariableReplacementUtil {
 
-    private TemplateReplacementUtil() {
+    private ContentVariableReplacementUtil() {
     }
 
     private static final String PLACEHOLDER_BEGIN = "{{";
@@ -83,7 +83,7 @@ public class TemplateReplacementUtil {
 
     /**
      * Takes the current placeholder value and returns the key inside of it. This is used in
-     * conjunction with the {@link com.adobe.acs.commons.properties.PropertyAggregatorService}
+     * conjunction with the {@link com.adobe.acs.commons.ccvar.PropertyAggregatorService}
      * properties.
      *
      * @param placeholder The placeholder input

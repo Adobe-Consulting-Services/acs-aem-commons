@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
 ### Added
-- #2512 - Added Templated Dialogs feature
+- #2512 - Added Contextual Content Variables feature
 - #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
 
 ### Fixed

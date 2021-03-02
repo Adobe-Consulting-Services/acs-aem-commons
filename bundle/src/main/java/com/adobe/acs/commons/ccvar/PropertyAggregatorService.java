@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties;
+package com.adobe.acs.commons.ccvar;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 

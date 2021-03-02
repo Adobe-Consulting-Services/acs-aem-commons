@@ -19,7 +19,7 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.properties.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;

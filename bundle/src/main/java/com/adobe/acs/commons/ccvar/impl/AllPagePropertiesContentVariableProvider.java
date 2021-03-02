@@ -17,10 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package com.adobe.acs.commons.properties.impl;
+package com.adobe.acs.commons.ccvar.impl;
 
-import com.adobe.acs.commons.properties.ContentVariableProvider;
-import com.adobe.acs.commons.properties.PropertyConfigService;
+import com.adobe.acs.commons.ccvar.ContentVariableProvider;
+import com.adobe.acs.commons.ccvar.PropertyConfigService;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.adobe.acs.commons.properties.util.PropertyAggregatorUtil.addPropertiesToMap;
+import static com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil.addPropertiesToMap;
 
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {

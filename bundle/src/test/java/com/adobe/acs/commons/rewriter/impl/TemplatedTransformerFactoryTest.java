@@ -20,11 +20,6 @@
 package com.adobe.acs.commons.rewriter.impl;
 
 
-import java.util.Map;
-
-import com.adobe.acs.commons.properties.impl.PropertyAggregatorServiceImpl;
-import com.adobe.acs.commons.properties.impl.PropertyAggregatorTestModel;
-
 import org.apache.sling.rewriter.ProcessingContext;
 import org.apache.sling.rewriter.Transformer;
 import org.apache.sling.rewriter.TransformerFactory;
@@ -43,8 +38,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import io.wcm.testing.mock.aem.junit.AemContext;
 
-import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultConfigMap;
-import static com.adobe.acs.commons.properties.TemplatedDialogTestUtil.defaultService;
+import static com.adobe.acs.commons.ccvar.ContextualContentVariableTestUtil.defaultService;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;

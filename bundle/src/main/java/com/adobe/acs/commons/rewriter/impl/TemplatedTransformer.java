@@ -19,8 +19,8 @@
  */
 package com.adobe.acs.commons.rewriter.impl;
 
-import com.adobe.acs.commons.properties.PropertyAggregatorService;
-import com.adobe.acs.commons.properties.util.TemplateReplacementUtil;
+import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
+import com.adobe.acs.commons.ccvar.util.ContentVariableReplacementUtil;
 import com.adobe.acs.commons.rewriter.ContentHandlerBasedTransformer;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.rewriter.ProcessingComponentConfiguration;
@@ -61,13 +61,13 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
             AttributesImpl newAttrs = new AttributesImpl(atts);
             for (int i = 0; i < newAttrs.getLength(); i++) {
                 String currentAttribute = newAttrs.getValue(i);
-                if (TemplateReplacementUtil.hasPlaceholder(currentAttribute)) {
+                if (ContentVariableReplacementUtil.hasPlaceholder(currentAttribute)) {
 
                     // Get the current placeholder in the string
-                    String placeholder = TemplateReplacementUtil.getPlaceholder(currentAttribute);
+                    String placeholder = ContentVariableReplacementUtil.getPlaceholder(currentAttribute);
 
                     // Transform it to the key in the property map
-                    String key = TemplateReplacementUtil.getKey(placeholder);
+                    String key = ContentVariableReplacementUtil.getKey(placeholder);
 
                     // If the placeholder key is in the map then replace it
                     if (contentVariableReplacements.containsKey(key)) {
@@ -90,11 +90,11 @@ public class TemplatedTransformer extends ContentHandlerBasedTransformer {
             String currentChunk = currentString.substring(start, start + length);
 
             // Get the current placeholders in the string
-            final List<String> placeholders = TemplateReplacementUtil.getPlaceholders(currentChunk);
+            final List<String> placeholders = ContentVariableReplacementUtil.getPlaceholders(currentChunk);
 
             for (String placeholder : placeholders) {
                 // Transform it to the key in the property map
-                final String key = TemplateReplacementUtil.getKey(placeholder);
+                final String key = ContentVariableReplacementUtil.getKey(placeholder);
 
                 // If the placeholder key is in the map then replace it
                 if (contentVariableReplacements.containsKey(key)) {
