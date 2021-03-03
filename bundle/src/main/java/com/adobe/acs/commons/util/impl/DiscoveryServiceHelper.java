@@ -46,9 +46,9 @@ public class DiscoveryServiceHelper implements TopologyEventListener {
     DiscoveryService discoveryService;
 
     private BundleContext bundleContext;
-    
-    private ServiceRegistration<ClusterLeader> clusterLeaderServiceRegistration;
-    
+
+    ServiceRegistration<ClusterLeader> clusterLeaderServiceRegistration;
+
     @Override
     public void handleTopologyEvent(TopologyEvent event) {
         TopologyView newView = event.getNewView();
