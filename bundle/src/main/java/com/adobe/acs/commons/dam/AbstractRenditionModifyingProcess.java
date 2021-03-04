@@ -125,6 +125,7 @@ public abstract class AbstractRenditionModifyingProcess {
 
     }
 
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, WorkflowHelper workflowHelper)
             throws IOException {
         File tmpFile = File.createTempFile(getTempFileSpecifier(), "." + workflowHelper.getExtension(mimetype));

@@ -55,6 +55,8 @@ public class CacheUtils {
      * @param cacheKey
      * @return
      */
+
+    @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     public static File createTemporaryCacheFile(CacheKey cacheKey) throws IOException {
         // Create a file in Java temp directory with cacheKey.toSting() as file name.
 
