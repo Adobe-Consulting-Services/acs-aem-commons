@@ -124,7 +124,8 @@ public abstract class AbstractRenditionModifyingProcess {
         }
 
     }
-
+    
+    // False positive, file path not controlled by the user
     @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
     void saveImage(Asset asset, Rendition toReplace, Layer layer, String mimetype, double quality, WorkflowHelper workflowHelper)
             throws IOException {
