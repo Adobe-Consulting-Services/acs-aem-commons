@@ -67,6 +67,7 @@ import javax.jcr.security.Privilege;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.spi.security.authorization.accesscontrol.AccessControlConstants;
+import org.apache.jackrabbit.oak.spi.security.privilege.PrivilegeConstants;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -209,6 +210,12 @@ public class Renovator extends ProcessDefinition {
     };
     Privilege[] requiredUpdatePrivileges;
 
+    private final transient String[] requiredAuditPrivilegeNames = {
+            Privilege.JCR_READ,
+            PrivilegeConstants.REP_WRITE
+    };
+    Privilege[] requiredAuditPrivileges;
+
     ReplicatorQueue replicatorQueue = new ReplicatorQueue();
     ReplicationOptions replicationOptions;
     private final Set<MovingNode> moves = Collections.synchronizedSet(new HashSet<>());
@@ -301,6 +308,7 @@ public class Renovator extends ProcessDefinition {
     }
 
     private static final String DAM_ROOT = "/content/dam";
+    private static final String AUDIT_ROOT = "/var/audit";
 
     ManagedProcess instanceInfo;
 
@@ -314,6 +322,7 @@ public class Renovator extends ProcessDefinition {
         requiredMovePrivileges = getPrivilegesFromNames(rr, requiredMovePrivilegeNames);
         requiredUpdatePrivileges = getPrivilegesFromNames(rr, requiredUpdatePrivilegeNames);
         requiredPublishPrivileges = getPrivilegesFromNames(rr, requiredPublishPrivilegeNames);
+        requiredAuditPrivileges = getPrivilegesFromNames(rr, requiredAuditPrivilegeNames);
         instance.defineCriticalAction("Eval Struct", rr, this::identifyStructure);
         instance.defineCriticalAction("Eval Refs", rr, this::identifyReferences);
         instance.defineCriticalAction("Check ACLs", rr, this::validateAllAcls);
@@ -496,6 +505,8 @@ public class Renovator extends ProcessDefinition {
                     });
                 });
             });
+
+            checkNodeAcls(rr, AUDIT_ROOT, requiredAuditPrivileges);
         });
     }
 
