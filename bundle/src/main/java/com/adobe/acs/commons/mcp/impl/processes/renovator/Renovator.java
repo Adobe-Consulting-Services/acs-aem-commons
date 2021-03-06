@@ -35,6 +35,7 @@ import com.adobe.acs.commons.mcp.model.GenericReport;
 import com.adobe.acs.commons.mcp.model.ManagedProcess;
 import com.adobe.acs.commons.util.visitors.TraversalException;
 import com.adobe.acs.commons.util.visitors.TreeFilteringResourceVisitor;
+import com.day.cq.audit.AuditLog;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.dam.api.DamConstants;
 import com.day.cq.replication.ReplicationActionType;
@@ -88,13 +89,15 @@ public class Renovator extends ProcessDefinition {
     private static final String SOURCE_COL = "source";
     private static final transient Logger LOG = LoggerFactory.getLogger(Renovator.class);
 
-    public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator) {
+    public Renovator(PageManagerFactory pageManagerFactory, Replicator replicator, AuditLog auditLog) {
         this.pageManagerFactory = pageManagerFactory;
         this.replicator = replicator;
+        this.auditLog = auditLog;
     }
 
     private final PageManagerFactory pageManagerFactory;
     private final Replicator replicator;
+    private final AuditLog auditLog;
 
     public enum PublishMethod {
         @Description("No publishing will occur")
@@ -173,6 +176,11 @@ public class Renovator extends ProcessDefinition {
             component = CheckboxComponent.class,
             options = {"checked"})
     private boolean dryRun = true;
+
+    @FormField(name = "Audit Trails",
+            description = "This will update audit trail entries based on what is moved.",
+            component = CheckboxComponent.class)
+    private boolean auditTrails = false;
 
     @FormField(name = "Detailed report",
             description = "Record extra details in the report, can be rather extensive.  Not recommended for large jobs.",
@@ -312,6 +320,13 @@ public class Renovator extends ProcessDefinition {
         if (!dryRun) {
             instance.defineCriticalAction("Build destination", rr, this::buildStructures);
             instance.defineCriticalAction("Move Tree", rr, this::moveTree);
+
+            if(auditTrails) {
+                instance.defineAction("Add Move Audit", rr, this::addMoveAudits);
+                instance.defineAction("Create Audit Structure Folders", rr, this::buildAuditStructure);
+                instance.defineAction("Move Audit Entries", rr, this::moveAudits);
+            }
+
             if (publishMethod != PublishMethod.NONE) {
                 instance.defineAction("Activate Tree", rr, this::activateTreeStructure);
                 instance.defineAction("Activate New", rr, this::activateNew);
@@ -321,6 +336,20 @@ public class Renovator extends ProcessDefinition {
             instance.defineAction("Remove source", rr, this::removeSource);
         }
     }
+
+    private void addMoveAudits(ActionManager actionManager) {
+
+    }
+
+    private void moveAudits(ActionManager actionManager) {
+
+    }
+
+    private void buildAuditStructure(ActionManager actionManager) {
+
+    }
+
+
 
     protected void identifyStructure(ActionManager manager) {
         manager.deferredWithResolver(rr -> {
