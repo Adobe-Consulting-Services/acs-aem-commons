@@ -19,13 +19,15 @@
  */
 package com.adobe.acs.commons.sorter;
 
-import com.day.cq.commons.JcrLabeledResource;
-import org.apache.jackrabbit.JcrConstants;
+import com.adobe.acs.commons.sorter.impl.NodeNameSorter;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.servlets.post.PostOperation;
 import org.apache.sling.servlets.post.PostResponse;
 import org.apache.sling.servlets.post.SlingPostProcessor;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +37,11 @@ import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.sling.servlets.post.PostOperation.PROP_OPERATION_NAME;
 
@@ -49,7 +54,7 @@ import static org.apache.sling.servlets.post.PostOperation.PROP_OPERATION_NAME;
  * </pre>
  * </p>
  *
- * You can use optional {@link #RP_CASE_SENSITIVE} and {@link #RP_SORT_BY_TITLE} parameters to control whether to sort by
+ * You can use optional {@link NodeNameSorter#RP_CASE_SENSITIVE} and {@link #RP_SORTER_NAME} parameters to control whether to sort by
  * by node name (default) or by jcr:title and whether the sort should be case-sensitive:
  * <pre>
  *     curl -u admin:admin -F":operation=acs-commons:sortNodes" \
@@ -65,7 +70,7 @@ public class SortNodesOperation implements PostOperation {
 
     /**
      * Name of the sort operation.
-     * The acs-commons: prefix is to void name clash with other PostOperations .
+     * The acs-commons: prefix is to avoid name clash with other PostOperations .
      */
     public static final String OPERATION_SORT = "acs-commons:sortNodes";
 
@@ -74,50 +79,33 @@ public class SortNodesOperation implements PostOperation {
      *
      * If this request parameter is missing then nodes will be sorted by node name.
      */
-    public static final String RP_SORT_BY_TITLE = ":byTitle";
+    public static final String RP_SORTER_NAME = ":sorterName";
 
-    /**
-     * Name of the request parameter indicating whether the sort  should be case sensitive
-     *
-     * If this request parameter is missing then the sort will be case insensitive
-     */
-    public static final String RP_CASE_SENSITIVE = ":caseSensitive";
+    public static final String DEFAULT_SORTER_NAME = NodeNameSorter.SORTER_NAME;
 
-    /**
-     * Name of the request parameter indicating whether the sort  should move non-hierarchy nodes to the top
-     *
-     * The default value is true which means jcr:content, rep:policy  and such will be sorted first by their node names
-     * followed by other,hierarchy nodes, e.g :
-     * <pre>
-     *   +  /parent
-     *      -  jcr:content
-     *      -  rep:policy
-     *      -  a
-     *      -  b
-     *      -  c
-     *      -  p
-     * </pre>
-     * If user forces it to <code>false</code> then nodes will be sorted regardless of their hierarchy type:
-     * <pre>
-     *   +  /parent
-     *      -  a
-     *      -  b
-     *      -  c
-     *      -  jcr:content
-     *      -  p
-     *      -  rep:policy
-     * </pre>
-     */
-    public static final String RP_NOT_HIERARCHY_FIRST = ":nonHierarchyFirst";
+
+    private final Map<String, NodeSorter> nodeSorters = Collections.synchronizedMap(new LinkedHashMap<>());
+
+    @Reference(service = NodeSorter.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC)
+    protected void bindNodeSorter(NodeSorter sorter, Map<String, Object> properties){
+        if (sorter != null ) {
+            String sorterName = sorter.getName();
+            log.debug("registering node sorter: {} -> {}", sorterName, sorter.getClass().getName());
+            nodeSorters.put(sorterName, sorter);
+        }
+    }
+
+    protected void unbindNodeSorter(NodeSorter sorter, Map<String, Object> properties){
+        String sorterName = sorter.getName();
+        log.debug("un-registering node sorter: {} -> {}", sorterName, sorter.getClass().getName());
+        nodeSorters.remove(sorterName);
+    }
 
     @Override
     public void run(SlingHttpServletRequest slingRequest, PostResponse response, SlingPostProcessor[] processors) {
         try {
-            final long t0 = System.currentTimeMillis();
-            final boolean byTitle = Boolean.parseBoolean(slingRequest.getParameter(RP_SORT_BY_TITLE));
-            final boolean caseSensitive = Boolean.parseBoolean(slingRequest.getParameter(RP_CASE_SENSITIVE));
-            final boolean nonHierarchyFirst = slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST) == null || Boolean.parseBoolean(slingRequest.getParameter(RP_NOT_HIERARCHY_FIRST));
-
             Node targetNode = slingRequest.getResource().adaptTo(Node.class);
             if (targetNode == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND,"Missing target node to sort: " + slingRequest.getResource().getPath());
@@ -129,7 +117,8 @@ public class SortNodesOperation implements PostOperation {
                 response.setParentLocation(targetNode.getParent().getPath());
             }
 
-            Comparator<Node> comparator = createComparator(nonHierarchyFirst, byTitle, caseSensitive);
+            long t0 = System.currentTimeMillis();
+            Comparator<Node> comparator = getNodeSorter(slingRequest);
             List<Node> children = getSortedNodes(targetNode, comparator);
 
             Node prev = null;
@@ -137,18 +126,16 @@ public class SortNodesOperation implements PostOperation {
                 Node n = children.get(children.size() - 1 - i);
                 if (prev != null) {
                     log.trace("orderBefore: {}, {}", n.getName(), prev.getName());
-
                     targetNode.orderBefore(n.getName(), prev.getName());
                 }
                 response.onChange("ordered", n.getPath(), prev == null ? "" : prev.getName());
                 prev = n;
             }
             targetNode.getSession().save();
-
             response.setTitle("Content sorted " + response.getPath());
 
             log.info("{} nodes sorted in {} ms", children.size(), System.currentTimeMillis()-t0 );
-        } catch (RepositoryException e) {
+        } catch (RepositoryException | IllegalArgumentException e) {
             response.setError(e);
         }
     }
@@ -162,6 +149,7 @@ public class SortNodesOperation implements PostOperation {
      * @throws RepositoryException  if something went wrong
      */
     List<Node> getSortedNodes(Node node, Comparator<Node> comparator) throws RepositoryException {
+
         List<Node> children = new ArrayList<>();
         NodeIterator it = node.getNodes();
         while (it.hasNext()) {
@@ -173,60 +161,17 @@ public class SortNodesOperation implements PostOperation {
         return children;
     }
 
-    /**
-     * Create a comparator to sort nodes
-     *
-     * @param nonHierarchyFirst   whether non-hierarchy nodes should go first
-     * @param byTitle   whether to sort by jcr:title. If <code>false</code> then sort by node name.
-     * @param caseSensitive whether comparison should be case-sensitive
-     * @return  comparator
-     */
-    static Comparator<Node> createComparator(boolean nonHierarchyFirst, boolean byTitle, boolean caseSensitive) {
-
-        Comparator<Node> comparator = (n1, n2) -> 0;
-
-        if(nonHierarchyFirst){
-            comparator = comparator.thenComparing((n1, n2) -> {
-                try {
-                    return Boolean.compare(
-                            n1.isNodeType(JcrConstants.NT_HIERARCHYNODE),
-                            n2.isNodeType(JcrConstants.NT_HIERARCHYNODE));
-                } catch (RepositoryException e) {
-                    return 0;
-                }
-            });
+    Comparator<Node> getNodeSorter(SlingHttpServletRequest slingRequest){
+        String sorterId = slingRequest.getParameter(RP_SORTER_NAME);
+        if(sorterId == null){
+            sorterId = DEFAULT_SORTER_NAME;
         }
-
-        if (byTitle) {
-            comparator = comparator.thenComparing((n1, n2) -> {
-                try {
-                    String title1 = new JcrLabeledResource(n1).getTitle();
-                    if (title1 == null) {
-                        title1 = n1.getName();
-                    }
-                    String title2 = new JcrLabeledResource(n2).getTitle();
-                    if (title2 == null) {
-                        title2 = n2.getName();
-                    }
-                    return caseSensitive ? title1.compareTo(title2) :
-                            title1.compareToIgnoreCase(title2);
-                } catch (RepositoryException e) {
-                    return 0;
-                }
-            });
-        } else {
-            comparator = comparator.thenComparing((n1, n2) -> {
-                try {
-                    String name1 = n1.getName();
-                    String name2 = n2.getName();
-                    return caseSensitive ? name1.compareTo(name2) :
-                            name1.compareToIgnoreCase(name2);
-                } catch (RepositoryException e) {
-                    return 0;
-                }
-            });
+        NodeSorter sorter = nodeSorters.get(sorterId);
+        if(sorter == null){
+            String msg = "NodeSorter was not found: " + sorterId +
+                    ". Available sorters are: " + nodeSorters.keySet().toString();
+            throw new IllegalArgumentException(msg);
         }
-        return comparator;
+        return sorter.createComparator(slingRequest);
     }
-
 }

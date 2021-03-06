@@ -19,6 +19,8 @@
  */
 package com.adobe.acs.commons.sorter;
 
+import com.adobe.acs.commons.sorter.impl.NodeNameSorter;
+import com.adobe.acs.commons.sorter.impl.NodeTitleSorter;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.servlets.post.PostResponse;
@@ -36,12 +38,15 @@ import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.adobe.acs.commons.sorter.SortNodesOperation.RP_SORTER_NAME;
 import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -54,6 +59,8 @@ public class SortNodesOperationTest {
 
     @Before
     public void setUp(){
+        sorter.bindNodeSorter(new NodeNameSorter(), Collections.emptyMap());
+        sorter.bindNodeSorter(new NodeTitleSorter(), Collections.emptyMap());
         context.build()
                 .resource("/sortable", JCR_PRIMARYTYPE, "cq:Page")
                 .resource("/sortable/page2", JCR_PRIMARYTYPE, "cq:Page")
@@ -66,12 +73,14 @@ public class SortNodesOperationTest {
                 .resource("/sortable/rep:policy", JCR_PRIMARYTYPE, "rep:ACL");
     }
 
+
     /**
      * by node name, case insensitive
      */
     @Test
     public void testSortByNameCaseInsensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,false, false);
+        MockSlingHttpServletRequest request = context.request();
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -84,7 +93,9 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testDisableNonHierarchyFirst() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(false,false, false);
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter(":nonHierarchyFirst", "false");
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -97,7 +108,9 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByNameCaseSensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,false, true);
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter(NodeTitleSorter.RP_CASE_SENSITIVE, "true");
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -110,7 +123,8 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByTitleCaseInsensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,true, false);
+        MockSlingHttpServletRequest request = context.request();
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -123,7 +137,10 @@ public class SortNodesOperationTest {
      */
     @Test
     public void testSortByTitleCaseSensitive() throws RepositoryException {
-        Comparator<Node> comparator =  SortNodesOperation.createComparator(true,true, true);
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter(RP_SORTER_NAME, NodeTitleSorter.SORTER_NAME);
+        request.addRequestParameter(NodeTitleSorter.RP_CASE_SENSITIVE, "true");
+        Comparator<Node> comparator = sorter.getNodeSorter(request);
         Node node = context.resourceResolver().getResource("/sortable").adaptTo(Node.class);
         List<Node> list = sorter.getSortedNodes(node, comparator);
 
@@ -141,21 +158,6 @@ public class SortNodesOperationTest {
         resource.getChildren().forEach(r -> children.add(r.adaptTo(Node.class)));
 
         assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page1", "page2", "Page3"), children);
-    }
-
-    @Test
-    public void testRequestParameters()  {
-        Resource resource  = context.resourceResolver().getResource("/sortable");
-        MockSlingHttpServletRequest request = context.request();
-        request.addRequestParameter(SortNodesOperation.RP_SORT_BY_TITLE, "true");
-        request.addRequestParameter(SortNodesOperation.RP_CASE_SENSITIVE, "true");
-        request.setResource(resource);
-        sorter.run(context.request(), mock(PostResponse.class), null);
-
-        List<Node> children = new ArrayList<>();
-        resource.getChildren().forEach(r -> children.add(r.adaptTo(Node.class)));
-
-        assertSortOrder(Arrays.asList("jcr:content", "rep:policy", "page2" /*A: Page-2*/, "Page3" /*C: Page-3*/, "page1" /*a: Page-1*/), children);
     }
 
     @Test
@@ -189,6 +191,20 @@ public class SortNodesOperationTest {
 
         verify(response).setError(errCaptor.capture());
         assertEquals("Child node ordering is not supported on this node",
+                errCaptor.getValue().getMessage());
+    }
+
+    @Test
+    public void testUnknownSorter()  {
+        PostResponse response = mock(PostResponse.class);
+        MockSlingHttpServletRequest request = context.request();
+        request.addRequestParameter(RP_SORTER_NAME, "sorterNA");
+        request.setResource(context.resourceResolver().getResource("/sortable"));
+        ArgumentCaptor<Throwable> errCaptor = ArgumentCaptor.forClass(Throwable.class);
+        sorter.run(request, response, null);
+
+        verify(response).setError(errCaptor.capture());
+        assertEquals("NodeSorter was not found: sorterNA. Available sorters are: [:nodeNameSorter, :nodeTitleSorter]",
                 errCaptor.getValue().getMessage());
     }
 

@@ -48,27 +48,49 @@
             <section  class="coral-Form-fieldset">
                 <div  class="coral-Form-fieldwrapper">
                     <label class="coral-Form-fieldlabel">Path *</label>
-                    <span  class="coral-Form-field coral-PathBrowser" data-init="pathbrowser" data-root-path="/content" data-option-loader="granite.ui.pathBrowser.pages.folder"
-                           data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile"
-                           data-crumb-root="content" data-picker-multiselect="false" data-root-path-valid-selection="true">
-                        <span class="coral-InputGroup coral-InputGroup--block">
-                            <input  class="coral-InputGroup-input js-coral-pathbrowser-input" type="text" name="./destinationPath" autocomplete="off"
-                                    is="coral-textfield" placeholder="/content/someFolder">
-                            <span class="coral-InputGroup-button">
-                                <button  class="js-coral-pathbrowser-button" type="button" title="Browse" is="coral-button" icon="folderSearch" iconsize="S"></button>
-                            </span>
-                        </span>
-                    </span>
-                </div>
 
-                <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
-                    <coral-checkbox  data-allowBulkEdit="true" name="./:byTitle" value="true" class="coral-Form-field">
-                        <coral-checkbox-label>Sort By Title. If unchecked nodes will be sorted by name</coral-checkbox-label>
-                    </coral-checkbox>
+
+
+                    <span class="coral-PathBrowser coral-Form-field"
+                          data-init="pathbrowser" data-root-path="/"
+                          data-option-loader="granite.ui.pathBrowser.pages.hierarchyNotFile"
+                          data-picker-src="/libs/wcm/core/content/common/pathbrowser/column.html/content?predicate=hierarchyNotFile"
+                          data-picker-title="Select Source Path"
+                          data-delay="30000"
+                          data-picker-multiselect="false" data-root-path-valid-selection="false">
+                     <span
+                             class="coral-InputGroup coral-InputGroup--block">
+                        <input
+                                class="coral-InputGroup-input js-coral-pathbrowser-input coral-Textfield source"
+                                is="coral-textfield" placeholder="Select/Enter source path"
+                                name="./destinationPath" value="" aria-invalid="false"
+                                aria-haspopup="true" aria-expanded="false" aria-owns="coral-26"
+                                required placeholder="/content/someFolder">
+                        <span class="coral-InputGroup-button">
+                           <button
+                                   class="js-coral-pathbrowser-button coral-Button coral-Button--secondary"
+                                   type="button" title="Browse" is="coral-button"
+                                   icon="folderSearch" iconsize="S" size="M" variant="secondary">
+                              <coral-icon
+                                      class="coral-Icon coral-Icon--sizeS coral-Icon--folderSearch"
+                                      icon="folderSearch" size="S" role="img"
+                                      aria-label="folder search"></coral-icon>
+                           </button>
+                        </span>
+                     </span>
+                  </span>
+
+                </div>
+                <div class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline"
+                     data-sly-use.defs="com.adobe.acs.commons.sorter.SortersPojo">
+                    <label class="coral-Form-fieldlabel">Sorter</label>
+                    <coral-select class="coral-Form-field" id="sorterDefinitionSelector" name=":sorterName" data-sly-list="${defs.availableSorters}">
+                        <coral-select-item value="${item.name}">${item.label}</coral-select-item>
+                    </coral-select>
                 </div>
                 <div  class="foundation-field-edit coral-Form-fieldwrapper coral-Form-fieldwrapper--singleline">
                     <coral-checkbox  data-allowBulkEdit="true" name="./:caseSensitive" value="true" class="coral-Form-field">
-                        <coral-checkbox-label>Case Sensitive Sort</coral-checkbox-label>
+                        <coral-checkbox-label>Case Sensitive</coral-checkbox-label>
                     </coral-checkbox>
                 </div>
 
