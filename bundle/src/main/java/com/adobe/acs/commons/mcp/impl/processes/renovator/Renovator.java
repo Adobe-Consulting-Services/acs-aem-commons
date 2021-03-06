@@ -506,7 +506,9 @@ public class Renovator extends ProcessDefinition {
                 });
             });
 
-            checkNodeAcls(rr, AUDIT_ROOT, requiredAuditPrivileges);
+            if(auditTrails) {
+                checkNodeAcls(rr, AUDIT_ROOT, requiredAuditPrivileges);
+            }
         });
     }
 
