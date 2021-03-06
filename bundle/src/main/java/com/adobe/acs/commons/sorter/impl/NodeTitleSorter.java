@@ -47,8 +47,8 @@ public class NodeTitleSorter implements NodeSorter {
     @Override
     public Comparator<Node> createComparator(HttpServletRequest request) {
         boolean caseSensitive = Boolean.parseBoolean(request.getParameter(RP_CASE_SENSITIVE));
-        boolean nonHierarchyFirst = request.getParameter(RP_NOT_HIERARCHY_FIRST) == null ||
-                Boolean.parseBoolean(request.getParameter(RP_NOT_HIERARCHY_FIRST));
+        boolean nonHierarchyFirst = request.getParameter(RP_NOT_HIERARCHY_FIRST) == null
+                || Boolean.parseBoolean(request.getParameter(RP_NOT_HIERARCHY_FIRST));
         Comparator<Node> parentComparator = nonHierarchyFirst ? HierarchyNodeComparator.INSTANCE : (n1, n2) -> 0;
         return parentComparator.thenComparing((n1, n2) -> {
             try {

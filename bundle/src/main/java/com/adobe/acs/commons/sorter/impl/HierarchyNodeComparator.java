@@ -30,7 +30,9 @@ class HierarchyNodeComparator implements Comparator<Node> {
 
     public static HierarchyNodeComparator INSTANCE = new HierarchyNodeComparator();
 
-    private HierarchyNodeComparator(){}
+    private HierarchyNodeComparator(){
+        // ensure singleton
+    }
 
     @Override
     public int compare(Node n1, Node n2) {

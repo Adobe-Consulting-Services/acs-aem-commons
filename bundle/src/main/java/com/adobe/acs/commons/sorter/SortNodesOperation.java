@@ -117,7 +117,7 @@ public class SortNodesOperation implements PostOperation {
                 response.setParentLocation(targetNode.getParent().getPath());
             }
 
-            long t0 = System.currentTimeMillis();
+            final long t0 = System.currentTimeMillis();
             Comparator<Node> comparator = getNodeSorter(slingRequest);
             List<Node> children = getSortedNodes(targetNode, comparator);
 
@@ -168,8 +168,8 @@ public class SortNodesOperation implements PostOperation {
         }
         NodeSorter sorter = nodeSorters.get(sorterId);
         if(sorter == null){
-            String msg = "NodeSorter was not found: " + sorterId +
-                    ". Available sorters are: " + nodeSorters.keySet().toString();
+            String msg = "NodeSorter was not found: " + sorterId
+                    + ". Available sorters are: " + nodeSorters.keySet().toString();
             throw new IllegalArgumentException(msg);
         }
         return sorter.createComparator(slingRequest);

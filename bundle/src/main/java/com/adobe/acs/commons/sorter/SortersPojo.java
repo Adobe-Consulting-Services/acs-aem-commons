@@ -34,7 +34,7 @@ public class SortersPojo extends WCMUsePojo {
 
     @Override
     public void activate(){
-
+        // no op
     }
 
     public Collection<NodeSorter> getAvailableSorters(){
