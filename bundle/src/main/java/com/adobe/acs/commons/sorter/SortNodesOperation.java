@@ -58,10 +58,10 @@ import static org.apache.sling.servlets.post.PostOperation.PROP_OPERATION_NAME;
  * by node name (default) or by jcr:title and whether the sort should be case-sensitive:
  * <pre>
  *     curl -u admin:admin -F":operation=acs-commons:sortNodes" \
- *     -F":byTitle:true" -F":caseSensitive:true" \
+ *     -F":sorterName:byTitle" -F":caseSensitive:true" \
  *     http://localhost:4502/content/someFolder
  * </pre>
- */
+  */
 @Component(property = {
         PROP_OPERATION_NAME + "=" + SortNodesOperation.OPERATION_SORT
 })
