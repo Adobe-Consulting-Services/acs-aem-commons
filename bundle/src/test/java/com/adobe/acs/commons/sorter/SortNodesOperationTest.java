@@ -204,7 +204,7 @@ public class SortNodesOperationTest {
         sorter.run(request, response, null);
 
         verify(response).setError(errCaptor.capture());
-        assertEquals("NodeSorter was not found: sorterNA. Available sorters are: [:nodeNameSorter, :nodeTitleSorter]",
+        assertEquals("NodeSorter was not found: sorterNA. Available sorters are: [byName, byTitle]",
                 errCaptor.getValue().getMessage());
     }
 
