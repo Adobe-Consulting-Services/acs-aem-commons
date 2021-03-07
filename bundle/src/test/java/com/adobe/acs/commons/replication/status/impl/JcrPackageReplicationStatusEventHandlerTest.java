@@ -35,8 +35,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.event.jobs.Job;
 import org.apache.sling.event.jobs.JobManager;
 import org.junit.Assert;
@@ -56,9 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.apache.sling.discovery.InstanceDescription;
-import org.apache.sling.discovery.TopologyEvent;
-import org.apache.sling.discovery.TopologyView;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -194,13 +189,6 @@ public class JcrPackageReplicationStatusEventHandlerTest {
         final Event event = new Event(ReplicationAction.EVENT_TOPIC, eventParams);
 
         final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        TopologyEvent te = mock(TopologyEvent.class);
-        TopologyView view = mock(TopologyView.class);
-        InstanceDescription instanceDescription = mock(InstanceDescription.class);
-        when(te.getNewView()).thenReturn(view);
-        when(view.getLocalInstance()).thenReturn(instanceDescription);
-        when(instanceDescription.isLeader()).thenReturn(true);
-        eventHandler.handleTopologyEvent(te);
         eventHandler.handleEvent(event);
 
         verify(jobManager, times(1)).addJob(eq("acs-commons/replication/package"), captor.capture());

@@ -25,8 +25,10 @@ import org.apache.sling.discovery.TopologyEvent;
 import org.apache.sling.discovery.TopologyEventListener;
 
 /**
- * Abstact base class for scheduled job to be run only on the cluster master.
+ * Abstract base class for scheduled job to be run only on the cluster master.
+ * @deprecated Depend on marker interface {@link ClusterLeader} instead.
  */
+@Deprecated
 @ConsumerType
 public abstract class RunnableOnMaster implements TopologyEventListener, Runnable {
 
