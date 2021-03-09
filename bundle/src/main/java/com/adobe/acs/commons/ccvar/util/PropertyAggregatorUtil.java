@@ -39,14 +39,22 @@ public class PropertyAggregatorUtil {
      * @param map                   the map that should be updated with the properties and their values
      * @param entries               the Set of entries in a map to be added
      * @param prefix                the prefix to apply to the
+     * @param shouldOverride        if true then properties added can be overridden/replaced with other values
      * @param propertyConfigService the {@link PropertyConfigService} used to check type and exclusion
      */
     public static void addPropertiesToMap(Map<String, Object> map, Set<Map.Entry<String, Object>> entries,
-                                          String prefix, PropertyConfigService propertyConfigService) {
+                                          String prefix, boolean shouldOverride, PropertyConfigService propertyConfigService) {
         for (Map.Entry<String, Object> entry : entries) {
             if (propertyConfigService.isAllowed(entry.getKey())
                     && propertyConfigService.isAllowedType(entry.getValue())) {
-                map.put(prefix + "." + entry.getKey(), entry.getValue());
+                String propertyName = prefix + "." + entry.getKey();
+                if (shouldOverride) {
+                    map.put(propertyName, entry.getValue());
+                } else {
+                    if (!map.containsKey(propertyName)) {
+                        map.put(propertyName, entry.getValue());
+                    }
+                }
             }
         }
     }

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil.addPropertiesToMap;
 
@@ -68,30 +67,10 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
         addPagePropertiesToMap(map, page, PAGE_PROP_PREFIX, propertyConfigService);
 
         // Add inherited page properties
-        Page parent = page.getParent();
-        while (parent != null) {
-            Map<String, Object> inheritedMap = new HashMap<>();
-            addPagePropertiesToMap(inheritedMap, parent, INHERITED_PAGE_PROP_PREFIX, propertyConfigService);
-            Set<Map.Entry<String, Object>> entries = inheritedMap.entrySet();
-            for (Map.Entry<String, Object> entry : entries) {
-                if (shouldAddInherited(map, entry.getKey())) {
-                    map.put(entry.getKey(), entry.getValue());
-                }
-            }
-            parent = parent.getParent();
+        while (page != null) {
+            addPagePropertiesToMap(map, page, INHERITED_PAGE_PROP_PREFIX, propertyConfigService);
+            page = page.getParent();
         }
-    }
-
-    /**
-     * Check to see if the current inherited property key is already contained in the set of properties.
-     *
-     * @param map          current map of properties
-     * @param propertyName current property name
-     * @return whether the map contains a local page property or an inherited property
-     */
-    private boolean shouldAddInherited(Map<String, Object> map, String propertyName) {
-        return !map.containsKey(propertyName.replace(INHERITED_PAGE_PROP_PREFIX, PAGE_PROP_PREFIX))
-                && !map.containsKey(propertyName);
     }
 
     /**
@@ -106,7 +85,7 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     private void addPagePropertiesToMap(Map<String, Object> map, Page page, String prefix,
                                               PropertyConfigService propertyConfigService) {
         ValueMap pageProperties = page.getProperties();
-        addPropertiesToMap(map, pageProperties.entrySet(), prefix, propertyConfigService);
+        addPropertiesToMap(map, pageProperties.entrySet(), prefix, false, propertyConfigService);
     }
 
     @Override

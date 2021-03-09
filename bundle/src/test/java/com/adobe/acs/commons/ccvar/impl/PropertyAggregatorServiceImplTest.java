@@ -21,7 +21,6 @@ package com.adobe.acs.commons.ccvar.impl;
 
 import com.adobe.acs.commons.ccvar.PropertyAggregatorService;
 import io.wcm.testing.mock.aem.junit.AemContext;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.Before;
@@ -85,24 +84,6 @@ public class PropertyAggregatorServiceImplTest {
     }
 
     @Test
-    public void testContentInheritanceOverride() {
-        service = defaultService(context);
-
-        Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content");
-        ModifiableValueMap modifiableValueMap = lofoten.adaptTo(ModifiableValueMap.class);
-        // Put in the 'inheritedProperty' value onto the lofoten node itself to be pulled instead of inheriting
-        modifiableValueMap.put("inheritedProperty", "newValue");
-        context.request().setResource(lofoten);
-        Map<String, Object> properties = service.getProperties(context.request());
-        Map<String, Object> expected = defaultPropertyMap();
-        // Remove old inherited value from default expected
-        expected.remove("inherited_page_properties.inheritedProperty");
-        // Add overridden value to expected
-        expected.put("page_properties.inheritedProperty", "newValue");
-        assertEquals(expected, properties);
-    }
-
-    @Test
     public void testPropertyExclusion() {
         Map<String, Object> config = defaultConfigMap();
         config.put("exclude.list", new String[]{"cq:(.*)", "jcr:(.*)"});
@@ -115,13 +96,18 @@ public class PropertyAggregatorServiceImplTest {
         Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = new HashMap<>();
         expected.put("inherited_page_properties.inheritedProperty", "inheritedValue");
+        expected.put("inherited_page_properties.sling:resourceType", "weretail/components/structure/page");
         expected.put("page_properties.sling:resourceType", "weretail/components/structure/page");
         assertEquals(expected, properties);
     }
 
     private Map<String, Object> defaultPropertyMap() {
         Map<String, Object> map = new HashMap<>();
+        map.put("inherited_page_properties.jcr:primaryType", "cq:PageContent");
+        map.put("inherited_page_properties.jcr:title", "Arctic Surfing In Lofoten");
         map.put("inherited_page_properties.inheritedProperty", "inheritedValue");
+        map.put("inherited_page_properties.jcr:createdBy", "admin");
+        map.put("inherited_page_properties.sling:resourceType", "weretail/components/structure/page");
         map.put("page_properties.jcr:primaryType", "cq:PageContent");
         map.put("page_properties.jcr:title", "Arctic Surfing In Lofoten");
         map.put("page_properties.sling:resourceType", "weretail/components/structure/page");
