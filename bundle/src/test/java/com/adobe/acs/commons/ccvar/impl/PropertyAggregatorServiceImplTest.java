@@ -93,11 +93,11 @@ public class PropertyAggregatorServiceImplTest {
 
         Resource lofoten = context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten");
         context.request().setResource(lofoten);
-        Map<String, Object> properties = service.getProperties(context.request());
         Map<String, Object> expected = new HashMap<>();
         expected.put("inherited_page_properties.inheritedProperty", "inheritedValue");
         expected.put("inherited_page_properties.sling:resourceType", "weretail/components/structure/page");
         expected.put("page_properties.sling:resourceType", "weretail/components/structure/page");
+        Map<String, Object> properties = service.getProperties(context.request());
         assertEquals(expected, properties);
     }
 
