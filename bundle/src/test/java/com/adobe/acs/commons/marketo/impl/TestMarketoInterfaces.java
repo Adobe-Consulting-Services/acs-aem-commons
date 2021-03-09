@@ -32,8 +32,8 @@ import org.junit.Test;
 
 public class TestMarketoInterfaces {
 
-    //@Test
-    // TODO Fix test running in Cloud Manager
+    @Test
+    // This test is known to fail when executed by Cloud Manager's code quality check, however works locally and in Travis
     public void testInterfaces() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object[] interfaces = new Object[] { new FormValue() {
         }, new MarketoClientConfiguration() {
