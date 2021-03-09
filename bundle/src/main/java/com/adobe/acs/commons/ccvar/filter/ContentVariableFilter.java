@@ -69,7 +69,7 @@ import java.util.regex.PatternSyntaxException;
 @Designate(ocd = ContentVariableFilter.Config.class)
 public class ContentVariableFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(ContentVariableFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContentVariableFilter.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
@@ -101,7 +101,7 @@ public class ContentVariableFilter implements Filter {
                     toReturn = currentTree.toString();
                 }
             } catch (Exception e) {
-                log.error("Exception during JSON property replacement", e);
+                LOG.error("Exception during JSON property replacement", e);
             } finally {
                 servletResponse.getWriter().write(toReturn);
             }
@@ -118,25 +118,25 @@ public class ContentVariableFilter implements Filter {
      */
     private boolean shouldProcess(String urlPath) {
         if (includePatterns.isEmpty() && excludePatterns.isEmpty()) {
-            log.debug("Include and Exclude patterns are empty, processing all requests");
+            LOG.debug("Include and Exclude patterns are empty, processing all requests");
             return true;
         }
         boolean shouldProcess = false;
         for (Pattern pattern : includePatterns) {
             if (pattern.matcher(urlPath).matches()) {
-                log.debug("URL path {} matches INCLUDE pattern {}", urlPath, pattern.toString());
+                LOG.debug("URL path {} matches INCLUDE pattern {}", urlPath, pattern.toString());
                 shouldProcess = true;
                 break;
             }
         }
         for (Pattern pattern : excludePatterns) {
             if (pattern.matcher(urlPath).matches()) {
-                log.debug("URL path {} matches EXCLUDE pattern {}", urlPath, pattern.toString());
+                LOG.debug("URL path {} matches EXCLUDE pattern {}", urlPath, pattern.toString());
                 shouldProcess = false;
                 break;
             }
         }
-        log.debug("URL path {} is processed: {}", urlPath, shouldProcess);
+        LOG.debug("URL path {} is processed: {}", urlPath, shouldProcess);
         return shouldProcess;
     }
 
@@ -239,7 +239,7 @@ public class ContentVariableFilter implements Filter {
                 try {
                     includePatterns.add(Pattern.compile(item));
                 } catch (PatternSyntaxException e) {
-                    log.error("Error adding includePattern. Invalid syntax in {}", item);
+                    LOG.error("Error adding includePattern. Invalid syntax in {}", item);
                 }
             }
         }
@@ -248,7 +248,7 @@ public class ContentVariableFilter implements Filter {
                 try {
                     excludePatterns.add(Pattern.compile(item));
                 } catch (PatternSyntaxException e) {
-                    log.error("Error adding excludePattern. Invalid syntax in {}", item);
+                    LOG.error("Error adding excludePattern. Invalid syntax in {}", item);
                 }
             }
         }

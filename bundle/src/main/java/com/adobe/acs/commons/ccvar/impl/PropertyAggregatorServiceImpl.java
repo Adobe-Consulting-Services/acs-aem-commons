@@ -39,7 +39,7 @@ import java.util.Map;
         configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class PropertyAggregatorServiceImpl implements PropertyAggregatorService {
 
-    private static final Logger log = LoggerFactory.getLogger(PropertyAggregatorServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PropertyAggregatorServiceImpl.class);
 
     @Reference(policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.MULTIPLE)
     private List<ContentVariableProvider> variableProviders;
@@ -53,10 +53,10 @@ public class PropertyAggregatorServiceImpl implements PropertyAggregatorService 
             if (variableProvider.accepts(request)) {
                 variableProvider.addProperties(map, request);
             } else {
-                log.debug(variableProvider.getClass().getName() + " does not accept request for request at {}.", request.getPathInfo());
+                LOG.debug(variableProvider.getClass().getName() + " does not accept request for request at {}.", request.getPathInfo());
             }
             if (map.size() == sizeBefore) {
-                log.debug(variableProvider.getClass().getName() + " either did not add any properties or replaced existing ones.");
+                LOG.debug(variableProvider.getClass().getName() + " either did not add any properties or replaced existing ones.");
             }
         }
 

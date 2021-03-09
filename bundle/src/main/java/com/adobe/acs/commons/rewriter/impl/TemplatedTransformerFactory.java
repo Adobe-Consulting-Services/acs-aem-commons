@@ -36,14 +36,14 @@ import org.slf4j.LoggerFactory;
         "pipeline.type=templated-transformer"
 })
 public class TemplatedTransformerFactory implements TransformerFactory {
-    private static final Logger log = LoggerFactory.getLogger(TemplatedTransformerFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TemplatedTransformerFactory.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
 
     @Override
     public Transformer createTransformer() {
-        log.trace("Templated Transformer");
+        LOG.trace("Templated Transformer");
         return new TemplatedTransformer(propertyAggregatorService);
     }
 }

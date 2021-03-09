@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil.addPropertiesToMap;
@@ -39,7 +38,7 @@ import static com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil.addPropert
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(AllPagePropertiesContentVariableProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AllPagePropertiesContentVariableProvider.class);
 
     public static final String PAGE_PROP_PREFIX = "page_properties";
     private static final String INHERITED_PAGE_PROP_PREFIX = "inherited_page_properties";
@@ -53,13 +52,13 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
 
         PageManager pageManager = resource.getResourceResolver().adaptTo(PageManager.class);
         if (pageManager == null) {
-            log.warn("PageManager was null, skipping properties.");
+            LOG.warn("PageManager was null, skipping properties.");
             return;
         }
         Page page = pageManager.getContainingPage(resource);
 
         if (page == null) {
-            log.warn("No containing page found for resource at {}", resource.getPath());
+            LOG.warn("No containing page found for resource at {}", resource.getPath());
             return;
         }
 
@@ -92,7 +91,7 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     public boolean accepts(SlingHttpServletRequest request) {
         PageManager pageManager = request.getResourceResolver().adaptTo(PageManager.class);
         if (pageManager == null) {
-            log.warn("PageManager is null, not accepting this request.");
+            LOG.warn("PageManager is null, not accepting this request.");
             return false;
         }
         Page page = pageManager.getContainingPage(request.getResource());
