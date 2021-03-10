@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TemplatedTransformerFactoryTest {
+public class ContentVariableTransformerFactoryTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
@@ -62,7 +62,7 @@ public class TemplatedTransformerFactoryTest {
 
     @Before
     public void setup() throws Exception {
-        context.load().json(getClass().getResourceAsStream("TemplatedTransformer.json"), "/content/we-retail/language-masters/en/experience");
+        context.load().json(getClass().getResourceAsStream("ContentVariableTransformer.json"), "/content/we-retail/language-masters/en/experience");
 
         MockSlingHttpServletRequest request = context.request();
         request.setResource(context.resourceResolver().getResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/responsivegrid/text"));
@@ -156,7 +156,7 @@ public class TemplatedTransformerFactoryTest {
         if (defaultService) {
             defaultService(context);
         }
-        transformerFactory = context.registerInjectActivateService(new TemplatedTransformerFactory());
+        transformerFactory = context.registerInjectActivateService(new ContentVariableTransformerFactory());
         transformer = transformerFactory.createTransformer();
         transformer.setContentHandler(handler);
         transformer.init(processingContext, null);

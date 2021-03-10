@@ -29,14 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link TransformerFactory} defined to create new {@link TemplatedTransformer} objects and pass in the reference to
+ * {@link TransformerFactory} defined to create new {@link ContentVariableTransformer} objects and pass in the reference to
  * the service used to aggregate properties.
  */
 @Component(service = TransformerFactory.class, property = {
         "pipeline.type=templated-transformer"
 })
-public class TemplatedTransformerFactory implements TransformerFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(TemplatedTransformerFactory.class);
+public class ContentVariableTransformerFactory implements TransformerFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(ContentVariableTransformerFactory.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
@@ -44,6 +44,6 @@ public class TemplatedTransformerFactory implements TransformerFactory {
     @Override
     public Transformer createTransformer() {
         LOG.trace("Templated Transformer");
-        return new TemplatedTransformer(propertyAggregatorService);
+        return new ContentVariableTransformer(propertyAggregatorService);
     }
 }

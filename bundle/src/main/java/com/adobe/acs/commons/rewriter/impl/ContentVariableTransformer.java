@@ -37,15 +37,15 @@ import java.util.Map;
  * {@link org.apache.sling.rewriter.Transformer} used to process HTML requests and replace content tokens found in the
  * rendered HTML.
  */
-public class TemplatedTransformer extends ContentHandlerBasedTransformer {
+public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
 
     private Map<String, Object> contentVariableReplacements;
     private PropertyAggregatorService aggregatorService;
 
-    public TemplatedTransformer() {
+    public ContentVariableTransformer() {
     }
 
-    public TemplatedTransformer(PropertyAggregatorService propertyAggregatorService) {
+    public ContentVariableTransformer(PropertyAggregatorService propertyAggregatorService) {
         this.aggregatorService = propertyAggregatorService;
     }
 
