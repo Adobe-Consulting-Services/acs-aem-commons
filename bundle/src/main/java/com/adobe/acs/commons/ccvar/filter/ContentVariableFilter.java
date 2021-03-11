@@ -209,16 +209,12 @@ public class ContentVariableFilter implements Filter {
      * @return The replaced or original String
      */
     private String replaceInString(String input, Map<String, Object> contentVariableReplacements) {
-        final List<String> placeholders = ContentVariableReplacementUtil.getPlaceholders(input);
-        for (String placeholder : placeholders) {
-
-            // Transform it to the key in the property map
-            String key = ContentVariableReplacementUtil.getKey(placeholder);
-
+        final List<String> keys = ContentVariableReplacementUtil.getKeys(input);
+        for (String key : keys) {
             // If the placeholder key is in the map then replace it
             if (contentVariableReplacements.containsKey(key)) {
                 String replaceValue = (String) contentVariableReplacements.get(key);
-                input = input.replace(placeholder, replaceValue);
+                input = input.replace(ContentVariableReplacementUtil.getPlaceholder(key), replaceValue);
             }
         }
         return input;
@@ -254,8 +250,8 @@ public class ContentVariableFilter implements Filter {
         }
     }
 
-    @ObjectClassDefinition(name = "ACS AEM Commons - Templated Filter Configuration", description = "JSON Rewriting"
-            + " Filter for supporting Templated Property replacement in JSON responses. This filter only applies to"
+    @ObjectClassDefinition(name = "ACS AEM Commons - Contextual Content Variable Filter Configuration", description = "JSON Rewriting"
+            + " Filter for supporting Content Variable Property replacement in JSON responses. This filter only applies to"
             + " /content/* and *.json requests. Additional filtering options are available below.")
     @interface Config {
 

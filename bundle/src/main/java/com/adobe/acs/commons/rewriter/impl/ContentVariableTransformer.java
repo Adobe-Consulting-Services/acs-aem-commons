@@ -61,18 +61,12 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
             AttributesImpl newAttrs = new AttributesImpl(atts);
             for (int i = 0; i < newAttrs.getLength(); i++) {
                 String currentAttribute = newAttrs.getValue(i);
-                if (ContentVariableReplacementUtil.hasPlaceholder(currentAttribute)) {
-
-                    // Get the current placeholder in the string
-                    String placeholder = ContentVariableReplacementUtil.getPlaceholder(currentAttribute);
-
-                    // Transform it to the key in the property map
-                    String key = ContentVariableReplacementUtil.getKey(placeholder);
-
+                final List<String> keys = ContentVariableReplacementUtil.getKeys(currentAttribute);
+                for (String key : keys) {
                     // If the placeholder key is in the map then replace it
                     if (contentVariableReplacements.containsKey(key)) {
                         String replaceValue = (String) contentVariableReplacements.get(key);
-                        newAttrs.setValue(i, currentAttribute.replace(placeholder, replaceValue));
+                        newAttrs.setValue(i, currentAttribute.replace(ContentVariableReplacementUtil.getPlaceholder(key), replaceValue));
                     }
                 }
             }
@@ -90,16 +84,12 @@ public class ContentVariableTransformer extends ContentHandlerBasedTransformer {
             String currentChunk = currentString.substring(start, start + length);
 
             // Get the current placeholders in the string
-            final List<String> placeholders = ContentVariableReplacementUtil.getPlaceholders(currentChunk);
-
-            for (String placeholder : placeholders) {
-                // Transform it to the key in the property map
-                final String key = ContentVariableReplacementUtil.getKey(placeholder);
-
+            final List<String> keys = ContentVariableReplacementUtil.getKeys(currentChunk);
+            for (String key : keys) {
                 // If the placeholder key is in the map then replace it
                 if (contentVariableReplacements.containsKey(key)) {
                     final String placeholderReplacement = String.valueOf(contentVariableReplacements.get(key));
-                    final String replacedChunk = currentChunk.replace(placeholder, placeholderReplacement);
+                    final String replacedChunk = currentChunk.replace(ContentVariableReplacementUtil.getPlaceholder(key), placeholderReplacement);
                     chunkLength = replacedChunk.length();
                     currentString = currentString.replace(currentChunk, replacedChunk);
                     currentChunk = replacedChunk;
