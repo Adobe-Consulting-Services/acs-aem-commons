@@ -42,6 +42,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.serviceusermapping.ServiceUserMapped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,6 @@ import javax.jcr.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,6 +107,9 @@ public class WorkflowPackageManagerImpl implements WorkflowPackageManager {
 
     @Reference
     ResourceResolverFactory resourceResolverFactory;
+
+    @Reference(target = "("+ServiceUserMapped.SUBSERVICENAME+"="+SERVICE_NAME+")")
+    ServiceUserMapped serviceUserMapped;
 
     private String bucketPath;
 
