@@ -20,16 +20,13 @@
 
 package com.adobe.acs.commons.http.headers.impl;
 
-import com.day.cq.commons.PathInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -58,7 +55,7 @@ import static com.adobe.acs.commons.http.headers.impl.AbstractDispatcherCacheHea
                 value = PROP_DISPATCHER_FILTER_ENGINE_SLING,
                 propertyPrivate = true)
 })
-public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeHeaderFilter {
+public class PropertyBasedDispatcherMaxAgeHeaderFilter extends ResourceBasedDispatcherMaxAgeHeaderFilter {
 
     private static final Logger log = LoggerFactory.getLogger(PropertyBasedDispatcherMaxAgeHeaderFilter.class);
 
@@ -82,7 +79,7 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
         }
         if (request instanceof SlingHttpServletRequest) {
             SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
-            Resource resource = getResource(request, slingRequest.getResourceResolver());
+            Resource resource = getResource(slingRequest);
             if (resource == null) {
                 log.debug("Could not find resource for request, not accepting");
                 return false;
@@ -92,7 +89,7 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
                 log.debug("Found a max age header value for request {} that is not the inherit value, accepting", resource.getPath());
                 return true;
             }
-            log.debug("PResource property is blank or INHERIT, not taking this filter ");
+            log.debug("Resource property is blank or INHERIT, not taking this filter ");
             return false;
         }
         return false;
@@ -102,7 +99,7 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
     protected String getHeaderValue(HttpServletRequest request) {
         if (request instanceof SlingHttpServletRequest) {
             SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
-            Resource resource = getResource(request, slingRequest.getResourceResolver());
+            Resource resource = getResource(slingRequest);
             if (resource != null) {
                 String headerValue = resource.getValueMap().get(propertyName, String.class);
                 return HEADER_PREFIX + headerValue;
@@ -110,18 +107,6 @@ public class PropertyBasedDispatcherMaxAgeHeaderFilter extends DispatcherMaxAgeH
         }
         log.debug("An error occurred, falling back to the default max age value of this filter");
         return super.getHeaderValue(request);
-    }
-
-    private Resource getResource(HttpServletRequest request, ResourceResolver resourceResolver) {
-        PathInfo pathInfo = new PathInfo(request.getRequestURI());
-        Resource reqResource = resourceResolver.getResource(pathInfo.getResourcePath());
-        if (reqResource != null) {
-            if (reqResource.isResourceType("cq:Page")) {
-                return reqResource.getChild(JcrConstants.JCR_CONTENT);
-            }
-            return reqResource;
-        }
-        return null;
     }
 
     @SuppressWarnings("squid:S1149")

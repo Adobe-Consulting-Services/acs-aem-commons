@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<head>
+    <link rel="shortcut icon" href="/libs/granite/core/content/login/favicon.ico">
+</head>
+<body class="coral--light foundation-layout-util-maximized-alt">
+<sly data-sly-call="${clientLib.all @ categories=['coralui3','granite.ui.coral.foundation','granite.ui.shell','cq.authoring.dialog', 'acs-commons.manage-redirects.app']}"
+     data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-use.context="serverlibs/context.js"/>
+
+<coral-shell-header aria-hidden="false" aria-label="Header Bar"
+                    class="coral--dark granite-shell-header coral3-Shell-header"
+                    role="region">
+    <coral-shell-header-home aria-level="2" class="globalnav-toggle" data-globalnav-toggle-href="/" role="heading">
+        <a class="coral3-Shell-homeAnchor" href="/"
+           icon="adobeExperienceManagerColor" is="coral-shell-homeanchor"
+           style="display: inline-block; padding-right: 0;">
+            <coral-icon
+                    aria-label="adobe experience manager color"
+                    class="coral3-Icon coral3-Shell-homeAnchor-icon coral3-Icon--adobeExperienceManagerColor coral3-Icon--sizeM"
+                    icon="adobeExperienceManagerColor" role="img"
+                    size="M"></coral-icon>
+            <coral-shell-homeanchor-label>Adobe Experience Manager
+            </coral-shell-homeanchor-label>
+        </a>
+        <span style="line-height: 2.375rem;">/ ACS AEM Commons / ${properties.jcr:title} </span>
+    </coral-shell-header-home>
+</coral-shell-header>
+
+
+<div class="foundation-layout-panel">
+    <div class="foundation-layout-panel-header">
+        <betty-titlebar>
+            <betty-titlebar-title>
+                <span aria-level="1" class="granite-title" role="heading">${properties.jcr:title}</span>
+            </betty-titlebar-title>
+            <betty-titlebar-primary></betty-titlebar-primary>
+            <betty-titlebar-secondary>
+            </betty-titlebar-secondary>
+        </betty-titlebar>
+    </div>
+    <div class="content-container-inner" style="width:60%; margin:0 auto;">
+        <coral-tabview>
+            <coral-tablist target="main-panel-1">
+                <coral-tab>Manage</coral-tab>
+                <coral-tab>Export</coral-tab>
+                <coral-tab>Import</coral-tab>
+                <coral-tab>Publish</coral-tab>
+            </coral-tablist>
+            <coral-panelstack id="main-panel-1" >
+                <sly data-sly-include="./redirect-rule/redirect-rule.html"></sly>
+                <coral-panel class="coral-Well">
+                    <div class="coral-Form-fieldwrapper">
+                        <button class="coral-Button coral-Button--primary new-redirect-rule"
+                                data-path="${context.redirectResource.path}/*">
+                            + Redirect Configuration</button>
+                    </div>
+                    <section class="coral-Form coral-Form--vertical">
+                        <div clas="coral-Form-fieldset">
+                            <br>
+                            <div class="coral-Form-fieldwrapper" style="width: 100%; display: inline-block;">
+                                <input is="coral-textfield" id="redirect-search-box" class="coral-Form-field" placeholder="Search" name="name" labelledby="label-vertical-textfield-0">
+                            </div>
+                        </div>
+
+                        <table is="coral-table" id="edit-redirect-coral-table" orderable  style="height:500px">
+                            <colgroup>
+                                <col is="coral-table-column">
+                                <col is="coral-table-column">
+                                <col is="coral-table-column">
+                                <col is="coral-table-column">
+                                <col is="coral-table-column" fixedwidth>
+                                <col is="coral-table-column">
+                            </colgroup>
+                            <thead is="coral-table-head" sticky>
+                            <tr is="coral-table-row">
+                                <th is="coral-table-headercell">Edit</th>
+                                <th is="coral-table-headercell">Redirect From</th>
+                                <th is="coral-table-headercell">Redirect To</th>
+                                <th is="coral-table-headercell">Status Code</th>
+                                <th is="coral-table-headercell">Until Date</th>
+                                <th is="coral-table-headercell"></th>
+                            </tr>
+                            </thead>
+                            <tbody is="coral-table-body"  divider="cell">
+                            <sly data-sly-list="${context.redirectResource.listChildren}">
+                                <div data-sly-test="${item.sling:resourceType}" data-sly-unwrap>
+                                    <sly data-sly-resource="${@path=item.path, resourceType='acs-commons/components/utilities/manage-redirects/redirect-row'}"/>
+                                </div>
+                            </sly>
+                            </tbody>
+                        </table>
+                    </section>
+                </coral-panel>
+                <coral-panel class="coral-Well">
+                    <section>
+                        <h2 class="coral-Heading coral-Heading--2">Export Redirect Map</h2>
+                        <p>Export combined redirect map into Excel spreadsheet. You can edit it offline and upload the redirect configurations using the Import option.</p>
+                        <form action="${resource.path}.export.html" method="get" class="coral-Form--aligned">
+                            <input type="hidden" name="path" value="${context.redirectResource.path}" />
+                            <div class="coral-Form-fieldwrapper">
+                                <button class="coral-Button coral-Button--primary  cq-dialog-download" icon="fileExcel" is="coral-button" variant="primary">Export Redirect Map</button>
+                            </div>
+                        </form>
+                    </section>
+                </coral-panel>
+                <coral-panel class="coral-Well">
+                    <section>
+                        <h2 class="coral-Heading coral-Heading--2">Import Redirect Map</h2>
+                        <p>The redirect map file will be combined with the redirects configured in AEM to create the final set of redirects. This file should be a spreadsheet file with the first column containing the source path, the second column containing the redirect destination and the third column containing the redirect status code.</p>
+                        <form action="${resource.path}.import.html" method="post" class="coral-Form--aligned" enctype="multipart/form-data">
+                            <input type="hidden" name="path" value="${context.redirectResource.path}" />
+                            <div class="coral-Form-fieldwrapper">
+                                <label class="coral-Form-fieldlabel" id="label-vertical-inputgroup-2"> Redirect Map File * </label>
+                                <div class="coral-InputGroup coral-Form-field">
+                                    <input is="coral-Textfield" class="coral-InputGroup-input coral3-Textfield" id="acs-redirect-import-ctrl" type="file" name="./redirects.redirectmap.xlsx" accept=".xlsx" />
+                                </div>
+                            </div>
+                            <div class="coral-Form-fieldwrapper">
+                                <button class="coral-Button coral-Button--primary  cq-dialog-upload" icon="fileExcel" is="coral-button" variant="primary">Import Redirect Map</button>
+                            </div>
+                        </form>
+                    </section>
+                </coral-panel>
+                <coral-panel class="coral-Well">
+                    <section>
+                        <form action="${resource.path}.replicate.html" method="post" class="coral-Form--aligned">
+                            <input type="hidden" name="cmd" value="Activate" />
+                            <input type="hidden" name="path" value="${context.redirectResource.path}" />
+                            <input type="hidden" name="_charset_" value="utf-8" />
+                            <div class="coral-Form-fieldwrapper">
+                                <button class="coral-Button cq-dialog-publish" icon="publish" is="coral-button" variant="primary" alert="Redirects have been published">Publish Redirect Configurations
+                                </button>
+                                <p>Last Published: ${'dd-MMMM-yyyy hh:mm:ss' @ format=context.redirectResource.valueMap['cq:lastReplicated'], timezone='EST'} by ${context.redirectResource.valueMap['cq:lastReplicatedBy']}
+                                </p>
+                            </div>
+                        </form>
+                    </section>
+                </coral-panel>
+            </coral-panelstack>
+        </coral-tabview>
+
+    </div>
+</div>
+</body>
