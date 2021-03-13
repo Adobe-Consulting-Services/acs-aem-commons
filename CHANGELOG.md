@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+## 5.0.0 - 2021-03-13
+
+### Changed
+- #2341 - ACS Commons fails to deploy to AEM as a Cloud Service due to inclusion of /var nodes
+
 ## 4.12.0 - 2021-03-13
 
 ### Added
