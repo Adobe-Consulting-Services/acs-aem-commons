@@ -30,7 +30,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.acs.commons.util.RunnableOnMaster;
+import com.adobe.acs.commons.util.ClusterLeader;
 
 import java.util.Collections;
 import java.util.Map;
@@ -44,7 +44,7 @@ import java.util.Map;
         @Property(name = "scheduler.expression", value = "0 0/15 * * * ?", label = "Refresh Interval",
                 description = "Twitter Feed Refresh interval (Quartz Cron Expression)"),
         @Property(name = "scheduler.concurrent", boolValue = false, propertyPrivate = true) })
-public final class TwitterFeedScheduler extends RunnableOnMaster {
+public final class TwitterFeedScheduler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterFeedScheduler.class);
 
@@ -61,8 +61,14 @@ public final class TwitterFeedScheduler extends RunnableOnMaster {
     @Reference
     private TwitterFeedUpdater twitterFeedService;
 
+    /**
+     * This service only becomes active if this instance is the cluster leader
+     */
+    @Reference
+    private ClusterLeader clusterLeader;
+
     @Override
-    public void runOnMaster() {
+    public void run() {
 
         try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(AUTH_INFO) ){
             log.debug("Master Instance, Running ACS AEM Commons Twitter Feed Scheduler");

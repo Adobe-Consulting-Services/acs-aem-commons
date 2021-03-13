@@ -19,9 +19,7 @@
  */
 package com.adobe.acs.commons.twitter.impl;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import junitx.util.PrivateAccessor;
@@ -33,10 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import org.apache.sling.discovery.InstanceDescription;
-import org.apache.sling.discovery.TopologyEvent;
-import org.apache.sling.discovery.TopologyView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterFeedSchedulerTest {
@@ -64,42 +58,20 @@ public class TwitterFeedSchedulerTest {
 
         when(resourceResolverFactory.getServiceResourceResolver(anyMap())).thenReturn(
                 resourceResolver);
-
-    }
-
-    public TopologyEvent createLeaderChangeEvent(boolean isLeader) {
-        TopologyEvent te = mock(TopologyEvent.class);
-        TopologyView view = mock(TopologyView.class);
-        InstanceDescription instanceDescription = mock(InstanceDescription.class);
-        when(te.getNewView()).thenReturn(view);
-        when(view.getLocalInstance()).thenReturn(instanceDescription);
-        when(instanceDescription.isLeader()).thenReturn(isLeader);
-        return te;
-    }
-    
-    @Test
-    public void testDefaultInstanceBehaviour() throws NoSuchFieldException {
-        boolean isLeader = (Boolean) PrivateAccessor.getField(scheduler,
-                "isLeader");
-        assertFalse(isLeader);
     }
 
     @Test
     public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenCallsService()
             throws Exception {
-        scheduler.handleTopologyEvent(createLeaderChangeEvent(true));
         scheduler.run();
         verify(twitterFeedService).updateTwitterFeedComponents(resourceResolver);
-
     }
 
     @Test
     public void test_GivenItsMasterInstance_WhenRunIsInvoked_ThenFinallyResourceResolverGetsClosed()
             throws Exception {
-        scheduler.handleTopologyEvent(createLeaderChangeEvent(true));
         scheduler.run();
         verify(resourceResolver).close();
-
     }
 
 }

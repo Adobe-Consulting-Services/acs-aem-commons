@@ -161,7 +161,7 @@
    */
   function toggleVisibilityElement($elem, hide) {
     var $fieldWrapper = $elem.closest('.coral-Form-fieldwrapper');
-    var tabPanel = $elem.parent().parent('coral-panel[role="tabpanel"]');
+    var tabPanel = $elem.parent().parent('coral-panel[role="region"],coral-panel[role="tabpanel"]');
     var tabLabelId = $(tabPanel).attr('aria-labelledby');
     var disable = $elem.attr('data-acs-disablewhenhidden');
     var required = $elem.attr('data-acs-optionalwhenhidden');
