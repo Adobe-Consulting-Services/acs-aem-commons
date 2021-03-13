@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    jcr:title="Sort Nodes"
+    jcr:description="Sort nodes by name or title"
+    icon="reorder"
+    href="/apps/acs-commons/content/sort-nodes.html"
+    id="acs-commons__sort-nodes"
+    target="_blank"/>
