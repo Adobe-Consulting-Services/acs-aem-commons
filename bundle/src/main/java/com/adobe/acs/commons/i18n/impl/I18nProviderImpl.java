@@ -106,7 +106,12 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
 
     @Override
     public String translate(final String key, final Resource resource) {
-        final I18n i18n = i18n(resource);
+        return translate(key, resource,false);
+    }
+
+    @Override
+    public String translate(String key, Resource resource, boolean localeIgnoreContent) {
+        final I18n i18n = i18n(resource, localeIgnoreContent);
         if (i18n != null) {
             return i18n.get(key);
         }
@@ -126,13 +131,18 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
 
     @Override
     public I18n i18n(final Resource resource) {
-        final I18n cached = cache.getIfPresent(resource.getPath());
+        return i18n(resource, false);
+    }
+
+    @Override
+    public I18n i18n(Resource resource, boolean localeIgnoreContent) {
+        final I18n cached = cache.getIfPresent(resource.getPath() + localeIgnoreContent);
         if (cached != null) {
             return cached;
         }
 
-        final I18n i18n = i18n(getResourceBundleFromPageLocale(resource));
-        cache.put(resource.getPath(), i18n);
+        final I18n i18n = i18n(getResourceBundleFromPageLocale(resource, localeIgnoreContent));
+        cache.put(resource.getPath() + localeIgnoreContent, i18n);
         return i18n;
     }
 
@@ -150,14 +160,14 @@ public class I18nProviderImpl extends AbstractGuavaCacheMBean<String,I18n> imple
         return new I18n(resourceBundle);
     }
 
-    private ResourceBundle getResourceBundleFromPageLocale(final Resource resource) {
-        return getResourceBundle(getLocaleFromResource(resource));
+    private ResourceBundle getResourceBundleFromPageLocale(final Resource resource, boolean localeIgnoreContent) {
+        return getResourceBundle(getLocaleFromResource(resource, localeIgnoreContent));
     }
 
-    private Locale getLocaleFromResource(final Resource resource) {
+    private Locale getLocaleFromResource(final Resource resource, boolean localeIgnoreContent) {
         final Page page = getResourcePage(resource);
         if (page != null) {
-            return page.getLanguage(false);
+            return page.getLanguage(localeIgnoreContent);
         }
 
         return null;
