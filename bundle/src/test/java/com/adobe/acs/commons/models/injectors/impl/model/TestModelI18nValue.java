@@ -32,4 +32,10 @@ public interface TestModelI18nValue {
     String getInjectField();
 
     I18n getI18n();
+
+    String getValidI18nFieldResource();
+
+    String getAnotherValidI18nFieldResource();
+
+    I18n getAlternateI18n();
 }

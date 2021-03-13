@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
 ### Added
+- #2518 - Extended the I18N provider / injector mechanism with more options 
 - #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
 - #2535 - Add option to append new data to arrays using the data importer tool in MCP
 

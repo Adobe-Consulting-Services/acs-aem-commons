@@ -75,14 +75,20 @@ public class I18NInjectorTest {
         context.registerService(Injector.class, i18nInjector);
         context.registerService(StaticInjectAnnotationProcessorFactory.class, new I18NAnnotationProcessorFactory());
         context.addModelsForClasses(TestModelI18nValueImpl.class);
-        when(i18nService.translate("com.acs.commmons.test", context.currentResource())).thenReturn("Translated from english");
-        when(i18nService.translate("anotherValidI18nField", context.currentResource())).thenReturn("FromNameValue");
+        when(i18nService.translate("com.acs.commmons.test", context.currentResource(), false)).thenReturn("Translated from english");
+        when(i18nService.translate("anotherValidI18nField", context.currentResource(), false)).thenReturn("FromNameValue");
+
+        when(i18nService.translate("com.acs.commmons.test.resource", context.currentResource(), true)).thenReturn("Translated from english - resource");
+        when(i18nService.translate("anotherValidI18nFieldResource", context.currentResource(), true)).thenReturn("FromNameValue - resource");
+
 
         when(i18nService.translate("com.acs.commmons.test", context.request())).thenReturn("Translated from english");
         when(i18nService.translate("anotherValidI18nField", context.request())).thenReturn("FromNameValue");
 
+
         when(i18nService.i18n(context.request())).thenReturn(i18n);
-        when(i18nService.i18n(context.currentResource())).thenReturn(i18n);
+        when(i18nService.i18n(context.currentResource(), false)).thenReturn(i18n);
+        when(i18nService.i18n(context.currentResource(), true)).thenReturn(i18n);
 
     }
 
@@ -113,11 +119,15 @@ public class I18NInjectorTest {
         assertNotNull(adapted);
         assertEquals("Translated from english", adapted.getValidI18nField());
         assertEquals("FromNameValue", adapted.getAnotherValidI18nField());
+        assertEquals("Translated from english - resource", adapted.getValidI18nFieldResource());
+        assertEquals("FromNameValue - resource", adapted.getAnotherValidI18nFieldResource());
         assertNull("we should skip javax.Inject", adapted.getInjectField());
         assertSame(i18n, adapted.getI18n());
+        assertSame(i18n, adapted.getAlternateI18n());
 
         if (adaptable instanceof Resource) {
-            verify(i18nService, times(1)).i18n((Resource) adaptable);
+            verify(i18nService, times(1)).i18n((Resource) adaptable, true);
+            verify(i18nService, times(1)).i18n((Resource) adaptable, false);
         } else if (adaptable instanceof HttpServletRequest) {
             verify(i18nService, times(1)).i18n((HttpServletRequest) adaptable);
         }

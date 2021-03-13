@@ -60,13 +60,18 @@ import com.day.cq.wcm.api.Page;
 public final class I18nProviderImplTest {
 
     private static final Locale LOCALE = Locale.US;
+    private static final Locale LOCALE_ALTERNATE = Locale.FRENCH;
+
     private static final String I18N_KEY = "i18nKey";
     private static final String TRANSLATED_FROM_ENGLISH = "Translated from English!";
+    private static final String TRANSLATED_FROM_FRENCH = "Bonjour!";
 
     private final I18nProviderImpl i18nProvider = spy(new I18nProviderImpl());
     private final HashMap<String, Object> resourceBundleProviderProps = new HashMap<>();
+    private final HashMap<String, Object> resourceBundleProviderPropsAlternatve = new HashMap<>();
 
     private final Map<String, String> i18nMap = new HashMap<>();
+    private final Map<String, String> i18nMapAlternate = new HashMap<>();
 
     @Mock
     private Config config;
@@ -76,6 +81,8 @@ public final class I18nProviderImplTest {
 
     @Mock
     private ResourceBundle resourceBundle;
+    @Mock
+    private ResourceBundle resourceBundleAlternate;
 
     @Mock
     private Resource resource;
@@ -95,15 +102,17 @@ public final class I18nProviderImplTest {
         resourceBundleProviderProps.put(Constants.SERVICE_RANKING, 11);
 
         when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
+        when(resourceBundleProvider.getResourceBundle(LOCALE_ALTERNATE)).thenReturn(resourceBundleAlternate);
+
         when(resource.getPath()).thenReturn("/some/path");
 
         i18nMap.put(I18N_KEY, TRANSLATED_FROM_ENGLISH);
-
-        final Answer<String> answer = (Answer<String>) invocationOnMock -> i18nMap.get(invocationOnMock.getArguments()[1]);
+        i18nMapAlternate.put(I18N_KEY, TRANSLATED_FROM_FRENCH);
 
         doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
         when(resourcePage.getLanguage(false)).thenReturn(LOCALE);
+        when(resourcePage.getLanguage(true)).thenReturn(LOCALE_ALTERNATE);
 
         when(config.getTtl()).thenReturn(10L);
         when(config.maxSizeCount()).thenReturn(10L);
@@ -134,15 +143,20 @@ public final class I18nProviderImplTest {
     @Test
     public void test_translate_resource() {
         final I18n mocked = mock(I18n.class);
+        final I18n mockedAlternate = mock(I18n.class);
         when(mocked.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_ENGLISH);
+        when(mockedAlternate.get(I18N_KEY)).thenReturn(TRANSLATED_FROM_FRENCH);
+
         doReturn(mocked).when(i18nProvider).i18n(resourceBundle);
+        doReturn(mockedAlternate).when(i18nProvider).i18n(resourceBundleAlternate);
 
         doReturn(resourcePage).when(i18nProvider).getResourcePage(resource);
 
-        when(resourceBundleProvider.getResourceBundle(LOCALE)).thenReturn(resourceBundle);
-
         final String translated = i18nProvider.translate(I18N_KEY, resource);
         assertEquals(TRANSLATED_FROM_ENGLISH, translated);
+
+        final String translatedAlternate = i18nProvider.translate(I18N_KEY, resource, true);
+        assertEquals(TRANSLATED_FROM_FRENCH, translatedAlternate);
     }
 
     @Test
@@ -181,7 +195,6 @@ public final class I18nProviderImplTest {
 
     @Test
     public void test_translate_resource_null()  {
-        doReturn(null).when(i18nProvider).i18n(resource);
         assertNull(i18nProvider.translate(null, resource));
     }
 

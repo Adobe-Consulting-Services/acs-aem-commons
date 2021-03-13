@@ -49,6 +49,18 @@ public @interface I18N {
     String SOURCE = "i18n";
 
     /**
+     * if true only the path is used to determine the language.
+     * @see com.day.cq.wcm.api.Page#getLanguage(boolean)
+     */
+    boolean localeIgnoreContent() default false;
+
+    /**
+     * Forces retrieving the i18n from the underlying resource, even if a request is being adapted.
+     * @return
+     */
+    boolean forceRetrievalFromUnderlyingResource() default false;
+
+    /**
      * Represents the i18nKey
      *
      * @return
