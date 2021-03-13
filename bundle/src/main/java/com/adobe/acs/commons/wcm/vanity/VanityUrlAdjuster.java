@@ -18,7 +18,7 @@
  * #L%
  */
 
-package com.adobe.acs.commons.wcm.vanity.impl;
+package com.adobe.acs.commons.wcm.vanity;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.osgi.annotation.versioning.ConsumerType;

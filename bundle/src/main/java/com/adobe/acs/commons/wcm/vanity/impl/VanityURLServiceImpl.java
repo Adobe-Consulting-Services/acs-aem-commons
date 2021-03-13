@@ -20,6 +20,7 @@
 package com.adobe.acs.commons.wcm.vanity.impl;
 
 import com.adobe.acs.commons.wcm.vanity.VanityURLService;
+import com.adobe.acs.commons.wcm.vanity.VanityUrlAdjuster;
 import com.day.cq.commons.PathInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -132,6 +133,4 @@ public class VanityURLServiceImpl implements VanityURLService {
 
         return false;
     }
-
-
 }
