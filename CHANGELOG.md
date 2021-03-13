@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+## 4.12.0 - 2021-03-13
+
 ### Added
 - #2518 - Extended the I18N provider / injector mechanism with more options 
 - #2451 - Adding a new dispatcher cache control header filter based on the resource type of the page
