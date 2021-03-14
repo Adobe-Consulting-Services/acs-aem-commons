@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com)
 <!-- Keep this up to date! After a release, change the tag name to the latest release -->
 [unreleased changes details]: https://github.com/Adobe-Consulting-Services/acs-aem-commons/compare/acs-aem-commons-4.7.2...HEAD
 
+### Fixed
+- #2546 - org.apache.sling.jcr.repoinit.RepositoryInitializer-aem-cs.config prevents repository startup of AEM Cloud Quickstart due to usage of /etc/tags
+
 ## 5.0.0 - 2021-03-13
 
 ### Changed
