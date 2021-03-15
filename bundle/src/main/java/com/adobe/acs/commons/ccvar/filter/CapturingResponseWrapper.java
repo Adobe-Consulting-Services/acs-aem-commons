@@ -70,7 +70,7 @@ public class CapturingResponseWrapper extends HttpServletResponseWrapper {
 
                 @Override
                 public boolean isReady() {
-                    return false;
+                    return true;
                 }
 
                 @Override
