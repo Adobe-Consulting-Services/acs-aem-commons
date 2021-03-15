@@ -34,6 +34,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+/**
+ * Default {@link ContentVariableProvider} provided that will aggregate the current and inherited page properties
+ * based on the request information passed in.
+ */
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {
 
@@ -94,6 +98,6 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
             return false;
         }
         Page page = pageManager.getContainingPage(request.getResource());
-        return page != null && page.getPath().startsWith("/content");
+        return page != null && page.getPath().startsWith("/content/");
     }
 }

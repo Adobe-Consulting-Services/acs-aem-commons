@@ -57,6 +57,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+/**
+ * Filter used to look for and rewrite content variables present in JSON responses. By default only handles .model.json
+ * requests.
+ */
 @Component(
         service = Filter.class,
         property = {
@@ -66,10 +70,10 @@ import java.util.regex.PatternSyntaxException;
         },
         configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-@Designate(ocd = ContentVariableFilter.Config.class)
-public class ContentVariableFilter implements Filter {
+@Designate(ocd = ContentVariableJsonFilter.Config.class)
+public class ContentVariableJsonFilter implements Filter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContentVariableFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContentVariableJsonFilter.class);
 
     @Reference
     private PropertyAggregatorService propertyAggregatorService;
@@ -226,7 +230,7 @@ public class ContentVariableFilter implements Filter {
     }
 
     @Activate
-    protected void activate(ContentVariableFilter.Config config) {
+    protected void activate(ContentVariableJsonFilter.Config config) {
         includePatterns = new ArrayList<>();
         excludePatterns = new ArrayList<>();
 

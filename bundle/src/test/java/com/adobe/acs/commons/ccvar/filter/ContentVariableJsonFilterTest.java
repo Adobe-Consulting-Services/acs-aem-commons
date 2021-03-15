@@ -46,7 +46,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ContentVariableFilterTest {
+public class ContentVariableJsonFilterTest {
     @Rule
     public final AemContext context = new AemContext(ResourceResolverType.JCR_OAK);
 
@@ -56,11 +56,11 @@ public class ContentVariableFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    private ContentVariableFilter filter;
+    private ContentVariableJsonFilter filter;
 
     @Before
     public void setup() throws IOException, ServletException {
-        context.load().json(getClass().getResourceAsStream("ContentVariableFilterContent.json"), "/content/we-retail/language-masters/en/experience");
+        context.load().json(getClass().getResourceAsStream("ContentVariableJsonFilterContent.json"), "/content/we-retail/language-masters/en/experience");
         context.currentResource("/content/we-retail/language-masters/en/experience/arctic-surfing-in-lofoten/jcr:content/root/hero_image");
     }
 
@@ -252,9 +252,9 @@ public class ContentVariableFilterTest {
     private void initServices(Map<String, Object> config) {
         defaultService(context);
         if (config != null) {
-            filter = context.registerInjectActivateService(new ContentVariableFilter(), config);
+            filter = context.registerInjectActivateService(new ContentVariableJsonFilter(), config);
         } else {
-            filter = context.registerInjectActivateService(new ContentVariableFilter());
+            filter = context.registerInjectActivateService(new ContentVariableJsonFilter());
         }
     }
 
