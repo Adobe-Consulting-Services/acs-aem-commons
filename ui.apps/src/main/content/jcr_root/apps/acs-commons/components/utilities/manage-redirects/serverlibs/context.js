@@ -2,7 +2,7 @@ use(function () {
     var RedirectFilter = Packages.com.adobe.acs.commons.redirects.filter.RedirectFilter;
     var ResourceUtil = Packages.org.apache.sling.api.resource.ResourceUtil;
 
-    var redirectHome;
+    var redirectHome = "/conf/acs-commons/redirects";
     var filters = sling.getServices(Packages.javax.servlet.Filter, null);
     for(var i=0; i < filters.length; i++ ){
         if(filters[i] instanceof RedirectFilter){
