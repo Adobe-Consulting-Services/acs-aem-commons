@@ -103,7 +103,7 @@ import static org.osgi.framework.Constants.SERVICE_ID;
  * A request filter that implements support for virtual redirects.
  */
 @Component(service = {Filter.class, RedirectFilterMBean.class, EventHandler.class},
-        configurationPolicy = ConfigurationPolicy.REQUIRE,property = {
+        configurationPolicy = ConfigurationPolicy.REQUIRE, property = {
         SERVICE_DESCRIPTION + "=A request filter implementing support for virtual redirects",
         SLING_FILTER_SCOPE + "=" + EngineConstants.FILTER_SCOPE_REQUEST,
         SERVICE_RANKING + ":Integer=10000",
@@ -155,10 +155,10 @@ public class RedirectFilter extends AnnotatedStandardMBean
 
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC,
+            policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private volatile LocationHeaderAdjuster urlAdjuster;
+    private LocationHeaderAdjuster urlAdjuster;
 
     private ServiceRegistration<?> listenerRegistration;
     private boolean enabled;
