@@ -21,6 +21,7 @@ package com.adobe.acs.commons.ccvar.impl;
 
 import com.adobe.acs.commons.ccvar.ContentVariableProvider;
 import com.adobe.acs.commons.ccvar.PropertyConfigService;
+import com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -32,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-
-import static com.adobe.acs.commons.ccvar.util.PropertyAggregatorUtil.addPropertiesToMap;
 
 @Component(service = ContentVariableProvider.class)
 public class AllPagePropertiesContentVariableProvider implements ContentVariableProvider {
@@ -84,7 +83,7 @@ public class AllPagePropertiesContentVariableProvider implements ContentVariable
     private void addPagePropertiesToMap(Map<String, Object> map, Page page, String prefix,
                                               PropertyConfigService propertyConfigService) {
         ValueMap pageProperties = page.getProperties();
-        addPropertiesToMap(map, pageProperties.entrySet(), prefix, false, propertyConfigService);
+        PropertyAggregatorUtil.addPropertiesToMap(map, pageProperties.entrySet(), prefix, false, propertyConfigService);
     }
 
     @Override
