@@ -48,12 +48,8 @@ public class PropertyAggregatorUtil {
             if (propertyConfigService.isAllowed(entry.getKey())
                     && propertyConfigService.isAllowedType(entry.getValue())) {
                 String propertyName = prefix + "." + entry.getKey();
-                if (shouldOverride) {
+                if (shouldOverride || !map.containsKey(propertyName)) {
                     map.put(propertyName, entry.getValue());
-                } else {
-                    if (!map.containsKey(propertyName)) {
-                        map.put(propertyName, entry.getValue());
-                    }
                 }
             }
         }
